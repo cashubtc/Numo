@@ -13,19 +13,14 @@ import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Signature;
-import java.security.SignatureException;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,12 +38,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 // Bouncy Castle for uncompressed point serialization (recommended for secp256k1)
-// You would need to add the Bouncy Castle dependency to your build.gradle:
 // implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
-// implementation 'org.bouncycastle:bcpkix-jdk15on:1.70'
-// And potentially initialize it: Security.addProvider(new BouncyCastleProvider());
-// For this example, I will include the logic assuming Bouncy Castle is available,
-// but will also provide a fallback/warning if it's not.
+// Must be initialized: Security.addProvider(new BouncyCastleProvider());
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
