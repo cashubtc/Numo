@@ -552,7 +552,7 @@ public class SatocashNfcClient {
             if (response != null && response.length > 0) {
                 return secureChannel.decryptResponse(response);
             } else {
-                return new byte[1];
+                return null;
             }
 
         } catch (NoSuchPaddingException | NoSuchAlgorithmException | InvalidKeyException |
