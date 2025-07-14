@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Hint for NFC scan -->
+    <!-- Hint for NFC scan - initially visible, hidden when card detected -->
     <TextView
         android:id="@+id/nfc_scan_hint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:layout_gravity="center_horizontal|top"
+        android:layout_marginTop="50dp"
         android:text="Tap an NFC card to begin"
         android:textSize="24sp"
         android:textColor="@android:color/darker_gray"
         android:gravity="center"
-        android:padding="16dp" />
+        android:padding="16dp"
+        android:visibility="gone" /> <!-- Initially gone, managed by Kotlin -->
 
-    <!-- Existing TextView for displaying NFC events -->
+    <!-- Main content area for NFC events -->
     <TextView
         android:id="@+id/textView"
         android:layout_width="match_parent"
@@ -24,6 +27,64 @@
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:text=""
-        android:textSize="16sp" />
+        android:textSize="16sp"
+        android:scrollbars="vertical"
+        android:visibility="gone" /> <!-- Initially gone, visible when card detected -->
+
+    <!-- Keypad and Request Payment Section -->
+    <LinearLayout
+        android:id="@+id/keypad_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center_horizontal|bottom"
+        android:padding="16dp"
+        android:visibility="visible"> <!-- Initially visible -->
+
+        <TextView
+            android:id="@+id/amount_display"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textSize="48sp"
+            android:gravity="end"
+            android:padding="8dp"
+            android:background="@android:color/white"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="16dp" />
+
+        <GridLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="3"
+            android:rowCount="4"
+            android:alignmentMode="alignBounds"
+            android:columnOrderPreserved="false">
+
+            <Button android:text="1" style="@style/KeypadButton" android:id="@+id/button_1" />
+            <Button android:text="2" style="@style/KeypadButton" android:id="@+id/button_2" />
+            <Button android:text="3" style="@style/KeypadButton" android:id="@+id/button_3" />
+            <Button android:text="4" style="@style/KeypadButton" android:id="@+id/button_4" />
+            <Button android:text="5" style="@style/KeypadButton" android:id="@+id/button_5" />
+            <Button android:text="6" style="@style/KeypadButton" android:id="@+id/button_6" />
+            <Button android:text="7" style="@style/KeypadButton" android:id="@+id/button_7" />
+            <Button android:text="8" style="@style/KeypadButton" android:id="@+id/button_8" />
+            <Button android:text="9" style="@style/KeypadButton" android:id="@+id/button_9" />
+            <Button android:text="CLR" style="@style/KeypadButton" android:id="@+id/button_clear" />
+            <Button android:text="0" style="@style/KeypadButton" android:id="@+id/button_0" />
+            <Button android:text="DEL" style="@style/KeypadButton" android:id="@+id/button_del" />
+
+        </GridLayout>
+
+        <Button
+            android:id="@+id/request_payment_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Request Payment"
+            android:textSize="24sp"
+            android:padding="16dp"
+            android:layout_marginTop="16dp" />
+
+    </LinearLayout>
 
 </FrameLayout>

@@ -7,7 +7,7 @@ import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.os.Bundle
 import android.util.Log
-import android.view.View // Import View
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -17,17 +17,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.security.SecureRandom
 import android.app.AlertDialog
 import android.text.InputType
 import android.widget.LinearLayout
 import kotlinx.coroutines.suspendCancellableCoroutine
+import com.cashujdk.nut00.Proof // Import Proof class
 
 class MainActivity : ComponentActivity() {
     private val TAG = "com.example.shellshock.MainActivity"
     private lateinit var textView: TextView
-    private lateinit var nfcScanHint: TextView // Declare nfcScanHint
+    private lateinit var nfcScanHint: TextView
+    private lateinit var keypadLayout: LinearLayout
+    private lateinit var amountDisplay: TextView
+    private lateinit var requestPaymentButton: Button
     private var nfcAdapter: NfcAdapter? = null
+
+    private var requestedAmount: Long = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,29 +42,64 @@ class MainActivity : ComponentActivity() {
 
         // Find UI components
         textView = findViewById(R.id.textView)
-        nfcScanHint = findViewById(R.id.nfc_scan_hint) // Initialize nfcScanHint
+        nfcScanHint = findViewById(R.id.nfc_scan_hint)
+        keypadLayout = findViewById(R.id.keypad_layout)
+        amountDisplay = findViewById(R.id.amount_display)
+        requestPaymentButton = findViewById(R.id.request_payment_button)
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         if (nfcAdapter == null) {
             textView.text = "NFC is not available on this device."
-            nfcScanHint.visibility = View.GONE // Hide hint if NFC is not available
+            nfcScanHint.visibility = View.GONE
+            keypadLayout.visibility = View.GONE // Hide keypad if NFC is not available
+            textView.visibility = View.VISIBLE // Show NFC error message
             return
         } else {
-            nfcScanHint.visibility = View.VISIBLE // Show hint initially if NFC is available
+            nfcScanHint.visibility = View.GONE // Hint is initially hidden, keypad is shown
+            keypadLayout.visibility = View.VISIBLE
+            textView.visibility = View.GONE // NFC event log is initially hidden
         }
 
+        setupKeypadListeners()
+
         // Handle NFC intent if the app was launched by an NFC tag
-        // The manifest filter with aid-filter will ensure this intent is already filtered
         if (NfcAdapter.ACTION_TECH_DISCOVERED == intent.action) {
             handleNfcIntent(intent)
         }
     }
 
+    private fun setupKeypadListeners() {
+        val buttons = listOf(
+            R.id.button_0, R.id.button_1, R.id.button_2, R.id.button_3,
+            R.id.button_4, R.id.button_5, R.id.button_6, R.id.button_7,
+            R.id.button_8, R.id.button_9
+        )
+
+        buttons.forEach { id ->
+            findViewById<Button>(id).setOnClickListener {
+                val digit = (it as Button).text.toString().toLong()
+                if (requestedAmount == 0L) {
+                    requestedAmount = digit
+                } else {
+                    requestedAmount = requestedAmount * 10 + digit
+                }
+                amountDisplay.text = requestedAmount.toString()
+            }
+        }
+
+        findViewById<Button>(R.id.button_clear).setOnClickListener {
+            requestedAmount = 0
+            amountDisplay.text = "0"
+        }
+
+        findViewById<Button>(R.id.button_del).setOnClickListener {
+            requestedAmount /= 10
+            amountDisplay.text = requestedAmount.toString()
+        }
+    }
+
     override fun onResume() {
         super.onResume()
-        // Enable foreground dispatch to give this app priority for NFC intents
-        // This is still useful if the app is already running and a new tag is discovered.
-        // The techLists array ensures only IsoDep tags are dispatched.
         nfcAdapter?.let {
             val pendingIntent = android.app.PendingIntent.getActivity(
                 this, 0, Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
@@ -69,7 +109,10 @@ class MainActivity : ComponentActivity() {
             it.enableForegroundDispatch(this, pendingIntent, null, techLists)
             Log.d(TAG, "Foreground dispatch enabled.")
         }
-        // Do NOT set nfcScanHint.visibility here. It's handled by handleNfcIntent and finally block.
+        // When resuming, show keypad and hide NFC log/hint
+        keypadLayout.visibility = View.VISIBLE
+        nfcScanHint.visibility = View.GONE
+        textView.visibility = View.GONE
         textView.text = "" // Clear previous card info
     }
 
@@ -81,7 +124,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        // The manifest filter with aid-filter will ensure this intent is already filtered
         if (intent != null && NfcAdapter.ACTION_TECH_DISCOVERED == intent.action) {
             handleNfcIntent(intent)
         }
@@ -91,63 +133,99 @@ class MainActivity : ComponentActivity() {
     private fun handleNfcIntent(intent: Intent) {
         val tag: Tag? = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
         if (tag != null) {
-            // Hide the hint when a card is detected
+            // Hide keypad and show NFC log when a card is detected
+            keypadLayout.visibility = View.GONE
             nfcScanHint.visibility = View.GONE
+            textView.visibility = View.VISIBLE
 
             textView.text = "NFC Tag discovered: ${tag.id?.toHexString()}"
             Log.d(TAG, "NFC Tag discovered: ${tag.id?.toHexString()}")
 
             lifecycleScope.launch(Dispatchers.IO) {
                 var satocashClient: SatocashNfcClient? = null
+                var satocashWallet: SatocashWallet? = null
                 try {
                     satocashClient = SatocashNfcClient(tag)
                     satocashClient.connect()
+                    satocashWallet = SatocashWallet(satocashClient)
 
-                    // --- Satocash Client Interaction Example ---
-                    // This is where you'd call the SatocashNfcClient methods
-                    // based on your application's logic.
-
-                    // 1. Select applet
-                    // This step might be redundant if the AID filter already selected it,
-                    // but it's good practice to explicitly select it or confirm.
                     satocashClient.selectApplet(SatocashNfcClient.SATOCASH_AID)
                     withContext(Dispatchers.Main) {
                         textView.text = "Satocash Applet found and selected!"
                     }
                     Log.d(TAG, "Satocash Applet selected.")
 
-                    // 2. Initialize Secure Channel
                     satocashClient.initSecureChannel()
                     withContext(Dispatchers.Main) {
                         textView.append("\nSecure Channel Initialized!")
                     }
                     Log.d(TAG, "Secure Channel Initialized.")
 
-                    // 3. Get Card Status (using secure channel)
                     val status = satocashClient.getStatus()
                     withContext(Dispatchers.Main) {
                         textView.append("\nCard Status: ${status["applet_version"]}, PIN tries: ${status["pin_tries_remaining"]}")
                     }
                     Log.d(TAG, "Card Status: $status")
 
-                    // 4. Verify PIN (example)
-                    // Prompt for PIN using a dialog
                     val pin = withContext(Dispatchers.Main) {
                         showPinInputDialog()
                     }
 
                     if (pin != null) {
                         try {
-                            satocashClient.verifyPin(pin, 0)
+                            satocashWallet.authenticatePIN(pin).join() // Authenticate using SatocashWallet
                             withContext(Dispatchers.Main) {
                                 textView.append("\nPIN Verified! Card Ready.")
                             }
                             Log.d(TAG, "PIN Verified.")
-                        } catch (e: SatocashNfcClient.SatocashException) {
+
+                            // Now, handle the request payment button click
                             withContext(Dispatchers.Main) {
-                                textView.append("\nPIN Verification Failed: ${e.message} (SW: ${String.format("0x%04X", e.sw)})")
+                                requestPaymentButton.setOnClickListener {
+                                    if (requestedAmount > 0) {
+                                        lifecycleScope.launch(Dispatchers.IO) {
+                                            try {
+                                                withContext(Dispatchers.Main) {
+                                                    textView.append("\nRequesting payment for $requestedAmount SAT...")
+                                                }
+                                                val receivedProofs: List<Proof> = satocashWallet.getPayment(requestedAmount, "SAT").join()
+                                                withContext(Dispatchers.Main) {
+                                                    textView.append("\nPayment successful! Received ${receivedProofs.size} proofs.")
+                                                    receivedProofs.forEach { proof ->
+                                                        textView.append("\n  Proof: Amount=${proof.amount}, Keyset=${proof.keysetId}")
+                                                    }
+                                                }
+                                                Log.d(TAG, "Payment successful. Received proofs: $receivedProofs")
+                                            } catch (e: Exception) {
+                                                withContext(Dispatchers.Main) {
+                                                    textView.append("\nPayment failed: ${e.message}")
+                                                }
+                                                Log.e(TAG, "Payment failed: ${e.message}", e)
+                                            }
+                                        }
+                                    } else {
+                                        withContext(Dispatchers.Main) {
+                                            textView.append("\nPlease enter an amount greater than 0.")
+                                        }
+                                    }
+                                }
+                                // Trigger the button click programmatically if you want it to happen immediately after PIN
+                                // requestPaymentButton.performClick()
                             }
-                            Log.e(TAG, "PIN Verification Failed: ${e.message} (SW: ${String.format("0x%04X", e.sw)})")
+
+                        } catch (e: RuntimeException) { // Catch RuntimeException from CompletableFuture.join()
+                            val cause = e.cause
+                            if (cause is SatocashNfcClient.SatocashException) {
+                                withContext(Dispatchers.Main) {
+                                    textView.append("\nPIN Verification Failed: ${cause.message} (SW: ${String.format("0x%04X", cause.sw)})")
+                                }
+                                Log.e(TAG, "PIN Verification Failed: ${cause.message} (SW: ${String.format("0x%04X", cause.sw)})")
+                            } else {
+                                withContext(Dispatchers.Main) {
+                                    textView.append("\nAuthentication Failed: ${e.message}")
+                                }
+                                Log.e(TAG, "Authentication Failed: ${e.message}", e)
+                            }
                         }
                     } else {
                         withContext(Dispatchers.Main) {
@@ -156,35 +234,6 @@ class MainActivity : ComponentActivity() {
                         Log.d(TAG, "PIN entry cancelled by user.")
                     }
 
-
-                    // Example: Get Card Label
-                    try {
-                        val label = satocashClient.getCardLabel()
-                        withContext(Dispatchers.Main) {
-                            textView.append("\nCard Label: $label")
-                        }
-                        Log.d(TAG, "Card Label: $label")
-                    } catch (e: SatocashNfcClient.SatocashException) {
-                        withContext(Dispatchers.Main) {
-                            textView.append("\nFailed to get card label: ${e.message}")
-                        }
-                        Log.e(TAG, "Failed to get card label: ${e.message}")
-                    }
-
-                    // Example: Import a dummy mint
-                    try {
-                        val dummyMintUrl = "https://dummy.mint.example.com"
-                        val mintIndex = satocashClient.importMint(dummyMintUrl)
-                        withContext(Dispatchers.Main) {
-                            textView.append("\nImported mint at index: $mintIndex")
-                        }
-                        Log.d(TAG, "Imported mint at index: $mintIndex")
-                    } catch (e: SatocashNfcClient.SatocashException) {
-                        withContext(Dispatchers.Main) {
-                            textView.append("\nFailed to import mint: ${e.message}")
-                        }
-                        Log.e(TAG, "Failed to import mint: ${e.message}")
-                    }
                 } catch (e: IOException) {
                     withContext(Dispatchers.Main) {
                         textView.text = "NFC Communication Error: ${e.message}"
@@ -206,9 +255,11 @@ class MainActivity : ComponentActivity() {
                     } catch (e: IOException) {
                         Log.e(TAG, "Error closing IsoDep connection: ${e.message}", e)
                     }
-                    // Show the hint again when the card interaction is finished or an error occurred
+                    // Show keypad and hide NFC log/hint when card interaction is finished or an error occurred
                     withContext(Dispatchers.Main) {
-                        nfcScanHint.visibility = View.VISIBLE
+                        keypadLayout.visibility = View.VISIBLE
+                        nfcScanHint.visibility = View.GONE // Ensure hint stays hidden if keypad is visible
+                        textView.visibility = View.GONE
                     }
                 }
             }
