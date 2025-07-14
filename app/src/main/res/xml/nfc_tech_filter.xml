@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <tech-list>
-        <tech-alias>android.nfc.tech.IsoDep</tech-alias>
+        <tech>android.nfc.tech.IsoDep</tech>
     </tech-list>
-    <aid-filter android:name="5361746F63617368" />
 </resources>

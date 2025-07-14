@@ -1,126 +1,176 @@
 package com.example.shellshock
 
-import android.app.Activity
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 
-class ImportProofActivity : Activity() {
+class ImportProofActivity : AppCompatActivity() {
 
+    private val TAG = "ImportProofActivity"
     private lateinit var etProof: EditText
-    private lateinit var btnImport: Button
-    private lateinit var nfcAdapter: NfcAdapter
+    private lateinit var btnSetToken: Button
+    private lateinit var statusTextView: TextView
+    private var nfcAdapter: NfcAdapter? = null
+
+    private var satocashWallet: SatocashWallet? = null
+    private var satocashClient: SatocashNfcClient? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_import_proof)
 
         etProof = findViewById(R.id.etProof)
-        btnImport = findViewById(R.id.btnImport)
-
-        btnImport.setOnClickListener {
-            val proofToken = etProof.text.toString()
-            if (proofToken.isNotBlank()) {
-                // Store the token and finish this activity
-                SatocashWallet.pendingProofToken = proofToken
-                Toast.makeText(this, "Proof token saved. Now tap a card in the main screen.", Toast.LENGTH_LONG).show()
-                finish()
-            } else {
-                Toast.makeText(this, "Please enter a Cashu proof token", Toast.LENGTH_SHORT).show()
-            }
-        }
+        btnSetToken = findViewById(R.id.btnSetToken)
+        statusTextView = findViewById(R.id.statusTextView)
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         if (nfcAdapter == null) {
-            Toast.makeText(this, "NFC is not available on this device.", Toast.LENGTH_LONG).show()
-            finish()
+            lifecycleScope.launch {
+                logStatus("NFC is not available on this device. Cannot flash proofs.")
+                btnSetToken.isEnabled = false
+            }
+        } else {
+            lifecycleScope.launch {
+                logStatus("NFC available. Enter token or place card to flash directly.")
+            }
+        }
+
+        btnSetToken.setOnClickListener {
+            val proofToken = etProof.text.toString()
+            if (proofToken.isNotBlank()) {
+                SatocashWallet.pendingProofToken = proofToken
+                lifecycleScope.launch {
+                    logStatus("Token set. Ready to flash to card: ${proofToken.take(30)}...")
+                }
+                Toast.makeText(this, "Token set. Now tap a card to import proofs.", Toast.LENGTH_LONG).show()
+            } else {
+                lifecycleScope.launch {
+                    logStatus("Please enter a Cashu proof token first.")
+                }
+                Toast.makeText(this, "Please enter a Cashu proof token", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        setupNfcForegroundDispatch()
+        nfcAdapter?.let {
+            val pendingIntent = android.app.PendingIntent.getActivity(
+                this, 0, Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                android.app.PendingIntent.FLAG_MUTABLE
+            )
+            val techLists = arrayOf(arrayOf(IsoDep::class.java.name))
+            it.enableForegroundDispatch(this, pendingIntent, null, techLists)
+            Log.d(TAG, "NFC Foreground dispatch enabled for ImportProofActivity.")
+        }
     }
 
     override fun onPause() {
         super.onPause()
-        stopNfcForegroundDispatch()
+        nfcAdapter?.disableForegroundDispatch(this)
+        Log.d(TAG, "NFC Foreground dispatch disabled for ImportProofActivity.")
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        if (NfcAdapter.ACTION_TECH_DISCOVERED == intent?.action) {
-            val tag: Tag? = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
-            tag?.let {
-                val isoDep = IsoDep.get(it)
-                if (isoDep != null) {
-                    try {
-                        isoDep.connect()
-                        // Assume the token is passed as a string extra in the NFC intent
-                        val proofToken = intent.getStringExtra("PROOF_TOKEN_EXTRA") // This extra needs to be put by the sender
-                        if (proofToken != null) {
-                            // Authenticate the card (assuming a default PIN or stored PIN)
-                            // For simplicity, let's use a hardcoded PIN for now.
-                            // In a real app, this would come from user input or secure storage.
-                            val satocashWallet = SatocashWallet(SatocashNfcClient(it))
-                            satocashWallet.authenticatePIN("0000").thenAccept { authenticated ->
-                                if (authenticated) {
-                                    satocashWallet.importProofsFromToken(proofToken).thenAccept { importedCount ->
-                                        runOnUiThread {
-                                            Toast.makeText(this, "Imported $importedCount proofs from NFC.", Toast.LENGTH_LONG).show()
-                                            finish()
-                                        }
-                                    }.exceptionally { e ->
-                                        runOnUiThread {
-                                            Toast.makeText(this, "Error importing proofs: ${e.message}", Toast.LENGTH_LONG).show()
-                                        }
-                                        null
-                                    }
-                                } else {
-                                    runOnUiThread {
-                                        Toast.makeText(this, "NFC Authentication failed.", Toast.LENGTH_LONG).show()
-                                    }
-                                }
-                            }.exceptionally { e ->
-                                runOnUiThread {
-                                    Toast.makeText(this, "Error during NFC authentication: ${e.message}", Toast.LENGTH_LONG).show()
-                                }
-                                null
-                            }
-                        } else {
-                            Toast.makeText(this, "No proof token found in NFC intent.", Toast.LENGTH_LONG).show()
-                        }
-                    } catch (e: IOException) {
-                        Toast.makeText(this, "Error communicating with NFC tag: ${e.message}", Toast.LENGTH_LONG).show()
-                    } finally {
-                        try {
-                            isoDep.close()
-                        } catch (e: IOException) {
-                            // Ignore
-                        }
+        if (intent != null && NfcAdapter.ACTION_TECH_DISCOVERED == intent.action) {
+            handleNfcImport(intent)
+        }
+    }
+
+    private fun handleNfcImport(intent: Intent) {
+        val tag: Tag? = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(NfcAdapter.EXTRA_TAG, Tag::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
+        }
+
+        if (tag == null) {
+            lifecycleScope.launch {
+                logStatus("NFC Tag not found in intent.")
+            }
+            return
+        }
+
+        val tokenToImport = SatocashWallet.pendingProofToken
+        if (tokenToImport.isNullOrBlank()) {
+            lifecycleScope.launch {
+                logStatus("No proof token set to import. Please enter it first or use the main activity to receive.")
+            }
+            Toast.makeText(this, "No token to import. Enter one or go to Main screen.", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        lifecycleScope.launch {
+            logStatus("NFC Tag discovered. Attempting to import proofs...")
+        }
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                satocashClient = SatocashNfcClient(tag)
+                satocashClient?.connect()
+                satocashWallet = SatocashWallet(satocashClient!!)
+
+                logStatus("Selecting Satocash Applet...")
+                satocashClient?.selectApplet(SatocashNfcClient.SATOCASH_AID)
+                logStatus("Satocash Applet found and selected!")
+
+                logStatus("Initializing Secure Channel...")
+                satocashClient?.initSecureChannel()
+                logStatus("Secure Channel Initialized!")
+
+                logStatus("Authenticating PIN (using hardcoded '0000')...")
+                val authenticated = satocashWallet?.authenticatePIN("0000")?.join() ?: false
+
+                if (authenticated) {
+                    logStatus("PIN Verified. Importing proofs...")
+                    val importedCount = satocashWallet?.importProofsFromToken(tokenToImport)?.join() ?: 0
+                    logStatus("Successfully imported $importedCount proofs to card!")
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@ImportProofActivity, "Imported $importedCount proofs!", Toast.LENGTH_LONG).show()
+                        SatocashWallet.pendingProofToken = ""
+                    }
+                } else {
+                    logStatus("PIN authentication failed. Proofs not imported.")
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@ImportProofActivity, "PIN authentication failed!", Toast.LENGTH_LONG).show()
                     }
                 }
+
+            } catch (e: Exception) {
+                logStatus("Error during import: ${e.message}")
+                Log.e(TAG, "Error during NFC proof import: ${e.message}", e)
+            } finally {
+                try {
+                    satocashClient?.close()
+                } catch (e: IOException) {
+                    Log.e(TAG, "Error closing IsoDep connection: ${e.message}", e)
+                }
+                logStatus("NFC interaction finished. Ready for next action.")
             }
         }
     }
 
-    private fun setupNfcForegroundDispatch() {
-        val intent = Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        val pendingIntent = android.app.PendingIntent.getActivity(this, 0, intent, android.app.PendingIntent.FLAG_IMMUTABLE)
-        val filters = arrayOf(
-            android.content.IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED)
-        )
-        val techLists = arrayOf(arrayOf(IsoDep::class.java.name))
-        nfcAdapter.enableForegroundDispatch(this, pendingIntent, filters, techLists)
-    }
-
-    private fun stopNfcForegroundDispatch() {
-        nfcAdapter.disableForegroundDispatch(this)
+    private suspend fun logStatus(message: String) {
+        withContext(Dispatchers.Main) {
+            val currentText = statusTextView.text.toString()
+            val newText = if (currentText.isBlank()) message else "$currentText\n$message"
+            statusTextView.text = newText
+            Log.d(TAG, message)
+        }
     }
 }

@@ -32,6 +32,11 @@
             <meta-data android:name="android.nfc.action.TECH_DISCOVERED"
                 android:resource="@xml/nfc_tech_filter" />
         </activity>
+        <activity android:name=".ImportProofActivity"
+            android:exported="false"
+            android:label="Import Proof"
+            android:theme="@style/Theme.Shellshock">
+        </activity>
     </application>
 
 </manifest>

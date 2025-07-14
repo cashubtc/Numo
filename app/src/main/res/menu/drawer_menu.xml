@@ -3,12 +3,15 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_pos"
+            android:icon="@android:drawable/ic_menu_manage"
             android:title="Point of Sale" />
         <item
             android:id="@+id/nav_request_payment"
+            android:icon="@android:drawable/ic_menu_send"
             android:title="Request Payment" />
         <item
             android:id="@+id/nav_import_proof"
+            android:icon="@android:drawable/ic_menu_upload"
             android:title="Import Proof" />
     </group>
 </menu>

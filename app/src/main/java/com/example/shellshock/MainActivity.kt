@@ -11,7 +11,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import androidx.activity.ComponentActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,9 +20,16 @@ import android.app.AlertDialog
 import android.text.InputType
 import android.widget.LinearLayout
 import kotlinx.coroutines.suspendCancellableCoroutine
-import com.cashujdk.nut00.Proof // Import Proof class
+import com.cashujdk.nut00.Proof
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.drawerlayout.widget.DrawerLayout
+import com.google.android.material.navigation.NavigationView
+import android.view.MenuItem
+import androidx.appcompat.widget.Toolbar
+import androidx.appcompat.app.AppCompatActivity
+import android.widget.Toast
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private val TAG = "com.example.shellshock.MainActivity"
     private lateinit var textView: TextView
     private lateinit var nfcScanHint: TextView
@@ -36,11 +42,34 @@ class MainActivity : ComponentActivity() {
     private var satocashClient: SatocashNfcClient? = null
     private var satocashWallet: SatocashWallet? = null
 
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var navigationView: NavigationView
+    private lateinit var toggle: ActionBarDrawerToggle
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         Log.d(TAG, "OnCreate was called")
+
+        // --- Toolbar and Navigation Drawer Setup ---
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
+        drawerLayout = findViewById(R.id.drawer_layout)
+        navigationView = findViewById(R.id.nav_view)
+
+        toggle = ActionBarDrawerToggle(
+            this,
+            drawerLayout,
+            toolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
+        )
+        drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        navigationView.setNavigationItemSelectedListener(this)
 
         // Find UI components
         textView = findViewById(R.id.textView)
@@ -53,21 +82,19 @@ class MainActivity : ComponentActivity() {
         if (nfcAdapter == null) {
             textView.text = "NFC is not available on this device."
             nfcScanHint.visibility = View.GONE
-            keypadLayout.visibility = View.GONE // Hide keypad if NFC is not available
-            textView.visibility = View.VISIBLE // Show NFC error message
+            keypadLayout.visibility = View.GONE
+            textView.visibility = View.VISIBLE
             return
         } else {
-            nfcScanHint.visibility = View.GONE // Hint is initially hidden, keypad is shown
+            nfcScanHint.visibility = View.GONE
             keypadLayout.visibility = View.VISIBLE
-            textView.visibility = View.GONE // NFC event log is initially hidden
+            textView.visibility = View.GONE
         }
 
         setupKeypadListeners()
 
-        // Set up the Request Payment button listener here
         requestPaymentButton.setOnClickListener {
             if (requestedAmount > 0) {
-                // Launch a coroutine to handle the payment process
                 lifecycleScope.launch(Dispatchers.IO) {
                     if (satocashClient == null || satocashWallet == null) {
                         withContext(Dispatchers.Main) {
@@ -83,13 +110,6 @@ class MainActivity : ComponentActivity() {
                         withContext(Dispatchers.Main) {
                             textView.append("\nRequesting payment for $requestedAmount SAT...")
                         }
-                        // Ensure PIN is authenticated before requesting payment
-                        // This part assumes PIN is already authenticated or will be handled by getPayment if needed
-                        // For now, we'll assume authentication happens during card detection.
-                        // If getPayment itself needs PIN, it should handle it.
-                        // If not, we need to re-prompt PIN here if not authenticated.
-                        // For simplicity, let's assume the card is ready after initial detection and PIN entry.
-
                         val receivedProofs: List<Proof> = satocashWallet!!.getPayment(requestedAmount, "SAT").join()
                         withContext(Dispatchers.Main) {
                             textView.append("\nPayment successful! Received ${receivedProofs.size} proofs.")
@@ -104,7 +124,6 @@ class MainActivity : ComponentActivity() {
                         }
                         Log.e(TAG, "Payment failed: ${e.message}", e)
                     } finally {
-                        // After payment attempt, show keypad again
                         withContext(Dispatchers.Main) {
                             keypadLayout.visibility = View.VISIBLE
                             nfcScanHint.visibility = View.GONE
@@ -124,8 +143,6 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-
-        // Handle NFC intent if the app was launched by an NFC tag
         if (NfcAdapter.ACTION_TECH_DISCOVERED == intent.action) {
             handleNfcIntent(intent)
         }
@@ -172,11 +189,10 @@ class MainActivity : ComponentActivity() {
             it.enableForegroundDispatch(this, pendingIntent, null, techLists)
             Log.d(TAG, "Foreground dispatch enabled.")
         }
-        // When resuming, show keypad and hide NFC log/hint
         keypadLayout.visibility = View.VISIBLE
         nfcScanHint.visibility = View.GONE
         textView.visibility = View.GONE
-        textView.text = "" // Clear previous card info
+        textView.text = "" 
     }
 
     override fun onPause() {
@@ -194,9 +210,13 @@ class MainActivity : ComponentActivity() {
 
     @SuppressLint("SetTextI19n")
     private fun handleNfcIntent(intent: Intent) {
-        val tag: Tag? = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
+        val tag: Tag? = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(NfcAdapter.EXTRA_TAG, Tag::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
+        }
         if (tag != null) {
-            // Hide keypad and show NFC log when a card is detected
             keypadLayout.visibility = View.GONE
             nfcScanHint.visibility = View.GONE
             textView.visibility = View.VISIBLE
@@ -234,13 +254,12 @@ class MainActivity : ComponentActivity() {
 
                     if (pin != null) {
                         try {
-                            satocashWallet?.authenticatePIN(pin)?.join() // Authenticate using SatocashWallet
+                            satocashWallet?.authenticatePIN(pin)?.join()
                             withContext(Dispatchers.Main) {
                                 textView.append("\nPIN Verified! Card Ready.")
                             }
                             Log.d(TAG, "PIN Verified.")
 
-                            // Example: Get Card Label
                             try {
                                 val label = satocashClient?.getCardLabel()
                                 withContext(Dispatchers.Main) {
@@ -254,7 +273,6 @@ class MainActivity : ComponentActivity() {
                                 Log.e(TAG, "Failed to get card label: ${e.message}")
                             }
 
-                            // Example: Import a dummy mint
                             try {
                                 val dummyMintUrl = "https://dummy.mint.example.com"
                                 val mintIndex = satocashClient?.importMint(dummyMintUrl)
@@ -269,7 +287,7 @@ class MainActivity : ComponentActivity() {
                                 Log.e(TAG, "Failed to import mint: ${e.message}")
                             }
 
-                        } catch (e: RuntimeException) { // Catch RuntimeException from CompletableFuture.join()
+                        } catch (e: RuntimeException) {
                             val cause = e.cause
                             if (cause is SatocashNfcClient.SatocashException) {
                                 withContext(Dispatchers.Main) {
@@ -311,10 +329,9 @@ class MainActivity : ComponentActivity() {
                     } catch (e: IOException) {
                         Log.e(TAG, "Error closing IsoDep connection: ${e.message}", e)
                     }
-                    // Show keypad and hide NFC log/hint when card interaction is finished or an error occurred
                     withContext(Dispatchers.Main) {
                         keypadLayout.visibility = View.VISIBLE
-                        nfcScanHint.visibility = View.GONE // Ensure hint stays hidden if keypad is visible
+                        nfcScanHint.visibility = View.GONE
                         textView.visibility = View.GONE
                     }
                 }
@@ -322,6 +339,47 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.nav_pos -> {
+                Toast.makeText(this, "Already at Point of Sale", Toast.LENGTH_SHORT).show()
+                keypadLayout.visibility = View.VISIBLE
+                nfcScanHint.visibility = View.GONE
+                textView.visibility = View.GONE
+            }
+            R.id.nav_request_payment -> {
+                Toast.makeText(this, "Request Payment selected", Toast.LENGTH_SHORT).show()
+                keypadLayout.visibility = View.VISIBLE
+                nfcScanHint.visibility = View.GONE
+                textView.visibility = View.GONE
+            }
+            R.id.nav_import_proof -> {
+                val intent = Intent(this, ImportProofActivity::class.java)
+                startActivity(intent)
+            }
+        }
+        drawerLayout.closeDrawers()
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (toggle.onOptionsItemSelected(item)) {
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onBackPressed() {
+        if (drawerLayout.isDrawerOpen(navigationView)) {
+            drawerLayout.closeDrawer(navigationView)
+        } else {
+            @Suppress("DEPRECATION")
+            super.onBackPressed()
+        }
+    }
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     private suspend fun showPinInputDialog(): String? = withContext(Dispatchers.Main) {
         return@withContext suspendCancellableCoroutine { continuation ->
             val builder = AlertDialog.Builder(this@MainActivity)
@@ -333,10 +391,9 @@ class MainActivity : ComponentActivity() {
 
             val layout = LinearLayout(this@MainActivity)
             layout.orientation = LinearLayout.VERTICAL
-            layout.setPadding(50, 20, 50, 20) // Add some padding
+            layout.setPadding(50, 20, 50, 20)
             layout.addView(input)
 
-            // Add a simple numeric keypad
             val keypadLayout = LinearLayout(this@MainActivity)
             keypadLayout.orientation = LinearLayout.VERTICAL
             keypadLayout.layoutParams = LinearLayout.LayoutParams(
@@ -348,7 +405,7 @@ class MainActivity : ComponentActivity() {
                 arrayOf("1", "2", "3"),
                 arrayOf("4", "5", "6"),
                 arrayOf("7", "8", "9"),
-                arrayOf("", "0", "DEL") // Empty string for spacing, DEL for backspace
+                arrayOf("", "0", "DEL")
             )
 
             for (row in buttons) {
@@ -412,7 +469,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // Extension function to convert ByteArray to Hex String for logging
     private fun ByteArray.toHexString(): String =
         joinToString(separator = "") { eachByte -> "%02x".format(eachByte) }
 }
