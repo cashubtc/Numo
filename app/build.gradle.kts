@@ -60,5 +60,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.bcprov.jdk15on)
     implementation(files("libs/cashu-java-sdk-1.0-SNAPSHOT.jar"))
-    implementation("com.squareup.okhttp3:okhttp:4.12.0") // Check for the latest version
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("androidx.appcompat:appcompat:1.6.0")
+
 }
