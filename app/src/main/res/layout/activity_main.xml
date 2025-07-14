@@ -61,18 +61,18 @@
             android:alignmentMode="alignBounds"
             android:columnOrderPreserved="false">
 
-            <Button android:text="1" style="@style/KeypadButton" android:id="@+id/button_1" />
-            <Button android:text="2" style="@style/KeypadButton" android:id="@+id/button_2" />
-            <Button android:text="3" style="@style/KeypadButton" android:id="@+id/button_3" />
-            <Button android:text="4" style="@style/KeypadButton" android:id="@+id/button_4" />
-            <Button android:text="5" style="@style/KeypadButton" android:id="@+id/button_5" />
-            <Button android:text="6" style="@style/KeypadButton" android:id="@+id/button_6" />
-            <Button android:text="7" style="@style/KeypadButton" android:id="@+id/button_7" />
-            <Button android:text="8" style="@style/KeypadButton" android:id="@+id/button_8" />
-            <Button android:text="9" style="@style/KeypadButton" android:id="@+id/button_9" />
-            <Button android:text="CLR" style="@style/KeypadButton" android:id="@+id/button_clear" />
-            <Button android:text="0" style="@style/KeypadButton" android:id="@+id/button_0" />
-            <Button android:text="DEL" style="@style/KeypadButton" android:id="@+id/button_del" />
+            <Button android:text="1" android:id="@+id/button_1" />
+            <Button android:text="2" android:id="@+id/button_2" />
+            <Button android:text="3" android:id="@+id/button_3" />
+            <Button android:text="4" android:id="@+id/button_4" />
+            <Button android:text="5" android:id="@+id/button_5" />
+            <Button android:text="6" android:id="@+id/button_6" />
+            <Button android:text="7" android:id="@+id/button_7" />
+            <Button android:text="8" android:id="@+id/button_8" />
+            <Button android:text="9" android:id="@+id/button_9" />
+            <Button android:text="CLR" android:id="@+id/button_clear" />
+            <Button android:text="0"  android:id="@+id/button_0" />
+            <Button android:text="DEL" android:id="@+id/button_del" />
 
         </GridLayout>
 
