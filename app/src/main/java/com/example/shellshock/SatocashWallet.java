@@ -88,7 +88,7 @@ public class SatocashWallet {
 
                 Map<Integer, String> keysetIndicesToIds = new HashMap<>();
                 for (SatocashNfcClient.KeysetInfo info : keysetInfos) {
-                    keysetIndicesToIds.put(info.index, info.id);
+                    keysetIndicesToIds.put(info.index, info.id.toLowerCase());
                 }
                 Log.d(TAG, "Keyset indices to IDs map: " + keysetIndicesToIds);
 
@@ -124,6 +124,7 @@ public class SatocashWallet {
 
                 List<Proof> sendSelection = selection.getSecond();
                 Log.d(TAG, "Selected proofs for sending, size: " + sendSelection.size());
+                Log.d(TAG, "Selected proofs: " + sendSelection.stream().map((p) -> p.amount).collect(Collectors.toList()));
                 
                 if (sendSelection.isEmpty()) {
                     throw new RuntimeException("Empty selection: couldn't select coins for this amount");
@@ -151,6 +152,7 @@ public class SatocashWallet {
                             if (proofAmount == selectedProof.amount && 
                                 selectedProof.keysetId.equals(keysetId)) {
                                 selectedProofsIndices.add(j);
+                                metadataAmountInfo.set(j, 0x80);
                                 break;
                             }
                         }
@@ -169,12 +171,13 @@ public class SatocashWallet {
                             1L << pf.amountExponent,
                             keysetIndicesToIds.get(pf.keysetIndex),
                             new StringSecret(bytesToHex(pf.secret)),
-                            hexToPoint(bytesToHex(pf.unblindedKey)),
+                            bytesToHex(pf.unblindedKey).toLowerCase(),
                             Optional.empty(),
                             Optional.empty()
                     );
                 }).collect(Collectors.toList());
                 Log.d(TAG, "Exported proofs from card, size: " + exportedProofs.size());
+                Log.d(TAG, "Exported proofs signatures: " + exportedProofs.stream().map((p) -> p.c).collect(Collectors.toList()));
 
                 // Create output amounts
                 Pair<List<Long>, List<Long>> outputAmounts = createOutputAmounts(amount, changeAmount);
@@ -210,10 +213,16 @@ public class SatocashWallet {
                 swapRequest.inputs = exportedProofs;
                 swapRequest.outputs = outputsAndSecretData.stream().map(Pair::getFirst).collect(Collectors.toList());
 
+                Log.d(TAG, "Attempting to swap proofs");
+
                 PostSwapResponse response = cashuHttpClient.swap(swapRequest).join();
                 GetKeysResponse keysResponse = keysFuture.join();
+
+                Log.d(TAG, "Successfully swapped and received proofs");
+
                 List<Proof> allProofs = constructAndVerifyProofs(response, keysResponse.keysets.get(0), outputsAndSecretData);
 
+                Log.d(TAG, "Successfully constructed and verified proofs");
                 List<Proof> changeProofs = allProofs.subList(0, outputAmounts.getFirst().size());
                 List<Proof> receiveProofs = allProofs.subList(outputAmounts.getFirst().size(), allProofs.size());
 
@@ -288,7 +297,7 @@ public class SatocashWallet {
                         cardClient.importProof(
                                 keysetIdsToIndices.get(proof.keysetId),
                                 ilog2(proof.amount),
-                                pointToHex(proof.c, true),
+                                proof.c,
                                 bytesToHex(proof.secret.getBytes())
                         );
                         importedCount++;
@@ -311,7 +320,7 @@ public class SatocashWallet {
             cardClient.importProof(
                     keysetIdsToIndices.get(proof.keysetId),
                     ilog2(proof.amount),
-                    pointToHex(proof.c, true),
+                    proof.c,
                     proof.secret.toString()
             );
         }
@@ -321,7 +330,9 @@ public class SatocashWallet {
         if (number < 0) {
             throw new IllegalArgumentException();
         }
-        return 63 - Long.numberOfLeadingZeros(number);
+        int n = 63 - Long.numberOfLeadingZeros(number);
+        Log.d(TAG, "ilog2("+number+") = "+n);
+        return n;
     }
 
     private static <K, V> Map<V, K> transposeMap(Map<K, V> originalMap) {
@@ -345,7 +356,7 @@ public class SatocashWallet {
             ECPoint key = hexToPoint(keyset.keys.get(BigInteger.valueOf(signature.amount)));
             ECPoint C = computeC(signature.getC_(), blindingFactor, key);
 
-            result.add(new Proof(signature.amount, signature.keysetId, secret, C, Optional.empty(), Optional.empty()));
+            result.add(new Proof(signature.amount, signature.keysetId, secret, pointToHex(C, true), Optional.empty(), Optional.empty()));
         }
         return result;
     }
