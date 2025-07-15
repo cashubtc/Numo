@@ -51,9 +51,16 @@
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:text=""
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:scrollbars="vertical"
+                android:fadeScrollbars="false"
+                android:verticalScrollbarPosition="right"
                 android:gravity="bottom"
+                android:maxLines="1000"
+                android:scrollbarStyle="outsideOverlay"
+                android:background="@android:color/black"
+                android:textColor="@android:color/white"
+                android:fontFamily="monospace"
                 android:visibility="gone" />
         </FrameLayout>
 

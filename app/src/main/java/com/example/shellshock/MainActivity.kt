@@ -37,6 +37,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var amountDisplay: TextView
     private lateinit var requestPaymentButton: Button
     private var nfcAdapter: NfcAdapter? = null
+    
+    private fun log(message: String) {
+        Log.d(TAG, message)
+        lifecycleScope.launch(Dispatchers.Main) {
+            textView.append("\n$message")
+            // Auto-scroll to bottom
+            val scrollAmount = textView.layout?.getLineTop(textView.lineCount) ?: 0
+            textView.scrollTo(0, scrollAmount)
+        }
+    }
 
     private var requestedAmount: Long = 0
     private var satocashClient: SatocashNfcClient? = null
@@ -195,32 +205,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             nfcScanHint.visibility = View.GONE
             textView.visibility = View.VISIBLE
 
-            textView.text = "NFC Tag discovered: ${tag.id?.toHexString()}"
-            Log.d(TAG, "NFC Tag discovered: ${tag.id?.toHexString()}")
+            // Clear previous log and start new session
+            textView.text = ""
+            log("NFC Tag discovered: ${tag.id?.toHexString()}")
 
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
                     satocashClient = SatocashNfcClient(tag)
                     satocashClient?.connect()
+                    log("Connected to NFC card")
+                    
                     satocashWallet = SatocashWallet(satocashClient!!)
+                    log("Created Satocash wallet instance")
 
                     satocashClient?.selectApplet(SatocashNfcClient.SATOCASH_AID)
-                    withContext(Dispatchers.Main) {
-                        textView.text = "Satocash Applet found and selected!"
-                    }
-                    Log.d(TAG, "Satocash Applet selected.")
+                    log("Satocash Applet found and selected!")
 
                     satocashClient?.initSecureChannel()
-                    withContext(Dispatchers.Main) {
-                        textView.append("\nSecure Channel Initialized!")
-                    }
-                    Log.d(TAG, "Secure Channel Initialized.")
-
-                    val status = satocashClient?.getStatus()
-                    withContext(Dispatchers.Main) {
-                        textView.append("\nCard Status: ${status?.get("applet_version")}, PIN tries: ${status?.get("pin_tries_remaining")}")
-                    }
-                    Log.d(TAG, "Card Status: $status")
+                    log("Secure Channel Initialized!")
 
                     val pin = withContext(Dispatchers.Main) {
                         showPinInputDialog()
@@ -229,88 +231,47 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     if (pin != null) {
                         try {
                             satocashWallet?.authenticatePIN(pin)?.join()
-                            withContext(Dispatchers.Main) {
-                                textView.append("\nPIN Verified! Card Ready.")
-                            }
-                            Log.d(TAG, "PIN Verified.")
-
-                            try {
-                                val label = satocashClient?.getCardLabel()
-                                withContext(Dispatchers.Main) {
-                                    textView.append("\nCard Label: $label")
-                                }
-                                Log.d(TAG, "Card Label: $label")
-                            } catch (e: SatocashNfcClient.SatocashException) {
-                                withContext(Dispatchers.Main) {
-                                    textView.append("\nFailed to get card label: ${e.message}")
-                                }
-                                Log.e(TAG, "Failed to get card label: ${e.message}")
-                            }
+                            log("PIN Verified! Card Ready.")
 
                             // If there's a requested amount, start the payment automatically
                             if (requestAmount > 0) {
                                 try {
-                                    withContext(Dispatchers.Main) {
-                                        textView.append("\nStarting payment for $requestAmount SAT...")
-                                    }
+                                    log("Starting payment for $requestAmount SAT...")
                                     val receivedProofs: List<Proof> = satocashWallet!!.getPayment(requestAmount, "SAT").join()
-                                    withContext(Dispatchers.Main) {
-                                        textView.append("\nPayment successful! Received ${receivedProofs.size} proofs.")
-                                        receivedProofs.forEach { proof ->
-                                            textView.append("\n  Proof: Amount=${proof.amount}, Keyset=${proof.keysetId}")
-                                        }
-                                        requestAmount = 0  // Reset the static amount after successful payment
+                                    log("Payment successful! Received ${receivedProofs.size} proofs.")
+                                    receivedProofs.forEach { proof ->
+                                        log("  Proof: Amount=${proof.amount}, Keyset=${proof.keysetId}")
                                     }
-                                    Log.d(TAG, "Payment successful. Received proofs: $receivedProofs")
+                                    requestAmount = 0  // Reset the static amount after successful payment
                                 } catch (e: Exception) {
-                                    withContext(Dispatchers.Main) {
-                                        textView.append("\nPayment failed: ${e.message}")
-                                    }
-                                    Log.e(TAG, "Payment failed: ${e.message}", e)
+                                    log("Payment failed: ${e.message}")
                                 }
                             }
 
                         } catch (e: RuntimeException) {
                             val cause = e.cause
                             if (cause is SatocashNfcClient.SatocashException) {
-                                withContext(Dispatchers.Main) {
-                                    textView.append("\nPIN Verification Failed: ${cause.message} (SW: ${String.format("0x%04X", cause.sw)})")
-                                }
-                                Log.e(TAG, "PIN Verification Failed: ${cause.message} (SW: ${String.format("0x%04X", cause.sw)})")
+                                log("PIN Verification Failed: ${cause.message} (SW: ${String.format("0x%04X", cause.sw)})")
                             } else {
-                                withContext(Dispatchers.Main) {
-                                    textView.append("\nAuthentication Failed: ${e.message}")
-                                }
-                                Log.e(TAG, "Authentication Failed: ${e.message}", e)
+                                log("Authentication Failed: ${e.message}")
                             }
                         }
                     } else {
-                        withContext(Dispatchers.Main) {
-                            textView.append("\nPIN entry cancelled.")
-                        }
-                        Log.d(TAG, "PIN entry cancelled by user.")
+                        log("PIN entry cancelled.")
                     }
 
                 } catch (e: IOException) {
-                    withContext(Dispatchers.Main) {
-                        textView.text = "NFC Communication Error: ${e.message}"
-                    }
-                    Log.e(TAG, "NFC Communication Error: ${e.message}", e)
+                    log("NFC Communication Error: ${e.message}")
                 } catch (e: SatocashNfcClient.SatocashException) {
-                    withContext(Dispatchers.Main) {
-                        textView.text = "Satocash Card Error: ${e.message} (SW: ${String.format("0x%04X", e.sw)})"
-                    }
-                    Log.e(TAG, "Satocash Card Error: ${e.message} (SW: ${String.format("0x%04X", e.sw)})", e)
+                    log("Satocash Card Error: ${e.message} (SW: ${String.format("0x%04X", e.sw)})")
                 } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        textView.text = "An unexpected error occurred: ${e.message}"
-                    }
-                    Log.e(TAG, "An unexpected error occurred: ${e.message}", e)
+                    log("An unexpected error occurred: ${e.message}")
                 } finally {
                     try {
                         satocashClient?.close()
+                        log("NFC connection closed.")
                     } catch (e: IOException) {
-                        Log.e(TAG, "Error closing IsoDep connection: ${e.message}", e)
+                        log("Error closing NFC connection: ${e.message}")
                     }
                     withContext(Dispatchers.Main) {
                         if (requestAmount > 0) {
@@ -318,7 +279,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             keypadLayout.visibility = View.GONE
                             nfcScanHint.visibility = View.VISIBLE
                             textView.visibility = View.VISIBLE
-                            textView.text = "Please tap your card to start the payment of $requestAmount SAT"
                         } else {
                             // If no payment is pending, show the keypad
                             keypadLayout.visibility = View.VISIBLE
