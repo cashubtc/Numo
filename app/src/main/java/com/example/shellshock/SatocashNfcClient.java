@@ -993,10 +993,11 @@ public class SatocashNfcClient {
         dataStream.write(shortToBytes((short) indexSize));
         byte[] response = sendSecureApdu(CLA_BITCOIN, INS_SATOCASH_GET_PROOF_INFO, (byte) unit.getValue(), (byte) infoType.getValue(), dataStream.toByteArray());
         Log.d(TAG, "Got proof info: " + bytesToHex(response));
-        List<Integer> intList = new ArrayList<>(response.length);
-        for (int i=0; i < response.length; ++i) {
-            intList.set(i, (int)response[i]);
+        List<Integer> intList = new ArrayList<>();
+        for (byte b : response) {
+            intList.add((int)b & 0xFF);  // Convert to unsigned int
         }
+        Log.d(TAG, "Converted to list: " + intList);
         return intList;
     }
     public boolean setCardLabel(String label) throws SatocashException {

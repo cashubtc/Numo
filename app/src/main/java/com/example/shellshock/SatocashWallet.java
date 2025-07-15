@@ -1,58 +1,32 @@
 package com.example.shellshock;
 
-import static com.cashujdk.cryptography.Cashu.computeB_;
-import static com.cashujdk.cryptography.Cashu.computeC;
-import static com.cashujdk.cryptography.Cashu.generateRandomScalar;
-import static com.cashujdk.cryptography.Cashu.hashToCurve;
-import static com.cashujdk.cryptography.Cashu.hexToPoint;
-import static com.cashujdk.cryptography.Cashu.pointToHex;
-import static com.cashujdk.cryptography.Cashu.verifyProof;
-import static com.example.shellshock.SatocashNfcClient.bytesToHex;
-
+import android.util.Log;
 import androidx.annotation.NonNull;
-
 import com.cashujdk.api.CashuHttpClient;
-import com.cashujdk.nut00.BlindSignature;
-import com.cashujdk.nut00.BlindedMessage;
-import com.cashujdk.nut00.ISecret;
-import com.cashujdk.nut00.Proof;
-import com.cashujdk.nut00.StringSecret;
-import com.cashujdk.nut00.Token;
-import com.cashujdk.nut01.GetKeysResponse;
-import com.cashujdk.nut01.KeysetItemResponse;
-import com.cashujdk.nut02.FeeHelper;
-import com.cashujdk.nut02.GetKeysetsItemResponse;
-import com.cashujdk.nut00.InnerToken;
-import com.cashujdk.nut02.GetKeysetsResponse;
-import com.cashujdk.nut03.PostSwapRequest;
-import com.cashujdk.nut03.PostSwapResponse;
-import com.cashujdk.utils.Pair;
-import com.cashujdk.utils.ProofSelector;
-
+import com.cashujdk.nut00.*;
+import com.cashujdk.nut01.*;
+import com.cashujdk.nut02.*;
+import com.cashujdk.nut03.*;
+import com.cashujdk.utils.*;
 import org.bouncycastle.math.ec.ECPoint;
 import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import java.util.stream.*;
 import okhttp3.OkHttpClient;
+
+import static com.cashujdk.cryptography.Cashu.*;
+import static com.example.shellshock.SatocashNfcClient.bytesToHex;
 
 public class SatocashWallet {
     private final SatocashNfcClient cardClient;
     private Boolean authenticated;
     @NotNull
     public static String pendingProofToken;
+
+    public static final String TAG = "SatocashWallet";
 
     public SatocashWallet(SatocashNfcClient _client) {
         cardClient = _client;
@@ -81,33 +55,48 @@ public class SatocashWallet {
                 // Step 1. Get mint
                 String mintUrl;
                 mintUrl = cardClient.exportMint(0);
+                Log.d(TAG, "Got mint URL: " + mintUrl);
 
                 // Step 2. Get mint keysets
                 CashuHttpClient cashuHttpClient = new CashuHttpClient(new OkHttpClient(), mintUrl);
                 CompletableFuture<GetKeysetsResponse> keysetsFuture = cashuHttpClient.getKeysets();
 
                 // Step 3. Get information about the proofs in the card
-                Map<Integer, String> metadataIndexToKeyset;
                 List<Integer> metadataAmountInfo = cardClient.getProofInfo(
                         SatocashNfcClient.Unit.valueOf(unit),
                         SatocashNfcClient.ProofInfoType.METADATA_AMOUNT_EXPONENT,
                         0,
                         128
                 );
+                Log.d(TAG, "Got metadata amount info, size: " + metadataAmountInfo.size());
+
                 List<Integer> metadataKeysetIndices = cardClient.getProofInfo(
                         SatocashNfcClient.Unit.valueOf(unit),
                         SatocashNfcClient.ProofInfoType.METADATA_KEYSET_INDEX,
                         0,
                         128
                 );
-                // Only consider unique indices
-                Set<Integer> uniqueKeysetIndices = new HashSet<>(metadataKeysetIndices);
-                // Get the actual keyset IDs from the card
-                List<SatocashNfcClient.KeysetInfo> keysetInfos = cardClient.exportKeysets(new ArrayList<Integer>(uniqueKeysetIndices));
-                Map<Integer, String> keysetIndicesToIds = new HashMap<>();
-                for (int i = 0; i < keysetInfos.size(); ++i) {
-                    keysetIndicesToIds.put(i, keysetInfos.get(i).id);
+                Log.d(TAG, "Got metadata keyset indices, size: " + metadataKeysetIndices.size());
+
+                // Only consider unique indices from unspent proofs
+                Set<Integer> uniqueKeysetIndices = new HashSet<>();
+                for (int i = 0; i < metadataKeysetIndices.size(); i++) {
+                    // Check if the proof is not spent (0x80 bit not set)
+                    if ((metadataAmountInfo.get(i) & 0x80) == 0) {
+                        uniqueKeysetIndices.add(metadataKeysetIndices.get(i));
+                    }
                 }
+                Log.d(TAG, "Unique keyset indices (from unspent proofs): " + uniqueKeysetIndices);
+
+                // Get the actual keyset IDs from the card
+                List<SatocashNfcClient.KeysetInfo> keysetInfos = cardClient.exportKeysets(new ArrayList<>(uniqueKeysetIndices));
+                Log.d(TAG, "Got keyset infos, size: " + keysetInfos.size());
+
+                Map<Integer, String> keysetIndicesToIds = new HashMap<>();
+                for (SatocashNfcClient.KeysetInfo info : keysetInfos) {
+                    keysetIndicesToIds.put(info.index, info.id);
+                }
+                Log.d(TAG, "Keyset indices to IDs map: " + keysetIndicesToIds);
 
                 // Wait for Mint keysets and then map them to their fee
                 GetKeysetsResponse keysetsResponse = keysetsFuture.join();
@@ -115,23 +104,36 @@ public class SatocashWallet {
                 for (GetKeysetsItemResponse keyset : keysetsResponse.keysets) {
                     keysetsFeesMap.put(keyset.keysetId, keyset.inputFee);
                 }
+                Log.d(TAG, "Got keysets fees map: " + keysetsFeesMap);
 
                 // Map getProofInfo response to dummy proofs (without the unblinded signature)
                 List<Proof> dummyProofs = new ArrayList<>();
                 for (int i = 0; i < metadataAmountInfo.size(); ++i) {
                     // Check that it isn't spent
-                    if ((metadataAmountInfo.get(i) & 0x80) == 0x00) {
-                        Proof p = new Proof();
-                        p.amount = 1L << metadataAmountInfo.get(i);
-                        p.keysetId = keysetIndicesToIds.get(metadataKeysetIndices.get(i));
-                        dummyProofs.add(p);
+                    if ((metadataAmountInfo.get(i) & 0x80) == 0) {
+                        int keysetIndex = metadataKeysetIndices.get(i);
+                        String keysetId = keysetIndicesToIds.get(keysetIndex);
+                        if (keysetId != null) {
+                            Proof p = new Proof();
+                            p.amount = 1L << (metadataAmountInfo.get(i) & 0x7F); // Remove the spent bit
+                            p.keysetId = keysetId;
+                            dummyProofs.add(p);
+                            Log.d(TAG, "Added dummy proof: amount=" + p.amount + ", keysetId=" + p.keysetId);
+                        }
                     }
                 }
+                Log.d(TAG, "Created dummy proofs, size: " + dummyProofs.size());
 
                 // Step 3. Coin selection
                 ProofSelector selector = new ProofSelector(Optional.of(keysetsFeesMap));
                 Pair<List<Proof>, List<Proof>> selection = selector.selectProofsToSend(dummyProofs, (int)amount, true);
-                List<Integer> selectedProofsIndices = getProofsIndices(selection, dummyProofs);
+
+                List<Proof> sendSelection = selection.getSecond();
+                Log.d(TAG, "Selected proofs for sending, size: " + sendSelection.size());
+                
+                if (sendSelection.isEmpty()) {
+                    throw new RuntimeException("Empty selection: couldn't select coins for this amount");
+                }
 
                 // Get amount plus fees
                 long amountWithFees = amount + FeeHelper.ComputeFee(selection.getSecond(), keysetsFeesMap);
@@ -142,6 +144,30 @@ public class SatocashWallet {
                 }
 
                 long changeAmount = sumProofs - amountWithFees;
+
+                // Match the selected proofs to their respective index in the card
+                List<Integer> selectedProofsIndices = new ArrayList<>();
+                for (Proof selectedProof : sendSelection) {
+                    for (int j = 0; j < metadataAmountInfo.size(); ++j) {
+                        if ((metadataAmountInfo.get(j) & 0x80) == 0) { // Not spent
+                            int keysetIndex = metadataKeysetIndices.get(j);
+                            String keysetId = keysetIndicesToIds.get(keysetIndex);
+                            long proofAmount = 1L << (metadataAmountInfo.get(j) & 0x7F);
+                            
+                            if (proofAmount == selectedProof.amount && 
+                                selectedProof.keysetId.equals(keysetId)) {
+                                selectedProofsIndices.add(j);
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if (selectedProofsIndices.size() != sendSelection.size()) {
+                    throw new RuntimeException("Failed to match all selected proofs to card indices");
+                }
+                
+                Log.d(TAG, "Selected proof indices: " + selectedProofsIndices);
 
                 // Step 4. Extract proofs from card
                 List<Proof> exportedProofs = cardClient.exportProofs(selectedProofsIndices).stream().map((pf) -> {
@@ -154,6 +180,7 @@ public class SatocashWallet {
                             Optional.empty()
                     );
                 }).collect(Collectors.toList());
+                Log.d(TAG, "Exported proofs from card, size: " + exportedProofs.size());
 
                 // Create output amounts
                 Pair<List<Long>, List<Long>> outputAmounts = createOutputAmounts(amount, changeAmount);
@@ -165,6 +192,7 @@ public class SatocashWallet {
                         .min(Comparator.comparing((k) -> k.inputFee))
                         .orElseThrow()
                         .keysetId;
+                Log.d(TAG, "Selected keyset ID for new proofs: " + selectedKeysetId);
 
                 // Request the keys in the keyset
                 CompletableFuture<GetKeysResponse> keysFuture = cashuHttpClient.getKeys(selectedKeysetId);
@@ -193,7 +221,7 @@ public class SatocashWallet {
                 List<Proof> allProofs = constructAndVerifyProofs(response, keysResponse.keysets.get(0), outputsAndSecretData);
 
                 List<Proof> changeProofs = allProofs.subList(0, outputAmounts.getFirst().size());
-                List<Proof> receiveProofs = allProofs.subList(outputAmounts.getFirst().size(), outputAmounts.getSecond().size());
+                List<Proof> receiveProofs = allProofs.subList(outputAmounts.getFirst().size(), allProofs.size());
 
                 // Import changeProofs to card
                 Map<String, Integer> keysetIdsToIndices = transposeMap(keysetIndicesToIds);
@@ -215,8 +243,8 @@ public class SatocashWallet {
 
                 // First, populate keysetIdsToIndices with existing keysets on the card
                 List<SatocashNfcClient.KeysetInfo> existingKeysets = cardClient.exportKeysets(new ArrayList<>());
-                for (int i = 0; i < existingKeysets.size(); ++i) {
-                    keysetIdsToIndices.put(existingKeysets.get(i).id, i);
+                for (SatocashNfcClient.KeysetInfo info : existingKeysets) {
+                    keysetIdsToIndices.put(info.id, info.index);
                 }
 
                 String mintUrl = token.mint;
@@ -229,7 +257,7 @@ public class SatocashWallet {
                             cardClient.importMint(mintUrl);
                         }
                     } catch (SatocashNfcClient.SatocashException e) {
-                        System.out.println("Mint not present on card, attempting to import: " + mintUrl);
+                        Log.d(TAG, "Mint not present on card, attempting to import: " + mintUrl);
                         try {
                             cardClient.importMint(mintUrl); // Corrected: only mintUrl as argument
                         } catch (SatocashNfcClient.SatocashException ex) {
@@ -244,7 +272,7 @@ public class SatocashWallet {
                     for (com.cashujdk.nut00.Proof proof : tokenEntry.proofs) { // Correctly access proofs from TokenEntry
                         // Check the keyset is in the card, import otherwise
                         if (!keysetIdsToIndices.containsKey(proof.keysetId)) {
-                            System.out.println("Keyset not present on card, attempting to import: " + proof.keysetId);
+                            Log.d(TAG, "Keyset not present on card, attempting to import: " + proof.keysetId);
                             int index = cardClient.importKeyset(proof.keysetId, 0, SatocashNfcClient.Unit.SAT /* TODO: change this to the actual unit of the keyset*/);
                             keysetIdsToIndices.put(proof.keysetId, index);
                         }
@@ -333,28 +361,5 @@ public class SatocashWallet {
         }
 
         return new Pair<>(changeOutputAmounts, receiveOutputAmounts);
-    }
-
-    @NonNull
-    private static List<Integer> getProofsIndices(Pair<List<Proof>, List<Proof>> selection, List<Proof> dummyProofs) {
-        List<Proof> sendSelection = selection.getSecond();
-        if (sendSelection.isEmpty()) {
-            throw new RuntimeException("Empty selection: couldn't select coins for this amount");
-        }
-        sendSelection.sort(Comparator.comparingLong((p) -> p.amount));
-
-        // Match the selected proofs to their respective index in the card
-        List<Integer> selectedProofsIndices = new ArrayList<>(selection.getFirst().size());
-        for (int i = 0; i < sendSelection.size(); ++i) {
-            for (int j = 0; j < dummyProofs.size(); ++j) {
-                if (sendSelection.get(i).amount == dummyProofs.get(j).amount &&
-                    sendSelection.get(i).keysetId.equals(dummyProofs.get(j).keysetId)
-                ) {
-                    selectedProofsIndices.set(i, j);
-                    break;
-                }
-            }
-        }
-        return selectedProofsIndices;
     }
 }

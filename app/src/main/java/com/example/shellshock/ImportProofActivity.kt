@@ -16,6 +16,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import android.app.AlertDialog
+import android.text.InputType
+import android.widget.LinearLayout
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 class ImportProofActivity : AppCompatActivity() {
 
@@ -133,22 +137,30 @@ class ImportProofActivity : AppCompatActivity() {
                 satocashClient?.initSecureChannel()
                 logStatus("Secure Channel Initialized!")
 
-                logStatus("Authenticating PIN (using hardcoded '0000')...")
-                val authenticated = satocashWallet?.authenticatePIN("0000")?.join() ?: false
-
-                if (authenticated) {
-                    logStatus("PIN Verified. Importing proofs...")
-                    val importedCount = satocashWallet?.importProofsFromToken(tokenToImport)?.join() ?: 0
-                    logStatus("Successfully imported $importedCount proofs to card!")
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@ImportProofActivity, "Imported $importedCount proofs!", Toast.LENGTH_LONG).show()
-                        SatocashWallet.pendingProofToken = ""
+                val pin = showPinInputDialog()
+                
+                if (pin != null) {
+                    try {
+                        satocashWallet?.authenticatePIN(pin)?.join()
+                        logStatus("PIN Verified. Importing proofs...")
+                        val importedCount = satocashWallet?.importProofsFromToken(tokenToImport)?.join() ?: 0
+                        logStatus("Successfully imported $importedCount proofs to card!")
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(this@ImportProofActivity, "Imported $importedCount proofs!", Toast.LENGTH_LONG).show()
+                            SatocashWallet.pendingProofToken = ""
+                        }
+                    } catch (e: RuntimeException) {
+                        val cause = e.cause
+                        if (cause is SatocashNfcClient.SatocashException) {
+                            logStatus("PIN Verification Failed: ${cause.message} (SW: ${String.format("0x%04X", cause.sw)})")
+                            Log.e(TAG, "PIN Verification Failed: ${cause.message} (SW: ${String.format("0x%04X", cause.sw)})")
+                        } else {
+                            logStatus("SatocashWallet Failed: ${e.message}")
+                            Log.e(TAG, "SatocashWallet Failed: ${e.message}", e)
+                        }
                     }
                 } else {
-                    logStatus("PIN authentication failed. Proofs not imported.")
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@ImportProofActivity, "PIN authentication failed!", Toast.LENGTH_LONG).show()
-                    }
+                    logStatus("PIN entry cancelled.")
                 }
 
             } catch (e: Exception) {
@@ -171,6 +183,96 @@ class ImportProofActivity : AppCompatActivity() {
             val newText = if (currentText.isBlank()) message else "$currentText\n$message"
             statusTextView.text = newText
             Log.d(TAG, message)
+        }
+    }
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private suspend fun showPinInputDialog(): String? = withContext(Dispatchers.Main) {
+        return@withContext suspendCancellableCoroutine { continuation ->
+            val builder = AlertDialog.Builder(this@ImportProofActivity)
+            builder.setTitle("Enter PIN")
+
+            val input = EditText(this@ImportProofActivity)
+            input.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
+            input.hint = "PIN"
+
+            val layout = LinearLayout(this@ImportProofActivity)
+            layout.orientation = LinearLayout.VERTICAL
+            layout.setPadding(50, 20, 50, 20)
+            layout.addView(input)
+
+            val keypadLayout = LinearLayout(this@ImportProofActivity)
+            keypadLayout.orientation = LinearLayout.VERTICAL
+            keypadLayout.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+
+            val buttons = arrayOf(
+                arrayOf("1", "2", "3"),
+                arrayOf("4", "5", "6"),
+                arrayOf("7", "8", "9"),
+                arrayOf("", "0", "DEL")
+            )
+
+            for (row in buttons) {
+                val rowLayout = LinearLayout(this@ImportProofActivity)
+                rowLayout.orientation = LinearLayout.HORIZONTAL
+                rowLayout.layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { weight = 1.0f }
+
+                for (text in row) {
+                    val button = Button(this@ImportProofActivity)
+                    button.text = text
+                    button.layoutParams = LinearLayout.LayoutParams(
+                        0,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    ).apply { weight = 1.0f }
+                    button.setOnClickListener {
+                        when (text) {
+                            "DEL" -> {
+                                if (input.text.isNotEmpty()) {
+                                    input.text = input.text.delete(input.text.length - 1, input.text.length)
+                                }
+                            }
+                            "" -> { /* Do nothing for empty button */ }
+                            else -> {
+                                input.append(text)
+                            }
+                        }
+                    }
+                    rowLayout.addView(button)
+                }
+                keypadLayout.addView(rowLayout)
+            }
+            layout.addView(keypadLayout)
+
+            builder.setView(layout)
+
+            builder.setPositiveButton("OK") { dialog, _ ->
+                val pin = input.text.toString()
+                if (continuation.isActive) {
+                    continuation.resume(pin) {}
+                }
+                dialog.dismiss()
+            }
+            builder.setNegativeButton("Cancel") { dialog, _ ->
+                if (continuation.isActive) {
+                    continuation.resume(null) {}
+                }
+                dialog.cancel()
+            }
+
+            builder.setOnCancelListener {
+                if (continuation.isActive) {
+                    continuation.resume(null) {}
+                }
+            }
+
+            val dialog = builder.create()
+            dialog.show()
         }
     }
 }

@@ -95,8 +95,12 @@ dependencies {
     implementation(files("libs/cashu-java-sdk-1.0-SNAPSHOT.jar"))
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     
-    // Jackson for JSON processing
+    // Jackson for JSON and CBOR processing
     implementation("com.fasterxml.jackson.core:jackson-databind:2.16.1")
     implementation("com.fasterxml.jackson.core:jackson-core:2.16.1")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.16.1")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:2.16.1")
+    
+    // CBOR library from Peter O. Upokecenter
+    implementation("com.upokecenter:cbor:4.5.2")
 }
