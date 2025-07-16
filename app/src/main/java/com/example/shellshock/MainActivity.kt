@@ -1,6 +1,9 @@
 package com.example.shellshock
 
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.nfc.Tag
@@ -35,8 +38,17 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var nfcScanHint: TextView
     private lateinit var keypadLayout: LinearLayout
     private lateinit var amountDisplay: TextView
+    private lateinit var tokenDisplay: TextView
+    private lateinit var copyTokenButton: Button
     private lateinit var requestPaymentButton: Button
     private var nfcAdapter: NfcAdapter? = null
+    
+    private fun copyTokenToClipboard(token: String) {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("Cashu Token", token)
+        clipboard.setPrimaryClip(clip)
+        Toast.makeText(this, "Token copied to clipboard", Toast.LENGTH_SHORT).show()
+    }
     
     private fun log(message: String) {
         Log.d(TAG, message)
@@ -59,6 +71,25 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     companion object {
         @JvmStatic
         var requestAmount: Long = 0
+    }
+
+    private fun updateUIState(showToken: Boolean = false, token: String? = null) {
+        tokenDisplay.visibility = if (showToken) View.VISIBLE else View.GONE
+        token?.let { tokenDisplay.text = it }
+
+        if (requestAmount > 0) {
+            // If we have a requested amount, show NFC scanning UI
+            keypadLayout.visibility = View.GONE
+            nfcScanHint.visibility = View.VISIBLE
+            textView.visibility = View.VISIBLE
+            textView.text = "Please tap your card to start the payment of $requestAmount SAT"
+        } else {
+            // Otherwise show the keypad (and token if present)
+            keypadLayout.visibility = View.VISIBLE
+            nfcScanHint.visibility = View.GONE
+            textView.visibility = View.GONE
+            textView.text = ""
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,7 +122,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         nfcScanHint = findViewById(R.id.nfc_scan_hint)
         keypadLayout = findViewById(R.id.keypad_layout)
         amountDisplay = findViewById(R.id.amount_display)
+        tokenDisplay = findViewById(R.id.token_display)
+        copyTokenButton = findViewById(R.id.copy_token_button)
         requestPaymentButton = findViewById(R.id.request_payment_button)
+
+        // Set up copy button click listener
+        copyTokenButton.setOnClickListener {
+            tokenDisplay.text.toString().let { token ->
+                if (token.isNotEmpty() && !token.startsWith("Error:")) {
+                    copyTokenToClipboard(token)
+                }
+            }
+        }
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         if (nfcAdapter == null) {
@@ -100,21 +142,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             keypadLayout.visibility = View.GONE
             textView.visibility = View.VISIBLE
             return
-        } else {
-            nfcScanHint.visibility = View.GONE
-            keypadLayout.visibility = View.VISIBLE
-            textView.visibility = View.GONE
         }
+        updateUIState()
 
         setupKeypadListeners()
 
         requestPaymentButton.setOnClickListener {
             if (requestedAmount > 0) {
                 requestAmount = requestedAmount  // Set the static variable
-                nfcScanHint.visibility = View.VISIBLE
-                keypadLayout.visibility = View.GONE
-                textView.visibility = View.VISIBLE
-                textView.text = "Please tap your card to start the payment of $requestAmount SAT"
+                updateUIState()
             } else {
                 Toast.makeText(this, "Please enter an amount greater than 0", Toast.LENGTH_SHORT).show()
             }
@@ -166,17 +202,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             it.enableForegroundDispatch(this, pendingIntent, null, techLists)
             Log.d(TAG, "Foreground dispatch enabled.")
         }
-        if (requestAmount > 0) {
-            keypadLayout.visibility = View.GONE
-            nfcScanHint.visibility = View.VISIBLE
-            textView.visibility = View.VISIBLE
-            textView.text = "Please tap your card to start the payment of $requestAmount SAT"
-        } else {
-            keypadLayout.visibility = View.VISIBLE
-            nfcScanHint.visibility = View.GONE
-            textView.visibility = View.GONE
-            textView.text = "" 
-        }
+        updateUIState()
     }
 
     override fun onPause() {
@@ -192,6 +218,44 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         }
     }
 
+    private fun clearPaymentUI() {
+        requestAmount = 0
+        updateUIState(showToken = false)
+    }
+
+    private fun handlePaymentSuccess(token: String) {
+        requestAmount = 0  // Reset the payment amount first
+        requestedAmount = 0  // Also reset the input amount
+        lifecycleScope.launch(Dispatchers.Main) {
+            withContext(Dispatchers.Main) {
+                tokenDisplay.visibility = View.VISIBLE
+                tokenDisplay.text = token
+                copyTokenButton.visibility = View.VISIBLE
+                keypadLayout.visibility = View.VISIBLE
+                nfcScanHint.visibility = View.GONE
+                textView.visibility = View.GONE
+                amountDisplay.text = "0"
+                Toast.makeText(this@MainActivity, "Payment successful!", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun handlePaymentError(message: String) {
+        requestAmount = 0  // Reset the payment amount first
+        requestedAmount = 0  // Also reset the input amount
+        lifecycleScope.launch(Dispatchers.Main) {
+            withContext(Dispatchers.Main) {
+                tokenDisplay.visibility = View.VISIBLE
+                tokenDisplay.text = "Error: $message"
+                copyTokenButton.visibility = View.GONE
+                keypadLayout.visibility = View.VISIBLE
+                nfcScanHint.visibility = View.GONE
+                textView.visibility = View.GONE
+                amountDisplay.text = "0"
+            }
+        }
+    }
+
     @SuppressLint("SetTextI19n")
     private fun handleNfcIntent(intent: Intent) {
         val tag: Tag? = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
@@ -201,14 +265,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
         }
         if (tag != null) {
-            keypadLayout.visibility = View.GONE
-            nfcScanHint.visibility = View.GONE
-            textView.visibility = View.VISIBLE
-
-            // Clear previous log and start new session
-            textView.text = ""
-            log("NFC Tag discovered: ${tag.id?.toHexString()}")
-
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
                     satocashClient = SatocashNfcClient(tag)
@@ -237,35 +293,62 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             if (requestAmount > 0) {
                                 try {
                                     log("Starting payment for $requestAmount SAT...")
-                                    val receivedProofs: List<Proof> = satocashWallet!!.getPayment(requestAmount, "SAT").join()
-                                    log("Payment successful! Received ${receivedProofs.size} proofs.")
-                                    receivedProofs.forEach { proof ->
-                                        log("  Proof: Amount=${proof.amount}, Keyset=${proof.keysetId}")
+                                    val token = satocashWallet!!.getPayment(requestAmount, "SAT").join()
+                                    log("Payment successful! Token received.")
+                                    
+                                    withContext(Dispatchers.Main) {
+                                        handlePaymentSuccess(token)
                                     }
-                                    requestAmount = 0  // Reset the static amount after successful payment
+                                    
                                 } catch (e: Exception) {
                                     log("Payment failed: ${e.message}")
+                                    withContext(Dispatchers.Main) {
+                                        handlePaymentError(e.message ?: "Unknown error occurred during payment")
+                                    }
                                 }
                             }
 
                         } catch (e: RuntimeException) {
                             val cause = e.cause
                             if (cause is SatocashNfcClient.SatocashException) {
-                                log("PIN Verification Failed: ${cause.message} (SW: ${String.format("0x%04X", cause.sw)})")
+                                val message = "PIN Verification Failed: ${cause.message} (SW: ${String.format("0x%04X", cause.sw)})"
+                                log(message)
+                                withContext(Dispatchers.Main) {
+                                    handlePaymentError(message)
+                                }
                             } else {
-                                log("Authentication Failed: ${e.message}")
+                                val message = "Authentication Failed: ${e.message}"
+                                log(message)
+                                withContext(Dispatchers.Main) {
+                                    handlePaymentError(message)
+                                }
                             }
                         }
                     } else {
                         log("PIN entry cancelled.")
+                        withContext(Dispatchers.Main) {
+                            handlePaymentError("PIN entry cancelled")
+                        }
                     }
 
                 } catch (e: IOException) {
-                    log("NFC Communication Error: ${e.message}")
+                    val message = "NFC Communication Error: ${e.message}"
+                    log(message)
+                    withContext(Dispatchers.Main) {
+                        handlePaymentError(message)
+                    }
                 } catch (e: SatocashNfcClient.SatocashException) {
-                    log("Satocash Card Error: ${e.message} (SW: ${String.format("0x%04X", e.sw)})")
+                    val message = "Satocash Card Error: ${e.message} (SW: ${String.format("0x%04X", e.sw)})"
+                    log(message)
+                    withContext(Dispatchers.Main) {
+                        handlePaymentError(message)
+                    }
                 } catch (e: Exception) {
-                    log("An unexpected error occurred: ${e.message}")
+                    val message = "An unexpected error occurred: ${e.message}"
+                    log(message)
+                    withContext(Dispatchers.Main) {
+                        handlePaymentError(message)
+                    }
                 } finally {
                     try {
                         satocashClient?.close()
@@ -273,19 +356,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     } catch (e: IOException) {
                         log("Error closing NFC connection: ${e.message}")
                     }
-                    withContext(Dispatchers.Main) {
-                        if (requestAmount > 0) {
-                            // If payment failed or was cancelled, keep showing the NFC scan hint
-                            keypadLayout.visibility = View.GONE
-                            nfcScanHint.visibility = View.VISIBLE
-                            textView.visibility = View.VISIBLE
-                        } else {
-                            // If no payment is pending, show the keypad
-                            keypadLayout.visibility = View.VISIBLE
-                            nfcScanHint.visibility = View.GONE
-                            textView.visibility = View.GONE
-                        }
-                    }
+                    // Let the success/error handlers manage the UI state
                 }
             }
         }
@@ -295,29 +366,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         when (item.itemId) {
             R.id.nav_pos -> {
                 Toast.makeText(this, "Already at Point of Sale", Toast.LENGTH_SHORT).show()
-                if (requestAmount > 0) {
-                    keypadLayout.visibility = View.GONE
-                    nfcScanHint.visibility = View.VISIBLE
-                    textView.visibility = View.VISIBLE
-                    textView.text = "Please tap your card to start the payment of $requestAmount SAT"
-                } else {
-                    keypadLayout.visibility = View.VISIBLE
-                    nfcScanHint.visibility = View.GONE
-                    textView.visibility = View.GONE
-                }
+                updateUIState()
             }
             R.id.nav_request_payment -> {
                 Toast.makeText(this, "Request Payment selected", Toast.LENGTH_SHORT).show()
-                if (requestAmount > 0) {
-                    keypadLayout.visibility = View.GONE
-                    nfcScanHint.visibility = View.VISIBLE
-                    textView.visibility = View.VISIBLE
-                    textView.text = "Please tap your card to start the payment of $requestAmount SAT"
-                } else {
-                    keypadLayout.visibility = View.VISIBLE
-                    nfcScanHint.visibility = View.GONE
-                    textView.visibility = View.GONE
-                }
+                updateUIState()
             }
             R.id.nav_import_proof -> {
                 val intent = Intent(this, ImportProofActivity::class.java)

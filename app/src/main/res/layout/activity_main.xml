@@ -74,6 +74,32 @@
             android:visibility="visible">
 
             <TextView
+                android:id="@+id/token_display"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="18sp"
+                android:gravity="center"
+                android:padding="16dp"
+                android:background="@android:color/white"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone"
+                android:ellipsize="end"
+                android:maxLines="3"
+                android:textIsSelectable="true"
+                android:longClickable="true" />
+
+            <Button
+                android:id="@+id/copy_token_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Copy Token"
+                android:layout_gravity="center"
+                android:visibility="gone"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
                 android:id="@+id/amount_display"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

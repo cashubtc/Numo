@@ -45,7 +45,7 @@ public class SatocashWallet {
         });
     }
 
-    public CompletableFuture<List<Proof>> getPayment(long amount, String unit) {
+    public CompletableFuture<String> getPayment(long amount, String unit) {
         return CompletableFuture.supplyAsync(() -> {
             if (!authenticated) {
                 throw new RuntimeException("Not authenticated");
@@ -170,7 +170,7 @@ public class SatocashWallet {
                     return new Proof(
                             1L << pf.amountExponent,
                             keysetIndicesToIds.get(pf.keysetIndex),
-                            new StringSecret(bytesToHex(pf.secret)),
+                            new StringSecret(bytesToHex(pf.secret).toLowerCase()),
                             bytesToHex(pf.unblindedKey).toLowerCase(),
                             Optional.empty(),
                             Optional.empty()
@@ -229,8 +229,10 @@ public class SatocashWallet {
                 // Import changeProofs to card
                 Map<String, Integer> keysetIdsToIndices = transposeMap(keysetIndicesToIds);
                 importProofs(changeProofs, keysetIdsToIndices);
-                return receiveProofs;
+                return new Token(receiveProofs).encode();
             } catch (SatocashNfcClient.SatocashException | IOException e) {
+                throw new RuntimeException(e);
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
@@ -242,6 +244,7 @@ public class SatocashWallet {
                 Token token = Token.decode(tokenString);
                 int importedCount = 0;
                 Log.d(TAG, "tokenString: " + tokenString);
+                Log.d(TAG, "token.tokens.size() = " + token.tokens.size());
 
                 List<Integer> metadataKeysetIndices = cardClient.getProofInfo(
                         SatocashNfcClient.Unit.valueOf(token.unit.toUpperCase()),
@@ -298,7 +301,7 @@ public class SatocashWallet {
                                 keysetIdsToIndices.get(proof.keysetId),
                                 ilog2(proof.amount),
                                 proof.c,
-                                bytesToHex(proof.secret.getBytes())
+                                ((StringSecret) proof.secret).getSecret()
                         );
                         importedCount++;
                     }
@@ -354,7 +357,7 @@ public class SatocashWallet {
             ISecret secret = secrets.get(i);
 
             ECPoint key = hexToPoint(keyset.keys.get(BigInteger.valueOf(signature.amount)));
-            ECPoint C = computeC(signature.getC_(), blindingFactor, key);
+            ECPoint C = computeC(hexToPoint(signature.c_), blindingFactor, key);
 
             result.add(new Proof(signature.amount, signature.keysetId, secret, pointToHex(C, true), Optional.empty(), Optional.empty()));
         }
