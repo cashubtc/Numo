@@ -124,6 +124,21 @@
                 android:layout_marginTop="16dp"
                 android:textAllCaps="false" />
 
+            <!-- Notification Area at Bottom -->
+            <TextView
+                android:id="@+id/notificationTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:minHeight="48dp"
+                android:text=""
+                android:textSize="14sp"
+                android:textColor="#E5E5EA"
+                android:gravity="center"
+                android:padding="12dp"
+                android:background="#2C2C2E"
+                android:visibility="gone" />
+
         </LinearLayout>
 
     </ScrollView>

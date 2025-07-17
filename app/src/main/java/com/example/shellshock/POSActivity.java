@@ -32,6 +32,7 @@ public class POSActivity extends AppCompatActivity {
     private EditText displayField;
     private Button submitButton;
     private GridLayout keyboardGrid;
+    private TextView notificationTextView;
     private NfcAdapter nfcAdapter;
     
     private long currentAmount = 0;
@@ -53,6 +54,7 @@ public class POSActivity extends AppCompatActivity {
         displayField = findViewById(R.id.displayField);
         submitButton = findViewById(R.id.submitButton);
         keyboardGrid = findViewById(R.id.keyboardGrid);
+        notificationTextView = findViewById(R.id.notificationTextView);
         
         // Initialize NFC
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
@@ -72,7 +74,7 @@ public class POSActivity extends AppCompatActivity {
                 // Start NFC payment process
                 startNfcPaymentProcess();
             } else {
-                displayTextView.setText("Please enter an amount greater than 0");
+                showTemporaryNotification("Please enter an amount greater than 0", 3000);
             }
         });
     }
@@ -127,6 +129,9 @@ public class POSActivity extends AppCompatActivity {
     }
     
     private void handleNumberPadClick(String text) {
+        // Hide notifications when user starts entering new amounts
+        hideNotification();
+        
         switch (text) {
             case "⌫": // Backspace
                 if (currentAmount > 0) {
@@ -157,13 +162,32 @@ public class POSActivity extends AppCompatActivity {
         displayTextView.setText(displayText);
     }
     
+    // Helper methods for notifications
+    private void showNotification(String message) {
+        runOnUiThread(() -> {
+            notificationTextView.setText(message);
+            notificationTextView.setVisibility(android.view.View.VISIBLE);
+        });
+    }
+    
+    private void hideNotification() {
+        runOnUiThread(() -> {
+            notificationTextView.setVisibility(android.view.View.GONE);
+        });
+    }
+    
+    private void showTemporaryNotification(String message, int durationMs) {
+        showNotification(message);
+        new android.os.Handler(getMainLooper()).postDelayed(this::hideNotification, durationMs);
+    }
+    
     private void startNfcPaymentProcess() {
         if (nfcAdapter == null) {
-            displayTextView.setText("NFC is not available on this device");
+            showNotification("NFC is not available on this device");
             return;
         }
         
-        displayTextView.setText("Please tap your NFC card to process payment of " + currentAmount + " SAT");
+        showNotification("Please tap your NFC card to process payment of " + currentAmount + " SAT");
         // NFC handling will be done in onNewIntent when card is tapped
     }
     
@@ -202,7 +226,7 @@ public class POSActivity extends AppCompatActivity {
     private void handleNfcIntent(Intent intent) {
         Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
         if (tag != null && currentAmount > 0) {
-            displayTextView.setText("NFC card detected. Processing payment...");
+            showNotification("NFC card detected. Processing payment...");
             
             // Process payment in background thread
             new Thread(() -> {
@@ -215,10 +239,10 @@ public class POSActivity extends AppCompatActivity {
                     satocashWallet = new SatocashWallet(satocashClient);
                     
                     satocashClient.selectApplet(SatocashNfcClient.SATOCASH_AID);
-                    runOnUiThread(() -> displayTextView.setText("Satocash card connected..."));
+                    showNotification("Satocash card connected...");
                     
                     satocashClient.initSecureChannel();
-                    runOnUiThread(() -> displayTextView.setText("Secure channel established..."));
+                    showNotification("Secure channel established...");
                     
                     // Get PIN from user
                     AtomicReference<String> pinRef = new AtomicReference<>();
@@ -239,13 +263,13 @@ public class POSActivity extends AppCompatActivity {
                         SatocashWallet finalSatocashWallet = satocashWallet;
                         satocashWallet.authenticatePIN(pin).join();
                         
-                        runOnUiThread(() -> displayTextView.setText("PIN verified. Processing payment..."));
+                        showNotification("PIN verified. Processing payment...");
                         
                         // Get payment
                         String tokenString = satocashWallet.getPayment(currentAmount, "SAT").join();
                         
                         runOnUiThread(() -> {
-                            displayTextView.setText("Payment successful! Received token for " + currentAmount + " SAT\nToken: " + tokenString.substring(0, Math.min(50, tokenString.length())) + "...");
+                            showNotification("Payment successful! Received token for " + currentAmount + " SAT");
                             // Reset amount after successful payment
                             currentAmount = 0;
                             updateDisplay();
@@ -254,11 +278,11 @@ public class POSActivity extends AppCompatActivity {
                         Log.d(TAG, "Payment successful. Received token: " + tokenString);
                         
                     } else {
-                        runOnUiThread(() -> displayTextView.setText("PIN entry cancelled"));
+                        showNotification("PIN entry cancelled");
                     }
                     
                 } catch (Exception e) {
-                    runOnUiThread(() -> displayTextView.setText("Payment failed: " + e.getMessage()));
+                    showNotification("Payment failed: " + e.getMessage());
                     Log.e(TAG, "Payment failed", e);
                 } finally {
                     if (satocashClient != null) {
