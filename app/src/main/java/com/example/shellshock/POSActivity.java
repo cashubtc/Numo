@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,9 +31,9 @@ public class POSActivity extends AppCompatActivity {
     private static final String TAG = "POSActivity";
     private TextView displayTextView;
     private EditText displayField;
-    private Button submitButton;
     private GridLayout keyboardGrid;
     private TextView notificationTextView;
+    private ProgressBar loadingSpinner;
     private NfcAdapter nfcAdapter;
     
     private long currentAmount = 0;
@@ -52,31 +53,24 @@ public class POSActivity extends AppCompatActivity {
         // Initialize views
         displayTextView = findViewById(R.id.displayTextView);
         displayField = findViewById(R.id.displayField);
-        submitButton = findViewById(R.id.submitButton);
         keyboardGrid = findViewById(R.id.keyboardGrid);
         notificationTextView = findViewById(R.id.notificationTextView);
+        loadingSpinner = findViewById(R.id.loadingSpinner);
         
         // Initialize NFC
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         
-        // Setup button listeners
-        setupButtons();
+        // Check if NFC is available
+        if (nfcAdapter == null) {
+            showNotification("NFC is not available on this device");
+        } else {
+            showNotification("Enter amount and tap NFC card to pay");
+        }
         
         // Setup number pad
         setupNumberPad();
         
         Log.d(TAG, "POSActivity created successfully");
-    }
-    
-    private void setupButtons() {
-        submitButton.setOnClickListener(v -> {
-            if (currentAmount > 0) {
-                // Start NFC payment process
-                startNfcPaymentProcess();
-            } else {
-                showTemporaryNotification("Please enter an amount greater than 0", 3000);
-            }
-        });
     }
     
     private void setupNumberPad() {
@@ -87,7 +81,7 @@ public class POSActivity extends AppCompatActivity {
             "1", "2", "3",
             "4", "5", "6", 
             "7", "8", "9",
-            ".", "0", "⌫"
+            "C", "0", "⌫"
         };
         
         for (int i = 0; i < buttonTexts.length; i++) {
@@ -115,15 +109,6 @@ public class POSActivity extends AppCompatActivity {
             final String buttonText = buttonTexts[i];
             button.setOnClickListener(v -> handleNumberPadClick(buttonText));
             
-            // Add long press clear for backspace button
-            if (buttonText.equals("⌫")) {
-                button.setOnLongClickListener(v -> {
-                    currentAmount = 0;
-                    updateDisplay();
-                    return true; // Consume the long click
-                });
-            }
-            
             keyboardGrid.addView(button);
         }
     }
@@ -138,8 +123,8 @@ public class POSActivity extends AppCompatActivity {
                     currentAmount = currentAmount / 10;
                 }
                 break;
-            case ".":
-                // For now, ignore decimal points since we're working with SAT
+            case "C": // Clear
+                currentAmount = 0;
                 break;
             default:
                 try {
@@ -181,14 +166,59 @@ public class POSActivity extends AppCompatActivity {
         new android.os.Handler(getMainLooper()).postDelayed(this::hideNotification, durationMs);
     }
     
-    private void startNfcPaymentProcess() {
-        if (nfcAdapter == null) {
-            showNotification("NFC is not available on this device");
-            return;
-        }
-        
-        showNotification("Please tap your NFC card to process payment of " + currentAmount + " SAT");
-        // NFC handling will be done in onNewIntent when card is tapped
+    // Transition methods for smooth keypad <-> spinner animations
+    private void showSpinnerWithTransition() {
+        runOnUiThread(() -> {
+            // Scale down and fade out keypad
+            keyboardGrid.animate()
+                    .scaleX(0.8f)
+                    .scaleY(0.8f)
+                    .alpha(0f)
+                    .setDuration(300)
+                    .withEndAction(() -> {
+                        keyboardGrid.setVisibility(android.view.View.GONE);
+                        
+                        // Scale up and fade in spinner
+                        loadingSpinner.setVisibility(android.view.View.VISIBLE);
+                        loadingSpinner.setScaleX(0.5f);
+                        loadingSpinner.setScaleY(0.5f);
+                        loadingSpinner.setAlpha(0f);
+                        loadingSpinner.animate()
+                                .scaleX(1f)
+                                .scaleY(1f)
+                                .alpha(1f)
+                                .setDuration(300)
+                                .start();
+                    })
+                    .start();
+        });
+    }
+    
+    private void showKeypadWithTransition() {
+        runOnUiThread(() -> {
+            // Scale down and fade out spinner
+            loadingSpinner.animate()
+                    .scaleX(0.5f)
+                    .scaleY(0.5f)
+                    .alpha(0f)
+                    .setDuration(300)
+                    .withEndAction(() -> {
+                        loadingSpinner.setVisibility(android.view.View.GONE);
+                        
+                        // Scale up and fade in keypad
+                        keyboardGrid.setVisibility(android.view.View.VISIBLE);
+                        keyboardGrid.setScaleX(0.8f);
+                        keyboardGrid.setScaleY(0.8f);
+                        keyboardGrid.setAlpha(0f);
+                        keyboardGrid.animate()
+                                .scaleX(1f)
+                                .scaleY(1f)
+                                .alpha(1f)
+                                .setDuration(300)
+                                .start();
+                    })
+                    .start();
+        });
     }
     
     @Override
@@ -225,75 +255,89 @@ public class POSActivity extends AppCompatActivity {
     @SuppressLint("SetTextI18n")
     private void handleNfcIntent(Intent intent) {
         Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-        if (tag != null && currentAmount > 0) {
-            showNotification("NFC card detected. Processing payment...");
-            
-            // Process payment in background thread
-            new Thread(() -> {
-                SatocashNfcClient satocashClient = null;
-                SatocashWallet satocashWallet = null;
+        if (tag != null) {
+            if (currentAmount > 0) {
+                showNotification("NFC card detected. Processing payment...");
                 
-                try {
-                    satocashClient = new SatocashNfcClient(tag);
-                    satocashClient.connect();
-                    satocashWallet = new SatocashWallet(satocashClient);
+                // Process payment in background thread
+                new Thread(() -> {
+                    SatocashNfcClient satocashClient = null;
+                    SatocashWallet satocashWallet = null;
                     
-                    satocashClient.selectApplet(SatocashNfcClient.SATOCASH_AID);
-                    showNotification("Satocash card connected...");
-                    
-                    satocashClient.initSecureChannel();
-                    showNotification("Secure channel established...");
-                    
-                    // Get PIN from user
-                    AtomicReference<String> pinRef = new AtomicReference<>();
-                    CompletableFuture<Void> pinFuture = new CompletableFuture<>();
-                    
-                    runOnUiThread(() -> {
-                        showPinInputDialog(pin -> {
-                            pinRef.set(pin);
-                            pinFuture.complete(null);
-                        });
-                    });
-                    
-                    pinFuture.join(); // Wait for PIN input
-                    String pin = pinRef.get();
-                    
-                    if (pin != null && !pin.isEmpty()) {
-                        // Authenticate with PIN
-                        SatocashWallet finalSatocashWallet = satocashWallet;
-                        satocashWallet.authenticatePIN(pin).join();
+                    try {
+                        satocashClient = new SatocashNfcClient(tag);
+                        satocashClient.connect();
+                        satocashWallet = new SatocashWallet(satocashClient);
                         
-                        showNotification("PIN verified. Processing payment...");
+                        satocashClient.selectApplet(SatocashNfcClient.SATOCASH_AID);
+                        showNotification("Satocash card connected...");
                         
-                        // Get payment
-                        String tokenString = satocashWallet.getPayment(currentAmount, "SAT").join();
+                        satocashClient.initSecureChannel();
+                        showNotification("Secure channel established...");
+                        
+                        // Get PIN from user
+                        AtomicReference<String> pinRef = new AtomicReference<>();
+                        CompletableFuture<Void> pinFuture = new CompletableFuture<>();
                         
                         runOnUiThread(() -> {
-                            showNotification("Payment successful! Received token for " + currentAmount + " SAT");
-                            // Reset amount after successful payment
-                            currentAmount = 0;
-                            updateDisplay();
+                            showPinInputDialog(pin -> {
+                                pinRef.set(pin);
+                                if (pin != null && !pin.isEmpty()) {
+                                    // Show spinner when PIN is successfully entered
+                                    showSpinnerWithTransition();
+                                }
+                                pinFuture.complete(null);
+                            });
                         });
                         
-                        Log.d(TAG, "Payment successful. Received token: " + tokenString);
+                        pinFuture.join(); // Wait for PIN input
+                        String pin = pinRef.get();
                         
-                    } else {
-                        showNotification("PIN entry cancelled");
-                    }
-                    
-                } catch (Exception e) {
-                    showNotification("Payment failed: " + e.getMessage());
-                    Log.e(TAG, "Payment failed", e);
-                } finally {
-                    if (satocashClient != null) {
-                        try {
-                            satocashClient.close();
-                        } catch (IOException e) {
-                            Log.e(TAG, "Error closing NFC connection", e);
+                        if (pin != null && !pin.isEmpty()) {
+                            // Authenticate with PIN
+                            SatocashWallet finalSatocashWallet = satocashWallet;
+                            satocashWallet.authenticatePIN(pin).join();
+                            
+                            showNotification("PIN verified. Processing payment...");
+                            
+                            // Get payment
+                            String tokenString = satocashWallet.getPayment(currentAmount, "SAT").join();
+                            
+                            runOnUiThread(() -> {
+                                showNotification("Payment successful! Received token for " + currentAmount + " SAT");
+                                // Reset amount after successful payment
+                                currentAmount = 0;
+                                updateDisplay();
+                                // Show keypad again after success
+                                showKeypadWithTransition();
+                            });
+                            
+                            Log.d(TAG, "Payment successful. Received token: " + tokenString);
+                            
+                        } else {
+                            showNotification("PIN entry cancelled");
+                            // Show keypad again after PIN cancellation
+                            showKeypadWithTransition();
+                        }
+                        
+                    } catch (Exception e) {
+                        showNotification("Payment failed: " + e.getMessage());
+                        Log.e(TAG, "Payment failed", e);
+                        // Show keypad again after failure
+                        showKeypadWithTransition();
+                    } finally {
+                        if (satocashClient != null) {
+                            try {
+                                satocashClient.close();
+                            } catch (IOException e) {
+                                Log.e(TAG, "Error closing NFC connection", e);
+                            }
                         }
                     }
-                }
-            }).start();
+                }).start();
+            } else {
+                showTemporaryNotification("Please enter an amount to pay first", 3000);
+            }
         }
     }
     
