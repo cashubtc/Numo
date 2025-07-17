@@ -6,4 +6,9 @@
         android:title="Top Up"
         android:icon="@drawable/ic_top_up"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_balance_check"
+        android:title="Check Balance"
+        android:icon="@drawable/ic_balance_check"
+        app:showAsAction="ifRoom" />
 </menu>

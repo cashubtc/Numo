@@ -123,6 +123,9 @@ public class ModernPOSActivity extends AppCompatActivity {
         if (item.getItemId() == R.id.action_top_up) {
             startActivity(new Intent(this, TopUpActivity.class));
             return true;
+        } else if (item.getItemId() == R.id.action_balance_check) {
+            startActivity(new Intent(this, BalanceCheckActivity.class));
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }

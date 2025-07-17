@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center">
+
+    <ImageView
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:src="@drawable/ic_balance_check"
+        android:layout_marginBottom="16dp"
+        android:tint="@color/colorAccent" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Place your NFC card near the phone"
+        android:textSize="18sp"
+        android:textColor="@color/textColorPrimary"
+        android:layout_marginBottom="8dp"
+        android:textAlignment="center" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hold until you hear a beep or see confirmation"
+        android:textSize="14sp"
+        android:textColor="@color/textColorSecondary"
+        android:textAlignment="center" />
+
+</LinearLayout>
