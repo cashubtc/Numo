@@ -154,7 +154,7 @@ public class POSActivity extends AppCompatActivity {
     
     private void updateDisplay() {
         String displayText = currentAmount == 0 ? "0" : String.valueOf(currentAmount);
-        displayTextView.setText(displayText + " SAT");
+        displayTextView.setText(displayText);
     }
     
     private void startNfcPaymentProcess() {
