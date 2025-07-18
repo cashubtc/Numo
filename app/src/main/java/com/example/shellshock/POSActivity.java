@@ -60,11 +60,9 @@ public class POSActivity extends AppCompatActivity {
         // Initialize NFC
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         
-        // Check if NFC is available
+        // Check if NFC is available (but don't show notification on startup)
         if (nfcAdapter == null) {
-            showNotification("NFC is not available on this device");
-        } else {
-            showNotification("Enter amount and tap NFC card to pay");
+            // NFC not available, but don't show message on startup
         }
         
         // Setup number pad
@@ -346,14 +344,93 @@ public class POSActivity extends AppCompatActivity {
         builder.setTitle("Enter PIN");
         
         EditText input = new EditText(this);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+        input.setInputType(InputType.TYPE_NULL); // Disable system keyboard
         input.setHint("PIN");
+        input.setTextSize(18);
+        input.setPadding(24, 16, 24, 16);
+        input.setBackground(getDrawable(R.drawable.pin_input_background));
+        input.setTextColor(getResources().getColor(R.color.colorPrimary, getTheme())); // Ivory white text
+        input.setHintTextColor(getResources().getColor(android.R.color.darker_gray, getTheme()));
+        input.setFocusable(false); // Prevent focus to avoid keyboard
+        input.setClickable(false); // Prevent clicking to avoid keyboard
+        input.setCursorVisible(false); // Hide cursor since no typing needed
         
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(50, 20, 50, 20);
+        layout.setPadding(32, 24, 32, 24); // Increased padding for more breathing room
         layout.addView(input);
         
+        // Add spacing consistent with button margins (increased for better separation)
+        android.view.View spacer = new android.view.View(this);
+        LinearLayout.LayoutParams spacerParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, 
+            32 // Increased spacing for better visual separation
+        );
+        spacer.setLayoutParams(spacerParams);
+        layout.addView(spacer);
+        
+        // Create custom keypad with Macademia-style spacing
+        LinearLayout keypadLayout = new LinearLayout(this);
+        keypadLayout.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams keypadParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        keypadLayout.setLayoutParams(keypadParams);
+        
+        String[][] buttons = {
+            {"1", "2", "3"},
+            {"4", "5", "6"},
+            {"7", "8", "9"},
+            {"C", "0", "⌫"}
+        };
+        
+        for (String[] row : buttons) {
+            LinearLayout rowLayout = new LinearLayout(this);
+            rowLayout.setOrientation(LinearLayout.HORIZONTAL);
+            LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            rowParams.setMargins(0, 8, 0, 8); // Match main keypad spacing
+            rowLayout.setLayoutParams(rowParams);
+            
+            for (String text : row) {
+                Button button = new Button(this);
+                button.setText(text);
+                LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT, // Match main keypad height
+                    1.0f
+                );
+                buttonParams.setMargins(8, 8, 8, 8); // Exactly match main keypad margins
+                button.setLayoutParams(buttonParams);
+                
+                // Match main keypad button styling exactly
+                button.setTextSize(24); // Same as main keypad
+                button.setPadding(16, 16, 16, 16); // Same as main keypad
+                button.setBackground(getDrawable(R.drawable.keypad_button_background)); // Same drawable
+                button.setTextColor(getResources().getColor(android.R.color.white, getTheme()));
+                button.setElevation(4); // Same elevation
+                
+                button.setOnClickListener(v -> {
+                    if ("⌫".equals(text)) {
+                        if (input.getText().length() > 0) {
+                            input.getText().delete(input.getText().length() - 1, input.getText().length());
+                        }
+                    } else if ("C".equals(text)) {
+                        input.setText(""); // Clear the entire PIN
+                    } else {
+                        input.append(text);
+                    }
+                });
+                
+                rowLayout.addView(button);
+            }
+            keypadLayout.addView(rowLayout);
+        }
+        
+        layout.addView(keypadLayout);
         builder.setView(layout);
         
         builder.setPositiveButton("OK", (dialog, which) -> {
@@ -371,6 +448,18 @@ public class POSActivity extends AppCompatActivity {
         
         AlertDialog dialog = builder.create();
         dialog.show();
+        
+        // Style the OK and Cancel buttons with ivory white text
+        Button positiveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        Button negativeButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+        
+        if (positiveButton != null) {
+            positiveButton.setTextColor(getResources().getColor(R.color.colorPrimary, getTheme()));
+        }
+        
+        if (negativeButton != null) {
+            negativeButton.setTextColor(getResources().getColor(R.color.colorPrimary, getTheme()));
+        }
     }
     
     interface PinCallback {

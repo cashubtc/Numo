@@ -4,21 +4,22 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="24dp"
-    android:gravity="center">
+    android:gravity="center"
+    android:background="#1E1E1E">
 
     <ImageView
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:src="@drawable/ic_balance_check"
-        android:layout_marginBottom="16dp"
-        android:tint="@color/colorAccent" />
+        android:layout_marginBottom="12dp"
+        android:tint="@color/colorPrimary" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Place your NFC card near the phone"
-        android:textSize="18sp"
-        android:textColor="@color/textColorPrimary"
+        android:textSize="16sp"
+        android:textColor="@color/colorPrimary"
         android:layout_marginBottom="8dp"
         android:textAlignment="center" />
 
@@ -27,7 +28,7 @@
         android:layout_height="wrap_content"
         android:text="Hold until you hear a beep or see confirmation"
         android:textSize="14sp"
-        android:textColor="@color/textColorSecondary"
+        android:textColor="#CCCCCC"
         android:textAlignment="center" />
 
 </LinearLayout>

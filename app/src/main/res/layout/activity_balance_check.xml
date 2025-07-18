@@ -32,19 +32,19 @@
             android:id="@+id/title_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="24dp"
             android:gravity="center"
             android:text="Ready to Scan"
-            android:textColor="@android:color/white"
-            android:textSize="28sp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
         <com.airbnb.lottie.LottieAnimationView
             android:id="@+id/lottie_animation"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="24dp"
             app:lottie_rawRes="@raw/nfc_scan"
             app:lottie_autoPlay="true"
             app:lottie_loop="true" />
@@ -52,35 +52,35 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="24dp"
             android:gravity="center"
             android:text="Hold your NFC card near the device."
-            android:textColor="@android:color/white"
-            android:textSize="18sp" />
+            android:textColor="@color/colorPrimary"
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/card_info_display"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="12dp"
             android:gravity="center"
             android:padding="16dp"
-            android:background="@drawable/keypad_border"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
+            android:background="@drawable/pin_input_background"
+            android:textColor="@color/colorPrimary"
+            android:textSize="14sp"
             android:visibility="gone" />
 
         <TextView
             android:id="@+id/balance_display"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             android:gravity="center"
             android:padding="16dp"
-            android:background="@drawable/keypad_border"
-            android:textSize="24sp"
-            android:textColor="@color/success_green"
+            android:background="@drawable/pin_input_background"
+            android:textSize="20sp"
+            android:textColor="@color/colorPrimary"
             android:textStyle="bold"
             android:visibility="gone" />
 
