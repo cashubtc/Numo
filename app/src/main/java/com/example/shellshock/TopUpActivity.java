@@ -3,6 +3,7 @@ package com.example.shellshock;
 import android.app.PendingIntent;
 import android.text.Layout;
 import android.content.Intent;
+import android.graphics.Color;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
@@ -11,6 +12,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.InputType;
 import android.util.Log;
+import android.view.MenuItem;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -18,11 +21,16 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.widget.Toolbar;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.core.app.NavUtils;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -32,23 +40,31 @@ public class TopUpActivity extends AppCompatActivity {
     private static final String TAG = "TopUpActivity";
     private TextInputEditText proofTokenEditText;
     private Button topUpSubmitButton;
-    private TextView statusTextView;
     private AlertDialog nfcDialog;
     private NfcAdapter nfcAdapter;
     private SatocashNfcClient satocashClient;
     private SatocashWallet satocashWallet;
     private String pendingProofToken;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private View rootView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(R.style.Theme_ShellShock);
+        setTheme(R.style.Theme_Shellshock);
         setContentView(R.layout.activity_top_up);
 
+        // Set up the toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Top Up");
+        }
+
+        rootView = findViewById(android.R.id.content);
         proofTokenEditText = findViewById(R.id.top_up_amount_edit_text);
         topUpSubmitButton = findViewById(R.id.top_up_submit_button);
-        statusTextView = findViewById(R.id.statusTextView);
 
         // Handle incoming share intent
         Intent intent = getIntent();
@@ -60,7 +76,7 @@ public class TopUpActivity extends AppCompatActivity {
             if (sharedText != null) {
                 pendingProofToken = sharedText;
                 proofTokenEditText.setText(sharedText);
-                logStatus("Received shared token: " + sharedText.substring(0, Math.min(sharedText.length(), 30)) + "...");
+                showStatusMessage("Token ready to be imported", true);
                 // Automatically show NFC dialog
                 showNfcDialog();
             }
@@ -68,48 +84,54 @@ public class TopUpActivity extends AppCompatActivity {
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         if (nfcAdapter == null) {
-            logStatus("NFC is not available on this device. Cannot flash proofs.");
+            showStatusMessage("NFC is not available on this device", false);
             topUpSubmitButton.setEnabled(false);
-        } else {
-            logStatus("NFC available. Enter token or place card to flash directly.");
         }
 
         topUpSubmitButton.setOnClickListener(v -> {
             String proofToken = proofTokenEditText.getText().toString();
             if (!proofToken.isEmpty()) {
                 pendingProofToken = proofToken;
-                logStatus("Token set. Ready to flash to card: " + proofToken.substring(0, Math.min(proofToken.length(), 30)) + "...");
-                Toast.makeText(this, "Token set. Now tap a card to import proofs.", Toast.LENGTH_LONG).show();
+                showStatusMessage("Tap your card to import the proofs", true);
                 showNfcDialog();
             } else {
-                logStatus("Please enter a Cashu proof token first.");
-                Toast.makeText(this, "Please enter a Cashu proof token", Toast.LENGTH_SHORT).show();
+                showStatusMessage("Please enter a Cashu proof token", false);
             }
         });
     }
 
-    private void logStatus(String message) {
-        Log.d(TAG, message);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Handle the Up button press
+            NavUtils.navigateUpFromSameTask(this);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void showStatusMessage(final String message, final boolean success) {
         mainHandler.post(() -> {
-            statusTextView.append(message + "\n");
-            // Wait for layout to be ready before scrolling
-            statusTextView.post(() -> {
-                Layout layout = statusTextView.getLayout();
-                if (layout != null) {
-                    int scrollAmount = layout.getLineTop(statusTextView.getLineCount()) - statusTextView.getHeight();
-                    if (scrollAmount > 0) {
-                        statusTextView.scrollTo(0, scrollAmount);
-                    } else {
-                        statusTextView.scrollTo(0, 0);
-                    }
-                }
-            });
+            Snackbar snackbar = Snackbar.make(rootView, message, Snackbar.LENGTH_LONG);
+            View snackbarView = snackbar.getView();
+            
+            // Get the text view inside Snackbar view
+            TextView textView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text);
+            textView.setTextColor(Color.WHITE);
+            
+            if (success) {
+                snackbarView.setBackgroundColor(Color.parseColor("#4CAF50")); // Green
+            } else {
+                snackbarView.setBackgroundColor(Color.parseColor("#F44336")); // Red
+            }
+            
+            snackbar.show();
         });
     }
 
     private void showNfcDialog() {
         mainHandler.post(() -> {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_ShellShock);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_Shellshock);
             LayoutInflater inflater = this.getLayoutInflater();
             View dialogView = inflater.inflate(R.layout.dialog_nfc_modern, null);
             builder.setView(dialogView);
@@ -283,12 +305,9 @@ public class TopUpActivity extends AppCompatActivity {
 
     private void handleNfcImport(Tag tag) {
         if (pendingProofToken == null || pendingProofToken.isEmpty()) {
-            logStatus("No proof token set to import. Please enter it first.");
-            Toast.makeText(this, "No token to import. Please enter one first.", Toast.LENGTH_LONG).show();
+            showStatusMessage("No proof token set to import", false);
             return;
         }
-
-        logStatus("NFC Tag discovered. Attempting to import proofs...");
 
         new Thread(() -> {
             try {
@@ -296,13 +315,8 @@ public class TopUpActivity extends AppCompatActivity {
                 satocashClient.connect();
                 satocashWallet = new SatocashWallet(satocashClient);
 
-                logStatus("Selecting Satocash Applet...");
                 satocashClient.selectApplet(SatocashNfcClient.SATOCASH_AID);
-                logStatus("Satocash Applet found and selected!");
-
-                logStatus("Initializing Secure Channel...");
                 satocashClient.initSecureChannel();
-                logStatus("Secure Channel Initialized!");
 
                 // Create a CompletableFuture for the PIN dialog result
                 CompletableFuture<String> pinFuture = new CompletableFuture<>();
@@ -315,73 +329,52 @@ public class TopUpActivity extends AppCompatActivity {
                         boolean authenticated = authFuture.join();
                         
                         if (authenticated) {
-                            logStatus("PIN Verified. Importing proofs...");
-
                             try {
                                 CompletableFuture<Integer> importFuture = satocashWallet.importProofsFromToken(pendingProofToken);
                                 int importedCount = importFuture.join();
-                                logStatus("Successfully imported " + importedCount + " proofs to card!");
+                                showStatusMessage("Success: Imported " + importedCount + " proofs", true);
 
                                 mainHandler.post(() -> {
                                     if (nfcDialog != null && nfcDialog.isShowing()) {
                                         nfcDialog.dismiss();
                                     }
-                                    Toast.makeText(TopUpActivity.this,
-                                            "Imported " + importedCount + " proofs!", Toast.LENGTH_LONG).show();
                                     pendingProofToken = "";
+                                    proofTokenEditText.setText("");
                                 });
                             } catch (Exception e) {
-                                String message = "Import failed: " + e.getMessage();
-                                logStatus(message);
-                                Log.e(TAG, message, e);
+                                showStatusMessage("Failure: " + e.getMessage(), false);
                             }
                         } else {
-                            String message = "PIN Verification Failed";
-                            logStatus(message);
-                            Log.e(TAG, message);
+                            showStatusMessage("Failure: PIN verification failed", false);
                         }
 
                     } catch (RuntimeException e) {
                         Throwable cause = e.getCause();
                         if (cause instanceof SatocashNfcClient.SatocashException) {
                             SatocashNfcClient.SatocashException satocashEx = (SatocashNfcClient.SatocashException) cause;
-                            String message = String.format("PIN Verification Failed: %s (SW: 0x%04X)",
-                                    satocashEx.getMessage(), satocashEx.getSw());
-                            logStatus(message);
-                            Log.e(TAG, message);
+                            showStatusMessage("Failure: " + satocashEx.getMessage(), false);
                         } else {
-                            String message = "SatocashWallet Failed: " + e.getMessage();
-                            logStatus(message);
-                            Log.e(TAG, message, e);
+                            showStatusMessage("Failure: " + e.getMessage(), false);
                         }
                     }
                 } else {
-                    logStatus("PIN entry cancelled.");
+                    showStatusMessage("Operation cancelled", false);
                 }
 
             } catch (IOException e) {
-                String message = "NFC Communication Error: " + e.getMessage();
-                logStatus(message);
-                Log.e(TAG, message, e);
+                showStatusMessage("Failure: NFC communication error", false);
             } catch (SatocashNfcClient.SatocashException e) {
-                String message = String.format("Satocash Card Error: %s (SW: 0x%04X)",
-                        e.getMessage(), e.getSw());
-                logStatus(message);
-                Log.e(TAG, message);
+                showStatusMessage("Failure: Card error - " + e.getMessage(), false);
             } catch (Exception e) {
-                String message = "An unexpected error occurred: " + e.getMessage();
-                logStatus(message);
-                Log.e(TAG, message);
+                showStatusMessage("Failure: " + e.getMessage(), false);
             } finally {
                 try {
                     if (satocashClient != null) {
                         satocashClient.close();
-                        Log.d(TAG, "NFC connection closed.");
                     }
                 } catch (IOException e) {
                     Log.e(TAG, "Error closing NFC connection: " + e.getMessage());
                 }
-                logStatus("NFC interaction finished. Ready for next action.");
             }
         }).start();
     }

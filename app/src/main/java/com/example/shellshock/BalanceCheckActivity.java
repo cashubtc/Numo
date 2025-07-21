@@ -35,7 +35,7 @@ public class BalanceCheckActivity extends AppCompatActivity {
         Log.d(TAG, "============================================");
         Log.d(TAG, "BalanceCheckActivity onCreate() called!");
         Log.d(TAG, "============================================");
-        setTheme(R.style.Theme_ShellShock);
+        setTheme(R.style.Theme_Shellshock);
         setContentView(R.layout.activity_balance_check);
 
         Toolbar toolbar = findViewById(R.id.toolbar);

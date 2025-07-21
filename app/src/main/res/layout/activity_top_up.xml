@@ -7,20 +7,15 @@
     android:background="@color/windowBackground"
     tools:context=".TopUpActivity">
 
-    <TextView
-        android:id="@+id/statusTextView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_margin="16dp"
-        android:padding="8dp"
-        android:background="@drawable/keypad_border"
-        android:textColor="@color/textColorPrimary"
-        android:scrollbars="vertical"
-        android:gravity="bottom"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/top_up_amount_layout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Light"
+        app:title="Top Up"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/top_up_amount_layout"
@@ -31,7 +26,8 @@
         android:hint="Enter Cashu Proof Token"
         app:layout_constraintBottom_toTopOf="@+id/top_up_submit_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/top_up_amount_edit_text"

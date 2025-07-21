@@ -49,7 +49,7 @@ public class ModernPOSActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(R.style.Theme_ShellShock);
+        setTheme(R.style.Theme_Shellshock);
         setContentView(R.layout.activity_modern_pos);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -158,7 +158,7 @@ public class ModernPOSActivity extends AppCompatActivity {
     }
 
     private void showNfcDialog(long amount) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_ShellShock);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_Shellshock);
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_nfc_modern, null);
         builder.setView(dialogView);
