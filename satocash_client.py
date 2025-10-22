@@ -1216,21 +1216,45 @@ class SatocashCard:
         else:
             raise SatocashException("Set PIN policy failed", sw=sw)
 
-    def set_pinless_amount(self, amount):
-        """Set maximum amount for PIN-less transactions"""
-        if self.verbose:
-            print(f"\n=== Setting PIN-less amount: {amount} ===")
+    def set_pinless_amount(self, unit: Unit, amount: int):
+        """Set maximum amount for PIN-less transactions.
         
+        This function sets the max amount that can be spent without asking for PIN.
+        Once this amount has been spent, a PIN is required for any additional payment.
+        Amount limit can then be reset again.
+        If amount is [0xff, 0xff, 0xff, 0xff], then PIN is never required.
+        PIN must be validated to call this function.
+
+        Args:
+            unit (Unit): Unit for the amount (SAT, MSAT, USD, EUR)
+            amount (int): Amount value (will be converted to 4 bytes)
+
+        Raises:
+            SatocashException: If operation fails or if unit is invalid
+        """
+        if self.verbose:
+            print(f"\n=== Setting PIN-less amount: {amount} {unit.name} ===")
+        
+        # Check unit validity
+        if unit == Unit.EMPTY:
+            raise SatocashException("Invalid unit for PIN-less amount", sw=Error.INCORRECT_P1)
+            
+        # Convert amount to 4 bytes, big-endian
         amount_bytes = [(amount >> 24) & 0xFF, (amount >> 16) & 0xFF, 
                        (amount >> 8) & 0xFF, amount & 0xFF]
         
+        # Send command with unit in P1 parameter
         response, sw = self.send_secure_apdu(self.CLA_BITCOIN, self.INS_SET_PINLESS_AMOUNT, 
-                                    0, 0, amount_bytes)
+                                    unit.value, 0, amount_bytes)
         
         if sw == Error.SUCCESS:
             if self.verbose:
                 print("✓ PIN-less amount set successfully!")
             return True
+        elif sw == Error.UNAUTHORIZED:
+            raise SatocashException("PIN not validated", sw=sw)
+        elif sw == Error.INCORRECT_P1:
+            raise SatocashException("Invalid unit specified", sw=sw)
         else:
             raise SatocashException("Set PIN-less amount failed", sw=sw)
 
@@ -1553,8 +1577,10 @@ def main():
                 policy = int(input("Enter PIN policy mask (e.g., 7 for all): "))
                 card.set_pin_policy(policy)
             elif choice == '17':
-                amount = int(input("Enter PIN-less amount: "))
-                card.set_pinless_amount(amount)
+                unit_val = int(input("Enter Unit (1=SAT, 2=MSAT, 3=USD, 4=EUR): "))
+                unit = Unit(unit_val)
+                amount = int(input("Enter PIN-less amount (0xFFFFFFFF for no PIN required): "))
+                card.set_pinless_amount(unit, amount)
             elif choice == '18':
                 card.export_authentikey()
             elif choice == '19':
