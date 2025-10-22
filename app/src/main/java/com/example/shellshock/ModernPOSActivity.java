@@ -47,6 +47,12 @@ public class ModernPOSActivity extends AppCompatActivity {
     private long requestedAmount = 0;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
+    // Status Words (SW) constants copied from SatocashNfcClient for error handling
+    private static class SW {
+        public static final int UNAUTHORIZED = 0x9C06;
+        public static final int PIN_FAILED = 0x63C0;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -393,9 +399,9 @@ public class ModernPOSActivity extends AppCompatActivity {
                     handlePaymentSuccess(token);
                     return;
                 } catch (RuntimeException e) {
-                    // Check if the error is specifically SW_UNAUTHORIZED
+                    // Check if the error is specifically SW.UNAUTHORIZED
                     if (e.getCause() instanceof SatocashNfcClient.SatocashException &&
-                        ((SatocashNfcClient.SatocashException)e.getCause()).getSw() == SatocashNfcClient.SW_UNAUTHORIZED) {
+                        ((SatocashNfcClient.SatocashException)e.getCause()).getSw() == SW.UNAUTHORIZED) {
                         
                         Log.d(TAG, "Got SW_UNAUTHORIZED, attempting with PIN authentication...");
                         
