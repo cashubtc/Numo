@@ -3,7 +3,7 @@
     <!-- Light Theme Colors -->
     <color name="colorPrimary">#FFFFFF</color>
     <color name="colorPrimaryDark">#E0E0E0</color>
-    <color name="colorAccent">#673AB7</color>
+    <color name="colorAccent">#757575</color>
     <color name="textColorPrimary">#212121</color>
     <color name="textColorSecondary">#757575</color>
     <color name="windowBackground">#F5F5F5</color>
@@ -14,9 +14,9 @@
     <color name="inputBoxStrokeColor">#212121</color>
     
     <!-- Action buttons in light mode -->
-    <color name="buttonBackground">#673AB7</color>
+    <color name="buttonBackground">#757575</color>
     <color name="buttonText">#FFFFFF</color>
-    <color name="iconTint">#673AB7</color>
+    <color name="iconTint">#757575</color>
 
     <!-- Default Colors (needed by base theme) -->
     <color name="purple_200">#FFBB86FC</color>

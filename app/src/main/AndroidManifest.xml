@@ -9,6 +9,9 @@
     <!-- Permission for network access -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
+    <!-- Permission for vibration -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -60,22 +63,32 @@
             <meta-data android:name="android.nfc.action.TECH_DISCOVERED"
                 android:resource="@xml/nfc_tech_filter" />
         </activity>
-        
-        <activity android:name="com.electricdreams.shellshock.BalanceCheckActivity"
+
+        <activity android:name=".BalanceCheckActivity"
             android:exported="false"
             android:label="Check Balance"
             android:theme="@style/Theme.Shellshock"
-            android:parentActivityName="com.electricdreams.shellshock.ModernPOSActivity" >
+            android:parentActivityName=".ModernPOSActivity" >
             <!-- Parent meta-data for up navigation -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.electricdreams.shellshock.ModernPOSActivity" />
+                android:value=".ModernPOSActivity" />
             <!-- NFC intent filters -->
             <intent-filter>
                 <action android:name="android.nfc.action.TECH_DISCOVERED" />
             </intent-filter>
             <meta-data android:name="android.nfc.action.TECH_DISCOVERED"
                 android:resource="@xml/nfc_tech_filter" />
+        </activity>
+        
+        <activity android:name=".TokenHistoryActivity"
+            android:exported="false"
+            android:label="Token History"
+            android:theme="@style/Theme.Shellshock"
+            android:parentActivityName=".ModernPOSActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ModernPOSActivity" />
         </activity>
     </application>
 

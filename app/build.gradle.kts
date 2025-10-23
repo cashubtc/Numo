@@ -111,4 +111,7 @@ dependencies {
     
     // CBOR library from Peter O. Upokecenter
     implementation("com.upokecenter:cbor:4.5.2")
+
+    // Gson for JSON serialization
+    implementation("com.google.code.gson:gson:2.10.1")
 }

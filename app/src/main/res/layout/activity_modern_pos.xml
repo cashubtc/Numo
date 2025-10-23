@@ -13,7 +13,8 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
+        android:theme="?attr/actionBarTheme"
+        app:popupTheme="?attr/actionBarPopupTheme"
         app:title="POS"
         app:layout_constraintTop_toTopOf="parent" />
 

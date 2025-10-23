@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public class ModernPOSActivity extends AppCompatActivity {
+public class ModernPOSActivity extends AppCompatActivity implements SatocashWallet.OperationFeedback {
 
     private static final String TAG = "ModernPOSActivity";
     private static final String PREFS_NAME = "ShellshockPrefs";
@@ -59,6 +59,12 @@ public class ModernPOSActivity extends AppCompatActivity {
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private MenuItem themeMenuItem;
     private boolean isNightMode = false;
+    private android.os.Vibrator vibrator;
+
+    // Vibration patterns (in milliseconds)
+    private static final long[] PATTERN_SUCCESS = {0, 50, 100, 50}; // Two quick pulses
+    private static final long[] PATTERN_ERROR = {0, 100}; // One longer pulse
+    private static final int VIBRATE_KEYPAD = 20; // Short keypad press
 
     // Status Words (SW) constants copied from SatocashNfcClient for error handling
     private static class SW {
@@ -95,6 +101,9 @@ public class ModernPOSActivity extends AppCompatActivity {
         inputModeContainer = findViewById(R.id.input_mode_container);
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+        // Initialize vibrator
+        vibrator = (android.os.Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         String[] buttonLabels = {
                 "1", "2", "3",
@@ -174,6 +183,8 @@ public class ModernPOSActivity extends AppCompatActivity {
     }
 
     private void onKeypadButtonClick(String label) {
+        vibrateKeypad();
+
         switch (label) {
             case "C":
                 currentInput.setLength(0);
@@ -258,9 +269,381 @@ public class ModernPOSActivity extends AppCompatActivity {
         } else if (itemId == R.id.action_theme_toggle) {
             toggleTheme();
             return true;
+        } else if (itemId == R.id.action_history) {
+            startActivity(new Intent(this, TokenHistoryActivity.class));
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    // ... rest of the code (PIN dialog, NFC handling, etc.) remains the same ...
+    private void vibrateSuccess() {
+        if (vibrator != null) {
+            vibrator.vibrate(PATTERN_SUCCESS, -1);
+        }
+    }
+
+    private void vibrateError() {
+        if (vibrator != null) {
+            vibrator.vibrate(PATTERN_ERROR, -1);
+        }
+    }
+
+    private void vibrateKeypad() {
+        if (vibrator != null) {
+            vibrator.vibrate(VIBRATE_KEYPAD);
+        }
+    }
+
+    // Call this method when a card operation succeeds
+    private void onCardOperationSuccess() {
+        vibrateSuccess();
+    }
+
+    // Call this method when a card operation fails
+    private void onCardOperationError() {
+        vibrateError();
+    }
+
+    // Implementation of SatocashWallet.OperationFeedback interface
+    @Override
+    public void onOperationSuccess() {
+        runOnUiThread(() -> vibrateSuccess());
+    }
+
+    @Override
+    public void onOperationError() {
+        runOnUiThread(() -> vibrateError());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (nfcAdapter != null) {
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    this, 0, new Intent(this, getClass())
+                            .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                    PendingIntent.FLAG_MUTABLE);
+            String[][] techList = new String[][]{new String[]{IsoDep.class.getName()}};
+            nfcAdapter.enableForegroundDispatch(this, pendingIntent, null, techList);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (nfcAdapter != null) {
+            nfcAdapter.disableForegroundDispatch(this);
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
+            Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+            if (tag != null) {
+                handleNfcPayment(tag);
+            }
+        }
+    }
+
+    private void showPinDialog(PinDialogCallback callback) {
+        mainHandler.post(() -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Enter PIN");
+
+            // Create layout for PIN input
+            LinearLayout layout = new LinearLayout(this);
+            layout.setOrientation(LinearLayout.VERTICAL);
+            int padding = (int) (50 * getResources().getDisplayMetrics().density);
+            int paddingVertical = (int) (20 * getResources().getDisplayMetrics().density);
+            layout.setPadding(padding, paddingVertical, padding, paddingVertical);
+
+            // Add PIN input field
+            EditText input = new EditText(this);
+            input.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
+            input.setHint("PIN");
+            layout.addView(input);
+
+            // Add keypad layout
+            LinearLayout keypadLayout = new LinearLayout(this);
+            keypadLayout.setOrientation(LinearLayout.VERTICAL);
+            LinearLayout.LayoutParams keypadParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            keypadLayout.setLayoutParams(keypadParams);
+
+            String[][] buttons = {
+                    {"1", "2", "3"},
+                    {"4", "5", "6"},
+                    {"7", "8", "9"},
+                    {"", "0", "DEL"}
+            };
+
+            for (String[] row : buttons) {
+                LinearLayout rowLayout = new LinearLayout(this);
+                rowLayout.setOrientation(LinearLayout.HORIZONTAL);
+                LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                rowParams.weight = 1.0f;
+                rowLayout.setLayoutParams(rowParams);
+
+                for (String text : row) {
+                    Button button = new Button(this);
+                    button.setText(text);
+                    LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(
+                            0,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    buttonParams.weight = 1.0f;
+                    button.setLayoutParams(buttonParams);
+
+                    button.setOnClickListener(v -> {
+                        if ("DEL".equals(text)) {
+                            if (input.length() > 0) {
+                                input.getText().delete(input.length() - 1, input.length());
+                            }
+                        } else if (!text.isEmpty()) {
+                            input.append(text);
+                        }
+                    });
+                    rowLayout.addView(button);
+                }
+                keypadLayout.addView(rowLayout);
+            }
+
+            // Add button layout
+            LinearLayout buttonLayout = new LinearLayout(this);
+            buttonLayout.setOrientation(LinearLayout.HORIZONTAL);
+            LinearLayout.LayoutParams buttonLayoutParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            buttonLayoutParams.topMargin = (int) (20 * getResources().getDisplayMetrics().density);
+            buttonLayout.setLayoutParams(buttonLayoutParams);
+
+            // Cancel button
+            Button cancelButton = new Button(this);
+            cancelButton.setText("Cancel");
+            LinearLayout.LayoutParams cancelParams = new LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1.0f
+            );
+            cancelParams.rightMargin = (int) (8 * getResources().getDisplayMetrics().density);
+            cancelButton.setLayoutParams(cancelParams);
+
+            // OK button
+            Button okButton = new Button(this);
+            okButton.setText("OK");
+            LinearLayout.LayoutParams okParams = new LinearLayout.LayoutParams(
+                    0,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1.0f
+            );
+            okParams.leftMargin = (int) (8 * getResources().getDisplayMetrics().density);
+            okButton.setLayoutParams(okParams);
+
+            buttonLayout.addView(cancelButton);
+            buttonLayout.addView(okButton);
+
+            layout.addView(keypadLayout);
+            layout.addView(buttonLayout);
+            builder.setView(layout);
+
+            AlertDialog dialog = builder.create();
+
+            cancelButton.setOnClickListener(v -> {
+                dialog.cancel();
+                callback.onPin(null);
+            });
+
+            okButton.setOnClickListener(v -> {
+                String pin = input.getText().toString();
+                dialog.dismiss();
+                callback.onPin(pin);
+            });
+
+            dialog.setOnCancelListener(dialogInterface -> callback.onPin(null));
+
+            dialog.show();
+        });
+    }
+
+    private void handlePaymentError(String message) {
+        requestedAmount = 0;
+        currentInput.setLength(0);
+
+        mainHandler.post(() -> {
+            if (nfcDialog != null && nfcDialog.isShowing()) {
+                nfcDialog.dismiss();
+            }
+            switchToTokenMode();
+            tokenDisplay.setText("Error: " + message);
+            copyTokenButton.setVisibility(View.GONE);
+        });
+    }
+
+    private void handlePaymentSuccess(String token) {
+        long amount = requestedAmount; // Save amount before resetting
+        requestedAmount = 0;
+        currentInput.setLength(0);
+
+        Log.d(TAG, "Payment successful! Token: " + token);
+
+        // Save token to history
+        TokenHistoryActivity.addToHistory(this, token, amount);
+
+        mainHandler.post(() -> {
+            if (nfcDialog != null && nfcDialog.isShowing()) {
+                nfcDialog.dismiss();
+            }
+            switchToTokenMode();
+            tokenDisplay.setText(token);
+            copyTokenButton.setVisibility(View.VISIBLE);
+            Toast.makeText(this, "Payment successful!", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void handleNfcPayment(Tag tag) {
+        if (requestedAmount <= 0) {
+            Toast.makeText(this, "Please enter an amount first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                satocashClient = new SatocashNfcClient(tag);
+                satocashClient.connect();
+                Log.d(TAG, "Connected to NFC card");
+
+                satocashWallet = new SatocashWallet(satocashClient);
+                Log.d(TAG, "Created Satocash wallet instance");
+
+                satocashClient.selectApplet(SatocashNfcClient.SATOCASH_AID);
+                Log.d(TAG, "Satocash Applet found and selected!");
+
+                satocashClient.initSecureChannel();
+                Log.d(TAG, "Secure Channel Initialized!");
+
+                // Try payment without PIN first
+                Log.d(TAG, "Attempting payment without PIN...");
+                try {
+                    CompletableFuture<String> paymentFuture = satocashWallet.getPayment(requestedAmount, "SAT");
+                    String token = paymentFuture.join();
+                    Log.d(TAG, "Payment successful without PIN! Token received.");
+                    handlePaymentSuccess(token);
+                    return;
+                } catch (RuntimeException e) {
+                    // First check if it's a "not enough funds" error
+                    if (e.getMessage() != null && e.getMessage().contains("not enough funds")) {
+                        Log.e(TAG, "Insufficient funds error: " + e.getMessage());
+                        handlePaymentError("Insufficient funds on card");
+                        return;
+                    }
+
+                    // Otherwise check if it's a card error requiring PIN
+                    Throwable cause = e.getCause();
+                    if (cause instanceof SatocashNfcClient.SatocashException) {
+                        SatocashNfcClient.SatocashException satocashEx = (SatocashNfcClient.SatocashException) cause;
+                        // First log the full exception details for debugging
+                        Log.d(TAG, "SatocashException caught during payment: " + satocashEx.getMessage());
+                        int statusWord = satocashEx.getSw();
+                        Log.d(TAG, String.format("Status Word received: 0x%04X", statusWord));
+
+                        if (statusWord == SW.UNAUTHORIZED) {
+                            Log.d(TAG, "Got SW_UNAUTHORIZED, attempting with PIN authentication...");
+                        
+                            // Create a CompletableFuture for the PIN dialog result
+                            CompletableFuture<String> pinFuture = new CompletableFuture<>();
+                            showPinDialog(pinFuture::complete);
+                            
+                            // Wait for PIN input
+                            String pin = pinFuture.join();
+                            
+                            if (pin != null) {
+                                try {
+                                    boolean authenticated = satocashWallet.authenticatePIN(pin).join();
+                                    
+                                    if (authenticated) {
+                                        Log.d(TAG, "PIN Verified! Card Ready.");
+
+                                        try {
+                                            Log.d(TAG, "Starting payment for " + requestedAmount + " SAT...");
+                                            CompletableFuture<String> paymentFuture = satocashWallet.getPayment(requestedAmount, "SAT");
+                                            String token = paymentFuture.join();
+                                            Log.d(TAG, "Payment successful! Token received.");
+                                            handlePaymentSuccess(token);
+                                        } catch (Exception pe) {
+                                            Log.e(TAG, "Payment failed: " + pe.getMessage());
+                                            handlePaymentError(pe.getMessage());
+                                        }
+                                    } else {
+                                        String message = "PIN Verification Failed";
+                                        Log.e(TAG, message);
+                                        handlePaymentError(message);
+                                    }
+                                } catch (RuntimeException re) {
+                                    Throwable reCause = re.getCause();
+                                    if (reCause instanceof SatocashNfcClient.SatocashException) {
+                                        SatocashNfcClient.SatocashException pinEx = (SatocashNfcClient.SatocashException) reCause;
+                                        String message = String.format("PIN Verification Failed: %s (SW: 0x%04X)",
+                                                pinEx.getMessage(), pinEx.getSw());
+                                        Log.e(TAG, message);
+                                        handlePaymentError(message);
+                                    } else {
+                                        String message = "Authentication Failed: " + re.getMessage();
+                                        Log.e(TAG, message);
+                                        handlePaymentError(message);
+                                    }
+                                }
+                            } else {
+                                Log.d(TAG, "PIN entry cancelled.");
+                                handlePaymentError("PIN entry cancelled");
+                            }
+                        } else {
+                            // If it's not SW_UNAUTHORIZED, handle as card error
+                            String message = String.format("Card Error: (SW: 0x%04X)", statusWord);
+                            Log.e(TAG, message);
+                            handlePaymentError(message);
+                        }
+                    } else {
+                        // If it's not a SatocashException, handle as generic error
+                        String message = "Payment failed: " + e.getMessage();
+                        Log.e(TAG, message);
+                        handlePaymentError(message);
+                    }
+                }
+            } catch (IOException e) {
+                String message = "NFC Communication Error: " + e.getMessage();
+                Log.e(TAG, message);
+                handlePaymentError(message);
+            } catch (SatocashNfcClient.SatocashException e) {
+                String message = String.format("Satocash Card Error: %s (SW: 0x%04X)",
+                        e.getMessage(), e.getSw());
+                Log.e(TAG, message);
+                handlePaymentError(message);
+            } catch (Exception e) {
+                String message = "An unexpected error occurred: " + e.getMessage();
+                Log.e(TAG, message);
+                handlePaymentError(message);
+            } finally {
+                try {
+                    if (satocashClient != null) {
+                        satocashClient.close();
+                        Log.d(TAG, "NFC connection closed.");
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, "Error closing NFC connection: " + e.getMessage());
+                }
+            }
+        }).start();
+    }
+
+    private interface PinDialogCallback {
+        void onPin(String pin);
+    }    
 }
