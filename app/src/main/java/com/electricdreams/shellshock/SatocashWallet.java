@@ -18,7 +18,7 @@ import java.util.stream.*;
 import okhttp3.OkHttpClient;
 
 import static com.cashujdk.cryptography.Cashu.*;
-import static com.example.shellshock.SatocashNfcClient.bytesToHex;
+import static com.electricdreams.shellshock.SatocashNfcClient.bytesToHex;
 
 public class SatocashWallet {
     private final SatocashNfcClient cardClient;
