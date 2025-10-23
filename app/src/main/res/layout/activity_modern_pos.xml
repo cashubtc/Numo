@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/windowBackground"
+    android:background="?android:attr/windowBackground"
     tools:context=".ModernPOSActivity">
 
     <androidx.appcompat.widget.Toolbar
@@ -13,7 +13,8 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Light"
+        android:theme="?attr/actionBarTheme"
+        app:popupTheme="?attr/actionBarPopupTheme"
         app:title="POS"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -23,7 +24,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:background="@drawable/keypad_border"
+        android:background="?attr/colorSurface"
         android:visibility="gone"
         android:minHeight="100dp"
         android:maxHeight="200dp"
@@ -38,7 +39,7 @@
             android:padding="16dp"
             android:gravity="start"
             android:textIsSelectable="true"
-            android:textColor="@color/textColorPrimary"
+            android:textColor="?android:attr/textColor"
             android:textSize="16sp" />
     </ScrollView>
 
@@ -89,7 +90,7 @@
             android:layout_margin="16dp"
             android:gravity="end"
             android:text="0"
-            android:textColor="@color/textColorPrimary"
+            android:textColor="?android:attr/textColor"
             android:textSize="60sp"
             app:layout_constraintBottom_toTopOf="@id/keypad"
             app:layout_constraintEnd_toEndOf="parent"
@@ -101,7 +102,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:background="@drawable/keypad_border"
+            android:background="?attr/colorSurface"
             android:columnCount="3"
             android:padding="8dp"
             app:layout_constraintBottom_toTopOf="@+id/submit_button"
@@ -114,11 +115,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:backgroundTint="@color/colorAccent"
             android:padding="20dp"
             android:text="Submit"
-            android:textColor="@color/keypadButtonTextColor"
             android:textSize="24sp"
+            android:backgroundTint="?attr/colorPrimary"
+            android:textColor="?attr/colorOnPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />

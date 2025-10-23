@@ -1,18 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme -->
+<resources>
     <style name="Theme.Shellshock" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color -->
-        <item name="colorPrimary">@color/purple_200</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/black</item>
-        <!-- Secondary brand color -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_200</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color -->
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/dark_buttonBackground</item>
+        <item name="colorPrimaryVariant">@color/dark_colorPrimaryDark</item>
+        <item name="colorOnPrimary">@color/dark_buttonText</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/dark_buttonBackground</item>
+        <item name="colorSecondaryVariant">@color/dark_buttonBackground</item>
+        <item name="colorOnSecondary">@color/dark_buttonText</item>
+        <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-        <!-- Enable window content transitions -->
-        <item name="android:windowContentTransitions">true</item>
+        <!-- Text colors -->
+        <item name="android:textColor">@color/dark_textColorPrimary</item>
+        <!-- Background colors -->
+        <item name="android:windowBackground">@color/dark_windowBackground</item>
+        <item name="android:colorBackground">@color/dark_windowBackground</item>
+        <!-- Surface colors -->
+        <item name="colorSurface">@color/dark_surfaceColor</item>
+        <item name="colorOnSurface">@color/dark_textColorPrimary</item>
+        <!-- Custom attributes -->
+        <item name="keypadButtonColor">@color/dark_keypadButtonColor</item>
+        <item name="keypadButtonTextColor">@color/dark_keypadButtonTextColor</item>
+        <item name="keypadButtonPressedColor">@color/dark_keypadButtonPressedColor</item>
+        <item name="inputBoxStrokeColor">@color/dark_inputBoxStrokeColor</item>
+        <!-- Toolbar theme -->
+        <item name="toolbarStyle">@style/Widget.App.Toolbar.Dark</item>
+        <!-- Icon tint -->
+        <item name="colorControlNormal">@color/dark_iconTint</item>
+    </style>
+
+    <style name="Widget.App.Toolbar.Dark" parent="Widget.MaterialComponents.Toolbar.Primary">
+        <item name="android:background">@color/dark_colorPrimary</item>
+        <item name="titleTextColor">@color/dark_textColorPrimary</item>
+        <item name="subtitleTextColor">@color/dark_textColorSecondary</item>
+        <item name="colorControlNormal">@color/dark_iconTint</item>
     </style>
 </resources>

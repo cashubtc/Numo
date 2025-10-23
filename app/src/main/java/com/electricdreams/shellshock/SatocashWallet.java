@@ -1,4 +1,4 @@
-package com.example.shellshock;
+package com.electricdreams.shellshock;
 
 import android.util.Log;
 import androidx.annotation.NonNull;
@@ -18,13 +18,20 @@ import java.util.stream.*;
 import okhttp3.OkHttpClient;
 
 import static com.cashujdk.cryptography.Cashu.*;
-import static com.example.shellshock.SatocashNfcClient.bytesToHex;
+import static com.electricdreams.shellshock.SatocashNfcClient.bytesToHex;
 
 public class SatocashWallet {
+    // Interface for operation feedback
+    public interface OperationFeedback {
+        void onOperationSuccess();
+        void onOperationError();
+    }
+
     private final SatocashNfcClient cardClient;
     private Boolean authenticated;
     @NotNull
     public static String pendingProofToken;
+    private OperationFeedback feedback;
 
     private static final String TAG = "SatocashWallet";
     private static final int SATOCASH_MAX_MINTS = 16;
@@ -34,6 +41,23 @@ public class SatocashWallet {
     public SatocashWallet(SatocashNfcClient _client) {
         cardClient = _client;
         authenticated = false;
+        feedback = null;
+    }
+
+    public void setOperationFeedback(OperationFeedback feedback) {
+        this.feedback = feedback;
+    }
+
+    private void notifySuccess() {
+        if (feedback != null) {
+            feedback.onOperationSuccess();
+        }
+    }
+
+    private void notifyError() {
+        if (feedback != null) {
+            feedback.onOperationError();
+        }
     }
 
     public CompletableFuture<Boolean> authenticatePIN(String pinCode) {
@@ -41,10 +65,12 @@ public class SatocashWallet {
             try {
                 cardClient.verifyPin(pinCode, 0);
                 authenticated = true;
+                notifySuccess();
+                return true;
             } catch (SatocashNfcClient.SatocashException e) {
+                notifyError();
                 throw new RuntimeException(e);
             }
-            return true;
         });
     }
 
@@ -241,13 +267,17 @@ public class SatocashWallet {
                     // Import changeProofs to card
                     Map<String, Integer> keysetIdsToIndices = transposeMap(keysetIndicesToIds);
                     importProofs(changeProofs, mintUrl, unit, keysetIdsToIndices);
+                    notifySuccess();
                     return new Token(receiveProofs, "sat", mintUrl).encode();
                 }
             } catch (SatocashNfcClient.SatocashException e) {
+                notifyError();
                 throw e;
             } catch (IOException e) {
+                notifyError();
                 throw new RuntimeException(e);
             } catch (Exception e) {
+                notifyError();
                 throw new RuntimeException(e);
             }
         });

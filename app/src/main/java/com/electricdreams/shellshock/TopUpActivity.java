@@ -1,4 +1,4 @@
-package com.example.shellshock;
+package com.electricdreams.shellshock;
 
 import android.app.PendingIntent;
 import android.text.Layout;

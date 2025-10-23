@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.shellshock"
+    namespace = "com.electricdreams.shellshock"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.shellshock"
+        applicationId = "com.electricdreams.shellshock"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -111,4 +111,7 @@ dependencies {
     
     // CBOR library from Peter O. Upokecenter
     implementation("com.upokecenter:cbor:4.5.2")
+
+    // Gson for JSON serialization
+    implementation("com.google.code.gson:gson:2.10.1")
 }

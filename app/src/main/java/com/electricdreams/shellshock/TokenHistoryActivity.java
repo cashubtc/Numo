@@ -1,0 +1,89 @@
+package com.electricdreams.shellshock;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class TokenHistoryActivity extends AppCompatActivity {
+    private static final String PREFS_NAME = "TokenHistory";
+    private static final String KEY_HISTORY = "history";
+
+    private TokenHistoryAdapter adapter;
+    private TextView emptyView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_history);
+
+        // Setup toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Token History");
+        }
+
+        // Setup RecyclerView
+        RecyclerView recyclerView = findViewById(R.id.history_recycler_view);
+        emptyView = findViewById(R.id.empty_view);
+        
+        adapter = new TokenHistoryAdapter();
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        // Load and display history
+        loadHistory();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
+
+    private void loadHistory() {
+        List<TokenHistoryEntry> history = getTokenHistory();
+        Collections.reverse(history); // Show newest first
+        adapter.setEntries(history);
+        
+        // Show/hide empty view
+        emptyView.setVisibility(history.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    public static List<TokenHistoryEntry> getTokenHistory(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        String json = prefs.getString(KEY_HISTORY, "[]");
+        Type type = new TypeToken<ArrayList<TokenHistoryEntry>>(){}.getType();
+        return new Gson().fromJson(json, type);
+    }
+
+    private List<TokenHistoryEntry> getTokenHistory() {
+        return getTokenHistory(this);
+    }
+
+    public static void addToHistory(Context context, String token, long amount) {
+        List<TokenHistoryEntry> history = getTokenHistory(context);
+        history.add(new TokenHistoryEntry(token, amount, new java.util.Date()));
+        
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(KEY_HISTORY, new Gson().toJson(history));
+        editor.apply();
+    }
+}

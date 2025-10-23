@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/windowBackground"
+    android:background="?android:attr/windowBackground"
     tools:context=".BalanceCheckActivity">
 
     <androidx.appcompat.widget.Toolbar
@@ -13,7 +13,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Light"
+        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
         app:title="Check NFC Balance"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -33,7 +33,7 @@
             android:layout_marginBottom="32dp"
             android:gravity="center"
             android:text="NFC Card Balance Check"
-            android:textColor="@color/textColorPrimary"
+            android:textColor="?android:attr/textColor"
             android:textSize="24sp"
             android:textStyle="bold" />
 
@@ -43,7 +43,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="32dp"
             android:src="@drawable/ic_balance_check"
-            android:tint="@color/textColorPrimary" />
+            app:tint="?android:attr/textColor" />
 
         <TextView
             android:layout_width="match_parent"
@@ -51,7 +51,7 @@
             android:layout_marginBottom="32dp"
             android:gravity="center"
             android:text="Tap your NFC card to check balance"
-            android:textColor="@color/textColorPrimary"
+            android:textColor="?android:attr/textColor"
             android:textSize="16sp" />
 
         <TextView
@@ -62,8 +62,8 @@
             android:layout_marginBottom="16dp"
             android:gravity="center"
             android:padding="16dp"
-            android:background="@drawable/keypad_border"
-            android:textColor="@color/textColorPrimary"
+            android:background="?attr/colorSurface"
+            android:textColor="?android:attr/textColor"
             android:textSize="16sp"
             android:visibility="gone" />
 
@@ -74,9 +74,9 @@
             android:layout_marginTop="16dp"
             android:gravity="center"
             android:padding="16dp"
-            android:background="@drawable/keypad_border"
+            android:background="?attr/colorSurface"
             android:textSize="24sp"
-            android:textColor="@color/colorAccent"
+            android:textColor="?attr/colorSecondary"
             android:textStyle="bold"
             android:visibility="gone" />
 

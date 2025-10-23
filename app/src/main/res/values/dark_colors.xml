@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark theme colors -->
+    <color name="dark_colorPrimary">#121212</color>
+    <color name="dark_colorPrimaryDark">#000000</color>
+    <color name="dark_colorAccent">#BB86FC</color>
+    <color name="dark_textColorPrimary">#FFFFFF</color>
+    <color name="dark_textColorSecondary">#B3FFFFFF</color>
+    <color name="dark_windowBackground">#121212</color>
+    <color name="dark_surfaceColor">#1E1E1E</color>
+    <color name="dark_keypadButtonColor">#2C2C2C</color>
+    <color name="dark_keypadButtonTextColor">#FFFFFF</color>
+</resources>

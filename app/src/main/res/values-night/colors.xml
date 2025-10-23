@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark Theme Colors -->
+    <color name="dark_colorPrimary">#121212</color>
+    <color name="dark_colorPrimaryDark">#000000</color>
+    <color name="dark_colorAccent">#BB86FC</color>
+    <color name="dark_textColorPrimary">#FFFFFF</color>
+    <color name="dark_textColorSecondary">#B3FFFFFF</color>
+    <color name="dark_windowBackground">#121212</color>
+    <color name="dark_surfaceColor">#1E1E1E</color>
+    <color name="dark_keypadButtonColor">#1E1E1E</color>
+    <color name="dark_keypadButtonPressedColor">#2D2D2D</color>
+    <color name="dark_keypadButtonTextColor">#FFFFFF</color>
+    <color name="dark_inputBoxStrokeColor">#FFFFFF</color>
+    
+    <!-- Action buttons in dark mode -->
+    <color name="dark_buttonBackground">#BB86FC</color>
+    <color name="dark_buttonText">#000000</color>
+    <color name="dark_iconTint">#BB86FC</color>
+</resources>

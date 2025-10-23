@@ -1,4 +1,4 @@
-package com.example.shellshock;
+package com.electricdreams.shellshock;
 
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;

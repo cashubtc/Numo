@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/windowBackground"
+    android:background="?android:attr/windowBackground"
     tools:context=".TopUpActivity">
 
     <androidx.appcompat.widget.Toolbar
@@ -13,7 +13,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Light"
+        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
         app:title="Top Up"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -24,6 +24,10 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:hint="Enter Cashu Proof Token"
+        android:textColorHint="?android:attr/textColor"
+        app:hintTextColor="?android:attr/textColor"
+        app:boxStrokeColor="?android:attr/textColor"
+        app:boxStrokeWidth="2dp"
         app:layout_constraintBottom_toTopOf="@+id/top_up_submit_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -35,7 +39,7 @@
             android:layout_height="wrap_content"
             android:inputType="textMultiLine"
             android:maxLines="3"
-            android:textColor="@color/textColorPrimary" />
+            android:textColor="?android:attr/textColor" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -44,10 +48,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:backgroundTint="@color/colorAccent"
         android:padding="20dp"
         android:text="Submit"
-        android:textColor="@color/keypadButtonTextColor"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

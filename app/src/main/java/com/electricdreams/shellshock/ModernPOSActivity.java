@@ -1,10 +1,11 @@
-package com.example.shellshock;
+package com.electricdreams.shellshock;
 
 import android.app.PendingIntent;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
@@ -27,6 +28,7 @@ import android.widget.ScrollView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
@@ -34,9 +36,12 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
-public class ModernPOSActivity extends AppCompatActivity {
+public class ModernPOSActivity extends AppCompatActivity implements SatocashWallet.OperationFeedback {
 
     private static final String TAG = "ModernPOSActivity";
+    private static final String PREFS_NAME = "ShellshockPrefs";
+    private static final String KEY_NIGHT_MODE = "nightMode";
+    
     private TextView amountDisplay;
     private Button submitButton;
     private StringBuilder currentInput = new StringBuilder();
@@ -52,6 +57,14 @@ public class ModernPOSActivity extends AppCompatActivity {
     private SatocashWallet satocashWallet;
     private long requestedAmount = 0;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private MenuItem themeMenuItem;
+    private boolean isNightMode = false;
+    private android.os.Vibrator vibrator;
+
+    // Vibration patterns (in milliseconds)
+    private static final long[] PATTERN_SUCCESS = {0, 50, 100, 50}; // Two quick pulses
+    private static final long[] PATTERN_ERROR = {0, 100}; // One longer pulse
+    private static final int VIBRATE_KEYPAD = 20; // Short keypad press
 
     // Status Words (SW) constants copied from SatocashNfcClient for error handling
     private static class SW {
@@ -61,8 +74,16 @@ public class ModernPOSActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Load theme preference before setting content view
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        isNightMode = prefs.getBoolean(KEY_NIGHT_MODE, false);
+        if (isNightMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
         super.onCreate(savedInstanceState);
-        setTheme(R.style.Theme_Shellshock);
         setContentView(R.layout.activity_modern_pos);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -80,6 +101,9 @@ public class ModernPOSActivity extends AppCompatActivity {
         inputModeContainer = findViewById(R.id.input_mode_container);
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+        // Initialize vibrator
+        vibrator = (android.os.Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         String[] buttonLabels = {
                 "1", "2", "3",
@@ -149,7 +173,6 @@ public class ModernPOSActivity extends AppCompatActivity {
         tokenScrollContainer.setVisibility(View.VISIBLE);
         tokenActionsContainer.setVisibility(View.VISIBLE);
         tokenDisplay.setVisibility(View.VISIBLE);
-        // Note: copyTokenButton visibility is managed by handlePaymentSuccess/Error
     }
 
     private void copyTokenToClipboard(String token) {
@@ -159,25 +182,9 @@ public class ModernPOSActivity extends AppCompatActivity {
         Toast.makeText(this, "Token copied to clipboard", Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_top_up) {
-            startActivity(new Intent(this, TopUpActivity.class));
-            return true;
-        } else if (item.getItemId() == R.id.action_balance_check) {
-            startActivity(new Intent(this, BalanceCheckActivity.class));
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     private void onKeypadButtonClick(String label) {
+        vibrateKeypad();
+
         switch (label) {
             case "C":
                 currentInput.setLength(0);
@@ -216,6 +223,128 @@ public class ModernPOSActivity extends AppCompatActivity {
         builder.setCancelable(true);
         nfcDialog = builder.create();
         nfcDialog.show();
+    }
+
+    private void toggleTheme() {
+        isNightMode = !isNightMode;
+        SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit();
+        editor.putBoolean(KEY_NIGHT_MODE, isNightMode);
+        editor.apply();
+
+        AppCompatDelegate.setDefaultNightMode(
+            isNightMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO
+        );
+        
+        updateThemeIcon();
+    }
+
+    private void updateThemeIcon() {
+        if (themeMenuItem != null) {
+            themeMenuItem.setIcon(
+                isNightMode ? R.drawable.ic_light_mode : R.drawable.ic_dark_mode
+            );
+            themeMenuItem.setTitle(
+                isNightMode ? "Switch to Light Mode" : "Switch to Dark Mode"
+            );
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        themeMenuItem = menu.findItem(R.id.action_theme_toggle);
+        updateThemeIcon();
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_top_up) {
+            startActivity(new Intent(this, TopUpActivity.class));
+            return true;
+        } else if (itemId == R.id.action_balance_check) {
+            startActivity(new Intent(this, BalanceCheckActivity.class));
+            return true;
+        } else if (itemId == R.id.action_theme_toggle) {
+            toggleTheme();
+            return true;
+        } else if (itemId == R.id.action_history) {
+            startActivity(new Intent(this, TokenHistoryActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void vibrateSuccess() {
+        if (vibrator != null) {
+            vibrator.vibrate(PATTERN_SUCCESS, -1);
+        }
+    }
+
+    private void vibrateError() {
+        if (vibrator != null) {
+            vibrator.vibrate(PATTERN_ERROR, -1);
+        }
+    }
+
+    private void vibrateKeypad() {
+        if (vibrator != null) {
+            vibrator.vibrate(VIBRATE_KEYPAD);
+        }
+    }
+
+    // Call this method when a card operation succeeds
+    private void onCardOperationSuccess() {
+        vibrateSuccess();
+    }
+
+    // Call this method when a card operation fails
+    private void onCardOperationError() {
+        vibrateError();
+    }
+
+    // Implementation of SatocashWallet.OperationFeedback interface
+    @Override
+    public void onOperationSuccess() {
+        runOnUiThread(() -> vibrateSuccess());
+    }
+
+    @Override
+    public void onOperationError() {
+        runOnUiThread(() -> vibrateError());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (nfcAdapter != null) {
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                    this, 0, new Intent(this, getClass())
+                            .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                    PendingIntent.FLAG_MUTABLE);
+            String[][] techList = new String[][]{new String[]{IsoDep.class.getName()}};
+            nfcAdapter.enableForegroundDispatch(this, pendingIntent, null, techList);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (nfcAdapter != null) {
+            nfcAdapter.disableForegroundDispatch(this);
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
+            Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+            if (tag != null) {
+                handleNfcPayment(tag);
+            }
+        }
     }
 
     private void showPinDialog(PinDialogCallback callback) {
@@ -344,23 +473,6 @@ public class ModernPOSActivity extends AppCompatActivity {
         });
     }
 
-    private void handlePaymentSuccess(String token) {
-        requestedAmount = 0;
-        currentInput.setLength(0);
-
-        Log.d(TAG, "Payment successful! Token: " + token);
-
-        mainHandler.post(() -> {
-            if (nfcDialog != null && nfcDialog.isShowing()) {
-                nfcDialog.dismiss();
-            }
-            switchToTokenMode();
-            tokenDisplay.setText(token);
-            copyTokenButton.setVisibility(View.VISIBLE);
-            Toast.makeText(this, "Payment successful!", Toast.LENGTH_SHORT).show();
-        });
-    }
-
     private void handlePaymentError(String message) {
         requestedAmount = 0;
         currentInput.setLength(0);
@@ -375,36 +487,25 @@ public class ModernPOSActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (nfcAdapter != null) {
-            PendingIntent pendingIntent = PendingIntent.getActivity(
-                    this, 0, new Intent(this, getClass())
-                            .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
-                    PendingIntent.FLAG_MUTABLE);
-            String[][] techList = new String[][]{new String[]{IsoDep.class.getName()}};
-            nfcAdapter.enableForegroundDispatch(this, pendingIntent, null, techList);
-        }
-    }
+    private void handlePaymentSuccess(String token) {
+        long amount = requestedAmount; // Save amount before resetting
+        requestedAmount = 0;
+        currentInput.setLength(0);
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (nfcAdapter != null) {
-            nfcAdapter.disableForegroundDispatch(this);
-        }
-    }
+        Log.d(TAG, "Payment successful! Token: " + token);
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        if (NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction())) {
-            Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-            if (tag != null) {
-                handleNfcPayment(tag);
+        // Save token to history
+        TokenHistoryActivity.addToHistory(this, token, amount);
+
+        mainHandler.post(() -> {
+            if (nfcDialog != null && nfcDialog.isShowing()) {
+                nfcDialog.dismiss();
             }
-        }
+            switchToTokenMode();
+            tokenDisplay.setText(token);
+            copyTokenButton.setVisibility(View.VISIBLE);
+            Toast.makeText(this, "Payment successful!", Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void handleNfcPayment(Tag tag) {
@@ -544,5 +645,5 @@ public class ModernPOSActivity extends AppCompatActivity {
 
     private interface PinDialogCallback {
         void onPin(String pin);
-    }
+    }    
 }

@@ -1,19 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base application theme. -->
-    <style name="Theme.Shellshock" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <style name="Theme.Shellshock" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/buttonBackground</item>
         <item name="colorPrimaryVariant">@color/colorPrimaryDark</item>
-        <item name="colorOnPrimary">@color/textColorPrimary</item>
+        <item name="colorOnPrimary">@color/buttonText</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/colorAccent</item>
-        <item name="colorSecondaryVariant">@color/colorAccent</item>
-        <item name="colorOnSecondary">@color/textColorPrimary</item>
+        <item name="colorSecondary">@color/buttonBackground</item>
+        <item name="colorSecondaryVariant">@color/buttonBackground</item>
+        <item name="colorOnSecondary">@color/buttonText</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
-        <item name="android:windowBackground">@color/windowBackground</item>
+        <!-- Text colors -->
         <item name="android:textColor">@color/textColorPrimary</item>
+        <!-- Background colors -->
+        <item name="android:windowBackground">@color/windowBackground</item>
+        <item name="android:colorBackground">@color/windowBackground</item>
+        <!-- Surface colors -->
+        <item name="colorSurface">@color/surfaceColor</item>
+        <item name="colorOnSurface">@color/textColorPrimary</item>
+        <!-- Custom attributes -->
+        <item name="keypadButtonColor">@color/keypadButtonColor</item>
+        <item name="keypadButtonTextColor">@color/keypadButtonTextColor</item>
+        <item name="keypadButtonPressedColor">@color/keypadButtonPressedColor</item>
+        <item name="inputBoxStrokeColor">@color/inputBoxStrokeColor</item>
+        <!-- Toolbar theme -->
+        <item name="toolbarStyle">@style/Widget.App.Toolbar.Light</item>
+        <!-- Icon tint -->
+        <item name="colorControlNormal">@color/iconTint</item>
+    </style>
+
+    <style name="Widget.App.Toolbar.Light" parent="Widget.MaterialComponents.Toolbar.Primary">
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="titleTextColor">@color/textColorPrimary</item>
+        <item name="subtitleTextColor">@color/textColorSecondary</item>
+        <item name="colorControlNormal">@color/iconTint</item>
     </style>
 </resources>

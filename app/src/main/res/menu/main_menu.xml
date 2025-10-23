@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_theme_toggle"
+        android:title="Toggle Theme"
+        android:icon="@drawable/ic_light_mode"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_top_up"
         android:title="Top Up"
         android:icon="@drawable/ic_top_up"
@@ -10,5 +15,10 @@
         android:id="@+id/action_balance_check"
         android:title="Check Balance"
         android:icon="@drawable/ic_balance_check"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_history"
+        android:title="History"
+        android:icon="@drawable/ic_history"
         app:showAsAction="ifRoom" />
 </menu>

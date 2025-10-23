@@ -1,4 +1,4 @@
-package com.example.shellshock.ui.theme
+package com.electricdreams.shellshock.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

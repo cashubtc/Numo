@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="Theme">
+        <attr name="keypadButtonColor" format="color"/>
+        <attr name="keypadButtonTextColor" format="color"/>
+        <attr name="keypadButtonPressedColor" format="color"/>
+        <attr name="inputBoxStrokeColor" format="color"/>
+    </declare-styleable>
+</resources>

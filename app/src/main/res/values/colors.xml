@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary and Secondary Colors -->
+    <!-- Light Theme Colors -->
     <color name="colorPrimary">#FFFFFF</color>
     <color name="colorPrimaryDark">#E0E0E0</color>
-    <color name="colorAccent">#D1C4E9</color> <!-- A light purple for accents -->
-
-    <!-- Text Colors -->
-    <color name="textColorPrimary">#212121</color> <!-- Dark text for light backgrounds -->
+    <color name="colorAccent">#757575</color>
+    <color name="textColorPrimary">#212121</color>
     <color name="textColorSecondary">#757575</color>
-
-    <!-- Background Colors -->
     <color name="windowBackground">#F5F5F5</color>
     <color name="surfaceColor">#FFFFFF</color>
-    
-    <!-- Keypad Colors -->
-    <color name="keypadButtonColor">#E1BEE7</color> <!-- Light purple button color -->
-    <color name="keypadButtonPressedColor">#CE93D8</color> <!-- Darker purple for pressed state -->
+    <color name="keypadButtonColor">#FFFFFF</color>
+    <color name="keypadButtonPressedColor">#E0E0E0</color>
     <color name="keypadButtonTextColor">#212121</color>
+    <color name="inputBoxStrokeColor">#212121</color>
+    
+    <!-- Action buttons in light mode -->
+    <color name="buttonBackground">#757575</color>
+    <color name="buttonText">#FFFFFF</color>
+    <color name="iconTint">#757575</color>
 
-    <!-- Default Colors (some are needed by the base theme) -->
+    <!-- Default Colors (needed by base theme) -->
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>

@@ -1,15 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_pressed="true">
-        <shape android:shape="rectangle">
-            <solid android:color="@color/keypadButtonPressedColor" />
-            <corners android:radius="8dp" />
-        </shape>
-    </item>
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="?attr/keypadButtonPressedColor">
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="@color/keypadButtonColor" />
+            <solid android:color="?attr/keypadButtonColor" />
             <corners android:radius="8dp" />
         </shape>
     </item>
-</selector>
+</ripple>
