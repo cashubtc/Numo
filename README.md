@@ -1,8 +1,8 @@
-# Shellshock
+# Shellshock 🥜⚡
 
-Shellshock is an Android Point-of-Sale application that enables merchants to receive Cashu ecash payments via smartcards. Using NFC technology, it provides a simple way to process transactions with physical cards that store Cashu tokens.
+Shellshock is an Android Point-of-Sale application that enables merchants to receive Cashu ecash payments via smartcards. Using NFC technology, it provides a simple way to process transactions with physical cards that store ecash.
 
-> ⚠️ **WARNING**: This application is **NOT** a wallet. It only acts as a terminal to receive payments and immediately generate redemption tokens. It does not store any tokens. tokens **MUST** be redeemed in a proper Cashu wallet immediately after receiving them, or you will lose your funds.
+> ⚠️ **WARNING**: This application is **NOT** a wallet. It only acts as a terminal to receive payments and immediately generate redemption tokens. It does not store any tokens. tokens **MUST** be redeemed in a proper Cashu wallet after receiving them, or the funds will be lost.
 
 ## Overview
 
