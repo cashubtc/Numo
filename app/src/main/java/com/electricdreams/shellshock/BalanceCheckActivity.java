@@ -59,7 +59,7 @@ public class BalanceCheckActivity extends AppCompatActivity {
 
     private void updateBalanceDisplay(long balance) {
         mainHandler.post(() -> {
-            balanceDisplay.setText(String.format("Balance: %d sats", balance));
+            balanceDisplay.setText(String.format("Balance: %d ₿", balance));
             balanceDisplay.setVisibility(View.VISIBLE);
         });
     }
@@ -171,7 +171,7 @@ public class BalanceCheckActivity extends AppCompatActivity {
                 Log.d(TAG, "5. Getting accurate card balance (no PIN authentication)...");
                 // Get balance using getProofInfo without PIN authentication
                 long totalBalance = getCardBalance();
-                Log.d(TAG, "✅ Balance check complete: " + totalBalance + " sats");
+                Log.d(TAG, "✅ Balance check complete: " + totalBalance + " ₿");
                 
                 updateBalanceDisplay(totalBalance);
 
@@ -261,13 +261,13 @@ public class BalanceCheckActivity extends AppCompatActivity {
                         int amountExponent = amounts.get(i);
                         long amount = (long) Math.pow(2, amountExponent);
                         totalBalance += amount;
-                        Log.d(TAG, "Proof " + i + ": " + amount + " sats (exp=" + amountExponent + ")");
+                        Log.d(TAG, "Proof " + i + ": " + amount + " ₿ (exp=" + amountExponent + ")");
 
                 }
             }
             
-            Log.d(TAG, "Total balance: " + totalBalance + " sats from " + unspentCount + " active proofs");
-            updateCardInfoDisplay("Card has " + unspentCount + " active proofs worth " + totalBalance + " sats");
+            Log.d(TAG, "Total balance: " + totalBalance + " ₿ from " + unspentCount + " active proofs");
+            updateCardInfoDisplay("Card has " + unspentCount + " active proofs worth " + totalBalance + " ₿");
             return totalBalance;
             
         } catch (SatocashNfcClient.SatocashException e) {

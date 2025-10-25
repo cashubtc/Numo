@@ -252,9 +252,9 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     private String formatAmount(String amount) {
         try {
             long value = amount.isEmpty() ? 0 : Long.parseLong(amount);
-            return NumberFormat.getNumberInstance(Locale.US).format(value) + " sats";
+            return NumberFormat.getNumberInstance(Locale.US).format(value) + " ₿";
         } catch (NumberFormatException e) {
-            return "0 sats";
+            return "";
         }
     }
 

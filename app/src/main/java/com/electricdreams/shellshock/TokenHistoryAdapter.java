@@ -50,7 +50,7 @@ public class TokenHistoryAdapter extends RecyclerView.Adapter<TokenHistoryAdapte
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         TokenHistoryEntry entry = entries.get(position);
-        holder.amountText.setText(String.format(Locale.getDefault(), "%d sats", entry.getAmount()));
+        holder.amountText.setText(String.format(Locale.getDefault(), "%d ₿", entry.getAmount()));
         holder.dateText.setText(dateFormat.format(entry.getDate()));
         
         holder.copyButton.setOnClickListener(v -> {
