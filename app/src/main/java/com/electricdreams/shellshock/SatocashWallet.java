@@ -128,6 +128,8 @@ public class SatocashWallet {
 
                     // Wait for Mint keysets and then map them to their fee
                     GetKeysetsResponse keysetsResponse = keysetsFuture.join();
+                    List<String> fullKeysetsIds = keysetsResponse.keysets
+                        .stream().map(k -> k.keysetId).collect(Collectors.toList());
                     Map<String, Integer> keysetsFeesMap = new HashMap<>();
                     for (GetKeysetsItemResponse keyset : keysetsResponse.keysets) {
                         keysetsFeesMap.put(keyset.keysetId, keyset.inputFee);
@@ -207,7 +209,7 @@ public class SatocashWallet {
                     List<Proof> exportedProofs = cardClient.exportProofs(selectedProofsIndices).stream().map((pf) -> {
                         return new Proof(
                                 1L << pf.amountExponent,
-                                keysetIndicesToIds.get(pf.keysetIndex),
+                                KeysetIdUtil.mapLongKeysetId(keysetIndicesToIds.get(pf.keysetIndex), fullKeysetsIds),
                                 new StringSecret(bytesToHex(pf.secret)),
                                 bytesToHex(pf.unblindedKey),
                                 Optional.empty(),
