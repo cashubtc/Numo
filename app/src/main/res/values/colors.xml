@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Light Theme Colors -->
-    <color name="colorPrimary">#FFFFFF</color>
-    <color name="colorPrimaryDark">#E0E0E0</color>
-    <color name="colorAccent">#757575</color>
-    <color name="textColorPrimary">#212121</color>
-    <color name="textColorSecondary">#757575</color>
-    <color name="windowBackground">#F5F5F5</color>
+    <!-- Light Theme Colors - Square Terminal Inspired -->
+    <color name="colorPrimary">#1173FE</color>
+    <color name="colorPrimaryDark">#1173FE</color>
+    <color name="colorAccent">#1173FE</color>
+    <color name="textColorPrimary">#000000</color>
+    <color name="textColorSecondary">#666666</color>
+    <color name="windowBackground">#FFFFFF</color>
     <color name="surfaceColor">#FFFFFF</color>
     <color name="keypadButtonColor">#FFFFFF</color>
-    <color name="keypadButtonPressedColor">#E0E0E0</color>
-    <color name="keypadButtonTextColor">#212121</color>
-    <color name="inputBoxStrokeColor">#212121</color>
+    <color name="keypadButtonPressedColor">#F5F5F5</color>
+    <color name="keypadButtonTextColor">#000000</color>
+    <color name="keypadButtonBorder">#E0E0E0</color>
+    <color name="inputBoxStrokeColor">#E0E0E0</color>
     
-    <!-- Action buttons in light mode -->
-    <color name="buttonBackground">#757575</color>
+    <!-- Action buttons -->
+    <color name="buttonBackground">#1173FE</color>
     <color name="buttonText">#FFFFFF</color>
-    <color name="iconTint">#757575</color>
-
-    <!-- Default Colors (needed by base theme) -->
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    
+    <!-- Navigation bar colors -->
+    <color name="navigationBarBackground">#F8F9FA</color>
+    <color name="navigationBarDivider">#E0E0E0</color>
+    <color name="navigationIconTint">#757575</color>
+    
+    <!-- Default Colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>
