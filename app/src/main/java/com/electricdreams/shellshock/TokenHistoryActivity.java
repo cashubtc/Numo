@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -44,6 +45,14 @@ public class TokenHistoryActivity extends AppCompatActivity {
         emptyView = findViewById(R.id.empty_view);
         
         adapter = new TokenHistoryAdapter();
+        adapter.setOnDeleteClickListener((entry, position) -> {
+            new AlertDialog.Builder(this)
+                .setTitle("Delete Token")
+                .setMessage("Are you sure you want to delete this token from history?")
+                .setPositiveButton("Delete", (dialog, which) -> deleteTokenFromHistory(position))
+                .setNegativeButton("Cancel", null)
+                .show();
+        });
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
@@ -64,6 +73,24 @@ public class TokenHistoryActivity extends AppCompatActivity {
         
         // Show/hide empty view
         emptyView.setVisibility(history.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private void deleteTokenFromHistory(int position) {
+        List<TokenHistoryEntry> history = getTokenHistory();
+        Collections.reverse(history); // Since we show newest first
+        if (position >= 0 && position < history.size()) {
+            history.remove(position);
+            Collections.reverse(history); // Reverse back for storage
+            
+            // Save updated history
+            SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString(KEY_HISTORY, new Gson().toJson(history));
+            editor.apply();
+            
+            // Reload the view
+            loadHistory();
+        }
     }
 
     public static List<TokenHistoryEntry> getTokenHistory(Context context) {

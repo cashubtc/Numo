@@ -47,6 +47,16 @@
             android:src="@drawable/ic_content_copy"
             android:tint="?attr/colorControlNormal" />
 
+        <ImageButton
+            android:id="@+id/delete_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Delete token"
+            android:src="@drawable/ic_delete"
+            android:tint="?attr/colorError" />
+
     </LinearLayout>
 
 </com.google.android.material.card.MaterialCardView>

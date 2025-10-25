@@ -21,6 +21,15 @@ import java.util.Locale;
 public class TokenHistoryAdapter extends RecyclerView.Adapter<TokenHistoryAdapter.ViewHolder> {
     private final List<TokenHistoryEntry> entries = new ArrayList<>();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("MMM d, yyyy HH:mm", Locale.getDefault());
+    private OnDeleteClickListener onDeleteClickListener;
+
+    public interface OnDeleteClickListener {
+        void onDeleteClick(TokenHistoryEntry entry, int position);
+    }
+
+    public void setOnDeleteClickListener(OnDeleteClickListener listener) {
+        this.onDeleteClickListener = listener;
+    }
 
     public void setEntries(List<TokenHistoryEntry> newEntries) {
         entries.clear();
@@ -49,6 +58,12 @@ public class TokenHistoryAdapter extends RecyclerView.Adapter<TokenHistoryAdapte
             clipboard.setPrimaryClip(clip);
             Toast.makeText(v.getContext(), "Token copied to clipboard", Toast.LENGTH_SHORT).show();
         });
+
+        holder.deleteButton.setOnClickListener(v -> {
+            if (onDeleteClickListener != null) {
+                onDeleteClickListener.onDeleteClick(entry, position);
+            }
+        });
     }
 
     @Override
@@ -60,12 +75,14 @@ public class TokenHistoryAdapter extends RecyclerView.Adapter<TokenHistoryAdapte
         final TextView amountText;
         final TextView dateText;
         final ImageButton copyButton;
+        final ImageButton deleteButton;
 
         ViewHolder(View view) {
             super(view);
             amountText = view.findViewById(R.id.amount_text);
             dateText = view.findViewById(R.id.date_text);
             copyButton = view.findViewById(R.id.copy_button);
+            deleteButton = view.findViewById(R.id.delete_button);
         }
     }
 }
