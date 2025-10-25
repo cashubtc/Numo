@@ -333,7 +333,7 @@ public class SatocashWallet {
                     // 2. For every proof:
                     // 2a. check that the keyset exists in the card, if not import it.
                     // 2b. Import the proof
-                    for (Proof proof : tokenEntry.proofs) { // Correctly access proofs from TokenEntry
+                    for (Proof proof : tokenEntry.getProofsShortId()) { // Correctly access proofs from TokenEntry
                         // Check the keyset is in the card, import otherwise
                         if (!keysetIdsToIndices.containsKey(proof.keysetId)) {
                             Log.d(TAG, "Keyset not present on card, attempting to import: " + proof.keysetId);
