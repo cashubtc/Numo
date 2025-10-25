@@ -3,6 +3,8 @@ package com.electricdreams.shellshock;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,11 +61,36 @@ public class TokenHistoryAdapter extends RecyclerView.Adapter<TokenHistoryAdapte
             Toast.makeText(v.getContext(), "Token copied to clipboard", Toast.LENGTH_SHORT).show();
         });
 
+        holder.openWithButton.setOnClickListener(v -> openTokenWithApp(v.getContext(), entry.getToken()));
+
         holder.deleteButton.setOnClickListener(v -> {
             if (onDeleteClickListener != null) {
                 onDeleteClickListener.onDeleteClick(entry, position);
             }
         });
+    }
+
+    private void openTokenWithApp(Context context, String token) {
+        String cashuUri = "cashu:" + token;
+        
+        // Create intent for viewing the URI
+        Intent uriIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(cashuUri));
+        uriIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        // Create a fallback intent for sharing as text
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, cashuUri);
+        
+        // Combine both intents into a chooser
+        Intent chooserIntent = Intent.createChooser(shareIntent, "Open token with...");
+        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { uriIntent });
+        
+        try {
+            context.startActivity(chooserIntent);
+        } catch (Exception e) {
+            Toast.makeText(context, "No apps available to handle this token", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -75,6 +102,7 @@ public class TokenHistoryAdapter extends RecyclerView.Adapter<TokenHistoryAdapte
         final TextView amountText;
         final TextView dateText;
         final ImageButton copyButton;
+        final ImageButton openWithButton;
         final ImageButton deleteButton;
 
         ViewHolder(View view) {
@@ -82,6 +110,7 @@ public class TokenHistoryAdapter extends RecyclerView.Adapter<TokenHistoryAdapte
             amountText = view.findViewById(R.id.amount_text);
             dateText = view.findViewById(R.id.date_text);
             copyButton = view.findViewById(R.id.copy_button);
+            openWithButton = view.findViewById(R.id.open_with_button);
             deleteButton = view.findViewById(R.id.delete_button);
         }
     }

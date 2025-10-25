@@ -48,6 +48,16 @@
             android:tint="?attr/colorControlNormal" />
 
         <ImageButton
+            android:id="@+id/open_with_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Open token with..."
+            android:src="@drawable/ic_open_with"
+            android:tint="?attr/colorControlNormal" />
+
+        <ImageButton
             android:id="@+id/delete_button"
             android:layout_width="48dp"
             android:layout_height="48dp"
