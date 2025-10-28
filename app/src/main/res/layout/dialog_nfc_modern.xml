@@ -8,6 +8,7 @@
     app:cardElevation="8dp">
 
     <LinearLayout
+        android:id="@+id/nfc_dialog_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
