@@ -40,11 +40,13 @@ public class TopUpActivity extends AppCompatActivity {
     private static final String TAG = "TopUpActivity";
     private TextInputEditText proofTokenEditText;
     private Button topUpSubmitButton;
-    private AlertDialog nfcDialog;
+    private AlertDialog nfcDialog, rescanDialog, processingDialog;
     private NfcAdapter nfcAdapter;
     private SatocashNfcClient satocashClient;
     private SatocashWallet satocashWallet;
     private String pendingProofToken;
+    private String savedPin;
+    private boolean waitingForRescan = false;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
     private View rootView;
 
@@ -142,6 +144,63 @@ public class TopUpActivity extends AppCompatActivity {
             builder.setCancelable(true);
             nfcDialog = builder.create();
             nfcDialog.show();
+        });
+    }
+    
+    private void showRescanDialog() {
+        mainHandler.post(() -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_Shellshock);
+            LayoutInflater inflater = this.getLayoutInflater();
+            View dialogView = inflater.inflate(R.layout.dialog_nfc_modern, null);
+            builder.setView(dialogView);
+
+            TextView nfcAmountDisplay = dialogView.findViewById(R.id.nfc_amount_display);
+            nfcAmountDisplay.setText("Ready to import proofs");
+
+            // Update the dialog title to provide clear instructions
+            TextView titleView = dialogView.findViewById(R.id.nfc_dialog_title);
+            if (titleView != null) {
+                titleView.setText("Scan Card Again");
+            }
+            
+            // Add message below the amount
+            TextView hintView = dialogView.findViewById(R.id.nfc_hint_text);
+            if (hintView != null) {
+                hintView.setText("PIN accepted. Please scan your card again to complete import.");
+                hintView.setVisibility(View.VISIBLE);
+            }
+
+            builder.setCancelable(true);
+            builder.setOnCancelListener(dialog -> {
+                // Reset state if dialog is dismissed
+                savedPin = null;
+                waitingForRescan = false;
+            });
+
+            rescanDialog = builder.create();
+            rescanDialog.show();
+        });
+    }
+    
+    private void showProcessingDialog() {
+        mainHandler.post(() -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_Shellshock);
+            View dialogView = getLayoutInflater().inflate(R.layout.dialog_nfc_modern, null);
+            builder.setView(dialogView);
+
+            TextView titleView = dialogView.findViewById(R.id.nfc_dialog_title);
+            if (titleView != null) {
+                titleView.setText("Processing Import");
+            }
+            
+            TextView amountView = dialogView.findViewById(R.id.nfc_amount_display);
+            if (amountView != null) {
+                amountView.setText("Importing proofs...");
+            }
+            
+            builder.setCancelable(false);
+            processingDialog = builder.create();
+            processingDialog.show();
         });
     }
 
@@ -308,73 +367,234 @@ public class TopUpActivity extends AppCompatActivity {
             showStatusMessage("No proof token set to import", false);
             return;
         }
+        
+        // If we're waiting for a rescan with a saved PIN, handle it differently
+        if (waitingForRescan && savedPin != null) {
+            processImportWithSavedPin(tag);
+            return;
+        }
+        
+        // If we're here and waiting for rescan is true but no saved PIN,
+        // reset the state as something went wrong
+        waitingForRescan = false;
 
         new Thread(() -> {
+            SatocashNfcClient tempClient = null;
             try {
-                satocashClient = new SatocashNfcClient(tag);
-                satocashClient.connect();
+                tempClient = new SatocashNfcClient(tag);
+                tempClient.connect();
+                Log.d(TAG, "Connected to NFC card");
+                
+                // Store client in class variable AFTER successful connection
+                satocashClient = tempClient;
                 satocashWallet = new SatocashWallet(satocashClient);
 
                 satocashClient.selectApplet(SatocashNfcClient.SATOCASH_AID);
+                Log.d(TAG, "Satocash Applet found and selected!");
+                
                 satocashClient.initSecureChannel();
+                Log.d(TAG, "Secure Channel Initialized!");
 
-                // Create a CompletableFuture for the PIN dialog result
-                CompletableFuture<String> pinFuture = new CompletableFuture<>();
-                showPinDialog(pin -> pinFuture.complete(pin));
-                String pin = pinFuture.join();
+                // First try importing without PIN
+                try {
+                    CompletableFuture<Integer> importFuture = satocashWallet.importProofsFromToken(pendingProofToken);
+                    int importedCount = importFuture.join();
+                    showStatusMessage("Success: Imported " + importedCount + " proofs", true);
 
-                if (pin != null) {
-                    try {
-                        CompletableFuture<Boolean> authFuture = satocashWallet.authenticatePIN(pin);
-                        boolean authenticated = authFuture.join();
+                    mainHandler.post(() -> {
+                        if (nfcDialog != null && nfcDialog.isShowing()) {
+                            nfcDialog.dismiss();
+                        }
+                        pendingProofToken = "";
+                        proofTokenEditText.setText("");
+                    });
+                    return;
+                } catch (RuntimeException e) {
+                    Throwable cause = e.getCause();
+                    if (cause instanceof SatocashNfcClient.SatocashException) {
+                        SatocashNfcClient.SatocashException satocashEx = (SatocashNfcClient.SatocashException) cause;
+                        int statusWord = satocashEx.getSw();
+                        Log.d(TAG, String.format("Status Word received: 0x%04X", statusWord));
                         
-                        if (authenticated) {
+                        if (statusWord == 0x9C06) { // Unauthorized - PIN required
+                            Log.d(TAG, "PIN authentication needed");
+                            
                             try {
-                                CompletableFuture<Integer> importFuture = satocashWallet.importProofsFromToken(pendingProofToken);
-                                int importedCount = importFuture.join();
-                                showStatusMessage("Success: Imported " + importedCount + " proofs", true);
-
-                                mainHandler.post(() -> {
-                                    if (nfcDialog != null && nfcDialog.isShowing()) {
-                                        nfcDialog.dismiss();
-                                    }
-                                    pendingProofToken = "";
-                                    proofTokenEditText.setText("");
-                                });
-                            } catch (Exception e) {
-                                showStatusMessage("Failure: " + e.getMessage(), false);
+                                // Close the connection properly before showing PIN dialog
+                                if (satocashClient != null) {
+                                    satocashClient.close();
+                                    Log.d(TAG, "NFC connection closed before PIN entry");
+                                    // Null out the client to avoid using a closed connection
+                                    final SatocashNfcClient closedClient = satocashClient;
+                                    satocashClient = null;
+                                }
+                            } catch (IOException ioe) {
+                                Log.e(TAG, "Error closing NFC connection before PIN entry: " + ioe.getMessage());
                             }
+                            
+                            // Get PIN and set up for rescan
+                            CompletableFuture<String> pinFuture = new CompletableFuture<>();
+                            mainHandler.post(() -> {
+                                if (nfcDialog != null && nfcDialog.isShowing()) {
+                                    nfcDialog.dismiss();
+                                }
+                                showPinDialog(pin -> {
+                                    pinFuture.complete(pin);
+                                });
+                            });
+                            
+                            String enteredPin = pinFuture.join();
+                            if (enteredPin != null) {
+                                // Save the PIN for the next scan
+                                savedPin = enteredPin;
+                                waitingForRescan = true;
+                                
+                                // Show dialog asking user to rescan the card
+                                mainHandler.post(() -> {
+                                    showRescanDialog();
+                                });
+                            } else {
+                                showStatusMessage("Operation cancelled", false);
+                            }
+                            return;
                         } else {
-                            showStatusMessage("Failure: PIN verification failed", false);
+                            showStatusMessage("Card error: " + satocashEx.getMessage(), false);
                         }
-
-                    } catch (RuntimeException e) {
-                        Throwable cause = e.getCause();
-                        if (cause instanceof SatocashNfcClient.SatocashException) {
-                            SatocashNfcClient.SatocashException satocashEx = (SatocashNfcClient.SatocashException) cause;
-                            showStatusMessage("Failure: " + satocashEx.getMessage(), false);
-                        } else {
-                            showStatusMessage("Failure: " + e.getMessage(), false);
-                        }
+                    } else {
+                        showStatusMessage("Error: " + e.getMessage(), false);
                     }
-                } else {
-                    showStatusMessage("Operation cancelled", false);
                 }
 
             } catch (IOException e) {
-                showStatusMessage("Failure: NFC communication error", false);
+                showStatusMessage("NFC Communication Error: " + e.getMessage(), false);
             } catch (SatocashNfcClient.SatocashException e) {
-                showStatusMessage("Failure: Card error - " + e.getMessage(), false);
+                showStatusMessage("Satocash Card Error: " + e.getMessage(), false);
             } catch (Exception e) {
-                showStatusMessage("Failure: " + e.getMessage(), false);
+                showStatusMessage("Error: " + e.getMessage(), false);
             } finally {
                 try {
-                    if (satocashClient != null) {
+                    // Only close if we haven't already closed and aren't in PIN flow
+                    if (satocashClient != null && !waitingForRescan) {
                         satocashClient.close();
+                        Log.d(TAG, "NFC connection closed in finally block.");
+                        satocashClient = null;
                     }
                 } catch (IOException e) {
                     Log.e(TAG, "Error closing NFC connection: " + e.getMessage());
                 }
+                
+                mainHandler.post(() -> {
+                    if (nfcDialog != null && nfcDialog.isShowing()) {
+                        nfcDialog.dismiss();
+                    }
+                });
+            }
+        }).start();
+    }
+    
+    private void processImportWithSavedPin(Tag tag) {
+        if (savedPin == null) {
+            Log.e(TAG, "No saved PIN available for import");
+            showStatusMessage("No saved PIN available", false);
+            return;
+        }
+
+        new Thread(() -> {
+            SatocashNfcClient tempClient = null;
+            try {
+                if (rescanDialog != null && rescanDialog.isShowing()) {
+                    mainHandler.post(() -> rescanDialog.dismiss());
+                }
+                
+                mainHandler.post(() -> {
+                    showProcessingDialog();
+                });
+                
+                tempClient = new SatocashNfcClient(tag);
+                tempClient.connect();
+                Log.d(TAG, "Connected to NFC card for PIN import");
+                
+                // Store in class variable AFTER successful connection
+                satocashClient = tempClient;
+                satocashWallet = new SatocashWallet(satocashClient);
+
+                satocashClient.selectApplet(SatocashNfcClient.SATOCASH_AID);
+                Log.d(TAG, "Satocash Applet found and selected!");
+
+                satocashClient.initSecureChannel();
+                Log.d(TAG, "Secure Channel Initialized!");
+
+                // Authenticate with saved PIN first
+                Log.d(TAG, "Authenticating with saved PIN...");
+                boolean authenticated = satocashWallet.authenticatePIN(savedPin).join();
+                
+                if (authenticated) {
+                    Log.d(TAG, "PIN Verified! Card Ready.");
+                    
+                    // Import proofs
+                    CompletableFuture<Integer> importFuture = satocashWallet.importProofsFromToken(pendingProofToken);
+                    int importedCount = importFuture.join();
+                    
+                    // Reset state variables
+                    waitingForRescan = false;
+                    savedPin = null;
+                    
+                    showStatusMessage("Success: Imported " + importedCount + " proofs", true);
+
+                    mainHandler.post(() -> {
+                        pendingProofToken = "";
+                        proofTokenEditText.setText("");
+                    });
+                } else {
+                    String message = "PIN Verification Failed";
+                    Log.e(TAG, message);
+                    // Reset state
+                    waitingForRescan = false;
+                    savedPin = null;
+                    showStatusMessage(message, false);
+                }
+            } catch (RuntimeException re) {
+                Throwable reCause = re.getCause();
+                if (reCause instanceof SatocashNfcClient.SatocashException) {
+                    SatocashNfcClient.SatocashException pinEx = (SatocashNfcClient.SatocashException) reCause;
+                    String message = String.format("PIN Verification Failed: %s (SW: 0x%04X)",
+                            pinEx.getMessage(), pinEx.getSw());
+                    Log.e(TAG, message);
+                    // Reset state
+                    waitingForRescan = false;
+                    savedPin = null;
+                    showStatusMessage(message, false);
+                } else {
+                    String message = "Authentication Failed: " + re.getMessage();
+                    Log.e(TAG, message);
+                    // Reset state
+                    waitingForRescan = false;
+                    savedPin = null;
+                    showStatusMessage(message, false);
+                }
+            } catch (Exception e) {
+                String message = "An unexpected error occurred: " + e.getMessage();
+                Log.e(TAG, message);
+                // Reset state
+                waitingForRescan = false;
+                savedPin = null;
+                showStatusMessage(message, false);
+            } finally {
+                try {
+                    if (satocashClient != null) {
+                        satocashClient.close();
+                        Log.d(TAG, "NFC connection closed.");
+                        satocashClient = null;
+                    }
+                } catch (IOException e) {
+                    Log.e(TAG, "Error closing NFC connection: " + e.getMessage());
+                }
+                
+                mainHandler.post(() -> {
+                    if (processingDialog != null && processingDialog.isShowing()) {
+                        processingDialog.dismiss();
+                    }
+                });
             }
         }).start();
     }
