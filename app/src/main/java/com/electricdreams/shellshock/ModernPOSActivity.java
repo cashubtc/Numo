@@ -33,7 +33,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import android.widget.ViewGroup;
+import android.view.ViewGroup;
 import android.widget.ProgressBar;
 
 import java.io.IOException;
