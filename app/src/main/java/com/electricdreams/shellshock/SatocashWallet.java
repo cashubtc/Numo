@@ -208,7 +208,7 @@ public class SatocashWallet {
                     Log.d(TAG, "Selected proof indices: " + selectedProofsIndices);
 
                     // Step 4. Extract proofs from card
-                    List<ProofInfo> exportedProofInfos = cardClient.exportProofs(selectedProofsIndices);
+                    List<SatocashNfcClient.ProofInfo> exportedProofInfos = cardClient.exportProofs(selectedProofsIndices);
                     
                     // From this point on. If we fail for any reason we try to send back the proofs to the card
                     try {
