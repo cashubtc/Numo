@@ -126,6 +126,8 @@ public class SatocashWallet {
                     }
                     Log.d(TAG, "Keyset indices to IDs map: " + keysetIndicesToIds);
 
+                    Map<String, Integer> keysetIdsToIndices = transposeMap(keysetIndicesToIds);
+
                     // Wait for Mint keysets and then map them to their fee
                     GetKeysetsResponse keysetsResponse = keysetsFuture.join();
                     List<String> fullKeysetsIds = keysetsResponse.keysets
@@ -206,71 +208,88 @@ public class SatocashWallet {
                     Log.d(TAG, "Selected proof indices: " + selectedProofsIndices);
 
                     // Step 4. Extract proofs from card
-                    List<Proof> exportedProofs = cardClient.exportProofs(selectedProofsIndices).stream().map((pf) -> {
-                        return new Proof(
-                                1L << pf.amountExponent,
-                                KeysetIdUtil.mapLongKeysetId(keysetIndicesToIds.get(pf.keysetIndex), fullKeysetsIds),
-                                new StringSecret(bytesToHex(pf.secret)),
-                                bytesToHex(pf.unblindedKey),
-                                Optional.empty(),
-                                Optional.empty()
-                        );
-                    }).collect(Collectors.toList());
-                    Log.d(TAG, "Exported proofs from card, size: " + exportedProofs.size());
-                    Log.d(TAG, "Exported proofs signatures: " + exportedProofs.stream().map((p) -> p.c).toList());
+                    List<SatocashNfcClient.ProofInfo> exportedProofInfos = cardClient.exportProofs(selectedProofsIndices);
+                    
+                    // From this point on. If we fail for any reason we try to send back the proofs to the card
+                    try {
+                        List<Proof> exportedProofs = exportedProofInfos.stream().map((pf) -> {
+                            return new Proof(
+                                    1L << pf.amountExponent,
+                                    KeysetIdUtil.mapLongKeysetId(keysetIndicesToIds.get(pf.keysetIndex), fullKeysetsIds),
+                                    new StringSecret(bytesToHex(pf.secret)),
+                                    bytesToHex(pf.unblindedKey),
+                                    Optional.empty(),
+                                    Optional.empty()
+                            );
+                        }).collect(Collectors.toList());
+                        Log.d(TAG, "Exported proofs from card, size: " + exportedProofs.size());
+                        Log.d(TAG, "Exported proofs signatures: " + exportedProofs.stream().map((p) -> p.c).toList());
 
-                    // Create output amounts
-                    Pair<List<Long>, List<Long>> outputAmounts = createOutputAmounts(amount, changeAmount);
+                        // Create output amounts
+                        Pair<List<Long>, List<Long>> outputAmounts = createOutputAmounts(amount, changeAmount);
 
-                    // Create swap outputs
-                    String selectedKeysetId = keysetsResponse.keysets
-                            .stream()
-                            .filter((k) -> k.active)
-                            .min(Comparator.comparing((k) -> k.inputFee))
-                            .map(k -> k.keysetId)
-                            .orElseThrow(() -> new RuntimeException("No active keyset found"));
-                    Log.d(TAG, "Selected keyset ID for new proofs: " + selectedKeysetId);
+                        // Create swap outputs
+                        String selectedKeysetId = keysetsResponse.keysets
+                                .stream()
+                                .filter((k) -> k.active)
+                                .min(Comparator.comparing((k) -> k.inputFee))
+                                .map(k -> k.keysetId)
+                                .orElseThrow(() -> new RuntimeException("No active keyset found"));
+                        Log.d(TAG, "Selected keyset ID for new proofs: " + selectedKeysetId);
 
-                    // Request the keys in the keyset
-                    CompletableFuture<GetKeysResponse> keysFuture = cashuHttpClient.getKeys(selectedKeysetId);
+                        // Request the keys in the keyset
+                        CompletableFuture<GetKeysResponse> keysFuture = cashuHttpClient.getKeys(selectedKeysetId);
 
-                    List<Pair<BlindedMessage, Pair<StringSecret, BigInteger>>> outputsAndSecretData = Stream.concat(outputAmounts.getFirst().stream(), outputAmounts.getSecond().stream())
-                            .map((output) -> {
-                                StringSecret secret = StringSecret.random();
-                                BigInteger blindingFactor = generateRandomScalar();
-                                BlindedMessage blindedMessage = new BlindedMessage(
-                                        output,
-                                        selectedKeysetId,
-                                        pointToHex(computeB_(messageToCurve(secret.getSecret()), blindingFactor), true),
-                                        Optional.empty()
-                                );
-                                return new Pair<>(blindedMessage, new Pair<>(secret, blindingFactor));
-                            })
-                            .collect(Collectors.toList());
+                        List<Pair<BlindedMessage, Pair<StringSecret, BigInteger>>> outputsAndSecretData = Stream.concat(outputAmounts.getFirst().stream(), outputAmounts.getSecond().stream())
+                                .map((output) -> {
+                                    StringSecret secret = StringSecret.random();
+                                    BigInteger blindingFactor = generateRandomScalar();
+                                    BlindedMessage blindedMessage = new BlindedMessage(
+                                            output,
+                                            selectedKeysetId,
+                                            pointToHex(computeB_(messageToCurve(secret.getSecret()), blindingFactor), true),
+                                            Optional.empty()
+                                    );
+                                    return new Pair<>(blindedMessage, new Pair<>(secret, blindingFactor));
+                                })
+                                .collect(Collectors.toList());
 
-                    // Create swap payload
-                    PostSwapRequest swapRequest = new PostSwapRequest();
-                    swapRequest.inputs = exportedProofs;
-                    swapRequest.outputs = outputsAndSecretData.stream().map(Pair::getFirst).collect(Collectors.toList());
+                        // Create swap payload
+                        PostSwapRequest swapRequest = new PostSwapRequest();
+                        swapRequest.inputs = exportedProofs;
+                        swapRequest.outputs = outputsAndSecretData.stream().map(Pair::getFirst).collect(Collectors.toList());
 
-                    Log.d(TAG, "Attempting to swap proofs");
+                        Log.d(TAG, "Attempting to swap proofs");
 
-                    PostSwapResponse response = cashuHttpClient.swap(swapRequest).join();
-                    GetKeysResponse keysResponse = keysFuture.join();
+                        PostSwapResponse response = cashuHttpClient.swap(swapRequest).join();
+                        GetKeysResponse keysResponse = keysFuture.join();
 
-                    Log.d(TAG, "Successfully swapped and received proofs");
+                        Log.d(TAG, "Successfully swapped and received proofs");
 
-                    List<Proof> allProofs = constructAndVerifyProofs(response, keysResponse.keysets.get(0), outputsAndSecretData);
+                        List<Proof> allProofs = constructAndVerifyProofs(response, keysResponse.keysets.get(0), outputsAndSecretData);
 
-                    Log.d(TAG, "Successfully constructed and verified proofs");
-                    List<Proof> changeProofs = allProofs.subList(0, outputAmounts.getFirst().size());
-                    List<Proof> receiveProofs = allProofs.subList(outputAmounts.getFirst().size(), allProofs.size());
+                        Log.d(TAG, "Successfully constructed and verified proofs");
+                        List<Proof> changeProofs = allProofs.subList(0, outputAmounts.getFirst().size());
+                        List<Proof> receiveProofs = allProofs.subList(outputAmounts.getFirst().size(), allProofs.size());
 
-                    // Import changeProofs to card
-                    Map<String, Integer> keysetIdsToIndices = transposeMap(keysetIndicesToIds);
-                    importProofs(changeProofs, mintUrl, unit, keysetIdsToIndices);
-                    notifySuccess();
-                    return new Token(receiveProofs, "sat", mintUrl).encode();
+                        // Import changeProofs to card
+                        importProofs(changeProofs, mintUrl, unit, keysetIdsToIndices);
+                        notifySuccess();
+                        return new Token(receiveProofs, "sat", mintUrl).encode();
+                    } catch (RuntimeException e) {
+                        Log.e(TAG, "Something went wrong. Re-importing extracted proofs to card.");
+                        List<Proof> proofInfos = exportedProofInfos.stream().map((pf) -> {
+                            return new Proof(
+                                    1L << pf.amountExponent,
+                                    keysetIndicesToIds.get(pf.keysetIndex),
+                                    new StringSecret(bytesToHex(pf.secret)),
+                                    bytesToHex(pf.unblindedKey),
+                                    Optional.empty(),
+                                    Optional.empty()
+                            );
+                        }).collect(Collectors.toList());
+                        importProofs(proofInfos, mintUrl, unit, keysetIdsToIndices);
+                    }
                 }
             } catch (SatocashNfcClient.SatocashException e) {
                 notifyError();
@@ -376,7 +395,7 @@ public class SatocashWallet {
 
             // Check the keyset is in the card, import otherwise
             if (!keysetIdsToIndices.containsKey(proof.keysetId)) {
-                int index = cardClient.importKeyset(proof.keysetId, mintIndex, SatocashNfcClient.Unit.valueOf(unit));
+                int index = cardClient.importKeyset(KeysetIdUtil.mapShortKeysetId(proof.keysetId), mintIndex, SatocashNfcClient.Unit.valueOf(unit));
                 keysetIdsToIndices.put(proof.keysetId, index);
             }
             cardClient.importProof(
