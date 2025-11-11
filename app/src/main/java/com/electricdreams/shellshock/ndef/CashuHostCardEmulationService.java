@@ -147,13 +147,13 @@ public class CashuHostCardEmulationService extends HostApduService {
                                         Log.e(TAG, "Payment callback is null, can't report redemption error");
                                     }
                                 } finally {
-                                    // Always reset the write mode to ensure service is ready for next interaction
-                                    Log.i(TAG, "Resetting write mode in finally block");
-                                    if (ndefProcessor != null) {
-                                        ndefProcessor.setWriteMode(false);
-                                    } else {
-                                        Log.e(TAG, "NDEF processor is null in finally block");
-                                    }
+                                    // DO NOT reset the write mode to ensure service can continue to read tokens
+                                    Log.i(TAG, "Maintaining write mode for continued token reception");
+                                    // if (ndefProcessor != null) {
+                                    //     ndefProcessor.setWriteMode(false);
+                                    // } else {
+                                    //     Log.e(TAG, "NDEF processor is null in finally block");
+                                    // }
                                 }
                             } else {
                                 Log.e(TAG, "Token failed validation, ignoring");
@@ -252,7 +252,7 @@ public class CashuHostCardEmulationService extends HostApduService {
         this.expectedAmount = amount;
         if (ndefProcessor != null) {
             ndefProcessor.setMessageToSend(paymentRequest);
-            ndefProcessor.setWriteMode(true);
+            ndefProcessor.setWriteMode(true); // Enable write mode to send payment request
         } else {
             Log.e(TAG, "NDEF processor is null, can't set payment request");
         }
@@ -273,7 +273,9 @@ public class CashuHostCardEmulationService extends HostApduService {
         Log.i(TAG, "Clearing payment request");
         this.expectedAmount = 0;
         if (ndefProcessor != null) {
-            ndefProcessor.setWriteMode(false);
+            ndefProcessor.setMessageToSend("");
+            // Keep write mode enabled to still be able to receive tokens
+            // ndefProcessor.setWriteMode(false);
         } else {
             Log.e(TAG, "NDEF processor is null, can't clear payment request");
         }

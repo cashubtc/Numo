@@ -88,7 +88,8 @@ public class NdefProcessor {
 
     /**
      * Set whether the processor is in write mode (NDEF tag emulation)
-     * Note: Even in write mode, the processor will still read incoming NDEF messages
+     * Note: The processor will always be able to receive NDEF messages, regardless of write mode
+     * When write mode is enabled, it will also send messages
      */
     public void setWriteMode(boolean enabled) {
         this.isInWriteMode = enabled;
@@ -102,7 +103,7 @@ public class NdefProcessor {
             Log.i(TAG, "Processor is now in write mode, ready to send message");
         }
         
-        // Always keep the ability to receive NDEF messages, regardless of write mode
+        // Always keep the ability to receive NDEF messages, regardless of write mode setting
         Log.i(TAG, "Processor will always accept incoming NDEF messages");
     }
 
@@ -184,7 +185,8 @@ public class NdefProcessor {
             Log.d(TAG, "CC File selected");
             return NDEF_RESPONSE_OK;
         } else if (Arrays.equals(fileId, NDEF_FILE_ID)) {
-            if (isInWriteMode && !messageToSend.isEmpty()) {
+            // Always prepare to send a message if one is set, regardless of write mode
+            if (!messageToSend.isEmpty()) {
                 Log.d(TAG, "NDEF File selected, using message: " + messageToSend);
                 selectedFile = createNdefMessage(messageToSend);
                 
@@ -193,7 +195,7 @@ public class NdefProcessor {
                     callback.onMessageSent();
                 }
             } else {
-                // Use empty message if we're not in write mode or no message is set
+                // Use empty message if no message is set
                 Log.d(TAG, "NDEF File selected, using empty message");
                 selectedFile = createNdefMessage("");
             }
