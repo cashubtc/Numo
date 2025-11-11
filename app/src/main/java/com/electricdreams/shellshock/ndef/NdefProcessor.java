@@ -88,6 +88,7 @@ public class NdefProcessor {
 
     /**
      * Set whether the processor is in write mode (NDEF tag emulation)
+     * Note: Even in write mode, the processor will still read incoming NDEF messages
      */
     public void setWriteMode(boolean enabled) {
         this.isInWriteMode = enabled;
@@ -100,6 +101,9 @@ public class NdefProcessor {
         } else {
             Log.i(TAG, "Processor is now in write mode, ready to send message");
         }
+        
+        // Always keep the ability to receive NDEF messages, regardless of write mode
+        Log.i(TAG, "Processor will always accept incoming NDEF messages");
     }
 
     /**
