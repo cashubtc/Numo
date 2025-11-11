@@ -12,6 +12,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -26,6 +27,7 @@ public class TokenHistoryActivity extends AppCompatActivity {
 
     private TokenHistoryAdapter adapter;
     private TextView emptyView;
+    private FloatingActionButton clearHistoryButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +58,10 @@ public class TokenHistoryActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        // Set up clear history button
+        clearHistoryButton = findViewById(R.id.clear_history_button);
+        clearHistoryButton.setOnClickListener(v -> showClearHistoryConfirmation());
+
         // Load and display history
         loadHistory();
     }
@@ -72,7 +78,31 @@ public class TokenHistoryActivity extends AppCompatActivity {
         adapter.setEntries(history);
         
         // Show/hide empty view
-        emptyView.setVisibility(history.isEmpty() ? View.VISIBLE : View.GONE);
+        boolean isEmpty = history.isEmpty();
+        emptyView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        
+        // Show/hide clear button based on if there are entries
+        clearHistoryButton.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+    }
+
+    private void showClearHistoryConfirmation() {
+        new AlertDialog.Builder(this)
+            .setTitle("Clear History")
+            .setMessage("Are you sure you want to clear all token history? This action cannot be undone.")
+            .setPositiveButton("Clear All", (dialog, which) -> clearAllHistory())
+            .setNegativeButton("Cancel", null)
+            .show();
+    }
+
+    private void clearAllHistory() {
+        // Clear history in shared preferences
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(KEY_HISTORY, "[]");
+        editor.apply();
+        
+        // Reload the view
+        loadHistory();
     }
 
     private void deleteTokenFromHistory(int position) {
