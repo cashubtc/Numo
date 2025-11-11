@@ -95,12 +95,12 @@ public class NdefProcessor {
         this.isInWriteMode = enabled;
         Log.i(TAG, "Write mode set to " + enabled);
         
-        if (!enabled) {
-            // Clear the message when disabling write mode
-            Log.i(TAG, "Clearing message as write mode is disabled");
-            this.messageToSend = "";
+        if (enabled) {
+            Log.i(TAG, "Processor is now in write mode, ready to send message: " + 
+                  (messageToSend.isEmpty() ? "<empty>" : messageToSend));
         } else {
-            Log.i(TAG, "Processor is now in write mode, ready to send message");
+            // Keep the message when disabling write mode, just don't send it
+            Log.i(TAG, "Processor is now in read-only mode, message preserved but not being sent");
         }
         
         // Always keep the ability to receive NDEF messages, regardless of write mode setting
@@ -148,7 +148,8 @@ public class NdefProcessor {
     public byte[] processCommandApdu(byte[] commandApdu) {
         // Check if NDEF AID is selected
         if (Arrays.equals(commandApdu, NDEF_SELECT_AID)) {
-            Log.d(TAG, "NDEF AID selected");
+            Log.d(TAG, "NDEF AID selected (write mode: " + isInWriteMode + 
+                  ", has message: " + !messageToSend.isEmpty() + ")");
             return NDEF_RESPONSE_OK;
         }
         
@@ -185,9 +186,9 @@ public class NdefProcessor {
             Log.d(TAG, "CC File selected");
             return NDEF_RESPONSE_OK;
         } else if (Arrays.equals(fileId, NDEF_FILE_ID)) {
-            // Always prepare to send a message if one is set, regardless of write mode
-            if (!messageToSend.isEmpty()) {
-                Log.d(TAG, "NDEF File selected, using message: " + messageToSend);
+            // Check if we should send a message (only if in write mode)
+            if (isInWriteMode && !messageToSend.isEmpty()) {
+                Log.d(TAG, "NDEF File selected, in write mode with message: " + messageToSend);
                 selectedFile = createNdefMessage(messageToSend);
                 
                 // Notify that the message is being sent
@@ -195,8 +196,9 @@ public class NdefProcessor {
                     callback.onMessageSent();
                 }
             } else {
-                // Use empty message if no message is set
-                Log.d(TAG, "NDEF File selected, using empty message");
+                // Only send empty message if write mode is disabled or no message is set
+                Log.d(TAG, "NDEF File selected, using empty message (write mode: " + isInWriteMode + 
+                      ", has message: " + !messageToSend.isEmpty() + ")");
                 selectedFile = createNdefMessage("");
             }
             return NDEF_RESPONSE_OK;
