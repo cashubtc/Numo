@@ -54,6 +54,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     private Button submitButton;
     private StringBuilder currentInput = new StringBuilder();
     private AlertDialog nfcDialog;
+    private AlertDialog paymentMethodDialog;
     private TextView tokenDisplay;
     private Button copyTokenButton;
     private Button openWithButton;
@@ -154,7 +155,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             String amount = currentInput.toString();
             if (!amount.isEmpty()) {
                 requestedAmount = Long.parseLong(amount);
-                showNfcDialog(requestedAmount);
+                showPaymentMethodDialog(requestedAmount);
             } else {
                 Toast.makeText(this, "Please enter an amount", Toast.LENGTH_SHORT).show();
             }
@@ -292,38 +293,119 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         }
     }
 
-    private void showNfcDialog(long amount) {
+    private void showPaymentMethodDialog(long amount) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_Shellshock);
         LayoutInflater inflater = this.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_nfc_modern, null);
+        View dialogView = inflater.inflate(R.layout.dialog_payment_method_choice, null);
+        
+        // If the layout doesn't exist, create it programmatically
+        if (dialogView == null) {
+            dialogView = new LinearLayout(this);
+            ((LinearLayout)dialogView).setOrientation(LinearLayout.VERTICAL);
+            
+            // Title
+            TextView title = new TextView(this);
+            title.setText("Choose Payment Method");
+            title.setTextSize(18);
+            title.setPadding(0, 20, 0, 20);
+            title.setGravity(android.view.Gravity.CENTER);
+            ((LinearLayout)dialogView).addView(title);
+            
+            // Amount
+            TextView amountText = new TextView(this);
+            amountText.setText(formatAmount(String.valueOf(amount)));
+            amountText.setTextSize(24);
+            amountText.setPadding(0, 10, 0, 30);
+            amountText.setGravity(android.view.Gravity.CENTER);
+            ((LinearLayout)dialogView).addView(amountText);
+            
+            // Smartcard button
+            Button smartcardButton = new Button(this);
+            smartcardButton.setText("Smartcard Payment");
+            smartcardButton.setPadding(20, 20, 20, 20);
+            LinearLayout.LayoutParams smartcardParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            smartcardParams.setMargins(30, 10, 30, 10);
+            smartcardButton.setLayoutParams(smartcardParams);
+            smartcardButton.setOnClickListener(v -> {
+                proceedWithSmartcardPayment(amount);
+                if (paymentMethodDialog != null) paymentMethodDialog.dismiss();
+            });
+            ((LinearLayout)dialogView).addView(smartcardButton);
+            
+            // NDEF button
+            Button ndefButton = new Button(this);
+            ndefButton.setText("NDEF Payment");
+            ndefButton.setPadding(20, 20, 20, 20);
+            LinearLayout.LayoutParams ndefParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            ndefParams.setMargins(30, 10, 30, 10);
+            ndefButton.setLayoutParams(ndefParams);
+            ndefButton.setOnClickListener(v -> {
+                proceedWithNdefPayment(amount);
+                if (paymentMethodDialog != null) paymentMethodDialog.dismiss();
+            });
+            ((LinearLayout)dialogView).addView(ndefButton);
+            
+            // Cancel button
+            Button cancelButton = new Button(this);
+            cancelButton.setText("Cancel");
+            cancelButton.setPadding(20, 20, 20, 20);
+            LinearLayout.LayoutParams cancelParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            cancelParams.setMargins(30, 20, 30, 10);
+            cancelButton.setLayoutParams(cancelParams);
+            cancelButton.setOnClickListener(v -> {
+                if (paymentMethodDialog != null) paymentMethodDialog.dismiss();
+            });
+            ((LinearLayout)dialogView).addView(cancelButton);
+            
+            int padding = (int)(20 * getResources().getDisplayMetrics().density);
+            ((LinearLayout)dialogView).setPadding(padding, padding, padding, padding);
+        } else {
+            // Use existing layout if available
+            TextView amountDisplay = dialogView.findViewById(R.id.amount_display);
+            Button smartcardButton = dialogView.findViewById(R.id.btn_smartcard_payment);
+            Button ndefButton = dialogView.findViewById(R.id.btn_ndef_payment);
+            Button cancelButton = dialogView.findViewById(R.id.btn_cancel);
+            
+            // Set amount
+            if (amountDisplay != null) {
+                amountDisplay.setText(formatAmount(String.valueOf(amount)));
+            }
+            
+            // Set up button listeners
+            if (smartcardButton != null) {
+                smartcardButton.setOnClickListener(v -> {
+                    proceedWithSmartcardPayment(amount);
+                    if (paymentMethodDialog != null) paymentMethodDialog.dismiss();
+                });
+            }
+            
+            if (ndefButton != null) {
+                ndefButton.setOnClickListener(v -> {
+                    proceedWithNdefPayment(amount);
+                    if (paymentMethodDialog != null) paymentMethodDialog.dismiss();
+                });
+            }
+            
+            if (cancelButton != null) {
+                cancelButton.setOnClickListener(v -> {
+                    if (paymentMethodDialog != null) paymentMethodDialog.dismiss();
+                });
+            }
+        }
+        
         builder.setView(dialogView);
-
-        TextView nfcAmountDisplay = dialogView.findViewById(R.id.nfc_amount_display);
-        nfcAmountDisplay.setText(formatAmount(String.valueOf(amount)));
-
-        // Add payment method selection buttons
-        Button smartcardButton = dialogView.findViewById(R.id.btn_smartcard_payment);
-        Button ndefButton = dialogView.findViewById(R.id.btn_ndef_payment);
-        
-        // Make buttons visible
-        smartcardButton.setVisibility(View.VISIBLE);
-        ndefButton.setVisibility(View.VISIBLE);
-        
-        smartcardButton.setOnClickListener(v -> {
-            // Proceed with the original smartcard payment flow
-            proceedWithSmartcardPayment(amount);
-            nfcDialog.dismiss();
-        });
-        
-        ndefButton.setOnClickListener(v -> {
-            // Proceed with NDEF payment flow
-            proceedWithNdefPayment(amount);
-            nfcDialog.dismiss();
-        });
-
         builder.setCancelable(true);
-        nfcDialog = builder.create();
-        nfcDialog.show();
+        paymentMethodDialog = builder.create();
+        paymentMethodDialog.show();
     }
     
     private void proceedWithSmartcardPayment(long amount) {
@@ -431,12 +513,10 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         // Handle cancel button
         cancelButton.setOnClickListener(v -> {
             Log.i(TAG, "NDEF payment canceled by user");
-            CashuHostCardEmulationService service = CashuHostCardEmulationService.getInstance();
-            if (service != null) {
-                service.clearPaymentRequest();
-                service.setPaymentCallback(null);
-            }
+            // Stop the HCE service properly
+            stopHceService();
             ndefDialog.dismiss();
+            Toast.makeText(this, "Payment canceled", Toast.LENGTH_SHORT).show();
         });
     }
     
@@ -457,15 +537,9 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                                 dialog.dismiss();
                             }
                             
-                            // Clear the payment request
-                            service.clearPaymentRequest();
-                            service.setPaymentCallback(null);
-                            
-                            // Set the received token
+                            // Set the received token and handle the success
+                            // This will automatically call stopHceService()
                             handlePaymentSuccess(token);
-                            
-                            // Save to history
-                            TokenHistoryActivity.addToHistory(ModernPOSActivity.this, token, amount);
                         } catch (Exception e) {
                             Log.e(TAG, "Error in payment callback: " + e.getMessage(), e);
                             handlePaymentError("Error processing payment: " + e.getMessage());
@@ -483,11 +557,8 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                             dialog.dismiss();
                         }
                         
-                        // Clean up resources
-                        service.clearPaymentRequest();
-                        service.setPaymentCallback(null);
-                        
                         // Handle the payment error
+                        // This will automatically call stopHceService()
                         handlePaymentError("Payment failed: " + errorMessage);
                     });
                 }
@@ -622,6 +693,13 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         if (nfcAdapter != null) {
             nfcAdapter.disableForegroundDispatch(this);
         }
+    }
+    
+    @Override
+    protected void onDestroy() {
+        // Make sure to stop the HCE service when the activity is destroyed
+        stopHceService();
+        super.onDestroy();
     }
 
     @Override
@@ -779,16 +857,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         currentInput.setLength(0);
 
         // Ensure HCE service is cleaned up on error
-        try {
-            CashuHostCardEmulationService hceService = CashuHostCardEmulationService.getInstance();
-            if (hceService != null) {
-                hceService.clearPaymentRequest();
-                hceService.setPaymentCallback(null);
-                Log.d(TAG, "HCE service cleaned up after payment error");
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error cleaning up HCE service: " + e.getMessage(), e);
-        }
+        stopHceService();
 
         mainHandler.post(() -> {
             if (nfcDialog != null && nfcDialog.isShowing()) {
@@ -800,11 +869,38 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             if (processingDialog != null && processingDialog.isShowing()) {
                 processingDialog.dismiss();
             }
+            if (paymentMethodDialog != null && paymentMethodDialog.isShowing()) {
+                paymentMethodDialog.dismiss();
+            }
             switchToTokenMode();
             tokenDisplay.setText("Error: " + message);
             copyTokenButton.setVisibility(View.GONE);
             openWithButton.setVisibility(View.GONE);
         });
+    }
+    
+    /**
+     * Properly stop and cleanup the HCE service
+     */
+    private void stopHceService() {
+        try {
+            CashuHostCardEmulationService hceService = CashuHostCardEmulationService.getInstance();
+            if (hceService != null) {
+                Log.d(TAG, "Stopping HCE service...");
+                // Clear any pending payment request
+                hceService.clearPaymentRequest();
+                // Remove payment callback
+                hceService.setPaymentCallback(null);
+                // Stop the service explicitly
+                Intent serviceIntent = new Intent(this, CashuHostCardEmulationService.class);
+                stopService(serviceIntent);
+                Log.d(TAG, "HCE service stopped successfully");
+            } else {
+                Log.d(TAG, "No active HCE service to stop");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error stopping HCE service: " + e.getMessage(), e);
+        }
     }
 
     private void handlePaymentSuccess(String token) {
@@ -813,6 +909,9 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         currentInput.setLength(0);
 
         Log.d(TAG, "Payment successful! Token: " + token);
+
+        // Ensure HCE service is cleaned up on success
+        stopHceService();
 
         TokenHistoryActivity.addToHistory(this, token, amount);
 
@@ -825,6 +924,9 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             }
             if (processingDialog != null && processingDialog.isShowing()) {
                 processingDialog.dismiss();
+            }
+            if (paymentMethodDialog != null && paymentMethodDialog.isShowing()) {
+                paymentMethodDialog.dismiss();
             }
             switchToTokenMode();
             tokenDisplay.setText(token);
