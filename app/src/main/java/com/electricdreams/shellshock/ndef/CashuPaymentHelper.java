@@ -282,7 +282,7 @@ public class CashuPaymentHelper {
 
             // Create swap payload
             PostSwapRequest swapRequest = new PostSwapRequest();
-            swapRequest.inputs = receiveProofs;
+            swapRequest.inputs = receiveProofs.stream().map(p -> new Proof(p.amount, p.keysetId, p.secret, p.c, Optional.empty(), Optional.empty())).collect(Collectors.toList());
             swapRequest.outputs = outputData.stream().map(bm -> bm.blindedMessage).collect(Collectors.toList());
 
             Log.d(TAG, "Attempting to swap proofs");
