@@ -427,28 +427,52 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     
     private void setupNdefPayment(CashuHostCardEmulationService service, String paymentRequest, 
                                   TextView statusText, AlertDialog dialog, long amount) {
-        // Set the payment request to the HCE service with expected amount
-        service.setPaymentRequest(paymentRequest, amount);
-        
-        // Set up callback for when a token is received
-        service.setPaymentCallback(token -> {
-            runOnUiThread(() -> {
-                // Dismiss the dialog
-                dialog.dismiss();
-                
-                // Clear the payment request
-                service.clearPaymentRequest();
-                
-                // Set the received token
-                handlePaymentSuccess(token);
-                
-                // Save to history
-                TokenHistoryActivity.addToHistory(this, token, amount);
+        try {
+            // Set the payment request to the HCE service with expected amount
+            service.setPaymentRequest(paymentRequest, amount);
+            
+            // Set up callback for when a token is received
+            service.setPaymentCallback(token -> {
+                runOnUiThread(() -> {
+                    try {
+                        // Dismiss the dialog
+                        if (dialog != null && dialog.isShowing()) {
+                            dialog.dismiss();
+                        }
+                        
+                        // Clear the payment request
+                        service.clearPaymentRequest();
+                        service.setPaymentCallback(null);
+                        
+                        // Set the received token
+                        handlePaymentSuccess(token);
+                        
+                        // Save to history
+                        TokenHistoryActivity.addToHistory(this, token, amount);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error in payment callback: " + e.getMessage(), e);
+                        handlePaymentError("Error processing payment: " + e.getMessage());
+                    }
+                });
             });
-        });
-        
-        // Update status text
-        statusText.setText("Waiting for payment...\n\nHold your phone against the paying device");
+            
+            // Update status text
+            statusText.setText("Waiting for payment...\n\nHold your phone against the paying device");
+        } catch (Exception e) {
+            Log.e(TAG, "Error setting up NDEF payment: " + e.getMessage(), e);
+            
+            // Clean up if there's an error
+            if (service != null) {
+                service.clearPaymentRequest();
+                service.setPaymentCallback(null);
+            }
+            
+            // Show error to user
+            if (dialog != null && dialog.isShowing()) {
+                dialog.dismiss();
+            }
+            handlePaymentError("Error setting up NDEF payment: " + e.getMessage());
+        }
     }
 
     private void showRescanDialog() {
@@ -716,6 +740,18 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     private void handlePaymentError(String message) {
         requestedAmount = 0;
         currentInput.setLength(0);
+
+        // Ensure HCE service is cleaned up on error
+        try {
+            CashuHostCardEmulationService hceService = CashuHostCardEmulationService.getInstance();
+            if (hceService != null) {
+                hceService.clearPaymentRequest();
+                hceService.setPaymentCallback(null);
+                Log.d(TAG, "HCE service cleaned up after payment error");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error cleaning up HCE service: " + e.getMessage(), e);
+        }
 
         mainHandler.post(() -> {
             if (nfcDialog != null && nfcDialog.isShowing()) {

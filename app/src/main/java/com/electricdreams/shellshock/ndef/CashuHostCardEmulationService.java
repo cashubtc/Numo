@@ -81,25 +81,42 @@ public class CashuHostCardEmulationService extends HostApduService {
                         if (isValid) {
                             Log.d(TAG, "Token passed validation");
                             
-                            // Try to redeem the token
-                            String redeemedToken = CashuPaymentHelper.redeemToken(message);
-                            if (redeemedToken != null) {
-                                Log.d(TAG, "Token successfully redeemed and reissued");
+                            try {
+                                // Try to redeem the token
+                                String redeemedToken = CashuPaymentHelper.redeemToken(message);
                                 
-                                // Notify the callback with the redeemed token
-                                if (paymentCallback != null) {
-                                    paymentCallback.onCashuTokenReceived(redeemedToken);
+                                if (redeemedToken != null) {
+                                    Log.d(TAG, "Token successfully redeemed and reissued");
+                                    
+                                    // Notify the callback with the redeemed token
+                                    if (paymentCallback != null) {
+                                        paymentCallback.onCashuTokenReceived(redeemedToken);
+                                    } else {
+                                        Log.e(TAG, "Payment callback is null, can't deliver redeemed token");
+                                    }
                                 } else {
-                                    Log.e(TAG, "Payment callback is null, can't deliver redeemed token");
+                                    Log.e(TAG, "Failed to redeem token, redemption returned null");
+                                    // If redemption fails but doesn't throw an exception, still send original token
+                                    if (paymentCallback != null) {
+                                        Log.w(TAG, "Sending original token as fallback after redemption failure");
+                                        paymentCallback.onCashuTokenReceived(message);
+                                    }
                                 }
-                            } else {
-                                Log.e(TAG, "Failed to redeem token");
-                                // Notify of failure
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error during token redemption: " + e.getMessage(), e);
+                                // Reset service state on error
+                                clearPaymentRequest();
+                                
+                                // Notify callback of error if available
                                 if (paymentCallback != null) {
-                                    // Still send the original token if redemption fails
-                                    // This allows the app to handle the failure gracefully
-                                    Log.w(TAG, "Sending original token despite redemption failure");
+                                    // Send original token if redemption fails with exception
+                                    Log.w(TAG, "Sending original token after redemption exception");
                                     paymentCallback.onCashuTokenReceived(message);
+                                }
+                            } finally {
+                                // Always reset the write mode to ensure service is ready for next interaction
+                                if (ndefProcessor != null) {
+                                    ndefProcessor.setWriteMode(false);
                                 }
                             }
                         } else {
