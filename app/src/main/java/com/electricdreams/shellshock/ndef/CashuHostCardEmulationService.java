@@ -1,6 +1,8 @@
-package com.electricdreams.shellshock.nfc;
+package com.electricdreams.shellshock.ndef;
 
 import android.nfc.cardemulation.HostApduService;
+import com.electricdreams.shellshock.ndef.CashuPaymentHelper;
+import com.electricdreams.shellshock.ndef.NdefProcessor;
 import android.os.Bundle;
 import android.util.Log;
 

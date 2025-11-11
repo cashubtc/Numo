@@ -170,7 +170,11 @@ public class CashuPaymentHelper {
             Log.d(TAG, "Selected keyset ID for new proofs: " + selectedKeysetId);
 
             
-            List<OutputData> outputData = OutputHelper.createOutputs(createOutputAmounts(tokenAmount - fee), selectedKeysetId);
+            // Create KeysetId object
+            com.cashujdk.nut01.KeysetId keysetId = new com.cashujdk.nut01.KeysetId();
+            keysetId.set_id(selectedKeysetId);
+            
+            List<OutputData> outputData = OutputHelper.createOutputs(createOutputAmounts(tokenAmount - fee), keysetId);
 
             // Request the keys in the keyset
             CompletableFuture<GetKeysResponse> keysFuture = cashuHttpClient.getKeys(selectedKeysetId);
@@ -220,7 +224,10 @@ public class CashuPaymentHelper {
 
     private static List<Proof> constructAndVerifyProofs(PostSwapResponse response, KeysetItemResponse keyset, List<OutputData> outputsAndSecretData) {
         List<BigInteger> blindingFactors = outputsAndSecretData.stream().map((output) -> new BigInteger(1, output.blindingFactor)).toList();
-        List<StringSecret> secrets = outputsAndSecretData.stream().map((output) -> output.secret).toList();
+        @SuppressWarnings("unchecked")
+        List<StringSecret> secrets = outputsAndSecretData.stream()
+            .map((output) -> (StringSecret) output.secret)
+            .collect(Collectors.toList());
 
         List<Proof> result = new ArrayList<>();
         for (int i = 0; i < response.signatures.size(); ++i) {
