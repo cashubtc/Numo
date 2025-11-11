@@ -4,6 +4,8 @@ import android.nfc.cardemulation.HostApduService;
 import com.electricdreams.shellshock.ndef.CashuPaymentHelper;
 import com.electricdreams.shellshock.ndef.NdefProcessor;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.content.Intent;
 import android.util.Log;
 
 /**
@@ -39,103 +41,127 @@ public class CashuHostCardEmulationService extends HostApduService {
      */
     public interface CashuPaymentCallback {
         void onCashuTokenReceived(String token);
+        void onCashuPaymentError(String errorMessage);
     }
     
     /**
      * Get the singleton instance
      */
     public static CashuHostCardEmulationService getInstance() {
-        Log.d(TAG, "getInstance called, instance: " + (instance != null ? "available" : "null"));
+        Log.i(TAG, "getInstance called, instance: " + (instance != null ? "available" : "null"));
         return instance;
     }
     
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "CashuHostCardEmulationService created");
+        Log.i(TAG, "=== CashuHostCardEmulationService created ===");
         
         try {
             // Create the NDEF processor
             ndefProcessor = new NdefProcessor(new NdefProcessor.NdefMessageCallback() {
                 @Override
                 public void onNdefMessageReceived(String message) {
-                    Log.d(TAG, "Received NDEF message: " + message);
-                    
-                    // Check if it's a Cashu token
-                    if (CashuPaymentHelper.isCashuToken(message)) {
-                        Log.d(TAG, "Received potential Cashu token, validating...");
+                    try {
+                        // Log all NDEF messages at the INFO level to ensure visibility
+                        Log.i(TAG, "========== RECEIVED NDEF MESSAGE ==========");
+                        Log.i(TAG, "Message content: " + message);
                         
-                        // Validate the token against expected amount
-                        boolean isValid = false;
-                        if (expectedAmount > 0) {
-                            isValid = CashuPaymentHelper.validateToken(message, expectedAmount);
-                            if (!isValid) {
-                                Log.e(TAG, "Token validation failed for amount: " + expectedAmount);
-                            }
-                        } else {
-                            // If no expected amount, just do basic validation
-                            Log.w(TAG, "No expected amount set for validation, performing basic check only");
-                            isValid = true;
-                        }
-                        
-                        if (isValid) {
-                            Log.d(TAG, "Token passed validation");
+                        // Check if it's a Cashu token
+                        if (CashuPaymentHelper.isCashuToken(message)) {
+                            Log.i(TAG, "Received potential Cashu token, validating...");
                             
-                            try {
-                                // Try to redeem the token
-                                String redeemedToken = CashuPaymentHelper.redeemToken(message);
+                            // Validate the token against expected amount
+                            boolean isValid = false;
+                            if (expectedAmount > 0) {
+                                isValid = CashuPaymentHelper.validateToken(message, expectedAmount);
+                                if (!isValid) {
+                                    String errorMsg = "Token validation failed for amount: " + expectedAmount;
+                                    Log.e(TAG, errorMsg);
+                                    
+                                    // Clear payment request on validation failure
+                                    clearPaymentRequest();
+                                    
+                                    // Notify callback of validation error
+                                    if (paymentCallback != null) {
+                                        paymentCallback.onCashuPaymentError(errorMsg);
+                                    }
+                                    return;
+                                }
+                                Log.i(TAG, "Token passed amount validation for " + expectedAmount + " sats");
+                            } else {
+                                // If no expected amount, just do basic validation
+                                Log.w(TAG, "No expected amount set for validation, performing basic check only");
+                                isValid = true;
+                            }
+                            
+                            if (isValid) {
+                                Log.i(TAG, "Token passed validation, attempting redemption...");
                                 
-                                if (redeemedToken != null) {
-                                    Log.d(TAG, "Token successfully redeemed and reissued");
+                                try {
+                                    // Try to redeem the token - this will throw an exception if redemption fails
+                                    String redeemedToken = CashuPaymentHelper.redeemToken(message);
+                                    Log.i(TAG, "Token successfully redeemed and reissued");
                                     
                                     // Notify the callback with the redeemed token
                                     if (paymentCallback != null) {
+                                        Log.i(TAG, "Calling payment callback with redeemed token");
                                         paymentCallback.onCashuTokenReceived(redeemedToken);
                                     } else {
                                         Log.e(TAG, "Payment callback is null, can't deliver redeemed token");
                                     }
-                                } else {
-                                    Log.e(TAG, "Failed to redeem token, redemption returned null");
-                                    // If redemption fails but doesn't throw an exception, still send original token
+                                } catch (CashuPaymentHelper.RedemptionException e) {
+                                    // This is a specific redemption failure
+                                    String errorMsg = "Token redemption failed: " + e.getMessage();
+                                    Log.e(TAG, errorMsg, e);
+                                    
+                                    // Reset service state on error
+                                    clearPaymentRequest();
+                                    
+                                    // Notify callback of error
                                     if (paymentCallback != null) {
-                                        Log.w(TAG, "Sending original token as fallback after redemption failure");
-                                        paymentCallback.onCashuTokenReceived(message);
+                                        Log.i(TAG, "Calling payment error callback");
+                                        paymentCallback.onCashuPaymentError(errorMsg);
+                                    }
+                                } catch (Exception e) {
+                                    // This is an unexpected error
+                                    String errorMsg = "Unexpected error during token redemption: " + e.getMessage();
+                                    Log.e(TAG, errorMsg, e);
+                                    
+                                    // Reset service state on error
+                                    clearPaymentRequest();
+                                    
+                                    // Notify callback of error
+                                    if (paymentCallback != null) {
+                                        Log.i(TAG, "Calling payment error callback");
+                                        paymentCallback.onCashuPaymentError(errorMsg);
+                                    }
+                                } finally {
+                                    // Always reset the write mode to ensure service is ready for next interaction
+                                    if (ndefProcessor != null) {
+                                        ndefProcessor.setWriteMode(false);
                                     }
                                 }
-                            } catch (Exception e) {
-                                Log.e(TAG, "Error during token redemption: " + e.getMessage(), e);
-                                // Reset service state on error
-                                clearPaymentRequest();
-                                
-                                // Notify callback of error if available
-                                if (paymentCallback != null) {
-                                    // Send original token if redemption fails with exception
-                                    Log.w(TAG, "Sending original token after redemption exception");
-                                    paymentCallback.onCashuTokenReceived(message);
-                                }
-                            } finally {
-                                // Always reset the write mode to ensure service is ready for next interaction
-                                if (ndefProcessor != null) {
-                                    ndefProcessor.setWriteMode(false);
-                                }
+                            } else {
+                                Log.e(TAG, "Token failed validation, ignoring");
                             }
                         } else {
-                            Log.e(TAG, "Token failed validation, ignoring");
+                            Log.i(TAG, "Received message is not a Cashu token: " + message);
                         }
-                    } else {
-                        Log.d(TAG, "Received message is not a Cashu token: " + message);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error in onNdefMessageReceived: " + e.getMessage(), e);
                     }
                 }
                 
                 @Override
                 public void onMessageSent() {
-                    Log.d(TAG, "NDEF message sent");
+                    Log.i(TAG, "NDEF message sent to peer device");
                 }
             });
             
             // Set the instance
             instance = this;
-            Log.d(TAG, "CashuHostCardEmulationService initialization complete");
+            Log.i(TAG, "CashuHostCardEmulationService initialization complete");
         } catch (Exception e) {
             Log.e(TAG, "Error creating HCE service: " + e.getMessage(), e);
         }
@@ -143,8 +169,9 @@ public class CashuHostCardEmulationService extends HostApduService {
     
     @Override
     public void onDestroy() {
+        Log.i(TAG, "=== HCE Service onDestroy called ===");
         super.onDestroy();
-        Log.d(TAG, "CashuHostCardEmulationService destroyed");
+        Log.i(TAG, "CashuHostCardEmulationService destroyed");
         
         // Clear the instance if this is the current one
         if (instance == this) {
@@ -154,24 +181,42 @@ public class CashuHostCardEmulationService extends HostApduService {
 
     @Override
     public byte[] processCommandApdu(byte[] commandApdu, Bundle extras) {
-        Log.d(TAG, "Received APDU: " + bytesToHex(commandApdu));
-        
         try {
+            // Log all incoming APDUs at INFO level for visibility
+            Log.i(TAG, "=== Received APDU command ===");
+            Log.i(TAG, "Hex: " + bytesToHex(commandApdu));
+            if (commandApdu.length > 0) {
+                String description = "";
+                if (commandApdu.length >= 2) {
+                    byte ins = commandApdu[1];
+                    switch (ins) {
+                        case (byte)0xA4: description = "SELECT"; break;
+                        case (byte)0xB0: description = "READ BINARY"; break;
+                        case (byte)0xD6: description = "UPDATE BINARY"; break;
+                        default: description = "UNKNOWN";
+                    }
+                }
+                Log.i(TAG, "Command: " + description);
+            }
+            
             // Try to process with the NDEF processor
+            Log.i(TAG, "Delegating to NDEF processor");
             byte[] response = ndefProcessor.processCommandApdu(commandApdu);
             
             if (response != NdefProcessor.NDEF_RESPONSE_ERROR) {
+                Log.i(TAG, "NDEF processor handled command successfully");
+                Log.i(TAG, "Response: " + bytesToHex(response));
                 return response;
             }
             
             // If not handled by the NDEF processor, try other commands
             if (isAidSelectCommand(commandApdu)) {
-                Log.d(TAG, "AID select command received");
+                Log.i(TAG, "AID select command received and handled");
                 return STATUS_SUCCESS;
             }
             
             // Unknown command
-            Log.d(TAG, "Unknown command: " + bytesToHex(commandApdu));
+            Log.w(TAG, "Unknown command not handled by NDEF processor: " + bytesToHex(commandApdu));
             return STATUS_FAILED;
         } catch (Exception e) {
             Log.e(TAG, "Error processing APDU command: " + e.getMessage(), e);
@@ -181,7 +226,7 @@ public class CashuHostCardEmulationService extends HostApduService {
 
     @Override
     public void onDeactivated(int reason) {
-        Log.d(TAG, "Deactivated: " + reason);
+        Log.i(TAG, "=== HCE Service deactivated with reason: " + reason + " ===");
     }
     
     /**
@@ -190,7 +235,7 @@ public class CashuHostCardEmulationService extends HostApduService {
      * @param amount The expected amount in sats
      */
     public void setPaymentRequest(String paymentRequest, long amount) {
-        Log.d(TAG, "Setting payment request: " + paymentRequest + " for amount: " + amount);
+        Log.i(TAG, "Setting payment request: " + paymentRequest + " for amount: " + amount);
         this.expectedAmount = amount;
         if (ndefProcessor != null) {
             ndefProcessor.setMessageToSend(paymentRequest);
@@ -212,7 +257,7 @@ public class CashuHostCardEmulationService extends HostApduService {
      * Clear the payment request
      */
     public void clearPaymentRequest() {
-        Log.d(TAG, "Clearing payment request");
+        Log.i(TAG, "Clearing payment request");
         this.expectedAmount = 0;
         if (ndefProcessor != null) {
             ndefProcessor.setWriteMode(false);
@@ -226,7 +271,7 @@ public class CashuHostCardEmulationService extends HostApduService {
      */
     public void setPaymentCallback(CashuPaymentCallback callback) {
         this.paymentCallback = callback;
-        Log.d(TAG, "Payment callback set: " + (callback != null ? "yes" : "no"));
+        Log.i(TAG, "Payment callback set: " + (callback != null ? "yes" : "no"));
     }
     
     /**
@@ -267,25 +312,62 @@ public class CashuHostCardEmulationService extends HostApduService {
             android.nfc.NfcAdapter adapter = manager.getDefaultAdapter();
             
             if (adapter == null) {
-                Log.d(TAG, "NFC is not supported on this device");
+                Log.i(TAG, "NFC is not supported on this device");
                 return false;
             }
             
             if (!adapter.isEnabled()) {
-                Log.d(TAG, "NFC is disabled on this device");
+                Log.i(TAG, "NFC is disabled on this device");
                 return false;
             }
             
             if (!context.getPackageManager().hasSystemFeature(android.content.pm.PackageManager.FEATURE_NFC_HOST_CARD_EMULATION)) {
-                Log.d(TAG, "HCE is not supported on this device");
+                Log.i(TAG, "HCE is not supported on this device");
                 return false;
             }
             
-            Log.d(TAG, "HCE is available on this device");
+            Log.i(TAG, "HCE is available on this device");
             return true;
         } catch (Exception e) {
             Log.e(TAG, "Error checking HCE availability: " + e.getMessage(), e);
             return false;
         }
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i(TAG, "=== HCE Service onStartCommand called ===");
+        Log.i(TAG, "Intent: " + (intent != null ? intent.toString() : "null"));
+        Log.i(TAG, "Flags: " + flags);
+        Log.i(TAG, "StartId: " + startId);
+        
+        return START_STICKY;
+    }
+
+    /**
+     * Log bind events (using a wrapped method since onBind is final)
+     */
+    public void logBindEvent(Intent intent) {
+        Log.i(TAG, "=== HCE Service bind event ===");
+        Log.i(TAG, "Intent: " + (intent != null ? intent.toString() : "null"));
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        Log.i(TAG, "=== HCE Service onTrimMemory called with level: " + level);
+        super.onTrimMemory(level);
+    }
+
+    @Override
+    public void onLowMemory() {
+        Log.i(TAG, "=== HCE Service onLowMemory called ===");
+        super.onLowMemory();
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        Log.i(TAG, "=== HCE Service onTaskRemoved called ===");
+        Log.i(TAG, "Root Intent: " + (rootIntent != null ? rootIntent.toString() : "null"));
+        super.onTaskRemoved(rootIntent);
     }
 }

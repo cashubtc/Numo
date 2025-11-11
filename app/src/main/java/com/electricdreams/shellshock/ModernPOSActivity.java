@@ -355,6 +355,8 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             return;
         }
         
+        Log.i(TAG, "Starting NDEF payment flow for " + amount + " sats");
+        
         // Create the payment request
         String paymentRequest = CashuPaymentHelper.createPaymentRequest(
                 amount, 
@@ -362,9 +364,12 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         );
         
         if (paymentRequest == null) {
+            Log.e(TAG, "Failed to create payment request");
             Toast.makeText(this, "Failed to create payment request", Toast.LENGTH_SHORT).show();
             return;
         }
+        
+        Log.i(TAG, "Created payment request: " + paymentRequest);
         
         // Show NDEF payment dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_Shellshock);
@@ -387,6 +392,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         
         // Start or use the HCE service
         statusText.setText("Initializing Host Card Emulation...");
+        Log.i(TAG, "Starting HCE service");
         
         // Force start the HCE service
         Intent serviceIntent = new Intent(this, CashuHostCardEmulationService.class);
@@ -395,20 +401,28 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         // Wait a bit then check for the service
         new Handler().postDelayed(() -> {
             CashuHostCardEmulationService hceService = CashuHostCardEmulationService.getInstance();
-            Log.d(TAG, "HCE service instance: " + (hceService != null ? "available" : "null"));
+            Log.i(TAG, "HCE service instance after first delay: " + (hceService != null ? "available" : "null"));
             
             if (hceService != null) {
+                Log.i(TAG, "Setting up NDEF payment with HCE service");
                 setupNdefPayment(hceService, paymentRequest, statusText, ndefDialog, amount);
             } else {
                 // Try one more time with a longer delay
                 statusText.setText("Waiting for HCE service...");
+                Log.i(TAG, "HCE service not available yet, trying with longer delay");
+                
                 new Handler().postDelayed(() -> {
                     CashuHostCardEmulationService service = CashuHostCardEmulationService.getInstance();
+                    Log.i(TAG, "HCE service instance after second delay: " + (service != null ? "available" : "null"));
+                    
                     if (service != null) {
+                        Log.i(TAG, "Setting up NDEF payment with HCE service (second attempt)");
                         setupNdefPayment(service, paymentRequest, statusText, ndefDialog, amount);
                     } else {
+                        String errorMsg = "HCE service not available. Make sure NFC is enabled and Host Card Emulation is supported on your device.";
+                        Log.e(TAG, errorMsg);
                         statusText.setText("Error: Host Card Emulation service not available");
-                        Toast.makeText(this, "HCE service not available. Make sure NFC is enabled and Host Card Emulation is supported on your device.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
                     }
                 }, 3000);
             }
@@ -416,6 +430,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         
         // Handle cancel button
         cancelButton.setOnClickListener(v -> {
+            Log.i(TAG, "NDEF payment canceled by user");
             CashuHostCardEmulationService service = CashuHostCardEmulationService.getInstance();
             if (service != null) {
                 service.clearPaymentRequest();
@@ -431,29 +446,51 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             // Set the payment request to the HCE service with expected amount
             service.setPaymentRequest(paymentRequest, amount);
             
-            // Set up callback for when a token is received
-            service.setPaymentCallback(token -> {
-                runOnUiThread(() -> {
-                    try {
+            // Set up callback for when a token is received or an error occurs
+            service.setPaymentCallback(new CashuHostCardEmulationService.CashuPaymentCallback() {
+                @Override
+                public void onCashuTokenReceived(String token) {
+                    runOnUiThread(() -> {
+                        try {
+                            // Dismiss the dialog
+                            if (dialog != null && dialog.isShowing()) {
+                                dialog.dismiss();
+                            }
+                            
+                            // Clear the payment request
+                            service.clearPaymentRequest();
+                            service.setPaymentCallback(null);
+                            
+                            // Set the received token
+                            handlePaymentSuccess(token);
+                            
+                            // Save to history
+                            TokenHistoryActivity.addToHistory(ModernPOSActivity.this, token, amount);
+                        } catch (Exception e) {
+                            Log.e(TAG, "Error in payment callback: " + e.getMessage(), e);
+                            handlePaymentError("Error processing payment: " + e.getMessage());
+                        }
+                    });
+                }
+                
+                @Override
+                public void onCashuPaymentError(String errorMessage) {
+                    runOnUiThread(() -> {
+                        Log.e(TAG, "Payment error callback: " + errorMessage);
+                        
                         // Dismiss the dialog
                         if (dialog != null && dialog.isShowing()) {
                             dialog.dismiss();
                         }
                         
-                        // Clear the payment request
+                        // Clean up resources
                         service.clearPaymentRequest();
                         service.setPaymentCallback(null);
                         
-                        // Set the received token
-                        handlePaymentSuccess(token);
-                        
-                        // Save to history
-                        TokenHistoryActivity.addToHistory(this, token, amount);
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error in payment callback: " + e.getMessage(), e);
-                        handlePaymentError("Error processing payment: " + e.getMessage());
-                    }
-                });
+                        // Handle the payment error
+                        handlePaymentError("Payment failed: " + errorMessage);
+                    });
+                }
             });
             
             // Update status text

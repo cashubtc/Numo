@@ -131,12 +131,14 @@ public class CashuPaymentHelper {
     /**
      * Attempt to redeem a Cashu token and get a reissued token
      * @param token The token to redeem
-     * @return A new Token with redeemed proofs, or null if redemption failed
+     * @return A new Token with redeemed proofs
+     * @throws RedemptionException if token redemption fails
      */
-    public static String redeemToken(String tokenString) {
+    public static String redeemToken(String tokenString) throws RedemptionException {
         if (!isCashuToken(tokenString)) {
-            Log.e(TAG, "Cannot redeem: Invalid token format");
-            return null;
+            String errorMsg = "Cannot redeem: Invalid token format";
+            Log.e(TAG, errorMsg);
+            throw new RedemptionException(errorMsg);
         }
         
         try {
@@ -146,6 +148,10 @@ public class CashuPaymentHelper {
 
             CashuHttpClient cashuHttpClient = new CashuHttpClient(new OkHttpClient(), mintUrl);
             GetKeysetsResponse keysetsResponse = cashuHttpClient.getKeysets().join();
+            if (keysetsResponse == null || keysetsResponse.keysets == null || keysetsResponse.keysets.isEmpty()) {
+                throw new RedemptionException("Failed to get keysets from mint: " + mintUrl);
+            }
+            
             final List<String> fullKeysetIds = keysetsResponse.keysets.stream().map((k) -> k.keysetId).collect(Collectors.toList());
             final Map<String, Integer> keysetsFeesMap = keysetsResponse.keysets.stream()
                 .collect(Collectors.toMap(k -> k.keysetId, k -> k.inputFee));
@@ -157,6 +163,10 @@ public class CashuPaymentHelper {
             List<Proof> receiveProofs = token.tokens.stream()
                 .flatMap(t -> t.getProofs(fullKeysetIds).stream())
                 .collect(Collectors.toList());
+                
+            if (receiveProofs.isEmpty()) {
+                throw new RedemptionException("No valid proofs found in token");
+            }
 
             long fee = FeeHelper.ComputeFee(receiveProofs, keysetsFeesMap);
 
@@ -166,7 +176,7 @@ public class CashuPaymentHelper {
                     .filter((k) -> k.active)
                     .min(Comparator.comparing((k) -> k.inputFee))
                     .map(k -> k.keysetId)
-                    .orElseThrow(() -> new RuntimeException("No active keyset found"));
+                    .orElseThrow(() -> new RedemptionException("No active keyset found on mint"));
             Log.d(TAG, "Selected keyset ID for new proofs: " + selectedKeysetId);
 
             
@@ -189,11 +199,21 @@ public class CashuPaymentHelper {
             Log.d(TAG, "Attempting to swap proofs");
 
             PostSwapResponse response = cashuHttpClient.swap(swapRequest).join();
+            if (response == null || response.signatures == null || response.signatures.isEmpty()) {
+                throw new RedemptionException("No signatures returned from mint during swap");
+            }
+            
             GetKeysResponse keysResponse = keysFuture.join();
+            if (keysResponse == null || keysResponse.keysets == null || keysResponse.keysets.isEmpty()) {
+                throw new RedemptionException("Failed to get keys from mint");
+            }
 
             Log.d(TAG, "Successfully swapped and received proofs");
 
             List<Proof> proofs = constructAndVerifyProofs(response, keysResponse.keysets.get(0), outputData);
+            if (proofs.isEmpty()) {
+                throw new RedemptionException("Failed to verify proofs from mint");
+            }
 
             Log.d(TAG, "Successfully constructed and verified proofs");
 
@@ -201,9 +221,26 @@ public class CashuPaymentHelper {
             
             Log.d(TAG, "Token redemption successful!");
             return newToken.encode();
+        } catch (RedemptionException e) {
+            // Re-throw our custom exceptions
+            throw e;
         } catch (Exception e) {
-            Log.e(TAG, "Token redemption failed: " + e.getMessage(), e);
-            return null;
+            String errorMsg = "Token redemption failed: " + e.getMessage();
+            Log.e(TAG, errorMsg, e);
+            throw new RedemptionException(errorMsg, e);
+        }
+    }
+    
+    /**
+     * Exception class for token redemption failures
+     */
+    public static class RedemptionException extends Exception {
+        public RedemptionException(String message) {
+            super(message);
+        }
+        
+        public RedemptionException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 

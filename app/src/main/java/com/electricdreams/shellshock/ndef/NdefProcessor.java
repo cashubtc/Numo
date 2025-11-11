@@ -83,7 +83,7 @@ public class NdefProcessor {
      */
     public void setMessageToSend(String message) {
         this.messageToSend = message;
-        Log.d(TAG, "Message to send set: " + message);
+        Log.i(TAG, "Message to send set: " + message);
     }
 
     /**
@@ -91,11 +91,14 @@ public class NdefProcessor {
      */
     public void setWriteMode(boolean enabled) {
         this.isInWriteMode = enabled;
-        Log.d(TAG, "Write mode set to " + enabled);
+        Log.i(TAG, "Write mode set to " + enabled);
         
         if (!enabled) {
             // Clear the message when disabling write mode
+            Log.i(TAG, "Clearing message as write mode is disabled");
             this.messageToSend = "";
+        } else {
+            Log.i(TAG, "Processor is now in write mode, ready to send message");
         }
     }
 
@@ -236,8 +239,10 @@ public class NdefProcessor {
         int offset = ((apdu[2] & 0xFF) << 8) | (apdu[3] & 0xFF);
         int dataLength = (apdu[4] & 0xFF);
         
+        Log.d(TAG, "UPDATE BINARY with offset=" + offset + ", length=" + dataLength);
+        
         if (apdu.length < 5 + dataLength) {
-            Log.e(TAG, "UPDATE BINARY apdu.length < 5 + dataLength");
+            Log.e(TAG, "UPDATE BINARY apdu.length < 5 + dataLength: " + apdu.length + " < " + (5 + dataLength));
             return NDEF_RESPONSE_ERROR;
         }
         
@@ -255,9 +260,15 @@ public class NdefProcessor {
             return NDEF_RESPONSE_ERROR;
         }
         
-        Log.d(TAG, "UPDATE BINARY success, updated " + dataLength + " bytes at offset " + offset);
-        Log.d(TAG, "UPDATE BINARY data: " + new String(data));
-        Log.d(TAG, "UPDATE BINARY data hex: " + bytesToHex(data));
+        Log.d(TAG, "UPDATE BINARY storing " + dataLength + " bytes at offset " + offset);
+        if (dataLength > 0) {
+            try {
+                Log.d(TAG, "Data (if text): " + new String(data, "UTF-8"));
+            } catch (Exception e) {
+                // Ignore if not valid UTF-8
+            }
+            Log.d(TAG, "Data (hex): " + bytesToHex(data));
+        }
         
         // Store the data
         System.arraycopy(data, 0, ndefData, offset, dataLength);
@@ -265,16 +276,25 @@ public class NdefProcessor {
         // If this is the first chunk of data, read the expected length
         if (offset == 0 && dataLength >= 2) {
             expectedNdefLength = ((ndefData[0] & 0xFF) << 8) | (ndefData[1] & 0xFF);
+            Log.d(TAG, "Expected NDEF message length: " + expectedNdefLength + " bytes");
         }
         
         // Check if we have received the complete message
-        if (expectedNdefLength != -1 && (offset + dataLength) >= (expectedNdefLength + 2)) {
-            try {
-                processReceivedNdefMessage(ndefData);
-                // Reset for next message
-                expectedNdefLength = -1;
-            } catch (Exception e) {
-                Log.e(TAG, "Error processing received NDEF message: " + e.getMessage());
+        if (expectedNdefLength != -1) {
+            Log.d(TAG, "Current position: " + (offset + dataLength) + ", need: " + (expectedNdefLength + 2));
+            
+            if ((offset + dataLength) >= (expectedNdefLength + 2)) {
+                Log.d(TAG, "Complete NDEF message received, processing...");
+                try {
+                    processReceivedNdefMessage(ndefData);
+                    // Reset for next message
+                    expectedNdefLength = -1;
+                    Arrays.fill(ndefData, (byte) 0);
+                } catch (Exception e) {
+                    Log.e(TAG, "Error processing received NDEF message: " + e.getMessage(), e);
+                }
+            } else {
+                Log.d(TAG, "Waiting for more data to complete NDEF message");
             }
         }
         
@@ -286,7 +306,7 @@ public class NdefProcessor {
      */
     private void processReceivedNdefMessage(byte[] ndefData) {
         Log.d(TAG, "Processing received NDEF message");
-        Log.d(TAG, "Hex dump: " + bytesToHex(Arrays.copyOfRange(ndefData, 0, Math.min(ndefData.length, 64))));
+        Log.d(TAG, "Hex dump: " + bytesToHex(Arrays.copyOfRange(ndefData, 0, Math.min(ndefData.length, 100))));
         
         int offset = 0;
         int totalLength = 0;
@@ -296,71 +316,213 @@ public class NdefProcessor {
         if (ndefData.length >= 2) {
             Log.d(TAG, "Type 4 style NDEF");
             totalLength = ((ndefData[0] & 0xFF) << 8) | (ndefData[1] & 0xFF);
+            Log.d(TAG, "NDEF message total length from header: " + totalLength);
             offset = 2;
         } else {
-            Log.e(TAG, "Invalid NDEF data");
+            Log.e(TAG, "Invalid NDEF data - length less than 2 bytes");
             return;
         }
         
         try {
+            if (offset >= ndefData.length) {
+                Log.e(TAG, "Invalid offset beyond data length");
+                return;
+            }
+            
             // Read record header starting at offset
             byte header = ndefData[offset];
+            Log.d(TAG, "NDEF header byte: 0x" + String.format("%02X", header));
+            
+            if (offset + 1 >= ndefData.length) {
+                Log.e(TAG, "Invalid data - can't read type length");
+                return;
+            }
+            
             int typeLength = ndefData[offset + 1] & 0xFF;
+            Log.d(TAG, "NDEF type length: " + typeLength);
             
             // Determine payload length field size based on the SR flag (0x10)
             int payloadLength;
             int typeFieldStart;
-            if ((header & 0x10) != 0) { // Short record: 1 byte payload length
+            
+            // Check SR (Short Record) flag
+            boolean isShortRecord = (header & 0x10) != 0;
+            Log.d(TAG, "Is short record: " + isShortRecord);
+            
+            if (isShortRecord) { // Short record: 1 byte payload length
+                if (offset + 2 >= ndefData.length) {
+                    Log.e(TAG, "Invalid data - can't read short record payload length");
+                    return;
+                }
+                
                 payloadLength = ndefData[offset + 2] & 0xFF;
                 typeFieldStart = offset + 3;
+                Log.d(TAG, "Short record payload length: " + payloadLength);
             } else { // Normal record: payload length is 4 bytes
+                if (offset + 5 >= ndefData.length) {
+                    Log.e(TAG, "Invalid data - can't read normal record payload length");
+                    return;
+                }
+                
                 payloadLength = ((ndefData[offset + 2] & 0xFF) << 24) |
                         ((ndefData[offset + 3] & 0xFF) << 16) |
                         ((ndefData[offset + 4] & 0xFF) << 8) |
                         (ndefData[offset + 5] & 0xFF);
                 typeFieldStart = offset + 6;
+                Log.d(TAG, "Normal record payload length: " + payloadLength);
             }
             
-            // Verify the record type is "T" (0x54) for a Text record
-            if (ndefData[typeFieldStart] != 0x54) {
-                Log.d(TAG, "NDEF message is not a Text Record. Found type: " + 
-                        (char) ndefData[typeFieldStart] + ", returning");
+            // Safety check for typeFieldStart
+            if (typeFieldStart >= ndefData.length) {
+                Log.e(TAG, "Invalid typeFieldStart beyond data length");
+                return;
+            }
+            
+            // Check TNF (Type Name Format)
+            int tnf = header & 0x07;
+            Log.d(TAG, "TNF: " + tnf);
+            
+            // Check if we have a valid type field
+            if (typeFieldStart + typeLength > ndefData.length) {
+                Log.e(TAG, "Type field extends beyond data bounds");
+                return;
+            }
+            
+            // Get the record type
+            byte[] typeField = Arrays.copyOfRange(ndefData, typeFieldStart, typeFieldStart + typeLength);
+            String typeStr = new String(typeField);
+            Log.d(TAG, "Record type: " + typeStr + " (hex: " + bytesToHex(typeField) + ")");
+            
+            // For text records, verify the record type is "T" (0x54)
+            // For URI records, verify the record type is "U" (0x55)
+            boolean isTextRecord = (typeLength == 1 && ndefData[typeFieldStart] == 0x54);
+            boolean isUriRecord = (typeLength == 1 && ndefData[typeFieldStart] == 0x55);
+            
+            Log.d(TAG, "Is Text Record: " + isTextRecord);
+            Log.d(TAG, "Is URI Record: " + isUriRecord);
+            
+            if (!isTextRecord && !isUriRecord) {
+                Log.w(TAG, "NDEF message is neither a Text Record nor URI Record. Type: " + 
+                      bytesToHex(typeField) + ", returning");
                 return;
             }
             
             // Payload starts immediately after the type field
             int payloadStart = typeFieldStart + typeLength;
+            Log.d(TAG, "Payload start position: " + payloadStart);
+            
             if (payloadStart >= ndefData.length) {
                 Log.e(TAG, "Payload start index out of bounds, returning");
                 return;
             }
             
-            // For a Text record, first payload byte is the status byte.
-            byte status = ndefData[payloadStart];
-            // Lower 6 bits of status indicate the language code length.
-            int languageCodeLength = status & 0x3F;
-            int textStart = payloadStart + 1 + languageCodeLength;
-            int textLength = payloadLength - 1 - languageCodeLength;
-            
-            if (textStart + textLength > ndefData.length) {
-                Log.e(TAG, "Text extraction bounds exceed data size.");
-                return;
+            if (isTextRecord) {
+                // For a Text record, first payload byte is the status byte
+                byte status = ndefData[payloadStart];
+                // Lower 6 bits of status indicate the language code length
+                int languageCodeLength = status & 0x3F;
+                Log.d(TAG, "Language code length: " + languageCodeLength);
+                
+                int textStart = payloadStart + 1 + languageCodeLength;
+                int textLength = payloadLength - 1 - languageCodeLength;
+                Log.d(TAG, "Text start position: " + textStart + ", length: " + textLength);
+                
+                if (textStart + textLength > ndefData.length) {
+                    Log.e(TAG, "Text extraction bounds exceed data size: " + 
+                          textStart + " + " + textLength + " > " + ndefData.length);
+                    return;
+                }
+                
+                byte[] textBytes = Arrays.copyOfRange(ndefData, textStart, textStart + textLength);
+                String text = new String(textBytes, "UTF-8");
+                
+                Log.d(TAG, "Extracted text: " + text);
+                
+                // Call the callback if set
+                if (callback != null) {
+                    Log.d(TAG, "Calling onNdefMessageReceived with text: " + text);
+                    callback.onNdefMessageReceived(text);
+                } else {
+                    Log.e(TAG, "Callback is null, can't deliver message");
+                }
+            } else if (isUriRecord) {
+                // URI Record handling - first byte is the URI identifier code
+                byte uriIdentifierCode = ndefData[payloadStart];
+                Log.d(TAG, "URI identifier code: " + uriIdentifierCode);
+                
+                int uriStart = payloadStart + 1;
+                int uriLength = payloadLength - 1;
+                Log.d(TAG, "URI start position: " + uriStart + ", length: " + uriLength);
+                
+                if (uriStart + uriLength > ndefData.length) {
+                    Log.e(TAG, "URI extraction bounds exceed data size");
+                    return;
+                }
+                
+                byte[] uriBytes = Arrays.copyOfRange(ndefData, uriStart, uriStart + uriLength);
+                String uri = new String(uriBytes, "UTF-8");
+                
+                // Prepend the URI prefix according to the identifier code
+                String prefix = getUriPrefix(uriIdentifierCode);
+                String fullUri = prefix + uri;
+                Log.d(TAG, "Extracted URI: " + fullUri);
+                
+                // Call the callback if set
+                if (callback != null) {
+                    Log.d(TAG, "Calling onNdefMessageReceived with URI: " + fullUri);
+                    callback.onNdefMessageReceived(fullUri);
+                } else {
+                    Log.e(TAG, "Callback is null, can't deliver message");
+                }
             }
             
-            byte[] textBytes = Arrays.copyOfRange(ndefData, textStart, textStart + textLength);
-            String text = new String(textBytes);
-            
-            Log.d(TAG, "Extracted text: " + text);
-            
-            // Call the callback if set
-            if (callback != null) {
-                callback.onNdefMessageReceived(text);
-            }
-            
-            // Clear the buffer for next message
-            Arrays.fill(ndefData, (byte) 0);
         } catch (Exception e) {
-            Log.e(TAG, "Error extracting text from NDEF message: " + e.getMessage());
+            Log.e(TAG, "Error extracting data from NDEF message: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Get the URI prefix for a URI identifier code
+     */
+    private String getUriPrefix(byte code) {
+        switch (code) {
+            case 0x00: return ""; // No prefix
+            case 0x01: return "http://www.";
+            case 0x02: return "https://www.";
+            case 0x03: return "http://";
+            case 0x04: return "https://";
+            case 0x05: return "tel:";
+            case 0x06: return "mailto:";
+            case 0x07: return "ftp://anonymous:anonymous@";
+            case 0x08: return "ftp://ftp.";
+            case 0x09: return "ftps://";
+            case 0x0A: return "sftp://";
+            case 0x0B: return "smb://";
+            case 0x0C: return "nfs://";
+            case 0x0D: return "ftp://";
+            case 0x0E: return "dav://";
+            case 0x0F: return "news:";
+            case 0x10: return "telnet://";
+            case 0x11: return "imap:";
+            case 0x12: return "rtsp://";
+            case 0x13: return "urn:";
+            case 0x14: return "pop:";
+            case 0x15: return "sip:";
+            case 0x16: return "sips:";
+            case 0x17: return "tftp:";
+            case 0x18: return "btspp://";
+            case 0x19: return "btl2cap://";
+            case 0x1A: return "btgoep://";
+            case 0x1B: return "tcpobex://";
+            case 0x1C: return "irdaobex://";
+            case 0x1D: return "file://";
+            case 0x1E: return "urn:epc:id:";
+            case 0x1F: return "urn:epc:tag:";
+            case 0x20: return "urn:epc:pat:";
+            case 0x21: return "urn:epc:raw:";
+            case 0x22: return "urn:epc:";
+            case 0x23: return "urn:nfc:";
+            default: return "";
         }
     }
 
