@@ -401,6 +401,10 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         
         // Show the dialog
         nfcDialog = builder.create();
+        
+        // Make dialog take up full height
+        nfcDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        
         nfcDialog.show();
     }
 
@@ -585,6 +589,12 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         }
 
         rescanDialog = builder.create();
+        
+        // Make dialog take up full height
+        if (rescanDialog.getWindow() != null) {
+            rescanDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        }
+        
         rescanDialog.show();
     }
 
@@ -601,6 +611,12 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         
         builder.setCancelable(false);
         processingDialog = builder.create();
+        
+        // Make dialog take up full height
+        if (processingDialog.getWindow() != null) {
+            processingDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        }
+        
         processingDialog.show();
     }
 

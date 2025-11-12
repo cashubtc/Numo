@@ -2,25 +2,24 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     app:cardBackgroundColor="@color/white"
     app:cardCornerRadius="8dp"
     app:cardElevation="8dp">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="24dp"
-        android:background="@color/white">
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:padding="24dp">
 
-        <!-- NFC indicator container - credit card proportions (1.59:1 height:width ratio) -->
+        <!-- NFC indicator container at top - credit card proportions -->
         <FrameLayout
+            android:id="@+id/card_container"
             android:layout_width="220dp"
             android:layout_height="140dp"
-            android:layout_gravity="center"
-            android:layout_marginVertical="24dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="48dp"
             android:background="@drawable/nfc_payment_background_rect">
 
             <!-- Center image - shows contactless icon and cashu icon -->
@@ -46,20 +45,18 @@
             </LinearLayout>
         </FrameLayout>
 
-        <Space
-            android:layout_width="match_parent"
-            android:layout_height="24dp" />
-
+        <!-- Cancel button at bottom -->
         <Button
             android:id="@+id/nfc_cancel_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="48dp"
             android:backgroundTint="@color/white"
             android:text="CANCEL"
             android:textColor="#FF0000"
             android:textStyle="bold"
             app:strokeColor="#FF0000"
             app:strokeWidth="1dp" />
-    </LinearLayout>
+    </RelativeLayout>
 </androidx.cardview.widget.CardView>
