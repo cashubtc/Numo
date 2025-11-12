@@ -369,7 +369,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                 }
                 // Clean up HCE service if it was started
                 if (ndefAvailable) {
-                    stopHceService();
+                    resetHceService();
                 }
                 Toast.makeText(this, "Payment canceled", Toast.LENGTH_SHORT).show();
             });
@@ -856,7 +856,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         currentInput.setLength(0);
 
         // Ensure HCE service is cleaned up on error
-        stopHceService();
+        resetHceService();
 
         mainHandler.post(() -> {
             if (nfcDialog != null && nfcDialog.isShowing()) {
@@ -879,23 +879,42 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     }
     
     /**
-     * Properly stop and cleanup the HCE service
+     * Properly reset the HCE service state
+     * Instead of stopping the service entirely, we just reset its state
      */
-    private void stopHceService() {
+    private void resetHceService() {
         try {
             NdefHostCardEmulationService hceService = NdefHostCardEmulationService.getInstance();
             if (hceService != null) {
-                Log.d(TAG, "Stopping HCE service...");
+                Log.d(TAG, "Resetting HCE service state...");
                 // Clear any pending payment request
                 hceService.clearPaymentRequest();
                 // Remove payment callback
                 hceService.setPaymentCallback(null);
-                // Stop the service explicitly
+                Log.d(TAG, "HCE service state reset successfully");
+            } else {
+                Log.d(TAG, "No active HCE service to reset");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error resetting HCE service: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Properly stop and cleanup the HCE service - only call this when app is exiting
+     */
+    private void stopHceService() {
+        try {
+            // First reset the service state
+            resetHceService();
+            
+            // Then explicitly stop the service (only when app is exiting)
+            NdefHostCardEmulationService hceService = NdefHostCardEmulationService.getInstance();
+            if (hceService != null) {
+                Log.d(TAG, "Stopping HCE service...");
                 Intent serviceIntent = new Intent(this, NdefHostCardEmulationService.class);
                 stopService(serviceIntent);
                 Log.d(TAG, "HCE service stopped successfully");
-            } else {
-                Log.d(TAG, "No active HCE service to stop");
             }
         } catch (Exception e) {
             Log.e(TAG, "Error stopping HCE service: " + e.getMessage(), e);
