@@ -294,138 +294,137 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     }
 
     private void showPaymentMethodDialog(long amount) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_Shellshock);
-        LayoutInflater inflater = this.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.dialog_payment_method_choice, null);
-        
-        // If the layout doesn't exist, create it programmatically
-        if (dialogView == null) {
-            dialogView = new LinearLayout(this);
-            ((LinearLayout)dialogView).setOrientation(LinearLayout.VERTICAL);
-            
-            // Title
-            TextView title = new TextView(this);
-            title.setText("Choose Payment Method");
-            title.setTextSize(18);
-            title.setPadding(0, 20, 0, 20);
-            title.setGravity(android.view.Gravity.CENTER);
-            ((LinearLayout)dialogView).addView(title);
-            
-            // Amount
-            TextView amountText = new TextView(this);
-            amountText.setText(formatAmount(String.valueOf(amount)));
-            amountText.setTextSize(24);
-            amountText.setPadding(0, 10, 0, 30);
-            amountText.setGravity(android.view.Gravity.CENTER);
-            ((LinearLayout)dialogView).addView(amountText);
-            
-            // Smartcard button
-            Button smartcardButton = new Button(this);
-            smartcardButton.setText("Smartcard Payment");
-            smartcardButton.setPadding(20, 20, 20, 20);
-            LinearLayout.LayoutParams smartcardParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            smartcardParams.setMargins(30, 10, 30, 10);
-            smartcardButton.setLayoutParams(smartcardParams);
-            smartcardButton.setOnClickListener(v -> {
-                proceedWithSmartcardPayment(amount);
-                if (paymentMethodDialog != null) paymentMethodDialog.dismiss();
-            });
-            ((LinearLayout)dialogView).addView(smartcardButton);
-            
-            // NDEF button
-            Button ndefButton = new Button(this);
-            ndefButton.setText("NDEF Payment");
-            ndefButton.setPadding(20, 20, 20, 20);
-            LinearLayout.LayoutParams ndefParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            ndefParams.setMargins(30, 10, 30, 10);
-            ndefButton.setLayoutParams(ndefParams);
-            ndefButton.setOnClickListener(v -> {
-                proceedWithNdefPayment(amount);
-                if (paymentMethodDialog != null) paymentMethodDialog.dismiss();
-            });
-            ((LinearLayout)dialogView).addView(ndefButton);
-            
-            // Cancel button
-            Button cancelButton = new Button(this);
-            cancelButton.setText("Cancel");
-            cancelButton.setPadding(20, 20, 20, 20);
-            LinearLayout.LayoutParams cancelParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, 
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
-            cancelParams.setMargins(30, 20, 30, 10);
-            cancelButton.setLayoutParams(cancelParams);
-            cancelButton.setOnClickListener(v -> {
-                if (paymentMethodDialog != null) paymentMethodDialog.dismiss();
-            });
-            ((LinearLayout)dialogView).addView(cancelButton);
-            
-            int padding = (int)(20 * getResources().getDisplayMetrics().density);
-            ((LinearLayout)dialogView).setPadding(padding, padding, padding, padding);
-        } else {
-            // Use existing layout if available
-            TextView amountDisplay = dialogView.findViewById(R.id.amount_display);
-            Button smartcardButton = dialogView.findViewById(R.id.btn_smartcard_payment);
-            Button ndefButton = dialogView.findViewById(R.id.btn_ndef_payment);
-            Button cancelButton = dialogView.findViewById(R.id.btn_cancel);
-            
-            // Set amount
-            if (amountDisplay != null) {
-                amountDisplay.setText(formatAmount(String.valueOf(amount)));
-            }
-            
-            // Set up button listeners
-            if (smartcardButton != null) {
-                smartcardButton.setOnClickListener(v -> {
-                    proceedWithSmartcardPayment(amount);
-                    if (paymentMethodDialog != null) paymentMethodDialog.dismiss();
-                });
-            }
-            
-            if (ndefButton != null) {
-                ndefButton.setOnClickListener(v -> {
-                    proceedWithNdefPayment(amount);
-                    if (paymentMethodDialog != null) paymentMethodDialog.dismiss();
-                });
-            }
-            
-            if (cancelButton != null) {
-                cancelButton.setOnClickListener(v -> {
-                    if (paymentMethodDialog != null) paymentMethodDialog.dismiss();
-                });
-            }
-        }
-        
-        builder.setView(dialogView);
-        builder.setCancelable(true);
-        paymentMethodDialog = builder.create();
-        paymentMethodDialog.show();
+        // Create a unified payment experience
+        proceedWithUnifiedPayment(amount);
     }
     
-    private void proceedWithSmartcardPayment(long amount) {
-        // This is the original smartcard payment flow
-        // Show the NFC dialog to scan the card
+    /**
+     * Unified payment flow that automatically detects the payment method based on the NFC card/device
+     */
+    private void proceedWithUnifiedPayment(long amount) {
+        // Store the requested amount for processing
+        requestedAmount = amount;
+
+        // For NDEF capability, we check and prepare upfront
+        final boolean ndefAvailable = NdefHostCardEmulationService.isHceAvailable(this);
+        String paymentRequestLocal = null;
+        
+        if (ndefAvailable) {
+            // Create the payment request in case we need it
+            paymentRequestLocal = CashuPaymentHelper.createPaymentRequest(
+                amount, 
+                "Payment of " + amount + " sats"
+            );
+            
+            if (paymentRequestLocal == null) {
+                Log.e(TAG, "Failed to create payment request");
+                Toast.makeText(this, "Failed to prepare NDEF payment data", Toast.LENGTH_SHORT).show();
+            } else {
+                Log.d(TAG, "Created payment request: " + paymentRequestLocal);
+                
+                // Start HCE service in the background
+                Intent serviceIntent = new Intent(this, NdefHostCardEmulationService.class);
+                startService(serviceIntent);
+            }
+        }
+        final String finalPaymentRequest = paymentRequestLocal;
+        
+        // Show the unified NFC scan dialog
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_Shellshock);
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_nfc_modern, null);
         builder.setView(dialogView);
 
+        // Set up dialog content
         TextView nfcAmountDisplay = dialogView.findViewById(R.id.nfc_amount_display);
         nfcAmountDisplay.setText(formatAmount(String.valueOf(amount)));
         
-        // Hide payment method buttons for this flow
+        TextView titleView = dialogView.findViewById(R.id.nfc_dialog_title);
+        if (titleView != null) {
+            titleView.setText("Scan Card or Device");
+        }
+        
+        TextView hintView = dialogView.findViewById(R.id.nfc_hint_text);
+        if (hintView != null) {
+            if (ndefAvailable && finalPaymentRequest != null) {
+                hintView.setText("Scan a Satocash card or bring your phone near an NFC device for payment");
+            } else {
+                hintView.setText("Scan your Satocash card to make the payment");
+            }
+            hintView.setVisibility(View.VISIBLE);
+        }
+        
+        // Hide payment method buttons in unified flow
         Button smartcardButton = dialogView.findViewById(R.id.btn_smartcard_payment);
         Button ndefButton = dialogView.findViewById(R.id.btn_ndef_payment);
-        smartcardButton.setVisibility(View.GONE);
-        ndefButton.setVisibility(View.GONE);
+        if (smartcardButton != null) smartcardButton.setVisibility(View.GONE);
+        if (ndefButton != null) ndefButton.setVisibility(View.GONE);
+        
+        // Add cancel button functionality if available
+        Button cancelButton = dialogView.findViewById(R.id.nfc_cancel_button);
+        if (cancelButton != null) {
+            cancelButton.setOnClickListener(v -> {
+                if (nfcDialog != null && nfcDialog.isShowing()) {
+                    nfcDialog.dismiss();
+                }
+                // Clean up HCE service if it was started
+                if (ndefAvailable) {
+                    stopHceService();
+                }
+                Toast.makeText(this, "Payment canceled", Toast.LENGTH_SHORT).show();
+            });
+        }
 
+        // Make dialog cancellable
         builder.setCancelable(true);
+        builder.setOnCancelListener(dialog -> {
+            // Clean up HCE service if it was started
+            if (ndefAvailable) {
+                stopHceService();
+            }
+        });
+
+        // If we have NDEF capability, setup the HCE service with the payment request
+        if (ndefAvailable && finalPaymentRequest != null) {
+            new Handler().postDelayed(() -> {
+                NdefHostCardEmulationService hceService = NdefHostCardEmulationService.getInstance();
+                if (hceService != null) {
+                    Log.d(TAG, "Setting up NDEF payment with HCE service in unified flow");
+                    
+                    // Set the payment request to the HCE service with expected amount
+                    hceService.setPaymentRequest(finalPaymentRequest, amount);
+                    
+                    // Set up callback for when a token is received or an error occurs
+                    hceService.setPaymentCallback(new NdefHostCardEmulationService.CashuPaymentCallback() {
+                        @Override
+                        public void onCashuTokenReceived(String token) {
+                            runOnUiThread(() -> {
+                                try {
+                                    // Set the received token and handle the success
+                                    // This will automatically call stopHceService()
+                                    handlePaymentSuccess(token);
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error in NDEF payment callback: " + e.getMessage(), e);
+                                    handlePaymentError("Error processing NDEF payment: " + e.getMessage());
+                                }
+                            });
+                        }
+                        
+                        @Override
+                        public void onCashuPaymentError(String errorMessage) {
+                            runOnUiThread(() -> {
+                                Log.e(TAG, "NDEF Payment error callback: " + errorMessage);
+                                handlePaymentError("NDEF Payment failed: " + errorMessage);
+                            });
+                        }
+                    });
+                    
+                    Log.d(TAG, "NDEF payment service ready in unified flow");
+                }
+            }, 1000);
+        }
+        
+        // Show the dialog
         nfcDialog = builder.create();
         nfcDialog.show();
     }
