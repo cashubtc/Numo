@@ -6,6 +6,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
@@ -914,6 +915,9 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         // Ensure HCE service is cleaned up on success
         stopHceService();
 
+        // Play success feedback
+        playSuccessFeedback();
+
         TokenHistoryActivity.addToHistory(this, token, amount);
 
         mainHandler.post(() -> {
@@ -935,6 +939,23 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             openWithButton.setVisibility(View.VISIBLE);
             Toast.makeText(this, "Payment successful!", Toast.LENGTH_SHORT).show();
         });
+    }
+
+    private void playSuccessFeedback() {
+        // Play success sound
+        try {
+            MediaPlayer mediaPlayer = MediaPlayer.create(this, R.raw.success_sound);
+            if (mediaPlayer != null) {
+                mediaPlayer.setOnCompletionListener(mp -> mp.release());
+                mediaPlayer.start();
+                Log.d(TAG, "Success sound played");
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error playing success sound: " + e.getMessage());
+        }
+
+        // Vibrate with success pattern
+        vibrateSuccess();
     }
 
     private void showPinDialog(PinDialogCallback callback) {

@@ -1,5 +1,8 @@
 package com.electricdreams.shellshock;
 
+import android.media.MediaPlayer;
+import android.os.Vibrator;
+import android.content.Context;
 import android.util.Log;
 import androidx.annotation.NonNull;
 import com.cashujdk.api.CashuHttpClient;

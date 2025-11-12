@@ -72,7 +72,7 @@
         android:background="@color/white"
         android:visibility="gone"
         android:minHeight="120dp"
-        android:maxHeight="240dp"
+        android:maxHeight="260dp"
         android:elevation="1dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -81,7 +81,7 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxHeight="160dp">
+            android:maxHeight="200dp">
 
             <TextView
                 android:id="@+id/token_display"
@@ -95,10 +95,10 @@
                 android:fontFamily="monospace" />
         </ScrollView>
         
-        <!-- Gradient overlay for fading effect -->
+        <!-- Gradient overlay for fading effect that starts from the middle -->
         <View
             android:layout_width="match_parent"
-            android:layout_height="70dp"
+            android:layout_height="120dp"
             android:layout_gravity="bottom"
             android:background="@drawable/token_text_fade" />
     </FrameLayout>
