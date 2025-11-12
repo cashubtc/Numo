@@ -11,6 +11,12 @@ import java.util.Arrays;
 public class NdefProcessor {
     private static final String TAG = "NdefProcessor";
 
+    // Timeout for waiting for NDEF message completion (3 seconds)
+    private static final long MESSAGE_TIMEOUT_MS = 3000;
+    
+    // Track last message activity time for timeout handling
+    private long lastMessageActivityTime = 0;
+
     // Command Headers
     private static final byte[] NDEF_SELECT_FILE_HEADER = {0x00, (byte) 0xA4, 0x00, 0x0C};
     
@@ -281,14 +287,65 @@ public class NdefProcessor {
         // Store the data
         System.arraycopy(data, 0, ndefData, offset, dataLength);
         
-        // If this is the first chunk of data, read the expected length
+        // Update the last message activity time whenever we receive data
+        lastMessageActivityTime = System.currentTimeMillis();
+        
+        // If this updates the length header (offset 0, length >=2)
         if (offset == 0 && dataLength >= 2) {
-            expectedNdefLength = ((ndefData[0] & 0xFF) << 8) | (ndefData[1] & 0xFF);
-            Log.d(TAG, "Expected NDEF message length: " + expectedNdefLength + " bytes");
+            int newLength = ((ndefData[0] & 0xFF) << 8) | (ndefData[1] & 0xFF);
+            
+            // Don't reset expectedNdefLength if the new length is 0 (could be initialization)
+            if (newLength > 0) {
+                Log.d(TAG, "NDEF message length updated: " + newLength + " bytes");
+                expectedNdefLength = newLength;
+                
+                // Check if we have any non-zero data beyond the header
+                boolean hasData = false;
+                for (int i = 2; i < newLength + 2; i++) {
+                    if (ndefData[i] != 0) {
+                        hasData = true;
+                        break;
+                    }
+                }
+                
+                if (hasData) {
+                    Log.d(TAG, "Length header updated and there appears to be data already in buffer. Processing message.");
+                    try {
+                        processReceivedNdefMessage(ndefData);
+                        // Reset for next message
+                        expectedNdefLength = -1;
+                        Arrays.fill(ndefData, (byte) 0);
+                        lastMessageActivityTime = 0;
+                        return NDEF_RESPONSE_OK;
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error processing received NDEF message after length update: " + e.getMessage(), e);
+                    }
+                }
+                
+                // Original check for cases where data is provided with the header
+                else if (expectedNdefLength > 0 && offset + dataLength >= expectedNdefLength + 2) {
+                    Log.d(TAG, "Length header updated and we have enough data to process the message");
+                    try {
+                        processReceivedNdefMessage(ndefData);
+                        // Reset for next message
+                        expectedNdefLength = -1;
+                        Arrays.fill(ndefData, (byte) 0);
+                        lastMessageActivityTime = 0;
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error processing received NDEF message after length update: " + e.getMessage(), e);
+                    }
+                }
+            } else if (newLength == 0) {
+                // This is likely an initialization or empty message - log but don't process
+                Log.d(TAG, "Received zero-length NDEF message header - ignoring as likely initialization");
+                // We'll still set expectedNdefLength for completeness, but we won't process this as a complete message
+                expectedNdefLength = newLength;
+                return NDEF_RESPONSE_OK;
+            }
         }
         
         // Check if we have received the complete message
-        if (expectedNdefLength != -1) {
+        if (expectedNdefLength > 0) { // Changed from != -1 to > 0 to prevent processing zero-length messages
             Log.d(TAG, "Current position: " + (offset + dataLength) + ", need: " + (expectedNdefLength + 2));
             
             if ((offset + dataLength) >= (expectedNdefLength + 2)) {
@@ -298,11 +355,47 @@ public class NdefProcessor {
                     // Reset for next message
                     expectedNdefLength = -1;
                     Arrays.fill(ndefData, (byte) 0);
+                    lastMessageActivityTime = 0;
                 } catch (Exception e) {
                     Log.e(TAG, "Error processing received NDEF message: " + e.getMessage(), e);
                 }
             } else {
-                Log.d(TAG, "Waiting for more data to complete NDEF message");
+                // Check if we have data in the buffer but are just waiting for more
+                // This might indicate we received chunks out of order or the final message was incomplete
+                boolean hasData = false;
+                for (int i = 2; i < Math.min(ndefData.length, expectedNdefLength + 2); i++) {
+                    if (ndefData[i] != 0) {
+                        hasData = true;
+                        break;
+                    }
+                }
+                
+                if (hasData) {
+                    // We have some data already - start a timeout handler to process partial data if needed
+                    Log.d(TAG, "Waiting for more data to complete NDEF message, but data already exists in buffer");
+                    
+                    // Set last activity time for timeout tracking
+                    if (lastMessageActivityTime == 0) {
+                        lastMessageActivityTime = System.currentTimeMillis();
+                    } else {
+                        // Check if we've been waiting too long without receiving new data
+                        long currentTime = System.currentTimeMillis();
+                        if (currentTime - lastMessageActivityTime > MESSAGE_TIMEOUT_MS) {
+                            Log.i(TAG, "Message reception timeout reached. Processing with available data.");
+                            try {
+                                processReceivedNdefMessage(ndefData);
+                                // Reset for next message
+                                expectedNdefLength = -1;
+                                Arrays.fill(ndefData, (byte) 0);
+                                lastMessageActivityTime = 0;
+                            } catch (Exception e) {
+                                Log.e(TAG, "Error processing received NDEF message after timeout: " + e.getMessage(), e);
+                            }
+                        }
+                    }
+                } else {
+                    Log.d(TAG, "Waiting for more data to complete NDEF message");
+                }
             }
         }
         
@@ -325,6 +418,20 @@ public class NdefProcessor {
             Log.i(TAG, "Type 4 style NDEF");
             totalLength = ((ndefData[0] & 0xFF) << 8) | (ndefData[1] & 0xFF);
             Log.i(TAG, "NDEF message total length from header: " + totalLength);
+            
+            // Validate message length - don't process empty or very short messages
+            if (totalLength <= 0) {
+                Log.e(TAG, "Invalid NDEF data - zero or negative length in header, ignoring message");
+                return;
+            }
+            
+            // Ensure we have enough data
+            if (totalLength + 2 > ndefData.length) {
+                Log.e(TAG, "Incomplete NDEF data - header specifies " + totalLength + 
+                      " bytes but we only have " + (ndefData.length - 2) + " bytes of payload");
+                return;
+            }
+            
             offset = 2;
         } else {
             Log.e(TAG, "Invalid NDEF data - length less than 2 bytes");
@@ -348,6 +455,12 @@ public class NdefProcessor {
             
             int typeLength = ndefData[offset + 1] & 0xFF;
             Log.i(TAG, "NDEF type length: " + typeLength);
+            
+            // Additional validation for type length
+            if (typeLength <= 0) {
+                Log.e(TAG, "Invalid type length: " + typeLength);
+                return;
+            }
             
             // Determine payload length field size based on the SR flag (0x10)
             int payloadLength;
@@ -378,6 +491,12 @@ public class NdefProcessor {
                         (ndefData[offset + 5] & 0xFF);
                 typeFieldStart = offset + 6;
                 Log.i(TAG, "Normal record payload length: " + payloadLength);
+            }
+            
+            // Validate payload length
+            if (payloadLength <= 0) {
+                Log.e(TAG, "Invalid payload length: " + payloadLength);
+                return;
             }
             
             // Safety check for typeFieldStart
