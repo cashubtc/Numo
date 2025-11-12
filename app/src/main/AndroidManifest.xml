@@ -93,8 +93,8 @@
                 android:value=".ModernPOSActivity" />
         </activity>
         
-        <!-- HCE Service for Cashu payments -->
-        <service android:name=".ndef.CashuHostCardEmulationService"
+        <!-- HCE Service for NDEF tag emulation -->
+        <service android:name=".ndef.NdefHostCardEmulationService"
             android:exported="true"
             android:permission="android.permission.BIND_NFC_SERVICE">
             <intent-filter>

@@ -41,7 +41,7 @@ import java.util.*;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
-import com.electricdreams.shellshock.ndef.CashuHostCardEmulationService;
+import com.electricdreams.shellshock.ndef.NdefHostCardEmulationService;
 import com.electricdreams.shellshock.ndef.CashuPaymentHelper;
 
 public class ModernPOSActivity extends AppCompatActivity implements SatocashWallet.OperationFeedback {
@@ -432,7 +432,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
 
     private void proceedWithNdefPayment(long amount) {
         // First check if HCE is available on this device
-        if (!CashuHostCardEmulationService.isHceAvailable(this)) {
+        if (!NdefHostCardEmulationService.isHceAvailable(this)) {
             Toast.makeText(this, "Host Card Emulation is not available on this device", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -477,12 +477,12 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         Log.i(TAG, "Starting HCE service");
         
         // Force start the HCE service
-        Intent serviceIntent = new Intent(this, CashuHostCardEmulationService.class);
+        Intent serviceIntent = new Intent(this, NdefHostCardEmulationService.class);
         startService(serviceIntent);
         
         // Wait a bit then check for the service
         new Handler().postDelayed(() -> {
-            CashuHostCardEmulationService hceService = CashuHostCardEmulationService.getInstance();
+            NdefHostCardEmulationService hceService = NdefHostCardEmulationService.getInstance();
             Log.i(TAG, "HCE service instance after first delay: " + (hceService != null ? "available" : "null"));
             
             if (hceService != null) {
@@ -494,7 +494,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                 Log.i(TAG, "HCE service not available yet, trying with longer delay");
                 
                 new Handler().postDelayed(() -> {
-                    CashuHostCardEmulationService service = CashuHostCardEmulationService.getInstance();
+                    NdefHostCardEmulationService service = NdefHostCardEmulationService.getInstance();
                     Log.i(TAG, "HCE service instance after second delay: " + (service != null ? "available" : "null"));
                     
                     if (service != null) {
@@ -520,14 +520,14 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         });
     }
     
-    private void setupNdefPayment(CashuHostCardEmulationService service, String paymentRequest, 
+    private void setupNdefPayment(NdefHostCardEmulationService service, String paymentRequest, 
                                   TextView statusText, AlertDialog dialog, long amount) {
         try {
             // Set the payment request to the HCE service with expected amount
             service.setPaymentRequest(paymentRequest, amount);
             
             // Set up callback for when a token is received or an error occurs
-            service.setPaymentCallback(new CashuHostCardEmulationService.CashuPaymentCallback() {
+            service.setPaymentCallback(new NdefHostCardEmulationService.CashuPaymentCallback() {
                 @Override
                 public void onCashuTokenReceived(String token) {
                     runOnUiThread(() -> {
@@ -884,7 +884,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
      */
     private void stopHceService() {
         try {
-            CashuHostCardEmulationService hceService = CashuHostCardEmulationService.getInstance();
+            NdefHostCardEmulationService hceService = NdefHostCardEmulationService.getInstance();
             if (hceService != null) {
                 Log.d(TAG, "Stopping HCE service...");
                 // Clear any pending payment request
@@ -892,7 +892,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                 // Remove payment callback
                 hceService.setPaymentCallback(null);
                 // Stop the service explicitly
-                Intent serviceIntent = new Intent(this, CashuHostCardEmulationService.class);
+                Intent serviceIntent = new Intent(this, NdefHostCardEmulationService.class);
                 stopService(serviceIntent);
                 Log.d(TAG, "HCE service stopped successfully");
             } else {

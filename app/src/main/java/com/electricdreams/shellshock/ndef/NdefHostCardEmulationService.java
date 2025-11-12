@@ -1,8 +1,6 @@
 package com.electricdreams.shellshock.ndef;
 
 import android.nfc.cardemulation.HostApduService;
-import com.electricdreams.shellshock.ndef.CashuPaymentHelper;
-import com.electricdreams.shellshock.ndef.NdefProcessor;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.content.Intent;
@@ -11,8 +9,8 @@ import android.util.Log;
 /**
  * Host Card Emulation service for NDEF tag emulation to receive Cashu payments
  */
-public class CashuHostCardEmulationService extends HostApduService {
-    private static final String TAG = "CashuHCEService";
+public class NdefHostCardEmulationService extends HostApduService {
+    private static final String TAG = "NdefHCEService";
     
     // Status words for NFC communication
     private static final byte[] STATUS_SUCCESS = {(byte) 0x90, (byte) 0x00};
@@ -34,7 +32,7 @@ public class CashuHostCardEmulationService extends HostApduService {
     private long expectedAmount = 0; // The expected amount for token validation
     
     // Singleton instance for access from activities
-    private static CashuHostCardEmulationService instance;
+    private static NdefHostCardEmulationService instance;
     
     /**
      * Callback interface for Cashu payments
@@ -47,7 +45,7 @@ public class CashuHostCardEmulationService extends HostApduService {
     /**
      * Get the singleton instance
      */
-    public static CashuHostCardEmulationService getInstance() {
+    public static NdefHostCardEmulationService getInstance() {
         Log.i(TAG, "getInstance called, instance: " + (instance != null ? "available" : "null"));
         return instance;
     }
@@ -55,7 +53,7 @@ public class CashuHostCardEmulationService extends HostApduService {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(TAG, "=== CashuHostCardEmulationService created ===");
+        Log.i(TAG, "=== NdefHostCardEmulationService created ===");
         
         try {
             // Create the NDEF processor
@@ -174,7 +172,7 @@ public class CashuHostCardEmulationService extends HostApduService {
             
             // Set the instance
             instance = this;
-            Log.i(TAG, "CashuHostCardEmulationService initialization complete");
+            Log.i(TAG, "NdefHostCardEmulationService initialization complete");
         } catch (Exception e) {
             Log.e(TAG, "Error creating HCE service: " + e.getMessage(), e);
         }
@@ -184,7 +182,7 @@ public class CashuHostCardEmulationService extends HostApduService {
     public void onDestroy() {
         Log.i(TAG, "=== HCE Service onDestroy called ===");
         super.onDestroy();
-        Log.i(TAG, "CashuHostCardEmulationService destroyed");
+        Log.i(TAG, "NdefHostCardEmulationService destroyed");
         
         // Clear the instance if this is the current one
         if (instance == this) {
