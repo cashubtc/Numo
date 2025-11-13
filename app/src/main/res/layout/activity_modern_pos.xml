@@ -11,16 +11,47 @@
         android:id="@+id/amount_display"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="48dp"
+        android:layout_marginEnd="8dp"
         android:gravity="start"
         android:text="0"
         android:textColor="@color/black"
         android:textSize="42sp"
         android:fontFamily="sans-serif-light"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/currency_switch_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+        
+    <!-- Currency Switch Button -->
+    <ImageButton
+        android:id="@+id/currency_switch_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="48dp"
+        android:layout_marginEnd="24dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_switch_currency"
+        android:contentDescription="Switch between Sats and USD"
+        android:tint="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+        
+    <TextView
+        android:id="@+id/fiat_amount_display"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:gravity="start"
+        android:text="$0.00 USD"
+        android:textColor="#707070"
+        android:textSize="18sp"
+        android:fontFamily="sans-serif-light"
+        app:layout_constraintEnd_toStartOf="@id/currency_switch_button"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/amount_display" />
 
     <!-- Input Mode Container -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -63,44 +94,35 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Token Display Container with Fading Effect -->
+    <!-- Token Display Container with Fixed Height -->
     <FrameLayout
         android:id="@+id/token_scroll_container"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="120dp"
         android:layout_margin="24dp"
         android:background="@color/white"
         android:visibility="gone"
-        android:minHeight="120dp"
-        android:maxHeight="260dp"
         android:elevation="1dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/amount_display">
         
-        <ScrollView
+        <!-- Fixed height text view with ellipsize to handle text overflow -->
+        <TextView
+            android:id="@+id/token_display"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:maxHeight="200dp">
-
-            <TextView
-                android:id="@+id/token_display"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:gravity="start"
-                android:textIsSelectable="true"
-                android:textColor="@color/black"
-                android:textSize="16sp"
-                android:fontFamily="monospace" />
-        </ScrollView>
-        
-        <!-- Gradient overlay for fading effect that starts from the middle -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:layout_gravity="bottom"
-            android:background="@drawable/token_text_fade" />
+            android:layout_height="match_parent"
+            android:padding="16dp"
+            android:gravity="start"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground"
+            android:ellipsize="end"
+            android:maxLines="4"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:fontFamily="monospace" />
+            
     </FrameLayout>
 
     <!-- Token Action Buttons Container -->
@@ -123,26 +145,9 @@
             android:orientation="horizontal">
 
             <Button
-                android:id="@+id/copy_token_button"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:text="Copy Token"
-                android:textSize="16sp"
-                android:backgroundTint="@color/white"
-                android:textColor="@color/black"
-                android:drawableStart="@drawable/ic_content_copy"
-                android:drawablePadding="8dp"
-                app:strokeColor="@color/keypadButtonBorder"
-                app:strokeWidth="1dp" />
-
-            <Button
                 android:id="@+id/open_with_button"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
                 android:text="Open With"
                 android:textSize="16sp"
                 android:backgroundTint="@color/white"
