@@ -16,6 +16,9 @@ public class NdefProcessor {
     
     // Track last message activity time for timeout handling
     private long lastMessageActivityTime = 0;
+    
+    // Flag to control whether incoming messages should be processed
+    private boolean processIncomingMessages = false;
 
     // Command Headers
     private static final byte[] NDEF_SELECT_FILE_HEADER = {0x00, (byte) 0xA4, 0x00, 0x0C};
@@ -94,7 +97,6 @@ public class NdefProcessor {
 
     /**
      * Set whether the processor is in write mode (NDEF tag emulation)
-     * Note: The processor will always be able to receive NDEF messages, regardless of write mode
      * When write mode is enabled, it will also send messages
      */
     public void setWriteMode(boolean enabled) {
@@ -102,15 +104,31 @@ public class NdefProcessor {
         Log.i(TAG, "Write mode set to " + enabled);
         
         if (enabled) {
+            // When enabling write mode, also enable processing incoming messages
+            this.processIncomingMessages = true;
             Log.i(TAG, "Processor is now in write mode, ready to send message: " + 
                   (messageToSend.isEmpty() ? "<empty>" : messageToSend));
+            Log.i(TAG, "Incoming message processing enabled");
         } else {
             // Keep the message when disabling write mode, just don't send it
             Log.i(TAG, "Processor is now in read-only mode, message preserved but not being sent");
+            
+            // When disabling write mode, also disable processing incoming messages by default
+            this.processIncomingMessages = false;
+            Log.i(TAG, "Incoming message processing disabled");
         }
-        
-        // Always keep the ability to receive NDEF messages, regardless of write mode setting
-        Log.i(TAG, "Processor will always accept incoming NDEF messages");
+    }
+    
+    /**
+     * Control whether to process incoming NDEF messages
+     * This allows finer control than setWriteMode() - can be used to enable/disable
+     * just the receiving capability without affecting the sending capability.
+     * 
+     * @param enabled true to process incoming messages, false to ignore them
+     */
+    public void setProcessIncomingMessages(boolean enabled) {
+        this.processIncomingMessages = enabled;
+        Log.i(TAG, "Process incoming messages set to: " + enabled);
     }
 
     /**
@@ -406,7 +424,14 @@ public class NdefProcessor {
      * Process a received NDEF message
      */
     private void processReceivedNdefMessage(byte[] ndefData) {
-        Log.i(TAG, "Processing received NDEF message");
+        Log.i(TAG, "Processing received NDEF message, process flag: " + processIncomingMessages);
+        
+        // Skip processing if we're not supposed to process incoming messages
+        if (!processIncomingMessages) {
+            Log.i(TAG, "Ignoring incoming NDEF message because processIncomingMessages is false");
+            return;
+        }
+        
         Log.i(TAG, "Hex dump: " + bytesToHex(Arrays.copyOfRange(ndefData, 0, Math.min(ndefData.length, 100))));
         
         int offset = 0;

@@ -57,7 +57,6 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     private AlertDialog nfcDialog;
     private AlertDialog paymentMethodDialog;
     private TextView tokenDisplay;
-    private Button copyTokenButton;
     private Button openWithButton;
     private Button resetButton;
     private FrameLayout tokenScrollContainer;
@@ -107,12 +106,19 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         submitButton = findViewById(R.id.submit_button);
         GridLayout keypad = findViewById(R.id.keypad);
         tokenDisplay = findViewById(R.id.token_display);
-        copyTokenButton = findViewById(R.id.copy_token_button);
         openWithButton = findViewById(R.id.open_with_button);
         resetButton = findViewById(R.id.reset_button);
         tokenScrollContainer = findViewById(R.id.token_scroll_container);
         tokenActionsContainer = findViewById(R.id.token_actions_container);
         inputModeContainer = findViewById(R.id.input_mode_container);
+
+        // Set up token display click listener to copy token to clipboard
+        tokenDisplay.setOnClickListener(v -> {
+            String token = tokenDisplay.getText().toString();
+            if (!token.isEmpty() && !token.startsWith("Error:")) {
+                copyTokenToClipboard(token);
+            }
+        });
 
         // Set up bottom navigation
         ImageButton topUpButton = findViewById(R.id.action_top_up);
@@ -162,13 +168,6 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             }
         });
 
-        copyTokenButton.setOnClickListener(v -> {
-            String token = tokenDisplay.getText().toString();
-            if (!token.isEmpty() && !token.startsWith("Error:")) {
-                copyTokenToClipboard(token);
-            }
-        });
-
         openWithButton.setOnClickListener(v -> {
             String token = tokenDisplay.getText().toString();
             if (!token.isEmpty() && !token.startsWith("Error:")) {
@@ -215,7 +214,6 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         tokenDisplay.setText("");
         
         // Reset buttons
-        copyTokenButton.setVisibility(View.GONE);
         openWithButton.setVisibility(View.GONE);
         
         // Reset PIN flow state
@@ -237,7 +235,6 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         tokenScrollContainer.setVisibility(View.VISIBLE);
         tokenActionsContainer.setVisibility(View.VISIBLE);
         tokenDisplay.setVisibility(View.VISIBLE);
-        copyTokenButton.setVisibility(View.VISIBLE);
         openWithButton.setVisibility(View.VISIBLE);
     }
 
@@ -857,7 +854,6 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             }
             switchToTokenMode();
             tokenDisplay.setText("Error: " + message);
-            copyTokenButton.setVisibility(View.GONE);
             openWithButton.setVisibility(View.GONE);
         });
     }
@@ -871,7 +867,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             NdefHostCardEmulationService hceService = NdefHostCardEmulationService.getInstance();
             if (hceService != null) {
                 Log.d(TAG, "Resetting HCE service state...");
-                // Clear any pending payment request
+                // Clear any pending payment request (this will also disable message processing)
                 hceService.clearPaymentRequest();
                 // Remove payment callback
                 hceService.setPaymentCallback(null);
@@ -935,7 +931,6 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             }
             switchToTokenMode();
             tokenDisplay.setText(token);
-            copyTokenButton.setVisibility(View.VISIBLE);
             openWithButton.setVisibility(View.VISIBLE);
             Toast.makeText(this, "Payment successful!", Toast.LENGTH_SHORT).show();
         });

@@ -159,13 +159,14 @@ public class NdefHostCardEmulationService extends HostApduService {
                                         Log.e(TAG, "Payment callback is null, can't report redemption error");
                                     }
                                 } finally {
-                                    // DO NOT reset the write mode to ensure service can continue to read tokens
-                                    Log.i(TAG, "Maintaining write mode for continued token reception");
-                                    // if (ndefProcessor != null) {
-                                    //     ndefProcessor.setWriteMode(false);
-                                    // } else {
-                                    //     Log.e(TAG, "NDEF processor is null in finally block");
-                                    // }
+                                    // Instead of always maintaining write mode, we now only maintain
+                                    // write mode and processing flags if we want to continue receiving tokens
+                                    Log.i(TAG, "Token processing complete");
+                                    // Disable incoming message processing after successful token processing
+                                    if (ndefProcessor != null) {
+                                        Log.i(TAG, "Disabling incoming message processing after token processing");
+                                        ndefProcessor.setProcessIncomingMessages(false);
+                                    }
                                 }
                             } else {
                                 Log.e(TAG, "Token failed validation, ignoring");
@@ -279,6 +280,9 @@ public class NdefHostCardEmulationService extends HostApduService {
         if (ndefProcessor != null) {
             ndefProcessor.setMessageToSend(paymentRequest);
             ndefProcessor.setWriteMode(true); // Enable write mode to send payment request
+            // Explicitly enable incoming message processing
+            ndefProcessor.setProcessIncomingMessages(true);
+            Log.i(TAG, "NDEF processor ready to send and receive messages");
         } else {
             Log.e(TAG, "NDEF processor is null, can't set payment request");
         }
@@ -300,8 +304,11 @@ public class NdefHostCardEmulationService extends HostApduService {
         this.expectedAmount = 0;
         if (ndefProcessor != null) {
             ndefProcessor.setMessageToSend("");
-            // Keep write mode enabled to still be able to receive tokens
-            // ndefProcessor.setWriteMode(false);
+            // Disable write mode when clearing payment request
+            ndefProcessor.setWriteMode(false);
+            // Explicitly disable incoming message processing when payment is not expected
+            ndefProcessor.setProcessIncomingMessages(false);
+            Log.i(TAG, "NDEF processor no longer processing incoming messages");
         } else {
             Log.e(TAG, "NDEF processor is null, can't clear payment request");
         }
