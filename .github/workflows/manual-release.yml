@@ -34,9 +34,55 @@ jobs:
           java-version: '17'
           cache: gradle
 
-      - name: Build with Gradle
-        run: ./gradlew build
+      # Decode the base 64 encoded keystore string to keystore.jks
+      - name: Decode Keystore
+        env:
+          ENCODED_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          mkdir -p $HOME/keystore
+          echo $ENCODED_KEYSTORE | base64 -d > $HOME/keystore/app-release.keystore
 
+      # Create a signing configuration for the project
+      - name: Create signing config
+        run: |
+          cat <<EOF > app/signing.gradle.kts
+          android {
+              signingConfigs {
+                  create("release") {
+                      storeFile = file("$HOME/keystore/app-release.keystore")
+                      storePassword = System.getenv("KEYSTORE_PASSWORD")
+                      keyAlias = System.getenv("KEY_ALIAS")
+                      keyPassword = System.getenv("KEY_PASSWORD")
+                  }
+              }
+              buildTypes {
+                  getByName("release") {
+                      signingConfig = signingConfigs.getByName("release")
+                  }
+              }
+          }
+          EOF
+          
+          # Apply the signing configuration by adding it to app/build.gradle.kts
+          echo "apply(from = \"signing.gradle.kts\")" >> app/build.gradle.kts
+
+      # Build signed APK with release profile
+      - name: Build Release APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleRelease
+
+      # Also build an Android App Bundle
+      - name: Build Release Bundle (AAB)
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew bundleRelease
+
+      # Create a GitHub release with the signed APK and Bundle
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
@@ -48,5 +94,6 @@ jobs:
           prerelease: ${{ github.event.inputs.pre_release }}
           files: |
             app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
