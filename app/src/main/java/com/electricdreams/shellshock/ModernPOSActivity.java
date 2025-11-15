@@ -122,7 +122,17 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
 
         // Initialize bitcoin price worker
         bitcoinPriceWorker = BitcoinPriceWorker.getInstance(this);
-        bitcoinPriceWorker.setPriceUpdateListener(price -> updateDisplay());
+        
+        // Set up the price listener to only update the display if it's needed
+        // This way, it won't reset the amount input when price updates
+        bitcoinPriceWorker.setPriceUpdateListener(price -> {
+            // Only update the display if we have an active conversion to show
+            // This prevents clearing the input during regular price updates
+            if (!currentInput.toString().isEmpty()) {
+                updateDisplay();
+            }
+        });
+        
         bitcoinPriceWorker.start();
         
         // Set up currency switch button
@@ -265,23 +275,11 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         // Toggle between sats and USD input mode
         isUsdInputMode = !isUsdInputMode;
         
-        // Clear the current input when switching modes
-        currentInput.setLength(0);
+        // Don't clear the current input when switching modes
+        // Just update the display to show the same value in the new mode
         
-        // Update UI based on current input mode
-        if (isUsdInputMode) {
-            // In USD mode, show USD as primary and sats as conversion
-            amountDisplay.setText("$0.00");
-            fiatAmountDisplay.setText("₿ 0");
-        } else {
-            // In sats mode (default), show sats as primary and USD as conversion
-            amountDisplay.setText("₿ 0");
-            fiatAmountDisplay.setText("$0.00 USD");
-        }
-        
-        // Update the submit button
-        submitButton.setText("Charge");
-        submitButton.setEnabled(false);
+        // Update UI based on current input mode and current value
+        updateDisplay();
     }
 
     private void onKeypadButtonClick(String label) {
