@@ -11,6 +11,8 @@ import android.util.Log;
 
 import com.electricdreams.shellshock.R;
 
+import java.util.List;
+
 /**
  * Host Card Emulation service for NDEF tag emulation to receive Cashu payments
  */

@@ -69,7 +69,9 @@ public class CashuPaymentHelper {
             
             // Set allowed mints if provided
             if (allowedMints != null && !allowedMints.isEmpty()) {
-                paymentRequest.mints = Optional.of(allowedMints);
+                // Convert List<String> to String[] for the Optional<String[]> field
+                String[] mintsArray = allowedMints.toArray(new String[0]);
+                paymentRequest.mints = Optional.of(mintsArray);
                 Log.d(TAG, "Added " + allowedMints.size() + " allowed mints to payment request");
             }
             
