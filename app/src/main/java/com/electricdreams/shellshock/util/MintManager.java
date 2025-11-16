@@ -22,7 +22,6 @@ public class MintManager {
         add("https://mint.minibits.cash/Bitcoin");
         add("https://mint.chorus.community");
         add("https://mint.cubabitcoin.org");
-        add("https://mint.macadamia.cash");
         add("https://mint.coinos.io");
     }};
     
