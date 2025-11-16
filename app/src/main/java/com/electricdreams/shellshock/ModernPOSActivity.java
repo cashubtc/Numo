@@ -276,13 +276,59 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     }
     
     private void toggleInputMode() {
-        // Toggle between sats and USD input mode
+        // Get current values before toggling
+        String inputStr = currentInput.toString();
+        long satsValue = 0;
+        double fiatValue = 0;
+        
+        // Calculate current values based on current mode
+        if (isUsdInputMode) {
+            // Currently in fiat mode, calculate sats
+            if (!inputStr.isEmpty()) {
+                try {
+                    long cents = Long.parseLong(inputStr);
+                    fiatValue = cents / 100.0;
+                    
+                    if (bitcoinPriceWorker != null && bitcoinPriceWorker.getCurrentPrice() > 0) {
+                        double btcAmount = fiatValue / bitcoinPriceWorker.getCurrentPrice();
+                        satsValue = (long)(btcAmount * 100000000);
+                    }
+                } catch (NumberFormatException e) {
+                    // If parsing fails, reset values
+                    satsValue = 0;
+                    fiatValue = 0;
+                }
+            }
+        } else {
+            // Currently in sats mode, calculate fiat
+            satsValue = inputStr.isEmpty() ? 0 : Long.parseLong(inputStr);
+            if (bitcoinPriceWorker != null) {
+                fiatValue = bitcoinPriceWorker.satoshisToFiat(satsValue);
+            }
+        }
+        
+        // Toggle the mode
         isUsdInputMode = !isUsdInputMode;
         
-        // Don't clear the current input when switching modes
-        // Just update the display to show the same value in the new mode
+        // Reset input string and set appropriate value based on new mode
+        currentInput.setLength(0);
         
-        // Update UI based on current input mode and current value
+        if (isUsdInputMode) {
+            // Switching to fiat mode
+            // Convert fiat value to cents and set as input
+            if (fiatValue > 0) {
+                long cents = (long)(fiatValue * 100);
+                currentInput.append(String.valueOf(cents));
+            }
+        } else {
+            // Switching to sats mode
+            // Set sats value as input
+            if (satsValue > 0) {
+                currentInput.append(String.valueOf(satsValue));
+            }
+        }
+        
+        // Update the display to show values in the new mode
         updateDisplay();
     }
 
