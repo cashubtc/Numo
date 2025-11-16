@@ -29,6 +29,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.FrameLayout;
 
+import com.electricdreams.shellshock.util.CurrencyManager;
+
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -150,10 +152,12 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         ImageButton topUpButton = findViewById(R.id.action_top_up);
         ImageButton balanceCheckButton = findViewById(R.id.action_balance_check);
         ImageButton historyButton = findViewById(R.id.action_history);
+        ImageButton settingsButton = findViewById(R.id.action_settings);
 
         topUpButton.setOnClickListener(v -> startActivity(new Intent(this, TopUpActivity.class)));
         balanceCheckButton.setOnClickListener(v -> startActivity(new Intent(this, BalanceCheckActivity.class)));
         historyButton.setOnClickListener(v -> startActivity(new Intent(this, TokenHistoryActivity.class)));
+        settingsButton.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         vibrator = (android.os.Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -324,38 +328,46 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         // Get the current value from the input
         String inputStr = currentInput.toString();
         long satsValue = 0;
-        double usdValue = 0;
+        double fiatValue = 0;
         
         if (isUsdInputMode) {
-            // Converting from USD input to sats equivalent
+            // Converting from fiat input to sats equivalent
             if (!inputStr.isEmpty()) {
                 try {
                     // Convert the input string to a double value in cents
                     long cents = Long.parseLong(inputStr);
-                    usdValue = cents / 100.0; // Convert cents to dollars
+                    fiatValue = cents / 100.0; // Convert cents to dollars/euros/etc
                     
-                    if (bitcoinPriceWorker != null && bitcoinPriceWorker.getBtcUsdPrice() > 0) {
+                    if (bitcoinPriceWorker != null && bitcoinPriceWorker.getCurrentPrice() > 0) {
                         // Calculate equivalent sats value
-                        double btcAmount = usdValue / bitcoinPriceWorker.getBtcUsdPrice();
+                        double btcAmount = fiatValue / bitcoinPriceWorker.getCurrentPrice();
                         satsValue = (long)(btcAmount * 100000000); // Convert BTC to sats
                     }
                     
-                    // Format USD amount for display (handling decimal point)
-                    String dollars = String.valueOf(cents / 100);
-                    String centsStr = String.format("%02d", cents % 100);
-                    String displayUsd = "$" + dollars + "." + centsStr;
-                    amountDisplay.setText(displayUsd);
+                    // Get currency symbol from CurrencyManager
+                    CurrencyManager currencyManager = CurrencyManager.getInstance(this);
+                    String symbol = currencyManager.getCurrentSymbol();
+                    
+                    // Format fiat amount for display (handling decimal point)
+                    String wholePart = String.valueOf(cents / 100);
+                    String centsPart = String.format("%02d", cents % 100);
+                    String displayFiat = symbol + wholePart + "." + centsPart;
+                    amountDisplay.setText(displayFiat);
                     
                     // Format sats equivalent
                     String satoshiEquivalent = "₿ " + NumberFormat.getNumberInstance(Locale.US).format(satsValue);
                     fiatAmountDisplay.setText(satoshiEquivalent);
                 } catch (NumberFormatException e) {
-                    amountDisplay.setText("$0.00");
+                    CurrencyManager currencyManager = CurrencyManager.getInstance(this);
+                    String symbol = currencyManager.getCurrentSymbol();
+                    amountDisplay.setText(symbol + "0.00");
                     fiatAmountDisplay.setText("₿ 0");
                     satsValue = 0;
                 }
             } else {
-                amountDisplay.setText("$0.00");
+                CurrencyManager currencyManager = CurrencyManager.getInstance(this);
+                String symbol = currencyManager.getCurrentSymbol();
+                amountDisplay.setText(symbol + "0.00");
                 fiatAmountDisplay.setText("₿ 0");
                 satsValue = 0;
             }
@@ -367,13 +379,14 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             String displayAmount = formatAmount(inputStr);
             amountDisplay.setText(displayAmount);
             
-            // Calculate and display USD equivalent
+            // Calculate and display fiat equivalent
             if (bitcoinPriceWorker != null) {
-                usdValue = bitcoinPriceWorker.satoshisToUsd(satsValue);
-                String formattedUsdAmount = bitcoinPriceWorker.formatUsdAmount(usdValue);
-                fiatAmountDisplay.setText(formattedUsdAmount);
+                fiatValue = bitcoinPriceWorker.satoshisToFiat(satsValue);
+                String formattedFiatAmount = bitcoinPriceWorker.formatFiatAmount(fiatValue);
+                fiatAmountDisplay.setText(formattedFiatAmount);
             } else {
-                fiatAmountDisplay.setText("$0.00 USD");
+                CurrencyManager currencyManager = CurrencyManager.getInstance(this);
+                fiatAmountDisplay.setText(currencyManager.formatCurrencyAmount(0.0));
             }
         }
         

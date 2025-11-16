@@ -243,6 +243,23 @@
                     android:contentDescription="Transaction History"
                     android:padding="16dp"/>
             </LinearLayout>
+            
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center">
+
+                <ImageButton
+                    android:id="@+id/action_settings"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?android:selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_settings"
+                    android:tint="@color/navigationIconTint"
+                    android:contentDescription="Settings"
+                    android:padding="16dp"/>
+            </LinearLayout>
         </LinearLayout>
 
     </LinearLayout>
