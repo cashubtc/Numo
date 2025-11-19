@@ -85,7 +85,7 @@ public class NdefHostCardEmulationService extends HostApduService {
                             Log.i(TAG, "Extracted Cashu token: " + cashuToken);
                             
                             // Get the list of allowed mints
-                            List<String> allowedMints = com.electricdreams.shellshock.util.MintManager.getInstance(getApplicationContext()).getAllowedMints();
+                            List<String> allowedMints = com.electricdreams.shellshock.core.util.MintManager.getInstance(getApplicationContext()).getAllowedMints();
                             Log.i(TAG, "Using allowed mints list with " + allowedMints.size() + " entries");
                             
                             // Validate the token against expected amount and mints
