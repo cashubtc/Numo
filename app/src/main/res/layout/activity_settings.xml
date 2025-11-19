@@ -203,11 +203,22 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/add_mint_layout" />
 
+            <!-- Items section -->
+            <include
+                android:id="@+id/items_section"
+                layout="@layout/section_items_settings"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/reset_mints_button" />
+
             <!-- Spacer -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
-                app:layout_constraintTop_toBottomOf="@id/reset_mints_button" />
+                app:layout_constraintTop_toBottomOf="@id/items_section" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

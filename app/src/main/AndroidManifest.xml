@@ -108,6 +108,51 @@
                 android:value=".ModernPOSActivity" />
         </activity>
         
+        <!-- Item Management Activities -->
+        <activity android:name="com.electricdreams.shellshock.feature.items.ItemEntryActivity"
+            android:exported="false"
+            android:label="Add Item"
+            android:theme="@style/Theme.Shellshock"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.items.ItemListActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.items.ItemListActivity" />
+        </activity>
+        
+        <activity android:name="com.electricdreams.shellshock.feature.items.ItemListActivity"
+            android:exported="false"
+            android:label="Items Catalog"
+            android:theme="@style/Theme.Shellshock"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.settings.SettingsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.settings.SettingsActivity" />
+        </activity>
+        
+        <activity android:name="com.electricdreams.shellshock.feature.items.ItemSelectionActivity"
+            android:exported="false"
+            android:label="Select Items"
+            android:theme="@style/Theme.Shellshock"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".ModernPOSActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ModernPOSActivity" />
+        </activity>
+        
+        <activity android:name="com.electricdreams.shellshock.feature.items.BasketActivity"
+            android:exported="false"
+            android:label="Basket"
+            android:theme="@style/Theme.Shellshock"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.items.ItemSelectionActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.items.ItemSelectionActivity" />
+        </activity>
+        
         <!-- HCE Service for NDEF tag emulation -->
         <service android:name=".ndef.NdefHostCardEmulationService"
             android:exported="true"

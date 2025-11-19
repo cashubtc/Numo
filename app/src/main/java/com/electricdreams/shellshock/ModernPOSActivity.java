@@ -111,6 +111,10 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_modern_pos);
 
+        // Check if we have a payment amount from intent (basket checkout)
+        Intent intent = getIntent();
+        long paymentAmount = intent.getLongExtra("EXTRA_PAYMENT_AMOUNT", 0);
+
         // Find all views
         amountDisplay = findViewById(R.id.amount_display);
         fiatAmountDisplay = findViewById(R.id.fiat_amount_display);
@@ -155,11 +159,13 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         ImageButton balanceCheckButton = findViewById(R.id.action_balance_check);
         ImageButton historyButton = findViewById(R.id.action_history);
         ImageButton settingsButton = findViewById(R.id.action_settings);
+        ImageButton catalogButton = findViewById(R.id.action_catalog);
 
         topUpButton.setOnClickListener(v -> startActivity(new Intent(this, TopUpActivity.class)));
         balanceCheckButton.setOnClickListener(v -> startActivity(new Intent(this, BalanceCheckActivity.class)));
         historyButton.setOnClickListener(v -> startActivity(new Intent(this, TokenHistoryActivity.class)));
         settingsButton.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
+        catalogButton.setOnClickListener(v -> startActivity(new Intent(this, com.electricdreams.shellshock.feature.items.ItemSelectionActivity.class)));
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         vibrator = (android.os.Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -211,7 +217,23 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
 
         // Ensure initial state
         resetToInputMode();
-        updateDisplay(); // Make sure first display is correct
+        
+        // Check if we need to set up an automatic payment from basket checkout
+        if (paymentAmount > 0) {
+            // Set input to the payment amount from basket
+            currentInput = new StringBuilder(String.valueOf(paymentAmount));
+            updateDisplay();
+            
+            // Automatically proceed with payment
+            new Handler().postDelayed(() -> {
+                if (submitButton.isEnabled()) {
+                    submitButton.performClick();
+                }
+            }, 500); // Small delay to allow UI to update
+        } else {
+            // Regular flow
+            updateDisplay(); // Make sure first display is correct
+        }
     }
 
     private void openTokenWithApp(String token) {
