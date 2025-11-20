@@ -162,7 +162,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         ImageButton catalogButton = findViewById(R.id.action_catalog);
 
         moreOptionsButton.setOnClickListener(v -> showOverflowMenu(v));
-        historyButton.setOnClickListener(v -> startActivity(new Intent(this, TokenHistoryActivity.class)));
+        historyButton.setOnClickListener(v -> startActivity(new Intent(this, PaymentsHistoryActivity.class)));
         settingsButton.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
         catalogButton.setOnClickListener(v -> startActivity(new Intent(this, com.electricdreams.shellshock.feature.items.ItemSelectionActivity.class)));
 
@@ -1149,7 +1149,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         // Play success feedback
         playSuccessFeedback();
 
-        TokenHistoryActivity.addToHistory(this, token, amount);
+        PaymentsHistoryActivity.addToHistory(this, token, amount);
 
         mainHandler.post(() -> {
             if (nfcDialog != null && nfcDialog.isShowing()) {
@@ -1333,7 +1333,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             toggleTheme();
             return true;
         } else if (itemId == R.id.action_history) {
-            startActivity(new Intent(this, TokenHistoryActivity.class));
+            startActivity(new Intent(this, PaymentsHistoryActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);
