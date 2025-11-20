@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Items Catalog"
+        android:text="Items Catalog Management"
         android:textAppearance="?attr/textAppearanceHeadline6"
         android:layout_marginBottom="16dp" />
 
@@ -19,6 +19,13 @@
         android:layout_height="wrap_content"
         android:text="No items in catalog"
         android:textAppearance="?attr/textAppearanceBody2"
+        android:layout_marginBottom="8dp" />
+        
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Use 'Manage Items' to view, add, edit or delete individual items in your catalog."
+        android:textAppearance="?attr/textAppearanceCaption"
         android:layout_marginBottom="16dp" />
 
     <LinearLayout
@@ -40,7 +47,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Add Items"
+            android:text="Manage Items"
             android:layout_marginStart="8dp" />
 
     </LinearLayout>
@@ -50,6 +57,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Clear All Items"
+        android:textColor="#F44336"
+        app:strokeColor="#F44336"
         style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
 </LinearLayout>

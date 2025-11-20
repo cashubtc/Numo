@@ -86,9 +86,9 @@
                 android:resource="@xml/nfc_tech_filter" />
         </activity>
         
-        <activity android:name="com.electricdreams.shellshock.feature.history.TokenHistoryActivity"
+        <activity android:name="com.electricdreams.shellshock.feature.history.PaymentsHistoryActivity"
             android:exported="false"
-            android:label="Token History"
+            android:label="Payments History"
             android:theme="@style/Theme.Shellshock"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".ModernPOSActivity">

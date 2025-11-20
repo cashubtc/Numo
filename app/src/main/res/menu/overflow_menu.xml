@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/action_overflow_top_up"
+        android:title="Top Up"
+        android:icon="@drawable/ic_top_up" />
+    <item
+        android:id="@+id/action_overflow_balance_check"
+        android:title="Check Balance"
+        android:icon="@drawable/ic_balance_check" />
+</menu>

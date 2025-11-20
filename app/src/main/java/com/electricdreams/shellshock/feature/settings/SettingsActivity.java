@@ -260,12 +260,23 @@ public class SettingsActivity extends AppCompatActivity implements MintsAdapter.
             itemListLauncher.launch(intent);
         });
         
+        // Update button tooltip/description
+        addItemsButton.setTooltipText("View, add, edit, or delete catalog items");
+        
         // Set up clear button
         clearItemsButton.setOnClickListener(v -> {
-            ItemManager itemManager = ItemManager.getInstance(this);
-            itemManager.clearItems();
-            updateItemsStatus();
-            Toast.makeText(this, "All items cleared", Toast.LENGTH_SHORT).show();
+            // Show confirmation dialog before clearing items
+            new androidx.appcompat.app.AlertDialog.Builder(this)
+                    .setTitle("Clear All Items")
+                    .setMessage("Are you sure you want to delete ALL items from your catalog? This cannot be undone.")
+                    .setPositiveButton("Delete All Items", (dialog, which) -> {
+                        ItemManager itemManager = ItemManager.getInstance(this);
+                        itemManager.clearItems();
+                        updateItemsStatus();
+                        Toast.makeText(this, "All items cleared", Toast.LENGTH_SHORT).show();
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
         });
     }
     

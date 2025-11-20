@@ -34,7 +34,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="No tokens in history"
+        android:text="No payments in history"
         android:textSize="18sp"
         android:visibility="gone"
         app:layout_behavior="@string/appbar_scrolling_view_behavior" />

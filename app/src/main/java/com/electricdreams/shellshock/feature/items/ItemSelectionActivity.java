@@ -176,6 +176,11 @@ public class ItemSelectionActivity extends AppCompatActivity {
             }
         }
         
+        void updateItems(List<Item> newItems) {
+            this.items = newItems;
+            notifyDataSetChanged();
+        }
+        
         @NonNull
         @Override
         public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

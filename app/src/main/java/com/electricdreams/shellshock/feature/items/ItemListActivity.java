@@ -62,6 +62,7 @@ public class ItemListActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.item_list_title);
 
         // Initialize views
         recyclerView = findViewById(R.id.items_recycler_view);
