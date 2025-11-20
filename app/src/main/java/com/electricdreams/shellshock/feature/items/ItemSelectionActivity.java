@@ -302,8 +302,14 @@ public class ItemSelectionActivity extends AppCompatActivity {
                     basketManager.removeItem(item.getId());
                     basketQuantities.remove(item.getId());
                 } else {
-                    // Update or add item to basket
-                    basketManager.updateItemQuantity(item.getId(), newQuantity);
+                    // Try to update item quantity first
+                    boolean updated = basketManager.updateItemQuantity(item.getId(), newQuantity);
+                    
+                    // If update failed, item doesn't exist in basket yet, so add it
+                    if (!updated) {
+                        basketManager.addItem(item, newQuantity);
+                    }
+                    
                     basketQuantities.put(item.getId(), newQuantity);
                     
                     // Show a toast when adding an item

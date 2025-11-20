@@ -69,6 +69,7 @@ public class BasketManager {
             }
         }
         
+        // If we get here, item is not in basket yet
         return false;
     }
     
