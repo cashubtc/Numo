@@ -1,25 +1,45 @@
 package com.electricdreams.shellshock.feature.items;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
-import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
+import android.app.AlertDialog;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
 import com.electricdreams.shellshock.R;
 import com.electricdreams.shellshock.core.model.Item;
 import com.electricdreams.shellshock.core.util.ItemManager;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.UUID;
 
 public class ItemEntryActivity extends AppCompatActivity {
 
     public static final String EXTRA_ITEM_ID = "extra_item_id";
+    private static final int REQUEST_IMAGE_CAPTURE = 1001;
+    private static final int REQUEST_PICK_IMAGE = 1002;
 
     private TextInputEditText nameInput;
     private TextInputEditText variationInput;
@@ -30,10 +50,34 @@ public class ItemEntryActivity extends AppCompatActivity {
     private TextInputEditText quantityInput;
     private CheckBox alertCheckbox;
     private TextInputEditText alertThresholdInput;
+    private ImageView itemImageView;
+    private ImageView imagePlaceholder;
+    private Button addImageButton;
+    private Button removeImageButton;
 
     private ItemManager itemManager;
     private String editItemId;
     private boolean isEditMode;
+    private Uri selectedImageUri;
+    private Item currentItem;
+    private String currentPhotoPath;
+
+    private final ActivityResultLauncher<String> selectGalleryLauncher = registerForActivityResult(
+            new ActivityResultContracts.GetContent(),
+            uri -> {
+                if (uri != null) {
+                    selectedImageUri = uri;
+                    updateImagePreview();
+                }
+            });
+    
+    private final ActivityResultLauncher<Uri> takePictureLauncher = registerForActivityResult(
+            new ActivityResultContracts.TakePicture(),
+            success -> {
+                if (success && selectedImageUri != null) {
+                    updateImagePreview();
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,9 +94,17 @@ public class ItemEntryActivity extends AppCompatActivity {
         quantityInput = findViewById(R.id.item_quantity_input);
         alertCheckbox = findViewById(R.id.item_alert_checkbox);
         alertThresholdInput = findViewById(R.id.item_alert_threshold_input);
+        itemImageView = findViewById(R.id.item_image_view);
+        imagePlaceholder = findViewById(R.id.item_image_placeholder);
+        addImageButton = findViewById(R.id.item_add_image_button);
+        removeImageButton = findViewById(R.id.item_remove_image_button);
 
         Button cancelButton = findViewById(R.id.item_cancel_button);
         Button saveButton = findViewById(R.id.item_save_button);
+
+        // Set up image buttons
+        addImageButton.setOnClickListener(v -> showImageSourceDialog());
+        removeImageButton.setOnClickListener(v -> removeImage());
 
         // Get item manager instance
         itemManager = ItemManager.getInstance(this);
@@ -82,6 +134,8 @@ public class ItemEntryActivity extends AppCompatActivity {
     private void loadItemData() {
         for (Item item : itemManager.getAllItems()) {
             if (item.getId().equals(editItemId)) {
+                currentItem = item;
+                
                 // Populate the form with item data
                 nameInput.setText(item.getName());
                 variationInput.setText(item.getVariationName());
@@ -93,11 +147,131 @@ public class ItemEntryActivity extends AppCompatActivity {
                 alertCheckbox.setChecked(item.isAlertEnabled());
                 alertThresholdInput.setEnabled(item.isAlertEnabled());
                 alertThresholdInput.setText(String.valueOf(item.getAlertThreshold()));
+                
+                // Load item image if available
+                if (item.getImagePath() != null) {
+                    Bitmap bitmap = itemManager.loadItemImage(item);
+                    if (bitmap != null) {
+                        itemImageView.setImageBitmap(bitmap);
+                        itemImageView.setVisibility(View.VISIBLE);
+                        imagePlaceholder.setVisibility(View.GONE);
+                        removeImageButton.setVisibility(View.VISIBLE);
+                    }
+                }
+                
                 break;
             }
         }
     }
+    
+    private void showImageSourceDialog() {
+        CharSequence[] options = {"Take Photo", "Choose from Gallery"};
+        
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Add Picture");
+        builder.setItems(options, (dialog, which) -> {
+            switch (which) {
+                case 0: // Take Photo
+                    takePicture();
+                    break;
+                case 1: // Choose from Gallery
+                    selectFromGallery();
+                    break;
+            }
+        });
+        builder.show();
+    }
+    
+    private void selectFromGallery() {
+        selectGalleryLauncher.launch("image/*");
+    }
+    
+    private void takePicture() {
+        // First check if camera permission is granted
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_IMAGE_CAPTURE);
+            return;
+        }
+        
+        try {
+            // Create a file to store the image
+            File photoFile = createImageFile();
+            
+            // Create the URI where the photo will be saved
+            selectedImageUri = FileProvider.getUriForFile(
+                    this,
+                    "com.electricdreams.shellshock.fileprovider",
+                    photoFile
+            );
+            
+            // Start camera using the ActivityResultLauncher
+            takePictureLauncher.launch(selectedImageUri);
+            
+        } catch (IOException ex) {
+            // Error occurred while creating the file
+            Toast.makeText(this, "Error creating image file: " + ex.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
 
+        // Save a file: path for use with ACTION_VIEW intents
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+    
+    private void removeImage() {
+        selectedImageUri = null;
+        itemImageView.setImageBitmap(null);
+        itemImageView.setVisibility(View.VISIBLE);
+        imagePlaceholder.setVisibility(View.VISIBLE);
+        removeImageButton.setVisibility(View.GONE);
+        
+        // If editing an item that already has an image, mark it for removal
+        if (isEditMode && currentItem != null && currentItem.getImagePath() != null) {
+            itemManager.deleteItemImage(currentItem);
+        }
+    }
+    
+    private void updateImagePreview() {
+        if (selectedImageUri != null) {
+            try {
+                Bitmap bitmap = android.provider.MediaStore.Images.Media.getBitmap(
+                        getContentResolver(), selectedImageUri);
+                itemImageView.setImageBitmap(bitmap);
+                itemImageView.setVisibility(View.VISIBLE);
+                imagePlaceholder.setVisibility(View.GONE);
+                removeImageButton.setVisibility(View.VISIBLE);
+            } catch (Exception e) {
+                Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            // If request is cancelled, the result arrays are empty
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission was granted, call camera again
+                takePicture();
+            } else {
+                // Permission denied
+                Toast.makeText(this, "Camera permission is required to take pictures", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+    
     private void saveItem() {
         // Validate required fields
         String name = nameInput.getText().toString().trim();
@@ -170,6 +344,11 @@ public class ItemEntryActivity extends AppCompatActivity {
         Item item = new Item();
         if (isEditMode) {
             item.setId(editItemId);
+            
+            // Preserve existing image path if not changed
+            if (currentItem != null && currentItem.getImagePath() != null && selectedImageUri == null) {
+                item.setImagePath(currentItem.getImagePath());
+            }
         } else {
             item.setId(UUID.randomUUID().toString());
         }
@@ -184,6 +363,7 @@ public class ItemEntryActivity extends AppCompatActivity {
         item.setAlertEnabled(alertCheckbox.isChecked());
         item.setAlertThreshold(alertThreshold);
 
+        // First save the item data
         boolean success;
         if (isEditMode) {
             success = itemManager.updateItem(item);
@@ -191,12 +371,21 @@ public class ItemEntryActivity extends AppCompatActivity {
             success = itemManager.addItem(item);
         }
 
-        if (success) {
-            Toast.makeText(this, isEditMode ? "Item updated" : "Item added", Toast.LENGTH_SHORT).show();
-            setResult(RESULT_OK);
-            finish();
-        } else {
+        if (!success) {
             Toast.makeText(this, "Failed to save item", Toast.LENGTH_SHORT).show();
+            return;
         }
+        
+        // Then save the image if one was selected
+        if (selectedImageUri != null) {
+            boolean imageSaved = itemManager.saveItemImage(item, selectedImageUri);
+            if (!imageSaved) {
+                Toast.makeText(this, "Item saved but image could not be saved", Toast.LENGTH_LONG).show();
+            }
+        }
+
+        Toast.makeText(this, isEditMode ? "Item updated" : "Item added", Toast.LENGTH_SHORT).show();
+        setResult(RESULT_OK);
+        finish();
     }
 }

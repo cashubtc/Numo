@@ -1,6 +1,8 @@
 package com.electricdreams.shellshock.feature.items;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -8,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +29,7 @@ import com.electricdreams.shellshock.core.util.CurrencyManager;
 import com.electricdreams.shellshock.core.util.ItemManager;
 import com.electricdreams.shellshock.core.worker.BitcoinPriceWorker;
 
+import java.io.File;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.List;
@@ -214,6 +218,7 @@ public class ItemSelectionActivity extends AppCompatActivity {
             private final ImageButton decreaseButton;
             private final TextView basketQuantityView;
             private final ImageButton increaseButton;
+            private final ImageView itemImageView;
             
             ItemViewHolder(@NonNull View itemView) {
                 super(itemView);
@@ -226,6 +231,7 @@ public class ItemSelectionActivity extends AppCompatActivity {
                 decreaseButton = itemView.findViewById(R.id.decrease_quantity_button);
                 basketQuantityView = itemView.findViewById(R.id.basket_quantity);
                 increaseButton = itemView.findViewById(R.id.increase_quantity_button);
+                itemImageView = itemView.findViewById(R.id.item_image);
             }
             
             void bind(Item item, int basketQuantity) {
@@ -263,6 +269,28 @@ public class ItemSelectionActivity extends AppCompatActivity {
                 
                 // Show basket quantity
                 basketQuantityView.setText(String.valueOf(basketQuantity));
+                
+                // Load and display the item image
+                if (item.getImagePath() != null && !item.getImagePath().isEmpty()) {
+                    // Create a file from the image path
+                    File imageFile = new File(item.getImagePath());
+                    if (imageFile.exists()) {
+                        // Load the image using Bitmap
+                        Bitmap bitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+                        if (bitmap != null) {
+                            itemImageView.setImageBitmap(bitmap);
+                        } else {
+                            // If bitmap loading fails, show placeholder
+                            itemImageView.setImageResource(R.drawable.ic_image_placeholder);
+                        }
+                    } else {
+                        // If file doesn't exist, show placeholder
+                        itemImageView.setImageResource(R.drawable.ic_image_placeholder);
+                    }
+                } else {
+                    // If no image path, show placeholder
+                    itemImageView.setImageResource(R.drawable.ic_image_placeholder);
+                }
                 
                 // Enable/disable decrease button based on basket quantity
                 decreaseButton.setEnabled(basketQuantity > 0);

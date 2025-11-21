@@ -22,6 +22,7 @@ public class Item implements Parcelable {
     private int quantity; // Available quantity
     private boolean alertEnabled; // Whether stock alerts are enabled
     private int alertThreshold; // Threshold for stock alerts
+    private String imagePath; // Path to item image (can be null)
 
     public Item() {
         // Default constructor
@@ -45,6 +46,7 @@ public class Item implements Parcelable {
         quantity = in.readInt();
         alertEnabled = in.readByte() != 0;
         alertThreshold = in.readInt();
+        imagePath = in.readString();
     }
 
     public static final Creator<Item> CREATOR = new Creator<Item>() {
@@ -147,6 +149,14 @@ public class Item implements Parcelable {
         this.alertThreshold = alertThreshold;
     }
 
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
+    }
+
     /**
      * Get display name combining name and variation if available
      */
@@ -175,6 +185,7 @@ public class Item implements Parcelable {
         dest.writeInt(quantity);
         dest.writeByte((byte) (alertEnabled ? 1 : 0));
         dest.writeInt(alertThreshold);
+        dest.writeString(imagePath);
     }
 
     @Override

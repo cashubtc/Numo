@@ -11,104 +11,120 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:padding="16dp">
-
-        <TextView
-            android:id="@+id/item_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceHeadline6"
-            android:ellipsize="end"
-            android:maxLines="1"
-            tools:text="T-Shirt" />
-
-        <TextView
-            android:id="@+id/item_variation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceBody2"
-            android:layout_marginBottom="8dp"
-            android:visibility="gone"
-            tools:text="Small"
-            tools:visibility="visible" />
-
-        <TextView
-            android:id="@+id/item_description"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceBody2"
-            android:maxLines="2"
-            android:ellipsize="end"
-            android:layout_marginBottom="8dp"
-            tools:text="100% organic soft cotton t-shirt" />
+        
+        <ImageView
+            android:id="@+id/item_image"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginEnd="16dp"
+            android:scaleType="centerCrop"
+            android:contentDescription="Item image"
+            android:background="@drawable/ic_image_placeholder"
+            tools:src="@drawable/ic_image_placeholder"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            android:orientation="vertical">
 
             <TextView
-                android:id="@+id/item_sku"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textAppearance="?attr/textAppearanceCaption"
-                tools:text="SKU: A12345" />
-
-            <TextView
-                android:id="@+id/item_price"
-                android:layout_width="wrap_content"
+                android:id="@+id/item_name"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="?attr/textAppearanceHeadline6"
-                android:textStyle="bold"
-                tools:text="$24.99" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+                android:ellipsize="end"
+                android:maxLines="1"
+                tools:text="T-Shirt" />
 
             <TextView
-                android:id="@+id/item_quantity"
-                android:layout_width="0dp"
+                android:id="@+id/item_variation"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:textAppearance="?attr/textAppearanceBody2"
-                tools:text="In stock: 10" />
+                android:layout_marginBottom="8dp"
+                android:visibility="gone"
+                tools:text="Small"
+                tools:visibility="visible" />
+
+            <TextView
+                android:id="@+id/item_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:layout_marginBottom="8dp"
+                tools:text="100% organic soft cotton t-shirt" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <ImageButton
-                    android:id="@+id/decrease_quantity_button"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Decrease quantity"
-                    android:src="@drawable/ic_minus" />
+                android:layout_marginBottom="8dp">
 
                 <TextView
-                    android:id="@+id/basket_quantity"
-                    android:layout_width="48dp"
+                    android:id="@+id/item_sku"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
+                    android:layout_weight="1"
+                    android:textAppearance="?attr/textAppearanceCaption"
+                    tools:text="SKU: A12345" />
+
+                <TextView
+                    android:id="@+id/item_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceHeadline6"
                     android:textStyle="bold"
-                    tools:text="1" />
+                    tools:text="$24.99" />
+            </LinearLayout>
 
-                <ImageButton
-                    android:id="@+id/increase_quantity_button"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="Increase quantity"
-                    android:src="@drawable/ic_plus" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/item_quantity"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    tools:text="In stock: 10" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageButton
+                        android:id="@+id/decrease_quantity_button"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Decrease quantity"
+                        android:src="@drawable/ic_minus" />
+
+                    <TextView
+                        android:id="@+id/basket_quantity"
+                        android:layout_width="48dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textAppearance="?attr/textAppearanceHeadline6"
+                        android:textStyle="bold"
+                        tools:text="1" />
+
+                    <ImageButton
+                        android:id="@+id/increase_quantity_button"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Increase quantity"
+                        android:src="@drawable/ic_plus" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

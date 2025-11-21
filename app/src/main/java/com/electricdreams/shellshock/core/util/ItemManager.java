@@ -2,6 +2,9 @@ package com.electricdreams.shellshock.core.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -13,8 +16,12 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -86,6 +93,9 @@ public class ItemManager {
                     if (!obj.isNull("alertThreshold")) {
                         item.setAlertThreshold(obj.getInt("alertThreshold"));
                     }
+                    if (!obj.isNull("imagePath")) {
+                        item.setImagePath(obj.getString("imagePath"));
+                    }
                     
                     items.add(item);
                 }
@@ -127,6 +137,9 @@ public class ItemManager {
                 obj.put("quantity", item.getQuantity());
                 obj.put("alertEnabled", item.isAlertEnabled());
                 obj.put("alertThreshold", item.getAlertThreshold());
+                if (item.getImagePath() != null) {
+                    obj.put("imagePath", item.getImagePath());
+                }
                 
                 array.put(obj);
             }
@@ -358,5 +371,120 @@ public class ItemManager {
         result.add(field.toString());
         
         return result.toArray(new String[0]);
+    }
+
+    /**
+     * Save an image for an item
+     * @param item Item to save image for
+     * @param imageUri Uri of the image to save
+     * @return true if saved successfully, false if failed
+     */
+    public boolean saveItemImage(Item item, Uri imageUri) {
+        try {
+            // Create images directory if it doesn't exist
+            File imagesDir = new File(context.getFilesDir(), "item_images");
+            if (!imagesDir.exists()) {
+                if (!imagesDir.mkdirs()) {
+                    Log.e(TAG, "Failed to create images directory");
+                    return false;
+                }
+            }
+
+            // Generate a unique filename based on item ID
+            String filename = "item_" + item.getId() + ".jpg";
+            File imageFile = new File(imagesDir, filename);
+
+            // If file already exists, delete it
+            if (imageFile.exists()) {
+                if (!imageFile.delete()) {
+                    Log.e(TAG, "Failed to delete existing image file");
+                }
+            }
+
+            // Copy the image from the Uri to the file
+            InputStream inputStream = context.getContentResolver().openInputStream(imageUri);
+            if (inputStream != null) {
+                // Decode and compress the bitmap to save space
+                Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                inputStream.close();
+                
+                // Scale down if the image is too large
+                if (bitmap.getWidth() > 1024 || bitmap.getHeight() > 1024) {
+                    int maxDimension = Math.max(bitmap.getWidth(), bitmap.getHeight());
+                    float scale = 1024f / maxDimension;
+                    int newWidth = Math.round(bitmap.getWidth() * scale);
+                    int newHeight = Math.round(bitmap.getHeight() * scale);
+                    bitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
+                }
+
+                // Save the image as JPEG with 85% quality
+                FileOutputStream outputStream = new FileOutputStream(imageFile);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 85, outputStream);
+                outputStream.flush();
+                outputStream.close();
+                
+                // Update the item's image path
+                item.setImagePath(imageFile.getAbsolutePath());
+                updateItem(item);
+                
+                return true;
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Error saving item image: " + e.getMessage(), e);
+        }
+        
+        return false;
+    }
+
+    /**
+     * Delete the image associated with an item
+     * @param item Item whose image should be deleted
+     * @return true if deleted successfully or if no image existed, false if failed
+     */
+    public boolean deleteItemImage(Item item) {
+        if (item.getImagePath() == null) {
+            return true; // No image to delete
+        }
+        
+        File imageFile = new File(item.getImagePath());
+        if (imageFile.exists()) {
+            if (imageFile.delete()) {
+                item.setImagePath(null);
+                updateItem(item);
+                return true;
+            } else {
+                Log.e(TAG, "Failed to delete image file: " + item.getImagePath());
+                return false;
+            }
+        } else {
+            // File doesn't exist, just update the item
+            item.setImagePath(null);
+            updateItem(item);
+            return true;
+        }
+    }
+
+    /**
+     * Load the image bitmap for an item
+     * @param item Item whose image should be loaded
+     * @return Bitmap of the image, or null if no image or error
+     */
+    public Bitmap loadItemImage(Item item) {
+        if (item.getImagePath() == null) {
+            return null;
+        }
+        
+        File imageFile = new File(item.getImagePath());
+        if (!imageFile.exists()) {
+            Log.w(TAG, "Image file not found: " + item.getImagePath());
+            return null;
+        }
+        
+        try {
+            return BitmapFactory.decodeFile(item.getImagePath());
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading item image: " + e.getMessage(), e);
+            return null;
+        }
     }
 }

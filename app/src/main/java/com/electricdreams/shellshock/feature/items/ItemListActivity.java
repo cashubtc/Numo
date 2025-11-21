@@ -2,6 +2,7 @@ package com.electricdreams.shellshock.feature.items;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -161,6 +163,8 @@ public class ItemListActivity extends AppCompatActivity {
             private final TextView quantityView;
             private final ImageButton editButton;
             private final ImageButton deleteButton;
+            private final ImageView itemImageView;
+            private final ImageView imagePlaceholder;
 
             ItemViewHolder(@NonNull View itemView) {
                 super(itemView);
@@ -172,6 +176,8 @@ public class ItemListActivity extends AppCompatActivity {
                 quantityView = itemView.findViewById(R.id.item_quantity);
                 editButton = itemView.findViewById(R.id.edit_item_button);
                 deleteButton = itemView.findViewById(R.id.delete_item_button);
+                itemImageView = itemView.findViewById(R.id.item_image);
+                imagePlaceholder = itemView.findViewById(R.id.item_image_placeholder);
             }
 
             void bind(Item item) {
@@ -206,6 +212,20 @@ public class ItemListActivity extends AppCompatActivity {
                 
                 // Show quantity
                 quantityView.setText("In stock: " + item.getQuantity());
+                
+                // Load item image if available
+                if (item.getImagePath() != null) {
+                    Bitmap bitmap = itemManager.loadItemImage(item);
+                    if (bitmap != null) {
+                        itemImageView.setImageBitmap(bitmap);
+                        imagePlaceholder.setVisibility(View.GONE);
+                    } else {
+                        imagePlaceholder.setVisibility(View.VISIBLE);
+                    }
+                } else {
+                    itemImageView.setImageBitmap(null);
+                    imagePlaceholder.setVisibility(View.VISIBLE);
+                }
                 
                 // Set up edit button
                 editButton.setOnClickListener(v -> {

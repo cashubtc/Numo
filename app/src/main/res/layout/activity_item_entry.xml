@@ -1,24 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:fillViewport="true">
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/item_name_layout"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:hint="Item Name">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/item_name_input"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="text" />
-    </com.google.android.material.textfield.TextInputLayout>
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_horizontal">
+
+            <FrameLayout
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_marginBottom="8dp">
+
+                <ImageView
+                    android:id="@+id/item_image_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:background="@android:color/darker_gray"
+                    android:contentDescription="Item image" />
+
+                <ImageView
+                    android:id="@+id/item_image_placeholder"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:src="@android:drawable/ic_menu_camera"
+                    android:contentDescription="No image" />
+            </FrameLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/item_add_image_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Add Image"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_marginEnd="8dp" />
+
+                <Button
+                    android:id="@+id/item_remove_image_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Remove"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/item_name_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:hint="Item Name">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/item_name_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/item_variation_layout"
@@ -160,3 +217,4 @@
     </LinearLayout>
 
 </LinearLayout>
+</ScrollView>

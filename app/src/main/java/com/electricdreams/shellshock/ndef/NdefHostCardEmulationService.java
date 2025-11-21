@@ -87,6 +87,9 @@ public class NdefHostCardEmulationService extends HostApduService {
                             // Get the list of allowed mints
                             List<String> allowedMints = com.electricdreams.shellshock.core.util.MintManager.getInstance(getApplicationContext()).getAllowedMints();
                             Log.i(TAG, "Using allowed mints list with " + allowedMints.size() + " entries");
+                            for (String mint : allowedMints) {
+                                Log.d(TAG, "allowed mint: " + mint);
+                            }
                             
                             // Validate the token against expected amount and mints
                             boolean isValid = false;
