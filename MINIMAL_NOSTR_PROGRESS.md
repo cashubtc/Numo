@@ -88,27 +88,73 @@ Build status: `./gradlew :app:assembleDebug` ✅
 
 ---
 
-## Step 4 – NIP-59 unwrap (NEXT)
+## Step 4 – NIP-59 unwrap (COMPLETED)
 
-**Planned file(s):**
+**Status:** ✅ Implemented and compiling
+
+**File:**
 
 - `app/src/main/java/com/electricdreams/shellshock/nostr/Nip59.java`
 
-Planned features:
+Features:
 
 - `UnwrappedDm unwrapGiftWrappedDm(NostrEvent giftwrap, byte[] ourPriv32)`:
-  - Verifies the outer kind 1059 event and its Schnorr signature.
-  - Uses `Nip44.getConversationKey(ourPriv32, giftwrap.pubkey)` and `Nip44.decrypt(giftwrap.content, conv1)` to obtain a kind 13 `seal` event.
-  - Verifies kind 13 event and its signature.
-  - Uses `Nip44.getConversationKey(ourPriv32, seal.pubkey)` and `Nip44.decrypt(seal.content, conv2)` to obtain inner kind 14 `rumor` event.
-  - Returns a struct with `giftwrap`, `seal`, `rumor` (where `rumor.content` is the DM plaintext we pass to Cashu).
+  - Validates that the outer event is kind 1059 and passes `giftwrap.verify()`.
+  - Derives first conversation key `conv1 = Nip44.getConversationKey(ourPriv32, gwPub)`.
+  - Decrypts `giftwrap.content` with `conv1` to JSON for a kind 13 `seal` event; parses and verifies it.
+  - Derives second conversation key `conv2 = Nip44.getConversationKey(ourPriv32, seal.pubkey)`.
+  - Decrypts `seal.content` with `conv2` to JSON for an inner kind 14 `rumor` event; parses it.
+  - Ensures `rumor.kind == 14` and `rumor.pubkey` matches `seal.pubkey` (per NIP-17 requirement).
+  - Returns an `UnwrappedDm` holding `giftwrap`, `seal`, and `rumor`, where `rumor.content` is the DM plaintext.
+
+Build status: `./gradlew :app:assembleDebug` ✅
 
 ---
 
-## Upcoming Steps
+## Step 5 – WebSocket client (COMPLETED)
 
-After Step 4:
+**Status:** ✅ Implemented and compiling
 
-- **Step 5 – WebSocket client**: OkHttp-based `NostrWebSocketClient` that subscribes to kind 1059 with `#p=[our pubkey]` on the configured relay list.
-- **Step 6 – NostrPaymentListener**: orchestrates unwrap + decrypt + `redeemFromPRPayload`.
-- **Step 7 – Integration**: wire `NostrKeyPair` + `NostrPaymentListener` into `ModernPOSActivity` alongside existing NFC/HCE + QR.
+**File:**
+
+- `app/src/main/java/com/electricdreams/shellshock/nostr/NostrWebSocketClient.java`
+
+Features:
+
+- Uses OkHttp's `WebSocket` to connect to a list of relay URLs.
+- On `start()`, connects to each relay and, on `onOpen`, sends a `REQ`:
+  - `{"kinds":[1059], "#p":["<our pubkey hex>"]}` with a generated `subscriptionId`.
+- Parses messages from relays:
+  - `EVENT` messages matching our `subscriptionId` are parsed into `NostrEvent` instances and passed to a pluggable `EventHandler`.
+  - `NOTICE`, `CLOSED`, and `EOSE` messages are logged for visibility.
+- Implements simple reconnect logic per relay with exponential backoff (1s → 2s → ... up to 60s) while `running==true`.
+- Supports `start()` / `stop()` lifecycle to begin or halt all relay connections.
+
+Build status: `./gradlew :app:assembleDebug` ✅
+
+---
+
+## Step 6 – NostrPaymentListener (NEXT)
+
+**Planned file(s):**
+
+- `app/src/main/java/com/electricdreams/shellshock/nostr/NostrPaymentListener.java`
+
+Planned features:
+
+- Wraps a `NostrWebSocketClient` instance.
+- On each incoming event:
+  - Filters for `kind == 1059` and `#p` containing our ephemeral pubkey (already handled at subscription level, but double-check if desired).
+  - Uses `Nip59.unwrapGiftWrappedDm(event, ourPriv32)` to obtain the inner kind 14 rumor.
+  - Treats `rumor.content` as a JSON `PaymentRequestPayload` and calls `CashuPaymentHelper.redeemFromPRPayload(...)`.
+  - On first successful redemption, stops the listener and invokes a success callback with the encoded token.
+  - On errors (decrypt failure, parse failure, redemption errors), logs and continues listening for additional DMs.
+
+---
+
+## Step 7 – Integration into ModernPOSActivity (LATER)
+
+- Create ephemeral `NostrKeyPair` per payment.
+- Generate `nprofile` over the configured relay list and embed it into the NUT-18 PaymentRequest transport.
+- Instantiate and start `NostrPaymentListener` alongside NFC/HCE when starting a unified payment.
+- Stop listener on payment success, error, dialog cancel, or activity destruction.
