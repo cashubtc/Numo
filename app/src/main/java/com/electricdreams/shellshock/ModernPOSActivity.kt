@@ -69,6 +69,11 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback 
     private val catalogItemsState = mutableStateOf<List<Item>>(emptyList())
     private val balanceState = mutableStateOf<Long?>(null)
     private val balanceStatusState = mutableStateOf("Tap your NFC card to check balance")
+    
+    // Basket state
+    private val basketQuantitiesState = mutableStateOf<Map<String, Int>>(emptyMap())
+    private val basketTotalItemsState = mutableStateOf(0)
+    private val basketTotalPriceState = mutableStateOf("$0.00")
 
     private var currentInput = StringBuilder()
     private var nfcDialog: AlertDialog? = null
@@ -119,6 +124,11 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback 
                                     4 -> Color.White // Profile/Settings
                                     else -> Color.White
                                 }
+                                // Update status bar color to match screen
+                                window.statusBarColor = when (index) {
+                                    2 -> 0xFF1B9A4B.toInt() // Exact CashGreen for keypad
+                                    else -> android.graphics.Color.WHITE
+                                }
                                 // Refresh data when switching tabs
                                 when (index) {
                                     0 -> loadHistory()
@@ -152,35 +162,59 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback 
                                 onKeyPress = { key -> onKeypadButtonClick(key) },
                                 onDelete = { onDeleteClick() },
                                 onToggleCurrency = { toggleInputMode() },
-                                onRequestClick = { Toast.makeText(this@ModernPOSActivity, "Request feature coming soon", Toast.LENGTH_SHORT).show() },
+                                onRequestClick = { showRequestDialog() },
                                 onPayClick = { onSubmitClick() },
                                 onQrClick = { Toast.makeText(this@ModernPOSActivity, "QR Scan coming soon", Toast.LENGTH_SHORT).show() },
                                 onProfileClick = { selectedNavIndex.value = 4 } // Go to Profile tab
                             )
                             3 -> CatalogScreen(
                             items = catalogItemsState.value,
-                            basketQuantities = emptyMap(), // TODO: Connect basket
-                            basketTotalItems = 0,
-                            basketTotalPrice = "$0.00",
-                            onItemAdd = { /* TODO */ },
-                            onItemRemove = { /* TODO */ },
-                            onViewBasket = { /* TODO */ },
-                            onCheckout = { /* TODO */ },
+                            basketQuantities = basketQuantitiesState.value,
+                            basketTotalItems = basketTotalItemsState.value,
+                            basketTotalPrice = basketTotalPriceState.value,
+                            onItemAdd = { item -> addItemToBasket(item) },
+                            onItemRemove = { item -> removeItemFromBasket(item) },
+                            onViewBasket = { navigateToBasket() },
+                            onCheckout = { checkoutBasket() },
                             onBackClick = null // Top-level
                         )
                             4 -> SettingsScreen(
-                            currentCurrency = "USD", // TODO: Load from settings
-                            onCurrencySelected = { /* TODO */ },
-                            mints = emptyList(), // TODO: Load from MintManager
-                            onAddMint = { /* TODO */ },
-                            onRemoveMint = { /* TODO */ },
-                            onResetMints = { /* TODO */ },
+                            currentCurrency = CurrencyManager.getInstance(this@ModernPOSActivity).currentSymbol,
+                            onCurrencySelected = { currency -> 
+                                CurrencyManager.getInstance(this@ModernPOSActivity).setPreferredCurrency(currency)
+                                Toast.makeText(this@ModernPOSActivity, "Currency changed to $currency", Toast.LENGTH_SHORT).show()
+                            },
+                            mints = MintManager.getInstance(this@ModernPOSActivity).allowedMints,
+                            onAddMint = { mintUrl -> 
+                                MintManager.getInstance(this@ModernPOSActivity).addMint(mintUrl)
+                                Toast.makeText(this@ModernPOSActivity, "Mint added", Toast.LENGTH_SHORT).show()
+                            },
+                            onRemoveMint = { mintUrl -> 
+                                MintManager.getInstance(this@ModernPOSActivity).removeMint(mintUrl)
+                                Toast.makeText(this@ModernPOSActivity, "Mint removed", Toast.LENGTH_SHORT).show()
+                            },
+                            onResetMints = { 
+                                MintManager.getInstance(this@ModernPOSActivity).resetToDefaults()
+                                Toast.makeText(this@ModernPOSActivity, "Mints reset to defaults", Toast.LENGTH_SHORT).show()
+                            },
                             itemsCount = catalogItemsState.value.size,
-                            onImportItems = { /* TODO */ },
-                            onManageItems = { /* TODO */ },
-                            onClearItems = { /* TODO */ },
-                            onBackClick = null, // Top-level
-                            onSaveClick = { /* TODO */ }
+                            onImportItems = { 
+                                val intent = Intent(this@ModernPOSActivity, com.electricdreams.shellshock.feature.items.ItemEntryActivity::class.java)
+                                startActivity(intent)
+                            },
+                            onManageItems = { 
+                                val intent = Intent(this@ModernPOSActivity, com.electricdreams.shellshock.feature.items.ItemListActivity::class.java)
+                                startActivity(intent)
+                            },
+                            onClearItems = { 
+                                itemManager?.clearItems()
+                                loadCatalog()
+                                Toast.makeText(this@ModernPOSActivity, "All items cleared", Toast.LENGTH_SHORT).show()
+                            },
+                            onSaveClick = { 
+                                Toast.makeText(this@ModernPOSActivity, "Settings saved", Toast.LENGTH_SHORT).show()
+                            },
+                            onBackClick = null // Top-level
                         )
                         }
                     }
@@ -191,7 +225,20 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback 
         // Initialize logic
         initLogic()
     }
-
+    
+    override fun onBackPressed() {
+        // Navigation hierarchy: always return to keypad (index 2) first
+        if (selectedNavIndex.value != 2) {
+            selectedNavIndex.value = 2
+            // Update scaffold and status bar colors
+            scaffoldBackgroundColor.value = CashGreen
+            window.statusBarColor = 0xFF1B9A4B.toInt()
+        } else {
+            // If already on keypad, exit app
+            super.onBackPressed()
+        }
+    }
+    
     private fun initLogic() {
         // Check if we have a payment amount from intent (basket checkout)
         val intent = intent
@@ -240,6 +287,84 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback 
     
     private fun loadCatalog() {
         catalogItemsState.value = itemManager?.allItems ?: emptyList()
+    }
+    
+    private fun addItemToBasket(item: Item) {
+        val currentQuantities = basketQuantitiesState.value.toMutableMap()
+        val currentQty = currentQuantities[item.id] ?: 0
+        currentQuantities[item.id] = currentQty + 1
+        basketQuantitiesState.value = currentQuantities
+        updateBasketTotals()
+    }
+    
+    private fun removeItemFromBasket(item: Item) {
+        val currentQuantities = basketQuantitiesState.value.toMutableMap()
+        val currentQty = currentQuantities[item.id] ?: 0
+        if (currentQty > 1) {
+            currentQuantities[item.id] = currentQty - 1
+        } else {
+            currentQuantities.remove(item.id)
+        }
+        basketQuantitiesState.value = currentQuantities
+        updateBasketTotals()
+    }
+    
+    private fun updateBasketTotals() {
+        val quantities = basketQuantitiesState.value
+        val items = catalogItemsState.value
+        
+        var totalItems = 0
+        var totalPrice = 0.0
+        
+        quantities.forEach { (itemId, qty) ->
+            val item = items.find { it.id == itemId }
+            if (item != null) {
+                totalItems += qty
+                totalPrice += item.price * qty
+            }
+        }
+        
+        basketTotalItemsState.value = totalItems
+        basketTotalPriceState.value = String.format("$%.2f", totalPrice)
+    }
+    
+    private fun navigateToBasket() {
+        val intent = Intent(this, com.electricdreams.shellshock.feature.items.BasketActivity::class.java)
+        startActivity(intent)
+    }
+    
+    private fun checkoutBasket() {
+        // Calculate total in sats
+        val quantities = basketQuantitiesState.value
+        val items = catalogItemsState.value
+        
+        var totalPrice = 0.0
+        quantities.forEach { (itemId, qty) ->
+            val item = items.find { it.id == itemId }
+            if (item != null) {
+                totalPrice += item.price * qty
+            }
+        }
+        
+        // Convert to sats if needed (assuming price is in USD)
+        val satsAmount = if (bitcoinPriceWorker != null && bitcoinPriceWorker!!.currentPrice > 0) {
+            val btcAmount = totalPrice / bitcoinPriceWorker!!.currentPrice
+            (btcAmount * 100000000).toLong()
+        } else {
+            (totalPrice * 100).toLong() // Fallback: treat as cents
+        }
+        
+        // Set the amount and show payment dialog
+        currentInput.setLength(0)
+        currentInput.append(satsAmount.toString())
+        requestedAmount = satsAmount
+        updateDisplay()
+        
+        // Switch to keypad tab and show payment dialog
+        selectedNavIndex.value = 2
+        Handler(Looper.getMainLooper()).postDelayed({
+            showPaymentMethodDialog(satsAmount)
+        }, 300)
     }
 
     private fun toggleInputMode() {
@@ -296,6 +421,49 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback 
         }
 
         updateDisplay()
+    }
+    
+    private fun showRequestDialog() {
+        val amount = currentInput.toString()
+        if (amount.isEmpty() || requestedAmount == 0L) {
+            Toast.makeText(this, "Please enter an amount first", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        // Get allowed mints
+        val mintManager = MintManager.getInstance(this)
+        val allowedMints = mintManager.allowedMints
+        
+        // Create payment request
+        val paymentRequest = CashuPaymentHelper.createPaymentRequest(
+            requestedAmount,
+            "Payment request for $requestedAmount sats",
+            allowedMints
+        )
+        
+        if (paymentRequest == null) {
+            Toast.makeText(this, "Failed to create payment request", Toast.LENGTH_SHORT).show()
+            return
+        }
+        
+        // Show dialog with payment request
+        val builder = AlertDialog.Builder(this, R.style.Theme_Shellshock)
+        builder.setTitle("Payment Request")
+        builder.setMessage("Amount: $requestedAmount sats\n\nPayment Request:\n$paymentRequest")
+        
+        builder.setPositiveButton("Copy") { dialog, _ ->
+            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            val clip = android.content.ClipData.newPlainText("Payment Request", paymentRequest)
+            clipboard.setPrimaryClip(clip)
+            Toast.makeText(this, "Payment request copied to clipboard", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+        
+        builder.setNegativeButton("Close") { dialog, _ ->
+            dialog.dismiss()
+        }
+        
+        builder.create().show()
     }
 
     private fun onKeypadButtonClick(label: String) {
