@@ -22,7 +22,7 @@
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Back"
-            android:src="@drawable/ic_arrow_back"
+            android:src="@drawable/ic_close"
             android:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -40,12 +40,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <View
-        android:id="@+id/toolbar_divider"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/divider_height"
-        android:background="@color/color_divider"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_container" />
+
 
     <TextView
         android:id="@+id/instruction_text"
@@ -55,7 +50,7 @@
         android:layout_marginTop="@dimen/space_xl"
         android:text="Enter Cashu Token"
         android:textAppearance="@style/Text.Heading1"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_divider" />
+        app:layout_constraintTop_toBottomOf="@id/toolbar_container" />
 
     <TextView
         android:id="@+id/sub_instruction_text"
@@ -94,6 +89,7 @@
         android:layout_marginBottom="@dimen/space_xl"
         android:background="@drawable/bg_button_primary_green"
         android:text="Submit"
+        android:stateListAnimator="@null"
         android:textAppearance="@style/Text.Button"
         android:textColor="@color/color_bg_white"
         app:layout_constraintBottom_toBottomOf="parent" />

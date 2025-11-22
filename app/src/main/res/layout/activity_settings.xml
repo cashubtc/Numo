@@ -22,7 +22,7 @@
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Back"
-            android:src="@drawable/ic_arrow_back"
+            android:src="@drawable/ic_close"
             android:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -40,18 +40,13 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <View
-        android:id="@+id/toolbar_divider"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/divider_height"
-        android:background="@color/color_divider"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_container" />
+
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/save_button"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_divider">
+        app:layout_constraintTop_toBottomOf="@id/toolbar_container">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -248,6 +243,7 @@
         android:text="Save Changes"
         android:textAppearance="@style/Text.Button"
         android:textColor="@color/color_bg_white"
+        android:stateListAnimator="@null"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

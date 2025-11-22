@@ -245,9 +245,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         }
 
         submitButton.setOnClickListener(v -> {
-            String amount = currentInput.toString();
-            if (!amount.isEmpty()) {
-                requestedAmount = Long.parseLong(amount);
+            if (requestedAmount > 0) {
                 showPaymentMethodDialog(requestedAmount);
             } else {
                 Toast.makeText(this, "Please enter an amount", Toast.LENGTH_SHORT).show();

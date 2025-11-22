@@ -48,7 +48,8 @@ public class PaymentRequestActivity extends AppCompatActivity {
     private ImageView qrImageView;
     private TextView paymentAmountDisplay;
     private TextView statusText;
-    private Button cancelButton;
+    private android.view.View closeButton;
+    private android.view.View shareButton;
 
     private long paymentAmount = 0;
     private String hcePaymentRequest = null;
@@ -61,19 +62,22 @@ public class PaymentRequestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment_request);
 
-        // Set up toolbar
+        // Toolbar removed in new design
+        /*
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
+        */
 
         // Initialize views
         qrImageView = findViewById(R.id.payment_request_qr);
         paymentAmountDisplay = findViewById(R.id.payment_amount_display);
         statusText = findViewById(R.id.payment_status_text);
-        cancelButton = findViewById(R.id.cancel_button);
+        closeButton = findViewById(R.id.close_button);
+        shareButton = findViewById(R.id.share_button);
 
         // Get payment amount from intent
         paymentAmount = getIntent().getLongExtra(EXTRA_PAYMENT_AMOUNT, 0);
@@ -87,12 +91,18 @@ public class PaymentRequestActivity extends AppCompatActivity {
 
         // Display payment amount
         String formattedAmount = "₿ " + NumberFormat.getNumberInstance(Locale.US).format(paymentAmount);
-        paymentAmountDisplay.setText("Amount: " + formattedAmount);
+        paymentAmountDisplay.setText("Scan to pay " + formattedAmount);
 
-        // Set up cancel button
-        cancelButton.setOnClickListener(v -> {
+        // Set up buttons
+        closeButton.setOnClickListener(v -> {
             Log.d(TAG, "Payment cancelled by user");
             cancelPayment();
+        });
+        
+        shareButton.setOnClickListener(v -> {
+            if (qrPaymentRequest != null) {
+                sharePaymentRequest(qrPaymentRequest);
+            }
         });
 
         // Initialize payment request
@@ -250,19 +260,48 @@ public class PaymentRequestActivity extends AppCompatActivity {
     }
 
     private Bitmap generateQrBitmap(String text, int size) throws Exception {
+        java.util.Map<com.google.zxing.EncodeHintType, Object> hints = new java.util.EnumMap<>(com.google.zxing.EncodeHintType.class);
+        hints.put(com.google.zxing.EncodeHintType.ERROR_CORRECTION, com.google.zxing.qrcode.decoder.ErrorCorrectionLevel.L);
+        hints.put(com.google.zxing.EncodeHintType.MARGIN, 1); // Small margin to ensure dots don't get cut off
+
         MultiFormatWriter writer = new MultiFormatWriter();
-        BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, size, size, null);
+        // We don't use the matrix from here for drawing, but we need it to know dimensions if we wanted to use the writer's scaling.
+        // But we use QRCodeWriter directly below.
 
-        int width = bitMatrix.getWidth();
-        int height = bitMatrix.getHeight();
-        Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                bmp.setPixel(x, y, bitMatrix.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
+        // Better approach: Generate raw matrix then scale up with dots
+        com.google.zxing.qrcode.QRCodeWriter qrWriter = new com.google.zxing.qrcode.QRCodeWriter();
+        BitMatrix rawMatrix = qrWriter.encode(text, BarcodeFormat.QR_CODE, 0, 0, hints);
+        
+        int matrixWidth = rawMatrix.getWidth();
+        int matrixHeight = rawMatrix.getHeight();
+        
+        // Calculate scale factor to fit requested size
+        int scale = size / matrixWidth;
+        int outputWidth = matrixWidth * scale;
+        int outputHeight = matrixHeight * scale;
+        
+        Bitmap outputBitmap = Bitmap.createBitmap(outputWidth, outputHeight, Bitmap.Config.ARGB_8888);
+        android.graphics.Canvas outputCanvas = new android.graphics.Canvas(outputBitmap);
+        outputCanvas.drawColor(0xFFFFFFFF);
+        
+        android.graphics.Paint paint = new android.graphics.Paint();
+        paint.setColor(0xFF000000);
+        paint.setAntiAlias(true);
+        
+        float radius = (float) scale / 2f;
+        
+        for (int x = 0; x < matrixWidth; x++) {
+            for (int y = 0; y < matrixHeight; y++) {
+                if (rawMatrix.get(x, y)) {
+                    float cx = x * scale + radius;
+                    float cy = y * scale + radius;
+                    // Draw circle with full radius for solid look
+                    outputCanvas.drawCircle(cx, cy, radius, paint);
+                }
             }
         }
-        return bmp;
+        
+        return outputBitmap;
     }
 
     private void handlePaymentSuccess(String token) {
@@ -324,5 +363,11 @@ public class PaymentRequestActivity extends AppCompatActivity {
     protected void onDestroy() {
         cleanupAndFinish();
         super.onDestroy();
+    }
+    private void sharePaymentRequest(String paymentRequest) {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, paymentRequest);
+        startActivity(Intent.createChooser(shareIntent, "Share Payment Request"));
     }
 }
