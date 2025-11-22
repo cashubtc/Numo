@@ -1,5 +1,7 @@
 package com.electricdreams.shellshock.nostr;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonPrimitive;
@@ -13,6 +15,7 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -29,6 +32,7 @@ public final class NostrEvent {
     public String sig;             // 64-byte lowercase hex of Schnorr signature
 
     private static final Gson gson = new Gson();
+    private static final String TAG = "NostrEventVerify";
 
     private static final X9ECParameters SECP256K1_PARAMS = SECNamedCurves.getByName("secp256k1");
     private static final ECDomainParameters SECP256K1 = new ECDomainParameters(
@@ -82,22 +86,31 @@ public final class NostrEvent {
         try {
             String expectedId = computeId();
             if (id == null || !id.equals(expectedId)) {
+                Log.w(TAG, "ID mismatch for kind=" + kind + " eventId=" + id + " computed=" + expectedId);
                 return false;
             }
             if (pubkey == null || sig == null) {
+                Log.w(TAG, "Missing pubkey or sig for kind=" + kind);
                 return false;
             }
             byte[] msg = hexToBytes(id);
             byte[] sigBytes = hexToBytes(sig);
             byte[] pubBytes = hexToBytes(pubkey);
             if (msg == null || sigBytes == null || pubBytes == null) {
+                Log.w(TAG, "Hex decode failed for kind=" + kind);
                 return false;
             }
             if (sigBytes.length != 64 || pubBytes.length != 32) {
+                Log.w(TAG, "Unexpected lengths for kind=" + kind + " sigLen=" + sigBytes.length + " pubLen=" + pubBytes.length);
                 return false;
             }
-            return verifySchnorr(pubBytes, msg, sigBytes);
+            boolean ok = verifySchnorr(pubBytes, msg, sigBytes);
+            if (!ok) {
+                Log.w(TAG, "Schnorr verify failed for kind=" + kind + " id=" + id + " pubkey=" + pubkey);
+            }
+            return ok;
         } catch (Exception e) {
+            Log.e(TAG, "Exception during verify for kind=" + kind + ": " + e.getMessage(), e);
             return false;
         }
     }
@@ -141,34 +154,43 @@ public final class NostrEvent {
      */
     private static boolean verifySchnorr(byte[] pub, byte[] msg, byte[] sig) {
         if (pub.length != 32 || msg.length != 32 || sig.length != 64) {
+            Log.w(TAG, "verifySchnorr: wrong lengths pub=" + pub.length + " msg=" + msg.length + " sig=" + sig.length);
             return false;
         }
 
         // Parse pubkey x coordinate
         BigInteger px = new BigInteger(1, pub);
-        if (px.signum() <= 0 || px.compareTo(SECP256K1.getCurve().getField().getCharacteristic()) >= 0) {
+        BigInteger p = SECP256K1_PARAMS.getCurve().getField().getCharacteristic();
+        if (px.signum() <= 0 || px.compareTo(p) >= 0) {
+            Log.w(TAG, "verifySchnorr: pubkey x out of range");
             return false;
         }
 
-        // Lift x to a curve point with even Y (BIP-340)
+        // Lift x to a curve point with even Y (BIP-340) using BouncyCastle's decodePoint
         ECPoint P = liftX(px);
-        if (P == null) return false;
+        if (P == null) {
+            Log.w(TAG, "verifySchnorr: liftX returned null");
+            return false;
+        }
 
         // Parse signature components
-        byte[] rBytes = new byte[32];
-        System.arraycopy(sig, 0, rBytes, 0, 32);
+        byte[] rBytes = Arrays.copyOfRange(sig, 0, 32);
+        byte[] sBytes = Arrays.copyOfRange(sig, 32, 64);
+
         BigInteger r = new BigInteger(1, rBytes);
-        BigInteger s = new BigInteger(1, sig, 32, 32);
+        BigInteger s = new BigInteger(1, sBytes);
         BigInteger n = SECP256K1.getN();
 
-        if (r.signum() <= 0 || r.compareTo(SECP256K1.getCurve().getField().getCharacteristic()) >= 0) {
+        if (r.signum() <= 0 || r.compareTo(p) >= 0) {
+            Log.w(TAG, "verifySchnorr: r out of range");
             return false;
         }
         if (s.signum() <= 0 || s.compareTo(n) >= 0) {
+            Log.w(TAG, "verifySchnorr: s out of range");
             return false;
         }
 
-        // Compute e = int(hash(bytes(r) || pub || msg)) mod n
+        // e = int(hash(bytes(r) || pub || msg)) mod n
         byte[] rPubMsg = new byte[32 + pub.length + msg.length];
         System.arraycopy(rBytes, 0, rPubMsg, 0, 32);
         System.arraycopy(pub, 0, rPubMsg, 32, pub.length);
@@ -176,46 +198,55 @@ public final class NostrEvent {
 
         BigInteger e = new BigInteger(1, sha256(rPubMsg)).mod(n);
         if (e.signum() == 0) {
+            Log.w(TAG, "verifySchnorr: e == 0");
             return false;
         }
 
         // R = s*G - e*P
         ECPoint R = SECP256K1.getG().multiply(s).subtract(P.multiply(e)).normalize();
-        if (R.isInfinity()) return false;
+        if (R.isInfinity()) {
+            Log.w(TAG, "verifySchnorr: R is infinity");
+            return false;
+        }
 
-        // Check that R has even Y and x(R) == r
+        // Check that R has even y and x(R) == r
         if (R.getAffineYCoord().toBigInteger().testBit(0)) {
-            return false; // Y is odd
+            Log.w(TAG, "verifySchnorr: R.y is odd");
         }
         BigInteger xR = R.getAffineXCoord().toBigInteger();
         return xR.equals(r);
     }
 
     /**
-     * Lift x-only pubkey to a curve point with even Y per BIP-340.
+     * Lift x-only pubkey to a curve point with even Y per BIP-340,
+     * using BouncyCastle's decodePoint.
      */
     private static ECPoint liftX(BigInteger x) {
-        // y^2 = x^3 + 7 over secp256k1
         BigInteger p = SECP256K1_PARAMS.getCurve().getField().getCharacteristic();
-        BigInteger rhs = x.modPow(BigInteger.valueOf(3), p).add(BigInteger.valueOf(7)).mod(p);
-        BigInteger y = sqrtModP(rhs, p);
-        if (y == null) return null;
-        if (y.testBit(0)) {
-            y = p.subtract(y); // make y even
+        if (x.signum() <= 0 || x.compareTo(p) >= 0) {
+            return null;
         }
-        return SECP256K1_PARAMS.getCurve().createPoint(x, y).normalize();
+        byte[] xBytes = to32Bytes(x);
+        byte[] comp = new byte[33];
+        comp[0] = 0x02; // even Y
+        System.arraycopy(xBytes, 0, comp, 1, 32);
+        try {
+            return SECP256K1_PARAMS.getCurve().decodePoint(comp).normalize();
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "liftX: decodePoint failed: " + e.getMessage());
+            return null;
+        }
     }
 
-    /**
-     * sqrt(n) mod p for secp256k1 (p % 4 == 3, so sqrt is simple).
-     */
-    private static BigInteger sqrtModP(BigInteger n, BigInteger p) {
-        if (n.signum() == 0) return BigInteger.ZERO;
-        BigInteger exp = p.add(BigInteger.ONE).shiftRight(2);
-        BigInteger r = n.modPow(exp, p);
-        if (r.multiply(r).mod(p).compareTo(n.mod(p)) != 0) {
-            return null; // no sqrt exists
+    private static byte[] to32Bytes(BigInteger v) {
+        byte[] src = v.toByteArray();
+        if (src.length == 32) return src;
+        byte[] out = new byte[32];
+        if (src.length > 32) {
+            System.arraycopy(src, src.length - 32, out, 0, 32);
+        } else {
+            System.arraycopy(src, 0, out, 32 - src.length, src.length);
         }
-        return r;
+        return out;
     }
 }

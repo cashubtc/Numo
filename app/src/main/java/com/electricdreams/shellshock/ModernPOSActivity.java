@@ -614,6 +614,12 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                 if (ndefAvailable) {
                     resetHceService();
                 }
+                // Stop Nostr listener if running
+                if (nostrListener != null) {
+                    Log.d(TAG, "Stopping NostrPaymentListener due to user cancel");
+                    nostrListener.stop();
+                    nostrListener = null;
+                }
                 Toast.makeText(this, "Payment canceled", Toast.LENGTH_SHORT).show();
             });
         }
@@ -624,6 +630,12 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             // Clean up HCE service if it was started
             if (ndefAvailable) {
                 stopHceService();
+            }
+            // Stop Nostr listener if running
+            if (nostrListener != null) {
+                Log.d(TAG, "Stopping NostrPaymentListener due to dialog cancel");
+                nostrListener.stop();
+                nostrListener = null;
             }
         });
 
