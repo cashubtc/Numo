@@ -38,81 +38,98 @@
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintTop_toBottomOf="@id/icon_scan">
 
-        <!-- Amount Display -->
-        <TextView
-            android:id="@+id/amount_display"
-            android:layout_width="wrap_content"
-            android:layout_height="120dp"
-            android:layout_marginTop="64dp"
-            android:layout_marginBottom="8dp"
-            android:gravity="center"
-            android:text="$0"
-            android:textColor="@color/color_bg_white"
-            android:textSize="64sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/currency_switch_container"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_chainStyle="packed" />
-
-        <!-- Currency Selector Pill -->
-        <LinearLayout
-            android:id="@+id/currency_switch_container"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
-            android:background="@drawable/bg_currency_pill"
-            android:gravity="center"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp"
-            app:layout_constraintBottom_toTopOf="@+id/keypad"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/amount_display">
-
-            <TextView
-                android:id="@+id/currency_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="USD"
-                android:textColor="@color/color_bg_white"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
-            <ImageView
-                android:layout_width="12dp"
-                android:layout_height="12dp"
-                android:layout_marginStart="6dp"
-                android:src="@drawable/ic_switch_currency"
-                app:tint="@color/color_bg_white" />
-        </LinearLayout>
-
-        <!-- Invisible button to maintain click functionality for currency switch -->
-        <View
-            android:id="@+id/currency_switch_button"
-            android:layout_width="0dp"
+        <!-- Scrollable upper content (amount + currency) -->
+        <ScrollView
+            android:id="@+id/upper_scroll_container"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="@id/currency_switch_container"
-            app:layout_constraintEnd_toEndOf="@id/currency_switch_container"
-            app:layout_constraintStart_toStartOf="@id/currency_switch_container"
-            app:layout_constraintTop_toTopOf="@id/currency_switch_container" />
+            android:fillViewport="true"
+            android:scrollbars="none"
+            app:layout_constraintBottom_toTopOf="@+id/keypad"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Keypad -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <!-- Amount Display -->
+                <TextView
+                    android:id="@+id/amount_display"
+                    android:layout_width="wrap_content"
+                    android:layout_height="120dp"
+                    android:layout_marginTop="64dp"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center"
+                    android:text="$0"
+                    android:textColor="@color/color_bg_white"
+                    android:textSize="64sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@+id/currency_switch_container"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_chainStyle="packed" />
+
+                <!-- Currency Selector Pill -->
+                <LinearLayout
+                    android:id="@+id/currency_switch_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="32dp"
+                    android:background="@drawable/bg_currency_pill"
+                    android:gravity="center"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="6dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/amount_display">
+
+                    <TextView
+                        android:id="@+id/currency_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="USD"
+                        android:textColor="@color/color_bg_white"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:layout_marginStart="6dp"
+                        android:src="@drawable/ic_switch_currency"
+                        app:tint="@color/color_bg_white" />
+                </LinearLayout>
+
+                <!-- Invisible button to maintain click functionality for currency switch -->
+                <View
+                    android:id="@+id/currency_switch_button"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    app:layout_constraintBottom_toBottomOf="@id/currency_switch_container"
+                    app:layout_constraintEnd_toEndOf="@id/currency_switch_container"
+                    app:layout_constraintStart_toStartOf="@id/currency_switch_container"
+                    app:layout_constraintTop_toTopOf="@id/currency_switch_container" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </ScrollView>
+
+        <!-- Keypad with fixed height -->
         <GridLayout
             android:id="@+id/keypad"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="360dp"
             android:layout_marginHorizontal="32dp"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="16dp"
             android:alignmentMode="alignBounds"
             android:columnCount="3"
             android:rowCount="4"
             android:useDefaultMargins="false"
             app:layout_constraintBottom_toTopOf="@+id/submit_button"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/currency_switch_container" />
+            app:layout_constraintStart_toStartOf="parent" />
 
         <!-- Single Charge Button -->
         <Button
