@@ -38,6 +38,9 @@ import com.cashujdk.utils.OutputData;
 import com.cashujdk.utils.OutputHelper;
 import com.cashujdk.cryptography.Cashu;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import okhttp3.OkHttpClient;
 
 /**
@@ -500,8 +503,11 @@ public class CashuPaymentHelper {
             throw new RedemptionException("PaymentRequestPayload JSON is null");
         }
         try {
-            com.google.gson.Gson gson = new com.google.gson.Gson();
-            PaymentRequestPayload payload = gson.fromJson(payloadJson, PaymentRequestPayload.class);
+            // Use the dedicated Gson instance defined on PaymentRequestPayload, which
+            // knows how to handle Cashu interfaces (ISecret) and hex BigIntegers
+            // inside the nested DLEQ structures.
+            Log.d(TAG, "payloadJson: " + payloadJson);
+            PaymentRequestPayload payload = PaymentRequestPayload.GSON.fromJson(payloadJson, PaymentRequestPayload.class);
             if (payload == null) {
                 throw new RedemptionException("Failed to parse PaymentRequestPayload");
             }
@@ -523,12 +529,20 @@ public class CashuPaymentHelper {
                 throw new RedemptionException("Insufficient amount in payload proofs: " + totalAmount + " < expected " + expectedAmount);
             }
 
-            // Build a temporary Token and redeem it using existing logic
+            // Build a temporary Token and redeem it using existing logic. The
+            // custom Gson ProofAdapter on PaymentRequestPayload ensures that
+            // each Proof has a non-null keysetId derived from the JSON `id`
+            // field and that DLEQ fields are parsed correctly from hex.
             Token tempToken = new Token(payload.proofs, payload.unit, mintUrl);
             String encoded = tempToken.encode();
             return redeemToken(encoded);
         } catch (com.google.gson.JsonSyntaxException e) {
             throw new RedemptionException("Invalid JSON for PaymentRequestPayload: " + e.getMessage(), e);
+        } catch (com.google.gson.JsonIOException e) {
+            // Surface Gson IO/instantiation issues with more context
+            String errorMsg = "PaymentRequestPayload redemption failed: " + e.getMessage();
+            Log.e(TAG, errorMsg, e);
+            throw new RedemptionException(errorMsg, e);
         } catch (RedemptionException e) {
             throw e;
         } catch (Exception e) {
@@ -547,5 +561,70 @@ public class CashuPaymentHelper {
         public String mint;    // required
         public String unit;    // required, expect "sat"
         public java.util.List<Proof> proofs; // required
+
+        // Gson instance tuned for NUT-18 PaymentRequestPayloads. We use a
+        // custom ProofAdapter that knows how to interpret the NUT-18 JSON
+        // fields (`secret`, `C`, `amount`, `id`, `dleq.{r,s,e}`, etc.) and
+        // map them into the SDK's com.cashujdk.nut00.Proof structure.
+        public static final com.google.gson.Gson GSON = new com.google.gson.GsonBuilder()
+                .registerTypeAdapter(
+                        com.cashujdk.nut00.Proof.class,
+                        new ProofAdapter()
+                )
+                .create();
+
+        private static final class ProofAdapter
+                implements com.google.gson.JsonDeserializer<com.cashujdk.nut00.Proof> {
+            @Override
+            public com.cashujdk.nut00.Proof deserialize(
+                    com.google.gson.JsonElement json,
+                    java.lang.reflect.Type typeOfT,
+                    com.google.gson.JsonDeserializationContext context
+            ) throws com.google.gson.JsonParseException {
+                if (json == null || !json.isJsonObject()) {
+                    throw new com.google.gson.JsonParseException("Expected object for Proof");
+                }
+                com.google.gson.JsonObject obj = json.getAsJsonObject();
+
+                long amount = obj.get("amount").getAsLong();
+                String secretStr = obj.get("secret").getAsString();
+                String cHex = obj.get("C").getAsString();
+                String keysetId = obj.has("id") && !obj.get("id").isJsonNull()
+                        ? obj.get("id").getAsString()
+                        : null;
+                if (keysetId == null || keysetId.isEmpty()) {
+                    throw new com.google.gson.JsonParseException("Proof is missing id/keysetId");
+                }
+
+                com.cashujdk.nut00.ISecret secret = new com.cashujdk.nut00.StringSecret(secretStr);
+
+                com.cashujdk.nut12.DLEQProof dleq = null;
+                if (obj.has("dleq") && obj.get("dleq").isJsonObject()) {
+                    com.google.gson.JsonObject d = obj.getAsJsonObject("dleq");
+                    String rStr = d.get("r").getAsString();
+                    String sStr = d.get("s").getAsString();
+                    String eStr = d.get("e").getAsString();
+
+                    java.math.BigInteger r = new java.math.BigInteger(rStr, 16);
+                    java.math.BigInteger s = new java.math.BigInteger(sStr, 16);
+                    java.math.BigInteger e = new java.math.BigInteger(eStr, 16);
+
+                    // SDK constructor: DLEQProof(BigInteger s, BigInteger e, Optional<BigInteger> r)
+                    dleq = new com.cashujdk.nut12.DLEQProof(s, e, java.util.Optional.of(r));
+                }
+
+                // SDK Proof: Proof(long amount, String keysetId, ISecret secret,
+                //               String c, Optional<String> witness,
+                //               Optional<DLEQProof> dleq)
+                return new com.cashujdk.nut00.Proof(
+                        amount,
+                        keysetId,
+                        secret,
+                        cHex,
+                        java.util.Optional.empty(),
+                        java.util.Optional.ofNullable(dleq)
+                );
+            }
+        }
     }
 }

@@ -5,6 +5,8 @@ import android.util.Log;
 import com.electricdreams.shellshock.ndef.CashuPaymentHelper;
 
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * High-level Nostr listener for a single payment.
@@ -31,6 +33,10 @@ public final class NostrPaymentListener {
 
     private NostrWebSocketClient client;
     private volatile boolean stopped = false;
+
+    // Track processed giftwrap event IDs so we don't handle the same payment
+    // multiple times when it arrives from different relays.
+    private final Set<String> seenEventIds = ConcurrentHashMap.newKeySet();
 
     public interface SuccessHandler {
         void onSuccess(String encodedToken);
@@ -95,6 +101,18 @@ public final class NostrPaymentListener {
         if (event.kind != 1059) {
             // Should already be filtered by subscription, but double-check.
             return;
+        }
+        if (event.id == null || event.id.isEmpty()) {
+            Log.w(TAG, "Received kind 1059 event without id from " + relayUrl + "; skipping");
+            return;
+        }
+        // Deduplicate by event ID across all relays. Synchronize so only one
+        // thread at a time can perform the check-and-add.
+        synchronized (seenEventIds) {
+            if (!seenEventIds.add(event.id)) {
+                Log.d(TAG, "Ignoring duplicate event id=" + event.id + " from " + relayUrl);
+                return;
+            }
         }
         try {
             Log.d(TAG, "Received kind 1059 event from " + relayUrl + " id=" + event.id);

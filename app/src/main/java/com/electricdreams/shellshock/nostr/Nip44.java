@@ -25,6 +25,8 @@ import java.util.Arrays;
  */
 public final class Nip44 {
 
+    public static final String TAG = "Nip44";
+
     private static final X9ECParameters SECP256K1_PARAMS = SECNamedCurves.getByName("secp256k1");
     private static final BigInteger CURVE_P = SECP256K1_PARAMS.getCurve().getField().getCharacteristic();
 
@@ -54,12 +56,9 @@ public final class Nip44 {
         ECPoint shared = P.multiply(d).normalize();
         byte[] sharedX = shared.getAffineXCoord().getEncoded(); // 32 bytes
 
+        // NIP-44 v2: conversation_key = HKDF-EXTRACT(IKM=shared_x, salt="nip44-v2")
         byte[] salt = "nip44-v2".getBytes(StandardCharsets.UTF_8);
-        HKDFBytesGenerator hkdf = new HKDFBytesGenerator(new SHA256Digest());
-        hkdf.init(new HKDFParameters(sharedX, salt, null));
-        byte[] conv = new byte[32];
-        hkdf.generateBytes(conv, 0, 32);
-        return conv;
+        return hkdfExtract(salt, sharedX);
     }
 
     /**
@@ -71,11 +70,9 @@ public final class Nip44 {
         }
         Decoded dec = decodePayload(payloadBase64);
 
-        // Derive per-message keys via HKDF-expand (L=76)
-        HKDFBytesGenerator hkdf = new HKDFBytesGenerator(new SHA256Digest());
-        hkdf.init(new HKDFParameters(conversationKey, null, dec.nonce));
-        byte[] okm = new byte[76];
-        hkdf.generateBytes(okm, 0, 76);
+        // Derive per-message keys via HKDF-EXPAND (L=76) from the already-extracted conversationKey.
+        // Spec: keys = hkdf_expand(OKM=conversation_key, info=nonce, L=76)
+        byte[] okm = hkdfExpand(conversationKey, dec.nonce, 76);
 
         byte[] chachaKey = Arrays.copyOfRange(okm, 0, 32);
         byte[] chachaNonce = Arrays.copyOfRange(okm, 32, 44); // 12 bytes
@@ -100,6 +97,62 @@ public final class Nip44 {
 
         // Remove padding and return plaintext string
         return unpad(padded);
+    }
+
+    // --- HKDF helpers (RFC 5869, SHA-256) ---
+
+    /** HKDF-Extract: PRK = HMAC(salt, IKM) */
+    private static byte[] hkdfExtract(byte[] salt, byte[] ikm) {
+        HMac mac = new HMac(new SHA256Digest());
+        if (salt == null) {
+            salt = new byte[32]; // zero salt when not provided
+        }
+        mac.init(new KeyParameter(salt));
+        mac.update(ikm, 0, ikm.length);
+        byte[] prk = new byte[32];
+        mac.doFinal(prk, 0);
+        return prk;
+    }
+
+    /** HKDF-Expand: OKM = T(1) || T(2) || ... truncated to 'length' */
+    private static byte[] hkdfExpand(byte[] prk, byte[] info, int length) {
+        if (length <= 0) {
+            throw new IllegalArgumentException("HKDF: invalid length");
+        }
+
+        HMac mac = new HMac(new SHA256Digest());
+        KeyParameter keyParam = new KeyParameter(prk);
+        mac.init(keyParam);
+
+        int hashLen = 32; // SHA-256 output length
+        int n = (int) Math.ceil((double) length / hashLen);
+        if (n > 255) {
+            throw new IllegalArgumentException("HKDF: length too large");
+        }
+
+        byte[] okm = new byte[length];
+        byte[] t = new byte[0];
+        int pos = 0;
+
+        for (int i = 1; i <= n; i++) {
+            mac.reset();
+            mac.init(keyParam);
+            if (t.length > 0) {
+                mac.update(t, 0, t.length);
+            }
+            if (info != null) {
+                mac.update(info, 0, info.length);
+            }
+            mac.update((byte) i);
+            t = new byte[hashLen];
+            mac.doFinal(t, 0);
+
+            int copyLen = Math.min(hashLen, length - pos);
+            System.arraycopy(t, 0, okm, pos, copyLen);
+            pos += copyLen;
+        }
+
+        return okm;
     }
 
     // --- Internal structures & helpers ---
@@ -190,32 +243,36 @@ public final class Nip44 {
 
     // --- Shared x-only lift (duplicate of NostrEvent.liftX to avoid dependency cycle) ---
 
+    /**
+     * Lift x-only pubkey to a curve point with even Y per BIP-340,
+     * using BouncyCastle's decodePoint.
+     */
     private static ECPoint liftX(BigInteger x) {
-        if (x.signum() <= 0 || x.compareTo(CURVE_P) >= 0) {
+        BigInteger p = SECP256K1_PARAMS.getCurve().getField().getCharacteristic();
+        if (x.signum() <= 0 || x.compareTo(p) >= 0) {
             return null;
         }
-        // y^2 = x^3 + 7 mod p
-        BigInteger rhs = x.modPow(BigInteger.valueOf(3), CURVE_P)
-                .add(BigInteger.valueOf(7))
-                .mod(CURVE_P);
-        BigInteger y = sqrtModP(rhs, CURVE_P);
-        if (y == null) return null;
-        if (y.testBit(0)) {
-            y = CURVE_P.subtract(y); // make y even
+        byte[] xBytes = to32Bytes(x);
+        byte[] comp = new byte[33];
+        comp[0] = 0x02; // even Y
+        System.arraycopy(xBytes, 0, comp, 1, 32);
+        try {
+            return SECP256K1_PARAMS.getCurve().decodePoint(comp).normalize();
+        } catch (IllegalArgumentException e) {
+            //Log.w(TAG, "liftX: decodePoint failed: " + e.getMessage());
+            return null;
         }
-        return SECP256K1_PARAMS.getCurve().createPoint(x, y).normalize();
     }
 
-    /**
-     * sqrt(n) mod p for secp256k1 (p % 4 == 3, so sqrt is simple).
-     */
-    private static BigInteger sqrtModP(BigInteger n, BigInteger p) {
-        if (n.signum() == 0) return BigInteger.ZERO;
-        BigInteger exp = p.add(BigInteger.ONE).shiftRight(2);
-        BigInteger r = n.modPow(exp, p);
-        if (!r.multiply(r).mod(p).equals(n.mod(p))) {
-            return null;
+    private static byte[] to32Bytes(BigInteger v) {
+        byte[] src = v.toByteArray();
+        if (src.length == 32) return src;
+        byte[] out = new byte[32];
+        if (src.length > 32) {
+            System.arraycopy(src, src.length - 32, out, 0, 32);
+        } else {
+            System.arraycopy(src, 0, out, 32 - src.length, src.length);
         }
-        return r;
+        return out;
     }
 }
