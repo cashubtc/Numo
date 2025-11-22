@@ -46,7 +46,7 @@ public class PaymentRequestActivity extends AppCompatActivity {
     };
 
     private ImageView qrImageView;
-    private TextView paymentAmountDisplay;
+    private TextView largeAmountDisplay;
     private TextView statusText;
     private android.view.View closeButton;
     private android.view.View shareButton;
@@ -74,7 +74,7 @@ public class PaymentRequestActivity extends AppCompatActivity {
 
         // Initialize views
         qrImageView = findViewById(R.id.payment_request_qr);
-        paymentAmountDisplay = findViewById(R.id.payment_amount_display);
+        largeAmountDisplay = findViewById(R.id.large_amount_display);
         statusText = findViewById(R.id.payment_status_text);
         closeButton = findViewById(R.id.close_button);
         shareButton = findViewById(R.id.share_button);
@@ -91,7 +91,7 @@ public class PaymentRequestActivity extends AppCompatActivity {
 
         // Display payment amount
         String formattedAmount = "₿ " + NumberFormat.getNumberInstance(Locale.US).format(paymentAmount);
-        paymentAmountDisplay.setText("Scan to pay " + formattedAmount);
+        largeAmountDisplay.setText("Pay " + formattedAmount);
 
         // Set up buttons
         closeButton.setOnClickListener(v -> {

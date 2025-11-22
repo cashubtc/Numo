@@ -30,6 +30,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Large Amount Display -->
+    <TextView
+        android:id="@+id/large_amount_display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:text="₿ 0"
+        android:textAppearance="@style/Text.DisplayAmount"
+        app:layout_constraintBottom_toTopOf="@id/qr_card"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <!-- QR Code Card -->
     <androidx.cardview.widget.CardView
         android:id="@+id/qr_card"
@@ -44,7 +56,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/close_button"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0.2">
+        app:layout_constraintVertical_bias="0.3">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -89,42 +101,23 @@
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:src="@drawable/cashu"
-            android:layout_marginEnd="8dp"/>
-
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
             android:src="@drawable/contactless"
             android:rotation="270" />
     </LinearLayout>
 
-    <!-- Name -->
+    <!-- Instruction Text -->
     <TextView
-        android:id="@+id/user_name"
+        android:id="@+id/instruction_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Julio Castellano"
+        android:text="Scan or tap to pay"
         android:textColor="@color/color_text_primary"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/icons_container" />
-
-    <!-- Subtitle / Amount -->
-    <TextView
-        android:id="@+id/payment_amount_display"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="Scan to pay"
-        android:textColor="@color/color_text_secondary"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/user_name" />
 
     <!-- Status Text (Hidden or subtle) -->
     <TextView
@@ -138,7 +131,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/payment_amount_display" />
+        app:layout_constraintTop_toBottomOf="@id/instruction_text" />
 
     <!-- Bottom Actions (Scan / My Code) - Optional based on image, but keeping simple for now -->
     <!-- The user image shows "Scan" and "My Code" toggle at bottom. 

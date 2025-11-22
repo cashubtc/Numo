@@ -834,7 +834,11 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
 
     private void vibrateKeypad() {
         if (vibrator != null) {
-            vibrator.vibrate(VIBRATE_KEYPAD);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                vibrator.vibrate(android.os.VibrationEffect.createPredefined(android.os.VibrationEffect.EFFECT_CLICK));
+            } else {
+                vibrator.vibrate(VIBRATE_KEYPAD);
+            }
         }
     }
 
