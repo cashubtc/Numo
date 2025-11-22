@@ -369,7 +369,7 @@ public class CashuPaymentHelper {
             // Create swap outputs
             String selectedKeysetId = keysetsResponse.keysets
                     .stream()
-                    .filter((k) -> k.active)
+                    .filter((k) -> k.active && k.unit.toLowerCase() == "sat")
                     .min(Comparator.comparing((k) -> k.inputFee))
                     .map(k -> k.keysetId)
                     .orElseThrow(() -> new RedemptionException("No active keyset found on mint"));
