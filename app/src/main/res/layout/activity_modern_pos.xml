@@ -4,113 +4,157 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_bg_white"
+    android:background="@color/color_primary_green"
     tools:context=".ModernPOSActivity">
 
-    <!-- Amount Display - Large centered -->
-    <TextView
-        android:id="@+id/amount_display"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/margin_screen_horizontal"
-        android:layout_marginTop="@dimen/space_5xl"
-        android:layout_marginEnd="@dimen/space_s"
-        android:gravity="center"
-        android:text="₿ 0"
-        android:textAppearance="@style/Text.DisplayAmount"
-        app:layout_constraintEnd_toStartOf="@id/currency_switch_button"
+    <!-- Top Bar -->
+    <ImageView
+        android:id="@+id/icon_scan"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="Scan"
+        android:src="@drawable/ic_scan"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Currency Switch Button -->
-    <ImageButton
-        android:id="@+id/currency_switch_button"
-        android:layout_width="@dimen/icon_size_large"
-        android:layout_height="@dimen/icon_size_large"
-        android:layout_marginTop="@dimen/space_5xl"
-        android:layout_marginEnd="@dimen/margin_screen_horizontal"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Switch between Sats and USD"
-        android:src="@drawable/ic_switch_currency"
-        android:tint="@color/color_text_primary"
+    <ImageView
+        android:id="@+id/icon_profile"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="Profile"
+        android:src="@drawable/ic_profile_placeholder"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Fiat Amount Display - Secondary text below main amount -->
-    <TextView
-        android:id="@+id/fiat_amount_display"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/margin_screen_horizontal"
-        android:layout_marginTop="@dimen/space_s"
-        android:layout_marginEnd="@dimen/margin_screen_horizontal"
-        android:gravity="center"
-        android:text="$0.00 USD"
-        android:textAppearance="@style/Text.Body"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/amount_display" />
 
     <!-- Input Mode Container -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/input_mode_container"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fiat_amount_display">
+        app:layout_constraintTop_toBottomOf="@id/icon_scan">
 
-        <!-- Numeric Keypad - Cash App Style -->
+        <!-- Amount Display -->
+        <TextView
+            android:id="@+id/amount_display"
+            android:layout_width="wrap_content"
+            android:layout_height="120dp"
+            android:layout_marginTop="64dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center"
+            android:text="$0"
+            android:textColor="@color/color_bg_white"
+            android:textSize="64sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@+id/currency_switch_container"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed" />
+
+        <!-- Currency Selector Pill -->
+        <LinearLayout
+            android:id="@+id/currency_switch_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:background="@drawable/bg_currency_pill"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="6dp"
+            app:layout_constraintBottom_toTopOf="@+id/keypad"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/amount_display">
+
+            <TextView
+                android:id="@+id/currency_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="USD"
+                android:textColor="@color/color_bg_white"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_marginStart="6dp"
+                android:src="@drawable/ic_switch_currency"
+                app:tint="@color/color_bg_white" />
+        </LinearLayout>
+
+        <!-- Invisible button to maintain click functionality for currency switch -->
+        <View
+            android:id="@+id/currency_switch_button"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="@id/currency_switch_container"
+            app:layout_constraintEnd_toEndOf="@id/currency_switch_container"
+            app:layout_constraintStart_toStartOf="@id/currency_switch_container"
+            app:layout_constraintTop_toTopOf="@id/currency_switch_container" />
+
+        <!-- Keypad -->
         <GridLayout
             android:id="@+id/keypad"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-            android:layout_marginTop="@dimen/space_4xl"
-            android:layout_marginBottom="@dimen/space_l"
+            android:layout_marginHorizontal="32dp"
+            android:layout_marginBottom="32dp"
             android:alignmentMode="alignBounds"
             android:columnCount="3"
             android:rowCount="4"
             android:useDefaultMargins="false"
-            app:layout_constraintBottom_toTopOf="@id/submit_button"
+            app:layout_constraintBottom_toTopOf="@+id/submit_button"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/currency_switch_container" />
 
-        <!-- Charge Button - Green Pill -->
+        <!-- Single Charge Button -->
         <Button
             android:id="@+id/submit_button"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/button_height"
-            android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-            android:layout_marginBottom="@dimen/space_xl"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginBottom="24dp"
             android:background="@drawable/bg_button_primary_green"
-            android:enabled="false"
             android:text="Charge"
-            android:textAppearance="@style/Text.Button"
+            android:textAllCaps="false"
             android:textColor="@color/color_bg_white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:stateListAnimator="@null"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
+        <!-- Hidden legacy views -->
+        <TextView
+            android:id="@+id/fiat_amount_display"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Token Display Container with Fixed Height -->
+    <!-- Token Display Container -->
     <FrameLayout
         android:id="@+id/token_scroll_container"
-        android:layout_width="0dp"
-        android:layout_height="120dp"
-        android:layout_margin="@dimen/margin_screen_horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="24dp"
         android:background="@color/color_bg_white"
-        android:elevation="1dp"
+        android:elevation="4dp"
         android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fiat_amount_display">
+        app:layout_constraintBottom_toTopOf="@id/token_actions_container"
+        app:layout_constraintTop_toBottomOf="@id/icon_scan">
 
-        <!-- Fixed height text view with ellipsize to handle text overflow -->
         <TextView
             android:id="@+id/token_display"
             android:layout_width="match_parent"
@@ -121,145 +165,99 @@
             android:focusable="true"
             android:fontFamily="monospace"
             android:gravity="start"
-            android:maxLines="4"
-            android:padding="@dimen/space_l"
+            android:padding="16dp"
             android:textColor="@color/color_text_primary"
             android:textSize="16sp" />
-
     </FrameLayout>
 
-    <!-- Token Action Buttons Container -->
+    <!-- Token Action Buttons -->
     <LinearLayout
         android:id="@+id/token_actions_container"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-        android:layout_marginTop="@dimen/space_l"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="24dp"
         android:orientation="vertical"
         android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/token_scroll_container">
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation">
 
-        <!-- Open With Button -->
         <Button
             android:id="@+id/open_with_button"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/button_height"
-            android:background="@drawable/bg_button_secondary_outlined"
-            android:drawablePadding="@dimen/space_s"
-            android:drawableStart="@drawable/ic_open_with"
+            android:layout_height="52dp"
+            android:background="@drawable/bg_button_white_pill"
             android:text="Open With"
-            android:textAppearance="@style/Text.Button"
-            android:textColor="@color/color_text_primary" />
+            android:textAllCaps="false"
+            android:textColor="@color/color_primary_green"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
-        <!-- Reset Button -->
         <Button
             android:id="@+id/reset_button"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/button_height"
-            android:layout_marginTop="@dimen/space_l"
-            android:background="@drawable/bg_button_secondary_outlined"
+            android:layout_height="52dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_button_white_pill"
             android:text="New Transaction"
-            android:textAppearance="@style/Text.Button"
-            android:textColor="@color/color_text_primary" />
-
+            android:textAllCaps="false"
+            android:textColor="@color/color_primary_green"
+            android:textSize="18sp"
+            android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Bottom Navigation - Cash App Style -->
+    <!-- Bottom Navigation (Restored & Transparent) -->
     <LinearLayout
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/color_bg_white"
-        android:orientation="vertical"
+        android:layout_height="64dp"
+        android:background="@android:color/transparent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Top Divider -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/divider_height"
-            android:background="@color/color_divider" />
+        <!-- More Options -->
+        <ImageButton
+            android:id="@+id/action_more_options"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="More Options"
+            android:src="@drawable/ic_more_vert"
+            app:tint="@color/color_bg_white" />
 
-        <!-- Navigation Icons Row -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/bottom_nav_height"
-            android:baselineAligned="false"
-            android:orientation="horizontal">
+        <!-- History -->
+        <ImageButton
+            android:id="@+id/action_history"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="History"
+            android:src="@drawable/ic_history"
+            app:tint="@color/color_bg_white" />
 
-            <!-- More Options -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center">
+        <!-- Catalog -->
+        <ImageButton
+            android:id="@+id/action_catalog"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Catalog"
+            android:src="@drawable/ic_catalog"
+            app:tint="@color/color_bg_white" />
 
-                <ImageButton
-                    android:id="@+id/action_more_options"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="?android:selectableItemBackgroundBorderless"
-                    android:contentDescription="More Options"
-                    android:padding="@dimen/space_l"
-                    android:src="@drawable/ic_more_vert"
-                    android:tint="@color/color_text_secondary" />
-            </LinearLayout>
-
-            <!-- History -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center">
-
-                <ImageButton
-                    android:id="@+id/action_history"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="?android:selectableItemBackgroundBorderless"
-                    android:contentDescription="Transaction History"
-                    android:padding="@dimen/space_l"
-                    android:src="@drawable/ic_history"
-                    android:tint="@color/color_text_secondary" />
-            </LinearLayout>
-
-            <!-- Catalog -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center">
-
-                <ImageButton
-                    android:id="@+id/action_catalog"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="?android:selectableItemBackgroundBorderless"
-                    android:contentDescription="Item Catalog"
-                    android:padding="@dimen/space_l"
-                    android:src="@drawable/ic_catalog"
-                    android:tint="@color/color_text_secondary" />
-            </LinearLayout>
-
-            <!-- Settings -->
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center">
-
-                <ImageButton
-                    android:id="@+id/action_settings"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="?android:selectableItemBackgroundBorderless"
-                    android:contentDescription="Settings"
-                    android:padding="@dimen/space_l"
-                    android:src="@drawable/ic_settings"
-                    android:tint="@color/color_text_secondary" />
-            </LinearLayout>
-        </LinearLayout>
+        <!-- Settings -->
+        <ImageButton
+            android:id="@+id/action_settings"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Settings"
+            android:src="@drawable/ic_settings"
+            app:tint="@color/color_bg_white" />
 
     </LinearLayout>
 

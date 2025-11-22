@@ -13,6 +13,8 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">@color/color_bg_white</item>
         <item name="android:windowLightStatusBar">true</item>
+        <!-- Navigation bar color (Transparent for floating pill) -->
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <!-- Text colors -->
         <item name="android:textColor">@color/color_text_primary</item>
         <!-- Background colors -->

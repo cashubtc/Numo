@@ -68,14 +68,15 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     };
 
     private TextView amountDisplay;
-    private TextView fiatAmountDisplay;
+    private TextView fiatAmountDisplay; // Kept for logic but hidden
     private Button submitButton;
+    private TextView currencyText;
     private StringBuilder currentInput = new StringBuilder();
 
     private TextView tokenDisplay;
     private Button openWithButton;
     private Button resetButton;
-    private ImageButton switchCurrencyButton;
+    private View switchCurrencyButton; // Changed to View for the invisible click target
     private FrameLayout tokenScrollContainer;
     private LinearLayout tokenActionsContainer;
     private ConstraintLayout inputModeContainer;
@@ -110,6 +111,12 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         public static final int PIN_FAILED = 0x63C0;
     }
 
+    private enum AnimationType {
+        NONE,
+        DIGIT_ENTRY,
+        CURRENCY_SWITCH
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Load theme preference before setting content view
@@ -130,9 +137,11 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         Log.d(TAG, "Created ModernPOSActivity with payment amount from basket: " + paymentAmount);
 
         // Find all views
+        // Find all views
         amountDisplay = findViewById(R.id.amount_display);
         fiatAmountDisplay = findViewById(R.id.fiat_amount_display);
         submitButton = findViewById(R.id.submit_button);
+        currencyText = findViewById(R.id.currency_text);
         GridLayout keypad = findViewById(R.id.keypad);
         tokenDisplay = findViewById(R.id.token_display);
         openWithButton = findViewById(R.id.open_with_button);
@@ -142,8 +151,33 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         tokenActionsContainer = findViewById(R.id.token_actions_container);
         inputModeContainer = findViewById(R.id.input_mode_container);
 
+        // Enable edge-to-edge
+        androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+        getWindow().setStatusBarColor(android.graphics.Color.TRANSPARENT);
+        getWindow().setNavigationBarColor(android.graphics.Color.TRANSPARENT);
+        
+        // Force white icons on status bar and nav bar (since background is dark green)
+        androidx.core.view.WindowInsetsControllerCompat windowInsetsController =
+                androidx.core.view.WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+        if (windowInsetsController != null) {
+            windowInsetsController.setAppearanceLightStatusBars(false);
+            windowInsetsController.setAppearanceLightNavigationBars(false);
+        }
+        
+        // Adjust padding for system bars
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, windowInsets) -> {
+            androidx.core.graphics.Insets insets = windowInsets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars());
+            // Apply top inset to top bar elements or root padding if needed
+            // For now, we'll just add top padding to the root view to avoid overlap
+            v.setPadding(0, insets.top, 0, insets.bottom);
+            return androidx.core.view.WindowInsetsCompat.CONSUMED;
+        });
+
         // Initialize bitcoin price worker
         bitcoinPriceWorker = com.electricdreams.shellshock.core.worker.BitcoinPriceWorker.getInstance(this);
+        
+        // Set window background to green for edge-to-edge effect
+        getWindow().setBackgroundDrawableResource(R.color.color_primary_green);
         
         // Set up the price listener to only update the display if it's needed
         // This way, it won't reset the amount input when price updates
@@ -151,7 +185,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             // Only update the display if we have an active conversion to show
             // This prevents clearing the input during regular price updates
             if (!currentInput.toString().isEmpty()) {
-                updateDisplay();
+                updateDisplay(AnimationType.NONE);
             }
         });
         
@@ -169,15 +203,17 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         });
 
         // Set up bottom navigation
+        // Set up bottom navigation
         ImageButton moreOptionsButton = findViewById(R.id.action_more_options);
         ImageButton historyButton = findViewById(R.id.action_history);
-        ImageButton settingsButton = findViewById(R.id.action_settings);
         ImageButton catalogButton = findViewById(R.id.action_catalog);
+        ImageButton settingsButton = findViewById(R.id.action_settings);
 
+        // Map buttons to actions
         moreOptionsButton.setOnClickListener(v -> showOverflowMenu(v));
         historyButton.setOnClickListener(v -> startActivity(new Intent(this, PaymentsHistoryActivity.class)));
-        settingsButton.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
         catalogButton.setOnClickListener(v -> startActivity(new Intent(this, com.electricdreams.shellshock.feature.items.ItemSelectionActivity.class)));
+        settingsButton.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);
         vibrator = (android.os.Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
@@ -193,7 +229,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         
         // Update keypad button creation to use weight for equal sizing
         for (String label : buttonLabels) {
-            Button button = (Button) inflater.inflate(R.layout.keypad_button, keypad, false);
+            Button button = (Button) inflater.inflate(R.layout.keypad_button_green_screen, keypad, false);
             button.setText(label);
             button.setOnClickListener(v -> onKeypadButtonClick(label));
             
@@ -209,9 +245,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         }
 
         submitButton.setOnClickListener(v -> {
-            String amount = currentInput.toString();
-            if (!amount.isEmpty()) {
-                requestedAmount = Long.parseLong(amount);
+            if (requestedAmount > 0) {
                 showPaymentMethodDialog(requestedAmount);
             } else {
                 Toast.makeText(this, "Please enter an amount", Toast.LENGTH_SHORT).show();
@@ -235,7 +269,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             // Set input to the payment amount from basket and set requested amount
             currentInput = new StringBuilder(String.valueOf(paymentAmount));
             requestedAmount = paymentAmount;
-            updateDisplay();
+            updateDisplay(AnimationType.NONE);
             
             // Automatically proceed with payment
             new Handler().postDelayed(() -> {
@@ -247,7 +281,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             }, 500); // Small delay to allow UI to update
         } else {
             // Regular flow
-            updateDisplay(); // Make sure first display is correct
+            updateDisplay(AnimationType.NONE); // Make sure first display is correct
         }
     }
 
@@ -296,7 +330,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         
         // Reset amount display
         currentInput.setLength(0);
-        updateDisplay();
+        updateDisplay(AnimationType.NONE);
     }
 
     private void switchToTokenMode() {
@@ -315,6 +349,14 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     }
     
     private void toggleInputMode() {
+        // Check if we can switch to USD
+        if (!isUsdInputMode) {
+            if (bitcoinPriceWorker == null || bitcoinPriceWorker.getCurrentPrice() <= 0) {
+                Toast.makeText(this, "Bitcoin price unavailable", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
         // Get current values before toggling
         String inputStr = currentInput.toString();
         long satsValue = 0;
@@ -368,7 +410,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         }
         
         // Update the display to show values in the new mode
-        updateDisplay();
+        updateDisplay(AnimationType.CURRENCY_SWITCH);
     }
 
     private void onKeypadButtonClick(String label) {
@@ -397,7 +439,54 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                 }
                 break;
         }
-        updateDisplay();
+        updateDisplay(AnimationType.DIGIT_ENTRY);
+    }
+    
+    private void animateCurrencySwitch(String newText, boolean isUp) {
+        // Cancel any running animation
+        amountDisplay.animate().cancel();
+        
+        // Reset properties if needed (though we want to animate from current state)
+        // If we are in a weird state, reset
+        if (amountDisplay.getAlpha() == 0f) {
+            amountDisplay.setAlpha(1f);
+            amountDisplay.setTranslationY(0f);
+        }
+
+        float startTranslation = 0f;
+        float exitTranslation = isUp ? -50f : 50f;
+        float enterStartTranslation = isUp ? 50f : -50f;
+
+        // Animate out
+        amountDisplay.animate()
+            .alpha(0f)
+            .translationY(exitTranslation)
+            .setDuration(150)
+            .setInterpolator(new android.view.animation.AccelerateInterpolator())
+            .withEndAction(() -> {
+                amountDisplay.setText(newText);
+                amountDisplay.setTranslationY(enterStartTranslation);
+                amountDisplay.animate()
+                    .alpha(1f)
+                    .translationY(0f)
+                    .setDuration(200)
+                    .setInterpolator(new android.view.animation.DecelerateInterpolator())
+                    .start();
+            })
+            .start();
+    }
+
+    private void animateDigitEntry(String newText) {
+        // Sleek pop animation for digit entry
+        amountDisplay.setText(newText);
+        amountDisplay.setScaleX(0.95f);
+        amountDisplay.setScaleY(0.95f);
+        amountDisplay.animate()
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(100)
+            .setInterpolator(new android.view.animation.OvershootInterpolator(1.5f))
+            .start();
     }
 
     private String formatAmount(String amount) {
@@ -409,11 +498,12 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         }
     }
 
-    private void updateDisplay() {
+    private void updateDisplay(AnimationType animationType) {
         // Get the current value from the input
         String inputStr = currentInput.toString();
         long satsValue = 0;
         double fiatValue = 0;
+        String amountDisplayText = "";
         
         if (isUsdInputMode) {
             // Converting from fiat input to sats equivalent
@@ -436,8 +526,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                     // Format fiat amount for display (handling decimal point)
                     String wholePart = String.valueOf(cents / 100);
                     String centsPart = String.format("%02d", cents % 100);
-                    String displayFiat = symbol + wholePart + "." + centsPart;
-                    amountDisplay.setText(displayFiat);
+                    amountDisplayText = symbol + wholePart + "." + centsPart;
                     
                     // Format sats equivalent
                     String satoshiEquivalent = "₿ " + NumberFormat.getNumberInstance(Locale.US).format(satsValue);
@@ -445,14 +534,14 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                 } catch (NumberFormatException e) {
                     CurrencyManager currencyManager = CurrencyManager.getInstance(this);
                     String symbol = currencyManager.getCurrentSymbol();
-                    amountDisplay.setText(symbol + "0.00");
+                    amountDisplayText = symbol + "0.00";
                     fiatAmountDisplay.setText("₿ 0");
                     satsValue = 0;
                 }
             } else {
                 CurrencyManager currencyManager = CurrencyManager.getInstance(this);
                 String symbol = currencyManager.getCurrentSymbol();
-                amountDisplay.setText(symbol + "0.00");
+                amountDisplayText = symbol + "0.00";
                 fiatAmountDisplay.setText("₿ 0");
                 satsValue = 0;
             }
@@ -461,8 +550,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             satsValue = inputStr.isEmpty() ? 0 : Long.parseLong(inputStr);
             
             // Format sats amount
-            String displayAmount = formatAmount(inputStr);
-            amountDisplay.setText(displayAmount);
+            amountDisplayText = formatAmount(inputStr);
             
             // Calculate and display fiat equivalent
             if (bitcoinPriceWorker != null) {
@@ -472,6 +560,20 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             } else {
                 CurrencyManager currencyManager = CurrencyManager.getInstance(this);
                 fiatAmountDisplay.setText(currencyManager.formatCurrencyAmount(0.0));
+            }
+        }
+        
+        // Update amount display with animation if needed
+        if (!amountDisplay.getText().toString().equals(amountDisplayText)) {
+            if (animationType == AnimationType.CURRENCY_SWITCH) {
+                // Animate UP if going to SATS (default/base), DOWN if going to USD (overlay/fiat)
+                // Or just consistent direction: SATS -> USD (Down), USD -> SATS (Up)
+                boolean animateUp = !isUsdInputMode; 
+                animateCurrencySwitch(amountDisplayText, animateUp);
+            } else if (animationType == AnimationType.DIGIT_ENTRY) {
+                animateDigitEntry(amountDisplayText);
+            } else {
+                amountDisplay.setText(amountDisplayText);
             }
         }
         
@@ -487,6 +589,13 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             submitButton.setText("Charge");
             submitButton.setEnabled(false);
             requestedAmount = 0;
+        }
+        
+        // Update currency text
+        if (isUsdInputMode) {
+            currencyText.setText("USD");
+        } else {
+            currencyText.setText("SATS");
         }
     }
 
@@ -733,7 +842,11 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
 
     private void vibrateKeypad() {
         if (vibrator != null) {
-            vibrator.vibrate(VIBRATE_KEYPAD);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                vibrator.vibrate(android.os.VibrationEffect.createPredefined(android.os.VibrationEffect.EFFECT_CLICK));
+            } else {
+                vibrator.vibrate(VIBRATE_KEYPAD);
+            }
         }
     }
 

@@ -21,7 +21,7 @@
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Back"
-            android:src="@drawable/ic_arrow_back"
+            android:src="@drawable/ic_close"
             android:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -39,11 +39,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <View
-        android:id="@+id/toolbar_divider"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/divider_height"
-        android:background="@color/color_divider" />
+
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -143,6 +139,7 @@
                 android:background="@drawable/bg_button_primary_green"
                 android:enabled="false"
                 android:text="Checkout"
+                android:stateListAnimator="@null"
                 android:textAppearance="@style/Text.Button"
                 android:textColor="@color/color_bg_white" />
         </LinearLayout>

@@ -1,145 +1,149 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="@color/color_bg_white">
 
-    <!-- Toolbar -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:title="Payment Request"
-        app:titleTextColor="@color/color_bg_white" />
+    <!-- Top Bar -->
+    <ImageButton
+        android:id="@+id/close_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_close"
+        app:tint="@color/color_text_primary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Content Container -->
-    <ScrollView
-        android:layout_width="match_parent"
+    <ImageButton
+        android:id="@+id/share_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_share"
+        app:tint="@color/color_text_primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Large Amount Display -->
+    <TextView
+        android:id="@+id/large_amount_display"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+        android:text="₿ 0"
+        android:textAppearance="@style/Text.DisplayAmount"
+        android:maxLines="1"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="20sp"
+        app:autoSizeMaxTextSize="@dimen/text_display_amount"
+        app:autoSizeStepGranularity="2sp"
+        app:layout_constraintBottom_toTopOf="@id/qr_card"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- QR Code Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/qr_card"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true">
+        android:layout_marginHorizontal="32dp"
+        app:cardBackgroundColor="@color/color_bg_white"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="6dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/close_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintVertical_bias="0.3">
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="@dimen/margin_screen_horizontal"
-            android:gravity="center">
+            android:layout_height="match_parent"
+            android:padding="24dp">
 
-            <!-- Title -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/space_xl"
-                android:text="Scan to Pay"
-                android:textAppearance="@style/Text.Title"
-                android:gravity="center" />
+            <ImageView
+                android:id="@+id/payment_request_qr"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter" />
 
-            <!-- NFC Card Indicator -->
+            <!-- Center Logo Overlay -->
             <FrameLayout
-                android:id="@+id/card_container"
-                android:layout_width="200dp"
-                android:layout_height="280dp"
-                android:layout_marginBottom="@dimen/space_2xl"
-                android:background="@drawable/nfc_payment_background_rect">
-
-                <!-- Icons displayed vertically in center -->
-                <LinearLayout
-                    android:id="@+id/payment_icons"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <!-- Contactless icon rotated to point upward -->
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_marginBottom="@dimen/space_xl"
-                        android:contentDescription="Contactless payment"
-                        android:rotation="270"
-                        android:src="@drawable/contactless" />
-
-                    <ImageView
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
-                        android:contentDescription="Cashu"
-                        android:src="@drawable/cashu" />
-                </LinearLayout>
-            </FrameLayout>
-
-            <!-- QR Code Section -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/space_l"
-                android:text="or scan QR code"
-                android:textAppearance="@style/Text.Caption"
-                android:gravity="center" />
-
-            <!-- QR Code Card -->
-            <androidx.cardview.widget.CardView
-                android:id="@+id/qr_card"
-                android:layout_width="280dp"
-                android:layout_height="280dp"
-                android:layout_marginBottom="@dimen/space_2xl"
-                app:cardCornerRadius="@dimen/radius_card"
-                app:cardElevation="@dimen/elevation_card">
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:background="@drawable/bg_qr_logo">
 
                 <ImageView
-                    android:id="@+id/payment_request_qr"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:adjustViewBounds="true"
-                    android:contentDescription="@string/payment_request_qr_description"
-                    android:padding="@dimen/space_l"
-                    android:scaleType="fitCenter" />
-            </androidx.cardview.widget.CardView>
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/cashu" />
+            </FrameLayout>
+        </FrameLayout>
+    </androidx.cardview.widget.CardView>
 
-            <!-- Payment Amount Info -->
-            <TextView
-                android:id="@+id/payment_amount_display"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/space_l"
-                android:textAppearance="@style/Text.BodyBold"
-                android:gravity="center" />
-
-            <!-- Status Text -->
-            <TextView
-                android:id="@+id/payment_status_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/space_xl"
-                android:text="Waiting for payment..."
-                android:textAppearance="@style/Text.Caption"
-                android:gravity="center" />
-
-        </LinearLayout>
-    </ScrollView>
-
-    <!-- Bottom Button Container -->
+    <!-- Icons below QR -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/icons_container"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="@dimen/margin_screen_horizontal"
-        android:background="@color/color_bg_white">
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/qr_card">
 
-        <!-- Cancel Button -->
-        <Button
-            android:id="@+id/cancel_button"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/button_height"
-            android:background="@drawable/bg_button_primary_green"
-            android:text="Cancel"
-            android:textAppearance="@style/Text.Button"
-            android:textColor="@color/color_bg_white" />
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/contactless"
+            android:rotation="270" />
     </LinearLayout>
 
-</LinearLayout>
+    <!-- Instruction Text -->
+    <TextView
+        android:id="@+id/instruction_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Scan or tap to pay"
+        android:textColor="@color/color_text_primary"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/icons_container" />
+
+    <!-- Status Text (Hidden or subtle) -->
+    <TextView
+        android:id="@+id/payment_status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Waiting for payment..."
+        android:textColor="@color/color_text_secondary"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/instruction_text" />
+
+    <!-- Bottom Actions (Scan / My Code) - Optional based on image, but keeping simple for now -->
+    <!-- The user image shows "Scan" and "My Code" toggle at bottom. 
+         Since this IS "My Code" (Payment Request), maybe we don't need the toggle if it's a dedicated activity.
+         But I'll add a "Scan" button at the bottom just in case, or leave it clean.
+         The prompt didn't explicitly ask for the toggle, just the "design".
+         I'll stick to the clean look. -->
+
+</androidx.constraintlayout.widget.ConstraintLayout>
