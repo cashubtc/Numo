@@ -21,7 +21,7 @@
             android:layout_centerHorizontal="true"
             android:layout_marginTop="48dp"
             android:background="@drawable/nfc_payment_background_rect">
-                
+
             <!-- Icons displayed vertically in center, contactless icon on top -->
             <LinearLayout
                 android:id="@+id/payment_icons"
@@ -47,6 +47,27 @@
                     android:contentDescription="Cashu" />
             </LinearLayout>
         </FrameLayout>
+
+        <!-- Large QR code card below the NFC card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/qr_card"
+            android:layout_width="280dp"
+            android:layout_height="280dp"
+            android:layout_below="@id/card_container"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="32dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <ImageView
+                android:id="@+id/payment_request_qr"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="0dp"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:contentDescription="@string/payment_request_qr_description" />
+        </androidx.cardview.widget.CardView>
 
         <!-- Cancel button at bottom -->
         <Button

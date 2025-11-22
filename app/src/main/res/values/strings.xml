@@ -7,4 +7,7 @@
     <!-- Host Card Emulation strings -->
     <string name="service_description">Cashu Payment Service</string>
     <string name="ndef_aid_description">NDEF Tag Type 4</string>
+
+    <!-- QR-based PaymentRequest -->
+    <string name="payment_request_qr_description">Cashu payment request QR code</string>
 </resources>

@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
@@ -24,6 +25,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -48,13 +50,27 @@ import java.util.concurrent.CompletableFuture;
 
 import com.electricdreams.shellshock.ndef.NdefHostCardEmulationService;
 import com.electricdreams.shellshock.ndef.CashuPaymentHelper;
+import com.electricdreams.shellshock.nostr.NostrKeyPair;
+import com.electricdreams.shellshock.nostr.NostrPaymentListener;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.common.BitMatrix;
 
 public class ModernPOSActivity extends AppCompatActivity implements SatocashWallet.OperationFeedback {
 
     private static final String TAG = "ModernPOSActivity";
     private static final String PREFS_NAME = "ShellshockPrefs";
     private static final String KEY_NIGHT_MODE = "nightMode";
-    
+
+    // Nostr relays to use for NIP-17 gift-wrapped DMs
+    private static final String[] NOSTR_RELAYS = new String[] {
+            "wss://relay.primal.net",
+            "wss://relay.damus.io",
+            "wss://nos.lol",
+            "wss://nostr.mom"
+    };
+
     private TextView amountDisplay;
     private TextView fiatAmountDisplay;
     private Button submitButton;
@@ -85,6 +101,9 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     private MenuItem themeMenuItem;
     private boolean isNightMode = false;
     private android.os.Vibrator vibrator;
+
+    // Nostr listener for QR / DM-based payments
+    private NostrPaymentListener nostrListener;
 
     // Vibration patterns (in milliseconds)
     private static final long[] PATTERN_SUCCESS = {0, 50, 100, 50}; // Two quick pulses
@@ -491,40 +510,99 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
 
         // For NDEF capability, we check and prepare upfront
         final boolean ndefAvailable = NdefHostCardEmulationService.isHceAvailable(this);
-        String paymentRequestLocal = null;
-        
+        String hcePaymentRequestLocal = null;
+
         // Get allowed mints
-        com.electricdreams.shellshock.core.util.MintManager mintManager = com.electricdreams.shellshock.core.util.MintManager.getInstance(this);
+        com.electricdreams.shellshock.core.util.MintManager mintManager =
+                com.electricdreams.shellshock.core.util.MintManager.getInstance(this);
         List<String> allowedMints = mintManager.getAllowedMints();
         Log.d(TAG, "Using " + allowedMints.size() + " allowed mints for payment request");
-        
+
+        // HCE (NDEF) PaymentRequest (same as before)
         if (ndefAvailable) {
-            // Create the payment request in case we need it
-            paymentRequestLocal = CashuPaymentHelper.createPaymentRequest(
-                amount, 
-                "Payment of " + amount + " sats",
-                allowedMints
+            hcePaymentRequestLocal = CashuPaymentHelper.createPaymentRequest(
+                    amount,
+                    "Payment of " + amount + " sats",
+                    allowedMints
             );
-            
-            if (paymentRequestLocal == null) {
-                Log.e(TAG, "Failed to create payment request");
+
+            if (hcePaymentRequestLocal == null) {
+                Log.e(TAG, "Failed to create payment request for HCE");
                 Toast.makeText(this, "Failed to prepare NDEF payment data", Toast.LENGTH_SHORT).show();
             } else {
-                Log.d(TAG, "Created payment request: " + paymentRequestLocal);
-                
+                Log.d(TAG, "Created HCE payment request: " + hcePaymentRequestLocal);
+
                 // Start HCE service in the background
                 Intent serviceIntent = new Intent(this, NdefHostCardEmulationService.class);
                 startService(serviceIntent);
             }
         }
-        final String finalPaymentRequest = paymentRequestLocal;
-        
+
+        // --- Nostr QR flow ---
+        // Generate an ephemeral nostr identity for this payment
+        NostrKeyPair eph = NostrKeyPair.generate();
+        String nostrPubHex = eph.getHexPub();
+        byte[] nostrSecret = eph.getSecretKeyBytes();
+
+        java.util.List<String> relayList = java.util.Arrays.asList(NOSTR_RELAYS);
+        String nprofile = com.electricdreams.shellshock.nostr.Nip19.encodeNprofile(
+                eph.getPublicKeyBytes(),
+                relayList
+        );
+
+        Log.d(TAG, "Ephemeral nostr pubkey=" + nostrPubHex + " nprofile=" + nprofile);
+
+        // QR-specific PaymentRequest WITH Nostr transport
+        String qrPaymentRequestLocal = CashuPaymentHelper.createPaymentRequestWithNostr(
+                amount,
+                "Payment of " + amount + " sats",
+                allowedMints,
+                nprofile
+        );
+        if (qrPaymentRequestLocal == null) {
+            Log.e(TAG, "Failed to create QR payment request with Nostr transport");
+        } else {
+            Log.d(TAG, "Created QR payment request with Nostr: " + qrPaymentRequestLocal);
+
+            // Start Nostr listener for this ephemeral identity
+            if (nostrListener != null) {
+                nostrListener.stop();
+                nostrListener = null;
+            }
+            nostrListener = new NostrPaymentListener(
+                    nostrSecret,
+                    nostrPubHex,
+                    amount,
+                    allowedMints,
+                    relayList,
+                    token -> runOnUiThread(() -> handlePaymentSuccess(token)),
+                    (msg, t) -> Log.e(TAG, "NostrPaymentListener error: " + msg, t)
+            );
+            nostrListener.start();
+        }
+
+        final String finalHcePaymentRequest = hcePaymentRequestLocal;
+        final String finalQrPaymentRequest = qrPaymentRequestLocal;
+
         // Show the unified NFC scan dialog using the simplified design
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.Theme_Shellshock);
         LayoutInflater inflater = this.getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.dialog_nfc_modern_simplified, null);
         builder.setView(dialogView);
-        
+
+        // Generate and display QR code if we have a request
+        ImageView qrImageView = dialogView.findViewById(R.id.payment_request_qr);
+        if (qrImageView != null && finalQrPaymentRequest != null) {
+            try {
+                Bitmap qrBitmap = generateQrBitmap(finalQrPaymentRequest, 512);
+                if (qrBitmap != null) {
+                    qrImageView.setImageBitmap(qrBitmap);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error generating QR bitmap: " + e.getMessage(), e);
+            }
+        }
+
         // Only need the cancel button
         Button cancelButton = dialogView.findViewById(R.id.nfc_cancel_button);
         if (cancelButton != null) {
@@ -535,6 +613,12 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                 // Clean up HCE service if it was started
                 if (ndefAvailable) {
                     resetHceService();
+                }
+                // Stop Nostr listener if running
+                if (nostrListener != null) {
+                    Log.d(TAG, "Stopping NostrPaymentListener due to user cancel");
+                    nostrListener.stop();
+                    nostrListener = null;
                 }
                 Toast.makeText(this, "Payment canceled", Toast.LENGTH_SHORT).show();
             });
@@ -547,18 +631,24 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             if (ndefAvailable) {
                 stopHceService();
             }
+            // Stop Nostr listener if running
+            if (nostrListener != null) {
+                Log.d(TAG, "Stopping NostrPaymentListener due to dialog cancel");
+                nostrListener.stop();
+                nostrListener = null;
+            }
         });
 
         // If we have NDEF capability, setup the HCE service with the payment request
-        if (ndefAvailable && finalPaymentRequest != null) {
+        if (ndefAvailable && finalHcePaymentRequest != null) {
             new Handler().postDelayed(() -> {
                 NdefHostCardEmulationService hceService = NdefHostCardEmulationService.getInstance();
                 if (hceService != null) {
                     Log.d(TAG, "Setting up NDEF payment with HCE service in unified flow");
-                    
+
                     // Set the payment request to the HCE service with expected amount
-                    hceService.setPaymentRequest(finalPaymentRequest, amount);
-                    
+                    hceService.setPaymentRequest(finalHcePaymentRequest, amount);
+
                     // Set up callback for when a token is received or an error occurs
                     hceService.setPaymentCallback(new NdefHostCardEmulationService.CashuPaymentCallback() {
                         @Override
@@ -566,7 +656,6 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                             runOnUiThread(() -> {
                                 try {
                                     // Set the received token and handle the success
-                                    // This will automatically call stopHceService()
                                     handlePaymentSuccess(token);
                                 } catch (Exception e) {
                                     Log.e(TAG, "Error in NDEF payment callback: " + e.getMessage(), e);
@@ -574,7 +663,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                                 }
                             });
                         }
-                        
+
                         @Override
                         public void onCashuPaymentError(String errorMessage) {
                             runOnUiThread(() -> {
@@ -583,19 +672,38 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                             });
                         }
                     });
-                    
+
                     Log.d(TAG, "NDEF payment service ready in unified flow");
                 }
             }, 1000);
         }
-        
+
         // Show the dialog
         nfcDialog = builder.create();
-        
+
         // Make dialog take up full height
         nfcDialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        
+
         nfcDialog.show();
+    }
+
+    /**
+     * Generate a QR code bitmap from the given text (e.g. creqA... PaymentRequest).
+     */
+    private Bitmap generateQrBitmap(String text, int size) throws Exception {
+        MultiFormatWriter writer = new MultiFormatWriter();
+        BitMatrix bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, size, size, null);
+
+        int width = bitMatrix.getWidth();
+        int height = bitMatrix.getHeight();
+        Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                bmp.setPixel(x, y, bitMatrix.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
+            }
+        }
+        return bmp;
     }
 
     private void proceedWithNdefPayment(long amount) {
@@ -877,6 +985,13 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     protected void onDestroy() {
         // Make sure to stop the HCE service when the activity is destroyed
         stopHceService();
+
+        // Stop any active nostr listener when activity is destroyed
+        if (nostrListener != null) {
+            Log.d(TAG, "Stopping NostrPaymentListener in onDestroy");
+            nostrListener.stop();
+            nostrListener = null;
+        }
         
         // Stop the Bitcoin price worker
         if (bitcoinPriceWorker != null) {
@@ -1074,6 +1189,13 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         // Ensure HCE service is cleaned up on error
         resetHceService();
 
+        // Stop any active nostr listener
+        if (nostrListener != null) {
+            Log.d(TAG, "Stopping NostrPaymentListener due to payment error");
+            nostrListener.stop();
+            nostrListener = null;
+        }
+
         mainHandler.post(() -> {
             if (nfcDialog != null && nfcDialog.isShowing()) {
                 nfcDialog.dismiss();
@@ -1145,6 +1267,13 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
 
         // Ensure HCE service is cleaned up on success
         stopHceService();
+
+        // Stop any active nostr listener
+        if (nostrListener != null) {
+            Log.d(TAG, "Stopping NostrPaymentListener due to payment success");
+            nostrListener.stop();
+            nostrListener = null;
+        }
 
         // Play success feedback
         playSuccessFeedback();

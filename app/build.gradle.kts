@@ -114,4 +114,7 @@ dependencies {
 
     // Gson for JSON serialization
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // QR code generation (ZXing core)
+    implementation("com.google.zxing:core:3.5.3")
 }

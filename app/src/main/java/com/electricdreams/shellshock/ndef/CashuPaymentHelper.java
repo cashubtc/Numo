@@ -38,6 +38,9 @@ import com.cashujdk.utils.OutputData;
 import com.cashujdk.utils.OutputHelper;
 import com.cashujdk.cryptography.Cashu;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import okhttp3.OkHttpClient;
 
 /**
@@ -82,6 +85,65 @@ public class CashuPaymentHelper {
         } catch (Exception e) {
             Log.e(TAG, "Error creating payment request: " + e.getMessage());
             e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Create a Cashu payment request that includes a Nostr transport according to NUT-18.
+     * This is intended for QR-based payments where the sender will use Nostr DM (NIP-17)
+     * to deliver the resulting ecash.
+     *
+     * @param amount       Amount in sats
+     * @param description  Optional description for the payment
+     * @param allowedMints List of allowed mints (can be null)
+     * @param nprofile     Receiver Nostr nprofile
+     * @return Encoded payment request (creqA...)
+     */
+    public static String createPaymentRequestWithNostr(
+            long amount,
+            String description,
+            List<String> allowedMints,
+            String nprofile
+    ) {
+        try {
+            PaymentRequest paymentRequest = new PaymentRequest();
+            paymentRequest.amount = Optional.of(amount);
+            paymentRequest.unit = Optional.of("sat");
+            paymentRequest.description = Optional.of(
+                    description != null ? description : "Payment for " + amount + " sats"
+            );
+
+            // Random short ID
+            String id = java.util.UUID.randomUUID().toString().substring(0, 8);
+            paymentRequest.id = Optional.of(id);
+
+            paymentRequest.singleUse = Optional.of(true);
+
+            if (allowedMints != null && !allowedMints.isEmpty()) {
+                String[] mintsArray = allowedMints.toArray(new String[0]);
+                paymentRequest.mints = Optional.of(mintsArray);
+                Log.d(TAG, "Added " + allowedMints.size() + " allowed mints to payment request (Nostr)");
+            }
+
+            // Nostr transport as per NUT-18
+            Transport nostrTransport = new Transport();
+            nostrTransport.type = "nostr";      // t: "nostr"
+            nostrTransport.target = nprofile;    // a: <nprofile>
+
+            // Tags: [["n", "17"]] to indicate NIP-17 DM support
+            TransportTag nipTag = new TransportTag();
+            nipTag.key = "n";
+            nipTag.value = "17";
+            nostrTransport.tags = Optional.of(new TransportTag[]{nipTag});
+
+            paymentRequest.transport = Optional.of(new Transport[]{nostrTransport});
+
+            String encodedRequest = paymentRequest.encode();
+            Log.d(TAG, "Created Nostr payment request: " + encodedRequest);
+            return encodedRequest;
+        } catch (Exception e) {
+            Log.e(TAG, "Error creating Nostr payment request: " + e.getMessage(), e);
             return null;
         }
     }
@@ -411,8 +473,8 @@ public class CashuPaymentHelper {
         return receiveOutputAmounts;
     }
 
-    private static List<Proof> constructAndVerifyProofs(PostSwapResponse response, KeysetItemResponse keyset, 
-                                              List<StringSecret> secrets, List<BigInteger> blindingFactors) {
+    private static List<Proof> constructAndVerifyProofs(PostSwapResponse response, KeysetItemResponse keyset,
+                                                       List<StringSecret> secrets, List<BigInteger> blindingFactors) {
         List<Proof> result = new ArrayList<>();
         for (int i = 0; i < response.signatures.size(); ++i) {
             BlindSignature signature = response.signatures.get(i);
@@ -428,5 +490,141 @@ public class CashuPaymentHelper {
             result.add(new Proof(signature.amount, signature.keysetId, secret, Cashu.pointToHex(C, true), Optional.empty(), Optional.empty()));
         }
         return result;
+    }
+
+    /**
+     * Parse a simple NUT-18-like PaymentRequestPayload JSON and attempt redemption by
+     * constructing a temporary Token and calling redeemToken.
+     */
+    public static String redeemFromPRPayload(String payloadJson,
+                                             long expectedAmount,
+                                             java.util.List<String> allowedMints) throws RedemptionException {
+        if (payloadJson == null) {
+            throw new RedemptionException("PaymentRequestPayload JSON is null");
+        }
+        try {
+            // Use the dedicated Gson instance defined on PaymentRequestPayload, which
+            // knows how to handle Cashu interfaces (ISecret) and hex BigIntegers
+            // inside the nested DLEQ structures.
+            Log.d(TAG, "payloadJson: " + payloadJson);
+            PaymentRequestPayload payload = PaymentRequestPayload.GSON.fromJson(payloadJson, PaymentRequestPayload.class);
+            if (payload == null) {
+                throw new RedemptionException("Failed to parse PaymentRequestPayload");
+            }
+            if (payload.mint == null || payload.mint.isEmpty()) {
+                throw new RedemptionException("PaymentRequestPayload is missing mint");
+            }
+            if (payload.unit == null || !"sat".equals(payload.unit)) {
+                throw new RedemptionException("Unsupported unit in PaymentRequestPayload: " + payload.unit);
+            }
+            if (payload.proofs == null || payload.proofs.isEmpty()) {
+                throw new RedemptionException("PaymentRequestPayload contains no proofs");
+            }
+            String mintUrl = payload.mint;
+            if (allowedMints != null && !allowedMints.isEmpty() && !allowedMints.contains(mintUrl)) {
+                throw new RedemptionException("Mint " + mintUrl + " not in allowed list");
+            }
+            long totalAmount = payload.proofs.stream().mapToLong(p -> p.amount).sum();
+            if (totalAmount < expectedAmount) {
+                throw new RedemptionException("Insufficient amount in payload proofs: " + totalAmount + " < expected " + expectedAmount);
+            }
+
+            // Build a temporary Token and redeem it using existing logic. The
+            // custom Gson ProofAdapter on PaymentRequestPayload ensures that
+            // each Proof has a non-null keysetId derived from the JSON `id`
+            // field and that DLEQ fields are parsed correctly from hex.
+            Token tempToken = new Token(payload.proofs, payload.unit, mintUrl);
+            String encoded = tempToken.encode();
+            return redeemToken(encoded);
+        } catch (com.google.gson.JsonSyntaxException e) {
+            throw new RedemptionException("Invalid JSON for PaymentRequestPayload: " + e.getMessage(), e);
+        } catch (com.google.gson.JsonIOException e) {
+            // Surface Gson IO/instantiation issues with more context
+            String errorMsg = "PaymentRequestPayload redemption failed: " + e.getMessage();
+            Log.e(TAG, errorMsg, e);
+            throw new RedemptionException(errorMsg, e);
+        } catch (RedemptionException e) {
+            throw e;
+        } catch (Exception e) {
+            String errorMsg = "PaymentRequestPayload redemption failed: " + e.getMessage();
+            Log.e(TAG, errorMsg, e);
+            throw new RedemptionException(errorMsg, e);
+        }
+    }
+
+    /**
+     * Minimal DTO for PaymentRequestPayload JSON as used in Nostr DMs.
+     */
+    public static class PaymentRequestPayload {
+        public String id;      // optional
+        public String memo;    // optional
+        public String mint;    // required
+        public String unit;    // required, expect "sat"
+        public java.util.List<Proof> proofs; // required
+
+        // Gson instance tuned for NUT-18 PaymentRequestPayloads. We use a
+        // custom ProofAdapter that knows how to interpret the NUT-18 JSON
+        // fields (`secret`, `C`, `amount`, `id`, `dleq.{r,s,e}`, etc.) and
+        // map them into the SDK's com.cashujdk.nut00.Proof structure.
+        public static final com.google.gson.Gson GSON = new com.google.gson.GsonBuilder()
+                .registerTypeAdapter(
+                        com.cashujdk.nut00.Proof.class,
+                        new ProofAdapter()
+                )
+                .create();
+
+        private static final class ProofAdapter
+                implements com.google.gson.JsonDeserializer<com.cashujdk.nut00.Proof> {
+            @Override
+            public com.cashujdk.nut00.Proof deserialize(
+                    com.google.gson.JsonElement json,
+                    java.lang.reflect.Type typeOfT,
+                    com.google.gson.JsonDeserializationContext context
+            ) throws com.google.gson.JsonParseException {
+                if (json == null || !json.isJsonObject()) {
+                    throw new com.google.gson.JsonParseException("Expected object for Proof");
+                }
+                com.google.gson.JsonObject obj = json.getAsJsonObject();
+
+                long amount = obj.get("amount").getAsLong();
+                String secretStr = obj.get("secret").getAsString();
+                String cHex = obj.get("C").getAsString();
+                String keysetId = obj.has("id") && !obj.get("id").isJsonNull()
+                        ? obj.get("id").getAsString()
+                        : null;
+                if (keysetId == null || keysetId.isEmpty()) {
+                    throw new com.google.gson.JsonParseException("Proof is missing id/keysetId");
+                }
+
+                com.cashujdk.nut00.ISecret secret = new com.cashujdk.nut00.StringSecret(secretStr);
+
+                com.cashujdk.nut12.DLEQProof dleq = null;
+                if (obj.has("dleq") && obj.get("dleq").isJsonObject()) {
+                    com.google.gson.JsonObject d = obj.getAsJsonObject("dleq");
+                    String rStr = d.get("r").getAsString();
+                    String sStr = d.get("s").getAsString();
+                    String eStr = d.get("e").getAsString();
+
+                    java.math.BigInteger r = new java.math.BigInteger(rStr, 16);
+                    java.math.BigInteger s = new java.math.BigInteger(sStr, 16);
+                    java.math.BigInteger e = new java.math.BigInteger(eStr, 16);
+
+                    // SDK constructor: DLEQProof(BigInteger s, BigInteger e, Optional<BigInteger> r)
+                    dleq = new com.cashujdk.nut12.DLEQProof(s, e, java.util.Optional.of(r));
+                }
+
+                // SDK Proof: Proof(long amount, String keysetId, ISecret secret,
+                //               String c, Optional<String> witness,
+                //               Optional<DLEQProof> dleq)
+                return new com.cashujdk.nut00.Proof(
+                        amount,
+                        keysetId,
+                        secret,
+                        cHex,
+                        java.util.Optional.empty(),
+                        java.util.Optional.ofNullable(dleq)
+                );
+            }
+        }
     }
 }
