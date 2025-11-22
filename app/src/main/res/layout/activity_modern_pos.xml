@@ -7,114 +7,143 @@
     android:background="@color/color_primary_green"
     tools:context=".ModernPOSActivity">
 
-    <!-- Top Bar -->
-    <ImageView
-        android:id="@+id/icon_scan"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
-        android:contentDescription="Scan"
-        android:src="@drawable/ic_scan"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <!-- Top Navigation Bar -->
+    <LinearLayout
+        android:id="@+id/top_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="@android:color/transparent"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="8dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <ImageView
-        android:id="@+id/icon_profile"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginTop="16dp"
-        android:contentDescription="Profile"
-        android:src="@drawable/ic_profile_placeholder"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        <!-- Catalog (Item List) -->
+        <ImageButton
+            android:id="@+id/action_catalog"
+            android:layout_width="48dp"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Item List"
+            android:src="@drawable/ic_catalog"
+            app:tint="@color/color_bg_white" />
+
+        <!-- Spacer -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <!-- History -->
+        <ImageButton
+            android:id="@+id/action_history"
+            android:layout_width="48dp"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="History"
+            android:src="@drawable/ic_history"
+            app:tint="@color/color_bg_white" />
+
+        <!-- Settings -->
+        <ImageButton
+            android:id="@+id/action_settings"
+            android:layout_width="48dp"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Settings"
+            android:src="@drawable/ic_settings"
+            app:tint="@color/color_bg_white" />
+
+        <!-- More Options (Hidden) -->
+        <ImageButton
+            android:id="@+id/action_more_options"
+            android:layout_width="48dp"
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="More Options"
+            android:src="@drawable/ic_more_vert"
+            android:visibility="gone"
+            app:tint="@color/color_bg_white" />
+
+    </LinearLayout>
 
     <!-- Input Mode Container -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/input_mode_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
-        app:layout_constraintTop_toBottomOf="@id/icon_scan">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_navigation">
 
-        <!-- Scrollable upper content (amount + currency) -->
-        <ScrollView
-            android:id="@+id/upper_scroll_container"
+        <!-- Upper content (amount + currency) - dynamically sized -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/upper_content_container"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:fillViewport="true"
-            android:scrollbars="none"
             app:layout_constraintBottom_toTopOf="@+id/keypad"
             app:layout_constraintTop_toTopOf="parent">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+            <!-- Amount Display -->
+            <TextView
+                android:id="@+id/amount_display"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="8dp"
+                android:gravity="center"
+                android:text="$0"
+                android:textColor="@color/color_bg_white"
+                android:textSize="64sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/currency_switch_container"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_chainStyle="packed" />
 
-                <!-- Amount Display -->
+            <!-- Currency Selector Pill -->
+            <LinearLayout
+                android:id="@+id/currency_switch_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_currency_pill"
+                android:gravity="center"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="6dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/amount_display">
+
                 <TextView
-                    android:id="@+id/amount_display"
-                    android:layout_width="wrap_content"
-                    android:layout_height="120dp"
-                    android:layout_marginTop="64dp"
-                    android:layout_marginBottom="8dp"
-                    android:gravity="center"
-                    android:text="$0"
-                    android:textColor="@color/color_bg_white"
-                    android:textSize="64sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toTopOf="@+id/currency_switch_container"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_chainStyle="packed" />
-
-                <!-- Currency Selector Pill -->
-                <LinearLayout
-                    android:id="@+id/currency_switch_container"
+                    android:id="@+id/currency_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="32dp"
-                    android:background="@drawable/bg_currency_pill"
-                    android:gravity="center"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="6dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/amount_display">
+                    android:text="USD"
+                    android:textColor="@color/color_bg_white"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/currency_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="USD"
-                        android:textColor="@color/color_bg_white"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+                <ImageView
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:layout_marginStart="6dp"
+                    android:src="@drawable/ic_switch_currency"
+                    app:tint="@color/color_bg_white" />
+            </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="12dp"
-                        android:layout_height="12dp"
-                        android:layout_marginStart="6dp"
-                        android:src="@drawable/ic_switch_currency"
-                        app:tint="@color/color_bg_white" />
-                </LinearLayout>
+            <!-- Invisible button to maintain click functionality for currency switch -->
+            <View
+                android:id="@+id/currency_switch_button"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="@id/currency_switch_container"
+                app:layout_constraintEnd_toEndOf="@id/currency_switch_container"
+                app:layout_constraintStart_toStartOf="@id/currency_switch_container"
+                app:layout_constraintTop_toTopOf="@id/currency_switch_container" />
 
-                <!-- Invisible button to maintain click functionality for currency switch -->
-                <View
-                    android:id="@+id/currency_switch_button"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    app:layout_constraintBottom_toBottomOf="@id/currency_switch_container"
-                    app:layout_constraintEnd_toEndOf="@id/currency_switch_container"
-                    app:layout_constraintStart_toStartOf="@id/currency_switch_container"
-                    app:layout_constraintTop_toTopOf="@id/currency_switch_container" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-        </ScrollView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- Keypad with fixed height -->
         <GridLayout
@@ -170,7 +199,7 @@
         android:elevation="4dp"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/token_actions_container"
-        app:layout_constraintTop_toBottomOf="@id/icon_scan">
+        app:layout_constraintTop_toBottomOf="@id/top_navigation">
 
         <TextView
             android:id="@+id/token_display"
@@ -196,7 +225,7 @@
         android:layout_marginBottom="24dp"
         android:orientation="vertical"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation">
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <Button
             android:id="@+id/open_with_button"
@@ -222,60 +251,6 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Bottom Navigation (Restored & Transparent) -->
-    <LinearLayout
-        android:id="@+id/bottom_navigation"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:background="@android:color/transparent"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- More Options -->
-        <ImageButton
-            android:id="@+id/action_more_options"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="More Options"
-            android:src="@drawable/ic_more_vert"
-            app:tint="@color/color_bg_white" />
-
-        <!-- History -->
-        <ImageButton
-            android:id="@+id/action_history"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="History"
-            android:src="@drawable/ic_history"
-            app:tint="@color/color_bg_white" />
-
-        <!-- Catalog -->
-        <ImageButton
-            android:id="@+id/action_catalog"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Catalog"
-            android:src="@drawable/ic_catalog"
-            app:tint="@color/color_bg_white" />
-
-        <!-- Settings -->
-        <ImageButton
-            android:id="@+id/action_settings"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Settings"
-            android:src="@drawable/ic_settings"
-            app:tint="@color/color_bg_white" />
-
-    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

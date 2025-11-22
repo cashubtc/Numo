@@ -238,7 +238,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             params.height = 0;
             params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
             params.rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
-            params.setMargins(4, 4, 4, 4);
+            params.setMargins(4, 2, 4, 2);  // left, top, right, bottom
             button.setLayoutParams(params);
             
             keypad.addView(button);
