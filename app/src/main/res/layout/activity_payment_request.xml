@@ -33,11 +33,17 @@
     <!-- Large Amount Display -->
     <TextView
         android:id="@+id/large_amount_display"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
+        android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
         android:text="₿ 0"
         android:textAppearance="@style/Text.DisplayAmount"
+        android:maxLines="1"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="20sp"
+        app:autoSizeMaxTextSize="@dimen/text_display_amount"
+        app:autoSizeStepGranularity="2sp"
         app:layout_constraintBottom_toTopOf="@id/qr_card"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
