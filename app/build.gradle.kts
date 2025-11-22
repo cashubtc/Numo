@@ -81,6 +81,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material:1.6.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
+    implementation("androidx.compose.material:material-icons-extended")
     
     // AndroidX Libraries
     implementation("androidx.appcompat:appcompat:1.6.1")
