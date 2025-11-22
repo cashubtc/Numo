@@ -26,8 +26,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.electricdreams.shellshock.ui.components.CashAppBottomBar
 import com.electricdreams.shellshock.ui.components.CashAppKeypad
 import com.electricdreams.shellshock.ui.components.CashAppPrimaryButton
 import com.electricdreams.shellshock.ui.theme.CashAppTypography
@@ -45,8 +43,7 @@ fun KeypadScreen(
     onRequestClick: () -> Unit,
     onPayClick: () -> Unit,
     onQrClick: () -> Unit,
-    onProfileClick: () -> Unit,
-    bottomBar: @Composable () -> Unit
+    onProfileClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -56,7 +53,7 @@ fun KeypadScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 80.dp) // Space for bottom bar
+                .padding(bottom = 16.dp) // Minimal padding
         ) {
             // Top Bar (QR and Profile)
             Row(
@@ -153,15 +150,6 @@ fun KeypadScreen(
                     contentColor = CashGreen
                 )
             }
-        }
-        
-        // Bottom Bar Container
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-        ) {
-            bottomBar()
         }
     }
 }

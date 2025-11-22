@@ -47,7 +47,7 @@ fun CatalogScreen(
     onItemRemove: (Item) -> Unit,
     onViewBasket: () -> Unit,
     onCheckout: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: (() -> Unit)? = null
 ) {
     Scaffold(
         topBar = {

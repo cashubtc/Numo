@@ -25,7 +25,7 @@ import java.util.Locale
 @Composable
 fun HistoryScreen(
     history: List<PaymentHistoryEntry>,
-    onBackClick: () -> Unit,
+    onBackClick: (() -> Unit)? = null,
     onClearHistoryClick: () -> Unit,
     onCopyClick: (String) -> Unit,
     onOpenClick: (String) -> Unit,

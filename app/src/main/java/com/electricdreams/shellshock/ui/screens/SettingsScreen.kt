@@ -39,7 +39,7 @@ fun SettingsScreen(
     onImportItems: () -> Unit,
     onManageItems: () -> Unit,
     onClearItems: () -> Unit,
-    onBackClick: () -> Unit,
+    onBackClick: (() -> Unit)? = null,
     onSaveClick: () -> Unit
 ) {
     Scaffold(

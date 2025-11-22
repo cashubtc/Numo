@@ -24,7 +24,7 @@ import com.electricdreams.shellshock.ui.theme.Gray700
 fun BalanceScreen(
     balance: Long?,
     statusMessage: String,
-    onBackClick: () -> Unit
+    onBackClick: (() -> Unit)? = null
 ) {
     Scaffold(
         topBar = {
