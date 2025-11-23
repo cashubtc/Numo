@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Disabled state - black with 20% opacity -->
+    <!-- Disabled state - black with 30% opacity (brighter than before) -->
     <item android:state_enabled="false">
         <shape android:shape="rectangle">
             <corners android:radius="26dp" />
-            <solid android:color="#33000000" />
+            <solid android:color="#4D000000" />
         </shape>
     </item>
     <!-- Pressed state - white with 15% opacity (slightly less for feedback) -->
@@ -14,11 +14,11 @@
             <solid android:color="#26FFFFFF" />
         </shape>
     </item>
-    <!-- Enabled state - white with 20% opacity -->
+    <!-- Enabled state - white with 15% opacity (darker than before) with border -->
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="26dp" />
-            <solid android:color="#33FFFFFF" />
+            <solid android:color="#56FFFFFF" />
         </shape>
     </item>
 </selector>
