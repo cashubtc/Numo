@@ -1,50 +1,27 @@
 package com.electricdreams.shellshock.ndef
 
 import android.util.Log
-import com.cashujdk.api.CashuHttpClient
-import com.cashujdk.cryptography.Cashu
-import com.cashujdk.nut00.BlindSignature
-import com.cashujdk.nut00.BlindedMessage
-import com.cashujdk.nut00.ISecret
-import com.cashujdk.nut00.InnerToken
-import com.cashujdk.nut00.Proof
-import com.cashujdk.nut00.StringSecret
-import com.cashujdk.nut00.Token
-import com.cashujdk.nut01.GetKeysResponse
-import com.cashujdk.nut01.KeysetId
-import com.cashujdk.nut01.KeysetItemResponse
-import com.cashujdk.nut02.FeeHelper
-import com.cashujdk.nut02.GetKeysetsResponse
-import com.cashujdk.nut03.PostSwapRequest
-import com.cashujdk.nut03.PostSwapResponse
-import com.cashujdk.nut12.DLEQProof
 import com.cashujdk.nut18.PaymentRequest
 import com.cashujdk.nut18.Transport
 import com.cashujdk.nut18.TransportTag
 import com.google.gson.*
-import okhttp3.OkHttpClient
-import org.bouncycastle.math.ec.ECPoint
+import kotlinx.coroutines.runBlocking
 import java.math.BigInteger
-import java.security.SecureRandom
 import java.util.Optional
 
 /**
  * Helper class for Cashu payment-related operations.
  *
- * NOTE: This is intentionally close to the original Java implementation to
- * make future replacement with CDK (Cashu Development Kit) straightforward.
+ * Payment request creation is handled via cashu-jdk. Token-level validation
+ * and redemption are implemented using the CDK (Cashu Development Kit)
+ * MultiMintWallet and Token types.
  */
 object CashuPaymentHelper {
 
     private const val TAG = "CashuPaymentHelper"
 
-    /**
-     * Create a Cashu payment request for a specific amount.
-     * @param amount Amount in sats
-     * @param description Optional description for the payment
-     * @param allowedMints List of allowed mints (can be null)
-     * @return Payment request string (creq...) or null on error
-     */
+    // === Payment request creation (cashu-jdk) ===============================
+
     @JvmStatic
     fun createPaymentRequest(
         amount: Long,
@@ -59,11 +36,9 @@ object CashuPaymentHelper {
                     description ?: "Payment for $amount sats",
                 )
 
-                // Random short ID
                 val id = java.util.UUID.randomUUID().toString().substring(0, 8)
                 this.id = Optional.of(id)
 
-                // Single use
                 singleUse = Optional.of(true)
 
                 if (!allowedMints.isNullOrEmpty()) {
@@ -82,17 +57,10 @@ object CashuPaymentHelper {
         }
     }
 
-    /**
-     * Overload without allowed mints.
-     */
     @JvmStatic
     fun createPaymentRequest(amount: Long, description: String?): String? =
         createPaymentRequest(amount, description, null)
 
-    /**
-     * Create a Cashu payment request that includes a Nostr transport according to NUT-18.
-     * For QR-based payments where the sender uses Nostr DM (NIP-17) to deliver ecash.
-     */
     @JvmStatic
     fun createPaymentRequestWithNostr(
         amount: Long,
@@ -119,7 +87,6 @@ object CashuPaymentHelper {
                     Log.d(TAG, "Added ${allowedMints.size} allowed mints to payment request (Nostr)")
                 }
 
-                // Nostr transport as per NUT-18
                 val nostrTransport = Transport().apply {
                     type = "nostr"
                     target = nprofile
@@ -143,14 +110,12 @@ object CashuPaymentHelper {
         }
     }
 
-    /** Basic format check for Cashu token. */
+    // === Token helpers ======================================================
+
     @JvmStatic
     fun isCashuToken(text: String?): Boolean =
         text != null && (text.startsWith("cashuB") || text.startsWith("cashuA"))
 
-    /**
-     * Extract a Cashu token from a string that might contain other content.
-     */
     @JvmStatic
     fun extractCashuToken(text: String?): String? {
         if (text == null) {
@@ -165,40 +130,33 @@ object CashuPaymentHelper {
 
         Log.i(TAG, "extractCashuToken: Analyzing text: $text")
 
-        // Hash-fragment style: #token=cashu...
         if (text.contains("#token=cashu")) {
             Log.i(TAG, "extractCashuToken: Found #token=cashu pattern")
             val tokenStart = text.indexOf("#token=cashu")
-            val cashuStart = tokenStart + 7 // "#token="
-            var cashuEnd = text.length
+            val cashuStart = tokenStart + 7
+            val cashuEnd = text.length
 
             val token = text.substring(cashuStart, cashuEnd)
             Log.i(TAG, "extractCashuToken: Extracted token from URL fragment: $token")
             return token
         }
 
-        // Query-style: ?token=cashu...
         if (text.contains("token=cashu")) {
             Log.i(TAG, "extractCashuToken: Found token=cashu pattern")
             val tokenStart = text.indexOf("token=cashu")
-            val cashuStart = tokenStart + 6 // "token="
+            val cashuStart = tokenStart + 6
             var cashuEnd = text.length
             val ampIndex = text.indexOf('&', cashuStart)
             val hashIndex = text.indexOf('#', cashuStart)
 
-            if (ampIndex > cashuStart && ampIndex < cashuEnd) {
-                cashuEnd = ampIndex
-            }
-            if (hashIndex > cashuStart && hashIndex < cashuEnd) {
-                cashuEnd = hashIndex
-            }
+            if (ampIndex > cashuStart && ampIndex < cashuEnd) cashuEnd = ampIndex
+            if (hashIndex > cashuStart && hashIndex < cashuEnd) cashuEnd = hashIndex
 
             val token = text.substring(cashuStart, cashuEnd)
             Log.i(TAG, "extractCashuToken: Extracted token from URL parameter: $token")
             return token
         }
 
-        // Fallback: scan for cashuA/cashuB prefix
         val prefixes = arrayOf("cashuA", "cashuB")
         for (prefix in prefixes) {
             val tokenIndex = text.indexOf(prefix)
@@ -222,14 +180,12 @@ object CashuPaymentHelper {
         return null
     }
 
-    /** Basic format check for Cashu payment request (creqA...). */
     @JvmStatic
     fun isCashuPaymentRequest(text: String?): Boolean =
         text != null && text.startsWith("creqA")
 
-    /**
-     * Validate a Cashu token for a specific amount and against allowed mints.
-     */
+    // === Validation using CDK Token ========================================
+
     @JvmStatic
     fun validateToken(
         tokenString: String?,
@@ -242,15 +198,17 @@ object CashuPaymentHelper {
         }
 
         return try {
-            val token = Token.decode(tokenString)
-            if (token.unit != "sat") {
-                Log.e(TAG, "Unsupported token unit: ${token.unit}")
+            val token = org.cashudevkit.Token.Companion.decode(
+                tokenString ?: error("tokenString is null"),
+            )
+
+            if (token.unit() != org.cashudevkit.CurrencyUnit.Sat) {
+                Log.e(TAG, "Unsupported token unit: ${token.unit()}")
                 return false
             }
 
-            // Mint check
             if (!allowedMints.isNullOrEmpty()) {
-                val mintUrl = token.mint
+                val mintUrl = token.mintUrl().url
                 if (!allowedMints.contains(mintUrl)) {
                     Log.e(TAG, "Mint not in allowed list: $mintUrl")
                     return false
@@ -259,11 +217,7 @@ object CashuPaymentHelper {
                 }
             }
 
-            val tokenAmount = token.tokens
-                .map { inner: InnerToken ->
-                    inner.proofsShortId.stream().mapToLong { p: Proof -> p.amount }.sum()
-                }
-                .sum()
+            val tokenAmount = token.value().value.toLong()
 
             if (tokenAmount < expectedAmount) {
                 Log.e(
@@ -273,7 +227,7 @@ object CashuPaymentHelper {
                 return false
             }
 
-            Log.d(TAG, "Token format validation passed, cryptographic verification pending")
+            Log.d(TAG, "Token format validation passed using CDK Token; amount=$tokenAmount sats")
             true
         } catch (e: Exception) {
             Log.e(TAG, "Token validation failed: ${e.message}", e)
@@ -281,15 +235,12 @@ object CashuPaymentHelper {
         }
     }
 
-    /** Overload without mint checking. */
     @JvmStatic
     fun validateToken(tokenString: String?, expectedAmount: Long): Boolean =
         validateToken(tokenString, expectedAmount, null)
 
-    /**
-     * Attempt to redeem a Cashu token and get a reissued token.
-     * @throws RedemptionException if token redemption fails
-     */
+    // === Redemption using CDK MultiMintWallet ===============================
+
     @JvmStatic
     @Throws(RedemptionException::class)
     fun redeemToken(tokenString: String?): String {
@@ -300,198 +251,80 @@ object CashuPaymentHelper {
         }
 
         try {
-            val token = Token.decode(tokenString)
-            val mintUrl = token.mint
+            val wallet =
+                com.electricdreams.shellshock.core.cashu.CashuWalletManager.getWallet()
+                    ?: throw RedemptionException("CDK wallet not initialized")
 
-            val httpClient = CashuHttpClient(OkHttpClient(), mintUrl)
-            val keysetsResponse = httpClient.keysets.join()
-                ?: throw RedemptionException("Failed to get keysets from mint: $mintUrl")
-
-            val keysets = keysetsResponse.keysets
-            if (keysets == null || keysets.isEmpty()) {
-                throw RedemptionException("Failed to get keysets from mint: $mintUrl")
-            }
-
-            val fullKeysetIds = keysets.map { it.keysetId }
-            val keysetsFeesMap = keysets.associate { it.keysetId to it.inputFee }
-
-            val tokenAmount = token.tokens
-                .map { inner: InnerToken ->
-                    inner.proofsShortId.stream().mapToLong { p: Proof -> p.amount }.sum()
-                }
-                .sum()
-
-            val receiveProofs = token.tokens
-                .flatMap { inner: InnerToken ->
-                    inner.getProofs(fullKeysetIds).toList()
-                }
-
-            if (receiveProofs.isEmpty()) {
-                throw RedemptionException("No valid proofs found in token")
-            }
-
-            val fee = FeeHelper.ComputeFee(receiveProofs, keysetsFeesMap)
-
-            val selectedKeysetId = keysets
-                .filter { it.active && it.unit.equals("sat", ignoreCase = true) }
-                .minByOrNull { it.inputFee }
-                ?.keysetId
-                ?: throw RedemptionException("No active keyset found on mint")
-
-            Log.d(TAG, "Selected keyset ID for new proofs: $selectedKeysetId")
-
-            val keysetId = KeysetId().apply { _id = selectedKeysetId }
-
-            val outputAmounts = createOutputAmounts(tokenAmount - fee)
-
-            val blindedMessages = mutableListOf<BlindedMessage>()
-            val secrets = mutableListOf<StringSecret>()
-            val blindingFactors = mutableListOf<BigInteger>()
-
-            for (output in outputAmounts) {
-                val secret = StringSecret.random()
-                secrets.add(secret)
-
-                val blindingFactor = BigInteger(256, SecureRandom())
-                blindingFactors.add(blindingFactor)
-
-                val bPrime = Cashu.computeB_(
-                    Cashu.messageToCurve(secret.secret),
-                    blindingFactor,
-                )
-                val blindedMessage = BlindedMessage(
-                    output,
-                    selectedKeysetId,
-                    Cashu.pointToHex(bPrime, true),
-                    Optional.empty(),
-                )
-                blindedMessages.add(blindedMessage)
-            }
-
-            val keysFuture = httpClient.getKeys(selectedKeysetId)
-
-            val swapRequest = PostSwapRequest().apply {
-                inputs = receiveProofs.map { p ->
-                    Proof(
-                        p.amount,
-                        p.keysetId,
-                        p.secret,
-                        p.c,
-                        Optional.empty(),
-                        Optional.empty(),
-                    )
-                }
-                outputs = blindedMessages
-            }
-
-            Log.d(TAG, "Attempting to swap proofs")
-            val swapResponse = httpClient.swap(swapRequest).join()
-                ?: throw RedemptionException("No signatures returned from mint during swap")
-
-            if (swapResponse.signatures == null || swapResponse.signatures.isEmpty()) {
-                throw RedemptionException("No signatures returned from mint during swap")
-            }
-
-            val keysResponse = keysFuture.join()
-            val returnedKeysets = keysResponse?.keysets
-            if (returnedKeysets == null || returnedKeysets.isEmpty()) {
-                throw RedemptionException("Failed to get keys from mint")
-            }
-
-            Log.d(TAG, "Successfully swapped and received proofs")
-
-            val proofs = constructAndVerifyProofs(
-                swapResponse,
-                returnedKeysets[0],
-                secrets,
-                blindingFactors,
+            // Decode incoming token using CDK Token
+            val cdkToken = org.cashudevkit.Token.Companion.decode(
+                tokenString ?: error("tokenString is null"),
             )
-            if (proofs.isEmpty()) {
-                throw RedemptionException("Failed to verify proofs from mint")
+
+            if (cdkToken.unit() != org.cashudevkit.CurrencyUnit.Sat) {
+                throw RedemptionException("Unsupported token unit: ${cdkToken.unit()}")
             }
 
-            Log.d(TAG, "Successfully constructed and verified proofs")
+            val mintUrl: org.cashudevkit.MintUrl = cdkToken.mintUrl()
 
-            val newToken = Token(proofs, token.unit, mintUrl)
-            Log.d(TAG, "Token redemption successful!")
-            return newToken.encode()
+            // Receive into wallet
+            val receiveOptions = org.cashudevkit.ReceiveOptions(
+                amountSplitTarget = org.cashudevkit.SplitTarget.None,
+                p2pkSigningKeys = emptyList(),
+                preimages = emptyList(),
+                metadata = emptyMap(),
+            )
+            val mmReceive = org.cashudevkit.MultiMintReceiveOptions(
+                allowUntrusted = false,
+                transferToMint = null,
+                receiveOptions = receiveOptions,
+            )
+
+            val amountReceived: org.cashudevkit.Amount
+            runBlocking {
+                amountReceived = wallet.receive(cdkToken, mmReceive)
+            }
+
+            // Prepare send back out
+            val outAmount: org.cashudevkit.Amount = amountReceived
+
+            val sendOptions = org.cashudevkit.SendOptions(
+                memo = null,
+                conditions = null,
+                amountSplitTarget = org.cashudevkit.SplitTarget.None,
+                sendKind = org.cashudevkit.SendKind.OfflineExact,
+                includeFee = false,
+                maxProofs = null,
+                metadata = emptyMap(),
+            )
+            val mmSend = org.cashudevkit.MultiMintSendOptions(
+                allowTransfer = false,
+                maxTransferAmount = null,
+                allowedMints = emptyList(),
+                excludedMints = emptyList(),
+                sendOptions = sendOptions,
+            )
+
+            val outTokenString = runBlocking {
+                val prepared: org.cashudevkit.PreparedSend =
+                    wallet.prepareSend(mintUrl, outAmount, mmSend)
+                val outToken: org.cashudevkit.Token =
+                    prepared.confirm("redeemed via CDK")
+                outToken.encode()
+            }
+
+            Log.d(TAG, "Token redemption via CDK successful")
+            return outTokenString
         } catch (e: RedemptionException) {
             throw e
         } catch (e: Exception) {
-            val errorMsg = "Token redemption failed: ${e.message}"
+            val errorMsg = "Token redemption via CDK failed: ${e.message}"
             Log.e(TAG, errorMsg, e)
             throw RedemptionException(errorMsg, e)
         }
     }
 
-    class RedemptionException : Exception {
-        constructor(message: String) : super(message)
-        constructor(message: String, cause: Throwable) : super(message, cause)
-    }
+    // === Redemption from PaymentRequestPayload (still cashu-jdk proofs) ==== 
 
-    private fun createOutputAmounts(amount: Long): List<Long> {
-        val outputs = mutableListOf<Long>()
-        var remaining = amount
-        var i = 0
-        while (remaining > 0) {
-            if ((remaining and 1L) == 1L) {
-                outputs.add(1L shl i)
-            }
-            remaining = remaining shr 1
-            i++
-        }
-        return outputs
-    }
-
-    private fun constructAndVerifyProofs(
-        response: PostSwapResponse,
-        keyset: KeysetItemResponse,
-        secrets: List<StringSecret>,
-        blindingFactors: List<BigInteger>,
-    ): List<Proof> {
-        val result = mutableListOf<Proof>()
-        val signatures = response.signatures ?: emptyList()
-        for (i in signatures.indices) {
-            val signature = signatures[i]
-            val blindingFactor = blindingFactors[i]
-            val secret = secrets[i]
-
-            val key: ECPoint = Cashu.hexToPoint(
-                keyset.keys[BigInteger.valueOf(signature.amount)] ?: continue,
-            )
-            val C = Cashu.computeC(Cashu.hexToPoint(signature.c_), blindingFactor, key)
-
-            val verified = Cashu.verifyProof(
-                Cashu.messageToCurve(secret.secret),
-                blindingFactor,
-                C,
-                signature.dleq.e,
-                signature.dleq.s,
-                key,
-            )
-
-            if (!verified) {
-                Log.e(TAG, "Couldn't verify signature: ${signature.c_}")
-            }
-
-            result.add(
-                Proof(
-                    signature.amount,
-                    signature.keysetId,
-                    secret,
-                    Cashu.pointToHex(C, true),
-                    Optional.empty(),
-                    Optional.empty(),
-                ),
-            )
-        }
-        return result
-    }
-
-    /**
-     * Parse a NUT-18-like PaymentRequestPayload JSON and attempt redemption by
-     * constructing a temporary Token and calling redeemToken.
-     */
     @JvmStatic
     @Throws(RedemptionException::class)
     fun redeemFromPRPayload(
@@ -532,7 +365,9 @@ object CashuPaymentHelper {
                 )
             }
 
-            val tempToken = Token(payload.proofs!!, payload.unit!!, mintUrl)
+            // Build a legacy cashu-jdk Token from proofs, then let CDK wallet
+            // handle the redemption via redeemToken(encoded).
+            val tempToken = com.cashujdk.nut00.Token(payload.proofs!!, payload.unit!!, mintUrl)
             val encoded = tempToken.encode()
             return redeemToken(encoded)
         } catch (e: JsonSyntaxException) {
@@ -550,30 +385,28 @@ object CashuPaymentHelper {
         }
     }
 
-    /**
-     * Minimal DTO for PaymentRequestPayload JSON as used in Nostr DMs.
-     */
+    // === DTO for PaymentRequestPayload ====================================== 
+
     class PaymentRequestPayload {
         var id: String? = null
         var memo: String? = null
         var mint: String? = null
         var unit: String? = null
-        var proofs: MutableList<Proof>? = null
+        var proofs: MutableList<com.cashujdk.nut00.Proof>? = null
 
         companion object {
             @JvmField
             val GSON: Gson = GsonBuilder()
-                .registerTypeAdapter(Proof::class.java, ProofAdapter())
+                .registerTypeAdapter(com.cashujdk.nut00.Proof::class.java, ProofAdapter())
                 .create()
         }
 
-        private class ProofAdapter : JsonDeserializer<Proof> {
-            @Throws(JsonParseException::class)
+        private class ProofAdapter : JsonDeserializer<com.cashujdk.nut00.Proof> {
             override fun deserialize(
                 json: JsonElement?,
                 typeOfT: java.lang.reflect.Type?,
                 context: JsonDeserializationContext?,
-            ): Proof {
+            ): com.cashujdk.nut00.Proof {
                 if (json == null || !json.isJsonObject) {
                     throw JsonParseException("Expected object for Proof")
                 }
@@ -587,9 +420,9 @@ object CashuPaymentHelper {
                 val keysetId = obj.get("id")?.takeIf { !it.isJsonNull }?.asString
                     ?: throw JsonParseException("Proof is missing id/keysetId")
 
-                val secret: ISecret = StringSecret(secretStr)
+                val secret: com.cashujdk.nut00.ISecret = com.cashujdk.nut00.StringSecret(secretStr)
 
-                var dleq: DLEQProof? = null
+                var dleq: com.cashujdk.nut12.DLEQProof? = null
                 if (obj.has("dleq") && obj.get("dleq").isJsonObject) {
                     val d = obj.getAsJsonObject("dleq")
                     val rStr = d.get("r").asString
@@ -600,10 +433,10 @@ object CashuPaymentHelper {
                     val s = BigInteger(sStr, 16)
                     val e = BigInteger(eStr, 16)
 
-                    dleq = DLEQProof(s, e, Optional.of(r))
+                    dleq = com.cashujdk.nut12.DLEQProof(s, e, Optional.of(r))
                 }
 
-                return Proof(
+                return com.cashujdk.nut00.Proof(
                     amount,
                     keysetId,
                     secret,
@@ -613,5 +446,12 @@ object CashuPaymentHelper {
                 )
             }
         }
+    }
+
+    // === Exception type =====================================================
+
+    class RedemptionException : Exception {
+        constructor(message: String) : super(message)
+        constructor(message: String, cause: Throwable) : super(message, cause)
     }
 }
