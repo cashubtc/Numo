@@ -133,20 +133,23 @@
                     android:layout_height="wrap_content"
                     android:text="$0.00 USD"
                     android:textColor="@color/color_bg_white"
-                    android:textSize="18sp"
+                    android:textSize="22sp"
                     android:textStyle="normal" />
 
                 <ImageButton
                     android:id="@+id/currency_switch_button"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:layout_marginStart="4dp"
                     android:background="@android:color/transparent"
-                    android:contentDescription="Swap currency"
-                    android:src="@drawable/ic_switch_currency"
-                    android:rotation="90"
                     android:clickable="false"
+                    android:contentDescription="Swap currency"
                     android:focusable="false"
+                    android:rotation="90"
+                    android:scaleX="0.7"
+                    android:scaleY="0.8"
+                    android:src="@drawable/ic_switch_currency"
+                    android:translationY="1dp"
                     app:tint="@color/color_bg_white" />
             </LinearLayout>
 
