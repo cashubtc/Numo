@@ -24,9 +24,9 @@
         android:id="@+id/remove_mint_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:minWidth="48dp"
-        android:minHeight="48dp"
-        android:padding="12dp"
+        android:minWidth="36dp"
+        android:minHeight="36dp"
+        android:padding="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="Remove mint"
         android:src="@drawable/ic_delete"
@@ -34,14 +34,5 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="@dimen/space_m"
-        android:background="@color/color_divider"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/mint_url_text"
-        app:layout_goneMarginTop="@dimen/space_m" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

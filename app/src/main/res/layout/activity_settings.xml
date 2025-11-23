@@ -65,6 +65,13 @@
                 android:orientation="horizontal"
                 android:paddingHorizontal="24dp">
 
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="16dp"
+                    android:src="@drawable/ic_switch_currency"
+                    app:tint="@color/color_icon_secondary" />
+
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -81,12 +88,6 @@
                     app:tint="@color/color_icon_secondary" />
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="24dp"
-                android:background="@color/color_divider" />
-
             <LinearLayout
                 android:id="@+id/mints_settings_item"
                 android:layout_width="match_parent"
@@ -97,6 +98,13 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:paddingHorizontal="24dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="16dp"
+                    android:src="@drawable/ic_settings"
+                    app:tint="@color/color_icon_secondary" />
 
                 <TextView
                     android:layout_width="0dp"
@@ -114,12 +122,6 @@
                     app:tint="@color/color_icon_secondary" />
             </LinearLayout>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="24dp"
-                android:background="@color/color_divider" />
-
             <LinearLayout
                 android:id="@+id/items_settings_item"
                 android:layout_width="match_parent"
@@ -130,6 +132,13 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:paddingHorizontal="24dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="16dp"
+                    android:src="@drawable/ic_catalog"
+                    app:tint="@color/color_icon_secondary" />
 
                 <TextView
                     android:layout_width="0dp"
@@ -146,12 +155,6 @@
                     android:src="@drawable/ic_chevron_forward"
                     app:tint="@color/color_icon_secondary" />
             </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="24dp"
-                android:background="@color/color_divider" />
 
         </LinearLayout>
     </ScrollView>
