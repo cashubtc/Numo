@@ -408,15 +408,30 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     }
 
     private void animateDigitEntry(String newText) {
-        // Sleek pop animation for digit entry
-        amountDisplay.setText(newText);
-        amountDisplay.setScaleX(0.95f);
-        amountDisplay.setScaleY(0.95f);
+        // Cancel any running animation
+        amountDisplay.animate().cancel();
+        
+        // Cash App/Apple-style sleek animation: subtle fade + scale
+        // Phase 1: Quick fade out and scale down
         amountDisplay.animate()
-            .scaleX(1f)
-            .scaleY(1f)
-            .setDuration(100)
-            .setInterpolator(new android.view.animation.OvershootInterpolator(1.5f))
+            .alpha(0.7f)
+            .scaleX(0.92f)
+            .scaleY(0.92f)
+            .setDuration(80)
+            .setInterpolator(new android.view.animation.DecelerateInterpolator(1.5f))
+            .withEndAction(() -> {
+                // Update text at the midpoint
+                amountDisplay.setText(newText);
+                
+                // Phase 2: Smooth fade in and scale back with slight overshoot
+                amountDisplay.animate()
+                    .alpha(1f)
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(200)
+                    .setInterpolator(new android.view.animation.OvershootInterpolator(0.8f))
+                    .start();
+            })
             .start();
     }
 
