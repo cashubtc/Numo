@@ -659,8 +659,6 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback 
                 } else {
                     Toast.makeText(this, "Payment completed but data was invalid", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                Toast.makeText(this, "Payment cancelled", Toast.LENGTH_SHORT).show()
             }
         }
     }
