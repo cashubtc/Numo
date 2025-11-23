@@ -544,7 +544,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         if (isUsdInputMode) {
             currencyText.setText("USD");
         } else {
-            currencyText.setText("SATS");
+            currencyText.setText("BTC");
         }
     }
 
@@ -855,13 +855,17 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                     long enteredAmount;
                     String entryUnit;
                     if (isUsdInputMode) {
-                        // In USD mode, calculate the fiat amount that was entered
+                        // In USD mode, use the actual input value (in cents)
                         entryUnit = "USD";
-                        if (bitcoinPriceWorker != null && bitcoinPriceWorker.getCurrentPrice() > 0) {
-                            double fiatValue = bitcoinPriceWorker.satoshisToFiat(amount);
-                            enteredAmount = (long)(fiatValue * 100); // Convert to cents
+                        String inputStr = currentInput.toString();
+                        if (!inputStr.isEmpty()) {
+                            try {
+                                enteredAmount = Long.parseLong(inputStr); // Already in cents
+                            } catch (NumberFormatException e) {
+                                enteredAmount = amount; // Fallback to sats if parsing fails
+                            }
                         } else {
-                            enteredAmount = amount; // Fallback to sats if no price available
+                            enteredAmount = amount; // Fallback to sats if no input
                         }
                     } else {
                         // In SAT mode, entered amount is the same as amount
