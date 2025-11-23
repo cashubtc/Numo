@@ -325,16 +325,6 @@ public class ItemSelectionActivity extends AppCompatActivity {
                         Toast.makeText(itemView.getContext(), "No more stock available", Toast.LENGTH_SHORT).show();
                     }
                 });
-                
-                // Set up item click listener
-                itemView.setOnClickListener(v -> {
-                    // If we have stock available or stock tracking is disabled, add one item
-                    if (hasStock) {
-                        updateBasketItem(item, basketQuantity + 1);
-                    } else {
-                        Toast.makeText(itemView.getContext(), "No more stock available", Toast.LENGTH_SHORT).show();
-                    }
-                });
             }
             
             private void updateBasketItem(Item item, int newQuantity) {
@@ -352,13 +342,6 @@ public class ItemSelectionActivity extends AppCompatActivity {
                     }
                     
                     basketQuantities.put(item.getId(), newQuantity);
-                    
-                    // Show a toast when adding an item
-                    if (newQuantity == 1) {
-                        Toast.makeText(itemView.getContext(), 
-                                item.getDisplayName() + " added to basket", 
-                                Toast.LENGTH_SHORT).show();
-                    }
                 }
                 
                 // Update UI

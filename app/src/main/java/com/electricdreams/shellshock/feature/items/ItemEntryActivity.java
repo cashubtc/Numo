@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.app.AlertDialog;
 
@@ -121,18 +122,65 @@ public class ItemEntryActivity extends AppCompatActivity {
 
         // Load item data if in edit mode
         if (isEditMode) {
-            // setTitle("Edit Item"); // Toolbar handles title
+            // Update title and button for edit mode
+            TextView toolbarTitle = findViewById(R.id.toolbar_title);
+            if (toolbarTitle != null) {
+                toolbarTitle.setText("Edit Item");
+            }
+            
+            // Change cancel button to delete button
+            cancelButton.setText("Delete Item");
+            cancelButton.setTextColor(getResources().getColor(R.color.color_warning_red, null));
+            
             loadItemData();
         } else {
             // setTitle("Add Item"); // Toolbar handles title
         }
 
         // Set up button listeners
-        cancelButton.setOnClickListener(v -> finish());
+        if (isEditMode) {
+            // In edit mode, cancel button becomes delete button
+            cancelButton.setOnClickListener(v -> showDeleteConfirmationDialog());
+        } else {
+            // In add mode, cancel button just closes
+            cancelButton.setOnClickListener(v -> finish());
+        }
+        
         saveButton.setOnClickListener(v -> saveItem());
         if (backButton != null) {
             backButton.setOnClickListener(v -> finish());
         }
+    }
+    
+    private void showDeleteConfirmationDialog() {
+        // Create Cash App style delete confirmation dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        
+        // Inflate custom view for the dialog
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_delete_confirmation, null);
+        builder.setView(dialogView);
+        
+        // Create the dialog
+        AlertDialog dialog = builder.create();
+        
+        // Set up button listeners
+        Button cancelButton = dialogView.findViewById(R.id.dialog_cancel_button);
+        Button confirmButton = dialogView.findViewById(R.id.dialog_confirm_button);
+        
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+        
+        confirmButton.setOnClickListener(v -> {
+            // Delete the item
+            if (currentItem != null) {
+                itemManager.removeItem(currentItem.getId());
+                Toast.makeText(this, "Item deleted", Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK);
+                dialog.dismiss();
+                finish();
+            }
+        });
+        
+        dialog.show();
     }
 
     private void loadItemData() {

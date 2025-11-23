@@ -31,7 +31,7 @@ public class TokenHistoryActivity extends AppCompatActivity {
 
     private TokenHistoryAdapter adapter;
     private TextView emptyView;
-    private FloatingActionButton clearHistoryButton;
+    // private FloatingActionButton clearHistoryButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +63,8 @@ public class TokenHistoryActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // Set up clear history button
-        clearHistoryButton = findViewById(R.id.clear_history_button);
-        clearHistoryButton.setOnClickListener(v -> showClearHistoryConfirmation());
+        // clearHistoryButton = findViewById(R.id.clear_history_button);
+        // clearHistoryButton.setOnClickListener(v -> showClearHistoryConfirmation());
 
         // Load and display history
         loadHistory();
@@ -86,7 +86,7 @@ public class TokenHistoryActivity extends AppCompatActivity {
         emptyView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
         
         // Show/hide clear button based on if there are entries
-        clearHistoryButton.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        // clearHistoryButton.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
     }
 
     private void showClearHistoryConfirmation() {

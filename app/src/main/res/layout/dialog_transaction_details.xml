@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/bg_bottom_sheet">
+
+    <View
+        android:layout_width="36dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/bg_bottom_sheet_handle"
+        android:layout_marginBottom="24dp"/>
+
+    <TextView
+        android:id="@+id/detail_amount"
+        style="@style/Text.DisplayAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="$0"
+        android:textColor="@color/color_text_primary" />
+
+    <TextView
+        android:id="@+id/detail_date"
+        style="@style/Text.Caption"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="8dp"
+        android:text="Date" />
+
+    <TextView
+        android:id="@+id/detail_token"
+        style="@style/Text.Body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:background="@color/color_bg_light"
+        android:padding="16dp"
+        android:fontFamily="monospace"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:text="Token..." />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="32dp">
+
+        <Button
+            android:id="@+id/btn_copy"
+            style="@style/Widget.Button.Secondary.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Copy Token"
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btn_open_with"
+            style="@style/Widget.Button.Secondary.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Open With..."
+            android:layout_marginBottom="12dp"/>
+
+        <Button
+            android:id="@+id/btn_delete"
+            style="@style/Widget.Button.Secondary.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Delete Transaction"
+            android:textColor="@color/color_warning_red"/>
+
+    </LinearLayout>
+
+</LinearLayout>

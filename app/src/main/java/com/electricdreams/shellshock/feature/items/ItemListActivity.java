@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -237,6 +238,13 @@ public class ItemListActivity extends AppCompatActivity {
                     imagePlaceholder.setVisibility(View.VISIBLE);
                 }
                 
+                // Set up item click to edit
+                itemView.setOnClickListener(v -> {
+                    Intent intent = new Intent(ItemListActivity.this, ItemEntryActivity.class);
+                    intent.putExtra(ItemEntryActivity.EXTRA_ITEM_ID, item.getId());
+                    addItemLauncher.launch(intent);
+                });
+                
                 // Set up edit button
                 editButton.setOnClickListener(v -> {
                     Intent intent = new Intent(ItemListActivity.this, ItemEntryActivity.class);
@@ -246,16 +254,30 @@ public class ItemListActivity extends AppCompatActivity {
                 
                 // Set up delete button
                 deleteButton.setOnClickListener(v -> {
-                    new AlertDialog.Builder(ItemListActivity.this)
-                            .setTitle("Delete Item")
-                            .setMessage("Are you sure you want to delete this item?")
-                            .setPositiveButton("Delete", (dialog, which) -> {
-                                itemManager.removeItem(item.getId());
-                                refreshItems();
-                                Toast.makeText(ItemListActivity.this, "Item deleted", Toast.LENGTH_SHORT).show();
-                            })
-                            .setNegativeButton("Cancel", null)
-                            .show();
+                    // Create Cash App style delete confirmation dialog
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ItemListActivity.this);
+                    
+                    // Inflate custom view for the dialog
+                    View dialogView = getLayoutInflater().inflate(R.layout.dialog_delete_confirmation, null);
+                    builder.setView(dialogView);
+                    
+                    // Create the dialog
+                    AlertDialog dialog = builder.create();
+                    
+                    // Set up button listeners
+                    Button cancelButton = dialogView.findViewById(R.id.dialog_cancel_button);
+                    Button confirmButton = dialogView.findViewById(R.id.dialog_confirm_button);
+                    
+                    cancelButton.setOnClickListener(view -> dialog.dismiss());
+                    
+                    confirmButton.setOnClickListener(view -> {
+                        itemManager.removeItem(item.getId());
+                        refreshItems();
+                        Toast.makeText(ItemListActivity.this, "Item deleted", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    });
+                    
+                    dialog.show();
                 });
             }
         }
