@@ -90,7 +90,7 @@ public class PaymentRequestActivity extends AppCompatActivity {
         }
 
         // Display payment amount
-        String formattedAmount = "₿ " + NumberFormat.getNumberInstance(Locale.US).format(paymentAmount);
+        String formattedAmount = "₿" + NumberFormat.getNumberInstance(Locale.US).format(paymentAmount);
         largeAmountDisplay.setText("Pay " + formattedAmount);
 
         // Set up buttons

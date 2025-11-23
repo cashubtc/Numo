@@ -125,7 +125,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
     
     private fun updateAmountDisplay() {
         val formattedAmount = if (unit == "sat") {
-            "₿ ${NumberFormat.getNumberInstance(Locale.US).format(amount)}"
+            "₿${NumberFormat.getNumberInstance(Locale.US).format(amount)}"
         } else {
             "$amount $unit"
         }

@@ -211,7 +211,23 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         // Update keypad button creation to use weight for equal sizing
         for (String label : buttonLabels) {
             Button button = (Button) inflater.inflate(R.layout.keypad_button_green_screen, keypad, false);
-            button.setText(label);
+            
+            if (label.equals("◀")) {
+                button.setText("");
+                android.graphics.drawable.Drawable icon = androidx.core.content.ContextCompat.getDrawable(this, R.drawable.ic_chevron_back);
+                if (icon != null) {
+                    // Tint the icon white to match the text color
+                    icon.setTint(getResources().getColor(R.color.color_bg_white, getTheme()));
+                    button.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+                    // We set it as a compound drawable, but since text is empty and gravity is center, it should work.
+                    // However, to be safe and center it perfectly, let's just set it as the icon if possible or use compound drawable.
+                    button.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
+                    // Adjust padding to ensure it looks centered if needed, but with empty text it should be fine.
+                }
+            } else {
+                button.setText(label);
+            }
+            
             button.setOnClickListener(v -> onKeypadButtonClick(label));
             
             GridLayout.LayoutParams params = new GridLayout.LayoutParams();
@@ -438,7 +454,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     private String formatAmount(String amount) {
         try {
             long value = amount.isEmpty() ? 0 : Long.parseLong(amount);
-            return "₿ " + NumberFormat.getNumberInstance(Locale.US).format(value);
+            return "₿" + NumberFormat.getNumberInstance(Locale.US).format(value);
         } catch (NumberFormatException e) {
             return "";
         }
@@ -475,20 +491,20 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                     amountDisplayText = symbol + wholePart + "." + centsPart;
                     
                     // Format sats equivalent
-                    String satoshiEquivalent = "₿ " + NumberFormat.getNumberInstance(Locale.US).format(satsValue);
+                    String satoshiEquivalent = "₿" + NumberFormat.getNumberInstance(Locale.US).format(satsValue);
                     fiatAmountDisplay.setText(satoshiEquivalent);
                 } catch (NumberFormatException e) {
                     CurrencyManager currencyManager = CurrencyManager.getInstance(this);
                     String symbol = currencyManager.getCurrentSymbol();
                     amountDisplayText = symbol + "0.00";
-                    fiatAmountDisplay.setText("₿ 0");
+                    fiatAmountDisplay.setText("₿0");
                     satsValue = 0;
                 }
             } else {
                 CurrencyManager currencyManager = CurrencyManager.getInstance(this);
                 String symbol = currencyManager.getCurrentSymbol();
                 amountDisplayText = symbol + "0.00";
-                fiatAmountDisplay.setText("₿ 0");
+                fiatAmountDisplay.setText("₿0");
                 satsValue = 0;
             }
         } else {
@@ -525,7 +541,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         
         // Update submit button text - always charge in sats
         if (satsValue > 0) {
-            String chargeText = "Charge ₿ " + NumberFormat.getNumberInstance(Locale.US).format(satsValue);
+            String chargeText = "Charge ₿" + NumberFormat.getNumberInstance(Locale.US).format(satsValue);
             submitButton.setText(chargeText);
             submitButton.setEnabled(true);
             

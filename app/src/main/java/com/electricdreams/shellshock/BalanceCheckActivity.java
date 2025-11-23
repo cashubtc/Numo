@@ -65,7 +65,7 @@ public class BalanceCheckActivity extends AppCompatActivity {
 
     private void updateBalanceDisplay(long balance) {
         mainHandler.post(() -> {
-            balanceDisplay.setText(String.format("Balance: %d ₿", balance));
+            balanceDisplay.setText(String.format("Balance: ₿%d", balance));
             balanceDisplay.setVisibility(View.VISIBLE);
         });
     }
@@ -273,7 +273,7 @@ public class BalanceCheckActivity extends AppCompatActivity {
             }
             
             Log.d(TAG, "Total balance: " + totalBalance + " ₿ from " + unspentCount + " active proofs");
-            updateCardInfoDisplay("Card has " + unspentCount + " active proofs worth " + totalBalance + " ₿");
+            updateCardInfoDisplay("Card has " + unspentCount + " active proofs worth ₿" + totalBalance);
             return totalBalance;
             
         } catch (SatocashNfcClient.SatocashException e) {

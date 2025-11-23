@@ -105,7 +105,7 @@
         android:layout_height="52dp"
         android:layout_marginHorizontal="24dp"
         android:layout_marginBottom="24dp"
-        android:background="@drawable/bg_button_secondary_pill"
+        android:background="@drawable/bg_button_secondary_gray"
         android:text="Close"
         android:textAllCaps="false"
         android:textColor="@color/color_bg_white"
