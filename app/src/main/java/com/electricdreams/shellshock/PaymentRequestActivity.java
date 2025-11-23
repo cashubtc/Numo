@@ -90,7 +90,7 @@ public class PaymentRequestActivity extends AppCompatActivity {
         }
 
         // Display payment amount
-        String formattedAmount = "₿" + NumberFormat.getNumberInstance(Locale.US).format(paymentAmount);
+        String formattedAmount = new com.electricdreams.shellshock.core.model.Amount(paymentAmount, com.electricdreams.shellshock.core.model.Amount.Currency.BTC).toString();
         largeAmountDisplay.setText("Pay " + formattedAmount);
 
         // Set up buttons

@@ -65,7 +65,7 @@ public class BalanceCheckActivity extends AppCompatActivity {
 
     private void updateBalanceDisplay(long balance) {
         mainHandler.post(() -> {
-            balanceDisplay.setText(String.format("Balance: ₿%d", balance));
+            balanceDisplay.setText("Balance: " + new com.electricdreams.shellshock.core.model.Amount(balance, com.electricdreams.shellshock.core.model.Amount.Currency.BTC).toString());
             balanceDisplay.setVisibility(View.VISIBLE);
         });
     }
@@ -273,7 +273,7 @@ public class BalanceCheckActivity extends AppCompatActivity {
             }
             
             Log.d(TAG, "Total balance: " + totalBalance + " ₿ from " + unspentCount + " active proofs");
-            updateCardInfoDisplay("Card has " + unspentCount + " active proofs worth ₿" + totalBalance);
+            updateCardInfoDisplay("Card has " + unspentCount + " active proofs worth " + new com.electricdreams.shellshock.core.model.Amount(totalBalance, com.electricdreams.shellshock.core.model.Amount.Currency.BTC).toString());
             return totalBalance;
             
         } catch (SatocashNfcClient.SatocashException e) {

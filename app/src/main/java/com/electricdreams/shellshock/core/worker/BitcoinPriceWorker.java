@@ -198,7 +198,8 @@ public class BitcoinPriceWorker {
      * Format a USD amount (for backward compatibility)
      */
     public String formatUsdAmount(double usdAmount) {
-        return String.format("$%.2f USD", usdAmount);
+        long cents = (long) Math.round(usdAmount * 100);
+        return new com.electricdreams.shellshock.core.model.Amount(cents, com.electricdreams.shellshock.core.model.Amount.Currency.USD).toString();
     }
 
     /**

@@ -128,18 +128,15 @@ public class CurrencyManager {
     /**
      * Format a currency amount with the appropriate symbol
      */
+    /**
+     * Format a currency amount with the appropriate symbol using Amount class
+     */
     public String formatCurrencyAmount(double amount) {
-        switch (currentCurrency) {
-            case CURRENCY_EUR:
-                return String.format("€%.2f EUR", amount);
-            case CURRENCY_GBP:
-                return String.format("£%.2f GBP", amount);
-            case CURRENCY_JPY:
-                // JPY typically doesn't use decimal places
-                return String.format("¥%.0f JPY", amount);
-            case CURRENCY_USD:
-            default:
-                return String.format("$%.2f USD", amount);
-        }
+        // Convert to minor units (cents)
+        long minorUnits = (long) Math.round(amount * 100);
+        com.electricdreams.shellshock.core.model.Amount.Currency currency = 
+            com.electricdreams.shellshock.core.model.Amount.Currency.fromCode(currentCurrency);
+            
+        return new com.electricdreams.shellshock.core.model.Amount(minorUnits, currency).toString();
     }
 }

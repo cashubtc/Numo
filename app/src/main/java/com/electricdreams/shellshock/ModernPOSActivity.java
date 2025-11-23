@@ -33,6 +33,7 @@ import android.widget.Toast;
 import android.widget.FrameLayout;
 
 import com.electricdreams.shellshock.core.util.CurrencyManager;
+import com.electricdreams.shellshock.core.model.Amount;
 import com.electricdreams.shellshock.feature.history.PaymentsHistoryActivity;
 import com.electricdreams.shellshock.feature.settings.SettingsActivity;
 
@@ -454,7 +455,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     private String formatAmount(String amount) {
         try {
             long value = amount.isEmpty() ? 0 : Long.parseLong(amount);
-            return "₿" + NumberFormat.getNumberInstance(Locale.US).format(value);
+            return new Amount(value, Amount.Currency.BTC).toString();
         } catch (NumberFormatException e) {
             return "";
         }
@@ -483,28 +484,26 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                     
                     // Get currency symbol from CurrencyManager
                     CurrencyManager currencyManager = CurrencyManager.getInstance(this);
-                    String symbol = currencyManager.getCurrentSymbol();
+                    Amount.Currency currency = Amount.Currency.fromCode(currencyManager.getCurrentCurrency());
                     
-                    // Format fiat amount for display (handling decimal point)
-                    String wholePart = String.valueOf(cents / 100);
-                    String centsPart = String.format("%02d", cents % 100);
-                    amountDisplayText = symbol + wholePart + "." + centsPart;
+                    // Format fiat amount for display using Amount class
+                    amountDisplayText = new Amount(cents, currency).toString();
                     
                     // Format sats equivalent
-                    String satoshiEquivalent = "₿" + NumberFormat.getNumberInstance(Locale.US).format(satsValue);
+                    String satoshiEquivalent = new Amount(satsValue, Amount.Currency.BTC).toString();
                     fiatAmountDisplay.setText(satoshiEquivalent);
                 } catch (NumberFormatException e) {
                     CurrencyManager currencyManager = CurrencyManager.getInstance(this);
-                    String symbol = currencyManager.getCurrentSymbol();
-                    amountDisplayText = symbol + "0.00";
-                    fiatAmountDisplay.setText("₿0");
+                    Amount.Currency currency = Amount.Currency.fromCode(currencyManager.getCurrentCurrency());
+                    amountDisplayText = new Amount(0, currency).toString();
+                    fiatAmountDisplay.setText(new Amount(0, Amount.Currency.BTC).toString());
                     satsValue = 0;
                 }
             } else {
                 CurrencyManager currencyManager = CurrencyManager.getInstance(this);
-                String symbol = currencyManager.getCurrentSymbol();
-                amountDisplayText = symbol + "0.00";
-                fiatAmountDisplay.setText("₿0");
+                Amount.Currency currency = Amount.Currency.fromCode(currencyManager.getCurrentCurrency());
+                amountDisplayText = new Amount(0, currency).toString();
+                fiatAmountDisplay.setText(new Amount(0, Amount.Currency.BTC).toString());
                 satsValue = 0;
             }
         } else {
@@ -541,7 +540,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         
         // Update submit button text - always charge in sats
         if (satsValue > 0) {
-            String chargeText = "Charge ₿" + NumberFormat.getNumberInstance(Locale.US).format(satsValue);
+            String chargeText = "Charge " + new Amount(satsValue, Amount.Currency.BTC).toString();
             submitButton.setText(chargeText);
             submitButton.setEnabled(true);
             

@@ -124,11 +124,8 @@ class PaymentReceivedActivity : AppCompatActivity() {
     }
     
     private fun updateAmountDisplay() {
-        val formattedAmount = if (unit == "sat") {
-            "₿${NumberFormat.getNumberInstance(Locale.US).format(amount)}"
-        } else {
-            "$amount $unit"
-        }
+        val currency = com.electricdreams.shellshock.core.model.Amount.Currency.fromCode(unit)
+        val formattedAmount = com.electricdreams.shellshock.core.model.Amount(amount, currency).toString()
         
         amountText.text = "$formattedAmount received."
     }
