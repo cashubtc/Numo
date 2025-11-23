@@ -189,67 +189,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Token Display Container -->
-    <FrameLayout
-        android:id="@+id/token_scroll_container"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_margin="24dp"
-        android:background="@color/color_bg_white"
-        android:elevation="4dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/token_actions_container"
-        app:layout_constraintTop_toBottomOf="@id/top_navigation">
 
-        <TextView
-            android:id="@+id/token_display"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:ellipsize="end"
-            android:focusable="true"
-            android:fontFamily="monospace"
-            android:gravity="start"
-            android:padding="16dp"
-            android:textColor="@color/color_text_primary"
-            android:textSize="16sp" />
-    </FrameLayout>
-
-    <!-- Token Action Buttons -->
-    <LinearLayout
-        android:id="@+id/token_actions_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginBottom="24dp"
-        android:orientation="vertical"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <Button
-            android:id="@+id/open_with_button"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:background="@drawable/bg_button_white_pill"
-            android:text="Open With"
-            android:textAllCaps="false"
-            android:textColor="@color/color_primary_green"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/reset_button"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/bg_button_white_pill"
-            android:text="New Transaction"
-            android:textAllCaps="false"
-            android:textColor="@color/color_primary_green"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-    </LinearLayout>
 
 
 

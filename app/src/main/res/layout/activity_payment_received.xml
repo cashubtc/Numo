@@ -21,80 +21,92 @@
         app:layout_constraintTop_toTopOf="parent"
         app:tint="@color/color_text_primary" />
 
+    <!-- Share Icon Button at top right -->
+    <ImageButton
+        android:id="@+id/share_icon_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Share"
+        android:src="@drawable/ic_share"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/color_text_primary" />
+
     <!-- Center content container -->
-    <LinearLayout
+    <FrameLayout
         android:id="@+id/center_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/buttons_container"
+        app:layout_constraintBottom_toTopOf="@+id/close_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Amount received text -->
-        <TextView
-            android:id="@+id/amount_received_text"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
             android:gravity="center"
-            android:text="₿ 0 received."
-            android:textColor="@color/color_text_primary"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:orientation="vertical">
 
-        <!-- Animated checkmark -->
-        <ImageView
-            android:id="@+id/checkmark_image"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:contentDescription="Success"
-            android:src="@drawable/ic_checkmark_circle"
-            android:visibility="invisible"
-            app:tint="@color/color_primary_green" />
+            <!-- Amount received text -->
+            <TextView
+                android:id="@+id/amount_received_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                android:gravity="center"
+                android:text="₿ 0 received."
+                android:textColor="@color/color_text_primary"
+                android:textSize="28sp"
+                android:textStyle="bold" />
 
-    </LinearLayout>
+            <!-- Animated checkmark container -->
+            <FrameLayout
+                android:layout_width="120dp"
+                android:layout_height="120dp">
 
-    <!-- Buttons container at bottom -->
-    <LinearLayout
-        android:id="@+id/buttons_container"
+                <!-- Green circle background -->
+                <ImageView
+                    android:id="@+id/checkmark_circle"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="Success background"
+                    android:src="@drawable/ic_circle_green"
+                    android:visibility="invisible" />
+
+                <!-- White checkmark icon -->
+                <ImageView
+                    android:id="@+id/checkmark_icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="Success"
+                    android:padding="30dp"
+                    android:src="@drawable/ic_check"
+                    android:visibility="invisible"
+                    app:tint="@color/color_bg_white" />
+
+            </FrameLayout>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- Close button at bottom (full width, secondary style) -->
+    <Button
+        android:id="@+id/close_button"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="52dp"
         android:layout_marginHorizontal="24dp"
         android:layout_marginBottom="24dp"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <!-- Export button -->
-        <Button
-            android:id="@+id/export_button"
-            android:layout_width="0dp"
-            android:layout_height="52dp"
-            android:layout_marginEnd="8dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_button_white_pill"
-            android:text="Export"
-            android:textAllCaps="false"
-            android:textColor="@color/color_primary_green"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <!-- Close button -->
-        <Button
-            android:id="@+id/close_button"
-            android:layout_width="0dp"
-            android:layout_height="52dp"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1"
-            android:background="@drawable/bg_button_white_pill"
-            android:text="Close"
-            android:textAllCaps="false"
-            android:textColor="@color/color_primary_green"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-    </LinearLayout>
+        android:background="@drawable/bg_button_secondary_pill"
+        android:text="Close"
+        android:textAllCaps="false"
+        android:textColor="@color/color_text_primary"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

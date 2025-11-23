@@ -31,9 +31,10 @@ class PaymentReceivedActivity : AppCompatActivity() {
     }
     
     private lateinit var amountText: TextView
-    private lateinit var checkmarkImage: ImageView
+    private lateinit var checkmarkCircle: ImageView
+    private lateinit var checkmarkIcon: ImageView
     private lateinit var closeButton: Button
-    private lateinit var exportButton: Button
+    private lateinit var shareIconButton: ImageButton
     private lateinit var closeIconButton: ImageButton
     
     private var tokenString: String? = null
@@ -51,8 +52,8 @@ class PaymentReceivedActivity : AppCompatActivity() {
         
         // Set light status bar icons (since background is white)
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
-        windowInsetsController?.isAppearanceLightStatusBars = true
-        windowInsetsController?.isAppearanceLightNavigationBars = true
+        windowInsetsController.isAppearanceLightStatusBars = true
+        windowInsetsController.isAppearanceLightNavigationBars = true
         
         // Adjust padding for system bars
         findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { v, windowInsets ->
@@ -63,9 +64,10 @@ class PaymentReceivedActivity : AppCompatActivity() {
         
         // Initialize views
         amountText = findViewById(R.id.amount_received_text)
-        checkmarkImage = findViewById(R.id.checkmark_image)
+        checkmarkCircle = findViewById(R.id.checkmark_circle)
+        checkmarkIcon = findViewById(R.id.checkmark_icon)
         closeButton = findViewById(R.id.close_button)
-        exportButton = findViewById(R.id.export_button)
+        shareIconButton = findViewById(R.id.share_icon_button)
         closeIconButton = findViewById(R.id.close_icon_button)
         
         // Get token from intent
@@ -85,8 +87,8 @@ class PaymentReceivedActivity : AppCompatActivity() {
             finish()
         }
         
-        exportButton.setOnClickListener {
-            exportToken()
+        shareIconButton.setOnClickListener {
+            shareToken()
         }
         
         closeIconButton.setOnClickListener {
@@ -94,7 +96,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
         }
         
         // Start the checkmark animation after a short delay
-        checkmarkImage.postDelayed({
+        checkmarkCircle.postDelayed({
             animateCheckmark()
         }, 100)
     }
@@ -132,37 +134,64 @@ class PaymentReceivedActivity : AppCompatActivity() {
     }
     
     private fun animateCheckmark() {
-        // Start invisible and scaled down
-        checkmarkImage.alpha = 0f
-        checkmarkImage.scaleX = 0f
-        checkmarkImage.scaleY = 0f
-        checkmarkImage.visibility = View.VISIBLE
+        // Animate green circle first
+        checkmarkCircle.alpha = 0f
+        checkmarkCircle.scaleX = 0f
+        checkmarkCircle.scaleY = 0f
+        checkmarkCircle.visibility = View.VISIBLE
         
-        // Create scale animations with overshoot for "pop" effect
-        val scaleX = ObjectAnimator.ofFloat(checkmarkImage, "scaleX", 0f, 1f).apply {
+        val circleScaleX = ObjectAnimator.ofFloat(checkmarkCircle, "scaleX", 0f, 1f).apply {
             duration = 500
             interpolator = OvershootInterpolator(2f)
         }
         
-        val scaleY = ObjectAnimator.ofFloat(checkmarkImage, "scaleY", 0f, 1f).apply {
+        val circleScaleY = ObjectAnimator.ofFloat(checkmarkCircle, "scaleY", 0f, 1f).apply {
             duration = 500
             interpolator = OvershootInterpolator(2f)
         }
         
-        // Fade in animation
-        val fadeIn = ObjectAnimator.ofFloat(checkmarkImage, "alpha", 0f, 1f).apply {
+        val circleFadeIn = ObjectAnimator.ofFloat(checkmarkCircle, "alpha", 0f, 1f).apply {
             duration = 300
         }
         
-        // Combine animations
-        val animatorSet = AnimatorSet()
-        animatorSet.playTogether(scaleX, scaleY, fadeIn)
-        animatorSet.start()
+        val circleAnimatorSet = AnimatorSet()
+        circleAnimatorSet.playTogether(circleScaleX, circleScaleY, circleFadeIn)
+        
+        // Animate white checkmark icon slightly after circle starts
+        checkmarkIcon.alpha = 0f
+        checkmarkIcon.scaleX = 0f
+        checkmarkIcon.scaleY = 0f
+        checkmarkIcon.visibility = View.VISIBLE
+        
+        val iconScaleX = ObjectAnimator.ofFloat(checkmarkIcon, "scaleX", 0f, 1f).apply {
+            duration = 400
+            startDelay = 150  // Start slightly after circle
+            interpolator = OvershootInterpolator(2.5f)  // More bounce for the icon
+        }
+        
+        val iconScaleY = ObjectAnimator.ofFloat(checkmarkIcon, "scaleY", 0f, 1f).apply {
+            duration = 400
+            startDelay = 150
+            interpolator = OvershootInterpolator(2.5f)
+        }
+        
+        val iconFadeIn = ObjectAnimator.ofFloat(checkmarkIcon, "alpha", 0f, 1f).apply {
+            duration = 250
+            startDelay = 150
+        }
+        
+        val iconAnimatorSet = AnimatorSet()
+        iconAnimatorSet.playTogether(iconScaleX, iconScaleY, iconFadeIn)
+        
+        // Play both animations together
+        val masterAnimatorSet = AnimatorSet()
+        masterAnimatorSet.playTogether(circleAnimatorSet, iconAnimatorSet)
+        masterAnimatorSet.start()
     }
     
-    private fun exportToken() {
+    private fun shareToken() {
         if (tokenString.isNullOrEmpty()) {
-            Toast.makeText(this, "No token to export", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "No token to share", Toast.LENGTH_SHORT).show()
             return
         }
         
@@ -181,13 +210,13 @@ class PaymentReceivedActivity : AppCompatActivity() {
         }
         
         // Combine both intents into a chooser
-        val chooserIntent = Intent.createChooser(uriIntent, "Export token")
+        val chooserIntent = Intent.createChooser(uriIntent, "Share token")
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(shareIntent))
         
         try {
             startActivity(chooserIntent)
         } catch (e: Exception) {
-            Toast.makeText(this, "No apps available to export this token", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "No apps available to share this token", Toast.LENGTH_SHORT).show()
         }
     }
 }

@@ -73,12 +73,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     private TextView currencyText;
     private StringBuilder currentInput = new StringBuilder();
 
-    private TextView tokenDisplay;
-    private Button openWithButton;
-    private Button resetButton;
     private View switchCurrencyButton; // Changed to View for the invisible click target
-    private FrameLayout tokenScrollContainer;
-    private LinearLayout tokenActionsContainer;
     private ConstraintLayout inputModeContainer;
     private NfcAdapter nfcAdapter;
     private SatocashNfcClient satocashClient;
@@ -143,12 +138,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         submitButton = findViewById(R.id.submit_button);
         currencyText = findViewById(R.id.currency_text);
         GridLayout keypad = findViewById(R.id.keypad);
-        tokenDisplay = findViewById(R.id.token_display);
-        openWithButton = findViewById(R.id.open_with_button);
-        resetButton = findViewById(R.id.reset_button);
         switchCurrencyButton = findViewById(R.id.currency_switch_button);
-        tokenScrollContainer = findViewById(R.id.token_scroll_container);
-        tokenActionsContainer = findViewById(R.id.token_actions_container);
         inputModeContainer = findViewById(R.id.input_mode_container);
 
         // Enable edge-to-edge
@@ -194,16 +184,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         // Set up currency switch button
         switchCurrencyButton.setOnClickListener(v -> toggleInputMode());
 
-        // Set up token display click listener to copy token to clipboard
-        tokenDisplay.setOnClickListener(v -> {
-            String token = tokenDisplay.getText().toString();
-            if (!token.isEmpty() && !token.startsWith("Error:")) {
-                copyTokenToClipboard(token);
-            }
-        });
 
-        // Set up bottom navigation
-        // Set up bottom navigation
         ImageButton moreOptionsButton = findViewById(R.id.action_more_options);
         ImageButton historyButton = findViewById(R.id.action_history);
         ImageButton catalogButton = findViewById(R.id.action_catalog);
@@ -252,14 +233,6 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             }
         });
 
-        openWithButton.setOnClickListener(v -> {
-            String token = tokenDisplay.getText().toString();
-            if (!token.isEmpty() && !token.startsWith("Error:")) {
-                openTokenWithApp(token);
-            }
-        });
-
-        resetButton.setOnClickListener(v -> resetToInputMode());
 
         // Ensure initial state
         resetToInputMode();
@@ -285,39 +258,10 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         }
     }
 
-    private void openTokenWithApp(String token) {
-        String cashuUri = "cashu:" + token;
-        
-        // Create intent for viewing the URI
-        Intent uriIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(cashuUri));
-        uriIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        // Create a fallback intent for sharing as text
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, cashuUri);
-        
-        // Combine both intents into a chooser
-        Intent chooserIntent = Intent.createChooser(uriIntent, "Open token with...");
-        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] { shareIntent });
-        
-        try {
-            startActivity(chooserIntent);
-        } catch (Exception e) {
-            Toast.makeText(this, "No apps available to handle this token", Toast.LENGTH_SHORT).show();
-        }
-    }
 
     private void resetToInputMode() {
-        tokenScrollContainer.setVisibility(View.GONE);
-        tokenActionsContainer.setVisibility(View.GONE);
         inputModeContainer.setVisibility(View.VISIBLE);
-        
-        // Clear token display
-        tokenDisplay.setText("");
-        
-        // Reset buttons
-        openWithButton.setVisibility(View.GONE);
         
         // Reset PIN flow state
         savedPin = null;
@@ -333,20 +277,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         updateDisplay(AnimationType.NONE);
     }
 
-    private void switchToTokenMode() {
-        inputModeContainer.setVisibility(View.GONE);
-        tokenScrollContainer.setVisibility(View.VISIBLE);
-        tokenActionsContainer.setVisibility(View.VISIBLE);
-        tokenDisplay.setVisibility(View.VISIBLE);
-        openWithButton.setVisibility(View.VISIBLE);
-    }
 
-    private void copyTokenToClipboard(String token) {
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        ClipData clip = ClipData.newPlainText("Cashu Token", token);
-        clipboard.setPrimaryClip(clip);
-        Toast.makeText(this, "Token copied to clipboard", Toast.LENGTH_SHORT).show();
-    }
     
     private void toggleInputMode() {
         // Check if we can switch to USD
@@ -1127,9 +1058,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             if (processingDialog != null && processingDialog.isShowing()) {
                 processingDialog.dismiss();
             }
-            switchToTokenMode();
-            tokenDisplay.setText("Error: " + message);
-            openWithButton.setVisibility(View.GONE);
+            Toast.makeText(this, "Payment error: " + message, Toast.LENGTH_LONG).show();
         });
     }
     
