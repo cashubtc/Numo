@@ -31,7 +31,7 @@ Additionally, Shellshock now simulates a Type 4 Forum tag with a payment request
 - Immediate token display and copy functionality
 - Type 4 Forum tag simulation with NDEF (NFC Data Exchange Format) compatibility
 - Compatibility with web applications like cashu.me through WebNFC API
-- [Coming Soon] Direct "Open With" integration for Cashu wallets
+- Direct "Open With" integration for Cashu wallets
 
 ## Requirements
 
