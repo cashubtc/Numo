@@ -290,7 +290,7 @@ object CashuPaymentHelper {
                 memo = null,
                 conditions = null,
                 amountSplitTarget = org.cashudevkit.SplitTarget.None,
-                sendKind = org.cashudevkit.SendKind.OfflineExact,
+                sendKind = org.cashudevkit.SendKind.OnlineExact,
                 includeFee = true,
                 maxProofs = null,
                 metadata = emptyMap(),
