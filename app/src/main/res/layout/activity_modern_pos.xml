@@ -167,7 +167,6 @@
                     android:scaleX="0.7"
                     android:scaleY="0.8"
                     android:src="@drawable/ic_switch_currency"
-                    android:translationY="1dp"
                     app:tint="@color/color_bg_white" />
             </LinearLayout>
 

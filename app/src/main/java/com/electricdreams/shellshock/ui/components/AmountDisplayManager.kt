@@ -250,17 +250,24 @@ class AmountDisplayManager(
         secondaryAmountDisplay.animate().cancel()
         switchCurrencyButton.animate().cancel()
         
+        // Convert 2dp to pixels for the icon offset
+        val iconOffsetPx = 2f * context.resources.displayMetrics.density
+        
         if (secondaryAmountDisplay.alpha == 0f) {
             secondaryAmountDisplay.alpha = 1f
             secondaryAmountDisplay.translationY = 0f
         }
         if (switchCurrencyButton.alpha == 0f) {
             switchCurrencyButton.alpha = 1f
-            switchCurrencyButton.translationY = 0f
+            switchCurrencyButton.translationY = iconOffsetPx
         }
         
         val exitTranslation = if (isUp) -30f else 30f
         val enterStartTranslation = if (isUp) 30f else -30f
+        
+        // Get current icon translation (should be iconOffsetPx, but handle case where it's not initialized)
+        val currentIconTranslation = switchCurrencyButton.translationY
+        val baseIconTranslation = if (currentIconTranslation == 0f) iconOffsetPx else currentIconTranslation
         
         // Animate both text and icon together
         secondaryAmountDisplay.animate()
@@ -280,17 +287,17 @@ class AmountDisplayManager(
             }
             .start()
             
-        // Animate icon with same timing
+        // Animate icon with same timing, preserving the 2dp offset
         switchCurrencyButton.animate()
             .alpha(0f)
-            .translationY(exitTranslation)
+            .translationY(baseIconTranslation + exitTranslation)
             .setDuration(150)
             .setInterpolator(android.view.animation.AccelerateInterpolator())
             .withEndAction {
-                switchCurrencyButton.translationY = enterStartTranslation
+                switchCurrencyButton.translationY = baseIconTranslation + enterStartTranslation
                 switchCurrencyButton.animate()
                     .alpha(1f)
-                    .translationY(0f)
+                    .translationY(iconOffsetPx)
                     .setDuration(200)
                     .setInterpolator(android.view.animation.DecelerateInterpolator())
                     .start()

@@ -142,6 +142,10 @@ class PosUiCoordinator(
         errorMessage = activity.findViewById(R.id.error_message)
         switchCurrencyButton = activity.findViewById(R.id.currency_switch_button)
         inputModeContainer = activity.findViewById(R.id.input_mode_container)
+        
+        // Initialize currency switch button translationY to 2dp
+        val iconOffsetPx = 2f * activity.resources.displayMetrics.density
+        switchCurrencyButton.translationY = iconOffsetPx
     }
 
     private fun initializeManagers() {
