@@ -4,21 +4,22 @@
     <item android:state_enabled="false">
         <shape android:shape="rectangle">
             <corners android:radius="26dp" />
-            <solid android:color="#3A3A3A" />
+            <solid android:color="#CCCCCC" />
         </shape>
     </item>
-    <!-- Pressed state - slightly lighter -->
+    <!-- Pressed state - 75% opacity white -->
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
             <corners android:radius="26dp" />
-            <solid android:color="#1A2529" />
+            <solid android:color="#BFFFFFFF" />
         </shape>
     </item>
-    <!-- Enabled state - off-black primary color -->
+    <!-- Enabled state - white -->
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="26dp" />
-            <solid android:color="@color/color_primary_green_light" />
+            <solid android:color="#FFFFFF" />
         </shape>
     </item>
 </selector>
+

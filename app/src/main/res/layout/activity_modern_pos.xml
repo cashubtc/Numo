@@ -83,6 +83,24 @@
             app:layout_constraintBottom_toTopOf="@+id/keypad"
             app:layout_constraintTop_toTopOf="parent">
 
+            <!-- Error Message (initially hidden) -->
+            <TextView
+                android:id="@+id/error_message"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="8dp"
+                android:gravity="center"
+                android:text="You must enter an amount to charge"
+                android:textColor="@color/color_bg_white"
+                android:textSize="16sp"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <!-- Amount Display -->
             <TextView
                 android:id="@+id/amount_display"
@@ -90,7 +108,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 android:gravity="center"
                 android:text="$0"
@@ -107,7 +125,7 @@
                 app:layout_constraintBottom_toTopOf="@+id/secondary_amount_container"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/error_message"
                 app:layout_constraintVertical_chainStyle="packed" />
 
             <!-- Secondary Amount Display with Swap Icon -->
@@ -171,18 +189,19 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <!-- Single Charge Button -->
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/submit_button"
             android:layout_width="match_parent"
             android:layout_height="52dp"
             android:layout_marginHorizontal="24dp"
             android:layout_marginBottom="24dp"
-            android:background="@drawable/bg_button_primary_green"
+            android:background="@drawable/bg_button_white"
             android:text="Charge"
             android:textAllCaps="false"
-            android:textColor="@color/color_bg_white"
-            android:textSize="18sp"
-            android:textStyle="bold"
+            android:textColor="#000000"
+            android:textSize="17sp"
+            android:fontFamily="sans-serif-medium"
+            android:elevation="0dp"
             android:stateListAnimator="@null"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

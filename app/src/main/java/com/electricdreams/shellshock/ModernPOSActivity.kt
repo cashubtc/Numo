@@ -17,6 +17,10 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
+import android.view.animation.AnimationSet
+import android.view.animation.AnimationUtils
+import android.view.animation.TranslateAnimation
 import android.widget.Button
 import android.widget.EditText
 import android.widget.GridLayout
@@ -50,6 +54,7 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback 
     private lateinit var submitButton: Button
     private lateinit var switchCurrencyButton: View
     private lateinit var inputModeContainer: ConstraintLayout
+    private lateinit var errorMessage: TextView
 
     private val currentInput = StringBuilder()
 
@@ -93,6 +98,7 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback 
         amountDisplay = findViewById(R.id.amount_display)
         secondaryAmountDisplay = findViewById(R.id.secondary_amount_display)
         submitButton = findViewById(R.id.submit_button)
+        errorMessage = findViewById(R.id.error_message)
         val keypad: GridLayout = findViewById(R.id.keypad)
         switchCurrencyButton = findViewById(R.id.currency_switch_button)
         inputModeContainer = findViewById(R.id.input_mode_container)
@@ -170,7 +176,7 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback 
             if (requestedAmount > 0) {
                 showPaymentMethodDialog(requestedAmount)
             } else {
-                Toast.makeText(this, "Please enter an amount", Toast.LENGTH_SHORT).show()
+                showAmountRequiredError()
             }
         }
 
@@ -411,6 +417,35 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback 
             putExtra(PaymentRequestActivity.EXTRA_FORMATTED_AMOUNT, formattedAmount)
         }
         startActivityForResult(intent, REQUEST_CODE_PAYMENT)
+    }
+
+    private fun showAmountRequiredError() {
+        // Show error message
+        errorMessage.visibility = View.VISIBLE
+        
+        // Shake the amount display
+        shakeAmountDisplay()
+        
+        // Hide error message after 3 seconds
+        mainHandler.postDelayed({
+            errorMessage.visibility = View.GONE
+        }, 3000)
+    }
+
+    private fun shakeAmountDisplay() {
+        // Create a shake animation that moves left and right
+        // This creates a smooth oscillating motion
+        val shake = object : Animation() {
+            override fun applyTransformation(interpolatedTime: Float, t: android.view.animation.Transformation) {
+                // Oscillate 8 times (left-right-left-right...) with 10px amplitude
+                val offset = (Math.sin(interpolatedTime * Math.PI * 8) * 10).toFloat()
+                t.matrix.setTranslate(offset, 0f)
+            }
+        }.apply {
+            duration = 400
+        }
+        
+        amountDisplay.startAnimation(shake)
     }
 
     // NDEF payment (HCE) is preserved but not currently invoked in the main flow
