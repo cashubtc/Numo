@@ -275,28 +275,29 @@ object CashuPaymentHelper {
             )
             val mmReceive = org.cashudevkit.MultiMintReceiveOptions(
                 allowUntrusted = false,
-                transferToMint = mintUrl,
+                transferToMint = null,
                 receiveOptions = receiveOptions,
             )
 
+            val amountReceived: org.cashudevkit.Amount
             runBlocking {
-                wallet.receive(cdkToken, mmReceive)
+                amountReceived = wallet.receive(cdkToken, mmReceive)
             }
 
             // Prepare send back out
-            val outAmount: org.cashudevkit.Amount = cdkToken.value()
+            val outAmount: org.cashudevkit.Amount = amountReceived
 
             val sendOptions = org.cashudevkit.SendOptions(
                 memo = null,
                 conditions = null,
                 amountSplitTarget = org.cashudevkit.SplitTarget.None,
-                sendKind = org.cashudevkit.SendKind.OnlineExact,
-                includeFee = true,
+                sendKind = org.cashudevkit.SendKind.OfflineExact,
+                includeFee = false,
                 maxProofs = null,
                 metadata = emptyMap(),
             )
             val mmSend = org.cashudevkit.MultiMintSendOptions(
-                allowTransfer = true,
+                allowTransfer = false,
                 maxTransferAmount = null,
                 allowedMints = emptyList(),
                 excludedMints = emptyList(),
