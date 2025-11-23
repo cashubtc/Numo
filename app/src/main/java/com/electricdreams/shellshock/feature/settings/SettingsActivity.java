@@ -50,7 +50,7 @@ public class SettingsActivity extends AppCompatActivity implements MintsAdapter.
     private MintsAdapter mintsAdapter;
     private EditText newMintEditText;
     private Button addMintButton;
-    private Button resetMintsButton;
+    private View resetMintsButton;
     
     private CurrencyManager currencyManager;
     private MintManager mintManager;
@@ -250,7 +250,7 @@ public class SettingsActivity extends AppCompatActivity implements MintsAdapter.
         TextView itemsStatusText = itemsSection.findViewById(R.id.items_status_text);
         Button importItemsButton = itemsSection.findViewById(R.id.import_items_button);
         Button addItemsButton = itemsSection.findViewById(R.id.add_items_button);
-        Button clearItemsButton = itemsSection.findViewById(R.id.clear_items_button);
+        View clearItemsButton = itemsSection.findViewById(R.id.clear_items_button);
         
         // Update status text
         updateItemsStatus();

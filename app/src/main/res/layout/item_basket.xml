@@ -5,82 +5,72 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/color_bg_white"
-    android:paddingHorizontal="@dimen/margin_content_horizontal"
-    android:paddingVertical="@dimen/space_m">
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="12dp">
 
-    <TextView
-        android:id="@+id/item_name"
+    <!-- Text Content -->
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textAppearance="@style/Text.BodyBold"
+        android:layout_marginEnd="16dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/item_total"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="T-Shirt" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/item_variation"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_2xs"
-        android:textAppearance="@style/Text.Caption"
-        android:visibility="gone"
-        app:layout_constraintEnd_toStartOf="@+id/item_total"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/item_name"
-        tools:text="Small"
-        tools:visibility="visible" />
+        <TextView
+            android:id="@+id/item_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="@style/Text.BodyBold"
+            tools:text="T-Shirt" />
 
-    <TextView
-        android:id="@+id/item_quantity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_xs"
-        android:textAppearance="@style/Text.Caption"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/item_variation"
-        tools:text="Qty: 2" />
+        <TextView
+            android:id="@+id/item_quantity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/Text.Caption"
+            tools:text="Qty: 2" />
+            
+        <!-- Hidden fields -->
+        <TextView
+            android:id="@+id/item_variation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+            
+        <TextView
+            android:id="@+id/item_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
 
-    <TextView
-        android:id="@+id/item_price"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/space_m"
-        android:textAppearance="@style/Text.Caption"
-        app:layout_constraintBottom_toBottomOf="@+id/item_quantity"
-        app:layout_constraintStart_toEndOf="@+id/item_quantity"
-        app:layout_constraintTop_toTopOf="@+id/item_quantity"
-        tools:text="$24.99" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/item_total"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/Text.BodyBold"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/remove_item_button"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="$49.98" />
 
     <ImageButton
         android:id="@+id/remove_item_button"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginStart="12dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="Remove item"
-        android:src="@drawable/ic_delete"
+        android:src="@drawable/ic_close"
         android:tint="@color/color_icon_secondary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/item_total" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="@dimen/space_m"
-        android:background="@color/color_divider"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/remove_item_button" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

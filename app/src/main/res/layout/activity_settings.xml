@@ -7,19 +7,19 @@
     android:background="@color/color_bg_white"
     tools:context=".SettingsActivity">
 
-    <!-- Custom Toolbar -->
+    <!-- Top App Bar -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/toolbar_container"
+        android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
+        android:layout_height="56dp"
         android:background="@color/color_bg_white"
-        android:paddingHorizontal="@dimen/space_m"
+        android:paddingHorizontal="16dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Back"
             android:src="@drawable/ic_close"
@@ -40,212 +40,168 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/save_button"
-        app:layout_constraintTop_toBottomOf="@id/toolbar_container">
+        app:layout_constraintTop_toBottomOf="@id/top_bar">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="@dimen/space_2xl">
+            android:paddingBottom="32dp">
 
-            <!-- Settings Title (Hidden in ScrollView as it's now in Toolbar) -->
+            <!-- Currency Section -->
             <TextView
-                android:id="@+id/settings_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone" />
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="4dp"
+                android:text="PREFERRED CURRENCY"
+                android:textAppearance="@style/Text.SectionHeader" />
 
-            <!-- Currency section -->
-            <TextView
-                android:id="@+id/currency_section_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_content_horizontal"
-                android:layout_marginTop="@dimen/space_xl"
-                android:text="Preferred Currency"
-                android:textAppearance="@style/Text.Heading1"
-                android:textSize="18sp" />
-
-            <TextView
-                android:id="@+id/currency_description"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_content_horizontal"
-                android:layout_marginTop="@dimen/space_xs"
-                android:text="Select the currency you want to use for Bitcoin conversions"
-                android:textAppearance="@style/Text.Body" />
-
-            <!-- Radio button group for currency selection -->
             <RadioGroup
                 android:id="@+id/currency_radio_group"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_content_horizontal"
-                android:layout_marginTop="@dimen/space_m">
+                android:layout_height="wrap_content">
 
+                <!-- USD -->
                 <RadioButton
                     android:id="@+id/radio_usd"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:buttonTint="@color/color_primary_green"
-                    android:checked="true"
-                    android:paddingStart="@dimen/space_s"
-                    android:paddingEnd="@dimen/space_s"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:button="@null"
+                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
+                    android:drawableTint="@color/color_primary_green"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="24dp"
                     android:text="US Dollar (USD)"
-                    android:textAppearance="@style/Text.Body"
-                    android:textSize="16sp" />
+                    android:textAppearance="@style/Text.BodyBold" />
 
+                <!-- EUR -->
                 <RadioButton
                     android:id="@+id/radio_eur"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:buttonTint="@color/color_primary_green"
-                    android:paddingStart="@dimen/space_s"
-                    android:paddingEnd="@dimen/space_s"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:button="@null"
+                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
+                    android:drawableTint="@color/color_primary_green"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="24dp"
                     android:text="Euro (EUR)"
-                    android:textAppearance="@style/Text.Body"
-                    android:textSize="16sp" />
+                    android:textAppearance="@style/Text.BodyBold" />
 
+                <!-- GBP -->
                 <RadioButton
                     android:id="@+id/radio_gbp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:buttonTint="@color/color_primary_green"
-                    android:paddingStart="@dimen/space_s"
-                    android:paddingEnd="@dimen/space_s"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:button="@null"
+                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
+                    android:drawableTint="@color/color_primary_green"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="24dp"
                     android:text="British Pound (GBP)"
-                    android:textAppearance="@style/Text.Body"
-                    android:textSize="16sp" />
+                    android:textAppearance="@style/Text.BodyBold" />
 
+                <!-- JPY -->
                 <RadioButton
                     android:id="@+id/radio_jpy"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:buttonTint="@color/color_primary_green"
-                    android:paddingStart="@dimen/space_s"
-                    android:paddingEnd="@dimen/space_s"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:button="@null"
+                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
+                    android:drawableTint="@color/color_primary_green"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="24dp"
                     android:text="Japanese Yen (JPY)"
-                    android:textAppearance="@style/Text.Body"
-                    android:textSize="16sp" />
+                    android:textAppearance="@style/Text.BodyBold" />
             </RadioGroup>
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/divider_height"
-                android:layout_marginHorizontal="@dimen/margin_content_horizontal"
-                android:layout_marginTop="@dimen/space_l"
-                android:background="@color/color_divider" />
-
-            <!-- Mints section -->
+            <!-- Mints Section -->
             <TextView
-                android:id="@+id/mints_section_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_content_horizontal"
-                android:layout_marginTop="@dimen/space_xl"
-                android:text="Allowed Mints"
-                android:textAppearance="@style/Text.Heading1"
-                android:textSize="18sp" />
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="4dp"
+                android:text="ALLOWED MINTS"
+                android:textAppearance="@style/Text.SectionHeader" />
 
-            <TextView
-                android:id="@+id/mints_description"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_content_horizontal"
-                android:layout_marginTop="@dimen/space_xs"
-                android:text="Manage the list of trusted Cashu mints"
-                android:textAppearance="@style/Text.Body" />
-
-            <!-- Mints RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/mints_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_content_horizontal"
-                android:layout_marginTop="@dimen/space_m" />
+                android:nestedScrollingEnabled="false" />
 
-            <!-- Add mint layout -->
+            <!-- Add Mint -->
             <LinearLayout
-                android:id="@+id/add_mint_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_content_horizontal"
-                android:layout_marginTop="@dimen/space_m"
+                android:layout_marginHorizontal="24dp"
+                android:layout_marginTop="16dp"
                 android:orientation="horizontal">
 
                 <EditText
                     android:id="@+id/new_mint_edit_text"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
                     android:layout_weight="1"
-                    android:background="@drawable/bg_search_bar"
-                    android:hint="Enter mint URL"
+                    android:background="@drawable/bg_search_field"
+                    android:hint="Add mint URL"
                     android:inputType="textUri"
-                    android:minHeight="@dimen/button_height"
-                    android:padding="@dimen/space_m"
-                    android:textAppearance="@style/Text.Body" />
+                    android:paddingHorizontal="16dp"
+                    android:textAppearance="@style/Text.Body"
+                    android:textSize="15sp" />
 
                 <Button
                     android:id="@+id/add_mint_button"
+                    style="@style/Widget.Button.Secondary.Outlined"
                     android:layout_width="wrap_content"
-                    android:layout_height="@dimen/button_height"
-                    android:layout_marginStart="@dimen/space_s"
-                    android:background="@drawable/bg_button_secondary_outlined"
-                    android:text="Add"
-                    android:textAppearance="@style/Text.Button"
-                    android:textColor="@color/color_text_primary" />
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:minHeight="40dp"
+                    android:text="Add" />
             </LinearLayout>
 
-            <!-- Reset mints button -->
-            <Button
+            <TextView
                 android:id="@+id/reset_mints_button"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
-                android:layout_marginTop="@dimen/space_m"
-                android:layout_marginEnd="@dimen/margin_content_horizontal"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="24dp"
+                android:background="?attr/selectableItemBackground"
+                android:padding="8dp"
                 android:text="Reset to Defaults"
-                android:textColor="@color/color_primary_green" />
+                android:textAppearance="@style/Text.Link" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/divider_height"
-                android:layout_marginHorizontal="@dimen/margin_content_horizontal"
-                android:layout_marginTop="@dimen/space_l"
-                android:background="@color/color_divider" />
-
-            <!-- Items section -->
+            <!-- Items Section -->
             <include
                 android:id="@+id/items_section"
                 layout="@layout/section_items_settings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_l" />
+                android:layout_marginTop="32dp" />
 
         </LinearLayout>
     </ScrollView>
 
-    <!-- Save button -->
+    <!-- Save Button -->
     <Button
         android:id="@+id/save_button"
-        android:layout_width="0dp"
-        android:layout_height="@dimen/button_height"
-        android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-        android:layout_marginBottom="@dimen/space_xl"
-        android:background="@drawable/bg_button_primary_green"
+        style="@style/Widget.Button.Primary.Green"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="24dp"
         android:text="Save Changes"
-        android:textAppearance="@style/Text.Button"
-        android:textColor="@color/color_bg_white"
-        android:stateListAnimator="@null"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

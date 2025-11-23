@@ -7,18 +7,18 @@
     android:background="@color/color_bg_white"
     android:orientation="vertical">
 
-    <!-- Custom Toolbar -->
+    <!-- Top App Bar -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/toolbar_container"
+        android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
+        android:layout_height="56dp"
         android:background="@color/color_bg_white"
-        android:paddingHorizontal="@dimen/space_m">
+        android:paddingHorizontal="16dp">
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Back"
             android:src="@drawable/ic_close"
@@ -39,8 +39,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -51,7 +49,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:paddingVertical="@dimen/space_s"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             tools:listitem="@layout/item_product_selection" />
 
         <TextView
@@ -65,47 +64,29 @@
 
     </FrameLayout>
 
+    <!-- Bottom Basket Summary -->
     <LinearLayout
         android:id="@+id/basket_summary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/color_bg_white"
-        android:elevation="8dp"
+        android:elevation="16dp"
         android:orientation="vertical"
-        android:padding="@dimen/space_m">
+        android:paddingHorizontal="24dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="24dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/space_s"
+            android:layout_marginBottom="16dp"
             android:orientation="horizontal">
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Items in basket:"
-                android:textAppearance="@style/Text.Body" />
-
-            <TextView
-                android:id="@+id/basket_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="@style/Text.BodyBold"
-                tools:text="3" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/space_m"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Total:"
+                android:text="Total"
                 android:textAppearance="@style/Text.Heading1" />
 
             <TextView
@@ -113,9 +94,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/Text.Heading1"
-                android:textColor="@color/color_primary_green"
                 tools:text="$24.99" />
         </LinearLayout>
+        
+        <!-- Hidden count view, kept for logic compatibility if needed -->
+        <TextView
+            android:id="@+id/basket_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -127,21 +114,19 @@
                 style="@style/Widget.Button.Secondary.Outlined"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/space_s"
+                android:layout_marginEnd="8dp"
                 android:layout_weight="1"
                 android:text="View Basket" />
 
             <Button
                 android:id="@+id/checkout_button"
+                style="@style/Widget.Button.Primary.Green"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                android:background="@drawable/bg_button_primary_green"
-                android:enabled="false"
-                android:text="Checkout"
-                android:stateListAnimator="@null"
-                android:textAppearance="@style/Text.Button"
-                android:textColor="@color/color_bg_white" />
+                android:text="Checkout" />
         </LinearLayout>
     </LinearLayout>
+
 </LinearLayout>

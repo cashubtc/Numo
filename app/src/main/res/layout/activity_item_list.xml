@@ -7,18 +7,18 @@
     android:background="@color/color_bg_white"
     android:orientation="vertical">
 
-    <!-- Custom Toolbar -->
+    <!-- Top App Bar -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/toolbar_container"
+        android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
+        android:layout_height="56dp"
         android:background="@color/color_bg_white"
-        android:paddingHorizontal="@dimen/space_m">
+        android:paddingHorizontal="16dp">
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Back"
             android:src="@drawable/ic_close"
@@ -39,19 +39,17 @@
 
         <ImageButton
             android:id="@+id/fab_add_item"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Add item"
             android:src="@android:drawable/ic_input_add"
-            android:tint="@color/color_primary_green"
+            android:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -62,7 +60,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:paddingVertical="@dimen/space_s"
+            android:paddingTop="8dp"
+            android:paddingBottom="80dp"
             tools:listitem="@layout/item_product" />
 
         <TextView
@@ -70,7 +69,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="No items in catalog.\nUse the + button to add items."
+            android:text="No items in catalog.\nTap + to add items."
             android:textAlignment="center"
             android:textAppearance="@style/Text.Body"
             android:visibility="gone" />

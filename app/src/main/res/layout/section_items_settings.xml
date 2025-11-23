@@ -1,67 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingHorizontal="@dimen/margin_content_horizontal">
+    android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/space_s"
-        android:text="Items Catalog Management"
-        android:textAppearance="@style/Text.Heading1"
-        android:textSize="18sp" />
-
-    <TextView
-        android:id="@+id/items_status_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/space_xs"
-        android:text="No items in catalog"
-        android:textAppearance="@style/Text.BodyBold" />
-        
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/space_m"
-        android:text="Use 'Manage Items' to view, add, edit or delete individual items in your catalog."
-        android:textAppearance="@style/Text.Caption" />
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="4dp"
+        android:text="ITEMS CATALOG"
+        android:textAppearance="@style/Text.SectionHeader" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/space_m"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingVertical="12dp">
 
-        <Button
-            android:id="@+id/import_items_button"
-            style="@style/Widget.Button.Secondary.Outlined"
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/items_status_text"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/space_s"
-            android:layout_weight="1"
-            android:text="Import CSV" />
+            android:text="No items in catalog"
+            android:textAppearance="@style/Text.BodyBold" />
 
-        <Button
-            android:id="@+id/add_items_button"
-            style="@style/Widget.Button.Secondary.Outlined"
-            android:layout_width="0dp"
+        <TextView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/space_s"
-            android:layout_weight="1"
-            android:text="Manage Items" />
+            android:layout_marginTop="4dp"
+            android:text="Manage your product catalog for quick checkout."
+            android:textAppearance="@style/Text.Body" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/import_items_button"
+                style="@style/Widget.Button.Secondary.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:text="Import CSV" />
+
+            <Button
+                android:id="@+id/add_items_button"
+                style="@style/Widget.Button.Secondary.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:text="Manage" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/clear_items_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:background="?attr/selectableItemBackground"
+            android:padding="8dp"
+            android:text="Clear All Items"
+            android:textAppearance="@style/Text.Link"
+            android:textColor="@color/color_warning_red" />
 
     </LinearLayout>
-
-    <Button
-        android:id="@+id/clear_items_button"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Clear All Items"
-        android:textAppearance="@style/Text.Button"
-        android:textColor="@color/color_warning_red" />
 
 </LinearLayout>
