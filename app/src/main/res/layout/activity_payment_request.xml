@@ -35,17 +35,17 @@
         android:id="@+id/large_amount_display"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginHorizontal="32dp"
         android:text="₿ 0"
         android:textColor="@color/color_text_primary"
-        android:textSize="64sp"
+        android:textSize="48sp"
         android:textStyle="bold"
         android:gravity="center"
         android:maxLines="1"
         app:autoSizeTextType="uniform"
         app:autoSizeMinTextSize="24sp"
-        app:autoSizeMaxTextSize="64sp"
+        app:autoSizeMaxTextSize="48sp"
         app:autoSizeStepGranularity="2sp"
         app:layout_constraintBottom_toTopOf="@id/qr_card"
         app:layout_constraintEnd_toEndOf="parent"
@@ -65,7 +65,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/close_button"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintVertical_bias="0.3">
+        app:layout_constraintVertical_bias="0.35">
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -80,22 +80,24 @@
                 android:scaleType="fitCenter" />
 
             <!-- Center Logo Overlay -->
-            <FrameLayout
+            <androidx.cardview.widget.CardView
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_gravity="center"
-                android:background="@drawable/bg_qr_logo">
+                app:cardBackgroundColor="@color/color_bg_white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
                     android:layout_gravity="center"
                     android:src="@drawable/cashu" />
-            </FrameLayout>
+            </androidx.cardview.widget.CardView>
         </FrameLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Icons below QR -->
+    <!-- Icons and Instruction -->
     <LinearLayout
         android:id="@+id/icons_container"
         android:layout_width="wrap_content"
@@ -112,21 +114,17 @@
             android:layout_height="24dp"
             android:src="@drawable/contactless"
             android:rotation="270" />
-    </LinearLayout>
 
-    <!-- Instruction Text -->
-    <TextView
-        android:id="@+id/instruction_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Scan or tap to pay"
-        android:textColor="@color/color_text_primary"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/icons_container" />
+        <TextView
+            android:id="@+id/instruction_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="Scan or Tap to Pay"
+            android:textColor="@color/color_text_primary"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+    </LinearLayout>
 
     <!-- Status Text (Hidden or subtle) -->
     <TextView
@@ -140,7 +138,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/instruction_text" />
+        app:layout_constraintTop_toBottomOf="@id/icons_container" />
 
     <!-- Bottom Actions (Scan / My Code) - Optional based on image, but keeping simple for now -->
     <!-- The user image shows "Scan" and "My Code" toggle at bottom. 

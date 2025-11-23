@@ -9,7 +9,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
 import android.nfc.tech.IsoDep;
@@ -215,15 +218,15 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             
             if (label.equals("◀")) {
                 button.setText("");
-                android.graphics.drawable.Drawable icon = androidx.core.content.ContextCompat.getDrawable(this, R.drawable.ic_chevron_back);
+                // Remove padding to ensure icon is centered
+                button.setPadding( 140, 0, 0, 0);
+                button.setCompoundDrawablePadding(0);
+                
+                Drawable icon = ContextCompat.getDrawable(this, R.drawable.ic_chevron_back);
                 if (icon != null) {
-                    // Tint the icon white to match the text color
-                    icon.setTint(getResources().getColor(R.color.color_bg_white, getTheme()));
-                    button.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
-                    // We set it as a compound drawable, but since text is empty and gravity is center, it should work.
-                    // However, to be safe and center it perfectly, let's just set it as the icon if possible or use compound drawable.
+                    icon = DrawableCompat.wrap(icon);
+                    DrawableCompat.setTint(icon, ContextCompat.getColor(this, R.color.color_bg_white));
                     button.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null);
-                    // Adjust padding to ensure it looks centered if needed, but with empty text it should be fine.
                 }
             } else {
                 button.setText(label);
