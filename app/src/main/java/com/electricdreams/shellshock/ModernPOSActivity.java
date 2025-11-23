@@ -72,12 +72,11 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
     };
 
     private TextView amountDisplay;
-    private TextView fiatAmountDisplay; // Kept for logic but hidden
+    private TextView secondaryAmountDisplay; // Shows the converted amount (fiat or sats)
     private Button submitButton;
-    private TextView currencyText;
     private StringBuilder currentInput = new StringBuilder();
 
-    private View switchCurrencyButton; // Changed to View for the invisible click target
+    private ImageButton switchCurrencyButton; // Swap button next to secondary amount
     private ConstraintLayout inputModeContainer;
     private NfcAdapter nfcAdapter;
     private SatocashNfcClient satocashClient;
@@ -136,11 +135,9 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         Log.d(TAG, "Created ModernPOSActivity with payment amount from basket: " + paymentAmount);
 
         // Find all views
-        // Find all views
         amountDisplay = findViewById(R.id.amount_display);
-        fiatAmountDisplay = findViewById(R.id.fiat_amount_display);
+        secondaryAmountDisplay = findViewById(R.id.secondary_amount_display);
         submitButton = findViewById(R.id.submit_button);
-        currencyText = findViewById(R.id.currency_text);
         GridLayout keypad = findViewById(R.id.keypad);
         switchCurrencyButton = findViewById(R.id.currency_switch_button);
         inputModeContainer = findViewById(R.id.input_mode_container);
@@ -454,7 +451,8 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         String inputStr = currentInput.toString();
         long satsValue = 0;
         double fiatValue = 0;
-        String amountDisplayText = "";
+        String mainAmountText = "";
+        String secondaryAmountText = "";
         
         if (isUsdInputMode) {
             // Converting from fiat input to sats equivalent
@@ -474,57 +472,57 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                     CurrencyManager currencyManager = CurrencyManager.getInstance(this);
                     Amount.Currency currency = Amount.Currency.fromCode(currencyManager.getCurrentCurrency());
                     
-                    // Format fiat amount for display using Amount class
-                    amountDisplayText = new Amount(cents, currency).toString();
+                    // Main display shows fiat amount
+                    mainAmountText = new Amount(cents, currency).toString();
                     
-                    // Format sats equivalent
-                    String satoshiEquivalent = new Amount(satsValue, Amount.Currency.BTC).toString();
-                    fiatAmountDisplay.setText(satoshiEquivalent);
+                    // Secondary display shows sats equivalent
+                    secondaryAmountText = new Amount(satsValue, Amount.Currency.BTC).toString();
                 } catch (NumberFormatException e) {
                     CurrencyManager currencyManager = CurrencyManager.getInstance(this);
                     Amount.Currency currency = Amount.Currency.fromCode(currencyManager.getCurrentCurrency());
-                    amountDisplayText = new Amount(0, currency).toString();
-                    fiatAmountDisplay.setText(new Amount(0, Amount.Currency.BTC).toString());
+                    mainAmountText = new Amount(0, currency).toString();
+                    secondaryAmountText = new Amount(0, Amount.Currency.BTC).toString();
                     satsValue = 0;
                 }
             } else {
                 CurrencyManager currencyManager = CurrencyManager.getInstance(this);
                 Amount.Currency currency = Amount.Currency.fromCode(currencyManager.getCurrentCurrency());
-                amountDisplayText = new Amount(0, currency).toString();
-                fiatAmountDisplay.setText(new Amount(0, Amount.Currency.BTC).toString());
+                mainAmountText = new Amount(0, currency).toString();
+                secondaryAmountText = new Amount(0, Amount.Currency.BTC).toString();
                 satsValue = 0;
             }
         } else {
             // Original sats input mode
             satsValue = inputStr.isEmpty() ? 0 : Long.parseLong(inputStr);
             
-            // Format sats amount
-            amountDisplayText = formatAmount(inputStr);
+            // Main display shows sats amount
+            mainAmountText = formatAmount(inputStr);
             
-            // Calculate and display fiat equivalent
+            // Secondary display shows fiat equivalent
             if (bitcoinPriceWorker != null) {
                 fiatValue = bitcoinPriceWorker.satoshisToFiat(satsValue);
-                String formattedFiatAmount = bitcoinPriceWorker.formatFiatAmount(fiatValue);
-                fiatAmountDisplay.setText(formattedFiatAmount);
+                secondaryAmountText = bitcoinPriceWorker.formatFiatAmount(fiatValue);
             } else {
                 CurrencyManager currencyManager = CurrencyManager.getInstance(this);
-                fiatAmountDisplay.setText(currencyManager.formatCurrencyAmount(0.0));
+                secondaryAmountText = currencyManager.formatCurrencyAmount(0.0);
             }
         }
         
-        // Update amount display with animation if needed
-        if (!amountDisplay.getText().toString().equals(amountDisplayText)) {
+        // Update main amount display with animation if needed
+        if (!amountDisplay.getText().toString().equals(mainAmountText)) {
             if (animationType == AnimationType.CURRENCY_SWITCH) {
                 // Animate UP if going to SATS (default/base), DOWN if going to USD (overlay/fiat)
-                // Or just consistent direction: SATS -> USD (Down), USD -> SATS (Up)
                 boolean animateUp = !isUsdInputMode; 
-                animateCurrencySwitch(amountDisplayText, animateUp);
+                animateCurrencySwitch(mainAmountText, animateUp);
             } else if (animationType == AnimationType.DIGIT_ENTRY) {
-                animateDigitEntry(amountDisplayText);
+                animateDigitEntry(mainAmountText);
             } else {
-                amountDisplay.setText(amountDisplayText);
+                amountDisplay.setText(mainAmountText);
             }
         }
+        
+        // Update secondary amount display (no animation needed)
+        secondaryAmountDisplay.setText(secondaryAmountText);
         
         // Update submit button text - always charge in sats
         if (satsValue > 0) {
@@ -538,13 +536,6 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             submitButton.setText("Charge");
             submitButton.setEnabled(false);
             requestedAmount = 0;
-        }
-        
-        // Update currency text
-        if (isUsdInputMode) {
-            currencyText.setText("USD");
-        } else {
-            currencyText.setText("BTC");
         }
     }
 

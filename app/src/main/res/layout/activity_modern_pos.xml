@@ -104,53 +104,44 @@
                 android:autoSizeMinTextSize="24sp"
                 android:autoSizeMaxTextSize="64sp"
                 android:autoSizeStepGranularity="2sp"
-                app:layout_constraintBottom_toTopOf="@+id/currency_switch_container"
+                app:layout_constraintBottom_toTopOf="@+id/secondary_amount_container"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_chainStyle="packed" />
 
-            <!-- Currency Selector Pill -->
+            <!-- Secondary Amount Display with Swap Icon -->
             <LinearLayout
-                android:id="@+id/currency_switch_container"
+                android:id="@+id/secondary_amount_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:background="@drawable/bg_currency_pill"
-                android:gravity="center"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="6dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/amount_display">
 
                 <TextView
-                    android:id="@+id/currency_text"
+                    android:id="@+id/secondary_amount_display"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="USD"
+                    android:text="$0.00 USD"
                     android:textColor="@color/color_bg_white"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
+                    android:textSize="16sp"
+                    android:textStyle="normal" />
 
-                <ImageView
-                    android:layout_width="12dp"
-                    android:layout_height="12dp"
-                    android:layout_marginStart="6dp"
+                <ImageButton
+                    android:id="@+id/currency_switch_button"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="Swap currency"
                     android:src="@drawable/ic_switch_currency"
                     app:tint="@color/color_bg_white" />
             </LinearLayout>
-
-            <!-- Invisible button to maintain click functionality for currency switch -->
-            <View
-                android:id="@+id/currency_switch_button"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                app:layout_constraintBottom_toBottomOf="@id/currency_switch_container"
-                app:layout_constraintEnd_toEndOf="@id/currency_switch_container"
-                app:layout_constraintStart_toStartOf="@id/currency_switch_container"
-                app:layout_constraintTop_toTopOf="@id/currency_switch_container" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -186,15 +177,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
-
-        <!-- Hidden legacy views -->
-        <TextView
-            android:id="@+id/fiat_amount_display"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
