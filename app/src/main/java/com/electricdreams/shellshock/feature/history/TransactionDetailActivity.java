@@ -132,6 +132,41 @@ public class TransactionDetailActivity extends AppCompatActivity {
         TextView entryUnitText = findViewById(R.id.detail_entry_unit);
         entryUnitText.setText(entry.getEntryUnit());
 
+        // Entered Amount
+        TextView enteredAmountText = findViewById(R.id.detail_entered_amount);
+        View enteredAmountRow = findViewById(R.id.entered_amount_row);
+        View enteredAmountDivider = findViewById(R.id.entered_amount_divider);
+        
+        if (entry.getEntryUnit() != null && !entry.getEntryUnit().equals("sat")) {
+            // Show entered amount in fiat currency
+            Amount.Currency entryCurrency = Amount.Currency.fromCode(entry.getEntryUnit());
+            Amount enteredAmount = new Amount(entry.getEnteredAmount(), entryCurrency);
+            enteredAmountText.setText(enteredAmount.toString());
+            enteredAmountRow.setVisibility(View.VISIBLE);
+            enteredAmountDivider.setVisibility(View.VISIBLE);
+        } else {
+            // Hide entered amount row if it's the same as the amount (sats)
+            enteredAmountRow.setVisibility(View.GONE);
+            enteredAmountDivider.setVisibility(View.GONE);
+        }
+
+        // Bitcoin Price
+        TextView bitcoinPriceText = findViewById(R.id.detail_bitcoin_price);
+        View bitcoinPriceRow = findViewById(R.id.bitcoin_price_row);
+        View bitcoinPriceDivider = findViewById(R.id.bitcoin_price_divider);
+        
+        if (entry.getBitcoinPrice() != null && entry.getBitcoinPrice() > 0) {
+            // Format Bitcoin price with currency manager's format
+            String formattedPrice = String.format(Locale.US, "$%,.2f", entry.getBitcoinPrice());
+            bitcoinPriceText.setText(formattedPrice);
+            bitcoinPriceRow.setVisibility(View.VISIBLE);
+            bitcoinPriceDivider.setVisibility(View.VISIBLE);
+        } else {
+            // Hide Bitcoin price row if not available
+            bitcoinPriceRow.setVisibility(View.GONE);
+            bitcoinPriceDivider.setVisibility(View.GONE);
+        }
+
         // Token
         TextView tokenText = findViewById(R.id.detail_token);
         tokenText.setText(entry.getToken());

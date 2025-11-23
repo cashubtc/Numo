@@ -240,6 +240,72 @@
                     android:layout_marginBottom="12dp"
                     android:background="@color/color_divider" />
 
+                <!-- Entered Amount Row -->
+                <LinearLayout
+                    android:id="@+id/entered_amount_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.BodyBold"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Entered Amount" />
+
+                    <TextView
+                        android:id="@+id/detail_entered_amount"
+                        style="@style/Text.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/color_text_primary"
+                        android:text="$1.23" />
+
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View
+                    android:id="@+id/entered_amount_divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@color/color_divider" />
+
+                <!-- Bitcoin Price Row -->
+                <LinearLayout
+                    android:id="@+id/bitcoin_price_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.BodyBold"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Bitcoin Price" />
+
+                    <TextView
+                        android:id="@+id/detail_bitcoin_price"
+                        style="@style/Text.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/color_text_primary"
+                        android:text="$27,333.45" />
+
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View
+                    android:id="@+id/bitcoin_price_divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@color/color_divider" />
+
                 <!-- Mint URL Row -->
                 <LinearLayout
                     android:layout_width="match_parent"
