@@ -83,6 +83,9 @@ public class PaymentsHistoryActivity extends AppCompatActivity {
         }
         intent.putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_MINT_URL, entry.getMintUrl());
         intent.putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_REQUEST, entry.getPaymentRequest());
+        intent.putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_IS_LIGHTNING, entry.isLightningPayment());
+        intent.putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_LIGHTNING_QUOTE, entry.getLightningQuoteJson());
+        intent.putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_LIGHTNING_BOLT11, entry.getLightningBolt11());
         intent.putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_POSITION, position);
         
         startActivityForResult(intent, REQUEST_TRANSACTION_DETAIL);
@@ -183,13 +186,16 @@ public class PaymentsHistoryActivity extends AppCompatActivity {
      * @param mintUrl The mint URL from which the token was received
      * @param paymentRequest The payment request used (can be null)
      */
-    public static void addToHistory(Context context, String token, long amount, 
-                                   String unit, String entryUnit, long enteredAmount, 
-                                   Double bitcoinPrice, String mintUrl, String paymentRequest) {
+    public static void addToHistory(Context context, String token, long amount,
+                                    String unit, String entryUnit, long enteredAmount,
+                                    Double bitcoinPrice, String mintUrl, String paymentRequest,
+                                    boolean lightningPayment, String lightningQuoteJson,
+                                    String lightningBolt11) {
         List<PaymentHistoryEntry> history = getPaymentHistory(context);
         history.add(new PaymentHistoryEntry(token, amount, new java.util.Date(), 
                                            unit, entryUnit, enteredAmount, bitcoinPrice, 
-                                           mintUrl, paymentRequest));
+                                           mintUrl, paymentRequest, lightningPayment,
+                                           lightningQuoteJson, lightningBolt11));
         
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
@@ -203,6 +209,14 @@ public class PaymentsHistoryActivity extends AppCompatActivity {
      */
     @Deprecated
     public static void addToHistory(Context context, String token, long amount) {
-        addToHistory(context, token, amount, "sat", "sat", amount, null, null, null);
+        addToHistory(context, token, amount, "sat", "sat", amount,
+                null, null, null, false, null, null);
+    }
+
+    public static void addToHistory(Context context, String token, long amount,
+                                    String unit, String entryUnit, long enteredAmount,
+                                    Double bitcoinPrice, String mintUrl, String paymentRequest) {
+        addToHistory(context, token, amount, unit, entryUnit, enteredAmount,
+                bitcoinPrice, mintUrl, paymentRequest, false, null, null);
     }
 }

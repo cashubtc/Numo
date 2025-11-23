@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +22,7 @@ import com.electricdreams.shellshock.core.model.Amount;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import org.json.JSONObject;
 
 /**
  * Full-screen activity to display detailed transaction information
@@ -37,6 +39,9 @@ public class TransactionDetailActivity extends AppCompatActivity {
     public static final String EXTRA_TRANSACTION_BITCOIN_PRICE = "transaction_bitcoin_price";
     public static final String EXTRA_TRANSACTION_MINT_URL = "transaction_mint_url";
     public static final String EXTRA_TRANSACTION_PAYMENT_REQUEST = "transaction_payment_request";
+    public static final String EXTRA_TRANSACTION_IS_LIGHTNING = "transaction_is_lightning";
+    public static final String EXTRA_TRANSACTION_LIGHTNING_QUOTE = "transaction_lightning_quote";
+    public static final String EXTRA_TRANSACTION_LIGHTNING_BOLT11 = "transaction_lightning_bolt11";
     public static final String EXTRA_TRANSACTION_POSITION = "transaction_position";
 
     private PaymentHistoryEntry entry;
@@ -59,6 +64,9 @@ public class TransactionDetailActivity extends AppCompatActivity {
         Double bitcoinPrice = bitcoinPriceValue > 0 ? bitcoinPriceValue : null;
         String mintUrl = intent.getStringExtra(EXTRA_TRANSACTION_MINT_URL);
         String paymentRequest = intent.getStringExtra(EXTRA_TRANSACTION_PAYMENT_REQUEST);
+        boolean isLightning = intent.getBooleanExtra(EXTRA_TRANSACTION_IS_LIGHTNING, false);
+        String lightningQuote = intent.getStringExtra(EXTRA_TRANSACTION_LIGHTNING_QUOTE);
+        String lightningBolt11 = intent.getStringExtra(EXTRA_TRANSACTION_LIGHTNING_BOLT11);
         position = intent.getIntExtra(EXTRA_TRANSACTION_POSITION, -1);
 
         // Create entry object
@@ -71,7 +79,10 @@ public class TransactionDetailActivity extends AppCompatActivity {
             enteredAmount,
             bitcoinPrice,
             mintUrl,
-            paymentRequest
+            paymentRequest,
+            isLightning,
+            lightningQuote,
+            lightningBolt11
         );
 
         // Setup UI
@@ -98,6 +109,8 @@ public class TransactionDetailActivity extends AppCompatActivity {
         // Amount display
         TextView amountText = findViewById(R.id.detail_amount);
         TextView amountValueText = findViewById(R.id.detail_amount_value);
+        TextView transactionTypeText = findViewById(R.id.transaction_type);
+        ImageView heroIcon = findViewById(R.id.hero_icon_image);
         
         Amount.Currency currency = Amount.Currency.fromCode(entry.getUnit());
         Amount amount = new Amount(entry.getAmount(), currency);
@@ -105,6 +118,15 @@ public class TransactionDetailActivity extends AppCompatActivity {
         
         amountText.setText(formattedAmount);
         amountValueText.setText(formattedAmount);
+
+        if (entry.isLightningPayment()) {
+            if (transactionTypeText != null) {
+                transactionTypeText.setText("Lightning payment received");
+            }
+            if (heroIcon != null) {
+                heroIcon.setImageResource(R.drawable.ic_lightning);
+            }
+        }
 
         // Date
         TextView dateText = findViewById(R.id.detail_date);
@@ -182,6 +204,50 @@ public class TransactionDetailActivity extends AppCompatActivity {
         } else {
             paymentRequestHeader.setVisibility(View.GONE);
             paymentRequestText.setVisibility(View.GONE);
+        }
+
+        // Lightning invoice details
+        View lightningHeader = findViewById(R.id.lightning_header);
+        View lightningContainer = findViewById(R.id.lightning_details_container);
+        TextView lightningBoltView = findViewById(R.id.detail_lightning_bolt11);
+        TextView lightningStateView = findViewById(R.id.detail_lightning_state);
+        TextView lightningIdView = findViewById(R.id.detail_lightning_id);
+
+        if (entry.isLightningPayment()) {
+            if (lightningHeader != null) {
+                lightningHeader.setVisibility(View.VISIBLE);
+            }
+            if (lightningContainer != null) {
+                lightningContainer.setVisibility(View.VISIBLE);
+            }
+            if (lightningBoltView != null) {
+                String bolt = entry.getLightningBolt11();
+                lightningBoltView.setText(bolt != null ? bolt : "Unavailable");
+            }
+            String stateText = "Paid";
+            String quoteId = "";
+            try {
+                String quoteJson = entry.getLightningQuoteJson();
+                if (quoteJson != null) {
+                    JSONObject obj = new JSONObject(quoteJson);
+                    stateText = obj.optString("state", stateText);
+                    quoteId = obj.optString("id", quoteId);
+                }
+            } catch (Exception ignored) {
+            }
+            if (lightningStateView != null) {
+                lightningStateView.setText(stateText);
+            }
+            if (lightningIdView != null) {
+                lightningIdView.setText(!quoteId.isEmpty() ? quoteId : "Not available");
+            }
+        } else {
+            if (lightningHeader != null) {
+                lightningHeader.setVisibility(View.GONE);
+            }
+            if (lightningContainer != null) {
+                lightningContainer.setVisibility(View.GONE);
+            }
         }
     }
 

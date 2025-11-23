@@ -89,11 +89,38 @@
                 app:cardElevation="0dp">
 
                 <ImageView
+                    android:id="@+id/qr_center_icon"
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:layout_gravity="center"
                     android:src="@drawable/cashu" />
             </androidx.cardview.widget.CardView>
+
+            <LinearLayout
+                android:id="@+id/lightning_progress_container"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:background="#80FFFFFF"
+                android:visibility="gone">
+
+                <ProgressBar
+                    android:id="@+id/lightning_progress_bar"
+                    style="?android:attr/progressBarStyleLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true" />
+
+                <TextView
+                    android:id="@+id/lightning_progress_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="Creating Lightning invoice..."
+                    android:textColor="@color/color_text_primary"
+                    android:textStyle="bold" />
+            </LinearLayout>
         </FrameLayout>
     </androidx.cardview.widget.CardView>
 
@@ -135,16 +162,38 @@
         android:text="Waiting for payment..."
         android:textColor="@color/color_text_secondary"
         android:textSize="14sp"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/icons_container" />
 
-    <!-- Bottom Actions (Scan / My Code) - Optional based on image, but keeping simple for now -->
-    <!-- The user image shows "Scan" and "My Code" toggle at bottom. 
-         Since this IS "My Code" (Payment Request), maybe we don't need the toggle if it's a dedicated activity.
-         But I'll add a "Scan" button at the bottom just in case, or leave it clean.
-         The prompt didn't explicitly ask for the toggle, just the "design".
-         I'll stick to the clean look. -->
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/payment_method_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginBottom="32dp"
+        android:layout_marginTop="16dp"
+        app:singleSelection="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/toggle_cashu"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cashu"
+            android:textAllCaps="false" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/toggle_lightning"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lightning"
+            android:textAllCaps="false" />
+
+    </com.google.android.material.button.MaterialButtonToggleGroup>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

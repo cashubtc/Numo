@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -21,6 +22,9 @@ import com.electricdreams.shellshock.ndef.NdefHostCardEmulationService;
 import com.electricdreams.shellshock.nostr.NostrKeyPair;
 import com.electricdreams.shellshock.nostr.NostrPaymentListener;
 
+import com.electricdreams.shellshock.lightning.LightningPaymentCoordinator;
+import com.electricdreams.shellshock.lightning.LightningPaymentResult;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
@@ -30,12 +34,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
+import org.cashudevkit.MintQuote;
+import org.cashudevkit.QuoteState;
+
 public class PaymentRequestActivity extends AppCompatActivity {
 
     private static final String TAG = "PaymentRequestActivity";
     public static final String EXTRA_PAYMENT_AMOUNT = "payment_amount";
     public static final String RESULT_EXTRA_TOKEN = "payment_token";
     public static final String RESULT_EXTRA_AMOUNT = "payment_amount";
+    public static final String RESULT_EXTRA_IS_LIGHTNING = "payment_is_lightning";
+    public static final String RESULT_EXTRA_LIGHTNING_QUOTE = "payment_lightning_quote";
+    public static final String RESULT_EXTRA_LIGHTNING_BOLT11 = "payment_lightning_bolt11";
 
     // Nostr relays to use for NIP-17 gift-wrapped DMs
     private static final String[] NOSTR_RELAYS = new String[] {
@@ -48,14 +58,28 @@ public class PaymentRequestActivity extends AppCompatActivity {
     private ImageView qrImageView;
     private TextView largeAmountDisplay;
     private TextView statusText;
+    private TextView instructionText;
     private android.view.View closeButton;
     private android.view.View shareButton;
+    private ImageView qrCenterIcon;
+    private View lightningProgressContainer;
+    private TextView lightningProgressText;
+    private MaterialButtonToggleGroup paymentMethodToggle;
 
     private long paymentAmount = 0;
     private String hcePaymentRequest = null;
     private String qrPaymentRequest = null;
     private NostrPaymentListener nostrListener = null;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+    private LightningPaymentCoordinator lightningPaymentCoordinator;
+    private String lightningMintUrl;
+    private String lightningBolt11;
+    private String lightningQuoteJson;
+    private String currentSharePayload;
+    private boolean lightningInvoiceReady = false;
+
+    private enum PaymentMode { CASHU, LIGHTNING }
+    private PaymentMode currentPaymentMode = PaymentMode.CASHU;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,8 +100,14 @@ public class PaymentRequestActivity extends AppCompatActivity {
         qrImageView = findViewById(R.id.payment_request_qr);
         largeAmountDisplay = findViewById(R.id.large_amount_display);
         statusText = findViewById(R.id.payment_status_text);
+        instructionText = findViewById(R.id.instruction_text);
         closeButton = findViewById(R.id.close_button);
         shareButton = findViewById(R.id.share_button);
+        qrCenterIcon = findViewById(R.id.qr_center_icon);
+        lightningProgressContainer = findViewById(R.id.lightning_progress_container);
+        lightningProgressText = findViewById(R.id.lightning_progress_text);
+        paymentMethodToggle = findViewById(R.id.payment_method_toggle);
+        statusText.setVisibility(View.VISIBLE);
 
         // Get payment amount from intent
         paymentAmount = getIntent().getLongExtra(EXTRA_PAYMENT_AMOUNT, 0);
@@ -99,14 +129,13 @@ public class PaymentRequestActivity extends AppCompatActivity {
             cancelPayment();
         });
         
-        shareButton.setOnClickListener(v -> {
-            if (qrPaymentRequest != null) {
-                sharePaymentRequest(qrPaymentRequest);
-            }
-        });
+        shareButton.setOnClickListener(v -> shareCurrentCode());
+
+        lightningPaymentCoordinator = new LightningPaymentCoordinator(new LightningInvoiceListener());
 
         // Initialize payment request
         initializePaymentRequest();
+        setupPaymentToggle();
     }
 
     @Override
@@ -125,13 +154,14 @@ public class PaymentRequestActivity extends AppCompatActivity {
     }
 
     private void initializePaymentRequest() {
-        statusText.setText("Preparing payment request...");
+        setStatusText("Preparing payment request...");
 
         // Get allowed mints
         com.electricdreams.shellshock.core.util.MintManager mintManager =
                 com.electricdreams.shellshock.core.util.MintManager.getInstance(this);
         List<String> allowedMints = mintManager.getAllowedMints();
         Log.d(TAG, "Using " + allowedMints.size() + " allowed mints for payment request");
+        lightningMintUrl = allowedMints != null && !allowedMints.isEmpty() ? allowedMints.get(0) : null;
 
         // Check if NDEF is available
         final boolean ndefAvailable = NdefHostCardEmulationService.isHceAvailable(this);
@@ -180,7 +210,7 @@ public class PaymentRequestActivity extends AppCompatActivity {
 
         if (qrPaymentRequest == null) {
             Log.e(TAG, "Failed to create QR payment request with Nostr transport");
-            statusText.setText("Error creating payment request");
+            setStatusText("Error creating payment request");
         } else {
             Log.d(TAG, "Created QR payment request with Nostr: " + qrPaymentRequest);
 
@@ -190,14 +220,148 @@ public class PaymentRequestActivity extends AppCompatActivity {
                 if (qrBitmap != null) {
                     qrImageView.setImageBitmap(qrBitmap);
                 }
-                statusText.setText("Waiting for payment...");
+                setStatusText("Waiting for payment...");
             } catch (Exception e) {
                 Log.e(TAG, "Error generating QR bitmap: " + e.getMessage(), e);
-                statusText.setText("Error generating QR code");
+                setStatusText("Error generating QR code");
             }
 
             // Start Nostr listener for this ephemeral identity
             setupNostrPayment(nostrSecret, nostrPubHex, relayList);
+        }
+    }
+
+    private void setupPaymentToggle() {
+        if (paymentMethodToggle == null) {
+            return;
+        }
+        paymentMethodToggle.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+            if (!isChecked) {
+                return;
+            }
+            if (checkedId == R.id.toggle_cashu) {
+                switchToCashu();
+            } else if (checkedId == R.id.toggle_lightning) {
+                switchToLightning();
+            }
+        });
+        paymentMethodToggle.check(R.id.toggle_cashu);
+        switchToCashu();
+    }
+
+    private void switchToCashu() {
+        currentPaymentMode = PaymentMode.CASHU;
+        if (lightningPaymentCoordinator != null) {
+            lightningPaymentCoordinator.cancelCurrentInvoice();
+        }
+        hideLightningSpinner();
+        updateCenterIcon(false);
+        if (instructionText != null) {
+            instructionText.setText("Scan or Tap to Pay");
+        }
+        if (qrPaymentRequest != null) {
+            try {
+                Bitmap qrBitmap = generateQrBitmap(qrPaymentRequest, 512);
+                qrImageView.setImageBitmap(qrBitmap);
+                currentSharePayload = qrPaymentRequest;
+            } catch (Exception e) {
+                Log.e(TAG, "Error generating Cashu QR: " + e.getMessage());
+                currentSharePayload = null;
+            }
+        } else {
+            currentSharePayload = null;
+        }
+        setStatusText("Waiting for payment...");
+    }
+
+    private void switchToLightning() {
+        currentPaymentMode = PaymentMode.LIGHTNING;
+        if (instructionText != null) {
+            instructionText.setText("Scan Lightning invoice");
+        }
+        if (lightningMintUrl == null || lightningMintUrl.isEmpty()) {
+            Toast.makeText(this, "No mint available for Lightning requests", Toast.LENGTH_SHORT).show();
+            if (paymentMethodToggle != null) {
+                paymentMethodToggle.check(R.id.toggle_cashu);
+            }
+            return;
+        }
+        lightningBolt11 = null;
+        lightningQuoteJson = null;
+        lightningInvoiceReady = false;
+        showLightningSpinner("Creating Lightning invoice...");
+        if (lightningPaymentCoordinator != null) {
+            lightningPaymentCoordinator.startNewInvoice(
+                    paymentAmount,
+                    "Payment of " + paymentAmount + " sats",
+                    lightningMintUrl
+            );
+        }
+    }
+
+    private void showLightningSpinner(String message) {
+        if (lightningProgressContainer != null) {
+            lightningProgressContainer.setVisibility(View.VISIBLE);
+        }
+        if (lightningProgressText != null) {
+            lightningProgressText.setText(message);
+        }
+        if (qrImageView != null) {
+            qrImageView.setImageBitmap(null);
+        }
+        currentSharePayload = null;
+        setStatusText(message);
+    }
+
+    private void hideLightningSpinner() {
+        if (lightningProgressContainer != null) {
+            lightningProgressContainer.setVisibility(View.GONE);
+        }
+    }
+
+    private void updateCenterIcon(boolean lightning) {
+        if (qrCenterIcon == null) {
+            return;
+        }
+        if (lightning) {
+            qrCenterIcon.setImageResource(R.drawable.ic_lightning);
+        } else {
+            qrCenterIcon.setImageResource(R.drawable.cashu);
+        }
+    }
+
+    private void setStatusText(String message) {
+        if (statusText != null) {
+            statusText.setVisibility(View.VISIBLE);
+            statusText.setText(message);
+        }
+    }
+
+    private void shareCurrentCode() {
+        if (currentSharePayload == null || currentSharePayload.isEmpty()) {
+            Toast.makeText(this, "Nothing to share yet", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, currentSharePayload);
+        startActivity(Intent.createChooser(shareIntent, "Share Code"));
+    }
+
+    private String getLightningStatusMessage(QuoteState state) {
+        if (state == null) {
+            return "Waiting for Lightning payment...";
+        }
+        switch (state) {
+            case ISSUED:
+            case UNPAID:
+                return "Waiting for Lightning payment...";
+            case PENDING:
+                return "Invoice detected. Waiting for confirmation...";
+            case PAID:
+                return "Lightning payment detected!";
+            default:
+                return "Lightning invoice status: " + state.name();
         }
     }
 
@@ -305,22 +469,29 @@ public class PaymentRequestActivity extends AppCompatActivity {
     }
 
     private void handlePaymentSuccess(String token) {
-        Log.d(TAG, "Payment successful! Token: " + token);
-        statusText.setText("Payment successful!");
+        handlePaymentSuccess(token, false, null, null);
+    }
 
-        // Return result to calling activity
+    private void handlePaymentSuccess(String token, boolean lightning,
+                                      String lightningQuote, String lightningBolt) {
+        Log.d(TAG, "Payment successful! Token: " + token);
+        setStatusText("Payment successful!");
+
         Intent resultIntent = new Intent();
         resultIntent.putExtra(RESULT_EXTRA_TOKEN, token);
         resultIntent.putExtra(RESULT_EXTRA_AMOUNT, paymentAmount);
+        resultIntent.putExtra(RESULT_EXTRA_IS_LIGHTNING, lightning);
+        if (lightning) {
+            resultIntent.putExtra(RESULT_EXTRA_LIGHTNING_QUOTE, lightningQuote);
+            resultIntent.putExtra(RESULT_EXTRA_LIGHTNING_BOLT11, lightningBolt);
+        }
         setResult(Activity.RESULT_OK, resultIntent);
-
-        // Clean up and finish
         cleanupAndFinish();
     }
 
     private void handlePaymentError(String errorMessage) {
         Log.e(TAG, "Payment error: " + errorMessage);
-        statusText.setText("Payment failed: " + errorMessage);
+        setStatusText("Payment failed: " + errorMessage);
         Toast.makeText(this, "Payment failed: " + errorMessage, Toast.LENGTH_LONG).show();
 
         // Return error result
@@ -356,6 +527,11 @@ public class PaymentRequestActivity extends AppCompatActivity {
             Log.e(TAG, "Error cleaning up HCE service: " + e.getMessage(), e);
         }
 
+        if (lightningPaymentCoordinator != null) {
+            lightningPaymentCoordinator.close();
+            lightningPaymentCoordinator = null;
+        }
+
         finish();
     }
 
@@ -364,10 +540,57 @@ public class PaymentRequestActivity extends AppCompatActivity {
         cleanupAndFinish();
         super.onDestroy();
     }
-    private void sharePaymentRequest(String paymentRequest) {
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, paymentRequest);
-        startActivity(Intent.createChooser(shareIntent, "Share Payment Request"));
+
+    private class LightningInvoiceListener implements LightningPaymentCoordinator.Listener {
+        @Override
+        public void onLightningInvoiceLoading() {
+            runOnUiThread(() -> showLightningSpinner("Creating Lightning invoice..."));
+        }
+
+        @Override
+        public void onLightningInvoiceReady(MintQuote quote) {
+            runOnUiThread(() -> {
+                lightningBolt11 = quote.getRequest();
+                hideLightningSpinner();
+                updateCenterIcon(true);
+                setStatusText("Waiting for Lightning payment...");
+                if (lightningBolt11 != null) {
+                    try {
+                        Bitmap qrBitmap = generateQrBitmap(lightningBolt11, 512);
+                        qrImageView.setImageBitmap(qrBitmap);
+                        currentSharePayload = lightningBolt11;
+                        lightningInvoiceReady = true;
+                    } catch (Exception e) {
+                        Log.e(TAG, "Unable to render Lightning invoice: " + e.getMessage());
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onLightningInvoiceStateUpdated(QuoteState state) {
+            runOnUiThread(() -> setStatusText(getLightningStatusMessage(state)));
+        }
+
+        @Override
+        public void onLightningInvoiceFailed(Throwable error) {
+            runOnUiThread(() -> {
+                Toast.makeText(PaymentRequestActivity.this,
+                        "Lightning invoice error: " + error.getMessage(),
+                        Toast.LENGTH_LONG).show();
+                if (paymentMethodToggle != null) {
+                    paymentMethodToggle.check(R.id.toggle_cashu);
+                } else {
+                    switchToCashu();
+                }
+            });
+        }
+
+        @Override
+        public void onLightningPaymentSuccess(LightningPaymentResult result) {
+            lightningQuoteJson = result.getSnapshotJson();
+            lightningBolt11 = result.getBolt11();
+            handlePaymentSuccess(result.getToken(), true, lightningQuoteJson, lightningBolt11);
+        }
     }
 }

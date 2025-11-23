@@ -15,6 +15,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import com.cashujdk.nut00.Token
+import com.electricdreams.shellshock.core.model.Amount
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -27,6 +28,8 @@ class PaymentReceivedActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_TOKEN = "extra_token"
         const val EXTRA_AMOUNT = "extra_amount"
+        const val EXTRA_IS_LIGHTNING = "extra_is_lightning"
+        const val EXTRA_LIGHTNING_BOLT11 = "extra_lightning_bolt11"
         private const val TAG = "PaymentReceivedActivity"
     }
     
@@ -40,6 +43,8 @@ class PaymentReceivedActivity : AppCompatActivity() {
     private var tokenString: String? = null
     private var amount: Long = 0
     private var unit: String = "sat"
+    private var isLightning: Boolean = false
+    private var lightningBolt11: String? = null
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,6 +78,8 @@ class PaymentReceivedActivity : AppCompatActivity() {
         // Get token from intent
         tokenString = intent.getStringExtra(EXTRA_TOKEN)
         amount = intent.getLongExtra(EXTRA_AMOUNT, 0)
+        isLightning = intent.getBooleanExtra(EXTRA_IS_LIGHTNING, false)
+        lightningBolt11 = intent.getStringExtra(EXTRA_LIGHTNING_BOLT11)
         
         // Parse token to extract amount and unit if not provided
         if (amount == 0L && tokenString != null) {
@@ -124,10 +131,14 @@ class PaymentReceivedActivity : AppCompatActivity() {
     }
     
     private fun updateAmountDisplay() {
-        val currency = com.electricdreams.shellshock.core.model.Amount.Currency.fromCode(unit)
-        val formattedAmount = com.electricdreams.shellshock.core.model.Amount(amount, currency).toString()
+        val currency = Amount.Currency.fromCode(unit)
+        val formattedAmount = Amount(amount, currency).toString()
         
-        amountText.text = "$formattedAmount received."
+        amountText.text = if (isLightning) {
+            "$formattedAmount received via Lightning."
+        } else {
+            "$formattedAmount received."
+        }
     }
     
     private fun animateCheckmark() {
@@ -194,6 +205,11 @@ class PaymentReceivedActivity : AppCompatActivity() {
         
         // Create intent to share/export the token
         val cashuUri = "cashu:$tokenString"
+        val shareText = StringBuilder(cashuUri).apply {
+            if (isLightning && !lightningBolt11.isNullOrEmpty()) {
+                append("\nLightning invoice: ").append(lightningBolt11)
+            }
+        }.toString()
         
         // Create intent for viewing the URI
         val uriIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(cashuUri)).apply {
@@ -203,7 +219,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
         // Create a fallback intent for sharing as text
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, cashuUri)
+            putExtra(Intent.EXTRA_TEXT, shareText)
         }
         
         // Combine both intents into a chooser

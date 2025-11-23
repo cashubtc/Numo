@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -77,10 +78,15 @@ public class PaymentsHistoryAdapter extends RecyclerView.Adapter<PaymentsHistory
         holder.dateText.setText(dateFormat.format(entry.getDate()));
         
         // Set title based on amount (simple logic for now)
-        if (entry.getAmount() > 0) {
+        if (entry.isLightningPayment()) {
+            holder.titleText.setText("Lightning payment");
+            holder.iconView.setImageResource(R.drawable.ic_lightning);
+        } else if (entry.getAmount() > 0) {
             holder.titleText.setText("Cash In");
+            holder.iconView.setImageResource(R.drawable.ic_bitcoin);
         } else {
             holder.titleText.setText("Cash Out");
+            holder.iconView.setImageResource(R.drawable.ic_bitcoin);
         }
 
         holder.itemView.setOnClickListener(v -> {
@@ -99,12 +105,14 @@ public class PaymentsHistoryAdapter extends RecyclerView.Adapter<PaymentsHistory
         final TextView amountText;
         final TextView dateText;
         final TextView titleText;
+        final ImageView iconView;
 
         ViewHolder(View view) {
             super(view);
             amountText = view.findViewById(R.id.amount_text);
             dateText = view.findViewById(R.id.date_text);
             titleText = view.findViewById(R.id.title_text);
+            iconView = view.findViewById(R.id.icon);
         }
     }
 }

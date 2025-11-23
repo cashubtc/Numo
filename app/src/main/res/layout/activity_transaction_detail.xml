@@ -77,6 +77,7 @@
                 android:background="@drawable/bg_circle_green">
 
                 <ImageView
+                    android:id="@+id/hero_icon_image"
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:layout_gravity="center"
@@ -390,6 +391,102 @@
                 android:textColor="@color/color_text_secondary"
                 android:visibility="gone"
                 android:text="..." />
+
+            <TextView
+                android:id="@+id/lightning_header"
+                style="@style/Text.SectionHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginTop="24dp"
+                android:text="LIGHTNING INVOICE"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/lightning_details_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_rounded_card"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.BodyBold"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Invoice State" />
+
+                    <TextView
+                        android:id="@+id/detail_lightning_state"
+                        style="@style/Text.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pending" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@color/color_divider" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/Text.BodyBold"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Quote ID" />
+
+                    <TextView
+                        android:id="@+id/detail_lightning_id"
+                        style="@style/Text.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="..." />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@color/color_divider" />
+
+                <TextView
+                    style="@style/Text.BodyBold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="BOLT11 Invoice" />
+
+                <TextView
+                    android:id="@+id/detail_lightning_bolt11"
+                    style="@style/Text.Body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="monospace"
+                    android:textSize="12sp"
+                    android:textColor="@color/color_text_secondary" />
+            </LinearLayout>
 
             <!-- Action Buttons -->
             <LinearLayout

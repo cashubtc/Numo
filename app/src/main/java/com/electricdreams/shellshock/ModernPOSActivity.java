@@ -847,6 +847,9 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                 // Payment was successful
                 String token = data.getStringExtra(PaymentRequestActivity.RESULT_EXTRA_TOKEN);
                 long amount = data.getLongExtra(PaymentRequestActivity.RESULT_EXTRA_AMOUNT, 0);
+                boolean isLightning = data.getBooleanExtra(PaymentRequestActivity.RESULT_EXTRA_IS_LIGHTNING, false);
+                String lightningQuote = data.getStringExtra(PaymentRequestActivity.RESULT_EXTRA_LIGHTNING_QUOTE);
+                String lightningBolt11 = data.getStringExtra(PaymentRequestActivity.RESULT_EXTRA_LIGHTNING_BOLT11);
                 
                 if (token != null && amount > 0) {
                     Log.d(TAG, "Payment completed successfully! Token: " + token);
@@ -894,12 +897,15 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
                     
                     // Add to payment history with comprehensive information
                     PaymentsHistoryActivity.addToHistory(this, token, amount, "sat", entryUnit, 
-                                                        enteredAmount, bitcoinPrice, mintUrl, null);
+                                                        enteredAmount, bitcoinPrice, mintUrl, null,
+                                                        isLightning, lightningQuote, lightningBolt11);
                     
                     // Launch PaymentReceivedActivity to show beautiful success screen
                     Intent successIntent = new Intent(this, PaymentReceivedActivity.class);
                     successIntent.putExtra(PaymentReceivedActivity.EXTRA_TOKEN, token);
                     successIntent.putExtra(PaymentReceivedActivity.EXTRA_AMOUNT, amount);
+                    successIntent.putExtra(PaymentReceivedActivity.EXTRA_IS_LIGHTNING, isLightning);
+                    successIntent.putExtra(PaymentReceivedActivity.EXTRA_LIGHTNING_BOLT11, lightningBolt11);
                     startActivity(successIntent);
                 } else {
                     Log.e(TAG, "Invalid payment result data");
@@ -1203,7 +1209,8 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
         
         // Add to payment history with comprehensive information
         PaymentsHistoryActivity.addToHistory(this, token, amount, "sat", entryUnit, 
-                                            enteredAmount, bitcoinPrice, mintUrl, null);
+                                            enteredAmount, bitcoinPrice, mintUrl, null,
+                                            false, null, null);
 
         mainHandler.post(() -> {
             if (rescanDialog != null && rescanDialog.isShowing()) {
@@ -1220,6 +1227,7 @@ public class ModernPOSActivity extends AppCompatActivity implements SatocashWall
             Intent successIntent = new Intent(this, PaymentReceivedActivity.class);
             successIntent.putExtra(PaymentReceivedActivity.EXTRA_TOKEN, token);
             successIntent.putExtra(PaymentReceivedActivity.EXTRA_AMOUNT, amount);
+            successIntent.putExtra(PaymentReceivedActivity.EXTRA_IS_LIGHTNING, false);
             startActivity(successIntent);
         });
     }

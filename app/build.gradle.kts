@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
@@ -45,9 +46,6 @@ android {
         // Remove buildConfig = true since it's deprecated
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"
-    }
 
     packaging {
         resources {
@@ -71,6 +69,7 @@ dependencies {
     val lifecycleVersion = "2.7.0"
     
     implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
+    implementation(platform("org.jetbrains.kotlin:kotlin-bom:2.1.0"))
     
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
@@ -111,6 +110,10 @@ dependencies {
     
     // CBOR library from Peter O. Upokecenter
     implementation("com.upokecenter:cbor:4.5.2")
+
+    // CDK Kotlin bindings + coroutines support for Lightning invoices
+    implementation("org.cashudevkit:cdk-kotlin:0.14.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
     // Gson for JSON serialization
     implementation("com.google.code.gson:gson:2.10.1")
