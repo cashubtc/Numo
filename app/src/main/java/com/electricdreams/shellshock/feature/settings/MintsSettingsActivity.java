@@ -9,7 +9,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -48,7 +47,6 @@ public class MintsSettingsActivity extends AppCompatActivity implements MintsAda
         
         // Set up RecyclerView
         mintsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mintsRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         
         // Set up adapter
         mintsAdapter = new MintsAdapter(mintManager.getAllowedMints(), this);
