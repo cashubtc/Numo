@@ -600,8 +600,12 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback 
             return
         }
         if (waitingForRescan && savedPin != null) {
-            // Re-scan with PIN flow is not implemented in this simplified port.
-            // Fall back to error for now to keep behavior explicit.
+            // TODO(shellshock-kotlin): Re-implement full PIN-based rescan flow here
+            // matching the original Java ModernPOSActivity logic:
+            //  - use savedPin + waitingForRescan
+            //  - reconnect SatocashNfcClient
+            //  - authenticatePIN(savedPin)
+            //  - retry getPayment(requestedAmount, "SAT")
             Toast.makeText(this, "PIN-based rescan not supported in this build", Toast.LENGTH_SHORT).show()
             return
         }
@@ -626,6 +630,13 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback 
                     if (cause is SatocashNfcClient.SatocashException) {
                         val statusWord = cause.sw
                         if (statusWord == SW.UNAUTHORIZED) {
+                            // TODO(shellshock-kotlin): Restore PIN entry + rescan UX here
+                            // Similar to TopUpActivity.processImportWithSavedPin and the
+                            // original Java ModernPOSActivity:
+                            //  - showPinDialog
+                            //  - save PIN to savedPin
+                            //  - set waitingForRescan = true
+                            //  - showRescanDialog()
                             handlePaymentError("PIN-required flow not implemented in this build")
                         } else {
                             handlePaymentError("Card Error: (SW: 0x%04X)".format(statusWord))
