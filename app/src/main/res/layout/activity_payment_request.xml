@@ -50,7 +50,7 @@
         android:id="@+id/large_amount_display"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="4dp"
         android:text="₿ 0"
         android:textColor="@color/color_text_primary"
         android:textSize="48sp"
@@ -60,10 +60,26 @@
         app:autoSizeMinTextSize="24sp"
         app:autoSizeMaxTextSize="48sp"
         app:autoSizeStepGranularity="2sp"
-        app:layout_constraintBottom_toTopOf="@id/qr_card"
+        app:layout_constraintBottom_toTopOf="@id/secondary_amount_display"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/pay_label" />
+
+    <!-- Secondary Amount Display (Converted Amount) -->
+    <TextView
+        android:id="@+id/secondary_amount_display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:text=""
+        android:textColor="@color/color_text_secondary"
+        android:textSize="16sp"
+        android:textStyle="normal"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/qr_card"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/large_amount_display" />
 
     <!-- QR Code Card -->
     <FrameLayout

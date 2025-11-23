@@ -14,7 +14,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.shellshock.core.model.Amount
 import com.electricdreams.shellshock.core.model.Amount.Currency
+import com.electricdreams.shellshock.core.util.CurrencyManager
 import com.electricdreams.shellshock.core.util.MintManager
+import com.electricdreams.shellshock.core.worker.BitcoinPriceWorker
 import com.electricdreams.shellshock.ndef.CashuPaymentHelper
 import com.electricdreams.shellshock.ndef.NdefHostCardEmulationService
 import com.electricdreams.shellshock.nostr.NostrKeyPair
@@ -29,6 +31,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     private lateinit var qrImageView: ImageView
     private lateinit var largeAmountDisplay: TextView
+    private lateinit var secondaryAmountDisplay: TextView
     private lateinit var statusText: TextView
     private lateinit var closeButton: android.view.View
     private lateinit var shareButton: android.view.View
@@ -45,6 +48,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         // Initialize views
         qrImageView = findViewById(R.id.payment_request_qr)
         largeAmountDisplay = findViewById(R.id.large_amount_display)
+        secondaryAmountDisplay = findViewById(R.id.secondary_amount_display)
         statusText = findViewById(R.id.payment_status_text)
         closeButton = findViewById(R.id.close_button)
         shareButton = findViewById(R.id.share_button)
@@ -65,6 +69,9 @@ class PaymentRequestActivity : AppCompatActivity() {
         
         // Display amount (without "Pay" prefix since it's in the label above)
         largeAmountDisplay.text = formattedAmountString
+
+        // Determine if main amount is fiat or satoshi and show converted amount
+        updateSecondaryAmountDisplay(formattedAmountString)
 
         // Set up buttons
         closeButton.setOnClickListener {
@@ -326,6 +333,67 @@ class PaymentRequestActivity : AppCompatActivity() {
     override fun onDestroy() {
         cleanupAndFinish()
         super.onDestroy()
+    }
+
+    private fun updateSecondaryAmountDisplay(formattedAmountString: String) {
+        // Determine if the main amount is fiat or satoshi
+        val isFiat = formattedAmountString.startsWith("$") || 
+                     formattedAmountString.startsWith("€") || 
+                     formattedAmountString.startsWith("£") || 
+                     formattedAmountString.startsWith("¥")
+        
+        val bitcoinPriceWorker = BitcoinPriceWorker.getInstance(this)
+        val currencyManager = CurrencyManager.getInstance(this)
+        
+        if (isFiat) {
+            // Main amount is fiat, show satoshi equivalent
+            if (bitcoinPriceWorker.getCurrentPrice() > 0) {
+                // Extract fiat amount from formatted string
+                val fiatValue = extractFiatValue(formattedAmountString)
+                if (fiatValue > 0) {
+                    // Convert fiat to satoshis
+                    val btcAmount = fiatValue / bitcoinPriceWorker.getCurrentPrice()
+                    val satoshis = (btcAmount * 100_000_000).toLong()
+                    val satoshiAmount = Amount(satoshis, Currency.BTC)
+                    secondaryAmountDisplay.text = satoshiAmount.toString()
+                    secondaryAmountDisplay.visibility = android.view.View.VISIBLE
+                } else {
+                    secondaryAmountDisplay.visibility = android.view.View.GONE
+                }
+            } else {
+                secondaryAmountDisplay.visibility = android.view.View.GONE
+            }
+        } else {
+            // Main amount is satoshi, show fiat equivalent
+            if (bitcoinPriceWorker.getCurrentPrice() > 0) {
+                val fiatValue = bitcoinPriceWorker.satoshisToFiat(paymentAmount)
+                if (fiatValue > 0) {
+                    val formattedFiat = bitcoinPriceWorker.formatFiatAmount(fiatValue)
+                    secondaryAmountDisplay.text = formattedFiat
+                    secondaryAmountDisplay.visibility = android.view.View.VISIBLE
+                } else {
+                    secondaryAmountDisplay.visibility = android.view.View.GONE
+                }
+            } else {
+                secondaryAmountDisplay.visibility = android.view.View.GONE
+            }
+        }
+    }
+
+    private fun extractFiatValue(formattedAmountString: String): Double {
+        // Remove currency symbols and parse the number
+        val cleaned = formattedAmountString
+            .replace("$", "")
+            .replace("€", "")
+            .replace("£", "")
+            .replace("¥", "")
+            .replace(",", "")
+            .trim()
+        return try {
+            cleaned.toDouble()
+        } catch (e: NumberFormatException) {
+            0.0
+        }
     }
 
     private fun sharePaymentRequest(paymentRequest: String) {
