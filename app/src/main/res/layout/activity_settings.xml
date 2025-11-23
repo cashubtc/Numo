@@ -57,7 +57,7 @@
             <LinearLayout
                 android:id="@+id/currency_settings_item"
                 android:layout_width="match_parent"
-                android:layout_height="64dp"
+                android:layout_height="72dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -70,13 +70,14 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Fiat Currency"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textSize="17sp"
+                    android:textColor="@color/color_text_primary"
+                    android:fontFamily="sans-serif-medium" />
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_arrow_back"
-                    android:rotation="180"
+                    android:src="@drawable/ic_chevron_forward"
                     app:tint="@color/color_icon_secondary" />
             </LinearLayout>
 
@@ -89,7 +90,7 @@
             <LinearLayout
                 android:id="@+id/mints_settings_item"
                 android:layout_width="match_parent"
-                android:layout_height="64dp"
+                android:layout_height="72dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -102,13 +103,14 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Cashu Mints"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textSize="17sp"
+                    android:textColor="@color/color_text_primary"
+                    android:fontFamily="sans-serif-medium" />
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_arrow_back"
-                    android:rotation="180"
+                    android:src="@drawable/ic_chevron_forward"
                     app:tint="@color/color_icon_secondary" />
             </LinearLayout>
 
@@ -121,7 +123,7 @@
             <LinearLayout
                 android:id="@+id/items_settings_item"
                 android:layout_width="match_parent"
-                android:layout_height="64dp"
+                android:layout_height="72dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -134,13 +136,14 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Items"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textSize="17sp"
+                    android:textColor="@color/color_text_primary"
+                    android:fontFamily="sans-serif-medium" />
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_arrow_back"
-                    android:rotation="180"
+                    android:src="@drawable/ic_chevron_forward"
                     app:tint="@color/color_icon_secondary" />
             </LinearLayout>
 
