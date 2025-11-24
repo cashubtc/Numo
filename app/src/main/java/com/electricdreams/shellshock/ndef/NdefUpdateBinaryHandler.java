@@ -189,11 +189,44 @@ public class NdefUpdateBinaryHandler {
      */
     private byte[] processMessageAndReset(byte[] ndefData) {
         try {
-            messageParser.processReceivedNdefMessage(ndefData, stateManager.isProcessIncomingMessages());
-            stateManager.resetForNextMessage();
+            // Make a defensive copy of just the relevant portion of the buffer
+            int expectedNdefLength = stateManager.getExpectedNdefLength();
+            int copyLength = ndefData.length;
+            if (expectedNdefLength > 0 && expectedNdefLength + 2 <= ndefData.length) {
+                // 2 extra bytes for the NDEF length header
+                copyLength = expectedNdefLength + 2;
+            }
+
+            final byte[] ndefCopy = Arrays.copyOf(ndefData, copyLength);
+            final boolean shouldProcess = stateManager.isProcessIncomingMessages();
+
+            Log.d(TAG, "Spawning async task to process received NDEF message (length=" + copyLength + ", process=" + shouldProcess + ")");
+
+            // Process the message on a background thread so we can return 0x9000
+            // to the reader immediately and not block the APDU flow on payment logic.
+            Thread worker = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        messageParser.processReceivedNdefMessage(ndefCopy, shouldProcess);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error processing received NDEF message asynchronously: " + e.getMessage(), e);
+                    } finally {
+                        // Once processing is done (success or failure), reset for the next message
+                        stateManager.resetForNextMessage();
+                        Log.d(TAG, "Async NDEF processing complete, state reset for next message");
+                    }
+                }
+            }, "NdefMessageProcessor");
+
+            worker.start();
         } catch (Exception e) {
-            Log.e(TAG, "Error processing received NDEF message: " + e.getMessage(), e);
+            Log.e(TAG, "Error scheduling async processing for received NDEF message: " + e.getMessage(), e);
         }
+
+        // Always acknowledge the UPDATE BINARY APDU immediately at the transport layer.
+        // Any payment/token errors are handled at the application layer and must not
+        // delay or change the APDU status word.
         return NdefConstants.NDEF_RESPONSE_OK;
     }
 }
