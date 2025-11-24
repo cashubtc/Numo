@@ -46,8 +46,8 @@ To build the debug version of the app:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/shellshock2.git
-cd shellshock2
+git clone https://github.com/lollerfirst/shellshock.git
+cd shellshock
 
 # Build debug APK
 ./gradlew assembleDebug
