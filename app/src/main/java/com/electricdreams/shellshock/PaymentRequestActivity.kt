@@ -225,9 +225,24 @@ class PaymentRequestActivity : AppCompatActivity() {
         fun onAnimationComplete(success: Boolean) {
             runOnUiThread {
                 Log.d(TAG, "Animation complete, success: $success")
-                animationCloseButton.visibility = View.VISIBLE
+                showCloseButtonAnimated()
             }
         }
+    }
+
+    private fun showCloseButtonAnimated() {
+        // Start from invisible and below
+        animationCloseButton.alpha = 0f
+        animationCloseButton.translationY = 60f
+        animationCloseButton.visibility = View.VISIBLE
+        
+        // Animate in with fade + slide up
+        animationCloseButton.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(400)
+            .setInterpolator(android.view.animation.DecelerateInterpolator())
+            .start()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
