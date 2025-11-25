@@ -497,8 +497,13 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
-        // Show PaymentReceivedActivity
-        showPaymentReceivedActivity(token)
+        // When resumed from history, we show the success screen ourselves.
+        // In normal flow, the caller (PaymentResultHandler) handles it.
+        if (isResumingPayment) {
+            showPaymentReceivedActivity(token)
+        } else {
+            cleanupAndFinish()
+        }
     }
 
     /**
@@ -533,16 +538,21 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
-        // Show PaymentReceivedActivity (without token for Lightning)
-        showPaymentReceivedActivity("")
+        // When resumed from history, we show the success screen ourselves.
+        // In normal flow, the caller (PaymentResultHandler) handles it.
+        if (isResumingPayment) {
+            showPaymentReceivedActivity("")
+        } else {
+            cleanupAndFinish()
+        }
     }
 
     private fun showPaymentReceivedActivity(token: String) {
-        val successIntent = Intent(this, PaymentReceivedActivity::class.java).apply {
+        val intent = Intent(this, PaymentReceivedActivity::class.java).apply {
             putExtra(PaymentReceivedActivity.EXTRA_TOKEN, token)
             putExtra(PaymentReceivedActivity.EXTRA_AMOUNT, paymentAmount)
         }
-        startActivity(successIntent)
+        startActivity(intent)
         cleanupAndFinish()
     }
 
