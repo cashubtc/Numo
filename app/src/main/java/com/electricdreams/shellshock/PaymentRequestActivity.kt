@@ -469,6 +469,11 @@ class PaymentRequestActivity : AppCompatActivity() {
     private fun handlePaymentSuccess(token: String) {
         Log.d(TAG, "Payment successful! Token: $token")
 
+        // Play success sound & vibration (normally handled by PaymentResultHandler
+        // for other flows). Since this Activity now fully handles success for
+        // Nostr/Lightning/HCE flows, we trigger feedback here.
+        playSuccessFeedback()
+
         statusText.visibility = View.VISIBLE
         statusText.text = "Payment successful!"
 
@@ -493,6 +498,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         val resultIntent = Intent().apply {
             putExtra(RESULT_EXTRA_TOKEN, token)
             putExtra(RESULT_EXTRA_AMOUNT, paymentAmount)
+            putExtra(EXTRA_HANDLED_INTERNALLY, true)
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
@@ -508,6 +514,10 @@ class PaymentRequestActivity : AppCompatActivity() {
      */
     private fun handleLightningPaymentSuccess() {
         Log.d(TAG, "Lightning payment successful (no Cashu token)")
+
+        // Play success sound & vibration here as this flow bypasses
+        // PaymentResultHandler.
+        playSuccessFeedback()
 
         statusText.visibility = View.VISIBLE
         statusText.text = "Payment successful!"
@@ -529,6 +539,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         val resultIntent = Intent().apply {
             putExtra(RESULT_EXTRA_TOKEN, "")
             putExtra(RESULT_EXTRA_AMOUNT, paymentAmount)
+            putExtra(EXTRA_HANDLED_INTERNALLY, true)
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
@@ -593,6 +604,25 @@ class PaymentRequestActivity : AppCompatActivity() {
         finish()
     }
 
+    private fun playSuccessFeedback() {
+        try {
+            val mediaPlayer = android.media.MediaPlayer.create(this, R.raw.success_sound)
+            mediaPlayer?.setOnCompletionListener { it.release() }
+            mediaPlayer?.start()
+        } catch (_: Exception) {
+            // Ignore audio errors to avoid crashing the POS
+        }
+
+        vibrateSuccess()
+    }
+
+    private fun vibrateSuccess() {
+        val vibrator = getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator?
+        vibrator?.let { v ->
+            v.vibrate(longArrayOf(0, 50, 100, 50), -1)
+        }
+    }
+
     override fun onDestroy() {
         cleanupAndFinish()
         super.onDestroy()
@@ -613,6 +643,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         const val EXTRA_FORMATTED_AMOUNT = "formatted_amount"
         const val RESULT_EXTRA_TOKEN = "payment_token"
         const val RESULT_EXTRA_AMOUNT = "payment_amount"
+        const val EXTRA_HANDLED_INTERNALLY = "handled_internally"
 
         // Extras for resuming pending payments
         const val EXTRA_RESUME_PAYMENT_ID = "resume_payment_id"

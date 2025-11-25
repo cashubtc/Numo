@@ -152,8 +152,17 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback 
             if (resultCode == Activity.RESULT_OK && data != null) {
                 val token = data.getStringExtra(PaymentRequestActivity.RESULT_EXTRA_TOKEN)
                 val amount = data.getLongExtra(PaymentRequestActivity.RESULT_EXTRA_AMOUNT, 0L)
-                if (token != null && amount > 0) {
+                val handledInternally =
+                    data.getBooleanExtra(PaymentRequestActivity.EXTRA_HANDLED_INTERNALLY, false)
+
+                // If the payment was fully handled inside PaymentRequestActivity
+                // (pending entry completed + success UI shown), don't invoke
+                // PaymentResultHandler again to avoid duplicate popups/history.
+                if (!handledInternally && !token.isNullOrEmpty() && amount > 0) {
                     uiCoordinator.handlePaymentSuccess(token, amount)
+                } else {
+                    // Optionally reset UI after an externally handled payment
+                    // uiCoordinator.resetAfterExternalPayment()
                 }
             }
         }
