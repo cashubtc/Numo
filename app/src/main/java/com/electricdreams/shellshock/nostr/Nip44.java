@@ -62,6 +62,58 @@ public final class Nip44 {
     }
 
     /**
+     * Encrypt a plaintext string using NIP-44 v2 and a precomputed 32-byte conversation key.
+     * Returns a base64-encoded payload.
+     */
+    public static String encrypt(String plaintext, byte[] conversationKey) throws Exception {
+        if (conversationKey == null || conversationKey.length != 32) {
+            throw new IllegalArgumentException("conversationKey must be 32 bytes");
+        }
+        if (plaintext == null) {
+            throw new IllegalArgumentException("plaintext cannot be null");
+        }
+
+        byte[] plaintextBytes = plaintext.getBytes(StandardCharsets.UTF_8);
+        
+        // Pad the plaintext
+        byte[] padded = pad(plaintextBytes);
+        
+        // Generate random 32-byte nonce
+        byte[] nonce = new byte[32];
+        new SecureRandom().nextBytes(nonce);
+        
+        // Derive per-message keys via HKDF-EXPAND (L=76) from conversation key
+        byte[] okm = hkdfExpand(conversationKey, nonce, 76);
+        
+        byte[] chachaKey = Arrays.copyOfRange(okm, 0, 32);
+        byte[] chachaNonce = Arrays.copyOfRange(okm, 32, 44); // 12 bytes
+        byte[] hmacKey = Arrays.copyOfRange(okm, 44, 76);
+        
+        // Encrypt with ChaCha20 (RFC7539 variant, 12-byte nonce)
+        ChaCha7539Engine engine = new ChaCha7539Engine();
+        engine.init(true, new ParametersWithIV(new KeyParameter(chachaKey), chachaNonce));
+        byte[] ciphertext = new byte[padded.length];
+        engine.processBytes(padded, 0, padded.length, ciphertext, 0);
+        
+        // Calculate MAC = HMAC-SHA256(key=hmacKey, data=nonce||ciphertext)
+        HMac hmac = new HMac(new SHA256Digest());
+        hmac.init(new KeyParameter(hmacKey));
+        hmac.update(nonce, 0, nonce.length);
+        hmac.update(ciphertext, 0, ciphertext.length);
+        byte[] mac = new byte[32];
+        hmac.doFinal(mac, 0);
+        
+        // Build payload: version(1) || nonce(32) || ciphertext(variable) || mac(32)
+        byte[] payload = new byte[1 + 32 + ciphertext.length + 32];
+        payload[0] = 2; // version
+        System.arraycopy(nonce, 0, payload, 1, 32);
+        System.arraycopy(ciphertext, 0, payload, 33, ciphertext.length);
+        System.arraycopy(mac, 0, payload, 33 + ciphertext.length, 32);
+        
+        return java.util.Base64.getEncoder().encodeToString(payload);
+    }
+
+    /**
      * Decrypt a NIP-44 v2 payload using a precomputed 32-byte conversation key.
      */
     public static String decrypt(String payloadBase64, byte[] conversationKey) throws Exception {
@@ -205,7 +257,27 @@ public final class Nip44 {
         return diff == 0;
     }
 
-    // --- Padding helpers (unpad only) ---
+    // --- Padding helpers ---
+
+    /**
+     * Pad plaintext bytes according to NIP-44 v2 spec.
+     * Format: [2-byte big-endian length] + [plaintext] + [zero padding to calcPaddedLen]
+     */
+    private static byte[] pad(byte[] plaintext) {
+        int len = plaintext.length;
+        if (len <= 0 || len > 65535) {
+            throw new IllegalArgumentException("NIP-44: invalid plaintext length " + len);
+        }
+        int paddedLen = calcPaddedLen(len);
+        byte[] result = new byte[2 + paddedLen];
+        // 2-byte big-endian length prefix
+        result[0] = (byte) ((len >> 8) & 0xff);
+        result[1] = (byte) (len & 0xff);
+        // Copy plaintext
+        System.arraycopy(plaintext, 0, result, 2, len);
+        // Remaining bytes are already zero-initialized
+        return result;
+    }
 
     private static String unpad(byte[] padded) {
         if (padded.length < 3) {

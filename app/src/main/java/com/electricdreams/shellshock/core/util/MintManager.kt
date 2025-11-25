@@ -3,6 +3,8 @@ package com.electricdreams.shellshock.core.util
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import com.electricdreams.shellshock.core.cashu.CashuWalletManager
+import com.electricdreams.shellshock.nostr.NostrMintBackup
 import org.json.JSONObject
 import java.net.URI
 import java.util.Locale
@@ -269,9 +271,41 @@ class MintManager private constructor(context: Context) {
         }
     }
 
-    /** Save current mints to preferences. */
+    /** Save current mints to preferences and trigger Nostr backup. */
     private fun saveChanges() {
         preferences.edit().putStringSet(KEY_MINTS, allowedMints).apply()
+        
+        // Trigger Nostr mint backup
+        triggerNostrMintBackup()
+    }
+
+    /**
+     * Trigger a Nostr mint backup using keys derived from the wallet mnemonic.
+     * This is called automatically when the mint list changes.
+     */
+    private fun triggerNostrMintBackup() {
+        val mnemonic = CashuWalletManager.getMnemonic()
+        if (mnemonic.isNullOrBlank()) {
+            Log.w(TAG, "Cannot backup mints to Nostr: wallet mnemonic not available")
+            return
+        }
+
+        val mints = getAllowedMints()
+        Log.d(TAG, "Triggering Nostr mint backup for ${mints.size} mints")
+
+        NostrMintBackup.publishMintBackup(mnemonic, mints) { result ->
+            if (result.success) {
+                Log.i(TAG, "✅ Nostr mint backup successful!")
+                Log.i(TAG, "   Event ID: ${result.eventId}")
+                Log.i(TAG, "   Published to ${result.successfulRelays.size} relays: ${result.successfulRelays.joinToString(", ")}")
+                if (result.failedRelays.isNotEmpty()) {
+                    Log.w(TAG, "   Failed relays: ${result.failedRelays.joinToString(", ")}")
+                }
+            } else {
+                Log.e(TAG, "❌ Nostr mint backup failed: ${result.error}")
+                Log.e(TAG, "   Failed relays: ${result.failedRelays.joinToString(", ")}")
+            }
+        }
     }
 
     /**
