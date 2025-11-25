@@ -54,6 +54,8 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     private lateinit var cashuQrImageView: ImageView
     private lateinit var lightningQrImageView: ImageView
+    private lateinit var cashuQrContainer: View
+    private lateinit var lightningQrContainer: View
     private lateinit var cashuTab: TextView
     private lateinit var lightningTab: TextView
     private lateinit var largeAmountDisplay: TextView
@@ -89,6 +91,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         // Initialize views
         cashuQrImageView = findViewById(R.id.payment_request_qr)
         lightningQrImageView = findViewById(R.id.lightning_qr)
+        cashuQrContainer = findViewById(R.id.cashu_qr_container)
+        lightningQrContainer = findViewById(R.id.lightning_qr_container)
         cashuTab = findViewById(R.id.cashu_tab)
         lightningTab = findViewById(R.id.lightning_tab)
         largeAmountDisplay = findViewById(R.id.large_amount_display)
@@ -160,7 +164,9 @@ class PaymentRequestActivity : AppCompatActivity() {
         cashuTab.setBackgroundResource(android.R.color.transparent)
 
         // QR visibility
+        lightningQrContainer.visibility = View.VISIBLE
         lightningQrImageView.visibility = View.VISIBLE
+        cashuQrContainer.visibility = View.INVISIBLE
         cashuQrImageView.visibility = View.INVISIBLE
 
         // Start lightning quote flow once when tab first selected and quote not created yet
@@ -177,7 +183,9 @@ class PaymentRequestActivity : AppCompatActivity() {
         lightningTab.setBackgroundResource(android.R.color.transparent)
 
         // QR visibility
+        cashuQrContainer.visibility = View.VISIBLE
         cashuQrImageView.visibility = View.VISIBLE
+        lightningQrContainer.visibility = View.INVISIBLE
         lightningQrImageView.visibility = View.INVISIBLE
 
         // Status text mainly controlled by Nostr / HCE flow
