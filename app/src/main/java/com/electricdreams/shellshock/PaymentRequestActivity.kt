@@ -1,5 +1,6 @@
 package com.electricdreams.shellshock
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
@@ -8,6 +9,11 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
+import android.webkit.JavascriptInterface
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -33,16 +39,22 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var largeAmountDisplay: TextView
     private lateinit var convertedAmountDisplay: TextView
     private lateinit var statusText: TextView
-    private lateinit var closeButton: android.view.View
-    private lateinit var shareButton: android.view.View
-    private lateinit var nfcReadingOverlay: android.view.View
+    private lateinit var closeButton: View
+    private lateinit var shareButton: View
+    private lateinit var nfcAnimationContainer: View
+    private lateinit var nfcAnimationWebView: WebView
+    private lateinit var animationCloseButton: ImageButton
 
     private var paymentAmount: Long = 0
     private var bitcoinPriceWorker: BitcoinPriceWorker? = null
     private var hcePaymentRequest: String? = null
     private var qrPaymentRequest: String? = null
     private var nostrListener: NostrPaymentListener? = null
+    private var webViewReady = false
+    private var pendingToken: String? = null
+    private var formattedAmount: String = ""
 
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_request)
@@ -54,7 +66,12 @@ class PaymentRequestActivity : AppCompatActivity() {
         statusText = findViewById(R.id.payment_status_text)
         closeButton = findViewById(R.id.close_button)
         shareButton = findViewById(R.id.share_button)
-        nfcReadingOverlay = findViewById(R.id.nfc_reading_overlay)
+        nfcAnimationContainer = findViewById(R.id.nfc_animation_container)
+        nfcAnimationWebView = findViewById(R.id.nfc_animation_webview)
+        animationCloseButton = findViewById(R.id.animation_close_button)
+
+        // Setup WebView for NFC animation
+        setupAnimationWebView()
 
         // Initialize Bitcoin price worker
         bitcoinPriceWorker = BitcoinPriceWorker.getInstance(this)
@@ -70,14 +87,14 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
 
         // Get formatted amount string if provided, otherwise format as BTC
-        val formattedAmountString = intent.getStringExtra(EXTRA_FORMATTED_AMOUNT)
+        formattedAmount = intent.getStringExtra(EXTRA_FORMATTED_AMOUNT)
             ?: Amount(paymentAmount, Currency.BTC).toString()
         
         // Display amount (without "Pay" prefix since it's in the label above)
-        largeAmountDisplay.text = formattedAmountString
+        largeAmountDisplay.text = formattedAmount
 
         // Calculate and display converted amount
-        updateConvertedAmount(formattedAmountString)
+        updateConvertedAmount(formattedAmount)
 
         // Set up buttons
         closeButton.setOnClickListener {
@@ -102,7 +119,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         val hasBitcoinPrice = (bitcoinPriceWorker?.getCurrentPrice() ?: 0.0) > 0
         
         if (!hasBitcoinPrice) {
-            convertedAmountDisplay.visibility = android.view.View.GONE
+            convertedAmountDisplay.visibility = View.GONE
             return
         }
         
@@ -113,9 +130,9 @@ class PaymentRequestActivity : AppCompatActivity() {
                 val formattedFiat = bitcoinPriceWorker?.formatFiatAmount(fiatValue)
                     ?: CurrencyManager.getInstance(this).formatCurrencyAmount(fiatValue)
                 convertedAmountDisplay.text = formattedFiat
-                convertedAmountDisplay.visibility = android.view.View.VISIBLE
+                convertedAmountDisplay.visibility = View.VISIBLE
             } else {
-                convertedAmountDisplay.visibility = android.view.View.GONE
+                convertedAmountDisplay.visibility = View.GONE
             }
         } else {
             // Main amount is fiat, show BTC conversion
@@ -123,9 +140,89 @@ class PaymentRequestActivity : AppCompatActivity() {
             if (paymentAmount > 0) {
                 val formattedBtc = Amount(paymentAmount, Currency.BTC).toString()
                 convertedAmountDisplay.text = formattedBtc
-                convertedAmountDisplay.visibility = android.view.View.VISIBLE
+                convertedAmountDisplay.visibility = View.VISIBLE
             } else {
-                convertedAmountDisplay.visibility = android.view.View.GONE
+                convertedAmountDisplay.visibility = View.GONE
+            }
+        }
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun setupAnimationWebView() {
+        nfcAnimationWebView.settings.apply {
+            javaScriptEnabled = true
+            loadWithOverviewMode = true
+            useWideViewPort = true
+        }
+        
+        // Make WebView background transparent
+        nfcAnimationWebView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+        
+        // Add JavaScript interface for communication
+        nfcAnimationWebView.addJavascriptInterface(AnimationBridge(), "Android")
+        
+        nfcAnimationWebView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                webViewReady = true
+                Log.d(TAG, "WebView animation page loaded")
+            }
+        }
+        
+        // Load the animation HTML
+        nfcAnimationWebView.loadUrl("file:///android_asset/nfc_animation.html")
+        
+        // Setup close button for animation overlay
+        animationCloseButton.setOnClickListener {
+            hideAnimationOverlay()
+            // If we have a pending token, process it
+            pendingToken?.let { token ->
+                processPaymentToken(token)
+            }
+        }
+    }
+
+    private fun showAnimationOverlay() {
+        nfcAnimationContainer.visibility = View.VISIBLE
+        animationCloseButton.visibility = View.GONE
+        
+        // Start the animation
+        if (webViewReady) {
+            nfcAnimationWebView.evaluateJavascript("startAnimation()", null)
+        }
+    }
+
+    private fun hideAnimationOverlay() {
+        nfcAnimationContainer.visibility = View.GONE
+        animationCloseButton.visibility = View.GONE
+        
+        // Reset the animation
+        if (webViewReady) {
+            nfcAnimationWebView.evaluateJavascript("reset()", null)
+        }
+    }
+
+    private fun showAnimationSuccess(amountText: String) {
+        if (webViewReady) {
+            val escapedAmount = amountText.replace("'", "\\'")
+            nfcAnimationWebView.evaluateJavascript("showSuccess('$escapedAmount')", null)
+        }
+    }
+
+    private fun showAnimationError(message: String) {
+        if (webViewReady) {
+            val escapedMessage = message.replace("'", "\\'")
+            nfcAnimationWebView.evaluateJavascript("showError('$escapedMessage')", null)
+        }
+    }
+
+    /** JavaScript interface for communication from WebView */
+    inner class AnimationBridge {
+        @JavascriptInterface
+        fun onAnimationComplete(success: Boolean) {
+            runOnUiThread {
+                Log.d(TAG, "Animation complete, success: $success")
+                animationCloseButton.visibility = View.VISIBLE
             }
         }
     }
@@ -252,15 +349,15 @@ class PaymentRequestActivity : AppCompatActivity() {
 
                     override fun onNfcReadingStarted() {
                         runOnUiThread {
-                            Log.d(TAG, "NFC reading started - showing overlay")
-                            nfcReadingOverlay.visibility = android.view.View.VISIBLE
+                            Log.d(TAG, "NFC reading started - showing animation overlay")
+                            showAnimationOverlay()
                         }
                     }
 
                     override fun onNfcReadingStopped() {
+                        // Don't hide overlay immediately - let the animation complete
                         runOnUiThread {
-                            Log.d(TAG, "NFC reading stopped - hiding overlay")
-                            nfcReadingOverlay.visibility = android.view.View.GONE
+                            Log.d(TAG, "NFC reading stopped")
                         }
                     }
                 })
@@ -335,13 +432,29 @@ class PaymentRequestActivity : AppCompatActivity() {
         Log.d(TAG, "Payment successful! Token: $token")
         
         statusText.text = "Payment successful!"
+        
+        // Store the token to process after user dismisses animation
+        pendingToken = token
 
+        // Prepare result intent
         val resultIntent = Intent().apply {
             putExtra(RESULT_EXTRA_TOKEN, token)
             putExtra(RESULT_EXTRA_AMOUNT, paymentAmount)
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
+        // Show success animation with the received amount
+        if (nfcAnimationContainer.visibility == View.VISIBLE) {
+            showAnimationSuccess(formattedAmount)
+        } else {
+            // Animation wasn't shown (e.g., QR payment), just finish
+            cleanupAndFinish()
+        }
+    }
+
+    private fun processPaymentToken(token: String) {
+        // Clear pending token and finish
+        pendingToken = null
         cleanupAndFinish()
     }
 
@@ -349,13 +462,18 @@ class PaymentRequestActivity : AppCompatActivity() {
         Log.e(TAG, "Payment error: $errorMessage")
         
         statusText.text = "Payment failed: $errorMessage"
-        Toast.makeText(this, "Payment failed: $errorMessage", Toast.LENGTH_LONG).show()
 
         setResult(Activity.RESULT_CANCELED)
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            cleanupAndFinish()
-        }, 3000)
+        // Show error animation if overlay is visible
+        if (nfcAnimationContainer.visibility == View.VISIBLE) {
+            showAnimationError(errorMessage)
+        } else {
+            Toast.makeText(this, "Payment failed: $errorMessage", Toast.LENGTH_LONG).show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                cleanupAndFinish()
+            }, 3000)
+        }
     }
 
     private fun cancelPayment() {
@@ -389,6 +507,13 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        // Clean up WebView to prevent memory leaks
+        nfcAnimationWebView.apply {
+            stopLoading()
+            loadUrl("about:blank")
+            removeAllViews()
+            destroy()
+        }
         cleanupAndFinish()
         super.onDestroy()
     }

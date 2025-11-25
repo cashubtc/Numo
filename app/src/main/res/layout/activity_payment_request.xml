@@ -177,12 +177,12 @@
          The prompt didn't explicitly ask for the toggle, just the "design".
          I'll stick to the clean look. -->
 
-    <!-- NFC Reading Overlay -->
+    <!-- NFC Animation Overlay (WebView) -->
     <FrameLayout
-        android:id="@+id/nfc_reading_overlay"
+        android:id="@+id/nfc_animation_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#CCFFFFFF"
+        android:background="#0A0A0A"
         android:clickable="true"
         android:focusable="true"
         android:visibility="gone"
@@ -191,27 +191,24 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="vertical"
-            android:gravity="center">
+        <WebView
+            android:id="@+id/nfc_animation_webview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent" />
 
-            <ProgressBar
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:indeterminate="true" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Reading from NFC..."
-                android:textColor="@color/color_text_primary"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-        </LinearLayout>
+        <!-- Close button appears after animation completes -->
+        <ImageButton
+            android:id="@+id/animation_close_button"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="48dp"
+            android:background="@drawable/bg_button_white_pill"
+            android:src="@drawable/ic_close"
+            android:padding="16dp"
+            android:visibility="gone"
+            app:tint="@color/color_text_primary" />
     </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
