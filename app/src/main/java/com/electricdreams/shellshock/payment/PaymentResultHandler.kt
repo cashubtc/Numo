@@ -58,6 +58,7 @@ class PaymentResultHandler(
         
         mainHandler.post {
             onComplete()
+            // This handler is used for NFC payments (not PaymentRequestActivity)
             val successIntent = Intent(activity, PaymentReceivedActivity::class.java).apply {
                 putExtra(PaymentReceivedActivity.EXTRA_TOKEN, token)
                 putExtra(PaymentReceivedActivity.EXTRA_AMOUNT, amount)

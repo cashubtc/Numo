@@ -503,13 +503,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
-        // When resumed from history, we show the success screen ourselves.
-        // In normal flow, the caller (PaymentResultHandler) handles it.
-        if (isResumingPayment) {
-            showPaymentReceivedActivity(token)
-        } else {
-            cleanupAndFinish()
-        }
+        // Play success feedback (sound + vibration)
+        playSuccessFeedback()
+
+        // Always show success screen directly to avoid flashing the POS activity
+        showPaymentReceivedActivity(token)
     }
 
     /**
@@ -544,13 +542,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
-        // When resumed from history, we show the success screen ourselves.
-        // In normal flow, the caller (PaymentResultHandler) handles it.
-        if (isResumingPayment) {
-            showPaymentReceivedActivity("")
-        } else {
-            cleanupAndFinish()
-        }
+        // Play success feedback (sound + vibration)
+        playSuccessFeedback()
+
+        // Always show success screen directly to avoid flashing the POS activity
+        showPaymentReceivedActivity("")
     }
 
     private fun showPaymentReceivedActivity(token: String) {
@@ -623,8 +619,31 @@ class PaymentRequestActivity : AppCompatActivity() {
         startActivity(Intent.createChooser(shareIntent, "Share Payment Request"))
     }
 
+    private fun playSuccessFeedback() {
+        try {
+            val mediaPlayer = android.media.MediaPlayer.create(this, R.raw.success_sound)
+            mediaPlayer?.setOnCompletionListener { it.release() }
+            mediaPlayer?.start()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error playing success sound: ${e.message}")
+        }
+        
+        vibrateSuccess()
+    }
+
+    private fun vibrateSuccess() {
+        try {
+            val vibrator = getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator?
+            vibrator?.vibrate(PATTERN_SUCCESS, -1)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error vibrating: ${e.message}")
+        }
+    }
+
     companion object {
         private const val TAG = "PaymentRequestActivity"
+        private val PATTERN_SUCCESS = longArrayOf(0, 50, 100, 50)
+
 
         const val EXTRA_PAYMENT_AMOUNT = "payment_amount"
         const val EXTRA_FORMATTED_AMOUNT = "formatted_amount"

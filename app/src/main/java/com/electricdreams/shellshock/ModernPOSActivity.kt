@@ -152,12 +152,10 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback 
             // Hide spinner regardless of result (success, cancel, or error)
             uiCoordinator.hideChargeButtonSpinner()
             
-            if (resultCode == Activity.RESULT_OK && data != null) {
-                val token = data.getStringExtra(PaymentRequestActivity.RESULT_EXTRA_TOKEN)
-                val amount = data.getLongExtra(PaymentRequestActivity.RESULT_EXTRA_AMOUNT, 0L)
-                if (token != null && amount > 0) {
-                    uiCoordinator.handlePaymentSuccess(token, amount)
-                }
+            // PaymentRequestActivity now handles showing PaymentReceivedActivity directly,
+            // so we just need to reset the UI here
+            if (resultCode == Activity.RESULT_OK) {
+                uiCoordinator.resetToInputMode()
             }
         }
     }
