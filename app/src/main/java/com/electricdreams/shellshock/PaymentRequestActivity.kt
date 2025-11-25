@@ -607,7 +607,7 @@ class PaymentRequestActivity : AppCompatActivity() {
      * after that path: `wss://mint.com/Bitcoin/v1/ws`.
      */
     private fun buildMintWsUrl(mintUrl: MintUrl): String {
-        val base = mintUrl.toString().removeSuffix("/")
+        val base = mintUrl.url.removeSuffix("/")
         val wsBase = when {
             base.startsWith("https://", ignoreCase = true) ->
                 "wss://" + base.removePrefix("https://")

@@ -103,5 +103,5 @@ dependencies {
     implementation("com.google.zxing:core:3.5.3")
 
     // CDK Kotlin bindings
-    implementation("org.cashudevkit:cdk-kotlin:0.13.4")
+    implementation("org.cashudevkit:cdk-kotlin:0.14.1")
 }
