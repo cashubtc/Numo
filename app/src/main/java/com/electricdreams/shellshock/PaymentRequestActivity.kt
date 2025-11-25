@@ -74,6 +74,10 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var resumeLightningMintUrl: String? = null
     private var resumeLightningInvoice: String? = null
 
+    // Resume data for Nostr
+    private var resumeNostrSecretHex: String? = null
+    private var resumeNostrNprofile: String? = null
+
     private val uiScope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -147,6 +151,10 @@ class PaymentRequestActivity : AppCompatActivity() {
         resumeLightningQuoteId = intent.getStringExtra(EXTRA_LIGHTNING_QUOTE_ID)
         resumeLightningMintUrl = intent.getStringExtra(EXTRA_LIGHTNING_MINT_URL)
         resumeLightningInvoice = intent.getStringExtra(EXTRA_LIGHTNING_INVOICE)
+
+        // Get resume data for Nostr if available
+        resumeNostrSecretHex = intent.getStringExtra(EXTRA_NOSTR_SECRET_HEX)
+        resumeNostrNprofile = intent.getStringExtra(EXTRA_NOSTR_NPROFILE)
 
         // Display amount (without "Pay" prefix since it's in the label above)
         largeAmountDisplay.text = formattedAmountString
@@ -295,16 +303,40 @@ class PaymentRequestActivity : AppCompatActivity() {
             }
         }
 
-        // Generate ephemeral nostr identity for QR payment
-        val eph = NostrKeyPair.generate()
+        // Generate or restore ephemeral nostr identity for QR payment
+        val relayList = NOSTR_RELAYS.toList()
+        val eph: NostrKeyPair
+        val nprofile: String
+        val nostrSecretHex: String
+
+        if (isResumingPayment && resumeNostrSecretHex != null && resumeNostrNprofile != null) {
+            // Resume with existing nostr keys
+            Log.d(TAG, "Resuming with stored nostr keys")
+            eph = NostrKeyPair.fromSecretHex(resumeNostrSecretHex!!)
+            nprofile = resumeNostrNprofile!!
+            nostrSecretHex = resumeNostrSecretHex!!
+        } else {
+            // Generate new ephemeral keys
+            eph = NostrKeyPair.generate()
+            nprofile = com.electricdreams.shellshock.nostr.Nip19.encodeNprofile(
+                eph.publicKeyBytes,
+                relayList
+            )
+            nostrSecretHex = eph.hexSec
+
+            // Store nostr info for future resume
+            pendingPaymentId?.let { paymentId ->
+                PaymentsHistoryActivity.updatePendingWithNostrInfo(
+                    context = this,
+                    paymentId = paymentId,
+                    nostrSecretHex = nostrSecretHex,
+                    nostrNprofile = nprofile,
+                )
+            }
+        }
+
         val nostrPubHex = eph.hexPub
         val nostrSecret = eph.secretKeyBytes
-
-        val relayList = NOSTR_RELAYS.toList()
-        val nprofile = com.electricdreams.shellshock.nostr.Nip19.encodeNprofile(
-            eph.publicKeyBytes,
-            relayList
-        )
 
         Log.d(TAG, "Ephemeral nostr pubkey=$nostrPubHex nprofile=$nprofile")
 
@@ -627,6 +659,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         const val EXTRA_LIGHTNING_QUOTE_ID = "lightning_quote_id"
         const val EXTRA_LIGHTNING_MINT_URL = "lightning_mint_url"
         const val EXTRA_LIGHTNING_INVOICE = "lightning_invoice"
+        const val EXTRA_NOSTR_SECRET_HEX = "nostr_secret_hex"
+        const val EXTRA_NOSTR_NPROFILE = "nostr_nprofile"
 
         // Nostr relays to use for NIP-17 gift-wrapped DMs
         private val NOSTR_RELAYS = arrayOf(

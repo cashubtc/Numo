@@ -102,6 +102,13 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             entry.lightningInvoice?.let {
                 putExtra(PaymentRequestActivity.EXTRA_LIGHTNING_INVOICE, it)
             }
+            // Pass nostr info for resuming Cashu over Nostr
+            entry.nostrSecretHex?.let {
+                putExtra(PaymentRequestActivity.EXTRA_NOSTR_SECRET_HEX, it)
+            }
+            entry.nostrNprofile?.let {
+                putExtra(PaymentRequestActivity.EXTRA_NOSTR_NPROFILE, it)
+            }
         }
         startActivityForResult(intent, REQUEST_RESUME_PAYMENT)
     }
@@ -321,6 +328,50 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     lightningQuoteId = lightningQuoteId,
                     lightningMintUrl = lightningMintUrl,
                     formattedAmount = existing.formattedAmount,
+                    nostrNprofile = existing.nostrNprofile,
+                    nostrSecretHex = existing.nostrSecretHex,
+                )
+                history[index] = updated
+
+                val prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
+            }
+        }
+
+        /**
+         * Update a pending payment with Nostr info (for resume capability).
+         */
+        @JvmStatic
+        fun updatePendingWithNostrInfo(
+            context: Context,
+            paymentId: String,
+            nostrSecretHex: String,
+            nostrNprofile: String,
+        ) {
+            val history = getPaymentHistory(context).toMutableList()
+            val index = history.indexOfFirst { it.id == paymentId }
+
+            if (index >= 0) {
+                val existing = history[index]
+                val updated = PaymentHistoryEntry(
+                    id = existing.id,
+                    token = existing.token,
+                    amount = existing.amount,
+                    date = existing.date,
+                    rawUnit = existing.getUnit(),
+                    rawEntryUnit = existing.getEntryUnit(),
+                    enteredAmount = existing.enteredAmount,
+                    bitcoinPrice = existing.bitcoinPrice,
+                    mintUrl = existing.mintUrl,
+                    paymentRequest = existing.paymentRequest,
+                    rawStatus = existing.getStatus(),
+                    paymentType = existing.paymentType,
+                    lightningInvoice = existing.lightningInvoice,
+                    lightningQuoteId = existing.lightningQuoteId,
+                    lightningMintUrl = existing.lightningMintUrl,
+                    formattedAmount = existing.formattedAmount,
+                    nostrNprofile = nostrNprofile,
+                    nostrSecretHex = nostrSecretHex,
                 )
                 history[index] = updated
 

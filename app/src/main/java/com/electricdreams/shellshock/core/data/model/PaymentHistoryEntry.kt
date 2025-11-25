@@ -70,6 +70,10 @@ data class PaymentHistoryEntry(
     /** Nostr profile for resuming Cashu over Nostr payments */
     @SerializedName("nostrNprofile")
     val nostrNprofile: String? = null,
+
+    /** Ephemeral nostr secret key (hex) for resuming NIP-17 listening */
+    @SerializedName("nostrSecretHex")
+    val nostrSecretHex: String? = null,
 ) {
 
     /** Public, non-null view of the token unit. */

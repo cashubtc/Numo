@@ -100,17 +100,8 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<PaymentsHistoryAdapter.ViewH
             holder.statusText.visibility = View.GONE
         }
 
-        // Show payment type subtitle for completed payments
-        if (!isPending && entry.paymentType != null) {
-            holder.subtitleText.visibility = View.VISIBLE
-            holder.subtitleText.text = when (entry.paymentType) {
-                PaymentHistoryEntry.TYPE_LIGHTNING -> "⚡ Lightning"
-                PaymentHistoryEntry.TYPE_CASHU -> "🥜 Cashu"
-                else -> ""
-            }
-        } else {
-            holder.subtitleText.visibility = View.GONE
-        }
+        // Hide subtitle for now (payment type already shown in title)
+        holder.subtitleText.visibility = View.GONE
 
         holder.itemView.setOnClickListener {
             onItemClickListener?.onItemClick(entry, position)
