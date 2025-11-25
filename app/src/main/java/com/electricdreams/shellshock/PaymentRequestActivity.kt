@@ -21,9 +21,8 @@ import com.electricdreams.shellshock.core.util.CurrencyManager
 import com.electricdreams.shellshock.feature.history.PaymentsHistoryActivity
 import com.electricdreams.shellshock.ndef.CashuPaymentHelper
 import com.electricdreams.shellshock.ndef.NdefHostCardEmulationService
-import com.electricdreams.shellshock.nostr.NostrKeyPair
-import com.electricdreams.shellshock.nostr.NostrPaymentListener
 import com.electricdreams.shellshock.payment.LightningMintHandler
+import com.electricdreams.shellshock.payment.NostrPaymentHandler
 import com.electricdreams.shellshock.payment.PaymentTabManager
 import com.electricdreams.shellshock.ui.util.QrCodeGenerator
 import kotlinx.coroutines.CoroutineScope
@@ -49,14 +48,13 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var paymentAmount: Long = 0
     private var bitcoinPriceWorker: BitcoinPriceWorker? = null
     private var hcePaymentRequest: String? = null
-    private var qrPaymentRequest: String? = null
-    private var nostrListener: NostrPaymentListener? = null
     private var formattedAmountString: String = ""
 
     // Tab manager for Cashu/Lightning tab switching
     private lateinit var tabManager: PaymentTabManager
 
-    // Lightning mint handler
+    // Payment handlers
+    private var nostrHandler: NostrPaymentHandler? = null
     private var lightningHandler: LightningMintHandler? = null
     private var lightningStarted = false
 
@@ -170,7 +168,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         shareButton.setOnClickListener {
             // By default, share the Cashu (Nostr) payment request; fall back to Lightning invoice
-            val toShare = qrPaymentRequest ?: lightningHandler?.currentInvoice ?: lightningInvoice
+            val toShare = nostrHandler?.paymentRequest ?: lightningHandler?.currentInvoice ?: lightningInvoice
             if (toShare != null) {
                 sharePaymentRequest(toShare)
             } else {
@@ -303,73 +301,48 @@ class PaymentRequestActivity : AppCompatActivity() {
             }
         }
 
-        // Generate or restore ephemeral nostr identity for QR payment
-        val relayList = NOSTR_RELAYS.toList()
-        val eph: NostrKeyPair
-        val nprofile: String
-        val nostrSecretHex: String
-
-        if (isResumingPayment && resumeNostrSecretHex != null && resumeNostrNprofile != null) {
-            // Resume with existing nostr keys
-            Log.d(TAG, "Resuming with stored nostr keys")
-            eph = NostrKeyPair.fromSecretHex(resumeNostrSecretHex!!)
-            nprofile = resumeNostrNprofile!!
-            nostrSecretHex = resumeNostrSecretHex!!
-        } else {
-            // Generate new ephemeral keys
-            eph = NostrKeyPair.generate()
-            nprofile = com.electricdreams.shellshock.nostr.Nip19.encodeNprofile(
-                eph.publicKeyBytes,
-                relayList
-            )
-            nostrSecretHex = eph.hexSec
-
-            // Store nostr info for future resume
-            pendingPaymentId?.let { paymentId ->
-                PaymentsHistoryActivity.updatePendingWithNostrInfo(
-                    context = this,
-                    paymentId = paymentId,
-                    nostrSecretHex = nostrSecretHex,
-                    nostrNprofile = nprofile,
-                )
-            }
-        }
-
-        val nostrPubHex = eph.hexPub
-        val nostrSecret = eph.secretKeyBytes
-
-        Log.d(TAG, "Ephemeral nostr pubkey=$nostrPubHex nprofile=$nprofile")
-
-        // QR-specific PaymentRequest WITH Nostr transport (Cashu over Nostr)
-        qrPaymentRequest = CashuPaymentHelper.createPaymentRequestWithNostr(
-            paymentAmount,
-            "Payment of $paymentAmount sats",
-            allowedMints,
-            nprofile
-        )
-
-        if (qrPaymentRequest == null) {
-            Log.e(TAG, "Failed to create QR payment request with Nostr transport")
-            statusText.text = "Error creating payment request"
-        } else {
-            Log.d(TAG, "Created QR payment request with Nostr: $qrPaymentRequest")
-
-            // Generate and display Cashu QR code
-            try {
-                val qrBitmap = QrCodeGenerator.generate(qrPaymentRequest!!, 512)
-                cashuQrImageView.setImageBitmap(qrBitmap)
-                statusText.text = "Waiting for payment..."
-            } catch (e: Exception) {
-                Log.e(TAG, "Error generating Cashu QR bitmap: ${e.message}", e)
-                statusText.text = "Error generating QR code"
-            }
-
-            // Start Nostr listener for this ephemeral identity
-            setupNostrPayment(nostrSecret, nostrPubHex, relayList)
-        }
+        // Initialize Nostr handler and start payment flow
+        nostrHandler = NostrPaymentHandler(this, allowedMints)
+        startNostrPaymentFlow()
 
         // Lightning flow is started only when user switches to Lightning tab
         // (see TabSelectionListener.onLightningTabSelected())
+    }
+
+    private fun startNostrPaymentFlow() {
+        val handler = nostrHandler ?: return
+
+        val callback = object : NostrPaymentHandler.Callback {
+            override fun onPaymentRequestReady(paymentRequest: String) {
+                try {
+                    val qrBitmap = QrCodeGenerator.generate(paymentRequest, 512)
+                    cashuQrImageView.setImageBitmap(qrBitmap)
+                    statusText.text = "Waiting for payment..."
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error generating Cashu QR bitmap: ${e.message}", e)
+                    statusText.text = "Error generating QR code"
+                }
+            }
+
+            override fun onTokenReceived(token: String) {
+                runOnUiThread {
+                    handlePaymentSuccess(token)
+                }
+            }
+
+            override fun onError(message: String) {
+                Log.e(TAG, "Nostr payment error: $message")
+                statusText.text = "Error: $message"
+            }
+        }
+
+        if (isResumingPayment && resumeNostrSecretHex != null && resumeNostrNprofile != null) {
+            // Resume with stored keys
+            handler.resume(paymentAmount, resumeNostrSecretHex!!, resumeNostrNprofile!!, callback)
+        } else {
+            // Start fresh
+            handler.start(paymentAmount, pendingPaymentId, callback)
+        }
     }
 
     private fun startLightningMintFlow() {
@@ -493,27 +466,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         }, 1000)
     }
 
-    private fun setupNostrPayment(
-        nostrSecret: ByteArray,
-        nostrPubHex: String,
-        relayList: List<String>
-    ) {
-        nostrListener?.stop()
-        nostrListener = null
-
-        nostrListener = NostrPaymentListener(
-            nostrSecret,
-            nostrPubHex,
-            paymentAmount,
-            MintManager.getInstance(this).getAllowedMints(),
-            relayList,
-            { token -> runOnUiThread { handlePaymentSuccess(token) } },
-            { msg, t -> Log.e(TAG, "NostrPaymentListener error: $msg", t) }
-        ).also { it.start() }
-
-        Log.d(TAG, "Nostr payment listener started")
-    }
-
     private fun handlePaymentSuccess(token: String) {
         Log.d(TAG, "Payment successful! Token: $token")
 
@@ -544,7 +496,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
-        cleanupAndFinish()
+        // Show PaymentReceivedActivity
+        showPaymentReceivedActivity(token)
     }
 
     /**
@@ -579,6 +532,16 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
+        // Show PaymentReceivedActivity (without token for Lightning)
+        showPaymentReceivedActivity("")
+    }
+
+    private fun showPaymentReceivedActivity(token: String) {
+        val successIntent = Intent(this, PaymentReceivedActivity::class.java).apply {
+            putExtra(PaymentReceivedActivity.EXTRA_TOKEN, token)
+            putExtra(PaymentReceivedActivity.EXTRA_AMOUNT, paymentAmount)
+        }
+        startActivity(successIntent)
         cleanupAndFinish()
     }
 
@@ -607,12 +570,9 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun cleanupAndFinish() {
-        // Stop Nostr listener
-        nostrListener?.let { listener ->
-            Log.d(TAG, "Stopping NostrPaymentListener")
-            listener.stop()
-            nostrListener = null
-        }
+        // Stop Nostr handler
+        nostrHandler?.stop()
+        nostrHandler = null
 
         // Stop Lightning handler
         lightningHandler?.cancel()
@@ -661,13 +621,5 @@ class PaymentRequestActivity : AppCompatActivity() {
         const val EXTRA_LIGHTNING_INVOICE = "lightning_invoice"
         const val EXTRA_NOSTR_SECRET_HEX = "nostr_secret_hex"
         const val EXTRA_NOSTR_NPROFILE = "nostr_nprofile"
-
-        // Nostr relays to use for NIP-17 gift-wrapped DMs
-        private val NOSTR_RELAYS = arrayOf(
-            "wss://relay.primal.net",
-            "wss://relay.damus.io",
-            "wss://nos.lol",
-            "wss://nostr.mom"
-        )
     }
 }
