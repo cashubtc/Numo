@@ -2,7 +2,6 @@ package com.electricdreams.shellshock.feature.items
 
 import android.animation.ValueAnimator
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Typeface
 import android.view.Gravity
@@ -23,31 +22,21 @@ class EmptyStateAnimator(
     private val context: Context,
     private val ribbonContainer: View
 ) {
-    // Chip data: emoji + product name pairs with assigned colors
+    // Limited to 6 visually distinct chips to reduce chaos
     private val chipData = listOf(
-        ChipItem("🥜", "PEANUTS", R.drawable.bg_chip_ribbon_lime, true),
         ChipItem("📚", "BOOKS", R.drawable.bg_chip_ribbon_cyan, true),
-        ChipItem("👕", "T-SHIRTS", R.drawable.bg_chip_ribbon_white, true),
-        ChipItem("☕", "COFFEE", R.drawable.bg_chip_ribbon_orange, true),
-        ChipItem("🎸", "GUITARS", R.drawable.bg_chip_ribbon_purple, false),
         ChipItem("🍕", "PIZZA", R.drawable.bg_chip_ribbon_pink, true),
-        ChipItem("💎", "JEWELRY", R.drawable.bg_chip_ribbon_yellow, true),
-        ChipItem("🎧", "HEADPHONES", R.drawable.bg_chip_ribbon_green, false),
         ChipItem("🌮", "TACOS", R.drawable.bg_chip_ribbon_lime, true),
-        ChipItem("🎨", "ART", R.drawable.bg_chip_ribbon_cyan, true),
-        ChipItem("🍩", "DONUTS", R.drawable.bg_chip_ribbon_pink, true),
-        ChipItem("💵", "FIAT", R.drawable.bg_chip_ribbon_green, false),
+        ChipItem("🎧", "HEADPHONES", R.drawable.bg_chip_ribbon_green, false),
         ChipItem("🎁", "GIFTS", R.drawable.bg_chip_ribbon_purple, false),
-        ChipItem("🧁", "CUPCAKES", R.drawable.bg_chip_ribbon_white, true),
-        ChipItem("🎮", "GAMES", R.drawable.bg_chip_ribbon_yellow, true),
-        ChipItem("🍺", "DRINKS", R.drawable.bg_chip_ribbon_orange, true)
+        ChipItem("🎮", "GAMES", R.drawable.bg_chip_ribbon_yellow, true)
     )
 
     // Animation durations for each row (ms) - varied for parallax effect
-    private val rowDurations = listOf(20000L, 16000L, 18000L, 14000L, 22000L)
+    private val rowDurations = listOf(18000L, 22000L, 20000L)
     
     // Starting offsets for each row (percentage of row width to offset start)
-    private val rowStartOffsets = listOf(0f, 0.2f, 0.1f, 0.35f, 0.15f)
+    private val rowStartOffsets = listOf(0f, 0.3f, 0.15f)
 
     // Active animators (to be cancelled on destroy)
     private val animators = mutableListOf<ValueAnimator>()
@@ -72,23 +61,21 @@ class EmptyStateAnimator(
         // Stop any existing animations first
         stop()
         
-        // Find row containers
+        // Find row containers (now only 3 rows)
         val row1 = ribbonContainer.findViewById<LinearLayout>(R.id.ribbon_row_1)
         val row2 = ribbonContainer.findViewById<LinearLayout>(R.id.ribbon_row_2)
         val row3 = ribbonContainer.findViewById<LinearLayout>(R.id.ribbon_row_3)
-        val row4 = ribbonContainer.findViewById<LinearLayout>(R.id.ribbon_row_4)
-        val row5 = ribbonContainer.findViewById<LinearLayout>(R.id.ribbon_row_5)
         val rowsWrapper = ribbonContainer.findViewById<FrameLayout>(R.id.ribbon_rows_wrapper)
 
-        val rowContainers = listOf(row1, row2, row3, row4, row5)
+        val rowContainers = listOf(row1, row2, row3)
 
         // Apply rotation to the wrapper after layout
         rowsWrapper?.post {
             rowsWrapper.pivotX = rowsWrapper.width / 2f
             rowsWrapper.pivotY = rowsWrapper.height / 2f
             rowsWrapper.rotation = -12f
-            rowsWrapper.scaleX = 1.4f
-            rowsWrapper.scaleY = 1.4f
+            rowsWrapper.scaleX = 1.3f
+            rowsWrapper.scaleY = 1.3f
         }
 
         // Populate and animate each row
@@ -104,12 +91,12 @@ class EmptyStateAnimator(
         row.removeAllViews()
         
         // Get a varied subset of chips for this row
-        val startIndex = (rowIndex * 3) % chipData.size
+        val startIndex = (rowIndex * 2) % chipData.size
         
-        // Add chips - enough to cover screen width plus extra for seamless loop
+        // Add chips - just enough for seamless looping (2 sets of 6)
         val chipsForRow = mutableListOf<ChipItem>()
-        repeat(3) { // Triple the chips for seamless looping
-            for (i in 0 until 6) {
+        repeat(2) {
+            for (i in chipData.indices) {
                 chipsForRow.add(chipData[(startIndex + i) % chipData.size])
             }
         }
@@ -142,21 +129,25 @@ class EmptyStateAnimator(
         
         return TextView(context).apply {
             text = "${chip.emoji}  ${chip.name}"
-            textSize = 14f
+            textSize = 15f
             typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
             setTextColor(if (chip.darkText) Color.BLACK else Color.WHITE)
             
             setBackgroundResource(chip.backgroundRes)
             
             // Padding
-            val hPadding = (14 * density).toInt()
+            val hPadding = (16 * density).toInt()
             val vPadding = (10 * density).toInt()
             setPadding(hPadding, vPadding, hPadding, vPadding)
             
             gravity = Gravity.CENTER
             
+            // Ensure single line - no wrapping
+            maxLines = 1
+            isSingleLine = true
+            
             // Layout params with margin
-            val margin = (6 * density).toInt()
+            val margin = (8 * density).toInt()
             layoutParams = LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
@@ -173,13 +164,13 @@ class EmptyStateAnimator(
         val rowWidth = row.width.toFloat()
         if (rowWidth <= 0) return
 
-        // Width of one set of chips (we have 3 sets)
-        val chipSetWidth = rowWidth / 3f
+        // Width of one set of chips (we have 2 sets)
+        val chipSetWidth = rowWidth / 2f
         
         // Initial offset based on row index for staggered look
         val initialOffset = -chipSetWidth * rowStartOffsets[rowIndex]
         
-        // Start with chips visible (negative X to show from left edge)
+        // Start with chips visible
         row.translationX = initialOffset
 
         val animator = ValueAnimator.ofFloat(0f, chipSetWidth).apply {
@@ -190,7 +181,7 @@ class EmptyStateAnimator(
             
             addUpdateListener { animation ->
                 val value = animation.animatedValue as Float
-                // Move right to left (subtract from initial position)
+                // Move right to left
                 row.translationX = initialOffset - value
             }
         }
