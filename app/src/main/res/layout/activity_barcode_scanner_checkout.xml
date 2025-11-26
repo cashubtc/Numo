@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <!-- Camera Preview -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/preview_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Scanner Overlay with Viewfinder -->
+    <View
+        android:id="@+id/scanner_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/scanner_overlay" />
+
+    <!-- Top Bar -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="48dp"
+        android:paddingHorizontal="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Scan to Add"
+            android:textColor="@android:color/white"
+            android:textSize="17sp"
+            android:fontFamily="sans-serif-medium" />
+
+    </FrameLayout>
+
+    <!-- Scanned Item Overlay (initially hidden) -->
+    <LinearLayout
+        android:id="@+id/scanned_item_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:background="@drawable/bg_scanner_item_overlay"
+        android:paddingTop="20dp"
+        android:paddingBottom="32dp"
+        android:visibility="gone"
+        android:translationY="300dp"
+        tools:visibility="visible"
+        tools:translationY="0dp">
+
+        <!-- Item Info -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingBottom="20dp">
+
+            <!-- Item Image -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/item_image_container"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/color_bg_secondary">
+
+                <ImageView
+                    android:id="@+id/item_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="Item image"
+                    android:scaleType="centerCrop" />
+
+                <ImageView
+                    android:id="@+id/item_image_placeholder"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="No image"
+                    android:src="@drawable/ic_image_placeholder"
+                    app:tint="@color/color_icon_tertiary" />
+            </androidx.cardview.widget.CardView>
+
+            <!-- Item Details -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/item_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/color_text_primary"
+                    android:textSize="17sp"
+                    android:fontFamily="sans-serif-medium"
+                    tools:text="Classic T-Shirt" />
+
+                <TextView
+                    android:id="@+id/item_variation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@color/color_text_tertiary"
+                    android:textSize="14sp"
+                    android:visibility="gone"
+                    tools:text="Medium / Navy Blue"
+                    tools:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/item_price"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="15sp"
+                    tools:text="$24.99" />
+
+            </LinearLayout>
+
+            <!-- Quantity Controls -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/decrease_button"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:padding="10dp"
+                    android:background="@drawable/bg_quantity_button"
+                    android:src="@drawable/ic_minus"
+                    app:tint="@color/color_text_primary"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="Decrease quantity" />
+
+                <TextView
+                    android:id="@+id/item_quantity"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="1"
+                    android:textColor="@color/color_text_primary"
+                    android:textSize="20sp"
+                    android:fontFamily="sans-serif-medium" />
+
+                <ImageButton
+                    android:id="@+id/increase_button"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:padding="10dp"
+                    android:background="@drawable/bg_quantity_button"
+                    android:src="@drawable/ic_plus"
+                    app:tint="@color/color_text_primary"
+                    android:scaleType="fitCenter"
+                    android:contentDescription="Increase quantity" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Close Button -->
+        <Button
+            android:id="@+id/close_button"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="24dp"
+            android:background="@drawable/bg_close_button_scanner"
+            android:text="Done"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="17sp"
+            android:fontFamily="sans-serif-medium" />
+
+    </LinearLayout>
+
+    <!-- Instruction Text (visible when no item scanned) -->
+    <TextView
+        android:id="@+id/instruction_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="120dp"
+        android:text="Scan barcode to add item"
+        android:textColor="#CCFFFFFF"
+        android:textSize="15sp"
+        android:fontFamily="sans-serif" />
+
+</FrameLayout>

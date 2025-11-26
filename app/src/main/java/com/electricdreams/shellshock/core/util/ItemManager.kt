@@ -170,6 +170,32 @@ class ItemManager private constructor(context: Context) {
     fun getAllItems(): List<Item> = ArrayList(items)
 
     /**
+     * Find an item by its SKU (barcode).
+     * @param sku SKU to search for.
+     * @return Item if found, null otherwise.
+     */
+    fun findItemBySku(sku: String): Item? {
+        return items.find { it.sku?.equals(sku, ignoreCase = true) == true }
+    }
+
+    /**
+     * Search items by name, SKU, or variation.
+     * @param query Search query.
+     * @return List of matching items.
+     */
+    fun searchItems(query: String): List<Item> {
+        if (query.isBlank()) return ArrayList(items)
+        
+        val lowerQuery = query.lowercase().trim()
+        return items.filter { item ->
+            item.name?.lowercase()?.contains(lowerQuery) == true ||
+            item.sku?.lowercase()?.contains(lowerQuery) == true ||
+            item.variationName?.lowercase()?.contains(lowerQuery) == true ||
+            item.category?.lowercase()?.contains(lowerQuery) == true
+        }
+    }
+
+    /**
      * Add an item to the catalog.
      * @param item Item to add.
      * @return true if added successfully, false if already exists.
