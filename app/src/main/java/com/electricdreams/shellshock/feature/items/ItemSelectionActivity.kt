@@ -25,7 +25,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.electricdreams.shellshock.ModernPOSActivity
+import com.electricdreams.shellshock.PaymentRequestActivity
 import com.electricdreams.shellshock.R
 import com.electricdreams.shellshock.core.model.Amount
 import com.electricdreams.shellshock.core.model.BasketItem
@@ -127,8 +127,8 @@ class ItemSelectionActivity : AppCompatActivity() {
                 .setMessage("Remove all items from basket?")
                 .setPositiveButton("Clear") { _, _ ->
                     basketManager.clearBasket()
+                    itemsAdapter.clearAllQuantities()
                     refreshBasket()
-                    itemsAdapter.notifyDataSetChanged()
                 }
                 .setNegativeButton("Cancel", null)
                 .show()
@@ -299,9 +299,8 @@ class ItemSelectionActivity : AppCompatActivity() {
         }
 
         val satoshisAmount = basketManager.getTotalSatoshis(bitcoinPriceWorker.getCurrentPrice())
-        val intent = Intent(this, ModernPOSActivity::class.java).apply {
-            putExtra("EXTRA_PAYMENT_AMOUNT", satoshisAmount)
-            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+        val intent = Intent(this, PaymentRequestActivity::class.java).apply {
+            putExtra("EXTRA_SATOSHI_AMOUNT", satoshisAmount)
         }
 
         basketManager.clearBasket()
@@ -334,6 +333,16 @@ class ItemSelectionActivity : AppCompatActivity() {
             for (basketItem in basketManager.getBasketItems()) {
                 basketQuantities[basketItem.item.id!!] = basketItem.quantity
             }
+        }
+
+        fun clearAllQuantities() {
+            basketQuantities.clear()
+            notifyDataSetChanged()
+        }
+
+        fun resetItemQuantity(itemId: String) {
+            basketQuantities.remove(itemId)
+            notifyDataSetChanged()
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
@@ -530,9 +539,10 @@ class ItemSelectionActivity : AppCompatActivity() {
                 }
 
                 removeButton.setOnClickListener {
-                    basketManager.removeItem(item.id!!)
+                    val itemId = item.id!!
+                    basketManager.removeItem(itemId)
+                    itemsAdapter.resetItemQuantity(itemId)
                     refreshBasket()
-                    itemsAdapter.notifyDataSetChanged()
                 }
             }
         }

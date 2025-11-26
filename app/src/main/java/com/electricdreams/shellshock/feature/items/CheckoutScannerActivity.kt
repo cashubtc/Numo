@@ -45,12 +45,6 @@ import java.util.concurrent.Executors
  */
 class CheckoutScannerActivity : AppCompatActivity() {
 
-    companion object {
-        private const val TAG = "CheckoutScanner"
-        private const val REQUEST_CAMERA_PERMISSION = 1001
-        const val RESULT_BASKET_UPDATED = 1002
-    }
-
     private lateinit var previewView: PreviewView
     private lateinit var overlayView: View
     private lateinit var instructionText: TextView
@@ -77,7 +71,16 @@ class CheckoutScannerActivity : AppCompatActivity() {
     private var currentItem: Item? = null
     private var currentQuantity: Int = 0
     private var lastScannedSku: String? = null
+    private var lastScanTime: Long = 0
+    private var barcodeLeftView = true
     private var basketUpdated = false
+    
+    companion object {
+        private const val TAG = "CheckoutScanner"
+        private const val REQUEST_CAMERA_PERMISSION = 1001
+        const val RESULT_BASKET_UPDATED = 1002
+        private const val SAME_BARCODE_COOLDOWN_MS = 1000L // 1 second cooldown for same barcode
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -291,29 +294,40 @@ class CheckoutScannerActivity : AppCompatActivity() {
     }
 
     private fun onBarcodeDetected(sku: String) {
-        // Debounce repeated scans of same SKU
-        if (sku == lastScannedSku && currentItem != null) {
-            // Same item - just increment quantity
-            runOnUiThread {
-                val item = currentItem ?: return@runOnUiThread
-                val hasStock = if (item.trackInventory) {
-                    item.quantity > currentQuantity
-                } else {
-                    true
-                }
-
-                if (hasStock) {
-                    currentQuantity++
-                    updateQuantityDisplay()
-                    updateBasketForCurrentItem()
-                    // Haptic feedback
-                    previewView.performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM)
-                }
+        val currentTime = System.currentTimeMillis()
+        
+        // Check if this is the same barcode and we're within cooldown period
+        if (sku == lastScannedSku) {
+            // Same barcode - check if cooldown has passed
+            if (currentTime - lastScanTime < SAME_BARCODE_COOLDOWN_MS) {
+                // Still in cooldown period, ignore this scan
+                return
             }
-            return
+            
+            // Cooldown passed - increment quantity
+            if (currentItem != null) {
+                lastScanTime = currentTime
+                runOnUiThread {
+                    val item = currentItem ?: return@runOnUiThread
+                    val hasStock = if (item.trackInventory) {
+                        item.quantity > currentQuantity
+                    } else {
+                        true
+                    }
+
+                    if (hasStock) {
+                        currentQuantity++
+                        updateQuantityDisplay()
+                        updateBasketForCurrentItem()
+                        // Haptic feedback
+                        previewView.performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM)
+                    }
+                }
+                return
+            }
         }
 
-        // Find item by SKU
+        // Different barcode - find item by SKU
         val item = itemManager.findItemBySku(sku)
         if (item == null) {
             runOnUiThread {
@@ -324,6 +338,7 @@ class CheckoutScannerActivity : AppCompatActivity() {
         }
 
         lastScannedSku = sku
+        lastScanTime = currentTime
         currentItem = item
 
         // Get current basket quantity for this item
