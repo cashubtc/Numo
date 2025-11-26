@@ -1,13 +1,21 @@
 package com.electricdreams.shellshock
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import android.view.WindowInsetsController
+import android.view.WindowManager
+import android.webkit.JavascriptInterface
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -41,9 +49,13 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var statusText: TextView
     private lateinit var closeButton: View
     private lateinit var shareButton: View
-    private lateinit var nfcReadingOverlay: View
     private lateinit var lightningLoadingSpinner: View
     private lateinit var lightningLogoCard: View
+    
+    // Animation views
+    private lateinit var nfcAnimationContainer: View
+    private lateinit var nfcAnimationWebView: WebView
+    private lateinit var animationCloseButton: Button
 
     // HCE mode for deciding which payload to emulate (Cashu vs Lightning)
     private enum class HceMode { CASHU, LIGHTNING }
@@ -86,7 +98,12 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var checkoutBasketJson: String? = null
 
     private val uiScope = CoroutineScope(Dispatchers.Main)
+    
+    // Animation state
+    private var webViewReady = false
+    private var pendingToken: String? = null
 
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_request)
@@ -105,7 +122,14 @@ class PaymentRequestActivity : AppCompatActivity() {
         shareButton = findViewById(R.id.share_button)
         lightningLoadingSpinner = findViewById(R.id.lightning_loading_spinner)
         lightningLogoCard = findViewById(R.id.lightning_logo_card)
-        nfcReadingOverlay = findViewById(R.id.nfc_reading_overlay)
+        
+        // Animation views
+        nfcAnimationContainer = findViewById(R.id.nfc_animation_container)
+        nfcAnimationWebView = findViewById(R.id.nfc_animation_webview)
+        animationCloseButton = findViewById(R.id.animation_close_button)
+
+        // Setup WebView for NFC animation
+        setupAnimationWebView()
 
         // Initialize tab manager
         tabManager = PaymentTabManager(
@@ -275,6 +299,134 @@ class PaymentRequestActivity : AppCompatActivity() {
                 convertedAmountDisplay.visibility = View.GONE
             }
         }
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun setupAnimationWebView() {
+        nfcAnimationWebView.settings.apply {
+            javaScriptEnabled = true
+            loadWithOverviewMode = true
+            useWideViewPort = true
+        }
+        
+        // Make WebView background transparent
+        nfcAnimationWebView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+        
+        // Add JavaScript interface for communication
+        nfcAnimationWebView.addJavascriptInterface(AnimationBridge(), "Android")
+        
+        nfcAnimationWebView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                webViewReady = true
+                Log.d(TAG, "WebView animation page loaded")
+            }
+        }
+        
+        // Load the animation HTML
+        nfcAnimationWebView.loadUrl("file:///android_asset/nfc_animation.html")
+        
+        // Setup close button for animation overlay - just close the activity
+        animationCloseButton.setOnClickListener {
+            pendingToken = null
+            cleanupAndFinish()
+        }
+    }
+
+    private fun showAnimationOverlay() {
+        // Make activity full screen for animation
+        makeFullScreen()
+        
+        nfcAnimationContainer.visibility = View.VISIBLE
+        animationCloseButton.visibility = View.GONE
+        
+        // Start the animation
+        if (webViewReady) {
+            nfcAnimationWebView.evaluateJavascript("startAnimation()", null)
+        }
+    }
+    
+    private fun makeFullScreen() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.let { controller ->
+                controller.hide(android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars())
+                controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            )
+        }
+        window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+    }
+    
+    private fun exitFullScreen() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.show(android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars())
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+        }
+        window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+    }
+
+    private fun showAnimationSuccess(amountText: String) {
+        if (webViewReady) {
+            val escapedAmount = amountText.replace("'", "\\'")
+            nfcAnimationWebView.evaluateJavascript("showSuccess('$escapedAmount')", null)
+            
+            // Play success sound and vibration
+            playSuccessFeedback()
+        }
+    }
+
+    private fun playSuccessFeedback() {
+        // Play success sound
+        try {
+            val mediaPlayer = android.media.MediaPlayer.create(this, R.raw.success_sound)
+            mediaPlayer?.setOnCompletionListener { it.release() }
+            mediaPlayer?.start()
+        } catch (_: Exception) {}
+        
+        // Vibrate
+        val vibrator = getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator?
+        vibrator?.vibrate(longArrayOf(0, 50, 100, 50), -1)
+    }
+
+    private fun showAnimationError(message: String) {
+        if (webViewReady) {
+            val escapedMessage = message.replace("'", "\\'")
+            nfcAnimationWebView.evaluateJavascript("showError('$escapedMessage')", null)
+        }
+    }
+
+    /** JavaScript interface for communication from WebView */
+    inner class AnimationBridge {
+        @JavascriptInterface
+        fun onAnimationComplete(success: Boolean) {
+            runOnUiThread {
+                Log.d(TAG, "Animation complete, success: $success")
+                showCloseButtonAnimated()
+            }
+        }
+    }
+
+    private fun showCloseButtonAnimated() {
+        // Start from invisible and below
+        animationCloseButton.alpha = 0f
+        animationCloseButton.translationY = 60f
+        animationCloseButton.visibility = View.VISIBLE
+        
+        // Animate in with fade + slide up
+        animationCloseButton.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(400)
+            .setInterpolator(android.view.animation.DecelerateInterpolator())
+            .start()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -523,15 +675,15 @@ class PaymentRequestActivity : AppCompatActivity() {
 
                     override fun onNfcReadingStarted() {
                         runOnUiThread {
-                            Log.d(TAG, "NFC reading started - showing overlay")
-                            nfcReadingOverlay.visibility = View.VISIBLE
+                            Log.d(TAG, "NFC reading started - showing animation overlay")
+                            showAnimationOverlay()
                         }
                     }
 
                     override fun onNfcReadingStopped() {
+                        // Don't hide overlay immediately - let the animation complete
                         runOnUiThread {
-                            Log.d(TAG, "NFC reading stopped - hiding overlay")
-                            nfcReadingOverlay.visibility = View.GONE
+                            Log.d(TAG, "NFC reading stopped")
                         }
                     }
                 })
@@ -546,6 +698,9 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         statusText.visibility = View.VISIBLE
         statusText.text = "Payment successful!"
+        
+        // Store the token to process after user dismisses animation
+        pendingToken = token
 
         // Extract mint URL from token
         val mintUrl = try {
@@ -571,8 +726,17 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
-        // Use unified success handler
-        showPaymentSuccess(token, paymentAmount)
+        // Show success animation with the received amount
+        if (nfcAnimationContainer.visibility == View.VISIBLE) {
+            // NFC animation is showing, transition to success
+            showAnimationSuccess(formattedAmountString)
+        } else {
+            // No animation showing (QR/Nostr payment), show animation overlay with success
+            showAnimationOverlay()
+            Handler(Looper.getMainLooper()).postDelayed({
+                showAnimationSuccess(formattedAmountString)
+            }, 500)
+        }
     }
 
     /**
@@ -607,17 +771,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
-        // Use unified success handler
-        showPaymentSuccess("", paymentAmount)
-    }
-
-    private fun showPaymentReceivedActivity(token: String) {
-        val intent = Intent(this, PaymentReceivedActivity::class.java).apply {
-            putExtra(PaymentReceivedActivity.EXTRA_TOKEN, token)
-            putExtra(PaymentReceivedActivity.EXTRA_AMOUNT, paymentAmount)
-        }
-        startActivity(intent)
-        cleanupAndFinish()
+        // Show success animation
+        showAnimationOverlay()
+        Handler(Looper.getMainLooper()).postDelayed({
+            showAnimationSuccess(formattedAmountString)
+        }, 500)
     }
 
     private fun handlePaymentError(errorMessage: String) {
@@ -625,13 +783,18 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         statusText.visibility = View.VISIBLE
         statusText.text = "Payment failed: $errorMessage"
-        Toast.makeText(this, "Payment failed: $errorMessage", Toast.LENGTH_LONG).show()
 
         setResult(Activity.RESULT_CANCELED)
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            cleanupAndFinish()
-        }, 3000)
+        // Show error animation if overlay is visible
+        if (nfcAnimationContainer.visibility == View.VISIBLE) {
+            showAnimationError(errorMessage)
+        } else {
+            Toast.makeText(this, "Payment failed: $errorMessage", Toast.LENGTH_LONG).show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                cleanupAndFinish()
+            }, 3000)
+        }
     }
 
     private fun cancelPayment() {
@@ -645,6 +808,9 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun cleanupAndFinish() {
+        // Exit full screen mode
+        exitFullScreen()
+        
         // Stop Nostr handler
         nostrHandler?.stop()
         nostrHandler = null
@@ -669,6 +835,13 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        // Clean up WebView to prevent memory leaks
+        nfcAnimationWebView.apply {
+            stopLoading()
+            loadUrl("about:blank")
+            removeAllViews()
+            destroy()
+        }
         cleanupAndFinish()
         super.onDestroy()
     }
@@ -681,37 +854,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         startActivity(Intent.createChooser(shareIntent, "Share Payment Request"))
     }
 
-    /**
-     * Unified success handler - plays feedback and shows success screen.
-     * This is the single source of truth for payment success handling.
-     */
-    private fun showPaymentSuccess(token: String, amount: Long) {
-        // Play success sound
-        try {
-            val mediaPlayer = android.media.MediaPlayer.create(this, R.raw.success_sound)
-            mediaPlayer?.setOnCompletionListener { it.release() }
-            mediaPlayer?.start()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error playing success sound: ${e.message}")
-        }
-        
-        // Vibrate
-        try {
-            val vibrator = getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator?
-            vibrator?.vibrate(PATTERN_SUCCESS, -1)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error vibrating: ${e.message}")
-        }
-
-        // Show success screen
-        showPaymentReceivedActivity(token)
-    }
-
     companion object {
         private const val TAG = "PaymentRequestActivity"
-        private val PATTERN_SUCCESS = longArrayOf(0, 50, 100, 50)
-
-
 
         const val EXTRA_PAYMENT_AMOUNT = "payment_amount"
         const val EXTRA_FORMATTED_AMOUNT = "formatted_amount"
