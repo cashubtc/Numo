@@ -737,7 +737,7 @@
                 android:text="Set a fixed price in your preferred currency. Bitcoin prices are in satoshis (sats)."
                 android:textAppearance="@style/Text.Caption" />
 
-            <!-- ==================== SKU / BARCODE SECTION ==================== -->
+            <!-- ==================== IDENTIFICATION SECTION ==================== -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -756,44 +756,97 @@
                 app:cardBackgroundColor="@color/color_bg_white">
 
                 <LinearLayout
-                    android:id="@+id/sku_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="8dp"
-                    android:minHeight="50dp">
+                    android:orientation="vertical"
+                    android:divider="@drawable/divider_horizontal"
+                    android:showDividers="middle">
 
-                    <TextView
-                        android:layout_width="60dp"
+                    <!-- GTIN Field -->
+                    <LinearLayout
+                        android:id="@+id/gtin_container"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="SKU"
-                        android:textAppearance="@style/Text.Body"
-                        android:textColor="@color/color_text_primary" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="8dp"
+                        android:minHeight="50dp">
 
-                    <EditText
-                        android:id="@+id/item_sku_input"
-                        android:layout_width="0dp"
+                        <TextView
+                            android:layout_width="60dp"
+                            android:layout_height="wrap_content"
+                            android:text="GTIN"
+                            android:textAppearance="@style/Text.Body"
+                            android:textColor="@color/color_text_primary" />
+
+                        <EditText
+                            android:id="@+id/item_gtin_input"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@null"
+                        android:text="Scan or enter barcode"
+                            android:inputType="text"
+                            android:textAppearance="@style/Text.Body"
+                            android:textColorHint="@color/color_text_tertiary" />
+
+                        <ImageButton
+                            android:id="@+id/btn_scan_barcode"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:contentDescription="Scan barcode"
+                            android:src="@drawable/ic_barcode_scan"
+                            app:tint="@color/color_primary_green" />
+
+                    </LinearLayout>
+
+                    <!-- SKU Field (manual entry only) -->
+                    <LinearLayout
+                        android:id="@+id/sku_container"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:background="@null"
-                        android:hint="Enter or scan barcode"
-                        android:inputType="text"
-                        android:textAppearance="@style/Text.Body"
-                        android:textColorHint="@color/color_text_tertiary" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:minHeight="50dp">
 
-                    <ImageButton
-                        android:id="@+id/btn_scan_barcode"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Scan barcode"
-                        android:src="@drawable/ic_barcode_scan"
-                        app:tint="@color/color_primary_green" />
+                        <TextView
+                            android:layout_width="60dp"
+                            android:layout_height="wrap_content"
+                            android:text="SKU"
+                            android:textAppearance="@style/Text.Body"
+                            android:textColor="@color/color_text_primary" />
+
+                        <EditText
+                            android:id="@+id/item_sku_input"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@null"
+                        android:text="Internal stock code"
+                            android:inputType="text"
+                            android:textAppearance="@style/Text.Body"
+                            android:textColorHint="@color/color_text_tertiary" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
+
+            <!-- GTIN Error Message -->
+            <TextView
+                android:id="@+id/gtin_error_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginBottom="16dp"
+                android:text="This GTIN already exists"
+                android:textSize="13sp"
+                android:textColor="@color/color_warning_red"
+                android:visibility="gone" />
 
             <!-- SKU Error Message -->
             <TextView

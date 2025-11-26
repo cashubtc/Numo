@@ -39,6 +39,7 @@ class ItemBuilder {
         category: String?,
         description: String,
         sku: String,
+        gtin: String,
         priceType: PriceType,
         currency: String,
         vatEnabled: Boolean,
@@ -65,6 +66,7 @@ class ItemBuilder {
             this.category = category
             this.description = description
             this.sku = sku
+            this.gtin = gtin
 
             // Pricing
             this.priceType = priceType
@@ -77,7 +79,7 @@ class ItemBuilder {
                 PriceType.SATS -> {
                     price = 0.0
                     priceSats = validationResult.satsPrice
-                }
+            }
             }
 
             // VAT (available for both fiat and Bitcoin items)

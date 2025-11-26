@@ -39,6 +39,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- Add Item Button (shown in normal mode) -->
         <ImageButton
             android:id="@+id/fab_add_item"
             android:layout_width="48dp"
@@ -48,6 +49,21 @@
             android:contentDescription="Add item"
             android:src="@drawable/ic_add"
             app:tint="@color/color_primary_green"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Done Button (shown in reordering mode) -->
+        <ImageButton
+            android:id="@+id/done_reorder_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="12dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Done reordering"
+            android:src="@drawable/ic_check"
+            app:tint="@color/color_primary_green"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

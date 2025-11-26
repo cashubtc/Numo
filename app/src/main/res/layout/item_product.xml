@@ -11,19 +11,34 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="20dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="20dp"
         android:paddingVertical="14dp"
         android:background="?attr/selectableItemBackground">
+
+        <!-- Drag Handle -->
+        <ImageView
+            android:id="@+id/drag_handle"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_drag_handle"
+            app:tint="@color/color_icon_tertiary"
+            android:contentDescription="Drag to reorder"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <!-- Item Image - Apple-style rounded square -->
         <androidx.cardview.widget.CardView
             android:id="@+id/image_container"
             android:layout_width="64dp"
             android:layout_height="64dp"
+            android:layout_marginStart="8dp"
             app:cardCornerRadius="12dp"
             app:cardElevation="0dp"
             app:cardBackgroundColor="@color/color_bg_secondary"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/drag_handle"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
 

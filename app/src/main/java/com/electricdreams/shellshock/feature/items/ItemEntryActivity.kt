@@ -27,7 +27,8 @@ import com.electricdreams.shellshock.feature.items.handlers.*
  * - PricingHandler: price type and VAT calculations
  * - InventoryHandler: inventory tracking
  * - ImageHandler: photo capture/selection
- * - SkuHandler: SKU validation and barcode scanning
+ * - SkuHandler: SKU validation
+ * - GtinHandler: GTIN validation and barcode scanning
  * - ItemFormValidator: form validation
  * - ItemBuilder: item object construction
  */
@@ -49,6 +50,7 @@ class ItemEntryActivity : AppCompatActivity() {
     private lateinit var inventoryHandler: InventoryHandler
     private lateinit var imageHandler: ImageHandler
     private lateinit var skuHandler: SkuHandler
+    private lateinit var gtinHandler: GtinHandler
     private lateinit var formValidator: ItemFormValidator
     private val itemBuilder = ItemBuilder()
 
@@ -72,7 +74,7 @@ class ItemEntryActivity : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 val barcodeValue = result.data?.getStringExtra(BarcodeScannerActivity.EXTRA_BARCODE_VALUE)
-                skuHandler.handleBarcodeScanResult(barcodeValue)
+                gtinHandler.handleBarcodeScanResult(barcodeValue)
             }
         }
 
@@ -111,6 +113,7 @@ class ItemEntryActivity : AppCompatActivity() {
         initializePricingHandler()
         initializeInventoryHandler()
         initializeImageHandler()
+        initializeGtinHandler()
         initializeSkuHandler()
         initializeFormValidator()
     }
@@ -181,15 +184,26 @@ class ItemEntryActivity : AppCompatActivity() {
         imageHandler.initialize()
     }
 
-    private fun initializeSkuHandler() {
-        skuHandler = SkuHandler(
+    private fun initializeGtinHandler() {
+        gtinHandler = GtinHandler(
             activity = this,
-            skuInput = findViewById(R.id.item_sku_input),
-            skuContainer = findViewById(R.id.sku_container),
-            skuErrorText = findViewById(R.id.sku_error_text),
+            gtinInput = findViewById(R.id.item_gtin_input),
+            gtinContainer = findViewById(R.id.gtin_container),
+            gtinErrorText = findViewById(R.id.gtin_error_text),
             scanBarcodeButton = findViewById(R.id.btn_scan_barcode),
             itemManager = itemManager,
             barcodeScanLauncher = barcodeScanLauncher
+        )
+        gtinHandler.setEditItemId(editItemId)
+        gtinHandler.initialize()
+    }
+
+    private fun initializeSkuHandler() {
+        skuHandler = SkuHandler(
+            skuInput = findViewById(R.id.item_sku_input),
+            skuContainer = findViewById(R.id.sku_container),
+            skuErrorText = findViewById(R.id.sku_error_text),
+            itemManager = itemManager
         )
         skuHandler.setEditItemId(editItemId)
         skuHandler.initialize()
@@ -201,7 +215,8 @@ class ItemEntryActivity : AppCompatActivity() {
             nameInput = nameInput,
             pricingHandler = pricingHandler,
             inventoryHandler = inventoryHandler,
-            skuHandler = skuHandler
+            skuHandler = skuHandler,
+            gtinHandler = gtinHandler
         )
     }
 
@@ -234,6 +249,7 @@ class ItemEntryActivity : AppCompatActivity() {
         // Delegated loading
         categoryTagHandler.setSelectedCategory(item.category)
         skuHandler.setSku(item.sku)
+        gtinHandler.setGtin(item.gtin)
         loadPricingData(item)
         loadInventoryData(item)
         imageHandler.loadItemImage(item)
@@ -301,6 +317,7 @@ class ItemEntryActivity : AppCompatActivity() {
             category = categoryTagHandler.getSelectedCategory(),
             description = descriptionInput.text.toString().trim(),
             sku = skuHandler.getSku(),
+            gtin = gtinHandler.getGtin(),
             priceType = pricingHandler.getCurrentPriceType(),
             currency = currencyManager.getCurrentCurrency(),
             vatEnabled = pricingHandler.isVatEnabled(),

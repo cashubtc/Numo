@@ -11,6 +11,7 @@ import com.electricdreams.shellshock.core.util.ItemManager
 
 /**
  * Handles item search and filtering logic for ItemSelectionActivity.
+ * Supports both text search and category filtering.
  */
 class ItemSearchHandler(
     private val itemManager: ItemManager,
@@ -18,11 +19,13 @@ class ItemSearchHandler(
     private val itemsRecyclerView: RecyclerView,
     private val emptyView: LinearLayout,
     private val noResultsView: LinearLayout,
-    private val onItemsFiltered: (List<Item>) -> Unit
+    private val onItemsFiltered: (List<Item>) -> Unit,
+    private val onFilterStateChanged: ((hasActiveFilters: Boolean) -> Unit)? = null
 ) {
 
     private var allItems: List<Item> = emptyList()
     private var filteredItems: List<Item> = emptyList()
+    private var selectedCategory: String? = null
 
     init {
         setupSearchListener()
@@ -33,7 +36,7 @@ class ItemSearchHandler(
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
-                filterItems(s?.toString() ?: "")
+                applyFilters()
             }
         })
     }
@@ -43,22 +46,75 @@ class ItemSearchHandler(
      */
     fun loadItems() {
         allItems = itemManager.getAllItems()
-        filteredItems = allItems
-        onItemsFiltered(filteredItems)
-        updateEmptyState()
+        applyFilters()
     }
 
     /**
-     * Filter items based on search query.
+     * Get all available categories from items.
      */
-    fun filterItems(query: String) {
-        filteredItems = if (query.isBlank()) {
-            allItems
-        } else {
-            itemManager.searchItems(query)
+    fun getCategories(): List<String> {
+        return itemManager.getAllCategories()
+    }
+
+    /**
+     * Check if any categories exist.
+     */
+    fun hasCategories(): Boolean {
+        return getCategories().isNotEmpty()
+    }
+
+    /**
+     * Get the currently selected category.
+     */
+    fun getSelectedCategory(): String? = selectedCategory
+
+    /**
+     * Set the selected category filter.
+     * Pass null to clear the category filter.
+     */
+    fun setSelectedCategory(category: String?) {
+        selectedCategory = category
+        applyFilters()
+    }
+
+    /**
+     * Clear all filters (search text and category).
+     */
+    fun clearAllFilters() {
+        selectedCategory = null
+        searchInput.text.clear()
+        applyFilters()
+    }
+
+    /**
+     * Check if any filters are currently active.
+     */
+    fun hasActiveFilters(): Boolean {
+        return selectedCategory != null || searchInput.text.isNotBlank()
+    }
+
+    /**
+     * Apply both text search and category filters.
+     */
+    private fun applyFilters() {
+        val query = searchInput.text?.toString() ?: ""
+        
+        filteredItems = allItems.filter { item ->
+            val matchesCategory = selectedCategory == null || 
+                item.category?.equals(selectedCategory, ignoreCase = true) == true
+            
+            val matchesSearch = query.isBlank() || 
+                item.name?.lowercase()?.contains(query.lowercase()) == true ||
+                item.sku?.lowercase()?.contains(query.lowercase()) == true ||
+                item.variationName?.lowercase()?.contains(query.lowercase()) == true ||
+                item.category?.lowercase()?.contains(query.lowercase()) == true
+            
+            matchesCategory && matchesSearch
         }
+        
         onItemsFiltered(filteredItems)
         updateEmptyState()
+        onFilterStateChanged?.invoke(hasActiveFilters())
     }
 
     /**
@@ -67,7 +123,7 @@ class ItemSearchHandler(
     private fun updateEmptyState() {
         val hasItems = allItems.isNotEmpty()
         val hasResults = filteredItems.isNotEmpty()
-        val isSearching = searchInput.text.isNotBlank()
+        val isFiltering = hasActiveFilters()
 
         when {
             !hasItems -> {
@@ -75,7 +131,7 @@ class ItemSearchHandler(
                 noResultsView.visibility = View.GONE
                 itemsRecyclerView.visibility = View.GONE
             }
-            !hasResults && isSearching -> {
+            !hasResults && isFiltering -> {
                 emptyView.visibility = View.GONE
                 noResultsView.visibility = View.VISIBLE
                 itemsRecyclerView.visibility = View.GONE

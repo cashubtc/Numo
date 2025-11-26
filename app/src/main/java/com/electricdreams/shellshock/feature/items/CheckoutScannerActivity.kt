@@ -71,7 +71,7 @@ class CheckoutScannerActivity : AppCompatActivity() {
 
     private var currentItem: Item? = null
     private var currentQuantity: Int = 0
-    private var lastScannedSku: String? = null
+    private var lastScannedGtin: String? = null
     private var lastScanTime: Long = 0
     private var barcodeLeftView = true
     private var basketUpdated = false
@@ -80,7 +80,7 @@ class CheckoutScannerActivity : AppCompatActivity() {
         private const val TAG = "CheckoutScanner"
         private const val REQUEST_CAMERA_PERMISSION = 1001
         const val RESULT_BASKET_UPDATED = 1002
-        private const val SAME_BARCODE_COOLDOWN_MS = 1000L // 1 second cooldown for same barcode
+        private const val SAME_BARCODE_COOLDOWN_MS = 2000L // 2 second cooldown for same barcode
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -304,17 +304,17 @@ class CheckoutScannerActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
-    private fun onBarcodeDetected(sku: String) {
+    private fun onBarcodeDetected(gtin: String) {
         val currentTime = System.currentTimeMillis()
         
         // Check if this is the same barcode and we're within cooldown period
-        if (sku == lastScannedSku) {
-            // Same barcode - check if cooldown has passed
-            if (currentTime - lastScanTime < SAME_BARCODE_COOLDOWN_MS) {
-                // Still in cooldown period, ignore this scan
-                return
-            }
-            
+        if (gtin == lastScannedGtin && currentTime - lastScanTime < SAME_BARCODE_COOLDOWN_MS) {
+            // Still in cooldown period, ignore this scan (no vibration)
+            return
+        }
+        
+        // Check if this is the same barcode after cooldown has passed
+        if (gtin == lastScannedGtin) {
             // Cooldown passed - increment quantity
             if (currentItem != null) {
                 lastScanTime = currentTime
@@ -330,7 +330,7 @@ class CheckoutScannerActivity : AppCompatActivity() {
                         currentQuantity++
                         updateQuantityDisplay()
                         updateBasketForCurrentItem()
-                        // Haptic feedback
+                        // Haptic feedback for successful quantity increment
                         previewView.performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM)
                     }
                 }
@@ -338,17 +338,14 @@ class CheckoutScannerActivity : AppCompatActivity() {
             }
         }
 
-        // Different barcode - find item by SKU
-        val item = itemManager.findItemBySku(sku)
+        // Different barcode - find item by Gtin
+        val item = itemManager.findItemByGtin(gtin)
         if (item == null) {
-            runOnUiThread {
-                Toast.makeText(this, "Item not found: $sku", Toast.LENGTH_SHORT).show()
-                previewView.performHapticFeedback(android.view.HapticFeedbackConstants.REJECT)
-            }
+            // No haptic feedback for unknown items during cooldown
             return
         }
 
-        lastScannedSku = sku
+        lastScannedGtin = gtin
         lastScanTime = currentTime
         currentItem = item
 
@@ -359,6 +356,7 @@ class CheckoutScannerActivity : AppCompatActivity() {
         runOnUiThread {
             showItemOverlay(item)
             updateBasketForCurrentItem()
+            // Haptic feedback ONLY for successful scans (not during cooldown)
             previewView.performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM)
         }
     }

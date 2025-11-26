@@ -63,24 +63,44 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <!-- Search Bar with Barcode Scanner -->
+                <!-- Search Bar with Barcode Scanner / Clear Button -->
                 <LinearLayout
+                    android:id="@+id/search_bar_container"
                     android:layout_width="match_parent"
                     android:layout_height="44dp"
                     android:layout_marginHorizontal="16dp"
                     android:layout_marginTop="8dp"
-                    android:layout_marginBottom="12dp"
                     android:background="@drawable/bg_search_field"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingHorizontal="12dp">
+                    android:paddingStart="12dp"
+                    android:paddingEnd="4dp">
 
                     <ImageView
+                        android:id="@+id/search_icon"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:contentDescription="Search"
                         android:src="@drawable/ic_search"
                         app:tint="@color/color_text_tertiary" />
+
+                    <!-- Category Badge (shown when category selected) -->
+                    <TextView
+                        android:id="@+id/category_badge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="24dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_category_badge"
+                        android:gravity="center"
+                        android:paddingHorizontal="8dp"
+                        android:textColor="@color/color_bg_white"
+                        android:textSize="13sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:visibility="gone"
+                        tools:text="Electronics"
+                        tools:visibility="visible" />
 
                     <EditText
                         android:id="@+id/search_input"
@@ -97,6 +117,7 @@
                         android:textColorHint="@color/color_text_tertiary"
                         android:textSize="16sp" />
 
+                    <!-- Scan Button (default) -->
                     <ImageButton
                         android:id="@+id/scan_button"
                         android:layout_width="40dp"
@@ -107,7 +128,38 @@
                         android:src="@drawable/ic_barcode_scan"
                         app:tint="@color/color_text_secondary" />
 
+                    <!-- Clear Filters Button (shown when filters active) -->
+                    <ImageButton
+                        android:id="@+id/clear_filters_button"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Clear filters"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_close_circle"
+                        app:tint="@color/color_text_secondary"
+                        android:visibility="gone" />
+
                 </LinearLayout>
+
+                <!-- Category Chips (shown when search focused and categories exist) -->
+                <com.google.android.flexbox.FlexboxLayout
+                    android:id="@+id/category_chips_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="4dp"
+                    android:paddingHorizontal="16dp"
+                    android:visibility="gone"
+                    app:flexWrap="wrap"
+                    app:alignItems="flex_start"
+                    app:justifyContent="flex_start"
+                    tools:visibility="visible" />
+
+                <!-- Spacer below search bar -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="8dp" />
 
             </LinearLayout>
 

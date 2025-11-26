@@ -14,7 +14,8 @@ class ItemFormValidator(
     private val nameInput: EditText,
     private val pricingHandler: PricingHandler,
     private val inventoryHandler: InventoryHandler,
-    private val skuHandler: SkuHandler
+    private val skuHandler: SkuHandler,
+    private val gtinHandler: GtinHandler
 ) {
     /**
      * Validation result containing success state and validated values.
@@ -25,7 +26,9 @@ class ItemFormValidator(
         val fiatPrice: Double = 0.0,
         val satsPrice: Long = 0L,
         val quantity: Int = 0,
-        val alertThreshold: Int = 5
+        val alertThreshold: Int = 5,
+        val sku: String = "",
+        val gtin: String = ""
     )
 
     /**
@@ -44,6 +47,13 @@ class ItemFormValidator(
         if (!skuHandler.isValid()) {
             Toast.makeText(activity, "Please use a unique SKU", Toast.LENGTH_SHORT).show()
             skuHandler.getSkuInput().requestFocus()
+            return ValidationResult(false)
+        }
+
+        // Validate GTIN is not duplicate
+        if (!gtinHandler.isValid()) {
+            Toast.makeText(activity, "Please use a unique GTIN", Toast.LENGTH_SHORT).show()
+            gtinHandler.getGtinInput().requestFocus()
             return ValidationResult(false)
         }
 
@@ -138,7 +148,9 @@ class ItemFormValidator(
             fiatPrice = fiatPrice,
             satsPrice = satsPrice,
             quantity = quantity,
-            alertThreshold = alertThreshold
+            alertThreshold = alertThreshold,
+            sku = skuHandler.getSku(),
+            gtin = gtinHandler.getGtin()
         )
     }
 }
