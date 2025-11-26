@@ -7,7 +7,7 @@
     android:background="@color/color_bg_white"
     android:fitsSystemWindows="true">
 
-    <!-- Top App Bar -->
+    <!-- Top App Bar (hidden when showing empty state) -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
@@ -82,82 +82,75 @@
         app:layout_anchor="@id/top_bar"
         app:layout_anchorGravity="bottom" />
 
-    <!-- Main Content Area -->
-    <FrameLayout
+    <!-- Regular Content: Items List (shown when items exist) -->
+    <LinearLayout
+        android:id="@+id/items_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="56dp">
+        android:layout_marginTop="56dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
 
-        <!-- Regular Content: Items List -->
-        <LinearLayout
-            android:id="@+id/items_content"
+        <!-- Items RecyclerView -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/items_recycler_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:overScrollMode="never"
+            tools:listitem="@layout/item_product" />
+
+        <!-- Bottom Actions Section (only shown when items exist) -->
+        <LinearLayout
+            android:id="@+id/bottom_actions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:visibility="gone"
-            tools:visibility="visible">
+            android:paddingHorizontal="20dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="24dp"
+            android:background="@color/color_bg_white">
 
-            <!-- Items RecyclerView -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/items_recycler_view"
+            <!-- Top divider -->
+            <View
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:clipToPadding="false"
-                android:overScrollMode="never"
-                tools:listitem="@layout/item_product" />
+                android:layout_height="0.5dp"
+                android:layout_marginBottom="16dp"
+                android:background="@color/color_divider" />
 
-            <!-- Bottom Actions Section (only shown when items exist) -->
-            <LinearLayout
-                android:id="@+id/bottom_actions"
+            <!-- Import from CSV Button -->
+            <Button
+                android:id="@+id/import_csv_button"
+                style="@style/Widget.Button.Secondary.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="12dp"
-                android:paddingBottom="24dp"
-                android:background="@color/color_bg_white">
+                android:text="Import from CSV" />
 
-                <!-- Top divider -->
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:layout_marginBottom="16dp"
-                    android:background="@color/color_divider" />
-
-                <!-- Import from CSV Button -->
-                <Button
-                    android:id="@+id/import_csv_button"
-                    style="@style/Widget.Button.Secondary.Outlined"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Import from CSV" />
-
-                <!-- Clear All Items Link -->
-                <TextView
-                    android:id="@+id/clear_items_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="16dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:padding="8dp"
-                    android:text="Clear All Items"
-                    android:textAppearance="@style/Text.Link"
-                    android:textColor="@color/color_warning_red" />
-
-            </LinearLayout>
+            <!-- Clear All Items Link -->
+            <TextView
+                android:id="@+id/clear_items_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:background="?attr/selectableItemBackground"
+                android:padding="8dp"
+                android:text="Clear All Items"
+                android:textAppearance="@style/Text.Link"
+                android:textColor="@color/color_warning_red" />
 
         </LinearLayout>
 
-        <!-- Empty State (Full Screen with Animation) -->
-        <include
-            android:id="@+id/empty_view"
-            layout="@layout/layout_empty_state_items"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="visible" />
+    </LinearLayout>
 
-    </FrameLayout>
+    <!-- Empty State (Full Screen - NO margin, positioned at root level) -->
+    <include
+        android:id="@+id/empty_view"
+        layout="@layout/layout_empty_state_items"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
