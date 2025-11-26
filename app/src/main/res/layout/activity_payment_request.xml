@@ -265,6 +265,7 @@
         android:background="#0A0A0A"
         android:clickable="true"
         android:focusable="true"
+        android:fitsSystemWindows="false"
         android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"

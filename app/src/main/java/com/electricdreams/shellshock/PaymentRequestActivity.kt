@@ -3,12 +3,15 @@ package com.electricdreams.shellshock
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
+import android.view.WindowInsetsController
+import android.view.WindowManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -318,6 +321,9 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun showAnimationOverlay() {
+        // Make activity full screen for animation
+        makeFullScreen()
+        
         nfcAnimationContainer.visibility = View.VISIBLE
         animationCloseButton.visibility = View.GONE
         
@@ -325,6 +331,33 @@ class PaymentRequestActivity : AppCompatActivity() {
         if (webViewReady) {
             nfcAnimationWebView.evaluateJavascript("startAnimation()", null)
         }
+    }
+    
+    private fun makeFullScreen() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.let { controller ->
+                controller.hide(android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars())
+                controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            )
+        }
+        window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+    }
+    
+    private fun exitFullScreen() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.insetsController?.show(android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars())
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+        }
+        window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
     }
 
     private fun showAnimationSuccess(amountText: String) {
@@ -714,6 +747,9 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun cleanupAndFinish() {
+        // Exit full screen mode
+        exitFullScreen()
+        
         // Stop Nostr handler
         nostrHandler?.stop()
         nostrHandler = null
