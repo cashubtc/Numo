@@ -253,12 +253,16 @@ public class NdefHostCardEmulationService extends HostApduService {
                 Log.i(TAG, "Command: " + description);
             }
             
-            // Start/reset NFC reading indicator when we receive APDU commands
-            // Only track reading if we have a payment callback set (meaning we're expecting a payment)
-            if (paymentCallback != null) {
+            // Start/reset NFC indicator only when we detect a WRITE (UPDATE BINARY) command.
+            // Reads happen frequently and are not meaningful for the UX animation.
+            // Only track writes if we have a payment callback set (meaning we're expecting a payment).
+            boolean isUpdateBinaryCommand =
+                    commandApdu.length >= 2 && commandApdu[1] == (byte) 0xD6; // UPDATE BINARY
+
+            if (paymentCallback != null && isUpdateBinaryCommand) {
                 startOrResetNfcReading();
             }
-            
+
             // Try to process with the NDEF processor
             Log.i(TAG, "Delegating to NDEF processor");
             byte[] response = ndefProcessor.processCommandApdu(commandApdu);
