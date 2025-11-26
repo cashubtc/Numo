@@ -36,8 +36,9 @@ class PaymentResultHandler(
         }
         
         val bitcoinPrice = bitcoinPriceWorker?.getCurrentPrice()?.takeIf { it > 0 }
-        
         val mintUrl = extractMintUrlFromToken(token)
+        
+        // Log to payment history
         PaymentsHistoryActivity.addToHistory(
             activity, 
             token, 
