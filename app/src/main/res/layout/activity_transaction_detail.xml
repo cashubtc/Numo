@@ -129,6 +129,21 @@
                 android:gravity="center"
                 android:text="Today at 11:01 PM" />
 
+            <!-- View Receipt Button (shown only for checkout transactions) -->
+            <Button
+                android:id="@+id/btn_view_basket"
+                style="@style/Widget.Button.Primary"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginTop="24dp"
+                android:text="View Receipt"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:fontFamily="sans-serif-medium"
+                android:visibility="gone" />
+
             <!-- Transaction Details Section -->
             <TextView
                 style="@style/Text.SectionHeader"
@@ -475,21 +490,6 @@
                 android:textColor="@color/color_text_secondary"
                 android:visibility="gone"
                 android:text="..." />
-
-            <!-- View Basket Button (prominent, shown only for checkout transactions) -->
-            <Button
-                android:id="@+id/btn_view_basket"
-                style="@style/Widget.Button.Primary"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginTop="32dp"
-                android:text="View Receipt"
-                android:textAllCaps="false"
-                android:textSize="16sp"
-                android:fontFamily="sans-serif-medium"
-                android:visibility="gone" />
 
             <!-- Action Buttons -->
             <LinearLayout
