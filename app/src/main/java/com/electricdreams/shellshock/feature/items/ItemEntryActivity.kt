@@ -412,56 +412,87 @@ class ItemEntryActivity : AppCompatActivity() {
     }
 
     private fun updateVatSectionVisibility() {
-        // VAT section only visible for fiat prices
-        vatSectionCard.visibility = if (currentPriceType == PriceType.FIAT) View.VISIBLE else View.GONE
+        // VAT section is always visible for both fiat and Bitcoin prices
+        vatSectionCard.visibility = View.VISIBLE
         
-        // Hide breakdown when VAT section is hidden
-        if (currentPriceType != PriceType.FIAT) {
-            priceBreakdownContainer.visibility = View.GONE
-        } else if (switchVatEnabled.isChecked) {
+        // Show breakdown when VAT is enabled
+        if (switchVatEnabled.isChecked) {
             priceBreakdownContainer.visibility = View.VISIBLE
+        } else {
+            priceBreakdownContainer.visibility = View.GONE
         }
     }
 
     private fun updatePriceBreakdown() {
-        if (!switchVatEnabled.isChecked || currentPriceType != PriceType.FIAT) {
+        if (!switchVatEnabled.isChecked) {
             priceBreakdownContainer.visibility = View.GONE
             return
         }
 
         priceBreakdownContainer.visibility = View.VISIBLE
 
-        // Get entered price
-        val priceStr = priceInput.text.toString().trim().replace(",", ".")
-        val enteredPrice = priceStr.toDoubleOrNull() ?: 0.0
-
         // Get VAT rate from input
         val vatRate = vatRateInput.text.toString().toIntOrNull() ?: 0
 
-        // Calculate prices based on whether entered price includes VAT or not
-        val netPrice: Double
-        val grossPrice: Double
-        val vatAmount: Double
+        when (currentPriceType) {
+            PriceType.FIAT -> {
+                // Get entered fiat price
+                val priceStr = priceInput.text.toString().trim().replace(",", ".")
+                val enteredPrice = priceStr.toDoubleOrNull() ?: 0.0
 
-        if (switchPriceIncludesVat.isChecked) {
-            // Entered price is gross (includes VAT) - need to calculate net
-            grossPrice = enteredPrice
-            netPrice = Item.calculateNetFromGross(grossPrice, vatRate.toDouble())
-            vatAmount = grossPrice - netPrice
-        } else {
-            // Entered price is net (excludes VAT) - need to calculate gross
-            netPrice = enteredPrice
-            grossPrice = Item.calculateGrossFromNet(netPrice, vatRate.toDouble())
-            vatAmount = grossPrice - netPrice
+                // Calculate prices based on whether entered price includes VAT or not
+                val netPrice: Double
+                val grossPrice: Double
+                val vatAmount: Double
+
+                if (switchPriceIncludesVat.isChecked) {
+                    // Entered price is gross (includes VAT) - need to calculate net
+                    grossPrice = enteredPrice
+                    netPrice = Item.calculateNetFromGross(grossPrice, vatRate.toDouble())
+                    vatAmount = grossPrice - netPrice
+                } else {
+                    // Entered price is net (excludes VAT) - need to calculate gross
+                    netPrice = enteredPrice
+                    grossPrice = Item.calculateGrossFromNet(netPrice, vatRate.toDouble())
+                    vatAmount = grossPrice - netPrice
+                }
+
+                // Format and display in fiat currency
+                val currency = Amount.Currency.fromCode(currencyManager.getCurrentCurrency())
+                textNetPrice.text = Amount.fromMajorUnits(netPrice, currency).toString()
+                textVatLabel.text = "VAT ($vatRate%)"
+                textVatAmount.text = Amount.fromMajorUnits(vatAmount, currency).toString()
+                textGrossPrice.text = Amount.fromMajorUnits(grossPrice, currency).toString()
+            }
+            PriceType.SATS -> {
+                // Get entered sats price
+                val satsStr = satsInput.text.toString().trim()
+                val enteredSats = satsStr.toLongOrNull() ?: 0L
+
+                // Calculate prices based on whether entered price includes VAT or not
+                val netSats: Long
+                val grossSats: Long
+                val vatSats: Long
+
+                if (switchPriceIncludesVat.isChecked) {
+                    // Entered price is gross (includes VAT) - need to calculate net
+                    grossSats = enteredSats
+                    netSats = Item.calculateNetFromGross(grossSats.toDouble(), vatRate.toDouble()).toLong()
+                    vatSats = grossSats - netSats
+                } else {
+                    // Entered price is net (excludes VAT) - need to calculate gross
+                    netSats = enteredSats
+                    grossSats = Item.calculateGrossFromNet(netSats.toDouble(), vatRate.toDouble()).toLong()
+                    vatSats = grossSats - netSats
+                }
+
+                // Format and display in sats
+                textNetPrice.text = Amount(netSats, Amount.Currency.BTC).toString()
+                textVatLabel.text = "VAT ($vatRate%)"
+                textVatAmount.text = Amount(vatSats, Amount.Currency.BTC).toString()
+                textGrossPrice.text = Amount(grossSats, Amount.Currency.BTC).toString()
+            }
         }
-
-        // Format and display
-        val currency = Amount.Currency.fromCode(currencyManager.getCurrentCurrency())
-        
-        textNetPrice.text = Amount.fromMajorUnits(netPrice, currency).toString()
-        textVatLabel.text = "VAT ($vatRate%)"
-        textVatAmount.text = Amount.fromMajorUnits(vatAmount, currency).toString()
-        textGrossPrice.text = Amount.fromMajorUnits(grossPrice, currency).toString()
     }
 
     private fun getVatRate(): Int {
@@ -524,6 +555,15 @@ class ItemEntryActivity : AppCompatActivity() {
                 }
             }
             null
+        })
+        
+        // Add text watcher for sats input to update VAT breakdown
+        satsInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                updatePriceBreakdown()
+            }
         })
     }
 
@@ -633,7 +673,7 @@ class ItemEntryActivity : AppCompatActivity() {
                 // VAT
                 switchVatEnabled.isChecked = item.vatEnabled
                 vatFieldsContainer.visibility = if (item.vatEnabled) View.VISIBLE else View.GONE
-                priceBreakdownContainer.visibility = if (item.vatEnabled && item.priceType == PriceType.FIAT) View.VISIBLE else View.GONE
+                priceBreakdownContainer.visibility = if (item.vatEnabled) View.VISIBLE else View.GONE
                 vatRateInput.setText(item.vatRate.toString())
                 // When editing, we show gross price in input, so price "includes VAT"
                 switchPriceIncludesVat.isChecked = true
@@ -950,14 +990,9 @@ class ItemEntryActivity : AppCompatActivity() {
                 }
             }
 
-            // VAT (only for fiat items)
-            if (currentPriceType == PriceType.FIAT) {
-                vatEnabled = switchVatEnabled.isChecked
-                vatRate = if (vatEnabled) getVatRate() else 0
-            } else {
-                vatEnabled = false
-                vatRate = 0
-            }
+            // VAT (available for both fiat and Bitcoin items)
+            vatEnabled = switchVatEnabled.isChecked
+            vatRate = if (vatEnabled) getVatRate() else 0
 
             // Inventory
             trackInventory = switchTrackInventory.isChecked

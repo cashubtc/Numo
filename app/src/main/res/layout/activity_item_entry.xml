@@ -476,7 +476,7 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- VAT Section (shown when Fiat is selected) -->
+            <!-- VAT Section (available for both Fiat and Bitcoin) -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/vat_section_card"
                 android:layout_width="match_parent"

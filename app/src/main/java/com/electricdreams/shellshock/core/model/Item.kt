@@ -60,15 +60,24 @@ data class Item(
     /**
      * Get the net price (excluding VAT).
      * For fiat: returns the stored price
-     * For sats: returns 0.0 (VAT not applicable to Bitcoin prices)
+     * For sats: returns 0.0 (use getNetSats() instead)
      */
     fun getNetPrice(): Double {
         return if (priceType == PriceType.FIAT) price else 0.0
     }
 
     /**
+     * Get the net price in sats (excluding VAT).
+     * For sats: returns the stored priceSats
+     * For fiat: returns 0L (use getNetPrice() instead)
+     */
+    fun getNetSats(): Long {
+        return if (priceType == PriceType.SATS) priceSats else 0L
+    }
+
+    /**
      * Get the VAT amount for this item.
-     * Returns 0.0 if VAT is not enabled or price type is SATS.
+     * Returns 0.0 for fiat or 0L for sats if VAT is not enabled.
      */
     fun getVatAmount(): Double {
         if (!vatEnabled || priceType != PriceType.FIAT || vatRate <= 0) return 0.0
@@ -76,13 +85,32 @@ data class Item(
     }
 
     /**
+     * Get the VAT amount in sats for this item.
+     * Returns 0L if VAT is not enabled or price type is not SATS.
+     */
+    fun getVatSats(): Long {
+        if (!vatEnabled || priceType != PriceType.SATS || vatRate <= 0) return 0L
+        return (priceSats * vatRate / 100.0).toLong()
+    }
+
+    /**
      * Get the gross price (including VAT).
      * For fiat: returns net price + VAT
-     * For sats: returns 0.0 (use priceSats instead)
+     * For sats: returns 0.0 (use getGrossSats() instead)
      */
     fun getGrossPrice(): Double {
         if (priceType != PriceType.FIAT) return 0.0
         return price + getVatAmount()
+    }
+
+    /**
+     * Get the gross price in sats (including VAT).
+     * For sats: returns net sats + VAT sats
+     * For fiat: returns 0L (use getGrossPrice() instead)
+     */
+    fun getGrossSats(): Long {
+        if (priceType != PriceType.SATS) return 0L
+        return priceSats + getVatSats()
     }
 
     /**
