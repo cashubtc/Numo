@@ -14,6 +14,63 @@
     <string name="common_reset_to_defaults">Reset to Defaults</string>
     <string name="common_retry">Retry</string>
 
+    <!-- Onboarding (UI strings used in layouts) -->
+    <string name="onboarding_tagline">Bitcoin POS with Cashu ecash</string>
+    <string name="onboarding_welcome_message">Accept Bitcoin payments instantly with zero fees using Cashu ecash technology.</string>
+    <string name="onboarding_terms">By continuing, you agree to our Terms of Service and Privacy Policy</string>
+    <string name="onboarding_button_get_started">Get Started</string>
+    <string name="onboarding_title_setup_wallet">Set Up Your Wallet</string>
+    <string name="onboarding_subtitle_choose_path">Choose how you&apos;d like to get started</string>
+    <string name="onboarding_option_create_wallet_title">Create New Wallet</string>
+    <string name="onboarding_option_create_wallet_subtitle">Start fresh with a new seed phrase</string>
+    <string name="onboarding_option_restore_wallet_title">Restore from Backup</string>
+    <string name="onboarding_option_restore_wallet_subtitle">Use your existing seed phrase</string>
+    <string name="onboarding_title_restore_wallet">Restore Wallet</string>
+    <string name="onboarding_instruction_enter_seed">Enter your 12-word seed phrase</string>
+    <string name="onboarding_instruction_enter_seed_detail">Enter the words in the correct order to restore your wallet.</string>
+    <string name="onboarding_button_paste_from_clipboard">Paste from Clipboard</string>
+    <string name="onboarding_seed_ready">Ready to continue</string>
+    <string name="onboarding_button_continue">Continue</string>
+    <string name="onboarding_status_creating_wallet">Creating your wallet...</string>
+    <string name="onboarding_status_creating_wallet_subtitle">This will only take a moment</string>
+    <string name="onboarding_status_searching_backup">Searching for backup...</string>
+    <string name="onboarding_status_searching_backup_detail">Checking Nostr relays for your mint configuration</string>
+    <string name="onboarding_title_your_mints">Your Mints</string>
+    <string name="onboarding_backup_found">Backup Found</string>
+    <string name="onboarding_backup_last_backed_up_sample">Last backed up Nov 26, 2024</string>
+    <string name="onboarding_title_select_mints">Select Mints</string>
+    <string name="onboarding_subtitle_select_mints">These mints will store your ecash tokens</string>
+    <string name="onboarding_mints_selected_sample">4 mints selected</string>
+    <string name="onboarding_status_restoring_wallet">Restoring Wallet</string>
+    <string name="onboarding_status_initializing_restore">Initializing restore...</string>
+    <string name="onboarding_success_wallet_created">Wallet Created</string>
+    <string name="onboarding_success_wallet_ready">Your wallet is ready to use</string>
+    <string name="onboarding_label_balance_by_mint">BALANCE BY MINT</string>
+    <string name="onboarding_button_enter_wallet">Enter Wallet</string>
+
+    <!-- Settings (UI strings used in layouts) -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_general">General</string>
+    <string name="settings_item_fiat_currency">Fiat Currency</string>
+    <string name="settings_item_mints">Mints</string>
+    <string name="settings_item_items">Items</string>
+    <string name="settings_item_tips_title">Tips</string>
+    <string name="settings_item_tips_subtitle">Configure tip options for checkout</string>
+    <string name="settings_item_theme">Theme</string>
+    <string name="settings_section_security">Security &amp; Privacy</string>
+    <string name="settings_item_security_title">Security &amp; Privacy</string>
+    <string name="settings_item_security_subtitle">Backup seed phrase, restore wallet</string>
+    <string name="settings_section_developer">Developer</string>
+    <string name="settings_item_developer_title">Developer Settings</string>
+    <string name="settings_item_developer_subtitle">Advanced settings and debugging tools</string>
+
+    <!-- Host Card Emulation strings (used from manifest/services) -->
+    <string name="service_description">Cashu Payment Service</string>
+    <string name="ndef_aid_description">NDEF Tag Type 4</string>
+
+    <!-- QR-based PaymentRequest description (used in layouts/accessibility) -->
+    <string name="payment_request_qr_description">Cashu payment request QR code</string>
+
     <!-- Errors & validation -->
     <string name="error_invalid_payment_amount">Invalid payment amount</string>
     <string name="error_invalid_melt_quote_data">Invalid melt quote data</string>
@@ -82,7 +139,7 @@
     <string name="top_up_processing_import">Processing Import</string>
     <string name="top_up_importing_proofs">Importing proofs...</string>
 
-    <!-- History / receipts -->
+    <!-- History / receipts (code-side labels) -->
     <string name="history_transaction_type_lightning_payment">Lightning Payment</string>
     <string name="history_transaction_type_cashu_payment">Cashu Payment</string>
     <string name="history_transaction_type_payment_received">Payment Received</string>
@@ -107,7 +164,7 @@
     <string name="history_sats_equivalent">≈ %1$s</string>
     <string name="history_payments_status_tap_to_resume">Tap to resume</string>
 
-    <!-- Tips / tip selection -->
+    <!-- Tips / tip selection (code-side) -->
     <string name="tip_selection_enter_tip_amount">Enter tip amount</string>
     <string name="tip_selection_question_add_tip">Would you like to add a tip?</string>
 
@@ -137,7 +194,7 @@
     <string name="onboarding_success_wallet_created_code">Wallet Created</string>
     <string name="onboarding_success_wallet_ready_code">Your wallet is ready to use</string>
 
-    <!-- Restore wallet (settings) -->
+    <!-- Restore wallet (settings, code-side messages) -->
     <string name="restore_wallet_title_restore">Restore Wallet</string>
     <string name="restore_wallet_title_fetching_backup">Fetching Backup</string>
     <string name="restore_wallet_title_review_mints">Review Mints</string>
@@ -153,21 +210,21 @@
     <string name="restore_wallet_mints_count">%1$d mint%2$s selected</string>
     <string name="restore_wallet_progress_initializing_restore">Initializing restore...</string>
 
-    <!-- Items / stock -->
+    <!-- Items / stock (code-side) -->
     <string name="items_quantity_in_stock">%1$d in stock</string>
     <string name="items_withdraw_from_mint">Withdraw from %1$s</string>
     <string name="items_edit_item_title">Edit Item</string>
 
-    <!-- POS / charge -->
+    <!-- POS / charge (code-side) -->
     <string name="pos_amount_charge">Charge %1$s</string>
     <string name="pos_charge">Charge</string>
 
-    <!-- Payment received / withdraw success -->
+    <!-- Payment received / withdraw success (code-side) -->
     <string name="payment_received_amount_received">%1$s received.</string>
     <string name="withdraw_success_amount_sent">%1$s sent.</string>
     <string name="withdraw_success_destination">To %1$s</string>
 
-    <!-- Dialog titles -->
+    <!-- Dialog titles (code-side) -->
     <string name="dialog_title_enter_pin">Enter PIN</string>
     <string name="dialog_title_remove_mint">Remove Mint</string>
     <string name="dialog_title_clear_basket">Clear Basket</string>

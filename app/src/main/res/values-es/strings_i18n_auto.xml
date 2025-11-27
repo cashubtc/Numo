@@ -162,7 +162,7 @@
     <string name="nfc_waiting_for_nfc">Esperando NFC...</string>
 
     <string name="onboarding_back">Atrás</string>
-    <string name="onboarding_backup_found">Copia de seguridad encontrada</string>
+    <!-- onboarding_backup_found defined in base values-es/strings.xml -->
     <string name="onboarding_create_wallet">Crear monedero</string>
     <string name="onboarding_last_backed_up_nov_26_2024">Última copia de seguridad: 26 nov 2024</string>
     <string name="onboarding_restore_wallet">Restaurar monedero</string>
