@@ -11,15 +11,14 @@ import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
 import android.widget.TextView
 import com.electricdreams.shellshock.R
-import kotlin.math.abs
-import kotlin.random.Random
+import kotlin.math.sin
 
 /**
- * Elegant floating chip animation for the empty state.
+ * Elegant rising chip animation for the empty state.
  * 
- * Each chip gently floats around the container, bouncing softly off edges.
- * Much simpler than scrolling - all 6 chips are created upfront and just move.
- * No rendering timing issues since chips don't enter/exit the viewport.
+ * Chips float upward from the bottom (near the button), gently bobbing
+ * as they rise. They fade in through the gradient at the bottom
+ * and wrap around when they reach the top, creating a continuous flow.
  */
 class EmptyStateAnimator(
     private val context: Context,
@@ -41,6 +40,9 @@ class EmptyStateAnimator(
     // Container for the floating chips
     private var chipContainer: FrameLayout? = null
     
+    // Animation time tracking
+    private var animationTime = 0f
+    
     // Prevent multiple simultaneous setups
     @Volatile private var isSettingUp = false
     @Volatile private var isRunning = false
@@ -52,15 +54,19 @@ class EmptyStateAnimator(
         val darkText: Boolean
     )
     
-    // Tracks position and velocity for each floating chip
+    // Tracks position and wave parameters for each floating chip
     private data class FloatingChip(
         val view: TextView,
-        var x: Float,
-        var y: Float,
-        var dx: Float,  // velocity X
-        var dy: Float,  // velocity Y
-        var rotation: Float,
-        var dRotation: Float  // rotation speed
+        val baseX: Float,           // Center X position
+        val phaseOffset: Float,     // Phase offset for sine wave (0 to 2π)
+        val bobAmplitude: Float,    // How much it bobs up/down
+        val driftAmplitude: Float,  // How much it drifts side to side
+        val bobSpeed: Float,        // Speed of bobbing
+        val driftSpeed: Float,      // Speed of horizontal drift
+        val riseSpeed: Float,       // Speed of upward float
+        val startOffset: Float,     // Initial Y offset so chips start staggered
+        val containerHeight: Float, // For wrapping calculation
+        val chipHeight: Float       // For wrapping calculation
     )
 
     fun start() {
@@ -72,6 +78,7 @@ class EmptyStateAnimator(
         animator?.cancel()
         animator = null
         floatingChips.clear()
+        animationTime = 0f
         
         // Find or use the ribbon container as our chip container
         chipContainer = ribbonContainer.findViewById<FrameLayout>(R.id.ribbon_rows_wrapper)
@@ -105,7 +112,7 @@ class EmptyStateAnimator(
         
         floatingChips.clear()
         
-        // Create each chip with a random starting position and velocity
+        // Create each chip and place in organized positions
         chipData.forEachIndexed { index, chip ->
             val chipView = createChipView(chip)
             container.addView(chipView)
@@ -117,49 +124,69 @@ class EmptyStateAnimator(
                 val chipWidth = chipView.width.toFloat()
                 val chipHeight = chipView.height.toFloat()
                 
-                // Fully random starting position anywhere in the container
-                val maxX = (containerWidth - chipWidth).coerceAtLeast(0f)
-                val maxY = (containerHeight - chipHeight).coerceAtLeast(0f)
+                // Horizontal positions spread across the container
+                // Staggered to avoid vertical alignment
+                val xPositions = listOf(0.08f, 0.52f, 0.28f, 0.68f, 0.15f, 0.58f)
+                val xPercent = xPositions[index]
                 
-                val startX = Random.nextFloat() * maxX
-                val startY = Random.nextFloat() * maxY
+                val padding = 16f
+                val usableWidth = containerWidth - chipWidth - (padding * 2)
+                val baseX = padding + (usableWidth * xPercent)
                 
-                // Random velocity - lively movement in any direction
-                val speed = 1.2f + Random.nextFloat() * 1.0f  // 1.2 to 2.2 pixels per frame
-                val angle = Random.nextFloat() * 360f
-                val dx = speed * kotlin.math.cos(Math.toRadians(angle.toDouble())).toFloat()
-                val dy = speed * kotlin.math.sin(Math.toRadians(angle.toDouble())).toFloat()
+                // Each chip starts at a different vertical position (staggered across full height)
+                // They'll continuously rise and wrap around
+                val startYPercent = index.toFloat() / chipData.size
+                val startY = containerHeight * startYPercent
                 
-                // Random rotation for visual interest
-                val rotation = Random.nextFloat() * 20f - 10f  // -10 to 10 degrees
-                val dRotation = (Random.nextFloat() - 0.5f) * 0.2f  // Rotation speed
+                // Each chip gets unique animation parameters
+                val phaseOffset = (index * Math.PI.toFloat() * 2f / chipData.size)
+                
+                // Gentle bob amplitude (8-14 pixels) - subtle wobble while rising
+                val bobAmplitude = 8f + (index % 3) * 3f
+                
+                // Small horizontal drift (8-16 pixels)
+                val driftAmplitude = 8f + (index % 2) * 8f
+                
+                // Vary speeds for organic feel
+                val bobSpeed = 0.8f + (index % 2) * 0.3f
+                val driftSpeed = 0.4f + (index % 3) * 0.15f
+                
+                // Rise speed - slow upward float (12-20 pixels per second)
+                val riseSpeed = 12f + (index % 3) * 4f
+                
+                // Stagger start positions so chips begin spread across the container
+                val wrapHeight = containerHeight + chipHeight
+                val startOffset = (index.toFloat() / chipData.size) * wrapHeight
                 
                 val floatingChip = FloatingChip(
                     view = chipView,
-                    x = startX,
-                    y = startY,
-                    dx = dx,
-                    dy = dy,
-                    rotation = rotation,
-                    dRotation = dRotation
+                    baseX = baseX,
+                    phaseOffset = phaseOffset,
+                    bobAmplitude = bobAmplitude,
+                    driftAmplitude = driftAmplitude,
+                    bobSpeed = bobSpeed,
+                    driftSpeed = driftSpeed,
+                    riseSpeed = riseSpeed,
+                    startOffset = startOffset,
+                    containerHeight = containerHeight,
+                    chipHeight = chipHeight
                 )
                 
                 floatingChips.add(floatingChip)
                 
-                // Set initial position
-                chipView.translationX = startX
+                // Set initial position (staggered vertically)
+                chipView.translationX = baseX
                 chipView.translationY = startY
-                chipView.rotation = rotation
                 
                 // Start animation once all chips are set up
                 if (floatingChips.size == chipData.size) {
-                    startFloatingAnimation(containerWidth, containerHeight)
+                    startFloatingAnimation()
                 }
             }
         }
     }
     
-    private fun startFloatingAnimation(containerWidth: Float, containerHeight: Float) {
+    private fun startFloatingAnimation() {
         // Setup complete, now running
         isSettingUp = false
         isRunning = true
@@ -172,52 +199,32 @@ class EmptyStateAnimator(
             interpolator = LinearInterpolator()
             
             addUpdateListener {
-                updateChipPositions(containerWidth, containerHeight)
+                animationTime += 0.016f  // Approximate delta time in seconds
+                updateChipPositions()
             }
         }
         
         animator?.start()
     }
     
-    private fun updateChipPositions(containerWidth: Float, containerHeight: Float) {
+    private fun updateChipPositions() {
         floatingChips.forEach { chip ->
-            val chipWidth = chip.view.width.toFloat()
-            val chipHeight = chip.view.height.toFloat()
+            // Calculate smooth sine wave offsets for gentle wobble
+            val bobOffset = sin((animationTime * chip.bobSpeed + chip.phaseOffset).toDouble()).toFloat() * chip.bobAmplitude
+            val driftOffset = sin((animationTime * chip.driftSpeed + chip.phaseOffset + Math.PI.toFloat() / 2f).toDouble()).toFloat() * chip.driftAmplitude
             
-            // Update position
-            chip.x += chip.dx
-            chip.y += chip.dy
-            chip.rotation += chip.dRotation
+            // Calculate upward movement - chips rise continuously
+            // When they go off the top, they wrap to the bottom (coming through gradient)
+            val wrapHeight = chip.containerHeight + chip.chipHeight
+            val totalRise = animationTime * chip.riseSpeed + chip.startOffset
             
-            // Bounce off edges with slight randomness
-            val maxX = (containerWidth - chipWidth).coerceAtLeast(0f)
-            val maxY = (containerHeight - chipHeight).coerceAtLeast(0f)
+            // Base Y position that rises and wraps
+            // Modulo keeps the position cycling, subtract from containerHeight so chips rise upward
+            val rawY = chip.containerHeight - (totalRise % wrapHeight)
             
-            if (chip.x <= 0f) {
-                chip.x = 0f
-                chip.dx = abs(chip.dx) * (0.9f + Random.nextFloat() * 0.2f)
-                chip.dRotation = -chip.dRotation
-            } else if (chip.x >= maxX) {
-                chip.x = maxX
-                chip.dx = -abs(chip.dx) * (0.9f + Random.nextFloat() * 0.2f)
-                chip.dRotation = -chip.dRotation
-            }
-            
-            if (chip.y <= 0f) {
-                chip.y = 0f
-                chip.dy = abs(chip.dy) * (0.9f + Random.nextFloat() * 0.2f)
-            } else if (chip.y >= maxY) {
-                chip.y = maxY
-                chip.dy = -abs(chip.dy) * (0.9f + Random.nextFloat() * 0.2f)
-            }
-            
-            // Clamp rotation to reasonable range
-            chip.rotation = chip.rotation.coerceIn(-15f, 15f)
-            
-            // Apply position and rotation
-            chip.view.translationX = chip.x
-            chip.view.translationY = chip.y
-            chip.view.rotation = chip.rotation
+            // Apply positions
+            chip.view.translationX = chip.baseX + driftOffset
+            chip.view.translationY = rawY + bobOffset
         }
     }
 
@@ -235,12 +242,12 @@ class EmptyStateAnimator(
         
         return TextView(context).apply {
             text = "${chip.emoji}  ${chip.name}"
-            textSize = 18f  // Larger text
+            textSize = 18f
             typeface = Typeface.create("sans-serif-bold", Typeface.BOLD)
             setTextColor(if (chip.darkText) Color.BLACK else Color.WHITE)
             setBackgroundResource(chip.backgroundRes)
             
-            // Larger padding for bigger chips
+            // Padding for the pill shape
             val hPadding = (22 * density).toInt()
             val vPadding = (14 * density).toInt()
             setPadding(hPadding, vPadding, hPadding, vPadding)
@@ -249,14 +256,12 @@ class EmptyStateAnimator(
             maxLines = 1
             isSingleLine = true
             
-            // Use FrameLayout.LayoutParams since we're adding to a FrameLayout
             layoutParams = FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
             
-            // Add shadow for depth
-            elevation = 6 * density
+            // No shadow - clean flat look
         }
     }
 }
