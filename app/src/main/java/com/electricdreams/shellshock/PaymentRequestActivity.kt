@@ -19,6 +19,7 @@ import com.electricdreams.shellshock.core.util.MintManager
 import com.electricdreams.shellshock.core.worker.BitcoinPriceWorker
 import com.electricdreams.shellshock.core.util.CurrencyManager
 import com.electricdreams.shellshock.feature.history.PaymentsHistoryActivity
+import com.electricdreams.shellshock.feature.tips.TipSelectionActivity
 import com.electricdreams.shellshock.ndef.CashuPaymentHelper
 import com.electricdreams.shellshock.ndef.NdefHostCardEmulationService
 import com.electricdreams.shellshock.payment.LightningMintHandler
@@ -44,6 +45,9 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var nfcReadingOverlay: View
     private lateinit var lightningLoadingSpinner: View
     private lateinit var lightningLogoCard: View
+    
+    // Tip-related views
+    private lateinit var tipInfoText: TextView
 
     // HCE mode for deciding which payload to emulate (Cashu vs Lightning)
     private enum class HceMode { CASHU, LIGHTNING }
@@ -52,6 +56,12 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var bitcoinPriceWorker: BitcoinPriceWorker? = null
     private var hcePaymentRequest: String? = null
     private var formattedAmountString: String = ""
+    
+    // Tip state (received from TipSelectionActivity)
+    private var tipAmountSats: Long = 0
+    private var tipPercentage: Int = 0
+    private var baseAmountSats: Long = 0
+    private var baseFormattedAmount: String = ""
 
     // Current HCE mode (defaults to Cashu)
     private var currentHceMode: HceMode = HceMode.CASHU
@@ -179,6 +189,10 @@ class PaymentRequestActivity : AppCompatActivity() {
         // Calculate and display converted amount
         updateConvertedAmount(formattedAmountString)
 
+        // Read tip info from intent BEFORE creating pending payment
+        // This must happen before createPendingPayment() so tip data is included
+        readTipInfoFromIntent()
+
         // Set up buttons
         closeButton.setOnClickListener {
             Log.d(TAG, "Payment cancelled by user")
@@ -196,9 +210,13 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
 
         // Create pending payment entry if this is a new payment (not resuming)
+        // This now includes tip info since readTipInfoFromIntent() was called first
         if (!isResumingPayment) {
             createPendingPayment()
         }
+        
+        // Set up tip display UI (after pending payment is created)
+        setupTipDisplay()
 
         // Initialize all payment modes (NDEF, Nostr, Lightning)
         initializePaymentRequest()
@@ -209,21 +227,52 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
     }
 
-    private fun createPendingPayment() {
-        // Parse the formatted amount string to extract the exact entered amount
-        // This avoids precision loss from sats→fiat→sats round-trip conversion
-        val parsedAmount = Amount.parse(formattedAmountString)
+    /**
+     * Read tip info from intent extras.
+     * Called BEFORE createPendingPayment() so tip data is available.
+     */
+    private fun readTipInfoFromIntent() {
+        tipAmountSats = intent.getLongExtra(TipSelectionActivity.EXTRA_TIP_AMOUNT_SATS, 0)
+        tipPercentage = intent.getIntExtra(TipSelectionActivity.EXTRA_TIP_PERCENTAGE, 0)
+        baseAmountSats = intent.getLongExtra(TipSelectionActivity.EXTRA_BASE_AMOUNT_SATS, 0)
+        baseFormattedAmount = intent.getStringExtra(TipSelectionActivity.EXTRA_BASE_FORMATTED_AMOUNT) ?: ""
         
+        if (tipAmountSats > 0) {
+            Log.d(TAG, "Read tip info from intent: tipAmount=$tipAmountSats, tipPercent=$tipPercentage%, baseAmount=$baseAmountSats")
+        }
+    }
+
+    private fun createPendingPayment() {
+        // Determine the entry unit and entered amount
+        // If tip is present, use the BASE amount (what was originally entered)
+        // If no tip, parse from formattedAmountString
         val entryUnit: String
         val enteredAmount: Long
         
-        if (parsedAmount != null) {
-            entryUnit = if (parsedAmount.currency == Currency.BTC) "sat" else parsedAmount.currency.name
-            enteredAmount = parsedAmount.value
+        if (tipAmountSats > 0 && baseAmountSats > 0) {
+            // Tip is present - use base amounts for accounting
+            // Parse base formatted amount to get the original entry unit
+            val parsedBase = Amount.parse(baseFormattedAmount)
+            if (parsedBase != null) {
+                entryUnit = if (parsedBase.currency == Currency.BTC) "sat" else parsedBase.currency.name
+                enteredAmount = parsedBase.value
+            } else {
+                // Fallback: use sats for base amount
+                entryUnit = "sat"
+                enteredAmount = baseAmountSats
+            }
+            Log.d(TAG, "Creating pending payment with tip: base=$enteredAmount $entryUnit, tip=$tipAmountSats sats, total=$paymentAmount sats")
         } else {
-            // Fallback if parsing fails (shouldn't happen with valid formatted amounts)
-            entryUnit = "sat"
-            enteredAmount = paymentAmount
+            // No tip - parse the formatted amount string
+            val parsedAmount = Amount.parse(formattedAmountString)
+            if (parsedAmount != null) {
+                entryUnit = if (parsedAmount.currency == Currency.BTC) "sat" else parsedAmount.currency.name
+                enteredAmount = parsedAmount.value
+            } else {
+                // Fallback if parsing fails (shouldn't happen with valid formatted amounts)
+                entryUnit = "sat"
+                enteredAmount = paymentAmount
+            }
         }
 
         val bitcoinPrice = bitcoinPriceWorker?.getCurrentPrice()?.takeIf { it > 0 }
@@ -237,9 +286,16 @@ class PaymentRequestActivity : AppCompatActivity() {
             paymentRequest = null, // Will be set after payment request is created
             formattedAmount = formattedAmountString,
             checkoutBasketJson = checkoutBasketJson,
+            tipAmountSats = tipAmountSats,
+            tipPercentage = tipPercentage,
         )
 
-        Log.d(TAG, "Created pending payment with id=$pendingPaymentId, hasBasket=${checkoutBasketJson != null}")
+        Log.d(TAG, "✅ CREATED PENDING PAYMENT: id=$pendingPaymentId")
+        Log.d(TAG, "   💰 Total amount: $paymentAmount sats")
+        Log.d(TAG, "   📊 Base amount: $enteredAmount $entryUnit")  
+        Log.d(TAG, "   💸 Tip: $tipAmountSats sats ($tipPercentage%)")
+        Log.d(TAG, "   🛒 Has basket: ${checkoutBasketJson != null}")
+        Log.d(TAG, "   📱 Formatted: $formattedAmountString")
     }
 
     private fun updateConvertedAmount(formattedAmountString: String) {
@@ -679,6 +735,31 @@ class PaymentRequestActivity : AppCompatActivity() {
             putExtra(Intent.EXTRA_TEXT, paymentRequest)
         }
         startActivity(Intent.createChooser(shareIntent, "Share Payment Request"))
+    }
+
+    /**
+     * Set up tip display UI.
+     * Tip info was already read from intent in readTipInfoFromIntent().
+     * This just sets up the visual display.
+     */
+    private fun setupTipDisplay() {
+        tipInfoText = findViewById(R.id.tip_info_text)
+        
+        // If we have tip info, show it below the converted amount
+        if (tipAmountSats > 0) {
+            val tipAmount = Amount(tipAmountSats, Currency.BTC)
+            val tipText = if (tipPercentage > 0) {
+                "includes $tipAmount tip ($tipPercentage%)"
+            } else {
+                "includes $tipAmount tip"
+            }
+            tipInfoText.text = tipText
+            tipInfoText.visibility = View.VISIBLE
+            
+            Log.d(TAG, "Displaying tip info: $tipAmountSats sats ($tipPercentage%)")
+        } else {
+            tipInfoText.visibility = View.GONE
+        }
     }
 
     /**

@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_bg_white">
+
+    <!-- Close Button (top left) -->
+    <ImageButton
+        android:id="@+id/close_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_close"
+        android:contentDescription="Close"
+        app:tint="@color/color_text_primary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Order Total Label -->
+    <TextView
+        android:id="@+id/order_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Order Total"
+        android:textColor="@color/color_text_secondary"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/close_button" />
+
+    <!-- Large Amount Display -->
+    <TextView
+        android:id="@+id/amount_display"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:text="$25.00"
+        android:textColor="@color/color_text_primary"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:maxLines="1"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="28sp"
+        app:autoSizeMaxTextSize="48sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/order_label" />
+
+    <!-- Converted Amount -->
+    <TextView
+        android:id="@+id/converted_amount_display"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text="₿ 42,500"
+        android:textColor="@color/color_text_secondary"
+        android:textSize="16sp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/amount_display" />
+
+    <!-- Question Text -->
+    <TextView
+        android:id="@+id/question_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="Would you like to add a tip?"
+        android:textColor="@color/color_text_primary"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/converted_amount_display" />
+
+    <!-- Tip Options Container -->
+    <LinearLayout
+        android:id="@+id/tip_options_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="top|center_horizontal"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/question_text"
+        app:layout_constraintBottom_toTopOf="@id/confirm_button">
+
+        <!-- Preset Buttons Container (2x2 grid) -->
+        <LinearLayout
+            android:id="@+id/preset_buttons_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <!-- Custom Tip Button -->
+        <LinearLayout
+            android:id="@+id/custom_tip_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:paddingVertical="18dp"
+            android:paddingHorizontal="16dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_tip_button_large"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <TextView
+                android:id="@+id/custom_tip_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Custom Tip"
+                android:textColor="@color/color_text_primary"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/custom_tip_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Enter amount"
+                android:textColor="@color/color_text_secondary"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <!-- No Tip Button -->
+        <TextView
+            android:id="@+id/no_tip_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:paddingHorizontal="48dp"
+            android:paddingVertical="14dp"
+            android:text="No Tip"
+            android:textColor="@color/color_text_secondary"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:background="?attr/selectableItemBackground" />
+
+    </LinearLayout>
+
+    <!-- Custom Input Container (hidden by default) -->
+    <LinearLayout
+        android:id="@+id/custom_input_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="16dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/question_text"
+        app:layout_constraintBottom_toTopOf="@id/custom_buttons_container">
+
+        <!-- Custom Amount Display -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <!-- Currency Symbol (before amount) -->
+            <TextView
+                android:id="@+id/custom_currency_prefix"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="$"
+                android:textColor="@color/color_text_primary"
+                android:textSize="48sp"
+                android:textStyle="bold"
+                android:includeFontPadding="false" />
+
+            <TextView
+                android:id="@+id/custom_amount_display"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@color/color_text_primary"
+                android:textSize="56sp"
+                android:textStyle="bold"
+                android:includeFontPadding="false" />
+
+        </LinearLayout>
+
+        <!-- Currency Toggle Button -->
+        <TextView
+            android:id="@+id/custom_currency_toggle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:text="Switch to ₿"
+            android:textColor="@color/color_accent_blue"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:background="?attr/selectableItemBackground" />
+
+        <!-- Keypad -->
+        <GridLayout
+            android:id="@+id/custom_keypad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:columnCount="3"
+            android:rowCount="4" />
+
+    </LinearLayout>
+
+    <!-- Custom Mode Buttons Container -->
+    <LinearLayout
+        android:id="@+id/custom_buttons_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="24dp"
+        android:paddingBottom="24dp"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- Back Button - starts full width, shrinks when Confirm appears -->
+        <Button
+            android:id="@+id/custom_back_button"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:text="Back"
+            android:textAllCaps="false"
+            android:textColor="@color/color_bg_white"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_button_secondary_gray" />
+
+        <!-- Confirm Button - hidden initially, appears with animation -->
+        <Button
+            android:id="@+id/custom_confirm_button"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="0"
+            android:layout_marginStart="0dp"
+            android:text="Confirm"
+            android:textAllCaps="false"
+            android:textColor="@color/color_bg_white"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_button_primary_green"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+    <!-- Main Confirm Button (bottom, for preset selections) -->
+    <Button
+        android:id="@+id/confirm_button"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginBottom="24dp"
+        android:text="Confirm"
+        android:textAllCaps="false"
+        android:textColor="@color/color_bg_white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:background="@drawable/bg_button_primary_green"
+        android:enabled="false"
+        android:alpha="0.4"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

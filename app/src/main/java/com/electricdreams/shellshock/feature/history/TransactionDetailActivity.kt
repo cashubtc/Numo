@@ -35,6 +35,8 @@ class TransactionDetailActivity : AppCompatActivity() {
     private var paymentType: String? = null
     private var lightningInvoice: String? = null
     private var checkoutBasketJson: String? = null
+    private var tipAmountSats: Long = 0
+    private var tipPercentage: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +58,8 @@ class TransactionDetailActivity : AppCompatActivity() {
         paymentType = intent.getStringExtra(EXTRA_TRANSACTION_PAYMENT_TYPE)
         lightningInvoice = intent.getStringExtra(EXTRA_TRANSACTION_LIGHTNING_INVOICE)
         checkoutBasketJson = intent.getStringExtra(EXTRA_CHECKOUT_BASKET_JSON)
+        tipAmountSats = intent.getLongExtra(EXTRA_TRANSACTION_TIP_AMOUNT, 0)
+        tipPercentage = intent.getIntExtra(EXTRA_TRANSACTION_TIP_PERCENTAGE, 0)
 
         // Create entry object (normalize nullable unit fields via Kotlin defaults)
         entry = PaymentHistoryEntry(
@@ -68,7 +72,17 @@ class TransactionDetailActivity : AppCompatActivity() {
             bitcoinPrice = bitcoinPrice,
             mintUrl = mintUrl,
             paymentRequest = paymentRequest,
+            tipAmountSats = tipAmountSats,
+            tipPercentage = tipPercentage,
         )
+
+        // DEBUG: Log received tip info
+        android.util.Log.d("TransactionDetailActivity", "🧾 TRANSACTION DETAIL DEBUG:")
+        android.util.Log.d("TransactionDetailActivity", "   💰 Total amount: $amount sats")
+        android.util.Log.d("TransactionDetailActivity", "   📊 Entered amount: $enteredAmount ${entryUnit ?: "null"}")
+        android.util.Log.d("TransactionDetailActivity", "   💸 Tip from intent: $tipAmountSats sats ($tipPercentage%)")
+        android.util.Log.d("TransactionDetailActivity", "   💸 Tip from entry: ${entry.tipAmountSats} sats (${entry.tipPercentage}%)")
+        android.util.Log.d("TransactionDetailActivity", "   🧮 Calculated base: ${entry.getBaseAmountSats()} sats")
 
         setupViews()
     }
@@ -107,7 +121,7 @@ class TransactionDetailActivity : AppCompatActivity() {
             }
         }
 
-        // Amount display - show primary and secondary amounts based on basket type
+        // Amount display - show BASE amount (excluding tip) for proper accounting
         val amountText: TextView = findViewById(R.id.detail_amount)
         val amountSubtitleText: TextView = findViewById(R.id.detail_amount_subtitle)
         val amountValueText: TextView = findViewById(R.id.detail_amount_value)
@@ -118,12 +132,14 @@ class TransactionDetailActivity : AppCompatActivity() {
             it.hasMixedPriceTypes() || it.getFiatItems().isEmpty() 
         } ?: (entry.getEntryUnit() == "sat")
         
-        val satAmount = Amount(entry.amount, Amount.Currency.BTC)
+        // Use BASE amount (excluding tip) for display - this is what was sold
+        val baseAmountSats = entry.getBaseAmountSats()
+        val baseSatAmount = Amount(baseAmountSats, Amount.Currency.BTC)
         
         if (showSatsAsPrimary) {
-            // Primary: Sats
-            amountText.text = satAmount.toString()
-            amountValueText.text = satAmount.toString()
+            // Primary: Sats (base amount)
+            amountText.text = baseSatAmount.toString()
+            amountValueText.text = baseSatAmount.toString()
             
             // Secondary: Fiat equivalent
             if (entry.enteredAmount > 0 && entry.getEntryUnit() != "sat") {
@@ -135,14 +151,14 @@ class TransactionDetailActivity : AppCompatActivity() {
                 amountSubtitleText.visibility = View.GONE
             }
         } else {
-            // Primary: Fiat
+            // Primary: Fiat (entered amount - which is the base amount)
             val entryCurrency = Amount.Currency.fromCode(entry.getEntryUnit())
             val fiatAmount = Amount(entry.enteredAmount, entryCurrency)
             amountText.text = fiatAmount.toString()
             amountValueText.text = fiatAmount.toString()
             
-            // Secondary: Sats paid
-            amountSubtitleText.text = satAmount.toString()
+            // Secondary: Sats paid (base amount, not total)
+            amountSubtitleText.text = baseSatAmount.toString()
             amountSubtitleText.visibility = View.VISIBLE
         }
 
@@ -221,6 +237,49 @@ class TransactionDetailActivity : AppCompatActivity() {
         } else {
             bitcoinPriceRow.visibility = View.GONE
             bitcoinPriceDivider.visibility = View.GONE
+        }
+
+        // Tip Row (shown only if tip was added)
+        val tipRow: View = findViewById(R.id.tip_row)
+        val tipLabel: TextView = findViewById(R.id.tip_label)
+        val tipAmountText: TextView = findViewById(R.id.detail_tip_amount)
+        val tipFiatRow: View = findViewById(R.id.tip_fiat_row)
+        val tipFiatText: TextView = findViewById(R.id.detail_tip_fiat)
+        val tipDivider: View = findViewById(R.id.tip_divider)
+        val totalPaidRow: View = findViewById(R.id.total_paid_row)
+        val totalPaidText: TextView = findViewById(R.id.detail_total_paid)
+        val totalPaidDivider: View = findViewById(R.id.total_paid_divider)
+
+        // FIXED: Use entry.tipAmountSats (from stored data) not local tipAmountSats (from intent)
+        if (entry.tipAmountSats > 0) {
+            // Show tip row with label including percentage if applicable
+            tipLabel.text = if (entry.tipPercentage > 0) "Added tip (${entry.tipPercentage}%)" else "Added tip"
+            tipAmountText.text = Amount(entry.tipAmountSats, Amount.Currency.BTC).toString()
+            tipRow.visibility = View.VISIBLE
+            tipDivider.visibility = View.VISIBLE
+
+            // Show fiat equivalent if we have bitcoin price
+            if (btcPrice != null && btcPrice > 0) {
+                val tipFiatValue = (entry.tipAmountSats.toDouble() / 100_000_000.0) * btcPrice * 100 // cents
+                val entryCurrency = Amount.Currency.fromCode(entry.getEntryUnit())
+                val tipFiatAmount = Amount(tipFiatValue.toLong(), entryCurrency)
+                tipFiatText.text = "≈ $tipFiatAmount"
+                tipFiatRow.visibility = View.VISIBLE
+            } else {
+                tipFiatRow.visibility = View.GONE
+            }
+
+            // Show total paid (base + tip)
+            val totalAmount = Amount(entry.amount, Amount.Currency.BTC)
+            totalPaidText.text = totalAmount.toString()
+            totalPaidRow.visibility = View.VISIBLE
+            totalPaidDivider.visibility = View.VISIBLE
+        } else {
+            tipRow.visibility = View.GONE
+            tipFiatRow.visibility = View.GONE
+            tipDivider.visibility = View.GONE
+            totalPaidRow.visibility = View.GONE
+            totalPaidDivider.visibility = View.GONE
         }
 
         // Lightning Invoice section
@@ -309,6 +368,10 @@ class TransactionDetailActivity : AppCompatActivity() {
             putExtra(BasketReceiptActivity.EXTRA_TOTAL_SATOSHIS, entry.amount)
             putExtra(BasketReceiptActivity.EXTRA_ENTERED_AMOUNT, entry.enteredAmount)
             putExtra(BasketReceiptActivity.EXTRA_ENTERED_CURRENCY, entry.getEntryUnit())
+            
+            // Pass tip information
+            putExtra(BasketReceiptActivity.EXTRA_TIP_AMOUNT_SATS, entry.tipAmountSats)
+            putExtra(BasketReceiptActivity.EXTRA_TIP_PERCENTAGE, entry.tipPercentage)
         }
         startActivity(intent)
     }
@@ -410,5 +473,7 @@ class TransactionDetailActivity : AppCompatActivity() {
         const val EXTRA_TRANSACTION_PAYMENT_TYPE = "transaction_payment_type"
         const val EXTRA_TRANSACTION_LIGHTNING_INVOICE = "transaction_lightning_invoice"
         const val EXTRA_CHECKOUT_BASKET_JSON = "checkout_basket_json"
+        const val EXTRA_TRANSACTION_TIP_AMOUNT = "transaction_tip_amount"
+        const val EXTRA_TRANSACTION_TIP_PERCENTAGE = "transaction_tip_percentage"
     }
 }

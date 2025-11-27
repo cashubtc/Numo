@@ -70,16 +70,32 @@
         android:id="@+id/converted_amount_display"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="4dp"
         android:text=""
         android:textColor="@color/color_text_secondary"
         android:textSize="16sp"
         android:textStyle="normal"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/qr_card"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/large_amount_display" />
+
+    <!-- Tip Info Text (shown when tip was added) -->
+    <TextView
+        android:id="@+id/tip_info_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="20dp"
+        android:text="includes ₿100 tip (15%)"
+        android:textColor="@color/color_success_green"
+        android:textSize="14sp"
+        android:textStyle="normal"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/qr_card"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/converted_amount_display" />
 
     <!-- QR Code Card -->
     <FrameLayout
@@ -91,7 +107,7 @@
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/converted_amount_display"
+        app:layout_constraintTop_toBottomOf="@id/tip_info_text"
         app:layout_constraintBottom_toTopOf="@id/icons_container"
         app:layout_constraintVertical_chainStyle="packed"
         app:layout_constraintVertical_bias="0.5">
@@ -176,7 +192,7 @@
         android:id="@+id/icons_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         app:layout_constraintEnd_toEndOf="parent"
@@ -201,7 +217,7 @@
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Status Text (Hidden or subtle) -->
+    <!-- Status Text (Hidden) -->
     <TextView
         android:id="@+id/payment_status_text"
         android:layout_width="wrap_content"

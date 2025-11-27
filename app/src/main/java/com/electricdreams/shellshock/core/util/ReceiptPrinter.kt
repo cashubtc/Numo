@@ -53,6 +53,9 @@ class ReceiptPrinter(private val context: Context) {
         val totalSatoshis: Long = 0,
         val enteredAmount: Long = 0, // in minor units (cents)
         val enteredCurrency: String = "USD",
+        // Tip information
+        val tipAmountSats: Long = 0,
+        val tipPercentage: Int = 0,
     )
 
     /**
@@ -243,26 +246,40 @@ class ReceiptPrinter(private val context: Context) {
             }
         }
 
-        // GRAND TOTAL
+        // GRAND TOTAL - show BASE amount (excluding tip) for accounting
+        val baseSats = totalSats - data.tipAmountSats
+        val baseFiat = getTotalFiatIncludingSatsConversion(data) // enteredAmount is already base
+        
         sb.appendLine()
         if (showSatsAsPrimary || (basket == null && data.enteredAmount == 0L)) {
-            // Primary: Sats
-            sb.appendLine(leftRight("TOTAL:", formatSats(totalSats)))
+            // Primary: Sats (base amount)
+            sb.appendLine(leftRight("TOTAL:", formatSats(baseSats)))
             
             // Secondary: Fiat equivalent
-            val totalFiat = getTotalFiatIncludingSatsConversion(data)
-            if (totalFiat > 0) {
-                sb.appendLine(leftRight("  (equivalent):", "≈ ${formatFiat(totalFiat)}"))
+            if (baseFiat > 0) {
+                sb.appendLine(leftRight("  (equivalent):", "≈ ${formatFiat(baseFiat)}"))
             }
         } else {
-            // Primary: Fiat
-            val totalFiat = getTotalFiatIncludingSatsConversion(data)
-            sb.appendLine(leftRight("TOTAL:", formatFiat(totalFiat)))
+            // Primary: Fiat (base amount)
+            sb.appendLine(leftRight("TOTAL:", formatFiat(baseFiat)))
             
             // Secondary: Sats
-            sb.appendLine(leftRight("  (paid):", formatSats(totalSats)))
+            sb.appendLine(leftRight("  (paid):", formatSats(baseSats)))
         }
         sb.appendLine()
+
+        // Add tip as separate line AFTER total (not included in total for accounting)
+        if (data.tipAmountSats > 0) {
+            sb.appendLine(line())
+            val tipLabel = if (data.tipPercentage > 0) {
+                "Tip (${data.tipPercentage}%):"
+            } else {
+                "Tip:"
+            }
+            sb.appendLine(leftRight(tipLabel, formatSats(data.tipAmountSats)))
+            sb.appendLine(leftRight("TOTAL PAID:", formatSats(totalSats)))
+            sb.appendLine()
+        }
 
         // Bitcoin price at time of transaction
         data.bitcoinPrice?.let { price ->
@@ -424,18 +441,40 @@ class ReceiptPrinter(private val context: Context) {
                 }
                 append("<div class=\"divider\"></div>")
             }
+            
+            // Note: tip is shown AFTER total in HTML, not in totalsHtml
         }
 
-        // Primary/secondary amount display
+        // Use BASE amounts (excluding tip) for the total - tip is shown separately
+        val baseSats = totalSats - data.tipAmountSats
+        val baseFiat = totalFiat // enteredAmount is already base
+
+        // Primary/secondary amount display (BASE amounts for accounting)
         val primaryTotal: String
         val secondaryTotal: String
         if (showSatsAsPrimary || (basket == null && data.enteredAmount == 0L)) {
-            primaryTotal = formatSats(totalSats)
-            secondaryTotal = if (totalFiat > 0) "≈ ${formatFiat(totalFiat)}" else ""
+            primaryTotal = formatSats(baseSats)
+            secondaryTotal = if (baseFiat > 0) "≈ ${formatFiat(baseFiat)}" else ""
         } else {
-            primaryTotal = formatFiat(totalFiat)
-            secondaryTotal = formatSats(totalSats)
+            primaryTotal = formatFiat(baseFiat)
+            secondaryTotal = formatSats(baseSats)
         }
+        
+        // Tip section HTML (shown after total)
+        val tipSectionHtml = if (data.tipAmountSats > 0) {
+            val tipLabel = if (data.tipPercentage > 0) "Tip (${data.tipPercentage}%)" else "Tip"
+            """
+            <div class="divider"></div>
+            <div class="row" style="color: #00C244; font-weight: bold;">
+                <span>$tipLabel:</span>
+                <span>${formatSats(data.tipAmountSats)}</span>
+            </div>
+            <div class="row total-row">
+                <span>TOTAL PAID:</span>
+                <span>${formatSats(totalSats)}</span>
+            </div>
+            """
+        } else ""
         
         return """
 <!DOCTYPE html>
@@ -547,6 +586,8 @@ class ReceiptPrinter(private val context: Context) {
         <span>$secondaryTotal</span>
     </div>
     """ else ""}
+    
+    $tipSectionHtml
     
     ${data.bitcoinPrice?.let { """
     <div class="row small" style="margin-top: 4px;">

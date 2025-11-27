@@ -43,12 +43,16 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<PaymentsHistoryAdapter.ViewH
         val context = holder.itemView.context
 
         // Display amount in the unit it was entered
+        // Use BASE amount (excluding tip) for proper accounting display
         val formattedAmount = if (entry.getEntryUnit() != "sat") {
+            // Fiat entry - enteredAmount is already the base amount
             val entryCurrency = Amount.Currency.fromCode(entry.getEntryUnit())
             val entryAmount = Amount(entry.enteredAmount, entryCurrency)
             entryAmount.toString()
         } else {
-            val satAmount = Amount(entry.amount, Amount.Currency.BTC)
+            // Sat entry - use base amount (excluding tip)
+            val baseAmountSats = entry.getBaseAmountSats()
+            val satAmount = Amount(baseAmountSats, Amount.Currency.BTC)
             satAmount.toString()
         }
 

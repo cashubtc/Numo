@@ -370,6 +370,107 @@
                     android:layout_marginBottom="12dp"
                     android:background="@color/color_divider" />
 
+                <!-- Tip Row (shown only if tip was added) -->
+                <LinearLayout
+                    android:id="@+id/tip_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/tip_label"
+                        style="@style/Text.BodyBold"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Tip"
+                        android:textColor="@color/color_success_green" />
+
+                    <TextView
+                        android:id="@+id/detail_tip_amount"
+                        style="@style/Text.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/color_success_green"
+                        android:text="₿500" />
+
+                </LinearLayout>
+
+                <!-- Tip Fiat Equivalent Row -->
+                <LinearLayout
+                    android:id="@+id/tip_fiat_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="4dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        style="@style/Text.Body"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="  (equivalent)"
+                        android:textColor="@color/color_text_tertiary"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:id="@+id/detail_tip_fiat"
+                        style="@style/Text.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/color_text_tertiary"
+                        android:textSize="13sp"
+                        android:text="≈ $0.50" />
+
+                </LinearLayout>
+
+                <!-- Tip Divider -->
+                <View
+                    android:id="@+id/tip_divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@color/color_divider"
+                    android:visibility="gone" />
+
+                <!-- Total Paid Row (shown only if tip was added) -->
+                <LinearLayout
+                    android:id="@+id/total_paid_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+
+                    <TextView
+                        style="@style/Text.BodyBold"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Total Paid" />
+
+                    <TextView
+                        android:id="@+id/detail_total_paid"
+                        style="@style/Text.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/color_text_primary"
+                        android:text="₿11,000" />
+
+                </LinearLayout>
+
+                <!-- Total Paid Divider -->
+                <View
+                    android:id="@+id/total_paid_divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="@color/color_divider"
+                    android:visibility="gone" />
+
                 <!-- Mint URL Row -->
                 <LinearLayout
                     android:layout_width="match_parent"

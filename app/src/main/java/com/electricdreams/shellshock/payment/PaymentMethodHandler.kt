@@ -6,6 +6,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.shellshock.PaymentRequestActivity
 import com.electricdreams.shellshock.core.util.MintManager
+import com.electricdreams.shellshock.feature.tips.TipSelectionActivity
+import com.electricdreams.shellshock.feature.tips.TipsManager
 import com.electricdreams.shellshock.ndef.CashuPaymentHelper
 import com.electricdreams.shellshock.ndef.NdefHostCardEmulationService
 
@@ -17,12 +19,30 @@ class PaymentMethodHandler(
 ) {
 
     /** Show payment method dialog for the specified amount */
-    fun showPaymentMethodDialog(amount: Long, formattedAmount: String) {
-        val intent = Intent(activity, PaymentRequestActivity::class.java).apply {
-            putExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, amount)
-            putExtra(PaymentRequestActivity.EXTRA_FORMATTED_AMOUNT, formattedAmount)
+    fun showPaymentMethodDialog(amount: Long, formattedAmount: String, checkoutBasketJson: String? = null) {
+        val tipsManager = TipsManager.getInstance(activity)
+        
+        if (tipsManager.tipsEnabled) {
+            // Route through tip selection activity first
+            val intent = Intent(activity, TipSelectionActivity::class.java).apply {
+                putExtra(TipSelectionActivity.EXTRA_PAYMENT_AMOUNT, amount)
+                putExtra(TipSelectionActivity.EXTRA_FORMATTED_AMOUNT, formattedAmount)
+                checkoutBasketJson?.let {
+                    putExtra(TipSelectionActivity.EXTRA_CHECKOUT_BASKET_JSON, it)
+                }
+            }
+            activity.startActivityForResult(intent, REQUEST_CODE_PAYMENT)
+        } else {
+            // Go directly to payment request
+            val intent = Intent(activity, PaymentRequestActivity::class.java).apply {
+                putExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, amount)
+                putExtra(PaymentRequestActivity.EXTRA_FORMATTED_AMOUNT, formattedAmount)
+                checkoutBasketJson?.let {
+                    putExtra(PaymentRequestActivity.EXTRA_CHECKOUT_BASKET_JSON, it)
+                }
+            }
+            activity.startActivityForResult(intent, REQUEST_CODE_PAYMENT)
         }
-        activity.startActivityForResult(intent, REQUEST_CODE_PAYMENT)
     }
 
     /** Proceed with NDEF payment (HCE) - preserved but not currently invoked in main flow */

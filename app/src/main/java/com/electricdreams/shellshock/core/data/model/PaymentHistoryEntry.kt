@@ -78,7 +78,30 @@ data class PaymentHistoryEntry(
     /** Serialized checkout basket JSON (if payment originated from item checkout) */
     @SerializedName("checkoutBasketJson")
     val checkoutBasketJson: String? = null,
+
+    /** Tip amount in satoshis (separate from main amount for accounting) */
+    @SerializedName("tipAmountSats")
+    val tipAmountSats: Long = 0,
+
+    /** Tip percentage selected (0 if custom amount, or preset like 5, 10, 15, 20) */
+    @SerializedName("tipPercentage")
+    val tipPercentage: Int = 0,
 ) {
+
+    /** Check if this payment includes a tip */
+    fun hasTip(): Boolean = tipAmountSats > 0
+
+    /** Get the base amount (excluding tip) in satoshis */
+    fun getBaseAmountSats(): Long = amount - tipAmountSats
+
+    /** Get tip formatted for display (e.g., "₿500" or "5%") */
+    fun getTipDisplayString(): String {
+        return if (tipAmountSats > 0) {
+            com.electricdreams.shellshock.core.model.Amount(tipAmountSats, com.electricdreams.shellshock.core.model.Amount.Currency.BTC).toString()
+        } else {
+            ""
+        }
+    }
 
     /**
      * Get the checkout basket if this payment originated from item checkout.
@@ -180,6 +203,8 @@ data class PaymentHistoryEntry(
             paymentRequest: String?,
             formattedAmount: String?,
             checkoutBasketJson: String? = null,
+            tipAmountSats: Long = 0,
+            tipPercentage: Int = 0,
         ): PaymentHistoryEntry {
             return PaymentHistoryEntry(
                 id = UUID.randomUUID().toString(),
@@ -196,6 +221,8 @@ data class PaymentHistoryEntry(
                 paymentType = null,
                 formattedAmount = formattedAmount,
                 checkoutBasketJson = checkoutBasketJson,
+                tipAmountSats = tipAmountSats,
+                tipPercentage = tipPercentage,
             )
         }
     }
