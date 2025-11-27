@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="@dimen/space_xl"
-            android:text="Scan to Pay"
+            android:text="@string/nfc_modern_simplified_scan_to_pay"
             android:textAppearance="@style/Text.Title" />
 
         <!-- NFC Card Indicator -->
@@ -56,14 +56,14 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:layout_marginBottom="@dimen/space_xl"
-                    android:contentDescription="Contactless payment"
+                    android:contentDescription="@string/nfc_modern_simplified_contactless_payment"
                     android:rotation="270"
                     android:src="@drawable/contactless" />
 
                 <ImageView
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:contentDescription="Cashu"
+                    android:contentDescription="@string/nfc_modern_simplified_cashu"
                     android:src="@drawable/cashu" />
             </LinearLayout>
         </FrameLayout>
@@ -74,7 +74,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="@dimen/space_l"
-            android:text="or scan QR code"
+            android:text="@string/nfc_modern_simplified_or_scan_qr_code"
             android:textAppearance="@style/Text.Caption" />
 
         <!-- QR Code Card -->
@@ -104,7 +104,7 @@
             android:layout_height="@dimen/button_height"
             android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
             android:background="@drawable/bg_button_primary_green"
-            android:text="Cancel"
+            android:text="@string/nfc_modern_simplified_cancel"
             android:textAppearance="@style/Text.Button"
             android:textColor="@color/color_bg_white" />
 

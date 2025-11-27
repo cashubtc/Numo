@@ -82,7 +82,7 @@
         android:layout_marginStart="8dp"
         android:padding="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Remove item"
+        android:contentDescription="@string/basket_compact_remove_item"
         android:src="@drawable/ic_close"
         app:tint="@color/color_icon_tertiary"
         app:layout_constraintBottom_toBottomOf="parent"

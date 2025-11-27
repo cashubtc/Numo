@@ -24,14 +24,14 @@
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_chevron_back"
-            android:contentDescription="Back"
+            android:contentDescription="@string/tips_settings_back"
             app:tint="@color/color_text_primary" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Tips"
+            android:text="@string/tips_settings_tips"
             android:textSize="20sp"
             android:textColor="@color/color_text_primary"
             android:fontFamily="sans-serif-medium"
@@ -63,7 +63,7 @@
                 android:paddingHorizontal="24dp"
                 android:paddingTop="16dp"
                 android:paddingBottom="8dp"
-                android:text="Allow customers to add a tip when paying. Tip presets will appear as quick-select buttons on the payment screen."
+                android:text="@string/tips_settings_allow_customers_to_add_a_tip_when_paying_tip_presets_will_appear_as_quick_select_buttons_on_the_payment_screen"
                 android:textSize="14sp"
                 android:textColor="@color/color_text_secondary"
                 android:lineSpacingExtra="2dp" />
@@ -88,7 +88,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Enable Tips"
+                    android:text="@string/tips_settings_enable_tips"
                     android:textSize="17sp"
                     android:textColor="@color/color_text_primary"
                     android:fontFamily="sans-serif-medium" />
@@ -114,7 +114,7 @@
                     android:paddingHorizontal="24dp"
                     android:paddingTop="24dp"
                     android:paddingBottom="8dp"
-                    android:text="TIP PRESETS"
+                    android:text="@string/tips_settings_tip_presets"
                     android:textSize="13sp"
                     android:textColor="@color/color_text_secondary"
                     android:fontFamily="sans-serif-medium"
@@ -126,7 +126,7 @@
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="24dp"
                     android:paddingBottom="12dp"
-                    android:text="Configure quick-select tip percentages. Customers can also enter a custom amount."
+                    android:text="@string/tips_settings_configure_quick_select_tip_percentages_customers_can_also_enter_a_custom_amount"
                     android:textSize="13sp"
                     android:textColor="@color/color_text_tertiary" />
 
@@ -171,7 +171,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Add Preset"
+                        android:text="@string/tips_settings_add_preset"
                         android:textSize="16sp"
                         android:textColor="@color/color_primary_green"
                         android:fontFamily="sans-serif-medium" />
@@ -192,7 +192,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Reset to Defaults"
+                        android:text="@string/tips_settings_reset_to_defaults"
                         android:textSize="16sp"
                         android:textColor="@color/color_text_secondary" />
                 </LinearLayout>

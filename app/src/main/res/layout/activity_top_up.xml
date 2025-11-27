@@ -24,7 +24,7 @@
             android:minHeight="48dp"
             android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/top_up_back"
             android:src="@drawable/ic_close"
             android:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -34,7 +34,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Top Up"
+            android:text="@string/top_up_top_up"
             android:textAppearance="@style/Text.Title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -51,7 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/margin_content_horizontal"
         android:layout_marginTop="@dimen/space_xl"
-        android:text="Enter Cashu Token"
+        android:text="@string/top_up_enter_cashu_token"
         android:textAppearance="@style/Text.Heading1"
         app:layout_constraintTop_toBottomOf="@id/toolbar_container" />
 
@@ -61,7 +61,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/margin_content_horizontal"
         android:layout_marginTop="@dimen/space_xs"
-        android:text="Paste a Cashu token to add funds to the card"
+        android:text="@string/top_up_paste_a_cashu_token_to_add_funds_to_the_card"
         android:textAppearance="@style/Text.Body"
         app:layout_constraintTop_toBottomOf="@id/instruction_text" />
 
@@ -73,7 +73,7 @@
         android:layout_marginTop="@dimen/space_l"
         android:background="@drawable/bg_search_bar"
         android:gravity="top|start"
-        android:hint="cashuA..."
+        android:hint="@string/top_up_cashua"
         android:inputType="textMultiLine"
         android:minLines="4"
         android:padding="@dimen/space_m"
@@ -91,7 +91,7 @@
         android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
         android:layout_marginBottom="@dimen/space_xl"
         android:background="@drawable/bg_button_primary_green"
-        android:text="Submit"
+        android:text="@string/top_up_submit"
         android:stateListAnimator="@null"
         android:textAppearance="@style/Text.Button"
         android:textColor="@color/color_bg_white"

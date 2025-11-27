@@ -41,7 +41,7 @@
                         android:layout_width="44dp"
                         android:layout_height="44dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Back"
+                        android:contentDescription="@string/selection_back"
                         android:padding="10dp"
                         android:src="@drawable/ic_chevron_back"
                         app:tint="@color/color_text_primary"
@@ -52,7 +52,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Checkout"
+                        android:text="@string/selection_checkout"
                         android:textColor="@color/color_text_primary"
                         android:textSize="17sp"
                         android:fontFamily="sans-serif-medium"
@@ -80,7 +80,7 @@
                         android:id="@+id/search_icon"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:contentDescription="Search"
+                        android:contentDescription="@string/selection_search"
                         android:src="@drawable/ic_search"
                         app:tint="@color/color_text_tertiary" />
 
@@ -109,7 +109,7 @@
                         android:layout_weight="1"
                         android:layout_marginStart="10dp"
                         android:background="@null"
-                        android:hint="Search items..."
+                        android:hint="@string/selection_search_items"
                         android:imeOptions="actionSearch"
                         android:inputType="text"
                         android:maxLines="1"
@@ -123,7 +123,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Scan barcode"
+                        android:contentDescription="@string/selection_scan_barcode"
                         android:padding="8dp"
                         android:src="@drawable/ic_barcode_scan"
                         app:tint="@color/color_text_secondary" />
@@ -134,7 +134,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Clear filters"
+                        android:contentDescription="@string/selection_clear_filters"
                         android:padding="10dp"
                         android:src="@drawable/ic_close_circle"
                         app:tint="@color/color_text_secondary"
@@ -194,14 +194,14 @@
                         android:layout_height="64dp"
                         android:src="@drawable/ic_shopping_bag"
                         app:tint="@color/color_icon_tertiary"
-                        android:contentDescription="No items" />
+                        android:contentDescription="@string/selection_no_items" />
 
                     <TextView
                         android:id="@+id/empty_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="No items found"
+                        android:text="@string/selection_no_items_found"
                         android:textColor="@color/color_text_secondary"
                         android:textSize="17sp"
                         android:fontFamily="sans-serif-medium" />
@@ -211,7 +211,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Add items in Settings → Items"
+                        android:text="@string/selection_add_items_in_settings_items"
                         android:textColor="@color/color_text_tertiary"
                         android:textSize="15sp"
                         android:gravity="center" />
@@ -233,13 +233,13 @@
                         android:layout_height="64dp"
                         android:src="@drawable/ic_search"
                         app:tint="@color/color_icon_tertiary"
-                        android:contentDescription="No results" />
+                        android:contentDescription="@string/selection_no_results" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="No matching items"
+                        android:text="@string/selection_no_matching_items"
                         android:textColor="@color/color_text_secondary"
                         android:textSize="17sp"
                         android:fontFamily="sans-serif-medium" />
@@ -249,7 +249,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Try a different search term"
+                        android:text="@string/selection_try_a_different_search_term"
                         android:textColor="@color/color_text_tertiary"
                         android:textSize="15sp" />
 
@@ -283,7 +283,7 @@
                         android:layout_height="20dp"
                         android:src="@drawable/ic_shopping_bag"
                         app:tint="@color/color_text_secondary"
-                        android:contentDescription="Basket" />
+                        android:contentDescription="@string/selection_basket" />
 
                     <TextView
                         android:id="@+id/basket_title"
@@ -291,7 +291,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginStart="8dp"
-                        android:text="Basket"
+                        android:text="@string/selection_basket"
                         android:textColor="@color/color_text_secondary"
                         android:textSize="13sp"
                         android:fontFamily="sans-serif-medium"
@@ -303,7 +303,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="8dp"
-                        android:text="Clear"
+                        android:text="@string/selection_clear"
                         android:textColor="@color/color_warning_red"
                         android:textSize="14sp"
                         android:fontFamily="sans-serif-medium"
@@ -341,7 +341,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Total"
+                        android:text="@string/selection_total"
                         android:textColor="@color/color_text_primary"
                         android:textSize="17sp"
                         android:fontFamily="sans-serif-medium" />
@@ -388,7 +388,7 @@
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:background="@drawable/bg_checkout_button"
-            android:text="Charge $0.00"
+            android:text="@string/selection_charge_0_00"
             android:textAllCaps="false"
             android:textColor="@color/color_bg_white"
             android:textSize="18sp"

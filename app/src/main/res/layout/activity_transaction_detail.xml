@@ -22,7 +22,7 @@
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_chevron_back"
-            android:contentDescription="Back"
+            android:contentDescription="@string/transaction_detail_back"
             android:padding="12dp"
             app:tint="@color/color_text_primary"
             app:layout_constraintStart_toStartOf="parent"
@@ -34,7 +34,7 @@
             style="@style/Text.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Transaction Details"
+            android:text="@string/transaction_detail_transaction_details"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -46,7 +46,7 @@
             android:layout_height="24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_share"
-            android:contentDescription="Share"
+            android:contentDescription="@string/transaction_detail_share"
             app:tint="@color/color_text_primary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -95,7 +95,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="16dp"
-                android:text="Payment Received" />
+                android:text="@string/transaction_detail_payment_received" />
 
             <!-- Mint Name (if available) -->
             <TextView
@@ -106,7 +106,7 @@
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="4dp"
                 android:textColor="@color/color_text_secondary"
-                android:text="From Mint" />
+                android:text="@string/transaction_detail_from_mint" />
 
             <!-- Large Amount Display -->
             <TextView
@@ -138,7 +138,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:text="Today at 11:01 PM" />
+                android:text="@string/transaction_detail_today_at_11_01_pm" />
 
             <!-- View Receipt Button (shown only for checkout transactions) -->
             <Button
@@ -149,7 +149,7 @@
                 android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
                 android:layout_marginTop="24dp"
-                android:text="View Receipt"
+                android:text="@string/transaction_detail_view_receipt"
                 android:textAllCaps="false"
                 android:textSize="16sp"
                 android:fontFamily="sans-serif-medium"
@@ -163,7 +163,7 @@
                 android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
                 android:layout_marginTop="32dp"
-                android:text="TRANSACTION DETAILS" />
+                android:text="@string/transaction_detail_transaction_details_2" />
 
             <!-- Details Container -->
             <LinearLayout
@@ -189,7 +189,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Payment Type" />
+                        android:text="@string/transaction_detail_payment_type" />
 
                     <TextView
                         android:id="@+id/detail_payment_type"
@@ -197,7 +197,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/color_text_primary"
-                        android:text="Cashu" />
+                        android:text="@string/transaction_detail_cashu" />
 
                 </LinearLayout>
 
@@ -222,7 +222,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Amount" />
+                        android:text="@string/transaction_detail_amount" />
 
                     <TextView
                         android:id="@+id/detail_amount_value"
@@ -253,7 +253,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Token Unit" />
+                        android:text="@string/transaction_detail_token_unit" />
 
                     <TextView
                         android:id="@+id/detail_token_unit"
@@ -261,7 +261,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/color_text_primary"
-                        android:text="sat" />
+                        android:text="@string/transaction_detail_sat" />
 
                 </LinearLayout>
 
@@ -284,7 +284,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Entered As" />
+                        android:text="@string/transaction_detail_entered_as" />
 
                     <TextView
                         android:id="@+id/detail_entry_unit"
@@ -292,7 +292,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/color_text_primary"
-                        android:text="USD" />
+                        android:text="@string/transaction_detail_usd" />
 
                 </LinearLayout>
 
@@ -316,7 +316,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Entered Amount" />
+                        android:text="@string/transaction_detail_entered_amount" />
 
                     <TextView
                         android:id="@+id/detail_entered_amount"
@@ -349,7 +349,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Bitcoin Price" />
+                        android:text="@string/transaction_detail_bitcoin_price" />
 
                     <TextView
                         android:id="@+id/detail_bitcoin_price"
@@ -384,7 +384,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Tip"
+                        android:text="@string/transaction_detail_tip"
                         android:textColor="@color/color_success_green" />
 
                     <TextView
@@ -411,7 +411,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="  (equivalent)"
+                        android:text="@string/transaction_detail_equivalent"
                         android:textColor="@color/color_text_tertiary"
                         android:textSize="13sp" />
 
@@ -449,7 +449,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Total Paid" />
+                        android:text="@string/transaction_detail_total_paid" />
 
                     <TextView
                         android:id="@+id/detail_total_paid"
@@ -481,7 +481,7 @@
                         style="@style/Text.BodyBold"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Mint" />
+                        android:text="@string/transaction_detail_mint" />
 
                     <TextView
                         android:id="@+id/detail_mint_url"
@@ -491,7 +491,7 @@
                         android:layout_marginTop="4dp"
                         android:textColor="@color/color_primary_green"
                         android:autoLink="web"
-                        android:text="https://mint.example.com" />
+                        android:text="@string/transaction_detail_https_mint_example_com" />
 
                 </LinearLayout>
 
@@ -507,7 +507,7 @@
                 android:layout_marginEnd="24dp"
                 android:layout_marginTop="24dp"
                 android:visibility="gone"
-                android:text="LIGHTNING INVOICE" />
+                android:text="@string/transaction_detail_lightning_invoice" />
 
             <LinearLayout
                 android:id="@+id/lightning_invoice_container"
@@ -531,7 +531,7 @@
                     android:maxLines="3"
                     android:ellipsize="middle"
                     android:textColor="@color/color_text_secondary"
-                    android:text="lnbc..." />
+                    android:text="@string/transaction_detail_lnbc" />
 
                 <TextView
                     android:id="@+id/copy_invoice_hint"
@@ -540,7 +540,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:textColor="@color/color_text_tertiary"
-                    android:text="Tap to copy invoice" />
+                    android:text="@string/transaction_detail_tap_to_copy_invoice" />
 
             </LinearLayout>
 
@@ -553,7 +553,7 @@
                 android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
                 android:layout_marginTop="24dp"
-                android:text="CASHU TOKEN" />
+                android:text="@string/transaction_detail_cashu_token" />
 
             <!-- Token Display -->
             <TextView
@@ -571,7 +571,7 @@
                 android:maxLines="4"
                 android:ellipsize="end"
                 android:textColor="@color/color_text_secondary"
-                android:text="cashuA..." />
+                android:text="@string/transaction_detail_cashua" />
 
             <!-- Payment Request Section (if available) -->
             <TextView
@@ -583,7 +583,7 @@
                 android:layout_marginEnd="24dp"
                 android:layout_marginTop="24dp"
                 android:visibility="gone"
-                android:text="PAYMENT REQUEST" />
+                android:text="@string/transaction_detail_payment_request" />
 
             <TextView
                 android:id="@+id/detail_payment_request"
@@ -617,7 +617,7 @@
                     style="@style/Widget.Button.Secondary.Outlined"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Copy Token"
+                    android:text="@string/transaction_detail_copy_token"
                     android:layout_marginBottom="12dp"/>
 
                 <Button
@@ -625,7 +625,7 @@
                     style="@style/Widget.Button.Secondary.Outlined"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Open With..."
+                    android:text="@string/transaction_detail_open_with"
                     android:layout_marginBottom="12dp"/>
 
                 <Button
@@ -633,7 +633,7 @@
                     style="@style/Widget.Button.Secondary.Outlined"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Delete Transaction"
+                    android:text="@string/transaction_detail_delete_transaction"
                     android:textColor="@color/color_warning_red"/>
 
             </LinearLayout>

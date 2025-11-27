@@ -42,7 +42,7 @@
             style="@style/Text.BodyBold"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Payment"
+            android:text="@string/payment_history_payment"
             android:maxLines="1"
             android:ellipsize="end" />
 
@@ -52,7 +52,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="Aug 24"
+            android:text="@string/payment_history_aug_24"
             android:maxLines="1"
             android:ellipsize="end" />
 
@@ -62,7 +62,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="Lightning"
+            android:text="@string/payment_history_lightning"
             android:visibility="gone"
             android:maxLines="1"
             android:ellipsize="end" />
@@ -91,7 +91,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="Pending"
+            android:text="@string/payment_history_pending"
             android:textColor="@color/color_warning"
             android:visibility="gone" />
     </LinearLayout>

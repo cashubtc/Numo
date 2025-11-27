@@ -24,7 +24,7 @@
             android:layout_width="48dp"
             android:layout_height="match_parent"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Item List"
+            android:contentDescription="@string/modern_pos_item_list"
             android:src="@drawable/ic_catalog"
             app:tint="@color/color_bg_white" />
 
@@ -40,7 +40,7 @@
             android:layout_width="48dp"
             android:layout_height="match_parent"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="History"
+            android:contentDescription="@string/modern_pos_history"
             android:src="@drawable/ic_history"
             app:tint="@color/color_bg_white" />
 
@@ -50,7 +50,7 @@
             android:layout_width="48dp"
             android:layout_height="match_parent"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Settings"
+            android:contentDescription="@string/modern_pos_settings"
             android:src="@drawable/ic_settings"
             app:tint="@color/color_bg_white" />
 
@@ -60,7 +60,7 @@
             android:layout_width="48dp"
             android:layout_height="match_parent"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="More Options"
+            android:contentDescription="@string/modern_pos_more_options"
             android:src="@drawable/ic_more_vert"
             android:visibility="gone"
             app:tint="@color/color_bg_white" />
@@ -93,7 +93,7 @@
                 android:layout_marginTop="32dp"
                 android:layout_marginBottom="8dp"
                 android:gravity="center"
-                android:text="You must enter an amount to charge"
+                android:text="@string/modern_pos_you_must_enter_an_amount_to_charge"
                 android:textColor="@color/color_bg_white"
                 android:textSize="16sp"
                 android:visibility="gone"
@@ -149,7 +149,7 @@
                     android:id="@+id/secondary_amount_display"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="$0.00 USD"
+                    android:text="@string/modern_pos_0_00_usd"
                     android:textColor="@color/color_bg_white"
                     android:textSize="22sp"
                     android:textStyle="normal" />
@@ -161,7 +161,7 @@
                     android:layout_marginStart="4dp"
                     android:background="@android:color/transparent"
                     android:clickable="false"
-                    android:contentDescription="Swap currency"
+                    android:contentDescription="@string/modern_pos_swap_currency"
                     android:focusable="false"
                     android:rotation="90"
                     android:scaleX="0.7"
@@ -195,7 +195,7 @@
             android:layout_marginHorizontal="24dp"
             android:layout_marginBottom="24dp"
             android:background="@drawable/bg_button_charge"
-            android:text="Charge"
+            android:text="@string/modern_pos_charge"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textSize="18sp"

@@ -168,7 +168,7 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@drawable/ic_add_circle"
-                        android:contentDescription="Create wallet"
+                        android:contentDescription="@string/onboarding_create_wallet"
                         app:tint="@color/color_success_green" />
 
                     <LinearLayout
@@ -231,7 +231,7 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@drawable/ic_restore"
-                        android:contentDescription="Restore wallet"
+                        android:contentDescription="@string/onboarding_restore_wallet"
                         app:tint="@color/color_accent_blue" />
 
                     <LinearLayout
@@ -307,13 +307,13 @@
                     android:src="@drawable/ic_arrow_back"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     app:tint="@color/color_text_primary"
-                    android:contentDescription="Back" />
+                    android:contentDescription="@string/onboarding_back" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Restore Wallet"
+                    android:text="@string/onboarding_restore_wallet_2"
                     android:textSize="17sp"
                     android:textColor="@color/color_text_primary"
                     android:fontFamily="sans-serif-medium"
@@ -558,13 +558,13 @@
                     android:src="@drawable/ic_arrow_back"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     app:tint="@color/color_text_primary"
-                    android:contentDescription="Back" />
+                    android:contentDescription="@string/onboarding_back" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Your Mints"
+                    android:text="@string/onboarding_your_mints"
                     android:textSize="17sp"
                     android:textColor="@color/color_text_primary"
                     android:fontFamily="sans-serif-medium"
@@ -619,7 +619,7 @@
                                 android:id="@+id/backup_status_title"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Backup Found"
+                                android:text="@string/onboarding_backup_found"
                                 android:textSize="15sp"
                                 android:textColor="@color/color_success_green"
                                 android:fontFamily="sans-serif-medium" />
@@ -629,7 +629,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
-                                android:text="Last backed up Nov 26, 2024"
+                                android:text="@string/onboarding_last_backed_up_nov_26_2024"
                                 android:textSize="13sp"
                                 android:textColor="@color/color_text_secondary" />
 

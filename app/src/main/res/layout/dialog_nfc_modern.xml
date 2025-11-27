@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="Scan NFC Card"
+            android:text="@string/nfc_modern_scan_nfc_card"
             android:textColor="@color/textColorPrimary"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -57,7 +57,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="4dp"
-                android:text="Smartcard"
+                android:text="@string/nfc_modern_smartcard"
                 android:visibility="gone" />
                 
             <Button
@@ -66,7 +66,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
-                android:text="NDEF"
+                android:text="@string/nfc_modern_ndef"
                 android:visibility="gone" />
         </LinearLayout>
             

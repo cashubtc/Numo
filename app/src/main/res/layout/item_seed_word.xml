@@ -24,7 +24,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:text="word"
+        android:text="@string/seed_word_word"
         android:textSize="15sp"
         android:textColor="@color/color_text_primary"
         android:fontFamily="monospace"

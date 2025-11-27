@@ -41,7 +41,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Copy token"
+            android:contentDescription="@string/token_history_copy_token"
             android:src="@drawable/ic_content_copy"
             android:tint="@color/color_icon_secondary" />
 
@@ -51,7 +51,7 @@
             android:layout_height="40dp"
             android:layout_marginStart="@dimen/space_xs"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Open token with..."
+            android:contentDescription="@string/token_history_open_token_with"
             android:src="@drawable/ic_open_with"
             android:tint="@color/color_icon_secondary" />
 
@@ -61,7 +61,7 @@
             android:layout_height="40dp"
             android:layout_marginStart="@dimen/space_xs"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Delete token"
+            android:contentDescription="@string/token_history_delete_token"
             android:src="@drawable/ic_delete"
             android:tint="@color/color_warning_red" />
     </LinearLayout>

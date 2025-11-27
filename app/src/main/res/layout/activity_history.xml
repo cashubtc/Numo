@@ -24,7 +24,7 @@
             android:minHeight="48dp"
             android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/history_back"
             android:src="@drawable/ic_close"
             android:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -34,7 +34,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Activity"
+            android:text="@string/history_activity"
             android:textAppearance="@style/Text.Title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -51,7 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
         android:layout_marginTop="24dp"
-        android:text="PAYMENT HISTORY"
+        android:text="@string/history_payment_history"
         app:layout_constraintTop_toBottomOf="@+id/top_bar" />
 
     <!-- List -->
@@ -71,7 +71,7 @@
         style="@style/Text.Body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="No payment history"
+        android:text="@string/history_no_payment_history"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

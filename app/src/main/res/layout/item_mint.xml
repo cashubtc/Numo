@@ -23,7 +23,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:background="@color/color_bg_surface"
-            android:contentDescription="Mint icon"
+            android:contentDescription="@string/mint_mint_icon"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_bitcoin"
             app:layout_constraintStart_toStartOf="parent"
@@ -56,7 +56,7 @@
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:button="@null"
-                    android:contentDescription="Select as Lightning mint"
+                    android:contentDescription="@string/mint_select_as_lightning_mint"
                     android:drawableStart="@drawable/ic_lightning_small"
                     android:drawablePadding="0dp"
                     android:gravity="center" />
@@ -106,7 +106,7 @@
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Remove mint"
+                android:contentDescription="@string/mint_remove_mint"
                 android:padding="6dp"
                 android:src="@drawable/ic_delete"
                 app:tint="@color/color_icon_secondary" />
@@ -139,7 +139,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Balance"
+                android:text="@string/mint_balance"
                 android:textColor="@color/color_text_secondary"
                 android:textSize="14sp" />
 
@@ -177,7 +177,7 @@
             android:layout_marginTop="12dp"
             android:minHeight="40dp"
             android:paddingHorizontal="16dp"
-            android:text="Withdraw from mint"
+            android:text="@string/mint_withdraw_from_mint"
             android:textSize="14sp"
             android:visibility="gone"
             app:cornerRadius="8dp"

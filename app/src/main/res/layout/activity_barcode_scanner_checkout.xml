@@ -32,7 +32,7 @@
             android:layout_height="44dp"
             android:layout_gravity="start"
             android:background="@drawable/bg_circle_button_dark"
-            android:contentDescription="Close"
+            android:contentDescription="@string/barcode_scanner_checkout_close"
             android:src="@drawable/ic_close"
             app:tint="@android:color/white" />
 
@@ -40,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Scan to Add"
+            android:text="@string/barcode_scanner_checkout_scan_to_add"
             android:textColor="@android:color/white"
             android:textSize="17sp"
             android:fontFamily="sans-serif-medium" />
@@ -84,7 +84,7 @@
                     android:id="@+id/item_image"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:contentDescription="Item image"
+                    android:contentDescription="@string/barcode_scanner_checkout_item_image"
                     android:scaleType="centerCrop" />
 
                 <ImageView
@@ -92,7 +92,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:layout_gravity="center"
-                    android:contentDescription="No image"
+                    android:contentDescription="@string/barcode_scanner_checkout_no_image"
                     android:src="@drawable/ic_image_placeholder"
                     app:tint="@color/color_icon_tertiary" />
             </androidx.cardview.widget.CardView>
@@ -156,7 +156,7 @@
                     android:src="@drawable/ic_minus"
                     app:tint="@color/color_text_primary"
                     android:scaleType="fitCenter"
-                    android:contentDescription="Decrease quantity" />
+                    android:contentDescription="@string/barcode_scanner_checkout_decrease_quantity" />
 
                 <TextView
                     android:id="@+id/item_quantity"
@@ -177,7 +177,7 @@
                     android:src="@drawable/ic_plus"
                     app:tint="@color/color_text_primary"
                     android:scaleType="fitCenter"
-                    android:contentDescription="Increase quantity" />
+                    android:contentDescription="@string/barcode_scanner_checkout_increase_quantity" />
 
             </LinearLayout>
 
@@ -190,7 +190,7 @@
             android:layout_height="56dp"
             android:layout_marginHorizontal="24dp"
             android:background="@drawable/bg_close_button_scanner"
-            android:text="Done"
+            android:text="@string/barcode_scanner_checkout_done"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textSize="17sp"
@@ -205,7 +205,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_marginBottom="120dp"
-        android:text="Scan barcode to add item"
+        android:text="@string/barcode_scanner_checkout_scan_barcode_to_add_item"
         android:textColor="#CCFFFFFF"
         android:textSize="15sp"
         android:fontFamily="sans-serif" />

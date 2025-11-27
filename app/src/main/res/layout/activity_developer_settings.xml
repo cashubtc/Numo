@@ -22,7 +22,7 @@
             android:minHeight="48dp"
             android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/developer_settings_back"
             android:src="@drawable/ic_close"
             android:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -32,7 +32,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Developer Settings"
+            android:text="@string/developer_settings_developer_settings"
             android:textAppearance="@style/Text.Title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -60,7 +60,7 @@
                 android:paddingHorizontal="24dp"
                 android:paddingTop="16dp"
                 android:paddingBottom="8dp"
-                android:text="Debugging"
+                android:text="@string/developer_settings_debugging"
                 android:textSize="13sp"
                 android:textColor="@color/color_text_secondary"
                 android:fontFamily="sans-serif-medium"
@@ -95,7 +95,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Restart Onboarding"
+                        android:text="@string/developer_settings_restart_onboarding"
                         android:textSize="17sp"
                         android:textColor="@color/color_text_primary"
                         android:fontFamily="sans-serif-medium" />
@@ -103,7 +103,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Start the onboarding flow again"
+                        android:text="@string/developer_settings_start_the_onboarding_flow_again"
                         android:textSize="14sp"
                         android:textColor="@color/color_text_secondary"
                         android:layout_marginTop="2dp" />
@@ -122,7 +122,7 @@
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="24dp"
                 android:paddingTop="16dp"
-                android:text="⚠️ Developer settings are for testing and debugging purposes only. Use with caution."
+                android:text="@string/developer_settings_developer_settings_are_for_testing_and_debugging_purposes_only_use_with_caution"
                 android:textSize="13sp"
                 android:textColor="@color/color_warning"
                 android:background="@color/color_bg_secondary"

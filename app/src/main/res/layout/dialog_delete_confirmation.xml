@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
-        android:text="Delete Item"
+        android:text="@string/delete_confirmation_delete_item"
         android:textAppearance="@style/Text.Heading1" />
 
     <TextView
@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
-        android:text="Are you sure you want to delete this item? This action cannot be undone."
+        android:text="@string/delete_confirmation_are_you_sure_you_want_to_delete_this_item_this_action_cannot_be_undone"
         android:textAppearance="@style/Text.Body" />
 
     <LinearLayout
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:text="Cancel" />
+            android:text="@string/delete_confirmation_cancel" />
 
         <Button
             android:id="@+id/dialog_confirm_button"
@@ -46,7 +46,7 @@
             android:background="@drawable/bg_button_primary_green"
             android:backgroundTint="@color/color_warning_red"
             android:stateListAnimator="@null"
-            android:text="Delete"
+            android:text="@string/delete_confirmation_delete"
             android:textAppearance="@style/Text.Button"
             android:textColor="@color/color_bg_white" />
     </LinearLayout>

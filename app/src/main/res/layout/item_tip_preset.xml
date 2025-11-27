@@ -37,7 +37,7 @@
         android:layout_height="48dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_delete"
-        android:contentDescription="Remove preset"
+        android:contentDescription="@string/tip_preset_remove_preset"
         app:tint="@color/color_text_tertiary" />
 
 </LinearLayout>
