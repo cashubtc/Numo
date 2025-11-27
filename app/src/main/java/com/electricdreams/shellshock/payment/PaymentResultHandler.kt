@@ -4,6 +4,8 @@ import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.shellshock.core.worker.BitcoinPriceWorker
+import com.electricdreams.shellshock.R
+
 import com.electricdreams.shellshock.feature.history.PaymentsHistoryActivity
 
 /**
@@ -60,7 +62,11 @@ class PaymentResultHandler(
     fun handlePaymentError(message: String, onComplete: () -> Unit) {
         mainHandler.post {
             onComplete()
-            android.widget.Toast.makeText(activity, getString(R.string.error_payment_error, message), android.widget.Toast.LENGTH_LONG).show()
+            android.widget.Toast.makeText(
+                activity,
+                activity.getString(R.string.error_payment_error, message),
+                android.widget.Toast.LENGTH_LONG
+            ).show()
         }
     }
 

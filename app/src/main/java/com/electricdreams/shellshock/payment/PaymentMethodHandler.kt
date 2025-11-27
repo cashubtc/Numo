@@ -5,6 +5,8 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.shellshock.PaymentRequestActivity
+import com.electricdreams.shellshock.R
+
 import com.electricdreams.shellshock.core.util.MintManager
 import com.electricdreams.shellshock.feature.tips.TipSelectionActivity
 import com.electricdreams.shellshock.feature.tips.TipsManager
@@ -48,7 +50,11 @@ class PaymentMethodHandler(
     /** Proceed with NDEF payment (HCE) - preserved but not currently invoked in main flow */
     fun proceedWithNdefPayment(amount: Long, onStatusUpdate: (String) -> Unit, onComplete: () -> Unit) {
         if (!NdefHostCardEmulationService.isHceAvailable(activity)) {
-            Toast.makeText(activity, getString(R.string.error_failed_to_create_payment_request), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                activity,
+                activity.getString(R.string.error_failed_to_create_payment_request),
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
 
@@ -56,7 +62,11 @@ class PaymentMethodHandler(
         val allowedMints = mintManager.getAllowedMints()
         val paymentRequest = CashuPaymentHelper.createPaymentRequest(amount, "Payment of $amount sats", allowedMints)
             ?: run {
-                Toast.makeText(activity, getString(R.string.error_failed_to_create_payment_request), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    activity,
+                    activity.getString(R.string.error_failed_to_create_payment_request),
+                    Toast.LENGTH_SHORT
+                ).show()
                 return
             }
 
@@ -94,7 +104,14 @@ class PaymentMethodHandler(
                 override fun onCashuPaymentError(errorMessage: String) {
                     activity.runOnUiThread {
                         onComplete()
-                        Toast.makeText(activity, getString(R.string.error_payment_failed, errorMessage), Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            activity,
+                            activity.getString(
+                                R.string.error_payment_failed,
+                                errorMessage
+                            ),
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
 
@@ -113,7 +130,11 @@ class PaymentMethodHandler(
             onStatusUpdate("Waiting for payment...\n\nHold your phone against the paying device")
         } catch (e: Exception) {
             onComplete()
-            Toast.makeText(activity, "Error setting up NDEF payment: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                activity,
+                "Error setting up NDEF payment: ${e.message}",
+                Toast.LENGTH_LONG
+            ).show()
         }
     }
 

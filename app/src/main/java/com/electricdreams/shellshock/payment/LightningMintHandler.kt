@@ -120,7 +120,10 @@ class LightningMintHandler(
             MintUrl(mintUrlStr)
         } catch (t: Throwable) {
             Log.e(TAG, "Invalid mint URL for Lightning mint: $mintUrlStr", t)
-            callback.onError(getString(R.string.error_invalid_mint_url))
+            callback.onError(
+                // No Android context here; keep simple English message
+                "Invalid mint URL"
+            )
             return
         }
 
@@ -206,7 +209,10 @@ class LightningMintHandler(
             MintUrl(mintUrlStr)
         } catch (t: Throwable) {
             Log.e(TAG, "Invalid mint URL for resume: $mintUrlStr", t)
-            callback.onError(getString(R.string.error_invalid_mint_url))
+            callback.onError(
+                // No Android context here; keep simple English message
+                "Invalid mint URL"
+            )
             return
         }
 

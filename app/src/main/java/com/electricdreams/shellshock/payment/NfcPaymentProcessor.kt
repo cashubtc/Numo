@@ -34,13 +34,21 @@ class NfcPaymentProcessor(
     /** Handle NFC tag for payment */
     fun handleNfcPayment(tag: Tag, requestedAmount: Long) {
         if (requestedAmount <= 0) {
-            Toast.makeText(activity, getString(R.string.prompt_enter_amount_first), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                activity,
+                activity.getString(R.string.prompt_enter_amount_first),
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
         
         if (waitingForRescan && savedPin != null) {
             // TODO: Re-implement full PIN-based rescan flow
-            Toast.makeText(activity, getString(R.string.error_payment_error), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                activity,
+                activity.getString(R.string.error_payment_error, "PIN-based rescan not supported"),
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
         

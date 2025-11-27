@@ -3,6 +3,8 @@ package com.electricdreams.shellshock.feature.items.handlers
 import android.app.Activity
 import android.content.Intent
 import android.widget.Toast
+import com.electricdreams.shellshock.R
+
 import com.electricdreams.shellshock.PaymentRequestActivity
 import com.electricdreams.shellshock.core.model.Amount
 import com.electricdreams.shellshock.core.model.CheckoutBasket
@@ -27,7 +29,11 @@ class CheckoutHandler(
      */
     fun proceedToCheckout() {
         if (basketManager.getTotalItemCount() == 0) {
-            Toast.makeText(activity, getString(R.string.error_basket_empty), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                activity,
+                activity.getString(R.string.error_basket_empty),
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
 
@@ -39,7 +45,11 @@ class CheckoutHandler(
         val totalSatoshis = basketManager.getTotalSatoshis(btcPrice)
 
         if (totalSatoshis <= 0) {
-            Toast.makeText(activity, getString(R.string.error_invalid_payment_amount), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                activity,
+                activity.getString(R.string.error_invalid_payment_amount),
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
 

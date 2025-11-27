@@ -5,6 +5,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.shellshock.core.model.PriceType
 
+import com.electricdreams.shellshock.R
+
 /**
  * Handles validation for all item form fields.
  * Centralizes validation logic and provides consistent error handling.
@@ -45,14 +47,22 @@ class ItemFormValidator(
 
         // Validate SKU is not duplicate
         if (!skuHandler.isValid()) {
-            Toast.makeText(activity, getString(R.string.error_unique_sku), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                activity,
+                activity.getString(R.string.error_unique_sku),
+                Toast.LENGTH_SHORT
+            ).show()
             skuHandler.getSkuInput().requestFocus()
             return ValidationResult(false)
         }
 
         // Validate GTIN is not duplicate
         if (!gtinHandler.isValid()) {
-            Toast.makeText(activity, getString(R.string.error_unique_gtin), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                activity,
+                activity.getString(R.string.error_unique_gtin),
+                Toast.LENGTH_SHORT
+            ).show()
             gtinHandler.getGtinInput().requestFocus()
             return ValidationResult(false)
         }

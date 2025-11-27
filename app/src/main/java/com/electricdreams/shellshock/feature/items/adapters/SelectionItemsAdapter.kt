@@ -277,7 +277,11 @@ class SelectionItemsAdapter(
                 if (hasStock) {
                     updateBasketItem(item, basketQuantity + 1, isCustomVariation)
                 } else {
-                    Toast.makeText(itemView.context, getString(R.string.error_no_more_stock), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        itemView.context,
+                        itemView.context.getString(R.string.error_no_more_stock),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
             
@@ -350,7 +354,11 @@ class SelectionItemsAdapter(
                     addCustomVariation(item, variationText)
                     hideKeyboard()
                 } else {
-                    Toast.makeText(itemView.context, getString(R.string.prompt_enter_variation_name), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        itemView.context,
+                        itemView.context.getString(R.string.prompt_enter_variation_name),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
             

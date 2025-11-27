@@ -131,7 +131,10 @@ class NostrPaymentHandler(
 
         if (request == null) {
             Log.e(TAG, "Failed to create payment request with Nostr transport")
-            callback.onError(getString(R.string.error_failed_to_create_payment_request))
+            callback.onError(
+                // No direct Android context here; keep message simple
+                "Failed to create payment request"
+            )
             return
         }
 

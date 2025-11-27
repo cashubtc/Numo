@@ -11,6 +11,8 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
+import com.electricdreams.shellshock.R
+
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -115,7 +117,11 @@ class ImageHandler(
         if (granted) {
             takePicture()
         } else {
-            Toast.makeText(activity, getString(R.string.error_camera_permission_required), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                activity,
+                activity.getString(R.string.error_camera_permission_required),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -181,7 +187,11 @@ class ImageHandler(
             )
             takePictureLauncher.launch(selectedImageUri)
         } catch (ex: IOException) {
-            Toast.makeText(activity, getString(R.string.error_error_creating_image_file, ex.message), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                activity,
+                activity.getString(R.string.error_error_creating_image_file, ex.message),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
@@ -204,7 +214,11 @@ class ImageHandler(
                 imagePlaceholder.visibility = View.GONE
                 updatePhotoButtonText()
             } catch (e: Exception) {
-                Toast.makeText(activity, getString(R.string.error_failed_to_load_image), Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    activity,
+                    activity.getString(R.string.error_failed_to_load_image),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }

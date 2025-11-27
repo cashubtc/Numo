@@ -20,7 +20,7 @@
     <string name="onboarding_terms">By continuing, you agree to our Terms of Service and Privacy Policy</string>
     <string name="onboarding_button_get_started">Get Started</string>
     <string name="onboarding_title_setup_wallet">Set Up Your Wallet</string>
-    <string name="onboarding_subtitle_choose_path">Choose how you&apos;d like to get started</string>
+    <string name="onboarding_subtitle_choose_path">Choose how you would like to get started</string>
     <string name="onboarding_option_create_wallet_title">Create New Wallet</string>
     <string name="onboarding_option_create_wallet_subtitle">Start fresh with a new seed phrase</string>
     <string name="onboarding_option_restore_wallet_title">Restore from Backup</string>

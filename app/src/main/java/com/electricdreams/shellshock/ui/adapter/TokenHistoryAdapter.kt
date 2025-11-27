@@ -54,7 +54,11 @@ class TokenHistoryAdapter : RecyclerView.Adapter<TokenHistoryAdapter.ViewHolder>
             val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Token", entry.token)
             clipboard.setPrimaryClip(clip)
-            Toast.makeText(context, getString(R.string.info_token_copied_to_clipboard), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.info_token_copied_to_clipboard),
+                Toast.LENGTH_SHORT
+            ).show()
         }
 
         holder.openWithButton.setOnClickListener { v -> openTokenWithApp(v.context, entry.token) }
@@ -83,7 +87,11 @@ class TokenHistoryAdapter : RecyclerView.Adapter<TokenHistoryAdapter.ViewHolder>
         try {
             context.startActivity(chooserIntent)
         } catch (e: Exception) {
-            Toast.makeText(context, getString(R.string.error_no_apps_for_token), Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                context,
+                context.getString(R.string.error_no_apps_for_token),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
