@@ -1,0 +1,73 @@
+<resources>
+    <string name="app_name">shellshock</string>
+    <string name="navigation_drawer_open">Abrir menú de navegación</string>
+    <string name="navigation_drawer_close">Cerrar menú de navegación</string>
+    <string name="item_list_title">Gestionar artículos del catálogo</string>
+
+    <!-- Common -->
+    <string name="common_ok">Aceptar</string>
+    <string name="common_cancel">Cancelar</string>
+    <string name="common_close">Cerrar</string>
+    <string name="common_back">Atrás</string>
+    <string name="common_continue">Continuar</string>
+    <string name="common_delete">Eliminar</string>
+    <string name="common_reset_to_defaults">Restablecer valores predeterminados</string>
+    <string name="common_retry">Reintentar</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_tagline">POS de Bitcoin con ecash Cashu</string>
+    <string name="onboarding_welcome_message">Acepta pagos en Bitcoin al instante y sin comisiones usando la tecnología de ecash de Cashu.</string>
+    <string name="onboarding_terms">Al continuar, aceptas nuestros Términos de servicio y Política de privacidad</string>
+    <string name="onboarding_button_get_started">Empezar</string>
+    <string name="onboarding_title_setup_wallet">Configura tu monedero</string>
+    <string name="onboarding_subtitle_choose_path">Elige cómo quieres empezar</string>
+    <string name="onboarding_option_create_wallet_title">Crear monedero nuevo</string>
+    <string name="onboarding_option_create_wallet_subtitle">Empieza de cero con una nueva frase semilla</string>
+    <string name="onboarding_option_restore_wallet_title">Restaurar desde copia de seguridad</string>
+    <string name="onboarding_option_restore_wallet_subtitle">Usa tu frase semilla existente</string>
+    <string name="onboarding_title_restore_wallet">Restaurar monedero</string>
+    <string name="onboarding_instruction_enter_seed">Introduce tu frase semilla de 12 palabras</string>
+    <string name="onboarding_instruction_enter_seed_detail">Introduce las palabras en el orden correcto para restaurar tu monedero.</string>
+    <string name="onboarding_button_paste_from_clipboard">Pegar desde el portapapeles</string>
+    <string name="onboarding_seed_ready">Listo para continuar</string>
+    <string name="onboarding_button_continue">Continuar</string>
+    <string name="onboarding_status_creating_wallet">Creando tu monedero...</string>
+    <string name="onboarding_status_creating_wallet_subtitle">Esto solo tomará un momento</string>
+    <string name="onboarding_status_searching_backup">Buscando copia de seguridad...</string>
+    <string name="onboarding_status_searching_backup_detail">Comprobando relés de Nostr para tu configuración de mints</string>
+    <string name="onboarding_title_your_mints">Tus mints</string>
+    <string name="onboarding_backup_found">Copia de seguridad encontrada</string>
+    <string name="onboarding_backup_last_backed_up_sample">Última copia de seguridad: 26 nov 2024</string>
+    <string name="onboarding_title_select_mints">Selecciona mints</string>
+    <string name="onboarding_subtitle_select_mints">Estos mints almacenarán tus tokens de ecash</string>
+    <string name="onboarding_mints_selected_sample">4 mints seleccionados</string>
+    <string name="onboarding_status_restoring_wallet">Restaurando monedero</string>
+    <string name="onboarding_status_initializing_restore">Inicializando restauración...</string>
+    <string name="onboarding_success_wallet_created">Monedero creado</string>
+    <string name="onboarding_success_wallet_ready">Tu monedero está listo para usarse</string>
+    <string name="onboarding_label_balance_by_mint">SALDO POR MINT</string>
+    <string name="onboarding_button_enter_wallet">Entrar al monedero</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_section_general">General</string>
+    <string name="settings_item_fiat_currency">Moneda fíat</string>
+    <string name="settings_item_mints">Mints</string>
+    <string name="settings_item_items">Artículos</string>
+    <string name="settings_item_tips_title">Propinas</string>
+    <string name="settings_item_tips_subtitle">Configura las opciones de propina para el cobro</string>
+    <string name="settings_item_theme">Tema</string>
+    <string name="settings_section_security">Seguridad y privacidad</string>
+    <string name="settings_item_security_title">Seguridad y privacidad</string>
+    <string name="settings_item_security_subtitle">Copia de seguridad de la frase semilla, restaurar monedero</string>
+    <string name="settings_section_developer">Desarrollador</string>
+    <string name="settings_item_developer_title">Ajustes de desarrollador</string>
+    <string name="settings_item_developer_subtitle">Ajustes avanzados y herramientas de depuración</string>
+
+    <!-- Host Card Emulation strings -->
+    <string name="service_description">Servicio de pagos Cashu</string>
+    <string name="ndef_aid_description">Etiqueta NDEF tipo 4</string>
+
+    <!-- QR-based PaymentRequest -->
+    <string name="payment_request_qr_description">Código QR de solicitud de pago Cashu</string>
+</resources>

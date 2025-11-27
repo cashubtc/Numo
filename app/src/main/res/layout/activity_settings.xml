@@ -32,7 +32,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Settings"
+            android:text="@string/settings_title"
             android:textAppearance="@style/Text.Title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -60,7 +60,7 @@
                 android:paddingHorizontal="24dp"
                 android:paddingTop="16dp"
                 android:paddingBottom="8dp"
-                android:text="General"
+                android:text="@string/settings_section_general"
                 android:textSize="13sp"
                 android:textColor="@color/color_text_secondary"
                 android:fontFamily="sans-serif-medium"
@@ -90,7 +90,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Fiat Currency"
+                    android:text="@string/settings_item_fiat_currency"
                     android:textSize="17sp"
                     android:textColor="@color/color_text_primary"
                     android:fontFamily="sans-serif-medium" />
@@ -124,7 +124,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Mints"
+                    android:text="@string/settings_item_mints"
                     android:textSize="17sp"
                     android:textColor="@color/color_text_primary"
                     android:fontFamily="sans-serif-medium" />
@@ -158,7 +158,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Items"
+                    android:text="@string/settings_item_items"
                     android:textSize="17sp"
                     android:textColor="@color/color_text_primary"
                     android:fontFamily="sans-serif-medium" />
@@ -197,7 +197,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tips"
+                        android:text="@string/settings_item_tips_title"
                         android:textSize="17sp"
                         android:textColor="@color/color_text_primary"
                         android:fontFamily="sans-serif-medium" />
@@ -205,7 +205,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Configure tip options for checkout"
+                        android:text="@string/settings_item_tips_subtitle"
                         android:textSize="14sp"
                         android:textColor="@color/color_text_secondary"
                         android:layout_marginTop="2dp" />
@@ -240,7 +240,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Theme"
+                    android:text="@string/settings_item_theme"
                     android:textSize="17sp"
                     android:textColor="@color/color_text_primary"
                     android:fontFamily="sans-serif-medium" />
@@ -259,7 +259,7 @@
                 android:paddingHorizontal="24dp"
                 android:paddingTop="24dp"
                 android:paddingBottom="8dp"
-                android:text="Security &amp; Privacy"
+                android:text="@string/settings_section_security"
                 android:textSize="13sp"
                 android:textColor="@color/color_text_secondary"
                 android:fontFamily="sans-serif-medium"
@@ -293,7 +293,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Security &amp; Privacy"
+                        android:text="@string/settings_item_security_title"
                         android:textSize="17sp"
                         android:textColor="@color/color_text_primary"
                         android:fontFamily="sans-serif-medium" />
@@ -301,7 +301,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Backup seed phrase, restore wallet"
+                        android:text="@string/settings_item_security_subtitle"
                         android:textSize="14sp"
                         android:textColor="@color/color_text_secondary"
                         android:layout_marginTop="2dp" />
@@ -321,7 +321,7 @@
                 android:paddingHorizontal="24dp"
                 android:paddingTop="24dp"
                 android:paddingBottom="8dp"
-                android:text="Developer"
+                android:text="@string/settings_section_developer"
                 android:textSize="13sp"
                 android:textColor="@color/color_text_secondary"
                 android:fontFamily="sans-serif-medium"
@@ -355,7 +355,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Developer Settings"
+                        android:text="@string/settings_item_developer_title"
                         android:textSize="17sp"
                         android:textColor="@color/color_text_primary"
                         android:fontFamily="sans-serif-medium" />
@@ -363,7 +363,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Advanced settings and debugging tools"
+                        android:text="@string/settings_item_developer_subtitle"
                         android:textSize="14sp"
                         android:textColor="@color/color_text_secondary"
                         android:layout_marginTop="2dp" />

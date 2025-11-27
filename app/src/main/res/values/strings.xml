@@ -3,7 +3,67 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="item_list_title">Manage Catalog Items</string>
-    
+
+    <!-- Common -->
+    <string name="common_ok">OK</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_close">Close</string>
+    <string name="common_back">Back</string>
+    <string name="common_continue">Continue</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_reset_to_defaults">Reset to Defaults</string>
+    <string name="common_retry">Retry</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_tagline">Bitcoin POS with Cashu ecash</string>
+    <string name="onboarding_welcome_message">Accept Bitcoin payments instantly with zero fees using Cashu ecash technology.</string>
+    <string name="onboarding_terms">By continuing, you agree to our Terms of Service and Privacy Policy</string>
+    <string name="onboarding_button_get_started">Get Started</string>
+    <string name="onboarding_title_setup_wallet">Set Up Your Wallet</string>
+    <string name="onboarding_subtitle_choose_path">Choose how you&apos;d like to get started</string>
+    <string name="onboarding_option_create_wallet_title">Create New Wallet</string>
+    <string name="onboarding_option_create_wallet_subtitle">Start fresh with a new seed phrase</string>
+    <string name="onboarding_option_restore_wallet_title">Restore from Backup</string>
+    <string name="onboarding_option_restore_wallet_subtitle">Use your existing seed phrase</string>
+    <string name="onboarding_title_restore_wallet">Restore Wallet</string>
+    <string name="onboarding_instruction_enter_seed">Enter your 12-word seed phrase</string>
+    <string name="onboarding_instruction_enter_seed_detail">Enter the words in the correct order to restore your wallet.</string>
+    <string name="onboarding_button_paste_from_clipboard">Paste from Clipboard</string>
+    <string name="onboarding_seed_ready">Ready to continue</string>
+    <string name="onboarding_button_continue">Continue</string>
+    <string name="onboarding_status_creating_wallet">Creating your wallet...</string>
+    <string name="onboarding_status_creating_wallet_subtitle">This will only take a moment</string>
+    <string name="onboarding_status_searching_backup">Searching for backup...</string>
+    <string name="onboarding_status_searching_backup_detail">Checking Nostr relays for your mint configuration</string>
+    <string name="onboarding_title_your_mints">Your Mints</string>
+    <string name="onboarding_backup_found">Backup Found</string>
+    <string name="onboarding_backup_last_backed_up_sample">Last backed up Nov 26, 2024</string>
+    <string name="onboarding_title_select_mints">Select Mints</string>
+    <string name="onboarding_subtitle_select_mints">These mints will store your ecash tokens</string>
+    <string name="onboarding_mints_selected_sample">4 mints selected</string>
+    <string name="onboarding_status_restoring_wallet">Restoring Wallet</string>
+    <string name="onboarding_status_initializing_restore">Initializing restore...</string>
+    <string name="onboarding_success_wallet_created">Wallet Created</string>
+    <string name="onboarding_success_wallet_ready">Your wallet is ready to use</string>
+    <string name="onboarding_label_balance_by_mint">BALANCE BY MINT</string>
+    <string name="onboarding_button_enter_wallet">Enter Wallet</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_general">General</string>
+    <string name="settings_item_fiat_currency">Fiat Currency</string>
+    <string name="settings_item_mints">Mints</string>
+    <string name="settings_item_items">Items</string>
+    <string name="settings_item_tips_title">Tips</string>
+    <string name="settings_item_tips_subtitle">Configure tip options for checkout</string>
+    <string name="settings_item_theme">Theme</string>
+    <string name="settings_section_security">Security &amp; Privacy</string>
+    <string name="settings_item_security_title">Security &amp; Privacy</string>
+    <string name="settings_item_security_subtitle">Backup seed phrase, restore wallet</string>
+    <string name="settings_section_developer">Developer</string>
+    <string name="settings_item_developer_title">Developer Settings</string>
+    <string name="settings_item_developer_subtitle">Advanced settings and debugging tools</string>
+
     <!-- Host Card Emulation strings -->
     <string name="service_description">Cashu Payment Service</string>
     <string name="ndef_aid_description">NDEF Tag Type 4</string>
