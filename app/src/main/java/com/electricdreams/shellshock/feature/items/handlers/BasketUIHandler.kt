@@ -3,6 +3,7 @@ package com.electricdreams.shellshock.feature.items.handlers
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import com.electricdreams.shellshock.R
 import com.electricdreams.shellshock.core.model.Amount
 import com.electricdreams.shellshock.core.util.BasketManager
 import com.electricdreams.shellshock.core.util.CurrencyManager
@@ -93,19 +94,19 @@ class BasketUIHandler(
             fiatTotal > 0 && satsTotal > 0 -> {
                 val fiatAmount = Amount.fromMajorUnits(fiatTotal, currency)
                 val satsAmount = Amount(satsTotal, Amount.Currency.BTC)
-                "Charge $fiatAmount + $satsAmount"
+                "${fiatAmount} + ${satsAmount}"
             }
             satsTotal > 0 -> {
                 val satsAmount = Amount(satsTotal, Amount.Currency.BTC)
-                "Charge $satsAmount"
+                satsAmount.toString()
             }
             else -> {
                 val fiatAmount = Amount.fromMajorUnits(fiatTotal, currency)
-                "Charge $fiatAmount"
+                fiatAmount.toString()
             }
         }
 
-        checkoutButton.text = buttonText
+        checkoutButton.text = checkoutButton.context.getString(R.string.pos_amount_charge, buttonText)
     }
 
     /**

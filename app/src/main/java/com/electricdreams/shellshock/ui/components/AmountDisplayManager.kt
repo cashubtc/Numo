@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import com.electricdreams.shellshock.R
 import com.electricdreams.shellshock.core.model.Amount
 import com.electricdreams.shellshock.core.util.CurrencyManager
 import com.electricdreams.shellshock.core.worker.BitcoinPriceWorker
@@ -143,13 +144,13 @@ class AmountDisplayManager(
             }
         }
 
-        // Update submit button
+        // Update submit button text & state based on requested amount
         if (satsValue > 0) {
-            submitButton.text = "Charge $amountDisplayText"
+            submitButton.text = context.getString(R.string.pos_amount_charge, amountDisplayText)
             submitButton.isEnabled = true
             requestedAmount = satsValue
         } else {
-            submitButton.text = "Charge"
+            submitButton.text = context.getString(R.string.pos_charge)
             submitButton.isEnabled = false
             requestedAmount = 0
         }
