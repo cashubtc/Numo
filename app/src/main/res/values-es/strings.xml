@@ -164,6 +164,13 @@
     <string name="history_sats_equivalent">≈ %1$s</string>
     <string name="history_payments_status_tap_to_resume">Toca para reanudar</string>
 
+    <!-- Títulos de la lista de historial de pagos -->
+    <string name="payment_history_payment">Pago</string>
+    <string name="payment_history_lightning">Lightning</string>
+    <string name="payment_history_pending">Pago pendiente</string>
+    <string name="payment_history_cash_in">Entrada de efectivo</string>
+    <string name="payment_history_cash_out">Salida de efectivo</string>
+
     <!-- Propinas / selección de propina -->
     <string name="tip_selection_enter_tip_amount">Introduce el importe de la propina</string>
     <string name="tip_selection_question_add_tip">¿Quieres añadir una propina?</string>

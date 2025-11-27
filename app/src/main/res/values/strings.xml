@@ -164,6 +164,13 @@
     <string name="history_sats_equivalent">≈ %1$s</string>
     <string name="history_payments_status_tap_to_resume">Tap to resume</string>
 
+    <!-- Payment history list titles (used in PaymentsHistoryAdapter) -->
+    <string name="payment_history_payment">Payment</string>
+    <string name="payment_history_lightning">Lightning</string>
+    <string name="payment_history_pending">Pending payment</string>
+    <string name="payment_history_cash_in">Cash In</string>
+    <string name="payment_history_cash_out">Cash Out</string>
+
     <!-- Tips / tip selection (code-side) -->
     <string name="tip_selection_enter_tip_amount">Enter tip amount</string>
     <string name="tip_selection_question_add_tip">Would you like to add a tip?</string>

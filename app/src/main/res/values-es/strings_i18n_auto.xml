@@ -170,9 +170,6 @@
     <string name="onboarding_your_mints">Tus mints</string>
 
     <string name="payment_history_aug_24">24 ago</string>
-    <string name="payment_history_lightning">Lightning</string>
-    <string name="payment_history_payment">Pago</string>
-    <string name="payment_history_pending">Pendiente</string>
 
     <string name="payment_received_0_received">₿ 0 recibido.</string>
     <string name="payment_received_close">Cerrar</string>

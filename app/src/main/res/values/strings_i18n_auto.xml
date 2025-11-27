@@ -149,9 +149,6 @@
     <string name="onboarding_restore_wallet_2">Restore Wallet</string>
     <string name="onboarding_your_mints">Your Mints</string>
     <string name="payment_history_aug_24">Aug 24</string>
-    <string name="payment_history_lightning">Lightning</string>
-    <string name="payment_history_payment">Payment</string>
-    <string name="payment_history_pending">Pending</string>
     <string name="payment_received_0_received">₿ 0 received.</string>
     <string name="payment_received_close">Close</string>
     <string name="payment_received_share">Share</string>
