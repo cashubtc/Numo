@@ -40,7 +40,7 @@ class BalanceCheckActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
-            title = "NFC Balance Check"
+            title = getString(R.string.balance_check_actionbar_title)
         }
 
         balanceDisplay = findViewById(R.id.balance_display)
@@ -49,14 +49,17 @@ class BalanceCheckActivity : AppCompatActivity() {
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         Log.d(TAG, "NFC Adapter available: ${nfcAdapter != null}")
 
-        updateCardInfoDisplay("Tap your NFC card to check balance")
+        updateCardInfoDisplay(getString(R.string.balance_check_card_info_tap_card))
 
         Log.d(TAG, "BalanceCheckActivity onCreate() completed - ready for NFC tap")
     }
 
     private fun updateBalanceDisplay(balance: Long) {
         mainHandler.post {
-            balanceDisplay.text = "Balance: " + Amount(balance, Amount.Currency.BTC).toString()
+            balanceDisplay.text = getString(
+                R.string.balance_check_status_balance,
+                Amount(balance, Amount.Currency.BTC).toString()
+            )
             balanceDisplay.visibility = View.VISIBLE
         }
     }
@@ -70,7 +73,7 @@ class BalanceCheckActivity : AppCompatActivity() {
 
     private fun handleBalanceCheckError(message: String) {
         mainHandler.post {
-            balanceDisplay.text = "Error: $message"
+            balanceDisplay.text = getString(R.string.balance_check_status_error, message)
             balanceDisplay.visibility = View.VISIBLE
             Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         }
@@ -126,11 +129,11 @@ class BalanceCheckActivity : AppCompatActivity() {
                         checkNfcBalance(tag)
                     } else {
                         Log.e(TAG, "❌ IsoDep not available on this tag")
-                        handleBalanceCheckError("Card does not support IsoDep")
+                        handleBalanceCheckError(getString(R.string.balance_check_error_card_does_not_support_isodep))
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "❌ Error checking tag technologies: ${e.message}")
-                    handleBalanceCheckError("Invalid NFC tag")
+                    handleBalanceCheckError(getString(R.string.balance_check_error_invalid_nfc_tag))
                 }
             } else {
                 Log.e(TAG, "❌ Tag was null in ACTION_TECH_DISCOVERED")
@@ -198,7 +201,7 @@ class BalanceCheckActivity : AppCompatActivity() {
 
                 if (totalProofs == 0) {
                     Log.d(TAG, "No proofs found in card")
-                    updateCardInfoDisplay("Card has no proofs")
+                    updateCardInfoDisplay(getString(R.string.balance_check_info_no_proofs))
                     return 0
                 }
 
@@ -215,7 +218,7 @@ class BalanceCheckActivity : AppCompatActivity() {
                 Log.d(TAG, "ProofState: $proofStates")
 
                 if (proofStates.isEmpty()) {
-                    updateCardInfoDisplay("No proof state data available")
+                    updateCardInfoDisplay(getString(R.string.balance_check_info_no_state_data))
                     return 0
                 }
 
@@ -228,7 +231,7 @@ class BalanceCheckActivity : AppCompatActivity() {
 
                 if (amounts.isEmpty()) {
                     Log.e(TAG, "Amounts data missing or mismatched")
-                    updateCardInfoDisplay("Proof data inconsistent")
+                    updateCardInfoDisplay(getString(R.string.balance_check_info_inconsistent_proofs))
                     return 0
                 }
 

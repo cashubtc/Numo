@@ -24,7 +24,7 @@
             android:minHeight="48dp"
             android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/balance_check_toolbar_back"
             android:src="@drawable/ic_close"
             android:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -34,7 +34,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Check Balance"
+            android:text="@string/balance_check_title"
             android:textAppearance="@style/Text.Title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -68,7 +68,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/space_m"
             android:gravity="center"
-            android:text="Tap Card"
+            android:text="@string/balance_check_cta_tap_card"
             android:textAppearance="@style/Text.Heading1" />
 
         <TextView
@@ -76,7 +76,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/space_2xl"
             android:gravity="center"
-            android:text="Hold your NFC card near the back of the device to check balance"
+            android:text="@string/balance_check_instructions"
             android:textAppearance="@style/Text.Body" />
 
         <TextView
