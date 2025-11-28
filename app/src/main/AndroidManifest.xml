@@ -31,7 +31,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Numo"
-        tools:targetApi="31">
+        android:localeConfig="@xml/locales_config"
+        tools:targetApi="33">
         <!-- Onboarding Activity - First Launch -->
         <activity
             android:name="com.electricdreams.numo.feature.onboarding.OnboardingActivity"
