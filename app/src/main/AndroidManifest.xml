@@ -212,6 +212,17 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
         </activity>
+
+        <activity android:name="com.electricdreams.numo.feature.settings.LanguageSettingsActivity"
+            android:exported="false"
+            android:label="@string/language_settings_title"
+            android:theme="@style/Theme.Numo"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.settings.SettingsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.settings.SettingsActivity" />
+        </activity>
         
         <activity android:name="com.electricdreams.numo.feature.settings.DeveloperSettingsActivity"
             android:exported="false"

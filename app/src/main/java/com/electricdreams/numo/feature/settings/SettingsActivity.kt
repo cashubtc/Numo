@@ -16,6 +16,12 @@ class SettingsActivity : AppCompatActivity() {
 
         findViewById<View?>(R.id.back_button)?.setOnClickListener { finish() }
 
+        // Language settings (look up by name to avoid compile-time dependency if R is stale)
+        val languageItemId = resources.getIdentifier("language_settings_item", "id", packageName)
+        findViewById<View?>(languageItemId)?.setOnClickListener {
+            startActivity(Intent(this, LanguageSettingsActivity::class.java))
+        }
+
         findViewById<View>(R.id.theme_settings_item).setOnClickListener {
             startActivity(Intent(this, ThemeSettingsActivity::class.java))
         }

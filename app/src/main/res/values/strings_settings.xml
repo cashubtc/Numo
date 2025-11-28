@@ -7,6 +7,10 @@
     <string name="settings_section_security">Security &amp; Privacy</string>
     <string name="settings_section_developer">Developer</string>
 
+    <!-- Settings items: language -->
+    <string name="settings_item_language_title">Language</string>
+    <string name="settings_item_language_subtitle">Choose app language</string>
+
     <!-- Settings items: currency -->
     <string name="settings_item_currency_title">Fiat Currency</string>
     <string name="settings_item_currency_subtitle">Choose your default fiat currency</string>
@@ -45,6 +49,7 @@
     <!-- Settings sub-activity labels -->
     <string name="settings_theme_title">Theme</string>
     <string name="settings_currency_title">Fiat Currency</string>
+    <string name="settings_language_title">Language</string>
     <string name="settings_mints_title">Mints</string>
     <string name="settings_security_title">Security &amp; Privacy</string>
 </resources>

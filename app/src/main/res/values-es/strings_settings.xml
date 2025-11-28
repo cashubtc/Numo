@@ -7,6 +7,10 @@
     <string name="settings_section_security">Seguridad y privacidad</string>
     <string name="settings_section_developer">Desarrollador</string>
 
+    <!-- Settings items: language -->
+    <string name="settings_item_language_title">Idioma</string>
+    <string name="settings_item_language_subtitle">Elige el idioma de la aplicación</string>
+
     <!-- Settings items: currency -->
     <string name="settings_item_currency_title">Moneda fiduciaria</string>
     <string name="settings_item_currency_subtitle">Elige tu moneda fiduciaria predeterminada</string>
@@ -45,6 +49,7 @@
     <!-- Settings sub-activity labels -->
     <string name="settings_theme_title">Tema</string>
     <string name="settings_currency_title">Moneda fiduciaria</string>
+    <string name="settings_language_title">Idioma</string>
     <string name="settings_mints_title">Mints</string>
     <string name="settings_security_title">Seguridad y privacidad</string>
 </resources>
