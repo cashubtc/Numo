@@ -60,4 +60,42 @@
     <string name="tip_selection_main_back">Atrás</string>
     <string name="tip_selection_main_confirm">Confirmar</string>
 
+    <!-- Payment request -->
+    <string name="payment_request_close_content_description">Cerrar</string>
+    <string name="payment_request_share_content_description">Compartir</string>
+    <string name="payment_request_pay_label">Pagar</string>
+    <string name="payment_request_instruction_scan_or_tap">Escanea o acerca para pagar</string>
+    <string name="payment_request_nfc_reading">Leyendo desde NFC...</string>
+
+    <string name="payment_request_error_invalid_amount">Importe de pago no válido</string>
+    <string name="payment_request_error_ndef_prepare">No se pudo preparar los datos de pago NDEF</string>
+    <string name="payment_request_error_nothing_to_share">Nada que compartir todavía</string>
+
+    <string name="payment_request_status_preparing">Preparando la solicitud de pago...</string>
+    <string name="payment_request_status_waiting_for_payment">Esperando el pago...</string>
+    <string name="payment_request_status_error_qr">Error al generar el código QR</string>
+    <string name="payment_request_status_error_generic">Error: %1$s</string>
+    <string name="payment_request_status_success">Pago completado correctamente</string>
+    <string name="payment_request_status_failed">El pago ha fallado: %1$s</string>
+    <string name="payment_request_lightning_error_failed">El pago Lightning ha fallado: %1$s</string>
+
+    <string name="payment_request_tip_info_with_percentage">incluye una propina de %1$s (%2$d%%)</string>
+    <string name="payment_request_tip_info_no_percentage">incluye una propina de %1$s</string>
+
+    <string name="payment_request_share_chooser_title">Compartir solicitud de pago</string>
+
+    <!-- Payment received -->
+    <string name="payment_received_amount">Has recibido %1$s.</string>
+    <string name="payment_received_button_view_details">Ver detalles</string>
+    <string name="payment_received_button_close">Cerrar</string>
+    <string name="payment_received_close_content_description">Cerrar</string>
+    <string name="payment_received_share_content_description">Compartir</string>
+    <string name="payment_received_success_background_description">Fondo de éxito</string>
+    <string name="payment_received_success_icon_description">Éxito</string>
+
+    <string name="payment_received_error_no_token">No hay ningún token para compartir</string>
+    <string name="payment_received_share_chooser_title">Compartir token</string>
+    <string name="payment_received_error_no_share_app">No hay aplicaciones disponibles para compartir este token</string>
+    <string name="payment_received_error_no_details">Los detalles de la transacción no están disponibles</string>
+
 </resources>

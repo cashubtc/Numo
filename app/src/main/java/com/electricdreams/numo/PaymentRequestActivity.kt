@@ -159,7 +159,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         if (paymentAmount <= 0) {
             Log.e(TAG, "Invalid payment amount: $paymentAmount")
-            Toast.makeText(this, "Invalid payment amount", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.payment_request_error_invalid_amount, Toast.LENGTH_SHORT).show()
             finish()
             return
         }
@@ -206,7 +206,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             if (toShare != null) {
                 sharePaymentRequest(toShare)
             } else {
-                Toast.makeText(this, "Nothing to share yet", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.payment_request_error_nothing_to_share, Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -350,7 +350,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     private fun initializePaymentRequest() {
         statusText.visibility = View.VISIBLE
-        statusText.text = "Preparing payment request..."
+        statusText.text = getString(R.string.payment_request_status_preparing)
 
         // Get allowed mints
         val mintManager = MintManager.getInstance(this)
@@ -374,7 +374,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
             if (hcePaymentRequest == null) {
                 Log.e(TAG, "Failed to create payment request for HCE")
-                Toast.makeText(this, "Failed to prepare NDEF payment data", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.payment_request_error_ndef_prepare, Toast.LENGTH_SHORT).show()
             } else {
                 Log.d(TAG, "Created HCE payment request: $hcePaymentRequest")
 
@@ -443,10 +443,10 @@ class PaymentRequestActivity : AppCompatActivity() {
                 try {
                     val qrBitmap = QrCodeGenerator.generate(paymentRequest, 512)
                     cashuQrImageView.setImageBitmap(qrBitmap)
-                    statusText.text = "Waiting for payment..."
+                    statusText.text = getString(R.string.payment_request_status_waiting_for_payment)
                 } catch (e: Exception) {
                     Log.e(TAG, "Error generating Cashu QR bitmap: ${e.message}", e)
-                    statusText.text = "Error generating QR code"
+                    statusText.text = getString(R.string.payment_request_status_error_qr)
                 }
             }
 
@@ -458,7 +458,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
             override fun onError(message: String) {
                 Log.e(TAG, "Nostr payment error: $message")
-                statusText.text = "Error: $message"
+                statusText.text = getString(R.string.payment_request_status_error_generic, message)
             }
         }
 
@@ -538,7 +538,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 if (tabManager.isLightningTabSelected()) {
                     Toast.makeText(
                         this@PaymentRequestActivity,
-                        "Lightning payment failed: $message",
+                        getString(R.string.payment_request_lightning_error_failed, message),
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -566,7 +566,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                                 handlePaymentSuccess(token)
                             } catch (e: Exception) {
                                 Log.e(TAG, "Error in NDEF payment callback: ${e.message}", e)
-                                handlePaymentError("Error processing NDEF payment: ${e.message}")
+                                handlePaymentError("NDEF Payment failed: ${e.message}")
                             }
                         }
                     }
@@ -602,7 +602,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         Log.d(TAG, "Payment successful! Token: $token")
 
         statusText.visibility = View.VISIBLE
-        statusText.text = "Payment successful!"
+        statusText.text = getString(R.string.payment_request_status_success)
 
         // Extract mint URL from token
         val mintUrl = try {
@@ -642,7 +642,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         Log.d(TAG, "Lightning payment successful (no Cashu token)")
 
         statusText.visibility = View.VISIBLE
-        statusText.text = "Payment successful!"
+        statusText.text = getString(R.string.payment_request_status_success)
 
         // Update pending payment to completed with Lightning info
         pendingPaymentId?.let { paymentId ->
@@ -681,8 +681,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         Log.e(TAG, "Payment error: $errorMessage")
 
         statusText.visibility = View.VISIBLE
-        statusText.text = "Payment failed: $errorMessage"
-        Toast.makeText(this, "Payment failed: $errorMessage", Toast.LENGTH_LONG).show()
+        statusText.text = getString(R.string.payment_request_status_failed, errorMessage)
+        Toast.makeText(this, getString(R.string.payment_request_status_failed, errorMessage), Toast.LENGTH_LONG).show()
 
         setResult(Activity.RESULT_CANCELED)
 
@@ -735,7 +735,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, paymentRequest)
         }
-        startActivity(Intent.createChooser(shareIntent, "Share Payment Request"))
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.payment_request_share_chooser_title)))
     }
 
     /**
@@ -749,10 +749,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         // If we have tip info, show it below the converted amount
         if (tipAmountSats > 0) {
             val tipAmount = Amount(tipAmountSats, Currency.BTC)
+            val tipAmountStr = tipAmount.toString()
             val tipText = if (tipPercentage > 0) {
-                "includes $tipAmount tip ($tipPercentage%)"
+                getString(R.string.payment_request_tip_info_with_percentage, tipAmountStr, tipPercentage)
             } else {
-                "includes $tipAmount tip"
+                getString(R.string.payment_request_tip_info_no_percentage, tipAmountStr)
             }
             tipInfoText.text = tipText
             tipInfoText.visibility = View.VISIBLE

@@ -70,4 +70,42 @@
     <string name="tip_selection_main_back">Back</string>
     <string name="tip_selection_main_confirm">Confirm</string>
 
+    <!-- Payment request -->
+    <string name="payment_request_close_content_description">Close</string>
+    <string name="payment_request_share_content_description">Share</string>
+    <string name="payment_request_pay_label">Pay</string>
+    <string name="payment_request_instruction_scan_or_tap">Scan or Tap to Pay</string>
+    <string name="payment_request_nfc_reading">Reading from NFC...</string>
+
+    <string name="payment_request_error_invalid_amount">Invalid payment amount</string>
+    <string name="payment_request_error_ndef_prepare">Failed to prepare NDEF payment data</string>
+    <string name="payment_request_error_nothing_to_share">Nothing to share yet</string>
+
+    <string name="payment_request_status_preparing">Preparing payment request...</string>
+    <string name="payment_request_status_waiting_for_payment">Waiting for payment...</string>
+    <string name="payment_request_status_error_qr">Error generating QR code</string>
+    <string name="payment_request_status_error_generic">Error: %1$s</string>
+    <string name="payment_request_status_success">Payment successful!</string>
+    <string name="payment_request_status_failed">Payment failed: %1$s</string>
+    <string name="payment_request_lightning_error_failed">Lightning payment failed: %1$s</string>
+
+    <string name="payment_request_tip_info_with_percentage">includes %1$s tip (%2$d%%)</string>
+    <string name="payment_request_tip_info_no_percentage">includes %1$s tip</string>
+
+    <string name="payment_request_share_chooser_title">Share Payment Request</string>
+
+    <!-- Payment received -->
+    <string name="payment_received_amount">%1$s received.</string>
+    <string name="payment_received_button_view_details">View Details</string>
+    <string name="payment_received_button_close">Close</string>
+    <string name="payment_received_close_content_description">Close</string>
+    <string name="payment_received_share_content_description">Share</string>
+    <string name="payment_received_success_background_description">Success background</string>
+    <string name="payment_received_success_icon_description">Success</string>
+
+    <string name="payment_received_error_no_token">No token to share</string>
+    <string name="payment_received_share_chooser_title">Share token</string>
+    <string name="payment_received_error_no_share_app">No apps available to share this token</string>
+    <string name="payment_received_error_no_details">Transaction details not available</string>
+
 </resources>

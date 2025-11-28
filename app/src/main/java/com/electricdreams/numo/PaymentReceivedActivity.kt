@@ -18,8 +18,6 @@ import androidx.core.view.WindowCompat
 import com.cashujdk.nut00.Token
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.feature.history.TransactionDetailActivity
-import java.text.NumberFormat
-import java.util.Locale
 
 /**
  * Activity that displays a beautiful success screen when a payment is received
@@ -136,7 +134,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
         val currency = com.electricdreams.numo.core.model.Amount.Currency.fromCode(unit)
         val formattedAmount = com.electricdreams.numo.core.model.Amount(amount, currency).toString()
         
-        amountText.text = "$formattedAmount received."
+        amountText.text = getString(R.string.payment_received_amount, formattedAmount)
     }
     
     private fun animateCheckmark() {
@@ -199,7 +197,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
     
     private fun shareToken() {
         if (tokenString.isNullOrEmpty()) {
-            Toast.makeText(this, "No token to share", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.payment_received_error_no_token, Toast.LENGTH_SHORT).show()
             return
         }
         
@@ -218,13 +216,13 @@ class PaymentReceivedActivity : AppCompatActivity() {
         }
         
         // Combine both intents into a chooser
-        val chooserIntent = Intent.createChooser(uriIntent, "Share token")
+        val chooserIntent = Intent.createChooser(uriIntent, getString(R.string.payment_received_share_chooser_title))
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(shareIntent))
         
         try {
             startActivity(chooserIntent)
         } catch (e: Exception) {
-            Toast.makeText(this, "No apps available to share this token", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.payment_received_error_no_share_app, Toast.LENGTH_SHORT).show()
         }
     }
     
@@ -234,7 +232,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
         val entry = history.lastOrNull()
         
         if (entry == null) {
-            Toast.makeText(this, "Transaction details not available", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.payment_received_error_no_details, Toast.LENGTH_SHORT).show()
             return
         }
         
