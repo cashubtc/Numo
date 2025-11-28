@@ -99,12 +99,26 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="8dp"
                 android:text="Your Recovery Phrase"
                 android:textSize="15sp"
                 android:textColor="@color/color_text_secondary"
                 android:fontFamily="sans-serif-medium"
                 android:gravity="center" />
+
+            <!-- Show/Hide Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/toggle_visibility_button"
+                style="@style/Widget.MaterialComponents.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="Show"
+                android:textSize="14sp"
+                android:textColor="@color/color_text_primary"
+                app:icon="@drawable/ic_visibility"
+                app:iconTint="@color/color_text_primary"
+                app:iconPadding="8dp" />
 
             <!-- Seed Words Grid Container -->
             <androidx.gridlayout.widget.GridLayout
@@ -114,7 +128,8 @@
                 app:columnCount="2"
                 app:rowCount="6"
                 app:useDefaultMargins="false"
-                android:layout_marginHorizontal="8dp">
+                android:layout_marginHorizontal="8dp"
+                android:layout_marginTop="16dp">
 
                 <!-- Words will be added programmatically -->
 

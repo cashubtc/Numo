@@ -22,7 +22,10 @@ class SeedPhraseActivity : AppCompatActivity() {
 
     private lateinit var seedWordsGrid: GridLayout
     private lateinit var copyButton: MaterialButton
+    private lateinit var toggleVisibilityButton: MaterialButton
     private var mnemonic: String? = null
+    private var words: List<String> = emptyList()
+    private var isRevealed: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,45 +33,64 @@ class SeedPhraseActivity : AppCompatActivity() {
 
         seedWordsGrid = findViewById(R.id.seed_words_grid)
         copyButton = findViewById(R.id.copy_button)
+        toggleVisibilityButton = findViewById(R.id.toggle_visibility_button)
 
-        findViewById<View>(R.id.back_button).setOnClickListener { 
-            finish() 
+        findViewById<View>(R.id.back_button).setOnClickListener {
+            finish()
         }
 
-        // Load and display the mnemonic
+        // Load the mnemonic but keep it hidden initially
         loadMnemonic()
+        displaySeedWords(blur = true)
+        updateToggleButton()
 
         copyButton.setOnClickListener {
-            copyToClipboard()
+            if (!isRevealed) {
+                Toast.makeText(
+                    this,
+                    "Tap Show to reveal your recovery phrase first",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                copyToClipboard()
+            }
+        }
+
+        toggleVisibilityButton.setOnClickListener {
+            isRevealed = !isRevealed
+            displaySeedWords(blur = !isRevealed)
+            updateToggleButton()
         }
     }
 
     private fun loadMnemonic() {
         mnemonic = CashuWalletManager.getMnemonic()
-        
+
         if (mnemonic.isNullOrBlank()) {
             Toast.makeText(this, "Wallet not initialized", Toast.LENGTH_SHORT).show()
             finish()
             return
         }
 
-        displaySeedWords(mnemonic!!.split(" "))
+        words = mnemonic!!.split(" ")
     }
 
-    private fun displaySeedWords(words: List<String>) {
+    private fun displaySeedWords(blur: Boolean) {
         seedWordsGrid.removeAllViews()
-        
+
+        if (words.isEmpty()) return
+
         val inflater = LayoutInflater.from(this)
-        
+
         words.forEachIndexed { index, word ->
             val wordView = inflater.inflate(R.layout.item_seed_word, seedWordsGrid, false)
-            
+
             val indexText = wordView.findViewById<TextView>(R.id.word_index)
             val wordText = wordView.findViewById<TextView>(R.id.word_text)
-            
+
             indexText.text = "${index + 1}"
-            wordText.text = word
-            
+            wordText.text = if (blur) "••••" else word
+
             // Set GridLayout params for 2-column layout
             val params = GridLayout.LayoutParams().apply {
                 width = 0
@@ -77,8 +99,18 @@ class SeedPhraseActivity : AppCompatActivity() {
                 rowSpec = GridLayout.spec(index / 2)
             }
             wordView.layoutParams = params
-            
+
             seedWordsGrid.addView(wordView)
+        }
+    }
+
+    private fun updateToggleButton() {
+        if (isRevealed) {
+            toggleVisibilityButton.text = "Hide"
+            toggleVisibilityButton.setIconResource(R.drawable.ic_visibility_off)
+        } else {
+            toggleVisibilityButton.text = "Show"
+            toggleVisibilityButton.setIconResource(R.drawable.ic_visibility)
         }
     }
 
@@ -87,7 +119,7 @@ class SeedPhraseActivity : AppCompatActivity() {
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Seed Phrase", phrase)
             clipboard.setPrimaryClip(clip)
-            
+
             Toast.makeText(this, "Copied to clipboard", Toast.LENGTH_SHORT).show()
         }
     }
