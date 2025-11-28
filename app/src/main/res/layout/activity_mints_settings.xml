@@ -22,7 +22,7 @@
             android:minHeight="48dp"
             android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/common_back"
             android:src="@drawable/ic_chevron_back"
             android:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -32,7 +32,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Mints"
+            android:text="@string/settings_mints_title"
             android:textAppearance="@style/Text.Title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -60,7 +60,7 @@
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="4dp"
-                android:text="ALLOWED MINTS"
+                android:text="@string/mints_settings_section_allowed_mints"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Lightning mint hint -->
@@ -69,7 +69,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginBottom="12dp"
-                android:text="Select a mint for ⚡ Lightning payments. The selected mint will be used to receive and send Bitcoin over Lightning."
+                android:text="@string/mints_settings_lightning_hint"
                 android:textAppearance="@style/Text.Caption"
                 android:textColor="@color/color_text_secondary" />
 
@@ -94,7 +94,7 @@
                     android:layout_height="40dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_search_field"
-                    android:hint="Add mint URL"
+                    android:hint="@string/mints_settings_add_mint_hint"
                     android:inputType="textUri"
                     android:paddingHorizontal="16dp"
                     android:textAppearance="@style/Text.Body"
@@ -116,7 +116,7 @@
                     android:layout_height="40dp"
                     android:layout_marginStart="8dp"
                     android:minHeight="40dp"
-                    android:text="Add" />
+                    android:text="@string/mints_settings_add_button" />
             </LinearLayout>
 
             <TextView
@@ -127,7 +127,7 @@
                 android:layout_marginTop="16dp"
                 android:background="?attr/selectableItemBackground"
                 android:padding="8dp"
-                android:text="Reset to Defaults"
+                android:text="@string/mints_settings_reset_defaults"
                 android:textAppearance="@style/Text.Link" />
 
         </LinearLayout>

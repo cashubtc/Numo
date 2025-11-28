@@ -1,0 +1,16 @@
+<resources>
+    <!-- Mints settings screen -->
+    <string name="mints_settings_section_allowed_mints">ALLOWED MINTS</string>
+    <string name="mints_settings_lightning_hint">
+        Select a mint for ⚡ Lightning payments. The selected mint will be used to receive and send Bitcoin over Lightning.
+    </string>
+    <string name="mints_settings_add_mint_hint">Add mint URL</string>
+    <string name="mints_settings_add_button">Add</string>
+    <string name="mints_settings_reset_defaults">Reset to Defaults</string>
+
+    <!-- Mints settings toasts & errors -->
+    <string name="mints_settings_error_invalid_url">Mint is not available or URL is wrong</string>
+    <string name="mints_settings_error_already_exists">Mint already in the list</string>
+    <string name="mints_settings_toast_reset_defaults">Mints reset to defaults</string>
+    <string name="mints_settings_toast_lightning_mint_selected">Lightning payments will use this mint</string>
+</resources>

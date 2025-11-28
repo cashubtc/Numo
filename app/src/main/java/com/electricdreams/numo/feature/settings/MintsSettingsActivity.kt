@@ -10,9 +10,9 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.electricdreams.numo.R
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.util.MintIconCache
 import com.electricdreams.numo.core.util.MintManager
@@ -201,10 +201,10 @@ class MintsSettingsActivity : AppCompatActivity(),
                 addMintLoading.visibility = View.GONE
                 addMintButton.isEnabled = true
                 newMintEditText.isEnabled = true
-                
+
                 Toast.makeText(
                     this@MintsSettingsActivity,
-                    "Mint is not available or URL is wrong",
+                    getString(R.string.mints_settings_error_invalid_url),
                     Toast.LENGTH_LONG
                 ).show()
                 return@launch
@@ -223,7 +223,11 @@ class MintsSettingsActivity : AppCompatActivity(),
                 loadMintBalances()
                 mintsAdapter.notifyDataSetChanged()
             } else {
-                Toast.makeText(this@MintsSettingsActivity, "Mint already in the list", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this@MintsSettingsActivity,
+                    getString(R.string.mints_settings_error_already_exists),
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             
             // Hide loading spinner and re-enable button
@@ -237,7 +241,11 @@ class MintsSettingsActivity : AppCompatActivity(),
         mintManager.resetToDefaults()
         mintsAdapter.updateMints(mintManager.getAllowedMints())
         mintsAdapter.setPreferredLightningMint(mintManager.getPreferredLightningMint())
-        Toast.makeText(this, "Mints reset to defaults", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            this,
+            getString(R.string.mints_settings_toast_reset_defaults),
+            Toast.LENGTH_SHORT
+        ).show()
         // Reload all balances
         loadMintBalances()
     }
@@ -253,7 +261,11 @@ class MintsSettingsActivity : AppCompatActivity(),
     override fun onLightningMintSelected(mintUrl: String) {
         if (mintManager.setPreferredLightningMint(mintUrl)) {
             mintsAdapter.setPreferredLightningMint(mintUrl)
-            Toast.makeText(this, "Lightning payments will use this mint", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                getString(R.string.mints_settings_toast_lightning_mint_selected),
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 
