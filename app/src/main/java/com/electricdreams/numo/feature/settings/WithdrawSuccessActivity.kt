@@ -55,12 +55,19 @@ class WithdrawSuccessActivity : AppCompatActivity() {
 
         // Get data from intent
         val amount = intent.getLongExtra("amount", 0)
-        val destination = intent.getStringExtra("destination") ?: "Lightning"
+        val destination = intent.getStringExtra("destination")
+            ?: getString(R.string.withdraw_success_destination_fallback)
 
         // Display data
         val amountObj = Amount(amount, Amount.Currency.BTC)
-        amountText.text = "${amountObj} sent."
-        destinationText.text = "To $destination"
+        amountText.text = getString(
+            R.string.withdraw_success_amount,
+            amountObj.toString()
+        )
+        destinationText.text = getString(
+            R.string.withdraw_success_destination,
+            destination
+        )
 
         // Set up button listener
         closeButton.setOnClickListener {

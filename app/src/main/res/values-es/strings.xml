@@ -282,6 +282,61 @@
     <!-- Common buttons -->
     <string name="common_ok">Aceptar</string>
 
+    <!-- Withdraw - Lightning selection screen -->
+    <string name="withdraw_lightning_toolbar_back">Atrás</string>
+    <string name="withdraw_lightning_title">Retirar</string>
+    <string name="withdraw_lightning_balance_label">Saldo disponible</string>
+    <string name="withdraw_lightning_mint_name_label">Nombre del mint</string>
+    <string name="withdraw_lightning_section_withdraw_to">RETIRAR A</string>
+    <string name="withdraw_lightning_option_invoice">⚡ Factura Lightning</string>
+    <string name="withdraw_lightning_invoice_hint_label">Introduce una factura Lightning (BOLT11)</string>
+    <string name="withdraw_lightning_invoice_hint_value">lnbc...</string>
+    <string name="withdraw_lightning_option_address">📧 Dirección Lightning</string>
+    <string name="withdraw_lightning_address_hint_label">Introduce una dirección Lightning</string>
+    <string name="withdraw_lightning_address_hint_value">usuario@dominio.com</string>
+    <string name="withdraw_lightning_amount_label">Importe (sats)</string>
+    <string name="withdraw_lightning_amount_hint">1000</string>
+    <string name="withdraw_lightning_button_continue">Continuar</string>
+
+    <!-- Withdraw - errors and toasts -->
+    <string name="withdraw_lightning_error_invalid_mint_url">URL de mint no válida</string>
+    <string name="withdraw_lightning_error_enter_invoice">Introduce una factura Lightning</string>
+    <string name="withdraw_lightning_error_wallet_not_initialized">El monedero no está inicializado</string>
+    <string name="withdraw_lightning_error_insufficient_balance">Saldo insuficiente. El importe más las comisiones (%1$d sats) supera tu saldo (%2$d sats). Prueba con un importe inferior a %3$d sats.</string>
+    <string name="withdraw_lightning_error_enter_address">Introduce una dirección Lightning</string>
+    <string name="withdraw_lightning_error_enter_valid_amount">Introduce un importe válido</string>
+    <string name="withdraw_lightning_error_generic">Error: %1$s</string>
+
+    <!-- Withdraw - melt quote screen -->
+    <string name="withdraw_melt_toolbar_back">Atrás</string>
+    <string name="withdraw_melt_title">Confirmar retirada</string>
+    <string name="withdraw_melt_summary">Retirar desde %1$s</string>
+    <string name="withdraw_melt_destination_label">A</string>
+    <string name="withdraw_melt_destination_placeholder">usuario@dominio.com</string>
+    <string name="withdraw_melt_amount_label">Importe</string>
+    <string name="withdraw_melt_fee_label">Reserva de comisión</string>
+    <string name="withdraw_melt_total_label">Total</string>
+    <string name="withdraw_melt_fee_note">La reserva de comisión se devolverá si la comisión Lightning real es inferior.</string>
+    <string name="withdraw_melt_loading">Procesando retirada...</string>
+
+    <!-- Withdraw - melt errors and states -->
+    <string name="withdraw_melt_error_invalid_data">Datos de cotización de retirada no válidos</string>
+    <string name="withdraw_melt_error_wallet_not_initialized">El monedero no está inicializado</string>
+    <string name="withdraw_melt_error_invoice_not_paid">El pago ha fallado: la factura no está pagada</string>
+    <string name="withdraw_melt_error_pending">El pago está pendiente. Vuelve a comprobarlo más tarde.</string>
+    <string name="withdraw_melt_error_unknown_state">El pago ha fallado: estado desconocido</string>
+    <string name="withdraw_melt_error_generic">Error: %1$s</string>
+    <string name="withdraw_melt_destination_unknown">Desconocido</string>
+    <string name="withdraw_melt_destination_invoice_fallback">Factura Lightning</string>
+
+    <!-- Withdraw - success screen -->
+    <string name="withdraw_success_amount">%1$s enviado.</string>
+    <string name="withdraw_success_destination">A %1$s</string>
+    <string name="withdraw_success_destination_fallback">Lightning</string>
+    <string name="withdraw_success_close">Cerrar</string>
+    <string name="withdraw_success_background_description">Fondo de éxito</string>
+    <string name="withdraw_success_icon_description">Éxito</string>
+
     <!-- History & transaction rows/dialogs -->
     <string name="history_toolbar_title">Actividad</string>
     <string name="history_section_payment_history">HISTORIAL DE PAGOS</string>

@@ -292,6 +292,61 @@
     <!-- Common buttons -->
     <string name="common_ok">OK</string>
 
+    <!-- Withdraw - Lightning selection screen -->
+    <string name="withdraw_lightning_toolbar_back">Back</string>
+    <string name="withdraw_lightning_title">Withdraw</string>
+    <string name="withdraw_lightning_balance_label">Available Balance</string>
+    <string name="withdraw_lightning_mint_name_label">Mint Name</string>
+    <string name="withdraw_lightning_section_withdraw_to">WITHDRAW TO</string>
+    <string name="withdraw_lightning_option_invoice">⚡ Lightning Invoice</string>
+    <string name="withdraw_lightning_invoice_hint_label">Enter a Lightning invoice (BOLT11)</string>
+    <string name="withdraw_lightning_invoice_hint_value">lnbc...</string>
+    <string name="withdraw_lightning_option_address">📧 Lightning Address</string>
+    <string name="withdraw_lightning_address_hint_label">Enter a Lightning address</string>
+    <string name="withdraw_lightning_address_hint_value">user@domain.com</string>
+    <string name="withdraw_lightning_amount_label">Amount (sats)</string>
+    <string name="withdraw_lightning_amount_hint">1000</string>
+    <string name="withdraw_lightning_button_continue">Continue</string>
+
+    <!-- Withdraw - errors and toasts -->
+    <string name="withdraw_lightning_error_invalid_mint_url">Invalid mint URL</string>
+    <string name="withdraw_lightning_error_enter_invoice">Please enter a Lightning invoice</string>
+    <string name="withdraw_lightning_error_wallet_not_initialized">Wallet not initialized</string>
+    <string name="withdraw_lightning_error_insufficient_balance">Insufficient balance. Amount + fees (%1$d sats) exceeds your balance (%2$d sats). Try an amount under %3$d sats.</string>
+    <string name="withdraw_lightning_error_enter_address">Please enter a Lightning address</string>
+    <string name="withdraw_lightning_error_enter_valid_amount">Please enter a valid amount</string>
+    <string name="withdraw_lightning_error_generic">Error: %1$s</string>
+
+    <!-- Withdraw - melt quote screen -->
+    <string name="withdraw_melt_toolbar_back">Back</string>
+    <string name="withdraw_melt_title">Confirm Withdrawal</string>
+    <string name="withdraw_melt_summary">Withdraw from %1$s</string>
+    <string name="withdraw_melt_destination_label">TO</string>
+    <string name="withdraw_melt_destination_placeholder">user@domain.com</string>
+    <string name="withdraw_melt_amount_label">Amount</string>
+    <string name="withdraw_melt_fee_label">Fee Reserve</string>
+    <string name="withdraw_melt_total_label">Total</string>
+    <string name="withdraw_melt_fee_note">The fee reserve will be returned if the actual Lightning fee is lower.</string>
+    <string name="withdraw_melt_loading">Processing withdrawal...</string>
+
+    <!-- Withdraw - melt errors and states -->
+    <string name="withdraw_melt_error_invalid_data">Invalid melt quote data</string>
+    <string name="withdraw_melt_error_wallet_not_initialized">Wallet not initialized</string>
+    <string name="withdraw_melt_error_invoice_not_paid">Payment failed: Invoice not paid</string>
+    <string name="withdraw_melt_error_pending">Payment is pending. Please check back later.</string>
+    <string name="withdraw_melt_error_unknown_state">Payment failed: Unknown state</string>
+    <string name="withdraw_melt_error_generic">Error: %1$s</string>
+    <string name="withdraw_melt_destination_unknown">Unknown</string>
+    <string name="withdraw_melt_destination_invoice_fallback">Lightning Invoice</string>
+
+    <!-- Withdraw - success screen -->
+    <string name="withdraw_success_amount">%1$s sent.</string>
+    <string name="withdraw_success_destination">To %1$s</string>
+    <string name="withdraw_success_destination_fallback">Lightning</string>
+    <string name="withdraw_success_close">Close</string>
+    <string name="withdraw_success_background_description">Success background</string>
+    <string name="withdraw_success_icon_description">Success</string>
+
     <!-- History & transaction rows/dialogs -->
     <string name="history_toolbar_title">Activity</string>
     <string name="history_section_payment_history">PAYMENT HISTORY</string>

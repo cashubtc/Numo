@@ -22,7 +22,7 @@
             android:minHeight="48dp"
             android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/withdraw_melt_toolbar_back"
             android:src="@drawable/ic_chevron_back"
             android:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -32,7 +32,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Confirm Withdrawal"
+            android:text="@string/withdraw_melt_title"
             android:textAppearance="@style/Text.Title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -61,7 +61,7 @@
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="24dp"
                 android:gravity="center"
-                android:text="Withdraw from Mint"
+                android:text="@string/withdraw_melt_summary"
                 android:textAppearance="@style/Text.Body"
                 android:textColor="@color/color_text_secondary"
                 android:textSize="15sp" />
@@ -83,21 +83,21 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="TO"
-                        android:textAppearance="@style/Text.Caption"
-                        android:textColor="@color/color_text_secondary"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/withdraw_melt_destination_label"
+                            android:textAppearance="@style/Text.Caption"
+                            android:textColor="@color/color_text_secondary"
                         android:textSize="12sp" />
 
-                    <TextView
-                        android:id="@+id/destination_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="user@domain.com"
-                        android:textAppearance="@style/Text.Body"
+                        <TextView
+                            android:id="@+id/destination_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/withdraw_melt_destination_placeholder"
+                            android:textAppearance="@style/Text.Body"
                         android:textColor="@color/color_text_primary"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -133,7 +133,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Amount"
+                            android:text="@string/withdraw_melt_amount_label"
                             android:textAppearance="@style/Text.Body"
                             android:textColor="@color/color_text_secondary"
                             android:textSize="15sp" />
@@ -161,7 +161,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Fee Reserve"
+                            android:text="@string/withdraw_melt_fee_label"
                             android:textAppearance="@style/Text.Body"
                             android:textColor="@color/color_text_secondary"
                             android:textSize="15sp" />
@@ -195,7 +195,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Total"
+                            android:text="@string/withdraw_melt_total_label"
                             android:textAppearance="@style/Text.Body"
                             android:textColor="@color/color_text_primary"
                             android:textSize="16sp"
@@ -224,7 +224,7 @@
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="16dp"
                 android:gravity="center"
-                android:text="The fee reserve will be returned if the actual Lightning fee is lower."
+                android:text="@string/withdraw_melt_fee_note"
                 android:textAppearance="@style/Text.Caption"
                 android:textColor="@color/color_text_secondary"
                 android:textSize="13sp" />
@@ -235,13 +235,14 @@
 
     <!-- Confirm Button -->
     <Button
+    <Button
         android:id="@+id/confirm_button"
         style="@style/Widget.Button.Primary.Green"
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_marginHorizontal="24dp"
         android:layout_marginBottom="24dp"
-        android:text="Confirm Withdrawal"
+        android:text="@string/withdraw_melt_title"
         android:textAllCaps="false"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -281,7 +282,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Processing withdrawal..."
+            android:text="@string/withdraw_melt_loading"
             android:textAppearance="@style/Text.Body"
             android:textColor="@color/color_text_primary"
             android:textSize="15sp"

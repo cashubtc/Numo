@@ -68,7 +68,11 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
         mintManager = MintManager.getInstance(this)
 
         if (mintUrl.isEmpty() || quoteId.isEmpty()) {
-            Toast.makeText(this, "Invalid melt quote data", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                getString(R.string.withdraw_melt_error_invalid_data),
+                Toast.LENGTH_SHORT
+            ).show()
             finish()
             return
         }
@@ -107,7 +111,7 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
                     invoice!!
                 }
             }
-            else -> "Unknown"
+            else -> getString(R.string.withdraw_melt_destination_unknown)
         }
         destinationText.text = destination
 
@@ -122,7 +126,10 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
 
         // Summary text
         val mintName = mintManager.getMintDisplayName(mintUrl)
-        summaryText.text = "Withdraw from $mintName"
+        summaryText.text = getString(
+            R.string.withdraw_melt_summary,
+            mintName
+        )
     }
 
     private fun confirmWithdrawal() {
@@ -135,7 +142,11 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
                 val wallet = CashuWalletManager.getWallet()
                 if (wallet == null) {
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(this@WithdrawMeltQuoteActivity, "Wallet not initialized", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@WithdrawMeltQuoteActivity,
+                            getString(R.string.withdraw_melt_error_wallet_not_initialized),
+                            Toast.LENGTH_SHORT
+                        ).show()
                         setLoading(false)
                     }
                     return@launch
@@ -199,18 +210,24 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
                             historyEntryId?.let {
                                 removeEntryFromHistory(it)
                             }
-                            showPaymentError("Payment failed: Invoice not paid")
+                            showPaymentError(
+                                getString(R.string.withdraw_melt_error_invoice_not_paid)
+                            )
                         }
                         QuoteState.PENDING -> {
                             // Keep in history as pending
-                            showPaymentError("Payment is pending. Please check back later.")
+                            showPaymentError(
+                                getString(R.string.withdraw_melt_error_pending)
+                            )
                         }
                         else -> {
                             // Remove from history
                             historyEntryId?.let {
                                 removeEntryFromHistory(it)
                             }
-                            showPaymentError("Payment failed: Unknown state")
+                            showPaymentError(
+                                getString(R.string.withdraw_melt_error_unknown_state)
+                            )
                         }
                     }
                 }
@@ -224,7 +241,12 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
                         removeEntryFromHistory(it)
                     }
                     
-                    showPaymentError("Error: ${e.message}")
+                    showPaymentError(
+                        getString(
+                            R.string.withdraw_melt_error_generic,
+                            e.message ?: ""
+                        )
+                    )
                 }
             }
         }
@@ -259,7 +281,9 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
     private fun showPaymentSuccess() {
         val intent = Intent(this, WithdrawSuccessActivity::class.java)
         intent.putExtra("amount", amount)
-        intent.putExtra("destination", lightningAddress ?: "Lightning Invoice")
+        val destinationLabel = lightningAddress
+            ?: getString(R.string.withdraw_melt_destination_invoice_fallback)
+        intent.putExtra("destination", destinationLabel)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
         finish()

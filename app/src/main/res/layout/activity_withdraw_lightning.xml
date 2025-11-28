@@ -22,7 +22,7 @@
             android:minHeight="48dp"
             android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/withdraw_lightning_toolbar_back"
             android:src="@drawable/ic_chevron_back"
             android:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -32,7 +32,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Withdraw"
+            android:text="@string/withdraw_lightning_title"
             android:textAppearance="@style/Text.Title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -73,7 +73,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Available Balance"
+                        android:text="@string/withdraw_lightning_balance_label"
                         android:textAppearance="@style/Text.Caption"
                         android:textColor="@color/color_text_secondary"
                         android:textSize="13sp" />
@@ -94,7 +94,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Mint Name"
+                        android:text="@string/withdraw_lightning_mint_name_label"
                         android:textAppearance="@style/Text.Caption"
                         android:textColor="@color/color_text_secondary"
                         android:textSize="13sp" />
@@ -110,7 +110,7 @@
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="32dp"
                 android:layout_marginBottom="12dp"
-                android:text="WITHDRAW TO"
+                android:text="@string/withdraw_lightning_section_withdraw_to"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Invoice Option -->
@@ -135,7 +135,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="⚡ Lightning Invoice"
+                        android:text="@string/withdraw_lightning_option_invoice"
                         android:textAppearance="@style/Text.Body"
                         android:textColor="@color/color_text_primary"
                         android:textSize="16sp"
@@ -162,7 +162,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Enter a Lightning invoice (BOLT11)"
+                        android:text="@string/withdraw_lightning_invoice_hint_label"
                         android:textAppearance="@style/Text.Caption"
                         android:textColor="@color/color_text_secondary" />
 
@@ -171,7 +171,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_search_field"
-                        android:hint="lnbc..."
+                        android:hint="@string/withdraw_lightning_invoice_hint_value"
                         android:inputType="textMultiLine"
                         android:maxLines="4"
                         android:minHeight="48dp"
@@ -224,7 +224,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="📧 Lightning Address"
+                        android:text="@string/withdraw_lightning_option_address"
                         android:textAppearance="@style/Text.Body"
                         android:textColor="@color/color_text_primary"
                         android:textSize="16sp"
@@ -251,7 +251,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
-                        android:text="Enter a Lightning address"
+                        android:text="@string/withdraw_lightning_address_hint_label"
                         android:textAppearance="@style/Text.Caption"
                         android:textColor="@color/color_text_secondary" />
 
@@ -260,7 +260,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_search_field"
-                        android:hint="user@domain.com"
+                        android:hint="@string/withdraw_lightning_address_hint_value"
                         android:inputType="textEmailAddress"
                         android:minHeight="48dp"
                         android:padding="12dp"
@@ -272,7 +272,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="8dp"
-                        android:text="Amount (sats)"
+                        android:text="@string/withdraw_lightning_amount_label"
                         android:textAppearance="@style/Text.Caption"
                         android:textColor="@color/color_text_secondary" />
 
@@ -281,7 +281,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_search_field"
-                        android:hint="1000"
+                        android:hint="@string/withdraw_lightning_amount_hint"
                         android:inputType="number"
                         android:minHeight="48dp"
                         android:padding="12dp"

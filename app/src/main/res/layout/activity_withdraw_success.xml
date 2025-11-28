@@ -33,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:gravity="center"
-                android:text="₿ 0 sent."
+                android:text="@string/withdraw_success_amount"
                 android:textColor="@color/color_text_primary"
                 android:textSize="28sp"
                 android:textStyle="bold" />
@@ -45,7 +45,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="32dp"
                 android:gravity="center"
-                android:text="To Lightning"
+                android:text="@string/withdraw_success_destination"
                 android:textColor="@color/color_text_secondary"
                 android:textSize="16sp" />
 
@@ -61,6 +61,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:contentDescription="Success background"
+                    android:contentDescription="@string/withdraw_success_background_description"
                     android:src="@drawable/ic_circle_solid_green"
                     android:visibility="invisible" />
 
@@ -70,7 +71,7 @@
                     android:layout_width="60dp"
                     android:layout_height="60dp"
                     android:layout_gravity="center"
-                    android:contentDescription="Success"
+                    android:contentDescription="@string/withdraw_success_icon_description"
                     android:src="@drawable/ic_check"
                     android:visibility="invisible"
                     app:tint="@color/color_bg_white" />
@@ -89,7 +90,7 @@
         android:layout_marginHorizontal="24dp"
         android:layout_marginBottom="24dp"
         android:background="@drawable/bg_button_secondary_gray"
-        android:text="Close"
+        android:text="@string/withdraw_success_close"
         android:textAllCaps="false"
         android:textColor="@color/color_bg_white"
         android:textSize="18sp"
