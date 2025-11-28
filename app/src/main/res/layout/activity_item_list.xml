@@ -21,7 +21,7 @@
             android:layout_height="48dp"
             android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/item_list_toolbar_back"
             android:src="@drawable/ic_chevron_back"
             app:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -32,7 +32,7 @@
             android:id="@+id/toolbar_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Items"
+            android:text="@string/item_list_toolbar_title"
             android:textAppearance="@style/Text.Title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -46,7 +46,7 @@
             android:layout_height="48dp"
             android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Add item"
+            android:contentDescription="@string/item_list_add_item"
             android:src="@drawable/ic_add"
             app:tint="@color/color_primary_green"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -60,7 +60,7 @@
             android:layout_height="48dp"
             android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Done reordering"
+            android:contentDescription="@string/item_list_done_reordering"
             android:src="@drawable/ic_check"
             app:tint="@color/color_primary_green"
             android:visibility="gone"
@@ -115,13 +115,13 @@
                     android:layout_height="80dp"
                     android:src="@drawable/ic_image_placeholder"
                     app:tint="@color/color_icon_tertiary"
-                    android:contentDescription="No items" />
+                    android:contentDescription="@string/item_list_empty_icon_description" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:text="No Items"
+                    android:text="@string/item_list_empty_title"
                     android:textColor="@color/color_text_primary"
                     android:textSize="20sp"
                     android:fontFamily="sans-serif-medium" />
@@ -130,7 +130,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Tap + to add your first item"
+                    android:text="@string/item_list_empty_subtitle"
                     android:textAlignment="center"
                     android:textColor="@color/color_text_tertiary"
                     android:textSize="15sp" />
@@ -163,7 +163,7 @@
                 style="@style/Widget.Button.Secondary.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Import from CSV" />
+                android:text="@string/item_list_import_from_csv" />
 
             <!-- Clear All Items Link -->
             <TextView
@@ -174,7 +174,7 @@
                 android:layout_marginTop="16dp"
                 android:background="?attr/selectableItemBackground"
                 android:padding="8dp"
-                android:text="Clear All Items"
+                android:text="@string/item_list_clear_all"
                 android:textAppearance="@style/Text.Link"
                 android:textColor="@color/color_warning_red" />
 

@@ -21,7 +21,7 @@
             android:layout_height="48dp"
             android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/item_entry_toolbar_back"
             android:src="@drawable/ic_chevron_back"
             app:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -32,7 +32,7 @@
             android:id="@+id/toolbar_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add Item"
+            android:text="@string/item_entry_title_add"
             android:textAppearance="@style/Text.Title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -44,7 +44,7 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Save"
+            android:text="@string/item_entry_button_save"
             android:textAppearance="@style/Text.Button"
             android:textColor="@color/color_primary_green"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -85,7 +85,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:background="@color/color_bg_white"
-                        android:contentDescription="Item image"
+                        android:contentDescription="@string/item_entry_image_description"
                         android:scaleType="centerCrop" />
 
                     <ImageView
@@ -93,7 +93,7 @@
                         android:layout_width="36dp"
                         android:layout_height="36dp"
                         android:layout_gravity="center"
-                        android:contentDescription="No image"
+                        android:contentDescription="@string/item_entry_image_placeholder"
                         android:src="@android:drawable/ic_menu_camera"
                         app:tint="@color/color_icon_secondary" />
                 </androidx.cardview.widget.CardView>
@@ -103,7 +103,7 @@
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
-                    android:text="Add Photo"
+                    android:text="@string/item_entry_button_add_photo"
                     android:textColor="@color/color_primary_green"
                     android:textSize="15sp"
                     android:textAllCaps="false" />
@@ -113,7 +113,7 @@
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="32dp"
-                    android:text="Remove Photo"
+                    android:text="@string/item_entry_button_remove_photo"
                     android:textColor="@color/color_warning_red"
                     android:textSize="13sp"
                     android:textAllCaps="false"
@@ -127,7 +127,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="8dp"
-                android:text="BASIC INFORMATION"
+                android:text="@string/item_entry_section_basic_information"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
@@ -158,7 +158,7 @@
                         <TextView
                             android:layout_width="100dp"
                             android:layout_height="wrap_content"
-                            android:text="Name"
+                            android:text="@string/item_entry_label_name"
                             android:textAppearance="@style/Text.Body"
                             android:textColor="@color/color_text_primary" />
 
@@ -168,7 +168,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:background="@null"
-                            android:hint="Item Name"
+                            android:hint="@string/item_entry_hint_name"
                             android:inputType="textCapWords"
                             android:textAppearance="@style/Text.Body"
                             android:textColorHint="@color/color_text_tertiary" />
@@ -186,7 +186,7 @@
                         <TextView
                             android:layout_width="100dp"
                             android:layout_height="wrap_content"
-                            android:text="Variation"
+                            android:text="@string/item_entry_label_variation"
                             android:textAppearance="@style/Text.Body"
                             android:textColor="@color/color_text_primary" />
 
@@ -196,7 +196,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:background="@null"
-                            android:hint="e.g. Small, Large"
+                            android:hint="@string/item_entry_hint_variation"
                             android:inputType="textCapWords"
                             android:textAppearance="@style/Text.Body"
                             android:textColorHint="@color/color_text_tertiary" />
@@ -215,7 +215,7 @@
                         <TextView
                             android:layout_width="100dp"
                             android:layout_height="wrap_content"
-                            android:text="Description"
+                            android:text="@string/item_entry_label_description"
                             android:textAppearance="@style/Text.Body"
                             android:textColor="@color/color_text_primary" />
 
@@ -225,7 +225,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:background="@null"
-                            android:hint="Optional"
+                            android:hint="@string/item_entry_hint_description"
                             android:inputType="textCapSentences|textMultiLine"
                             android:minLines="2"
                             android:textAppearance="@style/Text.Body"
@@ -241,7 +241,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="8dp"
-                android:text="CATEGORY"
+                android:text="@string/item_entry_section_category"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
@@ -288,7 +288,7 @@
                             android:layout_height="44dp"
                             android:layout_weight="1"
                             android:background="@drawable/bg_input_field_rounded"
-                            android:hint="New category name"
+                            android:hint="@string/item_entry_hint_new_category"
                             android:inputType="textCapWords"
                             android:paddingHorizontal="12dp"
                             android:textSize="15sp"
@@ -300,7 +300,7 @@
                             android:layout_height="44dp"
                             android:layout_marginStart="8dp"
                             android:background="@drawable/bg_circle_green"
-                            android:contentDescription="Confirm"
+                            android:contentDescription="@string/item_entry_category_confirm"
                             android:src="@drawable/ic_check"
                             app:tint="@color/color_bg_white" />
 
@@ -310,7 +310,7 @@
                             android:layout_height="44dp"
                             android:layout_marginStart="8dp"
                             android:background="?attr/selectableItemBackgroundBorderless"
-                            android:contentDescription="Cancel"
+                            android:contentDescription="@string/item_entry_category_cancel"
                             android:src="@drawable/ic_close"
                             app:tint="@color/color_text_secondary" />
 
@@ -331,7 +331,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="24dp"
-                android:text="Select an existing category or create a new one."
+                android:text="@string/item_entry_category_helper"
                 android:textAppearance="@style/Text.Caption" />
 
             <!-- ==================== PRICING SECTION ==================== -->
@@ -340,7 +340,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="8dp"
-                android:text="PRICING"
+                android:text="@string/item_entry_section_pricing"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
@@ -373,7 +373,7 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:text="Fiat"
+                            android:text="@string/item_entry_price_type_fiat"
                             android:textAllCaps="false"
                             android:textSize="15sp" />
 
@@ -383,7 +383,7 @@
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:text="Bitcoin"
+                            android:text="@string/item_entry_price_type_bitcoin"
                             android:textAllCaps="false"
                             android:textSize="15sp" />
 
@@ -402,7 +402,7 @@
                             android:id="@+id/currency_symbol"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="$"
+                            android:text="@string/item_entry_currency_symbol_default"
                             android:textSize="24sp"
                             android:textColor="@color/color_text_primary"
                             android:fontFamily="sans-serif-medium"
@@ -414,7 +414,7 @@
                             android:layout_height="56dp"
                             android:layout_weight="1"
                             android:background="@drawable/bg_input_field_rounded"
-                            android:hint="0.00"
+                            android:hint="@string/item_entry_hint_price_fiat"
                             android:inputType="numberDecimal"
                             android:paddingHorizontal="16dp"
                             android:textSize="20sp"
@@ -426,7 +426,7 @@
                             android:id="@+id/currency_code"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="USD"
+                            android:text="@string/item_entry_currency_code_default"
                             android:textSize="15sp"
                             android:textColor="@color/color_text_secondary"
                             android:layout_marginStart="8dp" />
@@ -444,7 +444,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="₿"
+                            android:text="@string/item_entry_bitcoin_symbol"
                             android:textSize="24sp"
                             android:textColor="@color/color_bitcoin_orange"
                             android:fontFamily="sans-serif-medium"
@@ -456,7 +456,7 @@
                             android:layout_height="56dp"
                             android:layout_weight="1"
                             android:background="@drawable/bg_input_field_rounded"
-                            android:hint="0"
+                            android:hint="@string/item_entry_hint_price_sats"
                             android:inputType="number"
                             android:paddingHorizontal="16dp"
                             android:textSize="20sp"
@@ -467,7 +467,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="sats"
+                            android:text="@string/item_entry_label_sats"
                             android:textSize="15sp"
                             android:textColor="@color/color_text_secondary"
                             android:layout_marginStart="8dp" />
@@ -508,7 +508,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Apply VAT"
+                            android:text="@string/item_entry_label_apply_vat"
                             android:textAppearance="@style/Text.Body"
                             android:textColor="@color/color_text_primary" />
 
@@ -542,7 +542,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Price includes VAT"
+                                android:text="@string/item_entry_label_price_includes_vat"
                                 android:textAppearance="@style/Text.Body"
                                 android:textColor="@color/color_text_primary" />
 
@@ -567,7 +567,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="VAT Rate"
+                                android:text="@string/item_entry_label_vat_rate"
                                 android:textAppearance="@style/Text.Body"
                                 android:textColor="@color/color_text_primary" />
 
@@ -584,7 +584,7 @@
                                     android:layout_height="36dp"
                                     android:background="@null"
                                     android:gravity="center"
-                                    android:hint="20"
+                                    android:hint="@string/item_entry_hint_vat_rate"
                                     android:inputType="number"
                                     android:maxLength="2"
                                     android:textSize="16sp"
@@ -631,7 +631,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Price Breakdown"
+                    android:text="@string/item_entry_price_breakdown_title"
                     android:textSize="12sp"
                     android:textColor="@color/color_text_secondary"
                     android:textAllCaps="true"
@@ -650,7 +650,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Net Price (excl. VAT)"
+                        android:text="@string/item_entry_price_breakdown_net_label"
                         android:textSize="15sp"
                         android:textColor="@color/color_text_secondary" />
 
@@ -658,7 +658,7 @@
                         android:id="@+id/text_net_price"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="$0.00"
+                        android:text="@string/item_entry_price_breakdown_net_value_default"
                         android:textSize="15sp"
                         android:textColor="@color/color_text_primary"
                         android:fontFamily="sans-serif-medium" />
@@ -678,7 +678,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="VAT (20%)"
+                        android:text="@string/item_entry_price_breakdown_vat_label"
                         android:textSize="15sp"
                         android:textColor="@color/color_text_secondary" />
 
@@ -686,7 +686,7 @@
                         android:id="@+id/text_vat_amount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="$0.00"
+                        android:text="@string/item_entry_price_breakdown_vat_value_default"
                         android:textSize="15sp"
                         android:textColor="@color/color_text_primary"
                         android:fontFamily="sans-serif-medium" />
@@ -711,7 +711,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Total (incl. VAT)"
+                        android:text="@string/item_entry_price_breakdown_total_label"
                         android:textSize="16sp"
                         android:textColor="@color/color_text_primary"
                         android:fontFamily="sans-serif-medium" />
@@ -720,7 +720,7 @@
                         android:id="@+id/text_gross_price"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="$0.00"
+                        android:text="@string/item_entry_price_breakdown_total_value_default"
                         android:textSize="18sp"
                         android:textColor="@color/color_primary_green"
                         android:fontFamily="sans-serif-bold" />
@@ -734,7 +734,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="24dp"
-                android:text="Set a fixed price in your preferred currency. Bitcoin prices are in satoshis (sats)."
+                android:text="@string/item_entry_price_helper"
                 android:textAppearance="@style/Text.Caption" />
 
             <!-- ==================== IDENTIFICATION SECTION ==================== -->
@@ -743,7 +743,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="8dp"
-                android:text="IDENTIFICATION"
+                android:text="@string/item_entry_section_identification"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
@@ -776,7 +776,7 @@
                         <TextView
                             android:layout_width="60dp"
                             android:layout_height="wrap_content"
-                            android:text="GTIN"
+                            android:text="@string/item_entry_label_gtin"
                             android:textAppearance="@style/Text.Body"
                             android:textColor="@color/color_text_primary" />
 
@@ -786,7 +786,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:background="@null"
-                        android:text="Scan or enter barcode"
+                            android:hint="@string/item_entry_hint_gtin"
                             android:inputType="text"
                             android:textAppearance="@style/Text.Body"
                             android:textColorHint="@color/color_text_tertiary" />
@@ -796,7 +796,7 @@
                             android:layout_width="44dp"
                             android:layout_height="44dp"
                             android:background="?attr/selectableItemBackgroundBorderless"
-                            android:contentDescription="Scan barcode"
+                            android:contentDescription="@string/item_entry_scan_barcode"
                             android:src="@drawable/ic_barcode_scan"
                             app:tint="@color/color_primary_green" />
 
@@ -816,7 +816,7 @@
                         <TextView
                             android:layout_width="60dp"
                             android:layout_height="wrap_content"
-                            android:text="SKU"
+                            android:text="@string/item_entry_label_sku"
                             android:textAppearance="@style/Text.Body"
                             android:textColor="@color/color_text_primary" />
 
@@ -826,7 +826,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:background="@null"
-                        android:text="Internal stock code"
+                            android:hint="@string/item_entry_hint_sku"
                             android:inputType="text"
                             android:textAppearance="@style/Text.Body"
                             android:textColorHint="@color/color_text_tertiary" />
@@ -843,7 +843,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="16dp"
-                android:text="This GTIN already exists"
+                android:text="@string/item_entry_error_gtin_exists"
                 android:textSize="13sp"
                 android:textColor="@color/color_warning_red"
                 android:visibility="gone" />
@@ -855,7 +855,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="16dp"
-                android:text="This SKU already exists"
+                android:text="@string/item_entry_error_sku_exists"
                 android:textSize="13sp"
                 android:textColor="@color/color_warning_red"
                 android:visibility="gone" />
@@ -866,7 +866,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="8dp"
-                android:text="INVENTORY"
+                android:text="@string/item_entry_section_inventory"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
@@ -898,7 +898,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Track Quantity"
+                            android:text="@string/item_entry_label_track_quantity"
                             android:textAppearance="@style/Text.Body"
                             android:textColor="@color/color_text_primary" />
 
@@ -931,7 +931,7 @@
                             <TextView
                                 android:layout_width="120dp"
                                 android:layout_height="wrap_content"
-                                android:text="Current Stock"
+                                android:text="@string/item_entry_label_current_stock"
                                 android:textAppearance="@style/Text.Body"
                                 android:textColor="@color/color_text_primary" />
 
@@ -942,7 +942,7 @@
                                 android:layout_weight="1"
                                 android:background="@null"
                                 android:gravity="end"
-                                android:hint="0"
+                                android:hint="@string/item_entry_hint_current_stock"
                                 android:inputType="number"
                                 android:textAppearance="@style/Text.Body"
                                 android:textColorHint="@color/color_text_tertiary" />
@@ -961,7 +961,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Low Stock Alert"
+                                android:text="@string/item_entry_label_low_stock_alert"
                                 android:textAppearance="@style/Text.Body"
                                 android:textColor="@color/color_text_primary" />
 
@@ -986,7 +986,7 @@
                             <TextView
                                 android:layout_width="120dp"
                                 android:layout_height="wrap_content"
-                                android:text="Alert When Below"
+                                android:text="@string/item_entry_label_alert_when_below"
                                 android:textAppearance="@style/Text.Body"
                                 android:textColor="@color/color_text_primary" />
 
@@ -997,9 +997,8 @@
                                 android:layout_weight="1"
                                 android:background="@null"
                                 android:gravity="end"
-                                android:hint="5"
+                                android:hint="@string/item_entry_hint_alert_threshold"
                                 android:inputType="number"
-                                android:text="5"
                                 android:textAppearance="@style/Text.Body"
                                 android:textColorHint="@color/color_text_tertiary" />
                         </LinearLayout>
@@ -1014,7 +1013,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="32dp"
-                android:text="Enable inventory tracking to monitor stock levels and receive low stock alerts."
+                android:text="@string/item_entry_inventory_helper"
                 android:textAppearance="@style/Text.Caption" />
 
             <!-- ==================== DELETE BUTTON (Edit mode only) ==================== -->
@@ -1025,7 +1024,7 @@
                 android:layout_height="48dp"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginBottom="32dp"
-                android:text="Cancel"
+                android:text="@string/item_entry_button_cancel"
                 android:textAppearance="@style/Text.Button"
                 android:textColor="@color/color_text_secondary" />
 

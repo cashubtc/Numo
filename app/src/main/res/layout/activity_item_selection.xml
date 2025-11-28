@@ -41,7 +41,7 @@
                         android:layout_width="44dp"
                         android:layout_height="44dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Back"
+                        android:contentDescription="@string/item_selection_toolbar_back"
                         android:padding="10dp"
                         android:src="@drawable/ic_chevron_back"
                         app:tint="@color/color_text_primary"
@@ -52,7 +52,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Checkout"
+                        android:text="@string/item_selection_toolbar_title"
                         android:textColor="@color/color_text_primary"
                         android:textSize="17sp"
                         android:fontFamily="sans-serif-medium"
@@ -80,7 +80,7 @@
                         android:id="@+id/search_icon"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:contentDescription="Search"
+                        android:contentDescription="@string/item_selection_search_icon_description"
                         android:src="@drawable/ic_search"
                         app:tint="@color/color_text_tertiary" />
 
@@ -109,7 +109,7 @@
                         android:layout_weight="1"
                         android:layout_marginStart="10dp"
                         android:background="@null"
-                        android:hint="Search items..."
+                        android:hint="@string/item_selection_search_hint"
                         android:imeOptions="actionSearch"
                         android:inputType="text"
                         android:maxLines="1"
@@ -123,7 +123,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Scan barcode"
+                        android:contentDescription="@string/item_selection_scan_barcode"
                         android:padding="8dp"
                         android:src="@drawable/ic_barcode_scan"
                         app:tint="@color/color_text_secondary" />
@@ -134,7 +134,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="Clear filters"
+                        android:contentDescription="@string/item_selection_clear_filters"
                         android:padding="10dp"
                         android:src="@drawable/ic_close_circle"
                         app:tint="@color/color_text_secondary"
@@ -194,14 +194,14 @@
                         android:layout_height="64dp"
                         android:src="@drawable/ic_shopping_bag"
                         app:tint="@color/color_icon_tertiary"
-                        android:contentDescription="No items" />
+                        android:contentDescription="@string/item_selection_empty_icon_description" />
 
                     <TextView
                         android:id="@+id/empty_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="No items found"
+                        android:text="@string/item_selection_empty_title"
                         android:textColor="@color/color_text_secondary"
                         android:textSize="17sp"
                         android:fontFamily="sans-serif-medium" />
@@ -211,7 +211,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Add items in Settings → Items"
+                        android:text="@string/item_selection_empty_subtitle"
                         android:textColor="@color/color_text_tertiary"
                         android:textSize="15sp"
                         android:gravity="center" />
@@ -233,13 +233,13 @@
                         android:layout_height="64dp"
                         android:src="@drawable/ic_search"
                         app:tint="@color/color_icon_tertiary"
-                        android:contentDescription="No results" />
+                        android:contentDescription="@string/item_selection_no_results_icon_description" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="No matching items"
+                        android:text="@string/item_selection_no_results_title"
                         android:textColor="@color/color_text_secondary"
                         android:textSize="17sp"
                         android:fontFamily="sans-serif-medium" />
@@ -249,7 +249,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="Try a different search term"
+                        android:text="@string/item_selection_no_results_subtitle"
                         android:textColor="@color/color_text_tertiary"
                         android:textSize="15sp" />
 
@@ -304,7 +304,7 @@
                     android:layout_height="20dp"
                     android:src="@drawable/ic_shopping_bag"
                     app:tint="@color/color_text_secondary"
-                    android:contentDescription="Basket" />
+                    android:contentDescription="@string/item_selection_basket_icon_description" />
 
                 <TextView
                     android:id="@+id/basket_title"
@@ -312,7 +312,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_marginStart="8dp"
-                    android:text="Basket"
+                    android:text="@string/item_selection_basket_title"
                     android:textColor="@color/color_text_secondary"
                     android:textSize="13sp"
                     android:fontFamily="sans-serif-medium"
@@ -324,7 +324,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="8dp"
-                    android:text="Clear"
+                    android:text="@string/item_selection_basket_clear"
                     android:textColor="@color/color_warning_red"
                     android:textSize="14sp"
                     android:fontFamily="sans-serif-medium"
@@ -362,7 +362,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Total"
+                    android:text="@string/item_selection_basket_total_label"
                     android:textColor="@color/color_text_primary"
                     android:textSize="17sp"
                     android:fontFamily="sans-serif-medium" />
@@ -397,7 +397,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:background="@drawable/bg_checkout_button"
-                android:text="Charge $0.00"
+                android:text="@string/item_selection_charge_button_default"
                 android:textAllCaps="false"
                 android:textColor="@color/color_bg_white"
                 android:textSize="18sp"

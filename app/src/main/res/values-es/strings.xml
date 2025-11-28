@@ -294,4 +294,129 @@
     <string name="mint_restore_status_restoring">Restaurando...</string>
     <string name="mint_restore_balance_change_placeholder">+0 sats</string>
 
+    <!-- Items & catalog / settings section -->
+    <string name="items_settings_section_title">CATÁLOGO DE ARTÍCULOS</string>
+    <string name="items_settings_status_empty">No hay artículos en el catálogo</string>
+    <string name="items_settings_description">Gestiona tu catálogo de productos para un cobro rápido.</string>
+    <string name="items_settings_import_csv">Importar CSV</string>
+    <string name="items_settings_manage">Gestionar</string>
+    <string name="items_settings_clear_all">Borrar todos los artículos</string>
+
+    <!-- Item list screen -->
+    <string name="item_list_toolbar_back">Atrás</string>
+    <string name="item_list_toolbar_title">Artículos</string>
+    <string name="item_list_add_item">Añadir artículo</string>
+    <string name="item_list_done_reordering">Terminar de reordenar</string>
+    <string name="item_list_empty_icon_description">Sin artículos</string>
+    <string name="item_list_empty_title">Sin artículos</string>
+    <string name="item_list_empty_subtitle">Toca + para añadir tu primer artículo</string>
+    <string name="item_list_import_from_csv">Importar desde CSV</string>
+    <string name="item_list_clear_all">Borrar todos los artículos</string>
+
+    <!-- Item entry / edit -->
+    <string name="item_entry_toolbar_back">Atrás</string>
+    <string name="item_entry_title_add">Añadir artículo</string>
+    <string name="item_entry_button_save">Guardar</string>
+    <string name="item_entry_image_description">Imagen del artículo</string>
+    <string name="item_entry_image_placeholder">Sin imagen</string>
+    <string name="item_entry_button_add_photo">Añadir foto</string>
+    <string name="item_entry_button_remove_photo">Quitar foto</string>
+
+    <string name="item_entry_section_basic_information">INFORMACIÓN BÁSICA</string>
+    <string name="item_entry_label_name">Nombre</string>
+    <string name="item_entry_hint_name">Nombre del artículo</string>
+    <string name="item_entry_label_variation">Variación</string>
+    <string name="item_entry_hint_variation">p. ej. Pequeño, Grande</string>
+    <string name="item_entry_label_description">Descripción</string>
+    <string name="item_entry_hint_description">Opcional</string>
+
+    <string name="item_entry_section_category">CATEGORÍA</string>
+    <string name="item_entry_hint_new_category">Nombre de la nueva categoría</string>
+    <string name="item_entry_category_confirm">Confirmar</string>
+    <string name="item_entry_category_cancel">Cancelar</string>
+    <string name="item_entry_category_helper">Selecciona una categoría existente o crea una nueva.</string>
+
+    <string name="item_entry_section_pricing">PRECIO</string>
+    <string name="item_entry_price_type_fiat">Fiat</string>
+    <string name="item_entry_price_type_bitcoin">Bitcoin</string>
+    <string name="item_entry_currency_symbol_default">$</string>
+    <string name="item_entry_hint_price_fiat">0,00</string>
+    <string name="item_entry_currency_code_default">USD</string>
+    <string name="item_entry_bitcoin_symbol">₿</string>
+    <string name="item_entry_hint_price_sats">0</string>
+    <string name="item_entry_label_sats">sats</string>
+
+    <string name="item_entry_label_apply_vat">Aplicar IVA</string>
+    <string name="item_entry_label_price_includes_vat">El precio incluye IVA</string>
+    <string name="item_entry_label_vat_rate">Tipo de IVA</string>
+    <string name="item_entry_hint_vat_rate">20</string>
+
+    <string name="item_entry_price_breakdown_title">Desglose del precio</string>
+    <string name="item_entry_price_breakdown_net_label">Precio neto (sin IVA)</string>
+    <string name="item_entry_price_breakdown_net_value_default">$0,00</string>
+    <string name="item_entry_price_breakdown_vat_label">IVA (20 %)</string>
+    <string name="item_entry_price_breakdown_vat_value_default">$0,00</string>
+    <string name="item_entry_price_breakdown_total_label">Total (con IVA)</string>
+    <string name="item_entry_price_breakdown_total_value_default">$0,00</string>
+
+    <string name="item_entry_price_helper">Establece un precio fijo en tu moneda preferida. Los precios en Bitcoin se expresan en satoshis (sats).</string>
+
+    <string name="item_entry_section_identification">IDENTIFICACIÓN</string>
+    <string name="item_entry_label_gtin">GTIN</string>
+    <string name="item_entry_hint_gtin">Escanea o introduce el código de barras</string>
+    <string name="item_entry_scan_barcode">Escanear código de barras</string>
+    <string name="item_entry_label_sku">SKU</string>
+    <string name="item_entry_hint_sku">Código interno de stock</string>
+    <string name="item_entry_error_gtin_exists">Este GTIN ya existe</string>
+    <string name="item_entry_error_sku_exists">Este SKU ya existe</string>
+
+    <string name="item_entry_section_inventory">INVENTARIO</string>
+    <string name="item_entry_label_track_quantity">Controlar cantidad</string>
+    <string name="item_entry_label_current_stock">Stock actual</string>
+    <string name="item_entry_hint_current_stock">0</string>
+    <string name="item_entry_label_low_stock_alert">Alerta de poco stock</string>
+    <string name="item_entry_label_alert_when_below">Alertar cuando esté por debajo de</string>
+    <string name="item_entry_hint_alert_threshold">5</string>
+    <string name="item_entry_inventory_helper">Activa el control de inventario para supervisar el stock y recibir alertas de poco stock.</string>
+
+    <string name="item_entry_button_cancel">Cancelar</string>
+
+    <!-- Item product row -->
+    <string name="item_product_drag_handle_description">Arrastrar para reordenar</string>
+    <string name="item_product_image_description">Imagen del artículo</string>
+    <string name="item_product_image_placeholder">Sin imagen</string>
+    <string name="item_product_chevron_more">Más</string>
+
+    <!-- Item selection row -->
+    <string name="item_selection_image_description">Imagen del artículo</string>
+    <string name="item_selection_image_placeholder">Sin imagen</string>
+    <string name="item_selection_decrease_quantity">Disminuir cantidad</string>
+    <string name="item_selection_increase_quantity">Aumentar cantidad</string>
+    <string name="item_selection_variation_hint">Añadir variación personalizada...</string>
+    <string name="item_selection_add_variation">Añadir</string>
+    <string name="item_selection_variation_helper">Crea un nuevo artículo con esta variación</string>
+
+    <!-- Item selection screen -->
+    <string name="item_selection_toolbar_back">Atrás</string>
+    <string name="item_selection_toolbar_title">Cobro</string>
+    <string name="item_selection_search_icon_description">Buscar</string>
+    <string name="item_selection_search_hint">Buscar artículos...</string>
+    <string name="item_selection_scan_barcode">Escanear código de barras</string>
+    <string name="item_selection_clear_filters">Borrar filtros</string>
+
+    <string name="item_selection_empty_icon_description">Sin artículos</string>
+    <string name="item_selection_empty_title">No se han encontrado artículos</string>
+    <string name="item_selection_empty_subtitle">Añade artículos en Ajustes → Artículos</string>
+
+    <string name="item_selection_no_results_icon_description">Sin resultados</string>
+    <string name="item_selection_no_results_title">No hay artículos coincidentes</string>
+    <string name="item_selection_no_results_subtitle">Prueba con otro término de búsqueda</string>
+
+    <string name="item_selection_basket_icon_description">Cesta</string>
+    <string name="item_selection_basket_title">Cesta</string>
+    <string name="item_selection_basket_clear">Vaciar</string>
+    <string name="item_selection_basket_total_label">Total</string>
+    <string name="item_selection_charge_button">Cobrar %1$s</string>
+    <string name="item_selection_charge_button_default">Cobrar $0,00</string>
+
 </resources>

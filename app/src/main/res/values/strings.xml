@@ -304,4 +304,129 @@
     <string name="mint_restore_status_restoring">Restoring...</string>
     <string name="mint_restore_balance_change_placeholder">+0 sats</string>
 
+    <!-- Items & catalog / settings section -->
+    <string name="items_settings_section_title">ITEMS CATALOG</string>
+    <string name="items_settings_status_empty">No items in catalog</string>
+    <string name="items_settings_description">Manage your product catalog for quick checkout.</string>
+    <string name="items_settings_import_csv">Import CSV</string>
+    <string name="items_settings_manage">Manage</string>
+    <string name="items_settings_clear_all">Clear All Items</string>
+
+    <!-- Item list screen -->
+    <string name="item_list_toolbar_back">Back</string>
+    <string name="item_list_toolbar_title">Items</string>
+    <string name="item_list_add_item">Add item</string>
+    <string name="item_list_done_reordering">Done reordering</string>
+    <string name="item_list_empty_icon_description">No items</string>
+    <string name="item_list_empty_title">No Items</string>
+    <string name="item_list_empty_subtitle">Tap + to add your first item</string>
+    <string name="item_list_import_from_csv">Import from CSV</string>
+    <string name="item_list_clear_all">Clear All Items</string>
+
+    <!-- Item entry / edit -->
+    <string name="item_entry_toolbar_back">Back</string>
+    <string name="item_entry_title_add">Add Item</string>
+    <string name="item_entry_button_save">Save</string>
+    <string name="item_entry_image_description">Item image</string>
+    <string name="item_entry_image_placeholder">No image</string>
+    <string name="item_entry_button_add_photo">Add Photo</string>
+    <string name="item_entry_button_remove_photo">Remove Photo</string>
+
+    <string name="item_entry_section_basic_information">BASIC INFORMATION</string>
+    <string name="item_entry_label_name">Name</string>
+    <string name="item_entry_hint_name">Item Name</string>
+    <string name="item_entry_label_variation">Variation</string>
+    <string name="item_entry_hint_variation">e.g. Small, Large</string>
+    <string name="item_entry_label_description">Description</string>
+    <string name="item_entry_hint_description">Optional</string>
+
+    <string name="item_entry_section_category">CATEGORY</string>
+    <string name="item_entry_hint_new_category">New category name</string>
+    <string name="item_entry_category_confirm">Confirm</string>
+    <string name="item_entry_category_cancel">Cancel</string>
+    <string name="item_entry_category_helper">Select an existing category or create a new one.</string>
+
+    <string name="item_entry_section_pricing">PRICING</string>
+    <string name="item_entry_price_type_fiat">Fiat</string>
+    <string name="item_entry_price_type_bitcoin">Bitcoin</string>
+    <string name="item_entry_currency_symbol_default">$</string>
+    <string name="item_entry_hint_price_fiat">0.00</string>
+    <string name="item_entry_currency_code_default">USD</string>
+    <string name="item_entry_bitcoin_symbol">₿</string>
+    <string name="item_entry_hint_price_sats">0</string>
+    <string name="item_entry_label_sats">sats</string>
+
+    <string name="item_entry_label_apply_vat">Apply VAT</string>
+    <string name="item_entry_label_price_includes_vat">Price includes VAT</string>
+    <string name="item_entry_label_vat_rate">VAT Rate</string>
+    <string name="item_entry_hint_vat_rate">20</string>
+
+    <string name="item_entry_price_breakdown_title">Price Breakdown</string>
+    <string name="item_entry_price_breakdown_net_label">Net Price (excl. VAT)</string>
+    <string name="item_entry_price_breakdown_net_value_default">$0.00</string>
+    <string name="item_entry_price_breakdown_vat_label">VAT (20%)</string>
+    <string name="item_entry_price_breakdown_vat_value_default">$0.00</string>
+    <string name="item_entry_price_breakdown_total_label">Total (incl. VAT)</string>
+    <string name="item_entry_price_breakdown_total_value_default">$0.00</string>
+
+    <string name="item_entry_price_helper">Set a fixed price in your preferred currency. Bitcoin prices are in satoshis (sats).</string>
+
+    <string name="item_entry_section_identification">IDENTIFICATION</string>
+    <string name="item_entry_label_gtin">GTIN</string>
+    <string name="item_entry_hint_gtin">Scan or enter barcode</string>
+    <string name="item_entry_scan_barcode">Scan barcode</string>
+    <string name="item_entry_label_sku">SKU</string>
+    <string name="item_entry_hint_sku">Internal stock code</string>
+    <string name="item_entry_error_gtin_exists">This GTIN already exists</string>
+    <string name="item_entry_error_sku_exists">This SKU already exists</string>
+
+    <string name="item_entry_section_inventory">INVENTORY</string>
+    <string name="item_entry_label_track_quantity">Track Quantity</string>
+    <string name="item_entry_label_current_stock">Current Stock</string>
+    <string name="item_entry_hint_current_stock">0</string>
+    <string name="item_entry_label_low_stock_alert">Low Stock Alert</string>
+    <string name="item_entry_label_alert_when_below">Alert When Below</string>
+    <string name="item_entry_hint_alert_threshold">5</string>
+    <string name="item_entry_inventory_helper">Enable inventory tracking to monitor stock levels and receive low stock alerts.</string>
+
+    <string name="item_entry_button_cancel">Cancel</string>
+
+    <!-- Item product row -->
+    <string name="item_product_drag_handle_description">Drag to reorder</string>
+    <string name="item_product_image_description">Item image</string>
+    <string name="item_product_image_placeholder">No image</string>
+    <string name="item_product_chevron_more">More</string>
+
+    <!-- Item selection row -->
+    <string name="item_selection_image_description">Item image</string>
+    <string name="item_selection_image_placeholder">No image</string>
+    <string name="item_selection_decrease_quantity">Decrease quantity</string>
+    <string name="item_selection_increase_quantity">Increase quantity</string>
+    <string name="item_selection_variation_hint">Add custom variation...</string>
+    <string name="item_selection_add_variation">Add</string>
+    <string name="item_selection_variation_helper">Creates a new item with this variation</string>
+
+    <!-- Item selection screen -->
+    <string name="item_selection_toolbar_back">Back</string>
+    <string name="item_selection_toolbar_title">Checkout</string>
+    <string name="item_selection_search_icon_description">Search</string>
+    <string name="item_selection_search_hint">Search items...</string>
+    <string name="item_selection_scan_barcode">Scan barcode</string>
+    <string name="item_selection_clear_filters">Clear filters</string>
+
+    <string name="item_selection_empty_icon_description">No items</string>
+    <string name="item_selection_empty_title">No items found</string>
+    <string name="item_selection_empty_subtitle">Add items in Settings → Items</string>
+
+    <string name="item_selection_no_results_icon_description">No results</string>
+    <string name="item_selection_no_results_title">No matching items</string>
+    <string name="item_selection_no_results_subtitle">Try a different search term</string>
+
+    <string name="item_selection_basket_icon_description">Basket</string>
+    <string name="item_selection_basket_title">Basket</string>
+    <string name="item_selection_basket_clear">Clear</string>
+    <string name="item_selection_basket_total_label">Total</string>
+    <string name="item_selection_charge_button">Charge %1$s</string>
+    <string name="item_selection_charge_button_default">Charge $0.00</string>
+
 </resources>

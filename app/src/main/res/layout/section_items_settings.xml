@@ -9,7 +9,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
         android:layout_marginBottom="4dp"
-        android:text="ITEMS CATALOG"
+        android:text="@string/items_settings_section_title"
         android:textAppearance="@style/Text.SectionHeader" />
 
     <LinearLayout
@@ -23,14 +23,14 @@
             android:id="@+id/items_status_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="No items in catalog"
+            android:text="@string/items_settings_status_empty"
             android:textAppearance="@style/Text.BodyBold" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Manage your product catalog for quick checkout."
+            android:text="@string/items_settings_description"
             android:textAppearance="@style/Text.Body" />
 
         <LinearLayout
@@ -46,7 +46,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_weight="1"
-                android:text="Import CSV" />
+                android:text="@string/items_settings_import_csv" />
 
             <Button
                 android:id="@+id/add_items_button"
@@ -55,7 +55,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                android:text="Manage" />
+                android:text="@string/items_settings_manage" />
 
         </LinearLayout>
 
@@ -67,7 +67,7 @@
             android:layout_marginTop="16dp"
             android:background="?attr/selectableItemBackground"
             android:padding="8dp"
-            android:text="Clear All Items"
+            android:text="@string/items_settings_clear_all"
             android:textAppearance="@style/Text.Link"
             android:textColor="@color/color_warning_red" />
 

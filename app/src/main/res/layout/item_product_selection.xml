@@ -32,7 +32,7 @@
                 android:id="@+id/item_image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:contentDescription="Item image"
+                android:contentDescription="@string/item_selection_image_description"
                 android:scaleType="centerCrop" />
 
             <ImageView
@@ -40,7 +40,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_gravity="center"
-                android:contentDescription="No image"
+                android:contentDescription="@string/item_selection_image_placeholder"
                 android:src="@drawable/ic_image_placeholder"
                 app:tint="@color/color_icon_tertiary" />
         </androidx.cardview.widget.CardView>
@@ -139,7 +139,7 @@
                 android:src="@drawable/ic_minus"
                 app:tint="@color/color_text_primary"
                 android:scaleType="fitCenter"
-                android:contentDescription="Decrease quantity" />
+                android:contentDescription="@string/item_selection_decrease_quantity" />
 
             <TextView
                 android:id="@+id/basket_quantity"
@@ -160,7 +160,7 @@
                 android:src="@drawable/ic_plus"
                 app:tint="@color/color_text_primary"
                 android:scaleType="fitCenter"
-                android:contentDescription="Increase quantity" />
+                android:contentDescription="@string/item_selection_increase_quantity" />
 
         </LinearLayout>
 
@@ -209,7 +209,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@null"
-                    android:hint="Add custom variation..."
+                    android:hint="@string/item_selection_variation_hint"
                     android:imeOptions="actionDone"
                     android:inputType="text|textCapSentences"
                     android:maxLines="1"
@@ -226,7 +226,7 @@
                 android:layout_height="44dp"
                 android:paddingHorizontal="18dp"
                 android:gravity="center"
-                android:text="Add"
+                android:text="@string/item_selection_add_variation"
                 android:textColor="@android:color/white"
                 android:textSize="15sp"
                 android:fontFamily="sans-serif-medium"
@@ -239,7 +239,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Creates a new item with this variation"
+            android:text="@string/item_selection_variation_helper"
             android:textColor="@color/color_text_tertiary"
             android:textSize="12sp" />
 
