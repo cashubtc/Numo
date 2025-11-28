@@ -1,6 +1,7 @@
 package com.electricdreams.numo.feature.items.handlers
 
 import android.view.View
+import com.electricdreams.numo.R
 import android.widget.Button
 import android.widget.TextView
 import com.electricdreams.numo.core.model.Amount
@@ -84,6 +85,7 @@ class BasketUIHandler(
      * Update the checkout button text with current totals.
      */
     fun updateCheckoutButton() {
+        val context = checkoutButton.context
         val fiatTotal = basketManager.getTotalPrice()
         val satsTotal = basketManager.getTotalSatsDirectPrice()
         val currencyCode = currencyManager.getCurrentCurrency()
@@ -93,15 +95,15 @@ class BasketUIHandler(
             fiatTotal > 0 && satsTotal > 0 -> {
                 val fiatAmount = Amount.fromMajorUnits(fiatTotal, currency)
                 val satsAmount = Amount(satsTotal, Amount.Currency.BTC)
-                "Charge $fiatAmount + $satsAmount"
+                context.getString(R.string.basket_charge_fiat_and_sats, fiatAmount.toString(), satsAmount.toString())
             }
             satsTotal > 0 -> {
                 val satsAmount = Amount(satsTotal, Amount.Currency.BTC)
-                "Charge $satsAmount"
+                context.getString(R.string.basket_charge_sats_only, satsAmount.toString())
             }
             else -> {
                 val fiatAmount = Amount.fromMajorUnits(fiatTotal, currency)
-                "Charge $fiatAmount"
+                context.getString(R.string.basket_charge_fiat_only, fiatAmount.toString())
             }
         }
 

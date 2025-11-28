@@ -1,0 +1,43 @@
+<resources>
+    <!-- Settings main screen -->
+    <string name="settings_title">Settings</string>
+
+    <!-- Settings sections -->
+    <string name="settings_section_general">General</string>
+    <string name="settings_section_security">Security &amp; Privacy</string>
+    <string name="settings_section_developer">Developer</string>
+
+    <!-- Settings items: currency -->
+    <string name="settings_item_currency_title">Fiat Currency</string>
+    <string name="settings_item_currency_subtitle">Choose your default fiat currency</string>
+
+    <!-- Settings items: mints -->
+    <string name="settings_item_mints_title">Mints</string>
+    <string name="settings_item_mints_subtitle">Manage Cashu mints and Lightning settings</string>
+
+    <!-- Settings items: items catalog -->
+    <string name="settings_item_items_title">Items</string>
+    <string name="settings_item_items_subtitle">Create and manage catalog items</string>
+
+    <!-- Settings items: tips -->
+    <string name="settings_item_tips_title">Tips</string>
+    <string name="settings_item_tips_subtitle">Configure tip options for checkout</string>
+
+    <!-- Settings items: theme -->
+    <string name="settings_item_theme_title">Theme</string>
+    <string name="settings_item_theme_subtitle">Switch between light and dark mode</string>
+
+    <!-- Settings items: security -->
+    <string name="settings_item_security_title">Security &amp; Privacy</string>
+    <string name="settings_item_security_subtitle">Backup seed phrase, restore wallet</string>
+
+    <!-- Settings items: developer -->
+    <string name="settings_item_developer_title">Developer Settings</string>
+    <string name="settings_item_developer_subtitle">Advanced settings and debugging tools</string>
+
+    <!-- Settings sub-activity labels -->
+    <string name="settings_theme_title">Theme</string>
+    <string name="settings_currency_title">Fiat Currency</string>
+    <string name="settings_mints_title">Mints</string>
+    <string name="settings_security_title">Security &amp; Privacy</string>
+</resources>

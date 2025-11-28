@@ -1,0 +1,28 @@
+<resources>
+    <!-- Basket receipt screen -->
+    <string name="basket_receipt_print_content_description">Print receipt</string>
+    <string name="basket_receipt_subtotal_label">Subtotal (excl. VAT)</string>
+    <string name="basket_receipt_bitcoin_items_label">Bitcoin Items</string>
+    <string name="basket_receipt_total_label">Total</string>
+    <string name="basket_receipt_paid_label">Paid</string>
+
+    <!-- Basket receipt hero VAT subtitle -->
+    <string name="basket_receipt_total_subtitle_with_vat">%1$s • incl. %2$s VAT</string>
+    <string name="basket_receipt_total_subtitle_vat_only">incl. %1$s VAT</string>
+
+    <!-- Basket receipt items header -->
+    <string name="basket_receipt_items_header_single">1 ITEM</string>
+    <string name="basket_receipt_items_header_multiple">%1$d ITEMS</string>
+
+    <!-- Basket receipt item details -->
+    <string name="basket_receipt_vat_label">incl. %1$d%% VAT</string>
+    <string name="basket_receipt_equivalent_label">equivalent</string>
+    <string name="basket_receipt_payment_item_label">Payment</string>
+    <string name="basket_receipt_paid_equivalent_label">paid</string>
+
+    <!-- Basket receipt totals and tip -->
+    <string name="basket_receipt_total_paid_label">Total Paid</string>
+    <string name="basket_receipt_tip_label">Tip</string>
+    <string name="basket_receipt_tip_label_with_percentage">Tip (%1$d%%)</string>
+    <string name="basket_receipt_vat_row_label">VAT (%1$d%%)</string>
+</resources>

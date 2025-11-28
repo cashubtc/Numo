@@ -24,7 +24,7 @@
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_chevron_back"
-            android:contentDescription="Back"
+            android:contentDescription="@string/common_back"
             android:padding="12dp"
             app:tint="@color/color_text_primary"
             app:layout_constraintStart_toStartOf="parent"
@@ -36,7 +36,7 @@
             style="@style/Text.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Receipt"
+            android:text="@string/basket_receipt_title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -48,7 +48,7 @@
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_print"
-            android:contentDescription="Print Receipt"
+            android:contentDescription="@string/basket_receipt_print_content_description"
             android:padding="12dp"
             app:tint="@color/color_primary_green"
             app:layout_constraintEnd_toEndOf="parent"
@@ -199,7 +199,7 @@
                         android:layout_weight="1"
                         android:textSize="15sp"
                         android:textColor="@color/color_text_secondary"
-                        android:text="Subtotal (excl. VAT)" />
+                        android:text="@string/basket_receipt_subtotal_label" />
 
                     <TextView
                         android:id="@+id/subtotal_value"
@@ -244,7 +244,7 @@
                             android:layout_weight="1"
                             android:textSize="15sp"
                             android:textColor="@color/color_text_secondary"
-                            android:text="Bitcoin Items" />
+                            android:text="@string/basket_receipt_bitcoin_items_label" />
 
                         <TextView
                             android:id="@+id/sats_items_value"
@@ -292,7 +292,7 @@
                         android:textSize="17sp"
                         android:textColor="@color/color_text_primary"
                         android:fontFamily="sans-serif-medium"
-                        android:text="Total" />
+                        android:text="@string/basket_receipt_total_label" />
 
                     <TextView
                         android:id="@+id/final_total_value"
@@ -338,13 +338,13 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_secondary"
-                        android:text="Paid" />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textSize="15sp"
+                            android:textColor="@color/color_text_secondary"
+                            android:text="@string/basket_receipt_paid_label" />
 
                     <TextView
                         android:id="@+id/paid_amount"

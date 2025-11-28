@@ -235,7 +235,6 @@
 
     <!-- Confirm Button -->
     <Button
-    <Button
         android:id="@+id/confirm_button"
         style="@style/Widget.Button.Primary.Green"
         android:layout_width="match_parent"

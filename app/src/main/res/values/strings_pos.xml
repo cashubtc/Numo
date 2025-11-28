@@ -1,0 +1,25 @@
+<resources>
+    <!-- POS main screen - navigation content descriptions -->
+    <string name="pos_nav_catalog_content_description">Item List</string>
+    <string name="pos_nav_history_content_description">History</string>
+    <string name="pos_nav_settings_content_description">Settings</string>
+    <string name="pos_nav_more_options_content_description">More Options</string>
+
+    <!-- POS main screen - amount & errors -->
+    <string name="pos_error_amount_required">You must enter an amount to charge</string>
+    <string name="pos_amount_placeholder_main">$0</string>
+    <string name="pos_amount_placeholder_secondary">$0.00 USD</string>
+    <string name="pos_currency_switch_content_description">Swap currency</string>
+
+    <!-- POS main screen - charge button -->
+    <string name="pos_charge_button">Charge</string>
+    <string name="pos_charge_button_with_amount">Charge %1$s</string>
+
+    <!-- POS main screen - secondary BTC label when no fiat price -->
+    <string name="pos_secondary_amount_btc_label">BTC</string>
+
+    <!-- Basket checkout button text -->
+    <string name="basket_charge_fiat_and_sats">Charge %1$s + %2$s</string>
+    <string name="basket_charge_sats_only">Charge %1$s</string>
+    <string name="basket_charge_fiat_only">Charge %1$s</string>
+</resources>

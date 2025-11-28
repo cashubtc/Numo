@@ -255,9 +255,13 @@ class BasketReceiptActivity : AppCompatActivity() {
             // Add VAT info to subtitle if space permits
             val currentSubtitle = totalSubtitleText.text.toString()
             if (currentSubtitle.isNotEmpty()) {
-                totalSubtitleText.text = "$currentSubtitle • incl. $vatAmount VAT"
+                totalSubtitleText.text = getString(
+                    R.string.basket_receipt_total_subtitle_with_vat,
+                    currentSubtitle,
+                    vatAmount.toString()
+                )
             } else {
-                totalSubtitleText.text = "incl. $vatAmount VAT"
+                totalSubtitleText.text = getString(R.string.basket_receipt_total_subtitle_vat_only, vatAmount.toString())
                 totalSubtitleText.visibility = View.VISIBLE
             }
         }
@@ -278,7 +282,7 @@ class BasketReceiptActivity : AppCompatActivity() {
         if (b != null && b.items.isNotEmpty()) {
             // Items header with count
             val itemCount = b.getTotalItemCount()
-            itemsHeaderText.text = if (itemCount == 1) "1 ITEM" else "$itemCount ITEMS"
+            itemsHeaderText.text = if (itemCount == 1) getString(R.string.basket_receipt_items_header_single) else getString(R.string.basket_receipt_items_header_multiple, itemCount)
 
             // Add each item
             val inflater = LayoutInflater.from(this)
@@ -295,7 +299,7 @@ class BasketReceiptActivity : AppCompatActivity() {
             }
         } else {
             // No basket - single "Payment" line
-            itemsHeaderText.text = "1 ITEM"
+            itemsHeaderText.text = getString(R.string.basket_receipt_items_header_single)
             
             val inflater = LayoutInflater.from(this)
             val itemView = inflater.inflate(R.layout.item_receipt_line, itemsContainer, false)
@@ -330,7 +334,7 @@ class BasketReceiptActivity : AppCompatActivity() {
                 val vatLabel = view.findViewById<TextView>(R.id.vat_label)
                 val vatAmountText = view.findViewById<TextView>(R.id.vat_amount)
 
-                vatLabel.text = "incl. ${item.vatRate}% VAT"
+                vatLabel.text = getString(R.string.basket_receipt_vat_label, item.vatRate)
                 val itemVat = Amount(item.getTotalVatCents(), currency)
                 vatAmountText.text = itemVat.toString()
                 vatDetailRow.visibility = View.VISIBLE
@@ -352,7 +356,7 @@ class BasketReceiptActivity : AppCompatActivity() {
                 
                 val vatLabel = view.findViewById<TextView>(R.id.vat_label)
                 val vatAmountText = view.findViewById<TextView>(R.id.vat_amount)
-                vatLabel.text = "equivalent"
+                vatLabel.text = getString(R.string.basket_receipt_equivalent_label)
                 vatAmountText.text = "≈ $fiatEquiv"
                 vatDetailRow.visibility = View.VISIBLE
             } else {
@@ -368,7 +372,7 @@ class BasketReceiptActivity : AppCompatActivity() {
 
         // Item name
         val nameText = view.findViewById<TextView>(R.id.item_name)
-        nameText.text = "Payment"
+        nameText.text = getString(R.string.basket_receipt_payment_item_label)
 
         // Unit price text and line total
         val unitPriceText = view.findViewById<TextView>(R.id.item_unit_price)
@@ -386,7 +390,7 @@ class BasketReceiptActivity : AppCompatActivity() {
                 val satsAmount = Amount(totalSatoshis, Amount.Currency.BTC)
                 val vatLabel = view.findViewById<TextView>(R.id.vat_label)
                 val vatAmountText = view.findViewById<TextView>(R.id.vat_amount)
-                vatLabel.text = "paid"
+                vatLabel.text = getString(R.string.basket_receipt_paid_equivalent_label)
                 vatAmountText.text = satsAmount.toString()
                 vatDetailRow.visibility = View.VISIBLE
             } else {
@@ -509,7 +513,7 @@ class BasketReceiptActivity : AppCompatActivity() {
 
         val label = TextView(this).apply {
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            text = "Total Paid"
+            text = getString(R.string.basket_receipt_total_paid_label)
             textSize = 15f
             setTextColor(resources.getColor(R.color.color_text_primary, theme))
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
@@ -544,7 +548,7 @@ class BasketReceiptActivity : AppCompatActivity() {
 
         val label = TextView(this).apply {
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            text = if (tipPercentage > 0) "Tip ($tipPercentage%)" else "Tip"
+            text = if (tipPercentage > 0) getString(R.string.basket_receipt_tip_label_with_percentage, tipPercentage) else getString(R.string.basket_receipt_tip_label)
             textSize = 15f
             setTextColor(resources.getColor(R.color.color_success_green, theme))
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
@@ -579,7 +583,7 @@ class BasketReceiptActivity : AppCompatActivity() {
 
         val label = TextView(this).apply {
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-            text = "VAT ($rate%)"
+            text = getString(R.string.basket_receipt_vat_row_label, rate)
             textSize = 15f
             setTextColor(resources.getColor(R.color.color_text_secondary, theme))
         }

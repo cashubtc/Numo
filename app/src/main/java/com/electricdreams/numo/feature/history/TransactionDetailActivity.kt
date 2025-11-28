@@ -106,20 +106,18 @@ class TransactionDetailActivity : AppCompatActivity() {
         val heroIcon = findViewById<ImageView>(R.id.hero_icon)
         val transactionType = findViewById<TextView>(R.id.transaction_type)
         
-        when (paymentType) {
-            PaymentHistoryEntry.TYPE_LIGHTNING -> {
-                heroIcon.setImageResource(R.drawable.ic_lightning_bolt)
-                transactionType.text = "Lightning Payment"
-            }
-            PaymentHistoryEntry.TYPE_CASHU -> {
-                heroIcon.setImageResource(R.drawable.ic_bitcoin)
-                transactionType.text = "Cashu Payment"
-            }
-            else -> {
-                heroIcon.setImageResource(R.drawable.ic_bitcoin)
-                transactionType.text = "Payment Received"
-            }
+        val typeTextRes = when (paymentType) {
+            PaymentHistoryEntry.TYPE_LIGHTNING -> R.string.transaction_detail_type_lightning_payment
+            PaymentHistoryEntry.TYPE_CASHU -> R.string.transaction_detail_type_cashu_payment
+            else -> R.string.transaction_detail_type_payment_received
         }
+
+        when (paymentType) {
+            PaymentHistoryEntry.TYPE_LIGHTNING -> heroIcon.setImageResource(R.drawable.ic_lightning_bolt)
+            else -> heroIcon.setImageResource(R.drawable.ic_bitcoin)
+        }
+
+        transactionType.setText(typeTextRes)
 
         // Amount display - show BASE amount (excluding tip) for proper accounting
         val amountText: TextView = findViewById(R.id.detail_amount)
@@ -174,11 +172,11 @@ class TransactionDetailActivity : AppCompatActivity() {
         val mintUrl = entry.mintUrl
         if (!mintUrl.isNullOrEmpty()) {
             val mintName = getMintDisplayName(mintUrl)
-            mintNameText.text = "From $mintName"
+            mintNameText.text = getString(R.string.transaction_detail_mint_from_name, mintName)
             mintUrlText.text = mintUrl
         } else {
             mintNameText.visibility = View.GONE
-            mintUrlText.text = "Unknown"
+            mintUrlText.text = getString(R.string.transaction_detail_mint_unknown)
         }
 
         // Payment Type Row
@@ -190,8 +188,8 @@ class TransactionDetailActivity : AppCompatActivity() {
             paymentTypeRow.visibility = View.VISIBLE
             paymentTypeDivider.visibility = View.VISIBLE
             paymentTypeText.text = when (paymentType) {
-                PaymentHistoryEntry.TYPE_LIGHTNING -> "⚡ Lightning"
-                PaymentHistoryEntry.TYPE_CASHU -> "🥜 Cashu"
+                PaymentHistoryEntry.TYPE_LIGHTNING -> getString(R.string.transaction_detail_payment_type_lightning_value)
+                PaymentHistoryEntry.TYPE_CASHU -> getString(R.string.transaction_detail_payment_type_cashu_value)
                 else -> paymentType
             }
         } else {
@@ -253,7 +251,11 @@ class TransactionDetailActivity : AppCompatActivity() {
         // FIXED: Use entry.tipAmountSats (from stored data) not local tipAmountSats (from intent)
         if (entry.tipAmountSats > 0) {
             // Show tip row with label including percentage if applicable
-            tipLabel.text = if (entry.tipPercentage > 0) "Added tip (${entry.tipPercentage}%)" else "Added tip"
+            tipLabel.text = if (entry.tipPercentage > 0) {
+                getString(R.string.transaction_detail_tip_added_with_percentage, entry.tipPercentage)
+            } else {
+                getString(R.string.transaction_detail_tip_added_label)
+            }
             tipAmountText.text = Amount(entry.tipAmountSats, Amount.Currency.BTC).toString()
             tipRow.visibility = View.VISIBLE
             tipDivider.visibility = View.VISIBLE
@@ -380,7 +382,11 @@ class TransactionDetailActivity : AppCompatActivity() {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip = ClipData.newPlainText("Cashu Token", entry.token)
         clipboard.setPrimaryClip(clip)
-        Toast.makeText(this, "Token copied to clipboard", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            this,
+            getString(R.string.history_toast_token_copied),
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun copyLightningInvoice() {
@@ -388,7 +394,11 @@ class TransactionDetailActivity : AppCompatActivity() {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip = ClipData.newPlainText("Lightning Invoice", invoice)
         clipboard.setPrimaryClip(clip)
-        Toast.makeText(this, "Invoice copied to clipboard", Toast.LENGTH_SHORT).show()
+        Toast.makeText(
+            this,
+            getString(R.string.history_toast_invoice_copied),
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     private fun openWithApp() {
@@ -420,34 +430,43 @@ class TransactionDetailActivity : AppCompatActivity() {
             val currency = Amount.Currency.fromCode(entry.getUnit())
             val amount = Amount(entry.amount, currency)
 
-            val typeLabel = when (paymentType) {
-                PaymentHistoryEntry.TYPE_LIGHTNING -> "Lightning"
-                PaymentHistoryEntry.TYPE_CASHU -> "Cashu"
-                else -> "Cashu"
+            val typeLabelRes = when (paymentType) {
+                PaymentHistoryEntry.TYPE_LIGHTNING -> R.string.history_share_type_lightning
+                PaymentHistoryEntry.TYPE_CASHU -> R.string.history_share_type_cashu
+                else -> R.string.history_share_type_cashu
             }
+            val typeLabel = getString(typeLabelRes)
 
             val shareText = buildString {
-                append("$typeLabel Payment\n")
-                append("Amount: $amount\n")
+                val firstLineRes = when (paymentType) {
+                    PaymentHistoryEntry.TYPE_LIGHTNING -> R.string.transaction_detail_type_lightning_payment
+                    PaymentHistoryEntry.TYPE_CASHU -> R.string.transaction_detail_type_cashu_payment
+                    else -> R.string.transaction_detail_type_payment_received
+                }
+                append(getString(firstLineRes))
+                append("\n")
+                append(getString(R.string.history_share_line_amount, amount.toString()))
                 if (entry.token.isNotEmpty()) {
-                    append("Token: ${entry.token}")
+                    append("\n")
+                    append(getString(R.string.history_share_line_token, entry.token))
                 } else if (!lightningInvoice.isNullOrEmpty()) {
-                    append("Invoice: $lightningInvoice")
+                    append("\n")
+                    append(getString(R.string.history_share_line_invoice, lightningInvoice))
                 }
             }
 
             putExtra(Intent.EXTRA_TEXT, shareText)
         }
 
-        startActivity(Intent.createChooser(shareIntent, "Share Transaction"))
+        startActivity(Intent.createChooser(shareIntent, getString(R.string.history_share_title)))
     }
 
     private fun showDeleteConfirmation() {
         AlertDialog.Builder(this)
-            .setTitle("Delete Payment")
-            .setMessage("Are you sure you want to delete this payment from history?")
-            .setPositiveButton("Delete") { _, _ -> deleteTransaction() }
-            .setNegativeButton("Cancel", null)
+            .setTitle(R.string.history_dialog_delete_title)
+            .setMessage(R.string.history_dialog_delete_message)
+            .setPositiveButton(R.string.history_dialog_delete_positive) { _, _ -> deleteTransaction() }
+            .setNegativeButton(R.string.history_dialog_delete_negative, null)
             .show()
     }
 

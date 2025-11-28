@@ -1,0 +1,43 @@
+<resources>
+    <!-- Settings main screen -->
+    <string name="settings_title">Ajustes</string>
+
+    <!-- Settings sections -->
+    <string name="settings_section_general">General</string>
+    <string name="settings_section_security">Seguridad y privacidad</string>
+    <string name="settings_section_developer">Desarrollador</string>
+
+    <!-- Settings items: currency -->
+    <string name="settings_item_currency_title">Moneda fiduciaria</string>
+    <string name="settings_item_currency_subtitle">Elige tu moneda fiduciaria predeterminada</string>
+
+    <!-- Settings items: mints -->
+    <string name="settings_item_mints_title">Mints</string>
+    <string name="settings_item_mints_subtitle">Gestiona los mints de Cashu y los ajustes de Lightning</string>
+
+    <!-- Settings items: items catalog -->
+    <string name="settings_item_items_title">Artículos</string>
+    <string name="settings_item_items_subtitle">Crea y gestiona artículos del catálogo</string>
+
+    <!-- Settings items: tips -->
+    <string name="settings_item_tips_title">Propinas</string>
+    <string name="settings_item_tips_subtitle">Configura las opciones de propina en el cobro</string>
+
+    <!-- Settings items: theme -->
+    <string name="settings_item_theme_title">Tema</string>
+    <string name="settings_item_theme_subtitle">Cambiar entre modo claro y oscuro</string>
+
+    <!-- Settings items: security -->
+    <string name="settings_item_security_title">Seguridad y privacidad</string>
+    <string name="settings_item_security_subtitle">Copia de la frase semilla, restaurar monedero</string>
+
+    <!-- Settings items: developer -->
+    <string name="settings_item_developer_title">Opciones de desarrollo</string>
+    <string name="settings_item_developer_subtitle">Opciones avanzadas y herramientas de depuración</string>
+
+    <!-- Settings sub-activity labels -->
+    <string name="settings_theme_title">Tema</string>
+    <string name="settings_currency_title">Moneda fiduciaria</string>
+    <string name="settings_mints_title">Mints</string>
+    <string name="settings_security_title">Seguridad y privacidad</string>
+</resources>

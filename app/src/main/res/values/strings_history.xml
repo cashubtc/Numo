@@ -1,0 +1,52 @@
+<resources>
+    <!-- Main menu -->
+    <string name="menu_toggle_theme_title">Toggle Theme</string>
+    <string name="menu_history_title">History</string>
+
+    <!-- History list row titles & status -->
+    <string name="history_row_title_pending_payment">Pending Payment</string>
+    <string name="history_row_title_lightning_payment">Lightning Payment</string>
+    <string name="history_row_title_cashu_payment">Cashu Payment</string>
+    <string name="history_row_title_cash_in">Cash In</string>
+    <string name="history_row_title_cash_out">Cash Out</string>
+    <string name="history_row_status_tap_to_resume">Tap to resume</string>
+
+    <!-- History: dialogs, toasts, chooser titles -->
+    <string name="history_open_with_title">Open payment with...</string>
+    <string name="history_toast_no_app">No apps available to handle this payment</string>
+    <string name="history_toast_token_copied">Token copied to clipboard</string>
+    <string name="history_toast_invoice_copied">Invoice copied to clipboard</string>
+
+    <string name="history_dialog_delete_title">Delete Payment</string>
+    <string name="history_dialog_delete_message">Are you sure you want to delete this payment from history?</string>
+    <string name="history_dialog_delete_positive">Delete</string>
+    <string name="history_dialog_delete_negative">Cancel</string>
+
+    <string name="history_dialog_clear_title">Clear History</string>
+    <string name="history_dialog_clear_message">Are you sure you want to clear all payment history? This action cannot be undone.</string>
+    <string name="history_dialog_clear_positive">Clear All</string>
+    <string name="history_dialog_clear_negative">Cancel</string>
+
+    <!-- Transaction detail: types and mint info -->
+    <string name="transaction_detail_type_lightning_payment">Lightning Payment</string>
+    <string name="transaction_detail_type_cashu_payment">Cashu Payment</string>
+    <string name="transaction_detail_mint_from_name">From %1$s</string>
+    <string name="transaction_detail_mint_unknown">Unknown</string>
+    <string name="transaction_detail_payment_type_lightning_value">⚡ Lightning</string>
+    <string name="transaction_detail_payment_type_cashu_value">🥜 Cashu</string>
+
+    <!-- Transaction detail: tip label -->
+    <string name="transaction_detail_tip_added_label">Added tip</string>
+    <string name="transaction_detail_tip_added_with_percentage">Added tip (%1$d%%)</string>
+
+    <!-- History sharing -->
+    <string name="history_share_title">Share Transaction</string>
+    <string name="history_share_type_lightning">Lightning</string>
+    <string name="history_share_type_cashu">Cashu</string>
+    <string name="history_share_line_amount">Amount: %1$s</string>
+    <string name="history_share_line_token">Token: %1$s</string>
+    <string name="history_share_line_invoice">Invoice: %1$s</string>
+
+    <!-- Basket receipt -->
+    <string name="basket_receipt_title">Receipt</string>
+</resources>

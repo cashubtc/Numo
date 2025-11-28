@@ -148,32 +148,32 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             putExtra(Intent.EXTRA_TEXT, cashuUri)
         }
 
-        val chooserIntent = Intent.createChooser(uriIntent, "Open payment with...").apply {
+        val chooserIntent = Intent.createChooser(uriIntent, getString(R.string.history_open_with_title)).apply {
             putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(shareIntent))
         }
 
         try {
             startActivity(chooserIntent)
         } catch (e: Exception) {
-            Toast.makeText(this, "No apps available to handle this payment", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.history_toast_no_app), Toast.LENGTH_SHORT).show()
         }
     }
 
     private fun showDeleteConfirmation(entry: PaymentHistoryEntry, position: Int) {
         AlertDialog.Builder(this)
-            .setTitle("Delete Payment")
-            .setMessage("Are you sure you want to delete this payment from history?")
-            .setPositiveButton("Delete") { _, _ -> deletePaymentFromHistory(position) }
-            .setNegativeButton("Cancel", null)
+            .setTitle(R.string.history_dialog_delete_title)
+            .setMessage(R.string.history_dialog_delete_message)
+            .setPositiveButton(R.string.history_dialog_delete_positive) { _, _ -> deletePaymentFromHistory(position) }
+            .setNegativeButton(R.string.history_dialog_delete_negative, null)
             .show()
     }
 
     private fun showClearHistoryConfirmation() {
         AlertDialog.Builder(this)
-            .setTitle("Clear History")
-            .setMessage("Are you sure you want to clear all payment history? This action cannot be undone.")
-            .setPositiveButton("Clear All") { _, _ -> clearAllHistory() }
-            .setNegativeButton("Cancel", null)
+            .setTitle(R.string.history_dialog_clear_title)
+            .setMessage(R.string.history_dialog_clear_message)
+            .setPositiveButton(R.string.history_dialog_clear_positive) { _, _ -> clearAllHistory() }
+            .setNegativeButton(R.string.history_dialog_clear_negative, null)
             .show()
     }
 

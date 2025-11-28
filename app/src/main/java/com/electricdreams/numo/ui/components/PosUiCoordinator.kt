@@ -290,7 +290,7 @@ class PosUiCoordinator(
     /** Hide spinner on charge button and enable it */
     fun hideChargeButtonSpinner() {
         submitButtonSpinner.visibility = View.GONE
-        submitButton.text = "Charge" // Restore button text
+        submitButton.text = activity.getString(R.string.pos_charge_button) // Restore button text
         submitButton.isEnabled = true
     }
 }

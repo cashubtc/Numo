@@ -1,0 +1,10 @@
+<resources>
+    <!-- Theme settings screen -->
+    <string name="theme_settings_section_mode">MODE</string>
+    <string name="theme_settings_dark_mode_label">Dark Mode</string>
+    <string name="theme_settings_section_app_theme">APP THEME</string>
+    <string name="theme_settings_option_obsidian">Obsidian</string>
+    <string name="theme_settings_option_bitcoin_orange">Bitcoin Orange</string>
+    <string name="theme_settings_option_green">Green</string>
+    <string name="theme_settings_option_white">White</string>
+</resources>

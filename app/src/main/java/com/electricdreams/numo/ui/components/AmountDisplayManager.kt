@@ -2,6 +2,7 @@ package com.electricdreams.numo.ui.components
 
 import android.content.Context
 import android.view.View
+import com.electricdreams.numo.R
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -121,7 +122,7 @@ class AmountDisplayManager(
                 switchCurrencyButton.visibility = View.VISIBLE
             } else {
                 // No price data - just show "BTC" without swap icon
-                secondaryDisplayText = "BTC"
+                secondaryDisplayText = context.getString(R.string.pos_secondary_amount_btc_label)
                 switchCurrencyButton.visibility = View.GONE
             }
         }
@@ -145,11 +146,11 @@ class AmountDisplayManager(
 
         // Update submit button
         if (satsValue > 0) {
-            submitButton.text = "Charge $amountDisplayText"
+            submitButton.text = context.getString(R.string.pos_charge_button_with_amount, amountDisplayText)
             submitButton.isEnabled = true
             requestedAmount = satsValue
         } else {
-            submitButton.text = "Charge"
+            submitButton.text = context.getString(R.string.pos_charge_button)
             submitButton.isEnabled = false
             requestedAmount = 0
         }

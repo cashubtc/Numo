@@ -60,7 +60,6 @@
                     android:id="@+id/checkmark_circle"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:contentDescription="Success background"
                     android:contentDescription="@string/withdraw_success_background_description"
                     android:src="@drawable/ic_circle_solid_green"
                     android:visibility="invisible" />

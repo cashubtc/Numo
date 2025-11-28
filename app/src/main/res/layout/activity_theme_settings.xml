@@ -22,7 +22,7 @@
             android:minHeight="48dp"
             android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/common_back"
             android:src="@drawable/ic_chevron_back"
             android:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -32,7 +32,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Theme"
+            android:text="@string/settings_theme_title"
             android:textAppearance="@style/Text.Title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -56,12 +56,12 @@
             <!-- Mode Section Header -->
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="4dp"
-                android:text="MODE"
-                android:textAppearance="@style/Text.SectionHeader" />
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="4dp"
+            android:text="@string/theme_settings_section_mode"
+            android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Dark Mode Toggle -->
             <LinearLayout
@@ -76,7 +76,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Dark Mode"
+                    android:text="@string/theme_settings_dark_mode_label"
                     android:textAppearance="@style/Text.BodyBold" />
 
                 <androidx.appcompat.widget.SwitchCompat
@@ -88,12 +88,12 @@
             <!-- App Theme Section Header -->
             <TextView
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="4dp"
-                android:text="APP THEME"
-                android:textAppearance="@style/Text.SectionHeader" />
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="4dp"
+            android:text="@string/theme_settings_section_app_theme"
+            android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Theme Radio Group -->
             <RadioGroup
@@ -111,7 +111,7 @@
                     android:drawableTint="@color/color_primary_green"
                     android:gravity="center_vertical"
                     android:paddingHorizontal="24dp"
-                    android:text="Obsidian"
+                    android:text="@string/theme_settings_option_obsidian"
                     android:textAppearance="@style/Text.BodyBold" />
 
                 <RadioButton
@@ -124,7 +124,7 @@
                     android:drawableTint="@color/color_primary_green"
                     android:gravity="center_vertical"
                     android:paddingHorizontal="24dp"
-                    android:text="Bitcoin Orange"
+                    android:text="@string/theme_settings_option_bitcoin_orange"
                     android:textAppearance="@style/Text.BodyBold" />
 
                 <RadioButton
@@ -137,7 +137,7 @@
                     android:drawableTint="@color/color_primary_green"
                     android:gravity="center_vertical"
                     android:paddingHorizontal="24dp"
-                    android:text="Green"
+                    android:text="@string/theme_settings_option_green"
                     android:textAppearance="@style/Text.BodyBold" />
 
                 <RadioButton
@@ -150,7 +150,7 @@
                     android:drawableTint="@color/color_primary_green"
                     android:gravity="center_vertical"
                     android:paddingHorizontal="24dp"
-                    android:text="White"
+                    android:text="@string/theme_settings_option_white"
                     android:textAppearance="@style/Text.BodyBold" />
             </RadioGroup>
 

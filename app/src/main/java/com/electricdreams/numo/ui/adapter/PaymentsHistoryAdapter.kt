@@ -72,11 +72,11 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<PaymentsHistoryAdapter.ViewH
 
         // Set title based on status and payment type
         holder.titleText.text = when {
-            isPending -> "Pending Payment"
-            entry.isLightning() -> "Lightning Payment"
-            entry.isCashu() -> "Cashu Payment"
-            entry.amount > 0 -> "Cash In"
-            else -> "Cash Out"
+            isPending -> context.getString(R.string.history_row_title_pending_payment)
+            entry.isLightning() -> context.getString(R.string.history_row_title_lightning_payment)
+            entry.isCashu() -> context.getString(R.string.history_row_title_cashu_payment)
+            entry.amount > 0 -> context.getString(R.string.history_row_title_cash_in)
+            else -> context.getString(R.string.history_row_title_cash_out)
         }
 
         // Set icon based on payment type and status
@@ -98,7 +98,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<PaymentsHistoryAdapter.ViewH
         // Show status for pending payments
         if (isPending) {
             holder.statusText.visibility = View.VISIBLE
-            holder.statusText.text = "Tap to resume"
+            holder.statusText.text = context.getString(R.string.history_row_status_tap_to_resume)
             holder.statusText.setTextColor(context.getColor(R.color.color_warning))
         } else {
             holder.statusText.visibility = View.GONE
