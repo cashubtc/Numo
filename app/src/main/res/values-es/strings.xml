@@ -43,7 +43,7 @@
     <string name="tips_dialog_remove_preset_positive">Eliminar</string>
 
     <string name="tips_dialog_reset_defaults_title">Restablecer valores predeterminados</string>
-    <string name="tips_dialog_reset_defaults_message">¿Restablecer las propinas predefinidas a los valores por defecto (5 %, 10 %, 15 %, 20 %)?</string>
+    <string name="tips_dialog_reset_defaults_message" formatted="false">¿Restablecer las propinas predefinidas a los valores por defecto (5 %, 10 %, 15 %, 20 %)?</string>
     <string name="tips_dialog_reset_defaults_positive">Restablecer</string>
     <string name="tips_toast_reset_to_defaults">Propinas restablecidas a los valores por defecto</string>
 

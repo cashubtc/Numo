@@ -53,7 +53,7 @@
     <string name="tips_dialog_remove_preset_positive">Remove</string>
 
     <string name="tips_dialog_reset_defaults_title">Reset to Defaults</string>
-    <string name="tips_dialog_reset_defaults_message">Reset tip presets to default values (5%, 10%, 15%, 20%)?</string>
+    <string name="tips_dialog_reset_defaults_message" formatted="false">Reset tip presets to default values (5%, 10%, 15%, 20%)?</string>
     <string name="tips_dialog_reset_defaults_positive">Reset</string>
     <string name="tips_toast_reset_to_defaults">Presets reset to defaults</string>
 
