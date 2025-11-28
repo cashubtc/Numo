@@ -108,4 +108,122 @@
     <string name="payment_received_error_no_share_app">No apps available to share this token</string>
     <string name="payment_received_error_no_details">Transaction details not available</string>
 
+    <!-- Onboarding / Welcome -->
+    <string name="onboarding_welcome_tagline">Bitcoin POS with Cashu ecash</string>
+    <string name="onboarding_welcome_message">Accept Bitcoin payments instantly with zero fees using Cashu ecash technology.</string>
+    <string name="onboarding_terms_text">By continuing, you agree to our Terms of Service and Privacy Policy</string>
+    <string name="onboarding_get_started">Get Started</string>
+
+    <!-- Onboarding / Choose Path -->
+    <string name="onboarding_setup_title">Set Up Your Wallet</string>
+    <string name="onboarding_setup_subtitle">Choose how you would like to get started</string>
+    <string name="onboarding_create_wallet_title">Create New Wallet</string>
+    <string name="onboarding_create_wallet_subtitle">Start fresh with a new seed phrase</string>
+    <string name="onboarding_restore_wallet_title">Restore from Backup</string>
+    <string name="onboarding_restore_wallet_subtitle">Use your existing seed phrase</string>
+
+    <!-- Onboarding / Restore Seed Entry -->
+    <string name="onboarding_seed_toolbar_back">Back</string>
+    <string name="onboarding_seed_toolbar_title">Restore Wallet</string>
+    <string name="onboarding_seed_instruction_title">Enter your 12-word seed phrase</string>
+    <string name="onboarding_seed_instruction_body">Enter the words in the correct order to restore your wallet.</string>
+    <string name="onboarding_seed_paste_button">Paste from Clipboard</string>
+    <string name="onboarding_seed_validation_ready">Ready to continue</string>
+    <string name="onboarding_seed_invalid_characters">Invalid characters detected</string>
+    <string name="onboarding_seed_words_entered_count">%1$d of 12 words entered</string>
+    <string name="onboarding_seed_continue">Continue</string>
+    <string name="onboarding_clipboard_empty">Clipboard is empty</string>
+    <string name="onboarding_seed_paste_invalid">Please paste a valid 12-word seed phrase</string>
+    <string name="onboarding_seed_paste_success">Seed phrase pasted</string>
+
+    <!-- Onboarding / Generating Wallet -->
+    <string name="onboarding_status_creating_wallet">Creating your wallet...</string>
+    <string name="onboarding_status_generating_seed">Generating seed phrase...</string>
+    <string name="onboarding_status_setting_up_mints">Setting up default mints...</string>
+    <string name="onboarding_status_initializing_wallet">Initializing wallet...</string>
+    <string name="onboarding_status_connecting_mints">Connecting to mints...</string>
+    <string name="onboarding_status_fetching_mints">Fetching mint information...</string>
+    <string name="onboarding_generating_hint">This will only take a moment</string>
+
+    <!-- Onboarding / Fetching Backup -->
+    <string name="onboarding_fetching_searching_backup">Searching for backup...</string>
+    <string name="onboarding_fetching_checking_relays">Checking Nostr relays for your mint configuration</string>
+
+    <!-- Onboarding / Review Mints -->
+    <string name="onboarding_mints_toolbar_back">Back</string>
+    <string name="onboarding_mints_toolbar_title">Your Mints</string>
+    <string name="onboarding_backup_found_title">Backup Found</string>
+    <string name="onboarding_backup_found_subtitle">Last backed up %1$s</string>
+    <string name="onboarding_backup_not_found_title">No Backup Found</string>
+    <string name="onboarding_backup_not_found_subtitle">Using default mints</string>
+    <string name="onboarding_mints_title">Select Mints</string>
+    <string name="onboarding_mints_subtitle_restore">Select which mints to restore</string>
+    <string name="onboarding_mints_subtitle_description">These mints will store your ecash tokens</string>
+    <string name="onboarding_mints_count">%1$d mint%2$s selected</string>
+    <string name="onboarding_mints_continue_restore">Restore Wallet</string>
+    <string name="onboarding_mints_continue_new_wallet">Continue</string>
+
+    <!-- Onboarding / Restoring -->
+    <string name="onboarding_restoring_title">Restoring Wallet</string>
+    <string name="onboarding_restoring_initializing">Initializing restore...</string>
+
+    <!-- Onboarding / Success -->
+    <string name="onboarding_success_restored_title">Wallet Restored</string>
+    <string name="onboarding_success_restored_recovered">Recovered %1$d sats</string>
+    <string name="onboarding_success_restored_total_balance">Total balance: %1$d sats</string>
+    <string name="onboarding_success_created_title">Wallet Created</string>
+    <string name="onboarding_success_created_subtitle">Your wallet is ready to use</string>
+    <string name="onboarding_success_balance_by_mint">BALANCE BY MINT</string>
+    <string name="onboarding_enter_wallet_button">Enter Wallet</string>
+
+    <!-- Onboarding / Errors -->
+    <string name="onboarding_error_creating_wallet">Error creating wallet: %1$s</string>
+    <string name="onboarding_error_initializing_wallet">Error initializing wallet: %1$s</string>
+
+    <!-- Restore Wallet (standalone screen) -->
+    <string name="restore_warning_title">Important Warning</string>
+    <string name="restore_warning_body">Restoring from a seed phrase will replace your current wallet. Make sure you have backed up your current seed phrase before proceeding.</string>
+    <string name="restore_seed_instruction_title">Enter your 12-word seed phrase</string>
+    <string name="restore_seed_paste_button">Paste from Clipboard</string>
+    <string name="restore_seed_continue">Continue</string>
+
+    <string name="restore_fetching_title">Checking for Backup</string>
+    <string name="restore_fetching_status">Searching Nostr relays...</string>
+
+    <string name="restore_backup_found_title">Backup Found</string>
+    <string name="restore_backup_found_subtitle">Last backed up Jan 1, 2024</string>
+    <string name="restore_backup_unknown_date">Unknown date</string>
+
+    <string name="restore_mints_title">Select mints to restore</string>
+    <string name="restore_mints_count">0 mints selected</string>
+    <string name="restore_mints_start_button">Start Restore</string>
+
+    <string name="restore_progress_title">Restoring Wallet</string>
+    <string name="restore_progress_status">Connecting to mints...</string>
+    <string name="restore_progress_status_waiting">Waiting...</string>
+    <string name="restore_progress_balance_increase">+%1$d sats</string>
+    <string name="restore_progress_balance_decrease">%1$d sats</string>
+
+    <string name="restore_success_title">Wallet Restored</string>
+    <string name="restore_success_subtitle">Your wallet has been successfully restored</string>
+    <string name="restore_success_balance_line">%1$d sats</string>
+    <string name="restore_success_done_button">Done</string>
+
+    <string name="restore_error_failed">Restore failed: %1$s</string>
+
+    <!-- Seed Phrase screen -->
+    <string name="seed_phrase_toolbar_back">Back</string>
+    <string name="seed_phrase_toolbar_title">Seed Phrase</string>
+    <string name="seed_phrase_warning_title">Keep this secret!</string>
+    <string name="seed_phrase_warning_body">Anyone with these 12 words can access your funds. Write them down and store them in a safe place. Never share them with anyone.</string>
+    <string name="seed_phrase_title">Your Recovery Phrase</string>
+    <string name="seed_phrase_show_button">Show</string>
+    <string name="seed_phrase_copy_button">Copy to Clipboard</string>
+    <string name="seed_phrase_clipboard_disclaimer">Make sure to clear your clipboard after pasting</string>
+
+    <!-- Terms dialog / common -->
+    <string name="dialog_terms_title">Terms of Service</string>
+    <string name="dialog_terms_body">NUMO WALLET - TERMS OF SERVICE&#x0A;&#x0A;1. ACCEPTANCE&#x0A;By using this wallet application, you agree to these terms.&#x0A;&#x0A;2. NATURE OF SERVICE&#x0A;This is a self-custodial Bitcoin wallet using Cashu ecash technology. You are solely responsible for your funds and seed phrase.&#x0A;&#x0A;3. SEED PHRASE&#x0A;Your 12-word seed phrase is the ONLY way to recover your wallet. Never share it. Store it securely offline. We cannot recover lost seed phrases.&#x0A;&#x0A;4. NO WARRANTY&#x0A;This software is provided "as is" without warranty of any kind. Use at your own risk.&#x0A;&#x0A;5. LIMITATION OF LIABILITY&#x0A;We are not liable for any loss of funds, whether through bugs, user error, or third-party mint failures.&#x0A;&#x0A;6. ECASH MINTS&#x0A;Ecash tokens are held by third-party mints. These mints may fail or become unavailable. Diversify across multiple mints.&#x0A;&#x0A;7. PRIVACY&#x0A;This wallet does not collect personal data. Transactions are processed through ecash mints which may have their own privacy policies.&#x0A;&#x0A;8. UPDATES&#x0A;These terms may be updated. Continued use constitutes acceptance.&#x0A;&#x0A;Last updated: November 2024</string>
+    <string name="common_close">Close</string>
+
 </resources>

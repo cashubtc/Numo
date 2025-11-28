@@ -163,8 +163,6 @@ class OnboardingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // CRITICAL: Force light mode for onboarding - must be before super.onCreate()
-        // This ensures consistent light theme regardless of system dark mode setting
-        // The app's dark mode preference (default: OFF) is only applied in ModernPOSActivity
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         
         super.onCreate(savedInstanceState)
@@ -191,7 +189,6 @@ class OnboardingActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         
         // Set the background color for status and nav bars to match content
-        // Use the light background color (#F6F7F8) for seamless appearance
         val bgColor = android.graphics.Color.parseColor("#F6F7F8")
         window.statusBarColor = bgColor
         window.navigationBarColor = bgColor
@@ -203,7 +200,6 @@ class OnboardingActivity : AppCompatActivity() {
         }
 
         // Apply insets as padding to content, but don't consume them
-        // This makes content avoid system bars while background extends behind them
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, insets.top, 0, insets.bottom)
@@ -273,62 +269,38 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun setupTermsText() {
-        val fullText = "By continuing, you agree to our Terms of Service and Privacy Policy"
+        val fullText = getString(R.string.onboarding_terms_text)
         val spannableString = SpannableString(fullText)
 
-        val termsStart = fullText.indexOf("Terms of Service")
-        val termsEnd = termsStart + "Terms of Service".length
+        val termsLabel = "Terms of Service"
+        val termsStart = fullText.indexOf(termsLabel)
+        if (termsStart != -1) {
+            val termsEnd = termsStart + termsLabel.length
 
-        val clickableSpan = object : ClickableSpan() {
-            override fun onClick(widget: View) {
-                showTermsDialog()
+            val clickableSpan = object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    showTermsDialog()
+                }
+
+                override fun updateDrawState(ds: TextPaint) {
+                    super.updateDrawState(ds)
+                    ds.color = ContextCompat.getColor(this@OnboardingActivity, R.color.color_accent_blue)
+                    ds.isUnderlineText = true
+                }
             }
 
-            override fun updateDrawState(ds: TextPaint) {
-                super.updateDrawState(ds)
-                ds.color = ContextCompat.getColor(this@OnboardingActivity, R.color.color_accent_blue)
-                ds.isUnderlineText = true
-            }
+            spannableString.setSpan(clickableSpan, termsStart, termsEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
 
-        spannableString.setSpan(clickableSpan, termsStart, termsEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         termsText.text = spannableString
         termsText.movementMethod = LinkMovementMethod.getInstance()
     }
 
     private fun showTermsDialog() {
         AlertDialog.Builder(this)
-            .setTitle("Terms of Service")
-            .setMessage("""
-                NUMO WALLET - TERMS OF SERVICE
-                
-                1. ACCEPTANCE
-                By using this wallet application, you agree to these terms.
-                
-                2. NATURE OF SERVICE
-                This is a self-custodial Bitcoin wallet using Cashu ecash technology. You are solely responsible for your funds and seed phrase.
-                
-                3. SEED PHRASE
-                Your 12-word seed phrase is the ONLY way to recover your wallet. Never share it. Store it securely offline. We cannot recover lost seed phrases.
-                
-                4. NO WARRANTY
-                This software is provided "as is" without warranty of any kind. Use at your own risk.
-                
-                5. LIMITATION OF LIABILITY
-                We are not liable for any loss of funds, whether through bugs, user error, or third-party mint failures.
-                
-                6. ECASH MINTS
-                Ecash tokens are held by third-party mints. These mints may fail or become unavailable. Diversify across multiple mints.
-                
-                7. PRIVACY
-                This wallet does not collect personal data. Transactions are processed through ecash mints which may have their own privacy policies.
-                
-                8. UPDATES
-                These terms may be updated. Continued use constitutes acceptance.
-                
-                Last updated: November 2024
-            """.trimIndent())
-            .setPositiveButton("Close", null)
+            .setTitle(R.string.dialog_terms_title)
+            .setMessage(getString(R.string.dialog_terms_body))
+            .setPositiveButton(R.string.common_close, null)
             .show()
     }
 
@@ -510,7 +482,7 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun startNewWalletFlow() {
         showStep(OnboardingStep.GENERATING_WALLET)
-        generatingStatus.text = "Creating your wallet..."
+        generatingStatus.text = getString(R.string.onboarding_status_creating_wallet)
 
         lifecycleScope.launch {
             try {
@@ -518,7 +490,7 @@ class OnboardingActivity : AppCompatActivity() {
                 delay(800)
 
                 withContext(Dispatchers.Main) {
-                    generatingStatus.text = "Generating seed phrase..."
+                    generatingStatus.text = getString(R.string.onboarding_status_generating_seed)
                 }
 
                 delay(600)
@@ -530,7 +502,7 @@ class OnboardingActivity : AppCompatActivity() {
                 generatedMnemonic = mnemonic
 
                 withContext(Dispatchers.Main) {
-                    generatingStatus.text = "Setting up default mints..."
+                    generatingStatus.text = getString(R.string.onboarding_status_setting_up_mints)
                 }
 
                 delay(500)
@@ -558,7 +530,7 @@ class OnboardingActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         this@OnboardingActivity,
-                        "Error creating wallet: ${e.message}",
+                        getString(R.string.onboarding_error_creating_wallet, e.message ?: ""),
                         Toast.LENGTH_LONG
                     ).show()
                     showStep(OnboardingStep.CHOOSE_PATH)
@@ -569,19 +541,18 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun completeNewWalletSetup() {
         showStep(OnboardingStep.GENERATING_WALLET)
-        generatingStatus.text = "Initializing wallet..."
+        generatingStatus.text = getString(R.string.onboarding_status_initializing_wallet)
 
         lifecycleScope.launch {
             try {
                 val mnemonic = generatedMnemonic ?: throw IllegalStateException("No mnemonic generated")
 
                 // Initialize CashuWalletManager with the generated mnemonic
-                // First, save the mnemonic to preferences
                 val prefs = getSharedPreferences("CashuWalletPrefs", Context.MODE_PRIVATE)
                 prefs.edit().putString("wallet_mnemonic", mnemonic).apply()
 
                 withContext(Dispatchers.Main) {
-                    generatingStatus.text = "Connecting to mints..."
+                    generatingStatus.text = getString(R.string.onboarding_status_connecting_mints)
                 }
 
                 delay(500)
@@ -590,7 +561,7 @@ class OnboardingActivity : AppCompatActivity() {
                 CashuWalletManager.init(this@OnboardingActivity)
 
                 withContext(Dispatchers.Main) {
-                    generatingStatus.text = "Fetching mint information..."
+                    generatingStatus.text = getString(R.string.onboarding_status_fetching_mints)
                 }
 
                 // Fetch mint info for selected mints
@@ -618,7 +589,7 @@ class OnboardingActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         this@OnboardingActivity,
-                        "Error initializing wallet: ${e.message}",
+                        getString(R.string.onboarding_error_initializing_wallet, e.message ?: ""),
                         Toast.LENGTH_LONG
                     ).show()
                     showStep(OnboardingStep.REVIEW_MINTS)
@@ -643,21 +614,21 @@ class OnboardingActivity : AppCompatActivity() {
                 seedValidationStatus.visibility = View.VISIBLE
                 seedValidationIcon.setImageResource(R.drawable.ic_close)
                 seedValidationIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_warning_red))
-                seedValidationText.text = "Invalid characters detected"
+                seedValidationText.text = getString(R.string.onboarding_seed_invalid_characters)
                 seedValidationText.setTextColor(ContextCompat.getColor(this, R.color.color_warning_red))
             }
             !allFilled -> {
                 seedValidationStatus.visibility = View.VISIBLE
                 seedValidationIcon.setImageResource(R.drawable.ic_warning)
                 seedValidationIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_warning))
-                seedValidationText.text = "$filledCount of 12 words entered"
+                seedValidationText.text = getString(R.string.onboarding_seed_words_entered_count, filledCount)
                 seedValidationText.setTextColor(ContextCompat.getColor(this, R.color.color_warning))
             }
             else -> {
                 seedValidationStatus.visibility = View.VISIBLE
                 seedValidationIcon.setImageResource(R.drawable.ic_check)
                 seedValidationIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_success_green))
-                seedValidationText.text = "Ready to continue"
+                seedValidationText.text = getString(R.string.onboarding_seed_validation_ready)
                 seedValidationText.setTextColor(ContextCompat.getColor(this, R.color.color_success_green))
             }
         }
@@ -674,7 +645,7 @@ class OnboardingActivity : AppCompatActivity() {
         val clipData = clipboard.primaryClip
 
         if (clipData == null || clipData.itemCount == 0) {
-            Toast.makeText(this, "Clipboard is empty", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.onboarding_clipboard_empty, Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -682,7 +653,7 @@ class OnboardingActivity : AppCompatActivity() {
         val words = pastedText.split("\\s+".toRegex()).filter { it.isNotBlank() }
 
         if (words.size != 12) {
-            Toast.makeText(this, "Please paste a valid 12-word seed phrase", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.onboarding_seed_paste_invalid, Toast.LENGTH_LONG).show()
             return
         }
 
@@ -693,7 +664,7 @@ class OnboardingActivity : AppCompatActivity() {
         }
 
         validateSeedInputs()
-        Toast.makeText(this, "Seed phrase pasted", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, R.string.onboarding_seed_paste_success, Toast.LENGTH_SHORT).show()
     }
 
     private fun getMnemonic(): String {
@@ -706,7 +677,7 @@ class OnboardingActivity : AppCompatActivity() {
         enteredMnemonic = getMnemonic()
 
         showStep(OnboardingStep.FETCHING_BACKUP)
-        fetchingStatus.text = "Searching for backup on Nostr..."
+        fetchingStatus.text = getString(R.string.onboarding_fetching_searching_backup)
 
         lifecycleScope.launch {
             val mnemonic = enteredMnemonic ?: return@launch
@@ -763,7 +734,7 @@ class OnboardingActivity : AppCompatActivity() {
         val mnemonic = enteredMnemonic ?: return
 
         showStep(OnboardingStep.RESTORING)
-        restoringStatus.text = "Initializing restore..."
+        restoringStatus.text = getString(R.string.onboarding_restoring_initializing)
         mintProgressContainer.removeAllViews()
         mintProgressViews.clear()
 
@@ -803,7 +774,7 @@ class OnboardingActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         this@OnboardingActivity,
-                        "Restore failed: ${e.message}",
+                        getString(R.string.restore_error_failed, e.message ?: ""),
                         Toast.LENGTH_LONG
                     ).show()
                     showStep(OnboardingStep.REVIEW_MINTS)
@@ -822,27 +793,27 @@ class OnboardingActivity : AppCompatActivity() {
                 backupStatusCard.background = ContextCompat.getDrawable(this, R.drawable.bg_success_card)
                 backupStatusIcon.setImageResource(R.drawable.ic_cloud_done)
                 backupStatusIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_success_green))
-                backupStatusTitle.text = "Backup Found"
+                backupStatusTitle.text = getString(R.string.onboarding_backup_found_title)
                 backupStatusTitle.setTextColor(ContextCompat.getColor(this, R.color.color_success_green))
 
                 val dateStr = backupTimestamp?.let {
                     SimpleDateFormat("MMM d, yyyy 'at' h:mm a", Locale.getDefault()).format(Date(it * 1000))
-                } ?: "Unknown date"
-                backupStatusSubtitle.text = "Last backed up $dateStr"
+                } ?: getString(R.string.restore_backup_unknown_date)
+                backupStatusSubtitle.text = getString(R.string.onboarding_backup_found_subtitle, dateStr)
             } else {
                 backupStatusCard.background = ContextCompat.getDrawable(this, R.drawable.bg_info_card)
                 backupStatusIcon.setImageResource(R.drawable.ic_cloud_off)
                 backupStatusIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_text_tertiary))
-                backupStatusTitle.text = "No Backup Found"
+                backupStatusTitle.text = getString(R.string.onboarding_backup_not_found_title)
                 backupStatusTitle.setTextColor(ContextCompat.getColor(this, R.color.color_text_primary))
-                backupStatusSubtitle.text = "Using default mints"
+                backupStatusSubtitle.text = getString(R.string.onboarding_backup_not_found_subtitle)
             }
-            mintsSubtitle.text = "Select which mints to restore"
-            mintsContinueButton.text = "Restore Wallet"
+            mintsSubtitle.text = getString(R.string.onboarding_mints_subtitle_restore)
+            mintsContinueButton.text = getString(R.string.onboarding_mints_continue_restore)
         } else {
             backupStatusCard.visibility = View.GONE
-            mintsSubtitle.text = "These mints will store your ecash tokens"
-            mintsContinueButton.text = "Continue"
+            mintsSubtitle.text = getString(R.string.onboarding_mints_subtitle_description)
+            mintsContinueButton.text = getString(R.string.onboarding_mints_continue_new_wallet)
         }
 
         // Update mints list
@@ -935,7 +906,8 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun updateMintsCount() {
         val count = selectedMints.size
-        mintsCountText.text = "$count mint${if (count != 1) "s" else ""} selected"
+        val pluralSuffix = if (count != 1) "s" else ""
+        mintsCountText.text = getString(R.string.onboarding_mints_count, count, pluralSuffix)
 
         mintsContinueButton.isEnabled = count > 0
         mintsContinueButton.alpha = if (count > 0) 1f else 0.5f
@@ -1001,7 +973,7 @@ class OnboardingActivity : AppCompatActivity() {
         }
 
         val statusText = TextView(this).apply {
-            text = "Waiting..."
+            text = getString(R.string.restore_progress_status_waiting)
             setTextColor(ContextCompat.getColor(context, R.color.color_text_tertiary))
             textSize = 13f
             tag = "status"
@@ -1054,7 +1026,9 @@ class OnboardingActivity : AppCompatActivity() {
                 val diff = after - before
                 if (diff != 0L) {
                     balanceText?.visibility = View.VISIBLE
-                    balanceText?.text = if (diff >= 0) "+$diff sats" else "$diff sats"
+                    val diffText = if (diff >= 0) getString(R.string.restore_progress_balance_increase, diff)
+                                   else getString(R.string.restore_progress_balance_decrease, diff)
+                    balanceText?.text = diffText
                     balanceText?.setTextColor(
                         ContextCompat.getColor(
                             this,
@@ -1085,11 +1059,11 @@ class OnboardingActivity : AppCompatActivity() {
             val totalRecovered = balanceChanges.values.sumOf { maxOf(0L, it.second - it.first) }
             val totalBalance = balanceChanges.values.sumOf { it.second }
 
-            successTitle.text = "Wallet Restored"
-            if (totalRecovered > 0) {
-                successSubtitle.text = "Recovered $totalRecovered sats"
+            successTitle.text = getString(R.string.onboarding_success_restored_title)
+            successSubtitle.text = if (totalRecovered > 0) {
+                getString(R.string.onboarding_success_restored_recovered, totalRecovered)
             } else {
-                successSubtitle.text = "Total balance: $totalBalance sats"
+                getString(R.string.onboarding_success_restored_total_balance, totalBalance)
             }
 
             // Show balance changes
@@ -1108,8 +1082,8 @@ class OnboardingActivity : AppCompatActivity() {
                 successBalanceSection.visibility = View.GONE
             }
         } else {
-            successTitle.text = "Wallet Created"
-            successSubtitle.text = "Your wallet is ready to use"
+            successTitle.text = getString(R.string.onboarding_success_created_title)
+            successSubtitle.text = getString(R.string.onboarding_success_created_subtitle)
             successBalanceSection.visibility = View.GONE
         }
 
@@ -1147,7 +1121,7 @@ class OnboardingActivity : AppCompatActivity() {
         }
 
         val detailText = TextView(this).apply {
-            text = "$after sats"
+            text = getString(R.string.restore_success_balance_line, after)
             setTextColor(ContextCompat.getColor(context, R.color.color_text_secondary))
             textSize = 13f
         }

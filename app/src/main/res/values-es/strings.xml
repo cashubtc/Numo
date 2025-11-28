@@ -98,4 +98,122 @@
     <string name="payment_received_error_no_share_app">No hay aplicaciones disponibles para compartir este token</string>
     <string name="payment_received_error_no_details">Los detalles de la transacción no están disponibles</string>
 
+    <!-- Onboarding / Welcome -->
+    <string name="onboarding_welcome_tagline">TPV de Bitcoin con Cashu ecash</string>
+    <string name="onboarding_welcome_message">Acepta pagos en Bitcoin al instante y sin comisiones usando la tecnología Cashu ecash.</string>
+    <string name="onboarding_terms_text">Al continuar, aceptas nuestros Términos de servicio y Política de privacidad</string>
+    <string name="onboarding_get_started">Comenzar</string>
+
+    <!-- Onboarding / Choose Path -->
+    <string name="onboarding_setup_title">Configura tu monedero</string>
+    <string name="onboarding_setup_subtitle">Elige cómo quieres empezar</string>
+    <string name="onboarding_create_wallet_title">Crear monedero nuevo</string>
+    <string name="onboarding_create_wallet_subtitle">Empieza desde cero con una nueva frase semilla</string>
+    <string name="onboarding_restore_wallet_title">Restaurar desde copia de seguridad</string>
+    <string name="onboarding_restore_wallet_subtitle">Usa tu frase semilla existente</string>
+
+    <!-- Onboarding / Restore Seed Entry -->
+    <string name="onboarding_seed_toolbar_back">Atrás</string>
+    <string name="onboarding_seed_toolbar_title">Restaurar monedero</string>
+    <string name="onboarding_seed_instruction_title">Introduce tu frase semilla de 12 palabras</string>
+    <string name="onboarding_seed_instruction_body">Introduce las palabras en el orden correcto para restaurar tu monedero.</string>
+    <string name="onboarding_seed_paste_button">Pegar desde el portapapeles</string>
+    <string name="onboarding_seed_validation_ready">Listo para continuar</string>
+    <string name="onboarding_seed_invalid_characters">Se han detectado caracteres no válidos</string>
+    <string name="onboarding_seed_words_entered_count">Has introducido %1$d de 12 palabras</string>
+    <string name="onboarding_seed_continue">Continuar</string>
+    <string name="onboarding_clipboard_empty">El portapapeles está vacío</string>
+    <string name="onboarding_seed_paste_invalid">Pega una frase semilla válida de 12 palabras</string>
+    <string name="onboarding_seed_paste_success">Frase semilla pegada</string>
+
+    <!-- Onboarding / Generating Wallet -->
+    <string name="onboarding_status_creating_wallet">Creando tu monedero...</string>
+    <string name="onboarding_status_generating_seed">Generando frase semilla...</string>
+    <string name="onboarding_status_setting_up_mints">Configurando mints por defecto...</string>
+    <string name="onboarding_status_initializing_wallet">Inicializando el monedero...</string>
+    <string name="onboarding_status_connecting_mints">Conectando con los mints...</string>
+    <string name="onboarding_status_fetching_mints">Obteniendo información de los mints...</string>
+    <string name="onboarding_generating_hint">Esto solo tomará un momento</string>
+
+    <!-- Onboarding / Fetching Backup -->
+    <string name="onboarding_fetching_searching_backup">Buscando copia de seguridad...</string>
+    <string name="onboarding_fetching_checking_relays">Comprobando relés Nostr para tu configuración de mints</string>
+
+    <!-- Onboarding / Review Mints -->
+    <string name="onboarding_mints_toolbar_back">Atrás</string>
+    <string name="onboarding_mints_toolbar_title">Tus mints</string>
+    <string name="onboarding_backup_found_title">Copia de seguridad encontrada</string>
+    <string name="onboarding_backup_found_subtitle">Última copia de seguridad: %1$s</string>
+    <string name="onboarding_backup_not_found_title">No se encontró copia de seguridad</string>
+    <string name="onboarding_backup_not_found_subtitle">Usando mints por defecto</string>
+    <string name="onboarding_mints_title">Selecciona mints</string>
+    <string name="onboarding_mints_subtitle_restore">Selecciona qué mints quieres restaurar</string>
+    <string name="onboarding_mints_subtitle_description">Estos mints almacenarán tus tokens ecash</string>
+    <string name="onboarding_mints_count">Has seleccionado %1$d mint%2$s</string>
+    <string name="onboarding_mints_continue_restore">Restaurar monedero</string>
+    <string name="onboarding_mints_continue_new_wallet">Continuar</string>
+
+    <!-- Onboarding / Restoring -->
+    <string name="onboarding_restoring_title">Restaurando monedero</string>
+    <string name="onboarding_restoring_initializing">Iniciando restauración...</string>
+
+    <!-- Onboarding / Success -->
+    <string name="onboarding_success_restored_title">Monedero restaurado</string>
+    <string name="onboarding_success_restored_recovered">Se han recuperado %1$d sats</string>
+    <string name="onboarding_success_restored_total_balance">Saldo total: %1$d sats</string>
+    <string name="onboarding_success_created_title">Monedero creado</string>
+    <string name="onboarding_success_created_subtitle">Tu monedero está listo para usar</string>
+    <string name="onboarding_success_balance_by_mint">SALDO POR MINT</string>
+    <string name="onboarding_enter_wallet_button">Entrar al monedero</string>
+
+    <!-- Onboarding / Errors -->
+    <string name="onboarding_error_creating_wallet">Error al crear el monedero: %1$s</string>
+    <string name="onboarding_error_initializing_wallet">Error al inicializar el monedero: %1$s</string>
+
+    <!-- Restore Wallet (standalone screen) -->
+    <string name="restore_warning_title">Advertencia importante</string>
+    <string name="restore_warning_body">Restaurar desde una frase semilla reemplazará tu monedero actual. Asegúrate de haber guardado la frase semilla actual antes de continuar.</string>
+    <string name="restore_seed_instruction_title">Introduce tu frase semilla de 12 palabras</string>
+    <string name="restore_seed_paste_button">Pegar desde el portapapeles</string>
+    <string name="restore_seed_continue">Continuar</string>
+
+    <string name="restore_fetching_title">Comprobando si hay copia de seguridad</string>
+    <string name="restore_fetching_status">Buscando en los relés Nostr...</string>
+
+    <string name="restore_backup_found_title">Copia de seguridad encontrada</string>
+    <string name="restore_backup_found_subtitle">Última copia de seguridad: 1 ene 2024</string>
+    <string name="restore_backup_unknown_date">Fecha desconocida</string>
+
+    <string name="restore_mints_title">Selecciona los mints que quieres restaurar</string>
+    <string name="restore_mints_count">0 mints seleccionados</string>
+    <string name="restore_mints_start_button">Iniciar restauración</string>
+
+    <string name="restore_progress_title">Restaurando monedero</string>
+    <string name="restore_progress_status">Conectando con los mints...</string>
+    <string name="restore_progress_status_waiting">Esperando...</string>
+    <string name="restore_progress_balance_increase">+%1$d sats</string>
+    <string name="restore_progress_balance_decrease">%1$d sats</string>
+
+    <string name="restore_success_title">Monedero restaurado</string>
+    <string name="restore_success_subtitle">Tu monedero se ha restaurado correctamente</string>
+    <string name="restore_success_balance_line">%1$d sats</string>
+    <string name="restore_success_done_button">Listo</string>
+
+    <string name="restore_error_failed">La restauración ha fallado: %1$s</string>
+
+    <!-- Seed Phrase screen -->
+    <string name="seed_phrase_toolbar_back">Atrás</string>
+    <string name="seed_phrase_toolbar_title">Frase semilla</string>
+    <string name="seed_phrase_warning_title">¡Mantén esto en secreto!</string>
+    <string name="seed_phrase_warning_body">Cualquiera que tenga estas 12 palabras puede acceder a tus fondos. Escríbelas y guárdalas en un lugar seguro. Nunca las compartas con nadie.</string>
+    <string name="seed_phrase_title">Tu frase de recuperación</string>
+    <string name="seed_phrase_show_button">Mostrar</string>
+    <string name="seed_phrase_copy_button">Copiar al portapapeles</string>
+    <string name="seed_phrase_clipboard_disclaimer">Asegúrate de borrar el portapapeles después de pegar</string>
+
+    <!-- Terms dialog / common -->
+    <string name="dialog_terms_title">Términos de servicio</string>
+    <string name="dialog_terms_body">NUMO WALLET - TÉRMINOS DE SERVICIO&#x0A;&#x0A;1. ACEPTACIÓN&#x0A;Al usar esta aplicación de monedero, aceptas estos términos.&#x0A;&#x0A;2. NATURALEZA DEL SERVICIO&#x0A;Este es un monedero de Bitcoin autocustodiado que utiliza la tecnología Cashu ecash. Tú eres el único responsable de tus fondos y de tu frase semilla.&#x0A;&#x0A;3. FRASE SEMILLA&#x0A;Tu frase semilla de 12 palabras es la ÚNICA forma de recuperar tu monedero. Nunca la compartas. Guárdala de forma segura fuera de línea. No podemos recuperar frases semilla perdidas.&#x0A;&#x0A;4. SIN GARANTÍA&#x0A;Este software se proporciona "tal cual", sin ningún tipo de garantía. Úsalo bajo tu propia responsabilidad.&#x0A;&#x0A;5. LIMITACIÓN DE RESPONSABILIDAD&#x0A;No somos responsables de ninguna pérdida de fondos, ya sea por errores de software, errores de usuario o fallos de mints de terceros.&#x0A;&#x0A;6. MINTS DE ECASH&#x0A;Los tokens ecash son custodiados por mints de terceros. Estos mints pueden fallar o dejar de estar disponibles. Distribuye tus fondos entre varios mints.&#x0A;&#x0A;7. PRIVACIDAD&#x0A;Este monedero no recopila datos personales. Las transacciones se procesan a través de mints de ecash que pueden tener sus propias políticas de privacidad.&#x0A;&#x0A;8. ACTUALIZACIONES&#x0A;Estos términos pueden actualizarse. El uso continuado implica la aceptación de los cambios.&#x0A;&#x0A;Última actualización: noviembre de 2024</string>
+    <string name="common_close">Cerrar</string>
+
 </resources>

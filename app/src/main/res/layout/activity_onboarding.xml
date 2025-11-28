@@ -47,7 +47,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Bitcoin POS with Cashu ecash"
+                android:text="@string/onboarding_welcome_tagline"
                 android:textSize="16sp"
                 android:textColor="@color/color_text_secondary"
                 android:gravity="center" />
@@ -61,7 +61,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Accept Bitcoin payments instantly with zero fees using Cashu ecash technology."
+                android:text="@string/onboarding_welcome_message"
                 android:textSize="17sp"
                 android:lineHeight="24sp"
                 android:textColor="@color/color_text_secondary"
@@ -77,7 +77,7 @@
                 android:id="@+id/terms_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="By continuing, you agree to our Terms of Service and Privacy Policy"
+                android:text="@string/onboarding_terms_text"
                 android:textSize="13sp"
                 android:textColor="@color/color_text_tertiary"
                 android:gravity="center"
@@ -89,7 +89,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="16dp"
-                android:text="Get Started"
+                android:text="@string/onboarding_get_started"
                 android:textSize="17sp"
                 android:textColor="#FFFFFF"
                 android:textAllCaps="false"
@@ -127,7 +127,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Set Up Your Wallet"
+                android:text="@string/onboarding_setup_title"
                 android:textSize="28sp"
                 android:textColor="@color/color_text_primary"
                 android:fontFamily="sans-serif-medium"
@@ -137,7 +137,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:text="Choose how you'd like to get started"
+                android:text="@string/onboarding_setup_subtitle"
                 android:textSize="16sp"
                 android:textColor="@color/color_text_secondary"
                 android:gravity="center" />
@@ -168,7 +168,7 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@drawable/ic_add_circle"
-                        android:contentDescription="Create wallet"
+                        android:contentDescription="@string/onboarding_create_wallet_title"
                         app:tint="@color/color_success_green" />
 
                     <LinearLayout
@@ -181,7 +181,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Create New Wallet"
+                            android:text="@string/onboarding_create_wallet_title"
                             android:textSize="17sp"
                             android:textColor="@color/color_text_primary"
                             android:fontFamily="sans-serif-medium" />
@@ -190,7 +190,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="Start fresh with a new seed phrase"
+                            android:text="@string/onboarding_create_wallet_subtitle"
                             android:textSize="14sp"
                             android:textColor="@color/color_text_secondary" />
 
@@ -231,7 +231,7 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:src="@drawable/ic_restore"
-                        android:contentDescription="Restore wallet"
+                        android:contentDescription="@string/onboarding_restore_wallet_title"
                         app:tint="@color/color_accent_blue" />
 
                     <LinearLayout
@@ -244,7 +244,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Restore from Backup"
+                            android:text="@string/onboarding_restore_wallet_title"
                             android:textSize="17sp"
                             android:textColor="@color/color_text_primary"
                             android:fontFamily="sans-serif-medium" />
@@ -253,7 +253,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="Use your existing seed phrase"
+                            android:text="@string/onboarding_restore_wallet_subtitle"
                             android:textSize="14sp"
                             android:textColor="@color/color_text_secondary" />
 
@@ -307,13 +307,13 @@
                     android:src="@drawable/ic_arrow_back"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     app:tint="@color/color_text_primary"
-                    android:contentDescription="Back" />
+                    android:contentDescription="@string/onboarding_seed_toolbar_back" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Restore Wallet"
+                    android:text="@string/onboarding_seed_toolbar_title"
                     android:textSize="17sp"
                     android:textColor="@color/color_text_primary"
                     android:fontFamily="sans-serif-medium"
@@ -343,7 +343,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="Enter your 12-word seed phrase"
+                        android:text="@string/onboarding_seed_instruction_title"
                         android:textSize="24sp"
                         android:textColor="@color/color_text_primary"
                         android:fontFamily="sans-serif-medium" />
@@ -352,7 +352,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Enter the words in the correct order to restore your wallet."
+                        android:text="@string/onboarding_seed_instruction_body"
                         android:textSize="15sp"
                         android:textColor="@color/color_text_secondary"
                         android:lineHeight="20sp" />
@@ -374,7 +374,7 @@
                         android:layout_height="44dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="16dp"
-                        android:text="Paste from Clipboard"
+                        android:text="@string/onboarding_seed_paste_button"
                         android:textSize="14sp"
                         android:textAllCaps="false"
                         app:strokeColor="@color/color_divider"
@@ -404,7 +404,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
-                            android:text="Ready to continue"
+                            android:text="@string/onboarding_seed_validation_ready"
                             android:textSize="14sp"
                             android:textColor="@color/color_success_green" />
 
@@ -427,7 +427,7 @@
                     android:id="@+id/seed_continue_button"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:text="Continue"
+                    android:text="@string/onboarding_seed_continue"
                     android:textSize="17sp"
                     android:textColor="#FFFFFF"
                     android:textAllCaps="false"
@@ -467,7 +467,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="Creating your wallet..."
+                android:text="@string/onboarding_status_creating_wallet"
                 android:textSize="17sp"
                 android:textColor="@color/color_text_primary"
                 android:gravity="center" />
@@ -476,7 +476,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="This will only take a moment"
+                android:text="@string/onboarding_generating_hint"
                 android:textSize="14sp"
                 android:textColor="@color/color_text_secondary"
                 android:gravity="center" />
@@ -511,7 +511,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="Searching for backup..."
+                android:text="@string/onboarding_fetching_searching_backup"
                 android:textSize="17sp"
                 android:textColor="@color/color_text_primary"
                 android:gravity="center" />
@@ -520,7 +520,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Checking Nostr relays for your mint configuration"
+                android:text="@string/onboarding_fetching_checking_relays"
                 android:textSize="14sp"
                 android:textColor="@color/color_text_secondary"
                 android:gravity="center" />
@@ -558,13 +558,13 @@
                     android:src="@drawable/ic_arrow_back"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     app:tint="@color/color_text_primary"
-                    android:contentDescription="Back" />
+                    android:contentDescription="@string/onboarding_mints_toolbar_back" />
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Your Mints"
+                    android:text="@string/onboarding_mints_toolbar_title"
                     android:textSize="17sp"
                     android:textColor="@color/color_text_primary"
                     android:fontFamily="sans-serif-medium"
@@ -619,7 +619,7 @@
                                 android:id="@+id/backup_status_title"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Backup Found"
+                                android:text="@string/onboarding_backup_found_title"
                                 android:textSize="15sp"
                                 android:textColor="@color/color_success_green"
                                 android:fontFamily="sans-serif-medium" />
@@ -629,7 +629,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
-                                android:text="Last backed up Nov 26, 2024"
+                                android:text="@string/onboarding_backup_found_subtitle"
                                 android:textSize="13sp"
                                 android:textColor="@color/color_text_secondary" />
 
@@ -642,7 +642,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="20dp"
-                        android:text="Select Mints"
+                        android:text="@string/onboarding_mints_title"
                         android:textSize="22sp"
                         android:textColor="@color/color_text_primary"
                         android:fontFamily="sans-serif-medium" />
@@ -652,7 +652,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="These mints will store your ecash tokens"
+                        android:text="@string/onboarding_mints_subtitle_description"
                         android:textSize="14sp"
                         android:textColor="@color/color_text_secondary" />
 
@@ -670,7 +670,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="4 mints selected"
+                        android:text="@string/onboarding_mints_count"
                         android:textSize="13sp"
                         android:textColor="@color/color_text_tertiary" />
 
@@ -691,7 +691,7 @@
                     android:id="@+id/mints_continue_button"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:text="Continue"
+                    android:text="@string/onboarding_mints_continue_new_wallet"
                     android:textSize="17sp"
                     android:textColor="#FFFFFF"
                     android:textAllCaps="false"
@@ -727,7 +727,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Restoring Wallet"
+                    android:text="@string/onboarding_restoring_title"
                     android:textSize="17sp"
                     android:textColor="@color/color_text_primary"
                     android:fontFamily="sans-serif-medium"
@@ -761,7 +761,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="Initializing restore..."
+                        android:text="@string/onboarding_restoring_initializing"
                         android:textSize="15sp"
                         android:textColor="@color/color_text_secondary"
                         android:gravity="center" />
@@ -811,7 +811,7 @@
                     android:layout_height="88dp"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_success_checkmark"
-                    android:contentDescription="Success" />
+                    android:contentDescription="@string/payment_received_success_icon_description" />
 
             </FrameLayout>
 
@@ -821,7 +821,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="32dp"
-                android:text="Wallet Created"
+                android:text="@string/onboarding_success_created_title"
                 android:textSize="28sp"
                 android:textColor="@color/color_text_primary"
                 android:fontFamily="sans-serif-medium"
@@ -832,7 +832,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Your wallet is ready to use"
+                android:text="@string/onboarding_success_created_subtitle"
                 android:textSize="16sp"
                 android:textColor="@color/color_text_secondary"
                 android:gravity="center" />
@@ -853,7 +853,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="BALANCE BY MINT"
+                    android:text="@string/onboarding_success_balance_by_mint"
                     android:textSize="12sp"
                     android:textColor="@color/color_text_tertiary"
                     android:letterSpacing="0.1"
@@ -877,7 +877,7 @@
                 android:id="@+id/enter_wallet_button"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="Enter Wallet"
+                android:text="@string/onboarding_enter_wallet_button"
                 android:textSize="17sp"
                 android:textColor="#FFFFFF"
                 android:textAllCaps="false"
