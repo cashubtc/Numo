@@ -117,7 +117,7 @@ class BarcodeScannerActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(
                     this,
-                    "Camera permission is required to scan barcodes",
+                    getString(R.string.barcode_scanner_error_camera_permission_required),
                     Toast.LENGTH_LONG
                 ).show()
                 finish()
@@ -210,18 +210,18 @@ class BarcodeScannerActivity : AppCompatActivity() {
 
     private fun formatToString(format: Int): String {
         return when (format) {
-            Barcode.FORMAT_EAN_13 -> "EAN-13"
-            Barcode.FORMAT_EAN_8 -> "EAN-8"
-            Barcode.FORMAT_UPC_A -> "UPC-A"
-            Barcode.FORMAT_UPC_E -> "UPC-E"
-            Barcode.FORMAT_CODE_128 -> "Code 128"
-            Barcode.FORMAT_CODE_39 -> "Code 39"
-            Barcode.FORMAT_CODE_93 -> "Code 93"
-            Barcode.FORMAT_ITF -> "ITF"
-            Barcode.FORMAT_CODABAR -> "Codabar"
-            Barcode.FORMAT_QR_CODE -> "QR Code"
-            Barcode.FORMAT_DATA_MATRIX -> "Data Matrix"
-            else -> "Unknown"
+            Barcode.FORMAT_EAN_13 -> getString(R.string.barcode_format_ean_13)
+            Barcode.FORMAT_EAN_8 -> getString(R.string.barcode_format_ean_8)
+            Barcode.FORMAT_UPC_A -> getString(R.string.barcode_format_upc_a)
+            Barcode.FORMAT_UPC_E -> getString(R.string.barcode_format_upc_e)
+            Barcode.FORMAT_CODE_128 -> getString(R.string.barcode_format_code_128)
+            Barcode.FORMAT_CODE_39 -> getString(R.string.barcode_format_code_39)
+            Barcode.FORMAT_CODE_93 -> getString(R.string.barcode_format_code_93)
+            Barcode.FORMAT_ITF -> getString(R.string.barcode_format_itf)
+            Barcode.FORMAT_CODABAR -> getString(R.string.barcode_format_codabar)
+            Barcode.FORMAT_QR_CODE -> getString(R.string.barcode_format_qr_code)
+            Barcode.FORMAT_DATA_MATRIX -> getString(R.string.barcode_format_data_matrix)
+            else -> getString(R.string.barcode_format_unknown)
         }
     }
 

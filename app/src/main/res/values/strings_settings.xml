@@ -11,6 +11,13 @@
     <string name="settings_item_currency_title">Fiat Currency</string>
     <string name="settings_item_currency_subtitle">Choose your default fiat currency</string>
 
+    <!-- Currency settings screen -->
+    <string name="currency_settings_section_preferred_currency">PREFERRED CURRENCY</string>
+    <string name="currency_settings_option_usd">US Dollar (USD)</string>
+    <string name="currency_settings_option_eur">Euro (EUR)</string>
+    <string name="currency_settings_option_gbp">British Pound (GBP)</string>
+    <string name="currency_settings_option_jpy">Japanese Yen (JPY)</string>
+
     <!-- Settings items: mints -->
     <string name="settings_item_mints_title">Mints</string>
     <string name="settings_item_mints_subtitle">Manage Cashu mints and Lightning settings</string>

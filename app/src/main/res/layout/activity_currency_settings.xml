@@ -22,7 +22,7 @@
             android:minHeight="48dp"
             android:padding="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/common_back"
             android:src="@drawable/ic_chevron_back"
             android:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -32,7 +32,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Fiat Currency"
+            android:text="@string/settings_currency_title"
             android:textAppearance="@style/Text.Title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -60,7 +60,7 @@
                 android:layout_marginHorizontal="24dp"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="4dp"
-                android:text="PREFERRED CURRENCY"
+                android:text="@string/currency_settings_section_preferred_currency"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Currency Radio Group -->
@@ -79,7 +79,7 @@
                     android:drawableTint="@color/color_primary_green"
                     android:gravity="center_vertical"
                     android:paddingHorizontal="24dp"
-                    android:text="US Dollar (USD)"
+                    android:text="@string/currency_settings_option_usd"
                     android:textAppearance="@style/Text.BodyBold" />
 
                 <RadioButton
@@ -92,7 +92,7 @@
                     android:drawableTint="@color/color_primary_green"
                     android:gravity="center_vertical"
                     android:paddingHorizontal="24dp"
-                    android:text="Euro (EUR)"
+                    android:text="@string/currency_settings_option_eur"
                     android:textAppearance="@style/Text.BodyBold" />
 
                 <RadioButton
@@ -105,7 +105,7 @@
                     android:drawableTint="@color/color_primary_green"
                     android:gravity="center_vertical"
                     android:paddingHorizontal="24dp"
-                    android:text="British Pound (GBP)"
+                    android:text="@string/currency_settings_option_gbp"
                     android:textAppearance="@style/Text.BodyBold" />
 
                 <RadioButton
@@ -118,7 +118,7 @@
                     android:drawableTint="@color/color_primary_green"
                     android:gravity="center_vertical"
                     android:paddingHorizontal="24dp"
-                    android:text="Japanese Yen (JPY)"
+                    android:text="@string/currency_settings_option_jpy"
                     android:textAppearance="@style/Text.BodyBold" />
             </RadioGroup>
 

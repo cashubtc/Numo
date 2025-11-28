@@ -233,7 +233,7 @@ class CheckoutScannerActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(
                     this,
-                    "Camera permission is required to scan barcodes",
+                    getString(R.string.barcode_scanner_error_camera_permission_required),
                     Toast.LENGTH_LONG
                 ).show()
                 finish()

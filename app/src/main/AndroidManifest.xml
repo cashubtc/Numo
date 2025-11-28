@@ -295,7 +295,7 @@
         
         <activity android:name="com.electricdreams.numo.feature.items.BarcodeScannerActivity"
             android:exported="false"
-            android:label="Scan Barcode"
+            android:label="@string/barcode_scanner_title"
             android:theme="@style/Theme.Numo.Fullscreen"
             android:screenOrientation="portrait"
             android:parentActivityName=".feature.items.ItemEntryActivity">
@@ -350,7 +350,7 @@
         
         <activity android:name="com.electricdreams.numo.feature.items.CheckoutScannerActivity"
             android:exported="false"
-            android:label="Scan Items"
+            android:label="@string/checkout_scanner_title"
             android:theme="@style/Theme.Numo.Fullscreen"
             android:screenOrientation="portrait"
             android:parentActivityName=".feature.items.ItemSelectionActivity">

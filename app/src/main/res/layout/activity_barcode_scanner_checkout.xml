@@ -32,7 +32,7 @@
             android:layout_height="44dp"
             android:layout_gravity="start"
             android:background="@drawable/bg_circle_button_dark"
-            android:contentDescription="Close"
+            android:contentDescription="@string/common_close"
             android:src="@drawable/ic_close"
             app:tint="@android:color/white" />
 
@@ -40,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Scan to Add"
+            android:text="@string/checkout_scanner_title"
             android:textColor="@android:color/white"
             android:textSize="17sp"
             android:fontFamily="sans-serif-medium" />
@@ -89,12 +89,12 @@
 
                 <ImageView
                     android:id="@+id/item_image_placeholder"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="center"
-                    android:contentDescription="No image"
-                    android:src="@drawable/ic_image_placeholder"
-                    app:tint="@color/color_icon_tertiary" />
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center"
+            android:contentDescription="@string/item_entry_image_placeholder"
+            android:src="@drawable/ic_image_placeholder"
+            app:tint="@color/color_icon_tertiary" />
             </androidx.cardview.widget.CardView>
 
             <!-- Item Details -->
@@ -190,7 +190,7 @@
             android:layout_height="56dp"
             android:layout_marginHorizontal="24dp"
             android:background="@drawable/bg_close_button_scanner"
-            android:text="Done"
+            android:text="@string/checkout_scanner_done_button"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textSize="17sp"
@@ -205,7 +205,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_marginBottom="120dp"
-        android:text="Scan barcode to add item"
+        android:text="@string/checkout_scanner_instruction_scan_to_add"
         android:textColor="#CCFFFFFF"
         android:textSize="15sp"
         android:fontFamily="sans-serif" />
