@@ -1,5 +1,2 @@
 <resources>
-    <string name="history_toolbar_title">Activité</string>
-    <string name="history_section_payment_history">HISTORIQUE DES PAIEMENTS</string>
-    <string name="history_empty">Aucun historique de paiement</string>
 </resources>
