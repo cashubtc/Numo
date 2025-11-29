@@ -34,6 +34,11 @@ class PinDotsView @JvmOverloads constructor(
     init {
         orientation = HORIZONTAL
         gravity = android.view.Gravity.CENTER
+        // Allow dot bounce animations to render fully without being clipped
+        // by the LinearLayout bounds. This keeps the visual behavior the same
+        // while avoiding the cropped look during scale animations.
+        clipToPadding = false
+        clipChildren = false
         setupDots()
     }
 
@@ -72,13 +77,13 @@ class PinDotsView @JvmOverloads constructor(
     fun addDigit() {
         if (currentLength < maxLength) {
             currentLength++
-            
+
             // Expand dots if needed
             if (currentLength > displayedDotCount && displayedDotCount < maxLength) {
                 displayedDotCount = currentLength
                 setupDots()
             }
-            
+
             updateDotStates()
             animateLastDot()
         }
