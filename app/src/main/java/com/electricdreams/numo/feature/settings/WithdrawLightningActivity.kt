@@ -1,5 +1,6 @@
 package com.electricdreams.numo.feature.settings
 
+import android.content.BroadcastReceiver
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -15,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.LightningAddressManager
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.ui.components.WithdrawAddressCard
@@ -56,6 +58,12 @@ class WithdrawLightningActivity : AppCompatActivity() {
     private lateinit var invoiceCard: WithdrawInvoiceCard
     private lateinit var addressCard: WithdrawAddressCard
     private lateinit var loadingOverlay: FrameLayout
+
+    // Balance refresh receiver
+    private val balanceRefreshReceiver: BroadcastReceiver = BalanceRefreshBroadcast.createReceiver { reason ->
+        Log.d(TAG, "Balance refresh broadcast received: $reason")
+        refreshBalance()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -336,5 +344,53 @@ class WithdrawLightningActivity : AppCompatActivity() {
         // Disable cards during loading
         invoiceCard.setCardEnabled(!loading)
         addressCard.setCardEnabled(!loading)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        BalanceRefreshBroadcast.register(this, balanceRefreshReceiver)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        BalanceRefreshBroadcast.unregister(this, balanceRefreshReceiver)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Refresh balance when returning to this activity
+        refreshBalance()
+    }
+
+    /**
+     * Refreshes the balance from the wallet and updates the UI.
+     * Called when broadcast is received or when activity resumes.
+     */
+    private fun refreshBalance() {
+        lifecycleScope.launch {
+            try {
+                val newBalance = withContext(Dispatchers.IO) {
+                    CashuWalletManager.getBalanceForMint(mintUrl)
+                }
+                
+                withContext(Dispatchers.Main) {
+                    if (newBalance != balance) {
+                        balance = newBalance
+                        val balanceAmount = Amount(balance, Amount.Currency.BTC)
+                        balanceText.text = balanceAmount.toString()
+                        
+                        // Update suggested amount in address card
+                        val suggestedAmount = (balance * (1 - FEE_BUFFER_PERCENT)).toLong()
+                        if (suggestedAmount > 0) {
+                            addressCard.setSuggestedAmount(suggestedAmount)
+                        }
+                        
+                        Log.d(TAG, "Balance updated to: $balance sats")
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error refreshing balance", e)
+            }
+        }
     }
 }
