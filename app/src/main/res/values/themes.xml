@@ -13,8 +13,9 @@
         <!-- Status bar color - matches window background for seamless edge-to-edge -->
         <item name="android:statusBarColor">@color/color_bg_white</item>
         <item name="android:windowLightStatusBar">true</item>
-        <!-- Navigation bar color - matches window background for seamless edge-to-edge -->
-        <item name="android:navigationBarColor">@color/color_bg_white</item>
+        <!-- Navigation bar: transparent so gesture pill truly floats over content/background -->
+        <!-- Content views should handle bottom insets where needed. -->
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightNavigationBar">true</item>
         <!-- Text colors -->
         <item name="android:textColor">@color/color_text_primary</item>
@@ -88,8 +89,8 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsFloating">false</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="bottomSheetStyle">@style/Widget.Numo.BottomSheet</item>
-        <item name="android:navigationBarColor">@color/color_bg_white</item>
+        <!-- Keep bottom sheet nav bar transparent so it floats above sheet/background -->
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
     
     <!-- Bottom Sheet Widget Style -->

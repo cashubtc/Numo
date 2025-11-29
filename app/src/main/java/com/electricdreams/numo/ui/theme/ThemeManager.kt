@@ -31,14 +31,10 @@ class ThemeManager(
         val rootLayout = contentView.getChildAt(0) as? androidx.constraintlayout.widget.ConstraintLayout
         
         val isWhiteTheme = (theme == "white")
-        
-        val backgroundColor = when (theme) {
-            "obsidian" -> android.graphics.Color.parseColor("#0B1215")
-            "bitcoin_orange" -> android.graphics.Color.parseColor("#F7931A")
-            "green" -> android.graphics.Color.parseColor("#00C244")
-            "white" -> android.graphics.Color.parseColor("#FFFFFF")
-            else -> android.graphics.Color.parseColor("#0B1215")
-        }
+
+        // Resolve the primary background color for the current theme so that
+        // both the POS activity root and the window background can share it.
+        val backgroundColor = resolveBackgroundColor(theme)
         
         // Text color: black ONLY for white theme, white for all other themes
         val textColor = if (isWhiteTheme) {
@@ -77,7 +73,11 @@ class ThemeManager(
         
         // Update status bar and navigation bar colors
         activity.window.statusBarColor = backgroundColor
-        activity.window.navigationBarColor = backgroundColor
+
+        // Let the system navigation bar be fully transparent so the gesture pill
+        // floats above whatever content/background we're drawing, instead of
+        // sitting on a solid-colored nav bar.
+        activity.window.navigationBarColor = android.graphics.Color.TRANSPARENT
         
         // Update status bar appearance based on theme
         val windowInsetsController = WindowInsetsControllerCompat(activity.window, activity.window.decorView)
@@ -103,5 +103,26 @@ class ThemeManager(
 
     companion object {
         private const val KEY_DARK_MODE = "darkMode"
+
+        /**
+         * Resolve the background color used by the POS UI based on the saved
+         * theme identifier. This keeps ModernPOSActivity's window background
+         * in sync with the same color used by ThemeManager for the root view.
+         */
+        fun resolveBackgroundColor(activity: AppCompatActivity): Int {
+            val prefs = activity.getSharedPreferences("app_prefs", AppCompatActivity.MODE_PRIVATE)
+            val theme = prefs.getString("app_theme", "green") ?: "green"
+            return resolveBackgroundColor(theme)
+        }
+
+        private fun resolveBackgroundColor(theme: String): Int {
+            return when (theme) {
+                "obsidian" -> android.graphics.Color.parseColor("#0B1215")
+                "bitcoin_orange" -> android.graphics.Color.parseColor("#F7931A")
+                "green" -> android.graphics.Color.parseColor("#00C244")
+                "white" -> android.graphics.Color.parseColor("#FFFFFF")
+                else -> android.graphics.Color.parseColor("#0B1215")
+            }
+        }
     }
 }

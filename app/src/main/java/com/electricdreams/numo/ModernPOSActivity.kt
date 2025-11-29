@@ -89,22 +89,30 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback,
 
     private fun setupWindowSettings() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        
+
+        // Use the same resolved background color as ThemeManager so the
+        // ModernPOS window background matches the active theme selection
+        // (obsidian, green, bitcoin orange, white, etc.). This ensures the
+        // navigation pill always floats above the correct themed background
+        // instead of a hardcoded "green".
+        val bgColor = com.electricdreams.numo.ui.theme.ThemeManager.resolveBackgroundColor(this)
+        window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(bgColor))
+
         window.statusBarColor = android.graphics.Color.TRANSPARENT
         window.navigationBarColor = android.graphics.Color.TRANSPARENT
 
         WindowInsetsControllerCompat(window, window.decorView).apply {
+            // For the dark themes we keep icons light; for white theme the
+            // ThemeManager will already have set light/dark appropriately.
             isAppearanceLightStatusBars = false
             isAppearanceLightNavigationBars = false
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
+            v.setPadding(0, insets.top, 0, 0)
             WindowInsetsCompat.CONSUMED
         }
-
-        window.setBackgroundDrawableResource(R.color.color_primary_green)
     }
 
     private fun setupBitcoinPriceWorker() {

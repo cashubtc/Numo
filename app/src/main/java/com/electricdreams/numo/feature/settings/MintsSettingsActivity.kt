@@ -27,6 +27,7 @@ import com.electricdreams.numo.feature.scanner.QRScannerActivity
 import com.electricdreams.numo.ui.components.AddMintInputCard
 import com.electricdreams.numo.ui.components.MintListItem
 import com.electricdreams.numo.ui.util.DialogHelper
+import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -116,6 +117,9 @@ class MintsSettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mints_settings)
+
+        // Global helper: draw content under system bars so nav pill floats over cards
+        enableEdgeToEdgeWithPill(this, lightNavIcons = true)
 
         MintIconCache.initialize(this)
         mintManager = MintManager.getInstance(this)

@@ -28,6 +28,7 @@ import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintIconCache
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.ui.util.DialogHelper
+import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -111,6 +112,9 @@ class MintDetailsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mint_details)
+
+        // Consistent edge-to-edge so nav pill floats above this detail sheet-style screen
+        enableEdgeToEdgeWithPill(this, lightNavIcons = true)
 
         mintUrl = intent.getStringExtra(EXTRA_MINT_URL) ?: run {
             finish()
