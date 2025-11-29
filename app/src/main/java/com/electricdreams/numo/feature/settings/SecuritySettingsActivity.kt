@@ -154,7 +154,7 @@ class SecuritySettingsActivity : AppCompatActivity() {
             config = DialogHelper.ConfirmationConfig(
                 title = "Remove PIN?",
                 message = "This will disable PIN protection. Anyone with access to this device will be able to access sensitive features like withdrawing funds and viewing your seed phrase.",
-                confirmText = "Remove PIN",
+                confirmText = "Remove",
                 cancelText = "Cancel",
                 isDestructive = true,
                 onConfirm = {
