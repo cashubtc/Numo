@@ -286,7 +286,7 @@
     <string name="nfc_payment_error_card_sw">Card Error: (SW: 0x%04X)</string>
     <string name="nfc_payment_error_generic">Payment failed: %1$s</string>
     <string name="nfc_payment_error_nfc_comm">NFC Communication Error: %1$s</string>
-    <string name="nfc_payment_error_satocash">Satocash Card Error: %1$s (SW: 0x%04X)</string>
+    <string name="nfc_payment_error_satocash">Satocash Card Error: %1$s (SW: 0x%2$04X)</string>
     <string name="nfc_payment_error_unexpected">An unexpected error occurred: %1$s</string>
 
     <!-- Common buttons -->
