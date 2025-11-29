@@ -204,9 +204,9 @@
     <!-- Seed Phrase screen -->
     <string name="seed_phrase_toolbar_back">Atrás</string>
     <string name="seed_phrase_toolbar_title">Frase semilla</string>
-    <string name="seed_phrase_warning_title">¡Mantén esto en secreto!</string>
-    <string name="seed_phrase_warning_body">Cualquiera que tenga estas 12 palabras
+    <string name="seed_phrase_warning_body">Cualquiera que tenga estas 12 palabras puede acceder a tus fondos. Escríbelas y guárdalas en un lugar seguro. Nunca las compartas con nadie.</string>
     <string name="basket_names_dialog_add_button">Añadir nombre</string>
     <string name="basket_archive_detail_view_payment">Ver pago</string>
 
     <string name="basket_names_dialog_edit_button">Guardar cambios</string>
+</resources>
