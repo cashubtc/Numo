@@ -37,7 +37,7 @@
         <activity
             android:name="com.electricdreams.numo.feature.onboarding.OnboardingActivity"
             android:exported="true"
-            android:label="Welcome"
+            android:label="@string/app_name"
             android:theme="@style/Theme.Numo"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden">
             <intent-filter>
