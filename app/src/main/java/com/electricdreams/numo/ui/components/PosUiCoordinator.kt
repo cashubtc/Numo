@@ -161,6 +161,8 @@ class PosUiCoordinator(
     /** Stop services */
     fun stopServices() {
         nfcPaymentProcessor.stopHceService()
+        // Prevent leaking the activity reference via pending callbacks
+        mainHandler.removeCallbacksAndMessages(null)
     }
 
     /** Get requested amount */

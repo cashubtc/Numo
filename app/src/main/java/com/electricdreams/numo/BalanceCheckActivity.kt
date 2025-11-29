@@ -108,6 +108,12 @@ class BalanceCheckActivity : AppCompatActivity() {
         Log.d(TAG, "✅ NFC foreground dispatch disabled")
     }
 
+    override fun onDestroy() {
+        // Prevent leaking the activity through pending callbacks
+        mainHandler.removeCallbacksAndMessages(null)
+        super.onDestroy()
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         Log.d(TAG, "=== NFC onNewIntent triggered ===")
