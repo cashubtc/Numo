@@ -10,6 +10,7 @@ import com.electricdreams.numo.core.util.CurrencyManager
 
 /**
  * Handles basket UI updates including total display and checkout button text.
+ * Works with the unified basket card layout that animates height on expand/collapse.
  */
 class BasketUIHandler(
     private val basketManager: BasketManager,
@@ -19,6 +20,16 @@ class BasketUIHandler(
     private val animationHandler: SelectionAnimationHandler,
     private val onBasketUpdated: () -> Unit
 ) {
+    
+    // Item count view in header (set via setItemCountView)
+    private var itemCountView: TextView? = null
+    
+    /**
+     * Set the item count view in the basket header.
+     */
+    fun setItemCountView(view: TextView) {
+        itemCountView = view
+    }
 
     /**
      * Refresh basket UI based on current basket state.
@@ -55,6 +66,7 @@ class BasketUIHandler(
     /**
      * Update the basket total display text.
      * Handles mixed fiat and sats pricing.
+     * Updates header total and item count.
      */
     fun updateBasketTotal() {
         val itemCount = basketManager.getTotalItemCount()
@@ -78,36 +90,33 @@ class BasketUIHandler(
             "0.00"
         }
 
+        // Update the header total display
         basketTotalView.text = formattedTotal
+        
+        // Update item count in header
+        updateItemCount(itemCount)
+    }
+    
+    /**
+     * Update the item count text in the basket header.
+     */
+    private fun updateItemCount(count: Int) {
+        itemCountView?.let { view ->
+            val context = view.context
+            view.text = if (count == 1) {
+                context.getString(R.string.item_selection_basket_item_count, count)
+            } else {
+                context.getString(R.string.item_selection_basket_items_count, count)
+            }
+        }
     }
 
     /**
-     * Update the checkout button text with current totals.
+     * Update the checkout button text.
+     * Total is already visible in the basket, so button just says "Charge".
      */
     fun updateCheckoutButton() {
-        val context = checkoutButton.context
-        val fiatTotal = basketManager.getTotalPrice()
-        val satsTotal = basketManager.getTotalSatsDirectPrice()
-        val currencyCode = currencyManager.getCurrentCurrency()
-        val currency = Amount.Currency.fromCode(currencyCode)
-
-        val buttonText = when {
-            fiatTotal > 0 && satsTotal > 0 -> {
-                val fiatAmount = Amount.fromMajorUnits(fiatTotal, currency)
-                val satsAmount = Amount(satsTotal, Amount.Currency.BTC)
-                context.getString(R.string.basket_charge_fiat_and_sats, fiatAmount.toString(), satsAmount.toString())
-            }
-            satsTotal > 0 -> {
-                val satsAmount = Amount(satsTotal, Amount.Currency.BTC)
-                context.getString(R.string.basket_charge_sats_only, satsAmount.toString())
-            }
-            else -> {
-                val fiatAmount = Amount.fromMajorUnits(fiatTotal, currency)
-                context.getString(R.string.basket_charge_fiat_only, fiatAmount.toString())
-            }
-        }
-
-        checkoutButton.text = buttonText
+        checkoutButton.text = checkoutButton.context.getString(R.string.item_selection_charge_button)
     }
 
     /**

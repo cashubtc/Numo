@@ -531,7 +531,105 @@
     <string name="item_selection_basket_title">Basket</string>
     <string name="item_selection_basket_clear">Clear</string>
     <string name="item_selection_basket_total_label">Total</string>
-    <string name="item_selection_charge_button">Charge %1$s</string>
-    <string name="item_selection_charge_button_default">Charge $0.00</string>
+    <string name="item_selection_basket_expand">Expand basket</string>
+    <string name="item_selection_basket_collapse">Collapse basket</string>
+    <string name="item_selection_basket_item_count">%1$d item</string>
+    <string name="item_selection_basket_items_count">%1$d items</string>
+    <string name="item_selection_charge_button">Charge</string>
+    <string name="item_selection_charge_button_default">Charge</string>
+    <string name="item_selection_save_button">Save</string>
+    <string name="item_selection_saved_baskets_button">Saved</string>
+    <string name="item_selection_save_basket">Save Basket</string>
+    <string name="item_selection_save_basket_hint">Enter a name (optional)</string>
+
+    <!-- Save Basket Dialog -->
+    <string name="dialog_save_basket_title">Save Basket</string>
+    <string name="dialog_save_basket_subtitle">Give your basket a name to find it easily later.</string>
+    <string name="dialog_save_basket_hint">Table 5, John order, etc.</string>
+    <string name="dialog_save_basket_helper">Leave empty to use default name</string>
+    <string name="dialog_save_basket_save">Save Basket</string>
+
+    <!-- Rename Basket Dialog -->
+    <string name="dialog_rename_basket_title">Rename Basket</string>
+    <string name="dialog_rename_basket_subtitle">Update the name for this basket.</string>
+    <string name="dialog_rename_basket_hint">Enter new name</string>
+    <string name="dialog_rename_basket_save">Save Changes</string>
+    <string name="item_selection_editing_basket">Editing: %1$s</string>
+
+    <!-- Saved Baskets -->
+    <string name="saved_baskets_back">Back</string>
+    <string name="saved_baskets_title">Saved Baskets</string>
+    <string name="saved_baskets_empty_icon">No saved baskets</string>
+    <string name="saved_baskets_empty_title">No saved baskets</string>
+    <string name="saved_baskets_empty_subtitle">Save a basket to keep it open for later.\nPerfect for tabs or restaurant tables.</string>
+    <string name="saved_baskets_meta_format">%1$s • %2$s</string>
+    <string name="saved_baskets_action_rename">Rename</string>
+    <string name="saved_baskets_action_delete">Delete</string>
+    <string name="saved_baskets_rename_title">Rename Basket</string>
+    <string name="saved_baskets_rename_hint">Enter basket name</string>
+    <string name="saved_baskets_delete_title">Delete Basket</string>
+    <string name="saved_baskets_delete_message">Delete \"%1$s\"? This cannot be undone.</string>
+
+    <!-- Basket Archive -->
+    <string name="basket_archive_back">Back</string>
+    <string name="basket_archive_title">Order History</string>
+    <string name="basket_archive_empty_icon">No archived orders</string>
+    <string name="basket_archive_empty_title">No completed orders</string>
+    <string name="basket_archive_empty_subtitle">Completed orders will appear here.\nPerfect for tracking sales history.</string>
+    <string name="basket_archive_paid_badge">PAID</string>
+    <string name="basket_archive_view_payment">View Payment</string>
+    <string name="basket_archive_delete">Delete</string>
+    <string name="basket_archive_delete_title">Delete Order</string>
+    <string name="basket_archive_delete_message">Delete \"%1$s\"? This cannot be undone.</string>
+    <string name="basket_archive_total_label">Total</string>
+    <string name="basket_archive_detail_title">Order Details</string>
+    <string name="saved_baskets_view_archive">Archive</string>
+    <string name="basket_archive_detail_view_payment">View Payment</string>
+
+
+    <!-- Common -->
+    <string name="common_save">Save</string>
+    <string name="common_delete">Delete</string>
+
+    <!-- Basket Names Settings -->
+    <string name="basket_names_settings_title">Basket Names</string>
+    <string name="basket_names_settings_description">Create preset names for quick basket saving.\nPerfect for restaurant tables or customer orders.</string>
+    <string name="basket_names_settings_presets_header">PRESET NAMES</string>
+    <string name="basket_names_settings_empty_title">No preset names</string>
+    <string name="basket_names_settings_empty_subtitle">Add names for quick basket saving</string>
+    <string name="basket_names_settings_add_name">Add Name</string>
+    <string name="basket_names_settings_examples">Examples: Table 1, Table 2, VIP, Takeout, John\'s Order</string>
+    <string name="basket_names_settings_clear_all">Clear All Names</string>
+
+    <!-- Basket Names Dialogs -->
+    <string name="basket_names_dialog_add_title">Add Preset Name</string>
+    <string name="basket_names_dialog_add_subtitle">Create a quick-select name for baskets</string>
+    <string name="basket_names_dialog_add_hint">e.g. Table 1</string>
+    <string name="basket_names_dialog_add_save">Add Name</string>
+
+    <string name="basket_names_dialog_edit_title">Edit Name</string>
+    <string name="basket_names_dialog_edit_subtitle">Update the preset name</string>
+    <string name="basket_names_dialog_edit_hint">Enter name</string>
+    <string name="basket_names_dialog_edit_save">Save Changes</string>
+
+    <string name="basket_names_dialog_add_button">Add Name</string>
+    <string name="basket_names_dialog_edit_button">Save Changes</string>
+
+    <string name="basket_names_dialog_delete_title">Delete Name</string>
+    <string name="basket_names_dialog_delete_message">Remove \"%1$s\" from presets?</string>
+
+    <string name="basket_names_dialog_clear_all_title">Clear All Names</string>
+    <string name="basket_names_dialog_clear_all_message">Remove all preset names? This cannot be undone.</string>
+    <string name="basket_names_dialog_clear_all_confirm">Clear All</string>
+
+    <!-- Basket Names Errors -->
+    <string name="basket_names_error_empty">Please enter a name</string>
+    <string name="basket_names_error_duplicate">This name already exists</string>
+
+    <!-- Plurals -->
+    <plurals name="saved_baskets_item_count">
+        <item quantity="one">%1$d item</item>
+        <item quantity="other">%1$d items</item>
+    </plurals>
 
 </resources>

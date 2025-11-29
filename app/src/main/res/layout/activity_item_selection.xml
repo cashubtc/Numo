@@ -8,266 +8,294 @@
     android:background="@color/color_bg_white"
     android:fitsSystemWindows="true">
 
-    <!-- Main Scrollable Content -->
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/main_scroll_view"
+    <!-- Main Content: fixed top bar + scrollable items -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true"
-        android:clipToPadding="false">
+        android:orientation="vertical">
 
+        <!-- Top Bar with Search (fixed at top) -->
         <LinearLayout
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:background="@color/color_bg_white"
+            android:paddingTop="8dp">
 
-            <!-- Top Bar with Search (Fixed at top visually but scrolls) -->
-            <LinearLayout
-                android:id="@+id/top_bar"
+            <!-- Header Row -->
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@color/color_bg_white"
-                android:paddingTop="8dp">
+                android:layout_height="48dp"
+                android:paddingHorizontal="8dp">
 
-                <!-- Header Row -->
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:paddingHorizontal="8dp">
-
-                    <ImageButton
-                        android:id="@+id/back_button"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="@string/item_selection_toolbar_back"
-                        android:padding="10dp"
-                        android:src="@drawable/ic_chevron_back"
-                        app:tint="@color/color_text_primary"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/item_selection_toolbar_title"
-                        android:textColor="@color/color_text_primary"
-                        android:textSize="17sp"
-                        android:fontFamily="sans-serif-medium"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-                <!-- Search Bar with Barcode Scanner / Clear Button -->
-                <LinearLayout
-                    android:id="@+id/search_bar_container"
-                    android:layout_width="match_parent"
+                <ImageButton
+                    android:id="@+id/back_button"
+                    android:layout_width="44dp"
                     android:layout_height="44dp"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginTop="8dp"
-                    android:background="@drawable/bg_search_field"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="4dp">
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/item_selection_toolbar_back"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_chevron_back"
+                    app:tint="@color/color_text_primary"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                    <ImageView
-                        android:id="@+id/search_icon"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:contentDescription="@string/item_selection_search_icon_description"
-                        android:src="@drawable/ic_search"
-                        app:tint="@color/color_text_tertiary" />
-
-                    <!-- Category Badge (shown when category selected) -->
-                    <TextView
-                        android:id="@+id/category_badge"
-                        android:layout_width="wrap_content"
-                        android:layout_height="24dp"
-                        android:layout_marginStart="8dp"
-                        android:background="@drawable/bg_category_badge"
-                        android:gravity="center"
-                        android:paddingHorizontal="8dp"
-                        android:textColor="@color/color_bg_white"
-                        android:textSize="13sp"
-                        android:fontFamily="sans-serif-medium"
-                        android:maxLines="1"
-                        android:ellipsize="end"
-                        android:visibility="gone"
-                        tools:text="Electronics"
-                        tools:visibility="visible" />
-
-                    <EditText
-                        android:id="@+id/search_input"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:layout_marginStart="10dp"
-                        android:background="@null"
-                        android:hint="@string/item_selection_search_hint"
-                        android:imeOptions="actionSearch"
-                        android:inputType="text"
-                        android:maxLines="1"
-                        android:textColor="@color/color_text_primary"
-                        android:textColorHint="@color/color_text_tertiary"
-                        android:textSize="16sp" />
-
-                    <!-- Scan Button (default) -->
-                    <ImageButton
-                        android:id="@+id/scan_button"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="@string/item_selection_scan_barcode"
-                        android:padding="8dp"
-                        android:src="@drawable/ic_barcode_scan"
-                        app:tint="@color/color_text_secondary" />
-
-                    <!-- Clear Filters Button (shown when filters active) -->
-                    <ImageButton
-                        android:id="@+id/clear_filters_button"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="@string/item_selection_clear_filters"
-                        android:padding="10dp"
-                        android:src="@drawable/ic_close_circle"
-                        app:tint="@color/color_text_secondary"
-                        android:visibility="gone" />
-
-                </LinearLayout>
-
-                <!-- Category Chips (shown when search focused and categories exist) -->
-                <com.google.android.flexbox.FlexboxLayout
-                    android:id="@+id/category_chips_container"
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/toolbar_title"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="4dp"
-                    android:paddingHorizontal="16dp"
+                    android:text="@string/item_selection_toolbar_title"
+                    android:textColor="@color/color_text_primary"
+                    android:textSize="17sp"
+                    android:fontFamily="sans-serif-medium"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <!-- Saved Baskets Button (top right) -->
+                <TextView
+                    android:id="@+id/saved_baskets_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:gravity="center"
+                    android:paddingHorizontal="12dp"
+                    android:text="@string/item_selection_saved_baskets_button"
+                    android:textColor="@color/color_accent_blue"
+                    android:textSize="15sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <!-- Search Bar with Barcode Scanner / Clear Button -->
+            <LinearLayout
+                android:id="@+id/search_bar_container"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_search_field"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="4dp">
+
+                <ImageView
+                    android:id="@+id/search_icon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:contentDescription="@string/item_selection_search_icon_description"
+                    android:src="@drawable/ic_search"
+                    app:tint="@color/color_text_tertiary" />
+
+                <!-- Category Badge (shown when category selected) -->
+                <TextView
+                    android:id="@+id/category_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_category_badge"
+                    android:gravity="center"
+                    android:paddingHorizontal="8dp"
+                    android:textColor="@color/color_bg_white"
+                    android:textSize="13sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end"
                     android:visibility="gone"
-                    app:flexWrap="wrap"
-                    app:alignItems="flex_start"
-                    app:justifyContent="flex_start"
+                    tools:text="Electronics"
                     tools:visibility="visible" />
 
-                <!-- Spacer below search bar -->
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="8dp" />
+                <EditText
+                    android:id="@+id/search_input"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:background="@null"
+                    android:hint="@string/item_selection_search_hint"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:textColor="@color/color_text_primary"
+                    android:textColorHint="@color/color_text_tertiary"
+                    android:textSize="16sp" />
+
+                <!-- Scan Button (default) -->
+                <ImageButton
+                    android:id="@+id/scan_button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/item_selection_scan_barcode"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_barcode_scan"
+                    app:tint="@color/color_text_secondary" />
+
+                <!-- Clear Filters Button (shown when filters active) -->
+                <ImageButton
+                    android:id="@+id/clear_filters_button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/item_selection_clear_filters"
+                    android:padding="10dp"
+                    android:src="@drawable/ic_close_circle"
+                    app:tint="@color/color_text_secondary"
+                    android:visibility="gone" />
 
             </LinearLayout>
 
-            <!-- Items List Section -->
-            <FrameLayout
-                android:id="@+id/items_container"
+            <!-- Category Chips (shown when search focused and categories exist) -->
+            <com.google.android.flexbox.FlexboxLayout
+                android:id="@+id/category_chips_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:minHeight="300dp">
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="4dp"
+                android:paddingHorizontal="16dp"
+                android:visibility="gone"
+                app:flexWrap="wrap"
+                app:alignItems="flex_start"
+                app:justifyContent="flex_start"
+                tools:visibility="visible" />
 
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/items_recycler_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:clipToPadding="false"
-                    android:paddingTop="8dp"
-                    android:nestedScrollingEnabled="false"
-                    tools:listitem="@layout/item_product_selection" />
-
-                <!-- Empty State -->
-                <LinearLayout
-                    android:id="@+id/empty_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="32dp"
-                    android:visibility="gone">
-
-                    <ImageView
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:src="@drawable/ic_shopping_bag"
-                        app:tint="@color/color_icon_tertiary"
-                        android:contentDescription="@string/item_selection_empty_icon_description" />
-
-                    <TextView
-                        android:id="@+id/empty_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/item_selection_empty_title"
-                        android:textColor="@color/color_text_secondary"
-                        android:textSize="17sp"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:id="@+id/empty_subtitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/item_selection_empty_subtitle"
-                        android:textColor="@color/color_text_tertiary"
-                        android:textSize="15sp"
-                        android:gravity="center" />
-
-                </LinearLayout>
-
-                <!-- No Search Results -->
-                <LinearLayout
-                    android:id="@+id/no_results_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="32dp"
-                    android:visibility="gone">
-
-                    <ImageView
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        android:src="@drawable/ic_search"
-                        app:tint="@color/color_icon_tertiary"
-                        android:contentDescription="@string/item_selection_no_results_icon_description" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
-                        android:text="@string/item_selection_no_results_title"
-                        android:textColor="@color/color_text_secondary"
-                        android:textSize="17sp"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:id="@+id/no_results_subtitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/item_selection_no_results_subtitle"
-                        android:textColor="@color/color_text_tertiary"
-                        android:textSize="15sp" />
-
-                </LinearLayout>
-
-            </FrameLayout>
-
-            <!-- Bottom spacing so content doesn't sit under basket/checkout -->
+            <!-- Spacer below search bar -->
             <View
-                android:id="@+id/bottom_spacer"
                 android:layout_width="match_parent"
-                android:layout_height="140dp" />
+                android:layout_height="8dp" />
 
         </LinearLayout>
 
-    </androidx.core.widget.NestedScrollView>
+        <!-- Scrollable items and spacer -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/main_scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:clipToPadding="false">
 
-    <!-- Bottom Basket + Checkout Container (fixed to bottom, grows upward) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Items List Section -->
+                <FrameLayout
+                    android:id="@+id/items_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="300dp">
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/items_recycler_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clipToPadding="false"
+                        android:paddingTop="8dp"
+                        android:nestedScrollingEnabled="false"
+                        tools:listitem="@layout/item_product_selection" />
+
+                    <!-- Empty State -->
+                    <LinearLayout
+                        android:id="@+id/empty_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="32dp"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:src="@drawable/ic_shopping_bag"
+                            app:tint="@color/color_icon_tertiary"
+                            android:contentDescription="@string/item_selection_empty_icon_description" />
+
+                        <TextView
+                            android:id="@+id/empty_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:text="@string/item_selection_empty_title"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="17sp"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <TextView
+                            android:id="@+id/empty_subtitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/item_selection_empty_subtitle"
+                            android:textColor="@color/color_text_tertiary"
+                            android:textSize="15sp"
+                            android:gravity="center" />
+
+                    </LinearLayout>
+
+                    <!-- No Search Results -->
+                    <LinearLayout
+                        android:id="@+id/no_results_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="32dp"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:layout_width="64dp"
+                            android:layout_height="64dp"
+                            android:src="@drawable/ic_search"
+                            app:tint="@color/color_icon_tertiary"
+                            android:contentDescription="@string/item_selection_no_results_icon_description" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:text="@string/item_selection_no_results_title"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="17sp"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <TextView
+                            android:id="@+id/no_results_subtitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/item_selection_no_results_subtitle"
+                            android:textColor="@color/color_text_tertiary"
+                            android:textSize="15sp" />
+
+                    </LinearLayout>
+
+                </FrameLayout>
+
+                <!-- Bottom spacing so content doesn't sit under basket/checkout -->
+                <View
+                    android:id="@+id/bottom_spacer"
+                    android:layout_width="match_parent"
+                    android:layout_height="140dp" />
+
+            </LinearLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+    </LinearLayout>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- BOTTOM BASKET + CHECKOUT: Apple-style unified card with smooth animation -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <LinearLayout
         android:id="@+id/bottom_basket_checkout_container"
         android:layout_width="match_parent"
@@ -277,134 +305,228 @@
         android:paddingHorizontal="16dp"
         android:paddingBottom="24dp"
         android:paddingTop="8dp"
-        android:clipToPadding="false">
+        android:clipToPadding="false"
+        android:clipChildren="false">
 
-        <!-- Basket Section (bottom, above charge button) -->
-        <LinearLayout
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- UNIFIED BASKET CARD: Single container that animates height      -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <androidx.cardview.widget.CardView
             android:id="@+id/basket_section"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/bg_basket_section"
+            app:cardBackgroundColor="@color/color_bg_elevated"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="4dp"
             android:visibility="gone"
+            android:clipChildren="true"
+            android:clipToPadding="true"
             tools:visibility="visible">
 
-            <!-- Basket Header -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingTop="12dp"
-                android:paddingBottom="8dp">
+                android:orientation="vertical"
+                android:clipChildren="true"
+                android:clipToPadding="true">
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_shopping_bag"
-                    app:tint="@color/color_text_secondary"
-                    android:contentDescription="@string/item_selection_basket_icon_description" />
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <!-- HEADER ROW: Always visible, tappable to expand/collapse -->
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/basket_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:paddingHorizontal="16dp"
+                    android:background="?attr/selectableItemBackground">
 
-                <TextView
-                    android:id="@+id/basket_title"
-                    android:layout_width="0dp"
+                    <!-- Shopping bag icon -->
+                    <ImageView
+                        android:id="@+id/basket_icon"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_shopping_bag"
+                        app:tint="@color/color_text_primary"
+                        android:contentDescription="@string/item_selection_basket_icon_description"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <!-- Item count text -->
+                    <TextView
+                        android:id="@+id/basket_item_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:textColor="@color/color_text_secondary"
+                        android:textSize="15sp"
+                        android:fontFamily="sans-serif"
+                        tools:text="3 items"
+                        app:layout_constraintStart_toEndOf="@id/basket_icon"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <!-- Total amount -->
+                    <TextView
+                        android:id="@+id/basket_total"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:textColor="@color/color_text_primary"
+                        android:textSize="18sp"
+                        android:fontFamily="sans-serif-medium"
+                        tools:text="$74.97"
+                        app:layout_constraintEnd_toStartOf="@id/basket_chevron"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                    <!-- Chevron (rotates on expand/collapse) -->
+                    <ImageView
+                        android:id="@+id/basket_chevron"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_up"
+                        app:tint="@color/color_text_tertiary"
+                        android:contentDescription="@string/item_selection_basket_expand"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintBottom_toBottomOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <!-- EXPANDABLE CONTENT: Items list with clear button        -->
+                <!-- This entire section animates height from 0 to measured  -->
+                <!-- ═══════════════════════════════════════════════════════ -->
+                <LinearLayout
+                    android:id="@+id/basket_expandable_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:text="@string/item_selection_basket_title"
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="13sp"
-                    android:fontFamily="sans-serif-medium"
-                    android:textAllCaps="true"
-                    android:letterSpacing="0.05" />
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    tools:visibility="visible">
 
-                <TextView
-                    android:id="@+id/clear_basket_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="@string/item_selection_basket_clear"
-                    android:textColor="@color/color_warning_red"
-                    android:textSize="14sp"
-                    android:fontFamily="sans-serif-medium"
-                    android:background="?attr/selectableItemBackgroundBorderless" />
+                    <!-- Divider below header -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:background="@color/color_divider" />
+
+                    <!-- Clear button row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="16dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/item_selection_basket_title"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="13sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:textAllCaps="true"
+                            android:letterSpacing="0.05" />
+
+                        <TextView
+                            android:id="@+id/clear_basket_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="4dp"
+                            android:text="@string/item_selection_basket_clear"
+                            android:textColor="@color/color_warning_red"
+                            android:textSize="14sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:background="?attr/selectableItemBackgroundBorderless" />
+
+                    </LinearLayout>
+
+                    <!-- Items list (no max height - expands fully) -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/basket_recycler_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:clipToPadding="false"
+                        android:paddingVertical="4dp"
+                        android:paddingHorizontal="8dp"
+                        android:nestedScrollingEnabled="false"
+                        android:overScrollMode="never"
+                        tools:listitem="@layout/item_basket_compact"
+                        tools:itemCount="3" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
-            <!-- Basket Items RecyclerView -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/basket_recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:nestedScrollingEnabled="false"
-                tools:listitem="@layout/item_basket_compact"
-                tools:itemCount="3" />
+        </androidx.cardview.widget.CardView>
 
-            <!-- Basket Divider -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="16dp"
-                android:background="@color/color_divider" />
-
-            <!-- Basket Total -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="14dp">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/item_selection_basket_total_label"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="17sp"
-                    android:fontFamily="sans-serif-medium" />
-
-                <TextView
-                    android:id="@+id/basket_total"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="20sp"
-                    android:fontFamily="sans-serif-medium"
-                    tools:text="$74.97" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- Checkout Button directly at bottom -->
-        <androidx.cardview.widget.CardView
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <!-- BUTTONS ROW: Save + Charge (Save only shown when editing)       -->
+        <!-- ═══════════════════════════════════════════════════════════════ -->
+        <LinearLayout
             android:id="@+id/checkout_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            app:cardBackgroundColor="@android:color/transparent"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
+            android:orientation="horizontal"
             android:visibility="gone"
             tools:visibility="visible">
 
-            <Button
-                android:id="@+id/checkout_button"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:background="@drawable/bg_checkout_button"
-                android:text="@string/item_selection_charge_button_default"
-                android:textAllCaps="false"
-                android:textColor="@color/color_bg_white"
-                android:textSize="18sp"
-                android:fontFamily="sans-serif-medium"
-                tools:text="Charge $74.97" />
+            <!-- Save Button (only visible when editing existing basket) -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/save_button_container"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                android:visibility="gone"
+                tools:visibility="visible">
 
-        </androidx.cardview.widget.CardView>
+                <Button
+                    android:id="@+id/save_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="@drawable/bg_save_button"
+                    android:text="@string/item_selection_save_button"
+                    android:textAllCaps="false"
+                    android:textColor="@color/color_bg_white"
+                    android:textSize="18sp"
+                    android:fontFamily="sans-serif-medium" />
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- Charge Button -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/charge_button_container"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp">
+
+                <Button
+                    android:id="@+id/checkout_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="@drawable/bg_checkout_button"
+                    android:text="@string/item_selection_charge_button_default"
+                    android:textAllCaps="false"
+                    android:textColor="@color/color_bg_white"
+                    android:textSize="18sp"
+                    android:fontFamily="sans-serif-medium"
+                    tools:text="Charge" />
+
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
 
     </LinearLayout>
 

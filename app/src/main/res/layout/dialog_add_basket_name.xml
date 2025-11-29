@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/bg_dialog_rounded">
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- HEADER ROW - Close button + Title                                        -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:paddingHorizontal="4dp">
+
+        <!-- Close X Button (top-left) -->
+        <ImageButton
+            android:id="@+id/close_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/common_close"
+            android:padding="12dp"
+            android:src="@drawable/ic_close"
+            app:tint="@color/color_text_secondary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <!-- Title (centered) -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/basket_names_dialog_add_title"
+            android:textSize="17sp"
+            android:textColor="@color/color_text_primary"
+            android:fontFamily="sans-serif-medium"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/color_divider" />
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- CONTENT SECTION                                                          -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Subtitle / Description -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/basket_names_dialog_add_subtitle"
+            android:textSize="15sp"
+            android:textColor="@color/color_text_secondary"
+            android:lineSpacingMultiplier="1.3" />
+
+        <!-- Input Field -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical"
+            android:background="@drawable/bg_input_field_rounded"
+            android:padding="4dp">
+
+            <EditText
+                android:id="@+id/name_input"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:background="@null"
+                android:paddingHorizontal="16dp"
+                android:hint="@string/basket_names_dialog_add_hint"
+                android:textSize="16sp"
+                android:textColor="@color/color_text_primary"
+                android:textColorHint="@color/color_text_tertiary"
+                android:fontFamily="sans-serif"
+                android:inputType="textCapWords"
+                android:maxLines="1"
+                android:imeOptions="actionDone"
+                tools:text="Table 1" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- ACTION BUTTON                                                            -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <Button
+        android:id="@+id/save_button"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/bg_button_primary_black"
+        android:backgroundTint="@android:color/transparent"
+        android:text="@string/basket_names_dialog_add_button"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:textAllCaps="false"
+        android:fontFamily="sans-serif-medium"
+        android:stateListAnimator="@null" />
+
+</LinearLayout>

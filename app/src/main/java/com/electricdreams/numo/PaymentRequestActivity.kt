@@ -17,6 +17,7 @@ import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.Amount.Currency
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
@@ -95,6 +96,9 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     // Checkout basket data (for item-based checkouts)
     private var checkoutBasketJson: String? = null
+    
+    // Saved basket ID (for basket-payment association)
+    private var savedBasketId: String? = null
 
     private val uiScope = CoroutineScope(Dispatchers.Main)
 
@@ -183,6 +187,9 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Get checkout basket data (for item-based checkouts)
         checkoutBasketJson = intent.getStringExtra(EXTRA_CHECKOUT_BASKET_JSON)
+        
+        // Get saved basket ID (for basket-payment association)
+        savedBasketId = intent.getStringExtra(EXTRA_SAVED_BASKET_ID)
 
         // Display amount (without "Pay" prefix since it's in the label above)
         largeAmountDisplay.text = formattedAmountString
@@ -287,6 +294,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             paymentRequest = null, // Will be set after payment request is created
             formattedAmount = formattedAmountString,
             checkoutBasketJson = checkoutBasketJson,
+            basketId = savedBasketId,
             tipAmountSats = tipAmountSats,
             tipPercentage = tipPercentage,
         )
@@ -765,10 +773,32 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     /**
+     * Mark the saved basket as paid and move it to archive.
+     * Called when payment is successfully completed.
+     */
+    private fun markBasketAsPaid() {
+        val basketId = savedBasketId ?: return
+        val paymentId = pendingPaymentId ?: return
+        
+        try {
+            val savedBasketManager = SavedBasketManager.getInstance(this)
+            val archivedBasket = savedBasketManager.markBasketAsPaid(basketId, paymentId)
+            if (archivedBasket != null) {
+                Log.d(TAG, "📦 Basket archived: ${archivedBasket.id} with payment $paymentId")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error archiving basket: ${e.message}", e)
+        }
+    }
+
+    /**
      * Unified success handler - plays feedback and shows success screen.
      * This is the single source of truth for payment success handling.
      */
     private fun showPaymentSuccess(token: String, amount: Long) {
+        // Archive the basket now that payment is complete
+        markBasketAsPaid()
+        
         // Play success sound
         try {
             val mediaPlayer = android.media.MediaPlayer.create(this, R.raw.success_sound)
@@ -811,5 +841,8 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Extra for checkout basket data
         const val EXTRA_CHECKOUT_BASKET_JSON = "checkout_basket_json"
+        
+        // Extra for saved basket ID
+        const val EXTRA_SAVED_BASKET_ID = "saved_basket_id"
     }
 }

@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_bg_white">
+
+    <!-- Top Bar -->
+    <LinearLayout
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="8dp"
+        android:elevation="1dp"
+        android:background="@color/color_bg_white"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/back_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_chevron_back"
+            android:contentDescription="@string/common_back"
+            app:tint="@color/color_text_primary" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/basket_names_settings_title"
+            android:textSize="20sp"
+            android:textColor="@color/color_text_primary"
+            android:fontFamily="sans-serif-medium"
+            android:textAlignment="center" />
+
+        <!-- Spacer to balance layout -->
+        <View
+            android:layout_width="48dp"
+            android:layout_height="48dp" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/top_bar"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="32dp">
+
+            <!-- Hero Section -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="24dp"
+                android:paddingBottom="20dp">
+
+                <!-- Icon -->
+                <FrameLayout
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:background="@drawable/bg_circle_accent_light">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_shopping_bag"
+                        app:tint="@color/color_accent_blue" />
+
+                </FrameLayout>
+
+                <!-- Description -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/basket_names_settings_description"
+                    android:textSize="15sp"
+                    android:textColor="@color/color_text_secondary"
+                    android:gravity="center"
+                    android:lineSpacingMultiplier="1.3" />
+
+            </LinearLayout>
+
+            <!-- Names List Container -->
+            <LinearLayout
+                android:id="@+id/names_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Section Header -->
+                <TextView
+                    android:id="@+id/names_header"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="24dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:text="@string/basket_names_settings_presets_header"
+                    android:textSize="13sp"
+                    android:textColor="@color/color_text_secondary"
+                    android:fontFamily="sans-serif-medium"
+                    android:textAllCaps="true"
+                    android:letterSpacing="0.05"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <!-- Card Container for Names -->
+                <LinearLayout
+                    android:id="@+id/names_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_rounded_card_large"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <!-- Names List -->
+                    <LinearLayout
+                        android:id="@+id/names_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+
+                </LinearLayout>
+
+                <!-- Empty State -->
+                <LinearLayout
+                    android:id="@+id/empty_state"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:layout_marginHorizontal="16dp"
+                    android:paddingVertical="32dp"
+                    android:background="@drawable/bg_rounded_card_large"
+                    tools:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_add_circle"
+                        app:tint="@color/color_icon_tertiary" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/basket_names_settings_empty_title"
+                        android:textSize="16sp"
+                        android:textColor="@color/color_text_secondary"
+                        android:fontFamily="sans-serif-medium" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/basket_names_settings_empty_subtitle"
+                        android:textSize="14sp"
+                        android:textColor="@color/color_text_tertiary"
+                        android:gravity="center" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Add Name Button -->
+            <LinearLayout
+                android:id="@+id/add_name_button"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginHorizontal="16dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:background="@drawable/bg_rounded_card_large"
+                android:clickable="true"
+                android:focusable="true">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="16dp"
+                    android:src="@drawable/ic_add"
+                    app:tint="@color/color_accent_blue" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/basket_names_settings_add_name"
+                    android:textSize="16sp"
+                    android:textColor="@color/color_accent_blue"
+                    android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+
+            <!-- Example suggestions -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:paddingHorizontal="24dp"
+                android:text="@string/basket_names_settings_examples"
+                android:textSize="13sp"
+                android:textColor="@color/color_text_tertiary"
+                android:lineSpacingMultiplier="1.4" />
+
+            <!-- Clear All Button (only shown when items exist) -->
+            <LinearLayout
+                android:id="@+id/clear_all_button"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="32dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/basket_names_settings_clear_all"
+                    android:textSize="16sp"
+                    android:textColor="@color/color_warning_red" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

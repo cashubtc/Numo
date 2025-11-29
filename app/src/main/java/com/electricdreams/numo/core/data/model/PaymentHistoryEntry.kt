@@ -75,9 +75,13 @@ data class PaymentHistoryEntry(
     @SerializedName("nostrSecretHex")
     val nostrSecretHex: String? = null,
 
-    /** Serialized checkout basket JSON (if payment originated from item checkout) */
+    /** Serialized checkout basket JSON (if payment originated from item checkout) - DEPRECATED, use basketId */
     @SerializedName("checkoutBasketJson")
     val checkoutBasketJson: String? = null,
+    
+    /** ID of the saved basket associated with this payment */
+    @SerializedName("basketId")
+    val basketId: String? = null,
 
     /** Tip amount in satoshis (separate from main amount for accounting) */
     @SerializedName("tipAmountSats")
@@ -115,6 +119,11 @@ data class PaymentHistoryEntry(
      * Check if this payment has associated checkout basket data.
      */
     fun hasCheckoutBasket(): Boolean = !checkoutBasketJson.isNullOrEmpty()
+    
+    /**
+     * Check if this payment has an associated saved basket.
+     */
+    fun hasSavedBasket(): Boolean = !basketId.isNullOrEmpty()
 
     /** Public, non-null view of the token unit. */
     fun getUnit(): String = rawUnit ?: "sat"
@@ -203,6 +212,7 @@ data class PaymentHistoryEntry(
             paymentRequest: String?,
             formattedAmount: String?,
             checkoutBasketJson: String? = null,
+            basketId: String? = null,
             tipAmountSats: Long = 0,
             tipPercentage: Int = 0,
         ): PaymentHistoryEntry {
@@ -221,6 +231,7 @@ data class PaymentHistoryEntry(
                 paymentType = null,
                 formattedAmount = formattedAmount,
                 checkoutBasketJson = checkoutBasketJson,
+                basketId = basketId,
                 tipAmountSats = tipAmountSats,
                 tipPercentage = tipPercentage,
             )

@@ -11,6 +11,7 @@ import com.electricdreams.numo.feature.pin.PinEntryActivity
 import com.electricdreams.numo.feature.pin.PinManager
 import com.electricdreams.numo.feature.pin.PinProtectionHelper
 import com.electricdreams.numo.feature.tips.TipsSettingsActivity
+import com.electricdreams.numo.feature.baskets.BasketNamesSettingsActivity
 
 /**
  * Main Settings screen.
@@ -69,6 +70,11 @@ class SettingsActivity : AppCompatActivity() {
         // Tips - unprotected (tips just add to balance)
         findViewById<View>(R.id.tips_settings_item).setOnClickListener {
             startActivity(Intent(this, TipsSettingsActivity::class.java))
+        }
+
+        // Basket Names - unprotected (just preset names)
+        findViewById<View>(R.id.basket_names_settings_item).setOnClickListener {
+            startActivity(Intent(this, BasketNamesSettingsActivity::class.java))
         }
 
         // === Payments Section ===

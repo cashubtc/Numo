@@ -410,6 +410,39 @@
                 android:value=".feature.items.ItemSelectionActivity" />
         </activity>
         
+        <activity android:name="com.electricdreams.numo.feature.baskets.SavedBasketsActivity"
+            android:exported="false"
+            android:label="@string/saved_baskets_title"
+            android:theme="@style/Theme.Numo"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.items.ItemSelectionActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.items.ItemSelectionActivity" />
+        </activity>
+        
+        <activity android:name="com.electricdreams.numo.feature.baskets.BasketArchiveActivity"
+            android:exported="false"
+            android:label="@string/basket_archive_title"
+            android:theme="@style/Theme.Numo"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.baskets.SavedBasketsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.baskets.SavedBasketsActivity" />
+        </activity>
+        
+        <activity android:name="com.electricdreams.numo.feature.baskets.BasketNamesSettingsActivity"
+            android:exported="false"
+            android:label="@string/basket_names_settings_title"
+            android:theme="@style/Theme.Numo"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.settings.SettingsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.settings.SettingsActivity" />
+        </activity>
+        
         <!-- HCE Service for NDEF tag emulation -->
         <service android:name=".ndef.NdefHostCardEmulationService"
             android:exported="true"

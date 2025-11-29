@@ -62,6 +62,11 @@ class SelectionItemsAdapter(
         customVariationItems.clear()
         notifyDataSetChanged()
     }
+    
+    fun syncQuantitiesFromBasket() {
+        refreshBasketQuantities()
+        notifyDataSetChanged()
+    }
 
     fun resetItemQuantity(itemId: String) {
         basketQuantities.remove(itemId)

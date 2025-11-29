@@ -130,6 +130,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_TYPE, entry.paymentType)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_LIGHTNING_INVOICE, entry.lightningInvoice)
             putExtra(TransactionDetailActivity.EXTRA_CHECKOUT_BASKET_JSON, entry.checkoutBasketJson)
+            putExtra(TransactionDetailActivity.EXTRA_BASKET_ID, entry.basketId)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_AMOUNT, entry.tipAmountSats)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_PERCENTAGE, entry.tipPercentage)
         }
@@ -236,6 +237,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             paymentRequest: String?,
             formattedAmount: String?,
             checkoutBasketJson: String? = null,
+            basketId: String? = null,
             tipAmountSats: Long = 0,
             tipPercentage: Int = 0,
         ): String {
@@ -247,6 +249,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 paymentRequest = paymentRequest,
                 formattedAmount = formattedAmount,
                 checkoutBasketJson = checkoutBasketJson,
+                basketId = basketId,
                 tipAmountSats = tipAmountSats,
                 tipPercentage = tipPercentage,
             )
@@ -297,6 +300,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     lightningMintUrl = lightningMintUrl,
                     formattedAmount = existing.formattedAmount,
                     checkoutBasketJson = existing.checkoutBasketJson, // Preserve basket data
+                    basketId = existing.basketId, // Preserve basket ID
                     tipAmountSats = existing.tipAmountSats, // Preserve tip info
                     tipPercentage = existing.tipPercentage, // Preserve tip info
                 )
@@ -343,6 +347,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     nostrNprofile = existing.nostrNprofile,
                     nostrSecretHex = existing.nostrSecretHex,
                     checkoutBasketJson = existing.checkoutBasketJson, // Preserve basket data
+                    basketId = existing.basketId, // Preserve basket ID
                     tipAmountSats = existing.tipAmountSats, // Preserve tip info
                     tipPercentage = existing.tipPercentage, // Preserve tip info
                 )
@@ -388,6 +393,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     nostrNprofile = nostrNprofile,
                     nostrSecretHex = nostrSecretHex,
                     checkoutBasketJson = existing.checkoutBasketJson, // Preserve basket data
+                    basketId = existing.basketId, // Preserve basket ID
                     tipAmountSats = existing.tipAmountSats, // Preserve tip info
                     tipPercentage = existing.tipPercentage, // Preserve tip info
                 )
@@ -434,6 +440,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     nostrNprofile = existing.nostrNprofile,
                     nostrSecretHex = existing.nostrSecretHex,
                     checkoutBasketJson = existing.checkoutBasketJson,
+                    basketId = existing.basketId, // Preserve basket ID
                     tipAmountSats = tipAmountSats,
                     tipPercentage = tipPercentage,
                 )

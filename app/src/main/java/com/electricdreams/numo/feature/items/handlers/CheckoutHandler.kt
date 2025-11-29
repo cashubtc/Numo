@@ -19,6 +19,9 @@ class CheckoutHandler(
     private val currencyManager: CurrencyManager,
     private val bitcoinPriceWorker: BitcoinPriceWorker
 ) {
+    
+    // Optional saved basket ID to associate with payment
+    var savedBasketId: String? = null
 
     /**
      * Proceed to checkout if basket is valid.
@@ -63,6 +66,7 @@ class CheckoutHandler(
             putExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, totalSatoshis)
             putExtra(PaymentRequestActivity.EXTRA_FORMATTED_AMOUNT, formattedAmount)
             putExtra(PaymentRequestActivity.EXTRA_CHECKOUT_BASKET_JSON, checkoutBasketJson)
+            savedBasketId?.let { putExtra(PaymentRequestActivity.EXTRA_SAVED_BASKET_ID, it) }
         }
 
         basketManager.clearBasket()

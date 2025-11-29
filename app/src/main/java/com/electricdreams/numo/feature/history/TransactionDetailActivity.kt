@@ -19,7 +19,10 @@ import com.electricdreams.numo.R
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.CheckoutBasket
+import com.electricdreams.numo.core.model.CheckoutBasketItem
+import com.electricdreams.numo.core.model.SavedBasket
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.util.SavedBasketManager
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -35,6 +38,8 @@ class TransactionDetailActivity : AppCompatActivity() {
     private var paymentType: String? = null
     private var lightningInvoice: String? = null
     private var checkoutBasketJson: String? = null
+    private var basketId: String? = null
+    private var savedBasket: SavedBasket? = null
     private var tipAmountSats: Long = 0
     private var tipPercentage: Int = 0
 
@@ -58,8 +63,14 @@ class TransactionDetailActivity : AppCompatActivity() {
         paymentType = intent.getStringExtra(EXTRA_TRANSACTION_PAYMENT_TYPE)
         lightningInvoice = intent.getStringExtra(EXTRA_TRANSACTION_LIGHTNING_INVOICE)
         checkoutBasketJson = intent.getStringExtra(EXTRA_CHECKOUT_BASKET_JSON)
+        basketId = intent.getStringExtra(EXTRA_BASKET_ID)
         tipAmountSats = intent.getLongExtra(EXTRA_TRANSACTION_TIP_AMOUNT, 0)
         tipPercentage = intent.getIntExtra(EXTRA_TRANSACTION_TIP_PERCENTAGE, 0)
+        
+        // Load saved basket if basketId is available
+        basketId?.let { id ->
+            savedBasket = SavedBasketManager.getInstance(this).getBasket(id)
+        }
 
         // Create entry object (normalize nullable unit fields via Kotlin defaults)
         entry = PaymentHistoryEntry(
@@ -358,8 +369,15 @@ class TransactionDetailActivity : AppCompatActivity() {
     }
 
     private fun openBasketReceipt() {
+        // Use saved basket data if available, otherwise fall back to checkoutBasketJson
+        val basketJsonToUse = if (savedBasket != null) {
+            convertSavedBasketToCheckoutBasket(savedBasket!!).toJson()
+        } else {
+            checkoutBasketJson
+        }
+        
         val intent = Intent(this, BasketReceiptActivity::class.java).apply {
-            putExtra(BasketReceiptActivity.EXTRA_CHECKOUT_BASKET_JSON, checkoutBasketJson)
+            putExtra(BasketReceiptActivity.EXTRA_CHECKOUT_BASKET_JSON, basketJsonToUse)
             putExtra(BasketReceiptActivity.EXTRA_PAYMENT_TYPE, paymentType)
             putExtra(BasketReceiptActivity.EXTRA_PAYMENT_DATE, entry.date.time)
             putExtra(BasketReceiptActivity.EXTRA_TRANSACTION_ID, entry.token.takeIf { it.isNotEmpty() }?.take(32))
@@ -376,6 +394,27 @@ class TransactionDetailActivity : AppCompatActivity() {
             putExtra(BasketReceiptActivity.EXTRA_TIP_PERCENTAGE, entry.tipPercentage)
         }
         startActivity(intent)
+    }
+    
+    /**
+     * Convert a SavedBasket to a CheckoutBasket for receipt display.
+     */
+    private fun convertSavedBasketToCheckoutBasket(savedBasket: SavedBasket): CheckoutBasket {
+        val checkoutItems = savedBasket.items.map { basketItem ->
+            CheckoutBasketItem.fromBasketItem(basketItem)
+        }
+        
+        // Determine currency from saved basket items
+        val currency = savedBasket.items.firstOrNull { !it.isSatsPrice() }?.item?.priceCurrency ?: "USD"
+        
+        return CheckoutBasket(
+            id = savedBasket.id,
+            checkoutTimestamp = savedBasket.paidAt ?: savedBasket.updatedAt,
+            items = checkoutItems,
+            currency = currency,
+            bitcoinPrice = entry.bitcoinPrice,
+            totalSatoshis = entry.amount,
+        )
     }
 
     private fun copyToken() {
@@ -492,6 +531,7 @@ class TransactionDetailActivity : AppCompatActivity() {
         const val EXTRA_TRANSACTION_PAYMENT_TYPE = "transaction_payment_type"
         const val EXTRA_TRANSACTION_LIGHTNING_INVOICE = "transaction_lightning_invoice"
         const val EXTRA_CHECKOUT_BASKET_JSON = "checkout_basket_json"
+        const val EXTRA_BASKET_ID = "basket_id"
         const val EXTRA_TRANSACTION_TIP_AMOUNT = "transaction_tip_amount"
         const val EXTRA_TRANSACTION_TIP_PERCENTAGE = "transaction_tip_percentage"
     }

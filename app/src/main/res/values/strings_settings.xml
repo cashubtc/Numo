@@ -37,6 +37,10 @@
     <string name="settings_item_tips_title">Tips</string>
     <string name="settings_item_tips_subtitle">Configure tip options for checkout</string>
 
+    <!-- Settings items: basket names -->
+    <string name="settings_item_basket_names_title">Basket Names</string>
+    <string name="settings_item_basket_names_subtitle">Create preset names for quick basket saving</string>
+
     <!-- Settings items: theme -->
     <string name="settings_item_theme_title">Theme</string>
     <string name="settings_item_theme_subtitle">Switch between light and dark mode</string>
