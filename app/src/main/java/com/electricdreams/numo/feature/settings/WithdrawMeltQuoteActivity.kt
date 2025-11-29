@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
-import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -16,17 +15,11 @@ import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.cashudevkit.MeltOptions
 import org.cashudevkit.QuoteState
-import java.util.Date
 
-/**
- * Activity to confirm and execute a melt (withdraw) operation
- */
 class WithdrawMeltQuoteActivity : AppCompatActivity() {
 
     companion object {
@@ -42,7 +35,6 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
     private var request: String = ""
     private lateinit var mintManager: MintManager
 
-    // Views
     private lateinit var backButton: ImageButton
     private lateinit var summaryText: TextView
     private lateinit var destinationText: TextView
@@ -50,8 +42,16 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
     private lateinit var feeText: TextView
     private lateinit var totalText: TextView
     private lateinit var confirmButton: Button
-    private lateinit var loadingSpinner: ProgressBar
-    private lateinit var loadingText: TextView
+    private lateinit var progressOverlay: View
+    private lateinit var processingStatusText: TextView
+    private lateinit var processingAmountValue: TextView
+    private lateinit var processingDestinationValue: TextView
+    private lateinit var processingStepPreparingIndicator: View
+    private lateinit var processingStepContactingIndicator: View
+    private lateinit var processingStepSettlingIndicator: View
+    private lateinit var processingStepPreparingLabel: TextView
+    private lateinit var processingStepContactingLabel: TextView
+    private lateinit var processingStepSettlingLabel: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,8 +89,16 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
         feeText = findViewById(R.id.fee_text)
         totalText = findViewById(R.id.total_text)
         confirmButton = findViewById(R.id.confirm_button)
-        loadingSpinner = findViewById(R.id.loading_spinner)
-        loadingText = findViewById(R.id.loading_text)
+        progressOverlay = findViewById(R.id.progress_overlay)
+        processingStatusText = findViewById(R.id.processing_status_text)
+        processingAmountValue = findViewById(R.id.processing_amount_value)
+        processingDestinationValue = findViewById(R.id.processing_destination_value)
+        processingStepPreparingIndicator = findViewById(R.id.processing_step_preparing_indicator)
+        processingStepContactingIndicator = findViewById(R.id.processing_step_contacting_indicator)
+        processingStepSettlingIndicator = findViewById(R.id.processing_step_settling_indicator)
+        processingStepPreparingLabel = findViewById(R.id.processing_step_preparing_label)
+        processingStepContactingLabel = findViewById(R.id.processing_step_contacting_label)
+        processingStepSettlingLabel = findViewById(R.id.processing_step_settling_label)
     }
 
     private fun setupListeners() {
@@ -99,11 +107,9 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
     }
 
     private fun displayQuoteInfo() {
-        // Display destination
         val destination = when {
             !lightningAddress.isNullOrBlank() -> lightningAddress!!
             !invoice.isNullOrBlank() -> {
-                // Abbreviate invoice for display
                 if (invoice!!.length > 24) {
                     "${invoice!!.take(12)}...${invoice!!.takeLast(12)}"
                 } else {
@@ -114,7 +120,6 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
         }
         destinationText.text = destination
 
-        // Display amounts
         val amountObj = Amount(amount, Amount.Currency.BTC)
         val feeObj = Amount(feeReserve, Amount.Currency.BTC)
         val totalObj = Amount(amount + feeReserve, Amount.Currency.BTC)
@@ -123,7 +128,6 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
         feeText.text = feeObj.toString()
         totalText.text = totalObj.toString()
 
-        // Summary text
         val mintName = mintManager.getMintDisplayName(mintUrl)
         summaryText.text = getString(
             R.string.withdraw_melt_summary,
@@ -137,7 +141,7 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
         lifecycleScope.launch {
             var withdrawEntryId: String? = null
             val autoWithdrawManager = AutoWithdrawManager.getInstance(this@WithdrawMeltQuoteActivity)
-            
+
             try {
                 val wallet = CashuWalletManager.getWallet()
                 if (wallet == null) {
@@ -152,7 +156,6 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
                     return@launch
                 }
 
-                // Create unified withdrawal history entry (manual withdrawal)
                 val destinationLabel = lightningAddress ?: request
                 val destinationType = when {
                     !lightningAddress.isNullOrBlank() -> "manual_address"
@@ -172,39 +175,41 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
                 )
                 withdrawEntryId = historyEntry.id
 
-                // Execute melt operation
+                withContext(Dispatchers.Main) {
+                    updateProcessingState(ProcessingStep.CONTACTING)
+                }
+
                 val melted = withContext(Dispatchers.IO) {
                     wallet.meltWithMint(org.cashudevkit.MintUrl(mintUrl), quoteId)
                 }
 
-                // Check melt state
                 val state = melted.state
                 Log.d(TAG, "Melt state after melt: $state")
 
-                // Check melt state
                 val meltQuote = withContext(Dispatchers.IO) {
                     wallet.checkMeltQuote(org.cashudevkit.MintUrl(mintUrl), quoteId)
                 }
 
-                Log.d(TAG, "Melt state after check: $meltQuote.state")
+                Log.d(TAG, "Melt state after check: ${meltQuote.state}")
+
+                withContext(Dispatchers.Main) {
+                    updateProcessingState(ProcessingStep.SETTLING)
+                }
 
                 withContext(Dispatchers.Main) {
                     setLoading(false)
 
                     when (meltQuote.state) {
-                        QuoteState.PAID  -> {
-                            // Update withdrawal entry to completed
+                        QuoteState.PAID -> {
                             withdrawEntryId?.let {
                                 autoWithdrawManager.updateWithdrawalStatus(
                                     id = it,
                                     status = com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry.STATUS_COMPLETED
                                 )
                             }
-                            // Show success activity
                             showPaymentSuccess()
                         }
                         QuoteState.UNPAID -> {
-                            // Mark as failed and show error
                             withdrawEntryId?.let {
                                 autoWithdrawManager.updateWithdrawalStatus(
                                     id = it,
@@ -217,13 +222,11 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
                             )
                         }
                         QuoteState.PENDING -> {
-                            // Keep in history as pending
                             showPaymentError(
                                 getString(R.string.withdraw_melt_error_pending)
                             )
                         }
                         else -> {
-                            // Mark as failed
                             withdrawEntryId?.let {
                                 autoWithdrawManager.updateWithdrawalStatus(
                                     id = it,
@@ -242,7 +245,6 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     setLoading(false)
 
-                    // Mark as failed on error
                     withdrawEntryId?.let { id ->
                         autoWithdrawManager.updateWithdrawalStatus(
                             id = id,
@@ -278,10 +280,87 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
         finish()
     }
 
+    private fun updateProcessingState(step: ProcessingStep) {
+        val (statusText, activeIndicator, activeLabel) = when (step) {
+            ProcessingStep.PREPARING -> Triple(
+                getString(R.string.withdraw_processing_status_preparing),
+                processingStepPreparingIndicator,
+                processingStepPreparingLabel
+            )
+            ProcessingStep.CONTACTING -> Triple(
+                getString(R.string.withdraw_processing_status_contacting),
+                processingStepContactingIndicator,
+                processingStepContactingLabel
+            )
+            ProcessingStep.SETTLING -> Triple(
+                getString(R.string.withdraw_processing_status_settling),
+                processingStepSettlingIndicator,
+                processingStepSettlingLabel
+            )
+        }
+
+        processingStatusText.text = statusText
+        updateStepIndicators(step)
+        activeIndicator.scaleX = 0.85f
+        activeIndicator.scaleY = 0.85f
+        activeIndicator.animate().scaleX(1f).scaleY(1f).setDuration(180).start()
+        activeLabel.alpha = 0.8f
+        activeLabel.animate().alpha(1f).setDuration(180).start()
+    }
+
+    private fun updateStepIndicators(activeStep: ProcessingStep) {
+        setStepState(
+            processingStepPreparingIndicator,
+            processingStepPreparingLabel,
+            activeStep.ordinal >= ProcessingStep.PREPARING.ordinal
+        )
+        setStepState(
+            processingStepContactingIndicator,
+            processingStepContactingLabel,
+            activeStep.ordinal >= ProcessingStep.CONTACTING.ordinal
+        )
+        setStepState(
+            processingStepSettlingIndicator,
+            processingStepSettlingLabel,
+            activeStep.ordinal >= ProcessingStep.SETTLING.ordinal
+        )
+    }
+
+    private fun setStepState(indicator: View, label: TextView, active: Boolean) {
+        val background = if (active) {
+            R.drawable.bg_processing_step_active
+        } else {
+            R.drawable.bg_processing_step_inactive
+        }
+        indicator.setBackgroundResource(background)
+        label.setTextColor(
+            if (active) getColor(R.color.color_text_primary) else getColor(R.color.color_text_secondary)
+        )
+        label.alpha = if (active) 1f else 0.6f
+    }
+
     private fun setLoading(loading: Boolean) {
-        loadingSpinner.visibility = if (loading) View.VISIBLE else View.GONE
-        loadingText.visibility = if (loading) View.VISIBLE else View.GONE
+        if (loading) {
+            processingAmountValue.text = totalText.text
+            processingDestinationValue.text = destinationText.text
+            updateProcessingState(ProcessingStep.PREPARING)
+            progressOverlay.alpha = 0f
+            progressOverlay.visibility = View.VISIBLE
+            progressOverlay.animate().alpha(1f).setDuration(200).start()
+        } else {
+            if (progressOverlay.visibility == View.VISIBLE) {
+                progressOverlay.animate().alpha(0f).setDuration(150).withEndAction {
+                    progressOverlay.visibility = View.GONE
+                }.start()
+            }
+        }
         confirmButton.isEnabled = !loading
         backButton.isEnabled = !loading
+    }
+
+    private enum class ProcessingStep {
+        PREPARING,
+        CONTACTING,
+        SETTLING
     }
 }

@@ -338,6 +338,18 @@
     <string name="withdraw_melt_error_unknown_state">Payment failed: Unknown state</string>
     <string name="withdraw_melt_error_generic">Error: %1$s</string>
     <string name="withdraw_melt_destination_unknown">Unknown</string>
+    <string name="withdraw_processing_title">Processing withdrawal</string>
+    <string name="withdraw_processing_subtitle">Please keep the device awake while we complete your transfer</string>
+    <string name="withdraw_processing_amount_label">Amount</string>
+    <string name="withdraw_processing_destination_label">Destination</string>
+    <string name="withdraw_processing_status_preparing">Preparing your withdrawal</string>
+    <string name="withdraw_processing_status_contacting">Contacting the mint</string>
+    <string name="withdraw_processing_status_settling">Waiting for Lightning settlement</string>
+    <string name="withdraw_processing_step_preparing">Preparing funds</string>
+    <string name="withdraw_processing_step_contacting">Contacting mint</string>
+    <string name="withdraw_processing_step_settling">Lightning settlement</string>
+    <string name="withdraw_processing_hint">This usually takes less than 10 seconds. You can safely leave this screen once completed.</string>
+
     <string name="withdraw_melt_destination_invoice_fallback">Lightning Invoice</string>
 
     <!-- Withdraw - success screen -->
