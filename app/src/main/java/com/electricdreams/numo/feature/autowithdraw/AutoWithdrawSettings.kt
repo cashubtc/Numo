@@ -2,6 +2,7 @@ package com.electricdreams.numo.feature.autowithdraw
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.electricdreams.numo.core.util.LightningAddressManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
@@ -27,7 +28,8 @@ class AutoWithdrawSettingsManager private constructor(private val context: Conte
         private const val KEY_MINT_SETTINGS = "mintSettings"
         private const val KEY_DEFAULT_THRESHOLD = "defaultThreshold"
         private const val KEY_DEFAULT_PERCENTAGE = "defaultPercentage"
-        private const val KEY_DEFAULT_LIGHTNING_ADDRESS = "defaultLightningAddress"
+        // Note: Lightning address is now managed by LightningAddressManager for consistency
+        // across auto-withdraw and manual withdraw features
         
         const val MIN_THRESHOLD_SATS = 1000L // Minimum 1k sats
         const val MAX_THRESHOLD_SATS = 1000000L // Maximum 1M sats
@@ -50,6 +52,7 @@ class AutoWithdrawSettingsManager private constructor(private val context: Conte
 
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val gson = Gson()
+    private val lightningAddressManager = LightningAddressManager.getInstance(context)
 
     /**
      * Check if auto-withdraw is globally enabled.
@@ -91,27 +94,42 @@ class AutoWithdrawSettingsManager private constructor(private val context: Conte
 
     /**
      * Get the default lightning address.
+     * Uses the shared LightningAddressManager for consistency with manual withdrawals.
      */
-    fun getDefaultLightningAddress(): String = prefs.getString(KEY_DEFAULT_LIGHTNING_ADDRESS, "") ?: ""
+    fun getDefaultLightningAddress(): String = lightningAddressManager.getLightningAddress()
 
     /**
      * Set the default lightning address.
+     * Uses the shared LightningAddressManager for consistency with manual withdrawals.
      */
     fun setDefaultLightningAddress(address: String) {
-        prefs.edit().putString(KEY_DEFAULT_LIGHTNING_ADDRESS, address).apply()
+        lightningAddressManager.setLightningAddress(address)
     }
 
     /**
      * Get settings for a specific mint.
+     * Note: The lightning address uses the shared global address from LightningAddressManager
+     * unless a per-mint override is stored (for future per-mint address support).
      */
     fun getMintSettings(mintUrl: String): MintWithdrawSettings {
         val allSettings = getAllMintSettings()
-        return allSettings[mintUrl] ?: MintWithdrawSettings(
+        val storedSettings = allSettings[mintUrl]
+        
+        // Use shared lightning address from LightningAddressManager
+        val sharedLightningAddress = lightningAddressManager.getLightningAddress()
+        
+        return storedSettings?.copy(
+            // Override with shared lightning address if the stored one is empty
+            lightningAddress = if (storedSettings.lightningAddress.isNotBlank()) 
+                storedSettings.lightningAddress 
+            else 
+                sharedLightningAddress
+        ) ?: MintWithdrawSettings(
             mintUrl = mintUrl,
             enabled = false,
             thresholdSats = getDefaultThreshold(),
             withdrawPercentage = getDefaultPercentage(),
-            lightningAddress = getDefaultLightningAddress()
+            lightningAddress = sharedLightningAddress
         )
     }
 

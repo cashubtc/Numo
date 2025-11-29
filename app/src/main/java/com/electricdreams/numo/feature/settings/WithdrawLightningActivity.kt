@@ -1,7 +1,6 @@
 package com.electricdreams.numo.feature.settings
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -16,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.util.LightningAddressManager
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.ui.components.WithdrawAddressCard
 import com.electricdreams.numo.ui.components.WithdrawInvoiceCard
@@ -34,20 +34,19 @@ import org.cashudevkit.MintUrl
  * - Smooth entrance animations
  * - Elegant loading states
  * - Professional UX suitable for checkout operators
+ * - Shared lightning address with auto-withdraw feature
  */
 class WithdrawLightningActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "WithdrawLightning"
         private const val FEE_BUFFER_PERCENT = 0.02 // 2% buffer for fees
-        private const val PREFS_NAME = "WithdrawLightningPreferences"
-        private const val KEY_LAST_LIGHTNING_ADDRESS = "lastLightningAddress"
     }
 
     private lateinit var mintUrl: String
     private var balance: Long = 0
     private lateinit var mintManager: MintManager
-    private lateinit var preferences: SharedPreferences
+    private lateinit var lightningAddressManager: LightningAddressManager
 
     // Views
     private lateinit var backButton: ImageButton
@@ -65,7 +64,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
         mintUrl = intent.getStringExtra("mint_url") ?: ""
         balance = intent.getLongExtra("balance", 0)
         mintManager = MintManager.getInstance(this)
-        preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        lightningAddressManager = LightningAddressManager.getInstance(this)
 
         if (mintUrl.isEmpty()) {
             Toast.makeText(
@@ -123,10 +122,11 @@ class WithdrawLightningActivity : AppCompatActivity() {
     }
 
     private fun prefillFields() {
-        // Pre-fill lightning address from preferences
-        val lastAddress = preferences.getString(KEY_LAST_LIGHTNING_ADDRESS, "")
-        if (!lastAddress.isNullOrEmpty()) {
-            addressCard.setAddress(lastAddress)
+        // Pre-fill lightning address from shared LightningAddressManager
+        // This is the same address used by auto-withdraw
+        val savedAddress = lightningAddressManager.getLightningAddress()
+        if (savedAddress.isNotEmpty()) {
+            addressCard.setAddress(savedAddress)
         }
 
         // Pre-fill amount with balance - 2% fee buffer
@@ -284,8 +284,9 @@ class WithdrawLightningActivity : AppCompatActivity() {
                         return@withContext
                     }
 
-                    // Save the lightning address to preferences
-                    preferences.edit().putString(KEY_LAST_LIGHTNING_ADDRESS, address).apply()
+                    // Save the lightning address to shared manager
+                    // This persists it for both manual and auto withdrawals
+                    lightningAddressManager.setLightningAddress(address)
 
                     // Launch melt quote activity
                     launchMeltQuoteActivity(meltQuote, null, address)
