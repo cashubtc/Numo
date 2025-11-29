@@ -37,5 +37,5 @@
     <string name="security_settings_enter_pin_subtitle">Verifica tu identidad para continuar</string>
     <string name="security_settings_remove_pin_dialog_title">¿Eliminar PIN?</string>
     <string name="security_settings_remove_pin_dialog_message">Esto desactivará la protección con PIN. Cualquiera que tenga acceso a este dispositivo podrá acceder a funciones sensibles como retirar fondos y ver tu frase semilla.</string>
-    <string name="security_settings_remove_pin_confirm">Eliminar PIN</string>
+    <string name="security_settings_remove_pin_confirm">Eliminar</string>
 </resources>
