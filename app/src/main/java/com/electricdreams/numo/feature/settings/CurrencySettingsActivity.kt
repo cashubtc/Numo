@@ -31,6 +31,15 @@ class CurrencySettingsActivity : AppCompatActivity() {
         radioGbp = findViewById(R.id.radio_gbp)
         radioJpy = findViewById(R.id.radio_jpy)
 
+        // Use the persisted preferred currency for initial selection.
+        // NOTE: Items in the editable catalog are normalized to this
+        // currency on load (see ItemManager). We intentionally do **not**
+        // rewrite historical data like receipts or payment history so that
+        // past checkouts still reflect the original currency they were
+        // created in.
+        //
+        // Active flows (item prices, baskets, checkout) always use this
+        // single preferred fiat currency.
         setSelectedCurrency(currencyManager.getCurrentCurrency())
 
         currencyRadioGroup.setOnCheckedChangeListener { _, _ ->

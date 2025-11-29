@@ -112,10 +112,25 @@ class ItemManager private constructor(context: Context) {
                             } catch (e: IllegalArgumentException) {
                                 com.electricdreams.numo.core.model.PriceType.FIAT
                             }
-                        }
                         if (!obj.isNull("priceCurrency")) {
                             priceCurrency = obj.getString("priceCurrency")
                         }
+
+                        // IMPORTANT: normalize legacy/foreign fiat currencies
+                        // to the current preferred currency so that all
+                        // *active* items always use a single fiat currency.
+                        //
+                        // Historical data (CheckoutBasket, Payment history,
+                        // receipts) keep their own currency fields and are
+                        // never rewritten. Here we only normalize the
+                        // editable catalog that is used for future checkouts.
+                        if (priceType == PriceType.FIAT) {
+                            val normalized = CurrencyManager.getInstance(context).getCurrentCurrency()
+                            if (!priceCurrency.equals(normalized, ignoreCase = true)) {
+                                priceCurrency = normalized
+                            }
+                        }
+
                         if (!obj.isNull("trackInventory")) {
                             trackInventory = obj.getBoolean("trackInventory")
                         }
