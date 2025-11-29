@@ -247,10 +247,8 @@
                         <!-- iOS-style Toggle -->
                         <androidx.appcompat.widget.SwitchCompat
                             android:id="@+id/enable_switch"
-                            android:layout_width="51dp"
-                            android:layout_height="31dp"
-                            android:thumb="@drawable/bg_toggle_thumb_ios"
-                            app:track="@drawable/bg_toggle_ios" />
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
 
                     </LinearLayout>
 
@@ -475,12 +473,12 @@
                                 android:stepSize="1"
                                 android:valueFrom="50"
                                 android:valueTo="98"
-                                app:haloColor="@color/color_success_green"
+                                app:haloColor="@color/color_accent_blue"
                                 app:haloRadius="24dp"
-                                app:thumbColor="@color/color_success_green"
+                                app:thumbColor="@color/color_accent_blue"
                                 app:thumbRadius="12dp"
                                 app:tickVisible="false"
-                                app:trackColorActive="@color/color_success_green"
+                                app:trackColorActive="@color/color_accent_blue"
                                 app:trackColorInactive="@color/color_bg_tertiary"
                                 app:trackHeight="6dp" />
 
