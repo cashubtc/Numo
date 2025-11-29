@@ -107,6 +107,7 @@
         android:layout_marginHorizontal="20dp"
         android:layout_marginBottom="20dp"
         android:background="@drawable/bg_button_primary_black"
+        android:backgroundTint="@android:color/transparent"
         android:text="@string/dialog_rename_basket_save"
         android:textColor="@android:color/white"
         android:textSize="16sp"

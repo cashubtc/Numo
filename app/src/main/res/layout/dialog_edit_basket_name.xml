@@ -107,11 +107,13 @@
         android:layout_marginHorizontal="20dp"
         android:layout_marginBottom="20dp"
         android:background="@drawable/bg_button_primary_black"
-        android:text="@string/basket_names_dialog_edit_save"
+        android:backgroundTint="@android:color/transparent"
+        android:text="@string/basket_names_dialog_edit_button"
         android:textColor="@android:color/white"
         android:textSize="16sp"
         android:textAllCaps="false"
         android:fontFamily="sans-serif-medium"
+        android:stateListAnimator="@null" />
         android:stateListAnimator="@null" />
 
 </LinearLayout>

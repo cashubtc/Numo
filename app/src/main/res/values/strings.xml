@@ -584,6 +584,8 @@
     <string name="basket_archive_total_label">Total</string>
     <string name="basket_archive_detail_title">Order Details</string>
     <string name="saved_baskets_view_archive">Archive</string>
+    <string name="basket_archive_detail_view_payment">View Payment</string>
+
 
     <!-- Common -->
     <string name="common_save">Save</string>
@@ -609,6 +611,9 @@
     <string name="basket_names_dialog_edit_subtitle">Update the preset name</string>
     <string name="basket_names_dialog_edit_hint">Enter name</string>
     <string name="basket_names_dialog_edit_save">Save Changes</string>
+
+    <string name="basket_names_dialog_add_button">Add Name</string>
+    <string name="basket_names_dialog_edit_button">Save Changes</string>
 
     <string name="basket_names_dialog_delete_title">Delete Name</string>
     <string name="basket_names_dialog_delete_message">Remove \"%1$s\" from presets?</string>
