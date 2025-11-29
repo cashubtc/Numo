@@ -237,6 +237,9 @@ class LightningMintHandler(
                         Log.d(TAG, "WebSocket subscription cancelled for resumed quote $quoteId")
                     } catch (e: Exception) {
                         Log.e(TAG, "WebSocket error for resumed quote $quoteId: ${e.message}", e)
+                        launch(Dispatchers.Main) {
+                            callback.onStatusUpdate("Connection lost, retrying...")
+                        }
                     }
                 }
 
@@ -247,6 +250,9 @@ class LightningMintHandler(
                         Log.d(TAG, "Polling cancelled for resumed quote $quoteId")
                     } catch (e: Exception) {
                         Log.e(TAG, "Polling error for resumed quote $quoteId: ${e.message}", e)
+                        launch(Dispatchers.Main) {
+                            callback.onStatusUpdate("Checking payment status...")
+                        }
                     }
                 }
 
@@ -468,14 +474,22 @@ class LightningMintHandler(
             return false
         }
 
-        Log.d(TAG, "Mint quote $quoteId is paid (detected by $source), calling wallet.mint")
-        val proofs = wallet.mint(mintUrl, quoteId, null)
-        Log.d(TAG, "Lightning mint completed with ${proofs.size} proofs ($source)")
+        return try {
+            Log.d(TAG, "Mint quote ${quoteId} is paid (detected by ${source}), calling wallet.mint")
+            val proofs = wallet.mint(mintUrl, quoteId, null)
+            Log.d(TAG, "Lightning mint completed with ${proofs.size} proofs (${source})")
 
-        uiScope.launch(Dispatchers.Main) {
-            callback.onPaymentSuccess()
+            uiScope.launch(Dispatchers.Main) {
+                callback.onPaymentSuccess()
+            }
+            true
+        } catch (t: Throwable) {
+            Log.e(TAG, "Minting failed for quote ${quoteId}", t)
+            uiScope.launch(Dispatchers.Main) {
+                callback.onError(t.localizedMessage ?: "Failed to mint proofs")
+            }
+            false
         }
-        return true
     }
 
     /**
@@ -523,6 +537,9 @@ class LightningMintHandler(
             } catch (e: Exception) {
                 // Log but continue polling - transient errors shouldn't stop us
                 Log.w(TAG, "Error polling mint quote $quoteId: ${e.message}")
+                uiScope.launch(Dispatchers.Main) {
+                    callback.onStatusUpdate("Lost connection to mint, retrying...")
+                }
             }
         }
     }

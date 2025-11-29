@@ -805,4 +805,8 @@
     <string name="mint_details_version_value">Version: %1$s</string>
     <string name="mint_details_software_unknown">Software: Unknown</string>
     <string name="mint_details_version_unknown">Version: Unknown</string>
+    <string name="restore_backup_failed">Could not fetch your cloud backup. Please try again.</string>
+    <string name="restore_failed_generic">Wallet restore failed. Please review your seed and try again.</string>
+    <string name="error_loading_mints">Could not load mint balances. Please try again.</string>
+    <string name="mints_add_failed">Unable to add mint. Check your connection and try again.</string>
 </resources>

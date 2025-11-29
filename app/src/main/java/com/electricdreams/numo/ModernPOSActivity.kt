@@ -166,6 +166,13 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback,
     // Lifecycle methods
     override fun onResume() {
         super.onResume()
+        CashuWalletManager.setErrorListener(object : CashuWalletManager.WalletErrorListener {
+            override fun onWalletError(message: String) {
+                runOnUiThread {
+                    Toast.makeText(this@ModernPOSActivity, message, Toast.LENGTH_LONG).show()
+                }
+            }
+        })
         
         // Reapply theme when returning from settings
         uiCoordinator.applyTheme()
@@ -184,10 +191,18 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback,
 
     override fun onPause() {
         super.onPause()
+        CashuWalletManager.setErrorListener(null)
         nfcAdapter?.disableForegroundDispatch(this)
     }
 
     override fun onDestroy() {
+        uiCoordinator.stopServices()
+        bitcoinPriceWorker?.stop()
+        super.onDestroy()
+    }
+
+    override fun onDestroy() {
+        CashuWalletManager.setErrorListener(null)
         uiCoordinator.stopServices()
         bitcoinPriceWorker?.stop()
         super.onDestroy()

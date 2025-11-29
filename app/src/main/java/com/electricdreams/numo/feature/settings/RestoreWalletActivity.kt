@@ -399,38 +399,45 @@ class RestoreWalletActivity : AppCompatActivity() {
         fetchingStatus.text = getString(R.string.onboarding_fetching_searching_backup)
 
         lifecycleScope.launch {
-            // Fetch backup from Nostr
-            val result = withContext(Dispatchers.IO) {
-                fetchMintBackupSuspend(mnemonic)
-            }
+            try {
+                // Fetch backup from Nostr
+                val result = withContext(Dispatchers.IO) {
+                    fetchMintBackupSuspend(mnemonic)
+                }
 
-            // Get existing configured mints
-            val mintManager = MintManager.getInstance(this@RestoreWalletActivity)
-            val existingMints = mintManager.getAllowedMints()
+                // Get existing configured mints
+                val mintManager = MintManager.getInstance(this@RestoreWalletActivity)
+                val existingMints = mintManager.getAllowedMints()
 
-            // Reset mint sets
-            discoveredMints.clear()
-            selectedMints.clear()
+                // Reset mint sets
+                discoveredMints.clear()
+                selectedMints.clear()
 
-            if (result.success && result.mints.isNotEmpty()) {
-                // Backup found! Add discovered mints
-                backupFound = true
-                backupTimestamp = result.timestamp
-                discoveredMints.addAll(result.mints)
-                selectedMints.addAll(result.mints)
-            } else {
-                // No backup found, use existing mints
-                backupFound = false
-                backupTimestamp = null
-            }
+                if (result.success && result.mints.isNotEmpty()) {
+                    // Backup found! Add discovered mints
+                    backupFound = true
+                    backupTimestamp = result.timestamp
+                    discoveredMints.addAll(result.mints)
+                    selectedMints.addAll(result.mints)
+                } else {
+                    // No backup found, use existing mints
+                    backupFound = false
+                    backupTimestamp = null
+                }
 
-            // Also include existing configured mints
-            discoveredMints.addAll(existingMints)
-            selectedMints.addAll(existingMints)
+                // Also include existing configured mints
+                discoveredMints.addAll(existingMints)
+                selectedMints.addAll(existingMints)
 
-            // Proceed to review screen
-            withContext(Dispatchers.Main) {
-                updateUIForStep(RestoreStep.REVIEW_MINTS)
+                // Proceed to review screen
+                withContext(Dispatchers.Main) {
+                    updateUIForStep(RestoreStep.REVIEW_MINTS)
+                }
+            } catch (t: Throwable) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@RestoreWalletActivity, getString(R.string.restore_backup_failed), Toast.LENGTH_LONG).show()
+                }
+                Log.e(TAG, "Failed to fetch mint backup", t)
             }
         }
     }
@@ -637,11 +644,12 @@ class RestoreWalletActivity : AppCompatActivity() {
                     showSuccess(balanceChanges)
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "Restore failed", e)
                 withContext(Dispatchers.Main) {
                     updateUIForStep(RestoreStep.REVIEW_MINTS)
                     Toast.makeText(
                         this@RestoreWalletActivity,
-                        "Restore failed: ${e.message}",
+                        getString(R.string.restore_failed_generic),
                         Toast.LENGTH_LONG
                     ).show()
                 }

@@ -208,42 +208,51 @@ class MintsSettingsActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            // Load balances
-            val balances = withContext(Dispatchers.IO) {
-                CashuWalletManager.getAllMintBalances()
+            try {
+                // Load balances
+                val balances = withContext(Dispatchers.IO) {
+                    CashuWalletManager.getAllMintBalances()
+                }
+                mintBalances.clear()
+                mintBalances.putAll(balances)
+                
+                // Auto-select lightning mint if none selected
+                if (selectedLightningMint == null || !mints.contains(selectedLightningMint)) {
+                    val highestBalanceMint = mints.maxByOrNull { mintBalances[it] ?: 0L }
+                    highestBalanceMint?.let { setLightningMint(it, animate = false) }
+                }
+                
+                // Build UI
+                buildMintList(mints)
+                updateLightningMintCard()
+                updateTotalBalance()
+                
+                // Refresh stale mint info
+                refreshStaleMintInfo()
+            } catch (t: Throwable) {
+                Log.e(TAG, "Failed to load mint balances", t)
+                Toast.makeText(this@MintsSettingsActivity, getString(R.string.error_loading_mints), Toast.LENGTH_LONG).show()
             }
-            mintBalances.clear()
-            mintBalances.putAll(balances)
-            
-            // Auto-select lightning mint if none selected
-            if (selectedLightningMint == null || !mints.contains(selectedLightningMint)) {
-                val highestBalanceMint = mints.maxByOrNull { mintBalances[it] ?: 0L }
-                highestBalanceMint?.let { setLightningMint(it, animate = false) }
-            }
-            
-            // Build UI
-            buildMintList(mints)
-            updateLightningMintCard()
-            updateTotalBalance()
-            
-            // Refresh stale mint info
-            refreshStaleMintInfo()
         }
     }
 
     private fun refreshBalances() {
         lifecycleScope.launch {
-            val balances = withContext(Dispatchers.IO) {
-                CashuWalletManager.getAllMintBalances()
+            try {
+                val balances = withContext(Dispatchers.IO) {
+                    CashuWalletManager.getAllMintBalances()
+                }
+                mintBalances.clear()
+                mintBalances.putAll(balances)
+                
+                // Update UI
+                val mints = mintManager.getAllowedMints()
+                buildMintList(mints)
+                updateLightningMintCard()
+                updateTotalBalance()
+            } catch (t: Throwable) {
+                Log.e(TAG, "Failed to refresh mint balances", t)
             }
-            mintBalances.clear()
-            mintBalances.putAll(balances)
-            
-            // Update UI
-            val mints = mintManager.getAllowedMints()
-            buildMintList(mints)
-            updateLightningMintCard()
-            updateTotalBalance()
         }
     }
 
@@ -409,36 +418,41 @@ class MintsSettingsActivity : AppCompatActivity() {
         addMintCard.setLoading(true)
 
         lifecycleScope.launch {
-            val isValid = validateMintUrl(mintUrl)
-            
-            if (!isValid) {
-                addMintCard.setLoading(false)
-                Toast.makeText(
-                    this@MintsSettingsActivity,
-                    getString(R.string.mints_invalid_url),
-                    Toast.LENGTH_LONG
-                ).show()
-                return@launch
-            }
+            try {
+                val isValid = validateMintUrl(mintUrl)
+                
+                if (!isValid) {
+                    addMintCard.setLoading(false)
+                    Toast.makeText(
+                        this@MintsSettingsActivity,
+                        getString(R.string.mints_invalid_url),
+                        Toast.LENGTH_LONG
+                    ).show()
+                    return@launch
+                }
 
-            val added = mintManager.addMint(mintUrl)
-            if (added) {
-                fetchAndStoreMintInfo(mintUrl)
-                loadMintsAndBalances()
-                addMintCard.clearInput()
-                addMintCard.collapseIfExpanded()
-                
-                // Broadcast that mints changed so other activities can refresh
-                BalanceRefreshBroadcast.send(this@MintsSettingsActivity, BalanceRefreshBroadcast.REASON_MINT_ADDED)
-                
-                Toast.makeText(
-                    this@MintsSettingsActivity,
-                    getString(R.string.mints_added_toast),
-                    Toast.LENGTH_SHORT
-                ).show()
+                val added = mintManager.addMint(mintUrl)
+                if (added) {
+                    fetchAndStoreMintInfo(mintUrl)
+                    loadMintsAndBalances()
+                    addMintCard.clearInput()
+                    addMintCard.collapseIfExpanded()
+                    
+                    // Broadcast that mints changed so other activities can refresh
+                    BalanceRefreshBroadcast.send(this@MintsSettingsActivity, BalanceRefreshBroadcast.REASON_MINT_ADDED)
+                    
+                    Toast.makeText(
+                        this@MintsSettingsActivity,
+                        getString(R.string.mints_added_toast),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (t: Throwable) {
+                Log.e(TAG, "Failed to add mint", t)
+                Toast.makeText(this@MintsSettingsActivity, R.string.mints_add_failed, Toast.LENGTH_LONG).show()
+            } finally {
+                addMintCard.setLoading(false)
             }
-            
-            addMintCard.setLoading(false)
         }
     }
 
@@ -478,29 +492,37 @@ class MintsSettingsActivity : AppCompatActivity() {
 
     private suspend fun fetchAndStoreMintInfo(mintUrl: String) {
         withContext(Dispatchers.IO) {
-            val info = CashuWalletManager.fetchMintInfo(mintUrl)
-            if (info != null) {
-                val json = CashuWalletManager.mintInfoToJson(info)
-                mintManager.setMintInfo(mintUrl, json)
-                mintManager.setMintRefreshTimestamp(mintUrl)
-                
-                info.iconUrl?.let { iconUrl ->
-                    if (iconUrl.isNotEmpty()) {
-                        MintIconCache.downloadAndCacheIcon(mintUrl, iconUrl)
+            try {
+                val info = CashuWalletManager.fetchMintInfo(mintUrl)
+                if (info != null) {
+                    val json = CashuWalletManager.mintInfoToJson(info)
+                    mintManager.setMintInfo(mintUrl, json)
+                    mintManager.setMintRefreshTimestamp(mintUrl)
+                    
+                    info.iconUrl?.let { iconUrl ->
+                        if (iconUrl.isNotEmpty()) {
+                            MintIconCache.downloadAndCacheIcon(mintUrl, iconUrl)
+                        }
                     }
                 }
+            } catch (t: Throwable) {
+                Log.w(TAG, "Failed to fetch mint info for ${mintUrl}", t)
             }
         }
     }
 
     private fun refreshStaleMintInfo() {
         lifecycleScope.launch {
-            val mintsToRefresh = mintManager.getMintsNeedingRefresh()
-            for (mintUrl in mintsToRefresh) {
-                fetchAndStoreMintInfo(mintUrl)
-            }
-            if (mintsToRefresh.isNotEmpty()) {
-                updateLightningMintCard()
+            try {
+                val mintsToRefresh = mintManager.getMintsNeedingRefresh()
+                for (mintUrl in mintsToRefresh) {
+                    fetchAndStoreMintInfo(mintUrl)
+                }
+                if (mintsToRefresh.isNotEmpty()) {
+                    updateLightningMintCard()
+                }
+            } catch (t: Throwable) {
+                Log.w(TAG, "Failed to refresh mint info", t)
             }
         }
     }
