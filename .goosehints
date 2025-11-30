@@ -2,3 +2,6 @@
 - reuse as much code as you can, avoid code duplication. 
 - if files get too long (longer than 300ish lines) tend to create new files when you write code with a new responsibility. we want to keep the files relatively short and keep the code easier to maintain.
 - design all features so that it looks incredibly good, Apple-like high quality app design with great UX and professional and useful design that makes it easy to use as a person working at a checkout. Apple-like UI design patterns.
+- unless for logging purposes, avoid the adding hard-coded string literals to the codebase: create localized labels instead.
+- always provide documentation for any and all new or modified methods and classes
+- do not use FQN (Fully Qualified Names). always prefer imports on top of the file and -if necessary- aliases.
