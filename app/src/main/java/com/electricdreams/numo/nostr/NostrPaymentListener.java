@@ -172,14 +172,18 @@ public final class NostrPaymentListener {
                 Log.w(TAG, "Redemption returned empty token; ignoring");
             }
         } catch (RuntimeException re) {
-            if (re.getCause() instanceof CashuPaymentHelper.RedemptionException) {
-                CashuPaymentHelper.RedemptionException e = (CashuPaymentHelper.RedemptionException) re.getCause();
+            Throwable cause = re.getCause();
+            if (cause instanceof CashuPaymentHelper.RedemptionException) {
+                CashuPaymentHelper.RedemptionException e = (CashuPaymentHelper.RedemptionException) cause;
                 Log.e(TAG, "Redemption error for event from " + relayUrl + ": " + e.getMessage(), e);
                 if (errorHandler != null) {
                     errorHandler.onError("PaymentRequestPayload redemption failed", e);
                 }
             } else {
-                throw re;
+                Log.e(TAG, "Unexpected runtime error during Nostr redemption from " + relayUrl + ": " + re.getMessage(), re);
+                if (errorHandler != null) {
+                    errorHandler.onError("Unexpected error during Nostr redemption", re);
+                }
             }
         } catch (CashuPaymentHelper.RedemptionException e) {
             Log.e(TAG, "Redemption error for event from " + relayUrl + ": " + e.getMessage(), e);

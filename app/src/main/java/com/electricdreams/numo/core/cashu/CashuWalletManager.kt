@@ -196,10 +196,20 @@ object CashuWalletManager : MintManager.MintChangeListener {
         // so that it is completely isolated from the main POS wallet.
         val tempMnemonic = generateMnemonic()
 
-        // Use an in-memory database for temporary operations. We use the
-        // WalletDatabaseImpl test constructor with a fake pointer; CDK will
-        // treat this as an ephemeral, non-persistent database instance.
-        val tempDb = WalletDatabaseImpl(NoPointer)
+        // Use a throwaway on-disk SQLite database under the app's cache
+        // directory for temporary operations. We do *not* use the
+        // WalletDatabaseImpl(NoPointer) test constructor here because it
+        // provides no backing storage and causes CDK's WalletDatabase
+        // callbacks (e.g., add_melt_quote) to fail with
+        // UnexpectedUniFFICallbackError / NullPointerException.
+        val tempDbFile = appContext.getDatabasePath("cashu_temp_wallet_${System.currentTimeMillis()}.db").apply {
+            parentFile?.let { parent ->
+                if (!parent.exists()) {
+                    parent.mkdirs()
+                }
+            }
+        }
+        val tempDb = WalletSqliteDatabase(tempDbFile.absolutePath)
 
         val config = WalletConfig(targetProofCount = 10u)
 

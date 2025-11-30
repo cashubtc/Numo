@@ -83,38 +83,83 @@ object SwapToLightningMintManager {
     ): SwapResult = withContext(Dispatchers.IO) {
         Log.d(TAG, "Starting swapFromUnknownMint for mint=$unknownMintUrl amount=$expectedAmount sats")
 
-        // 1) Obtain or reuse Lightning invoice for this payment (Lightning mint)
-        val mintManager = MintManager.getInstance(appContext)
-        val lightningMintUrl = mintManager.getPreferredLightningMint()
-            ?: run {
-                Log.e(TAG, "No preferred Lightning mint configured")
-                return@withContext SwapResult.Failure("No Lightning mint configured")
-            }
-
-        val lightningInvoiceInfo = LightningMintInvoiceManager.getOrCreateInvoiceForPayment(
-            appContext = appContext,
-            lightningMintUrl = lightningMintUrl,
-            paymentContext = paymentContext
-        )
-
-        val bolt11 = lightningInvoiceInfo.bolt11
-        Log.d(TAG, "Using Lightning invoice for swap: quoteId=${lightningInvoiceInfo.quoteId} bolt11=$bolt11")
-        // 2) Create a temporary single-mint Wallet and request a melt quote
-        //    from the unknown mint using the Lightning invoice. This wallet
+        // 1) Create a temporary single-mint Wallet and receive the payer's
+        //    token so that it holds the proofs we want to melt. This wallet
         //    is entirely ephemeral and uses its own random seed.
 
         val tempWallet = try {
             CashuWalletManager.getTemporaryWalletForMint(unknownMintUrl)
         } catch (t: Throwable) {
-            val msg = "Failed to create temporary wallet for unknown mint: ${t.message}"
+            val msg = "Failed to create temporary wallet for unknown mint: ${'$'}{t.message}"
             Log.e(TAG, msg, t)
             return@withContext SwapResult.Failure(msg)
         }
 
+        // Before we can melt, CDK requires that the wallet actually holds
+        // proofs for this mint. We receive the provided Cashu token into the
+        // temporary wallet and use the returned Amount as the received
+        // balance for this swap.
+        val walletBalance: Long = try {
+            val cdkToken = org.cashudevkit.Token.decode(cashuToken)
+
+            val receiveOptions = org.cashudevkit.ReceiveOptions(
+                amountSplitTarget = org.cashudevkit.SplitTarget.None,
+                p2pkSigningKeys = emptyList(),
+                preimages = emptyList(),
+                metadata = emptyMap(),
+            )
+
+            Log.d(TAG, "Receiving payer token into temporary wallet for mint=$unknownMintUrl")
+            val receivedAmount = tempWallet.receive(cdkToken, receiveOptions)
+            receivedAmount.value.toLong()
+        } catch (t: Throwable) {
+            val msg = "Failed to receive payer token into temporary wallet: ${t.message}"
+            Log.e(TAG, msg, t)
+            try { tempWallet.close() } catch (_: Throwable) {}
+            return@withContext SwapResult.Failure(msg)
+        }
+
+        if (walletBalance <= 0L) {
+            val msg = "Temporary wallet has zero balance after receive"
+            Log.e(TAG, msg)
+            try { tempWallet.close() } catch (_: Throwable) {}
+            return@withContext SwapResult.Failure(msg)
+        }
+
+        val feeBuffer = (walletBalance.toDouble() * MAX_FEE_RESERVE_RATIO).toLong() // 3% fee buffer
+        val lightningAmount = walletBalance - feeBuffer
+        if (lightningAmount <= 0L) {
+            val msg = "Received amount $walletBalance is too small after 3% fee buffer"
+            Log.e(TAG, msg)
+            try { tempWallet.close() } catch (_: Throwable) {}
+            return@withContext SwapResult.Failure(msg)
+        }
+
+        // 3) Obtain or reuse a Lightning mint quote for `lightningAmount`.
+        val mintManager = MintManager.getInstance(appContext)
+        val lightningMintUrl = mintManager.getPreferredLightningMint()
+            ?: run {
+                Log.e(TAG, "No preferred Lightning mint configured")
+                try { tempWallet.close() } catch (_: Throwable) {}
+                return@withContext SwapResult.Failure("No Lightning mint configured")
+            }
+
+        val adjustedPaymentContext = paymentContext.copy(amountSats = lightningAmount)
+
+        val lightningInvoiceInfo = LightningMintInvoiceManager.getOrCreateInvoiceForPayment(
+            appContext = appContext,
+            lightningMintUrl = lightningMintUrl,
+            paymentContext = adjustedPaymentContext
+        )
+
+        val bolt11 = lightningInvoiceInfo.bolt11
+        Log.d(TAG, "Using Lightning invoice for swap: quoteId=${'$'}{lightningInvoiceInfo.quoteId} bolt11=$bolt11")
+
+        // 4) Request a melt quote from the unknown mint for this bolt11.
         val meltQuote: MeltQuote = try {
             tempWallet.meltQuote(bolt11, null)
         } catch (t: Throwable) {
-            val msg = "Failed to request melt quote from unknown mint: ${t.message}"
+            val msg = "Failed to request melt quote from unknown mint: ${'$'}{t.message}"
             Log.e(TAG, msg, t)
             tempWallet.close()
             return@withContext SwapResult.Failure(msg)
@@ -129,19 +174,11 @@ object SwapToLightningMintManager {
             return@withContext SwapResult.Failure(msg)
         }
 
-        val feeRatio = feeReserve.toDouble() / quoteAmount.toDouble()
-        if (feeRatio > MAX_FEE_RESERVE_RATIO) {
-            val percent = feeRatio * 100.0
-            val msg = "Melt fee reserve too high: ${"%.2f".format(percent)}% (max 5%)"
+        val totalMeltRequired = quoteAmount + feeReserve
+        if (totalMeltRequired > walletBalance) {
+            val msg = "Unknown-mint melt requires $totalMeltRequired sats but temp wallet balance is $walletBalance"
             Log.w(TAG, msg)
-            return@withContext SwapResult.Failure(msg)
-        }
-
-        // 3) Ensure the melt quote amount covers the expected payment
-        if (quoteAmount < expectedAmount) {
-            val msg = "Melt quote amount $quoteAmount is less than expected amount $expectedAmount"
-            Log.w(TAG, msg)
-            tempWallet.close()
+            try { tempWallet.close() } catch (_: Throwable) {}
             return@withContext SwapResult.Failure(msg)
         }
 

@@ -454,31 +454,26 @@ object CashuPaymentHelper {
             if (payload.unit == null || payload.unit != "sat") {
                 throw RedemptionException("Unsupported unit in PaymentRequestPayload: ${payload.unit}")
             }
-            if (payload.proofs.isNullOrEmpty()) {
-                throw RedemptionException("PaymentRequestPayload contains no proofs")
-            }
+	            if (payload.proofs.isNullOrEmpty()) {
+	                throw RedemptionException("PaymentRequestPayload contains no proofs")
+	            }
 
-            val mintUrl = payload.mint!!
-            if (!allowedMints.isNullOrEmpty() && !allowedMints.contains(mintUrl)) {
-                throw RedemptionException("Mint $mintUrl not in allowed list")
-            }
-
-            val totalAmount = payload.proofs!!.sumOf { it.amount }
-            if (totalAmount < expectedAmount) {
-                throw RedemptionException(
-                    "Insufficient amount in payload proofs: $totalAmount < expected $expectedAmount",
-                )
-            }
+	            val totalAmount = payload.proofs!!.sumOf { it.amount }
+	            if (totalAmount < expectedAmount) {
+	                throw RedemptionException(
+	                    "Insufficient amount in payload proofs: $totalAmount < expected $expectedAmount",
+	                )
+	            }
 
             // Build a legacy cashu-jdk Token from proofs, then delegate to the
             // high-level swap-aware redemption path so that unknown mints can be
             // swapped to the merchant's Lightning mint.
-            val tempToken = com.cashujdk.nut00.Token(payload.proofs!!, payload.unit!!, mintUrl)
-            val encoded = tempToken.encode()
-            return redeemTokenWithSwap(
-                appContext = appContext,
-                tokenString = encoded,
-                expectedAmount = expectedAmount,
+            val tempToken = com.cashujdk.nut00.Token(payload.proofs!!, payload.unit!!, payload.mint!!)
+	            val encoded = tempToken.encode()
+	            return redeemTokenWithSwap(
+	                appContext = appContext,
+	                tokenString = encoded,
+	                expectedAmount = expectedAmount,
                 allowedMints = allowedMints,
                 paymentContext = paymentContext,
             )
