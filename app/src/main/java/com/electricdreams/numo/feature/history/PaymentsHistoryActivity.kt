@@ -325,6 +325,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             lightningInvoice: String,
             lightningQuoteId: String,
             lightningMintUrl: String,
+            swapToLightningMintJson: String? = null,
         ) {
             val history = getPaymentHistory(context).toMutableList()
             val index = history.indexOfFirst { it.id == paymentId }
@@ -354,6 +355,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     basketId = existing.basketId, // Preserve basket ID
                     tipAmountSats = existing.tipAmountSats, // Preserve tip info
                     tipPercentage = existing.tipPercentage, // Preserve tip info
+                    swapToLightningMintJson = swapToLightningMintJson ?: existing.swapToLightningMintJson,
                 )
                 history[index] = updated
 

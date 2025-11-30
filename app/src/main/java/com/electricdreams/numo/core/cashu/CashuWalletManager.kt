@@ -10,6 +10,10 @@ import kotlinx.coroutines.launch
 import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.MintUrl
 import org.cashudevkit.MultiMintWallet
+import org.cashudevkit.Wallet
+import org.cashudevkit.WalletConfig
+import org.cashudevkit.WalletDatabaseImpl
+import org.cashudevkit.NoPointer
 import org.cashudevkit.WalletSqliteDatabase
 import org.cashudevkit.generateMnemonic
 
@@ -112,7 +116,6 @@ object CashuWalletManager : MintManager.MintChangeListener {
             dbFile.delete()
             Log.d(TAG, "Deleted existing wallet database")
         }
-
         // Save new mnemonic
         val prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().putString(KEY_MNEMONIC, newMnemonic).apply()
@@ -167,8 +170,46 @@ object CashuWalletManager : MintManager.MintChangeListener {
         wallet = newWallet
 
         Log.d(TAG, "Wallet restore complete. Restored ${mints.size} mints.")
-        
         return balanceChanges
+    }
+
+    /**
+     * Create a temporary, single-mint wallet instance for interacting with a
+     * mint that is not part of the main MultiMintWallet's allowed-mints set.
+     *
+     * This is used for swap-to-Lightning flows where we want to:
+     *  - keep our main wallet and balances untouched, and
+     *  - treat the unknown payer mint purely as a transient liquidity source.
+     *
+     * The temporary wallet:
+     *  - Uses the same global mnemonic (so any resulting proofs can be
+     *    understood by CDK), but
+     *  - Stores its state in an in-memory SQLite database ("file::memory:")
+     *    so it does not interfere with the persistent wallet database.
+     */
+    suspend fun getTemporaryWalletForMint(unknownMintUrl: String): Wallet {
+        if (!this::appContext.isInitialized) {
+            throw IllegalStateException("CashuWalletManager not initialized")
+        }
+
+        // For the temporary wallet we deliberately use a fresh random mnemonic
+        // so that it is completely isolated from the main POS wallet.
+        val tempMnemonic = generateMnemonic()
+
+        // Use an in-memory database for temporary operations. We use the
+        // WalletDatabaseImpl test constructor with a fake pointer; CDK will
+        // treat this as an ephemeral, non-persistent database instance.
+        val tempDb = WalletDatabaseImpl(NoPointer)
+
+        val config = WalletConfig(targetProofCount = 10u)
+
+        return Wallet(
+            unknownMintUrl,
+            CurrencyUnit.Sat,
+            tempMnemonic,
+            tempDb,
+            config
+        )
     }
 
     override fun onMintsChanged(newMints: List<String>) {

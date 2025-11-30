@@ -31,6 +31,8 @@ import com.electricdreams.numo.ui.util.QrCodeGenerator
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class PaymentRequestActivity : AppCompatActivity() {
 
@@ -570,12 +572,49 @@ class PaymentRequestActivity : AppCompatActivity() {
                 // Set up callback for when a token is received or an error occurs
                 hceService.setPaymentCallback(object : NdefHostCardEmulationService.CashuPaymentCallback {
                     override fun onCashuTokenReceived(token: String) {
-                        runOnUiThread {
+                        // Raw Cashu token received over NFC. Delegate full
+                        // validation, swap-to-Lightning-mint (if needed),
+                        // and redemption to CashuPaymentHelper.
+                        uiScope.launch {
                             try {
-                                handlePaymentSuccess(token)
+                                val paymentId = pendingPaymentId
+                                val paymentContext = com.electricdreams.numo.payment.SwapToLightningMintManager.PaymentContext(
+                                    paymentId = paymentId,
+                                    amountSats = paymentAmount,
+                                )
+
+                                val mintManager = MintManager.getInstance(this@PaymentRequestActivity)
+                                val allowedMints = mintManager.getAllowedMints()
+
+                                val redeemedToken = CashuPaymentHelper.redeemTokenWithSwap(
+                                    appContext = this@PaymentRequestActivity,
+                                    tokenString = token,
+                                    expectedAmount = paymentAmount,
+                                    allowedMints = allowedMints,
+                                    paymentContext = paymentContext,
+                                )
+
+                                // If redeemedToken is non-empty, it's a Cashu
+                                // payment; if empty, it was fulfilled via
+                                // Lightning swap.
+                                withContext(Dispatchers.Main) {
+                                    if (redeemedToken.isNotEmpty()) {
+                                        handlePaymentSuccess(redeemedToken)
+                                    } else {
+                                        handleLightningPaymentSuccess()
+                                    }
+                                }
+                            } catch (e: CashuPaymentHelper.RedemptionException) {
+                                val msg = e.message ?: "Unknown redemption error"
+                                Log.e(TAG, "Error in NDEF payment redemption: $msg", e)
+                                withContext(Dispatchers.Main) {
+                                    handlePaymentError("NDEF Payment failed: $msg")
+                                }
                             } catch (e: Exception) {
-                                Log.e(TAG, "Error in NDEF payment callback: ${e.message}", e)
-                                handlePaymentError("NDEF Payment failed: ${e.message}")
+                                Log.e(TAG, "Unexpected error in NDEF payment callback: ${e.message}", e)
+                                withContext(Dispatchers.Main) {
+                                    handlePaymentError("NDEF Payment failed: ${e.message}")
+                                }
                             }
                         }
                     }
@@ -620,7 +659,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             null
         }
 
-        // Update pending payment to completed
+        // Update pending payment to completed (Cashu payment path)
         pendingPaymentId?.let { paymentId ->
             PaymentsHistoryActivity.completePendingPayment(
                 context = this,

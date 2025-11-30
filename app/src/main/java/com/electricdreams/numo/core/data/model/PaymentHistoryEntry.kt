@@ -90,6 +90,14 @@ data class PaymentHistoryEntry(
     /** Tip percentage selected (0 if custom amount, or preset like 5, 10, 15, 20) */
     @SerializedName("tipPercentage")
     val tipPercentage: Int = 0,
+
+    /**
+     * Optional metadata for swap-to-Lightning-mint flows.
+     * Stores the unknown mint URL and the associated melt/mint quote IDs
+     * so that the swap can be inspected or resumed from history.
+     */
+    @SerializedName("swapToLightningMintJson")
+    val swapToLightningMintJson: String? = null,
 ) {
 
     /** Check if this payment includes a tip */
@@ -183,6 +191,17 @@ data class PaymentHistoryEntry(
         const val TYPE_LIGHTNING = "lightning"
 
         /**
+         * Simple DTO for recording swap-to-Lightning-mint metadata on a
+         * PaymentHistoryEntry. Serialized as JSON into swapToLightningMintJson.
+         */
+        data class SwapToLightningMintFrame(
+            val unknownMintUrl: String,
+            val meltQuoteId: String,
+            val lightningMintUrl: String,
+            val lightningQuoteId: String,
+        )
+
+        /**
          * Extract mint URL from a cashu token.
          */
         @JvmStatic
@@ -234,6 +253,7 @@ data class PaymentHistoryEntry(
                 basketId = basketId,
                 tipAmountSats = tipAmountSats,
                 tipPercentage = tipPercentage,
+                swapToLightningMintJson = null,
             )
         }
     }

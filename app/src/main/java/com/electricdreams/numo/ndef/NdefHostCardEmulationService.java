@@ -95,103 +95,19 @@ public class NdefHostCardEmulationService extends HostApduService {
                         
                         // First try to extract a Cashu token from the message
                         String cashuToken = CashuPaymentHelper.extractCashuToken(message);
-                        
+
                         if (cashuToken != null) {
                             Log.i(TAG, "Extracted Cashu token: " + cashuToken);
-                            
-                            // Get the list of allowed mints
-                            List<String> allowedMints = com.electricdreams.numo.core.util.MintManager.getInstance(getApplicationContext()).getAllowedMints();
-                            Log.i(TAG, "Using allowed mints list with " + allowedMints.size() + " entries");
-                            for (String mint : allowedMints) {
-                                Log.d(TAG, "allowed mint: " + mint);
-                            }
-                            
-                            // Validate the token against expected amount and mints
-                            boolean isValid = false;
-                            if (expectedAmount > 0) {
-                                Log.i(TAG, "Validating token for expected amount: " + expectedAmount);
-                                isValid = CashuPaymentHelper.validateToken(cashuToken, expectedAmount, allowedMints);
-                                if (!isValid) {
-                                    String errorMsg = "Token validation failed for amount or mint";
-                                    Log.e(TAG, errorMsg);
-                                    
-                                    // Clear payment request on validation failure
-                                    clearPaymentRequest();
-                                    
-                                    // Notify callback of validation error
-                                    if (paymentCallback != null) {
-                                        Log.i(TAG, "Calling error callback with: " + errorMsg);
-                                        paymentCallback.onCashuPaymentError(errorMsg);
-                                    } else {
-                                        Log.e(TAG, "Payment callback is null, can't report validation error");
-                                    }
-                                    return;
-                                }
-                                Log.i(TAG, "Token passed amount and mint validation for " + expectedAmount + " sats");
+
+                            // HCE layer should only extract and forward the token.
+                            // Validation, swap-to-Lightning-mint, and redemption are
+                            // handled at a higher level (CashuPaymentHelper / Kotlin).
+
+                            if (paymentCallback != null) {
+                                Log.i(TAG, "Forwarding raw Cashu token to payment callback");
+                                paymentCallback.onCashuTokenReceived(cashuToken);
                             } else {
-                                // If no expected amount, just do basic validation
-                                Log.w(TAG, "No expected amount set for validation, performing basic check only");
-                                isValid = true;
-                            }
-                            
-                            if (isValid) {
-                                Log.i(TAG, "Token passed validation, attempting redemption...");
-                                
-                                try {
-                                    // Try to redeem the token - this will throw an exception if redemption fails
-                                    String redeemedToken = CashuPaymentHelper.redeemToken(cashuToken);
-                                    Log.i(TAG, "Token successfully redeemed and reissued: " + redeemedToken.substring(0, Math.min(redeemedToken.length(), 20)) + "...");
-                                    
-                                    // Notify the callback with the redeemed token
-                                    // The callback will handle success feedback (sound + vibration)
-                                    if (paymentCallback != null) {
-                                        Log.i(TAG, "Calling payment success callback");
-                                        paymentCallback.onCashuTokenReceived(redeemedToken);
-                                    } else {
-                                        Log.e(TAG, "Payment callback is null, can't deliver redeemed token");
-                                    }
-                                } catch (CashuPaymentHelper.RedemptionException e) {
-                                    // This is a specific redemption failure
-                                    String errorMsg = "Token redemption failed: " + e.getMessage();
-                                    Log.e(TAG, errorMsg, e);
-                                    
-                                    // Reset service state on error
-                                    clearPaymentRequest();
-                                    
-                                    // Notify callback of error
-                                    if (paymentCallback != null) {
-                                        Log.i(TAG, "Calling payment error callback for redemption failure");
-                                        paymentCallback.onCashuPaymentError(errorMsg);
-                                    } else {
-                                        Log.e(TAG, "Payment callback is null, can't report redemption error");
-                                    }
-                                } catch (Exception e) {
-                                    // This is an unexpected error
-                                    String errorMsg = "Unexpected error during token redemption: " + e.getMessage();
-                                    Log.e(TAG, errorMsg, e);
-                                    
-                                    // Reset service state on error
-                                    clearPaymentRequest();
-                                    
-                                    // Notify callback of error
-                                    if (paymentCallback != null) {
-                                        Log.i(TAG, "Calling payment error callback for unexpected error");
-                                        paymentCallback.onCashuPaymentError(errorMsg);
-                                    } else {
-                                        Log.e(TAG, "Payment callback is null, can't report redemption error");
-                                    }
-                                } finally {
-                                    // Instead of always maintaining write mode, we now only maintain
-                                    // write mode and processing flags if we want to continue receiving tokens
-                                    Log.i(TAG, "Token processing complete");
-                                    // Disable incoming message processing after successful token processing
-                                    if (ndefProcessor != null) {
-                                        Log.i(TAG, "Disabling incoming message processing after token processing");
-                                        ndefProcessor.setProcessIncomingMessages(false);
-                                    }
-                                }
-                            } else {
-                                Log.e(TAG, "Token failed validation, ignoring");
+                                Log.e(TAG, "Payment callback is null, can't deliver raw Cashu token");
                             }
                         } else {
                             Log.i(TAG, "No Cashu token found in received message");
@@ -480,4 +396,5 @@ public class NdefHostCardEmulationService extends HostApduService {
             }
         }
     }
+
 }
