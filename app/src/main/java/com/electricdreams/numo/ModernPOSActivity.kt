@@ -1,5 +1,5 @@
 package com.electricdreams.numo
-import com.electricdreams.numo.R
+import android.widget.Toast
 
 import android.app.Activity
 import android.app.PendingIntent
@@ -193,12 +193,6 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback,
         super.onPause()
         CashuWalletManager.setErrorListener(null)
         nfcAdapter?.disableForegroundDispatch(this)
-    }
-
-    override fun onDestroy() {
-        uiCoordinator.stopServices()
-        bitcoinPriceWorker?.stop()
-        super.onDestroy()
     }
 
     override fun onDestroy() {

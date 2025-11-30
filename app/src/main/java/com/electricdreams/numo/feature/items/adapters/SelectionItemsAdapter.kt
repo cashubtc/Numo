@@ -217,7 +217,11 @@ class SelectionItemsAdapter(
             nameView.text = item.name ?: ""
 
             setupVariationDisplay(item, isCustomVariation)
-            priceView.text = item.getFormattedPrice()
+            val currencyCode = com.electricdreams.numo.core.util.CurrencyManager
+                .getInstance(itemView.context)
+                .getCurrentCurrency()
+            priceView.text = item.getFormattedPrice(currencyCode)
+
             setupStockDisplay(item, isCustomVariation)
             quantityView.text = basketQuantity.toString()
             loadItemImage(item)

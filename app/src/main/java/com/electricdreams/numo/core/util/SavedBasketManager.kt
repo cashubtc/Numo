@@ -361,7 +361,6 @@ class SavedBasketManager private constructor(context: Context) {
             put("price", item.price)
             put("priceSats", item.priceSats)
             put("priceType", item.priceType.name)
-            put("priceCurrency", item.priceCurrency)
             put("vatEnabled", item.vatEnabled)
             put("vatRate", item.vatRate)
             put("imagePath", item.imagePath ?: JSONObject.NULL)
@@ -381,7 +380,6 @@ class SavedBasketManager private constructor(context: Context) {
             price = json.optDouble("price", 0.0),
             priceSats = json.optLong("priceSats", 0L),
             priceType = try { PriceType.valueOf(json.optString("priceType", "FIAT")) } catch (e: Exception) { PriceType.FIAT },
-            priceCurrency = json.optString("priceCurrency", "USD"),
             vatEnabled = json.optBoolean("vatEnabled", false),
             vatRate = json.optInt("vatRate", 0),
             imagePath = if (json.isNull("imagePath")) null else json.optString("imagePath")

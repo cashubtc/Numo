@@ -1,6 +1,7 @@
 package com.electricdreams.numo.core.model
 
 import android.os.Parcelable
+import com.electricdreams.numo.core.util.CurrencyManager
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
 import kotlin.math.roundToLong
@@ -36,8 +37,7 @@ data class Item(
     var gtin: String? = null,                   // Global Trade Item Number
     var price: Double = 0.0,                    // NET price in fiat (excluding VAT)
     var priceSats: Long = 0L,                   // Price in satoshis (used when priceType is SATS)
-    var priceType: PriceType = PriceType.FIAT,  // Whether price is in fiat or sats
-    var priceCurrency: String = "USD",          // Fiat currency code (USD, EUR, etc.)
+    var priceType: PriceType = PriceType.FIAT,  // Whether price is in fiat or sats (fiat unit is global)
     var vatEnabled: Boolean = false,            // Whether VAT/tax applies to this item
     var vatRate: Int = 0,                       // VAT rate as integer percentage (e.g., 20 for 20%)
     var trackInventory: Boolean = false,        // Whether to track inventory for this item
@@ -121,14 +121,14 @@ data class Item(
      * - JPY: no decimals (e.g., ¥420)
      * - BTC: comma thousand separator (e.g., ₿1,000)
      */
-    fun getFormattedPrice(currencySymbol: String = "$"): String {
+    fun getFormattedPrice(currencyCode: String): String {
         return when (priceType) {
             PriceType.SATS -> Amount(priceSats, Amount.Currency.BTC).toString()
             PriceType.FIAT -> {
                 // Use gross price (including VAT) for customer-facing display
                 val displayPrice = getGrossPrice()
                 val minorUnits = (displayPrice * 100).roundToLong()
-                val currency = Amount.Currency.fromCode(priceCurrency)
+                val currency = Amount.Currency.fromCode(currencyCode)
                 Amount(minorUnits, currency).toString()
             }
         }
@@ -137,32 +137,32 @@ data class Item(
     /**
      * Get formatted net price (excluding VAT).
      */
-    fun getFormattedNetPrice(): String {
+    fun getFormattedNetPrice(currencyCode: String): String {
         if (priceType != PriceType.FIAT) return ""
         val minorUnits = (price * 100).roundToLong()
-        val currency = Amount.Currency.fromCode(priceCurrency)
+        val currency = Amount.Currency.fromCode(currencyCode)
         return Amount(minorUnits, currency).toString()
     }
 
     /**
      * Get formatted VAT amount.
      */
-    fun getFormattedVatAmount(): String {
+    fun getFormattedVatAmount(currencyCode: String): String {
         if (priceType != PriceType.FIAT || !vatEnabled) return ""
         val vatAmount = getVatAmount()
         val minorUnits = (vatAmount * 100).roundToLong()
-        val currency = Amount.Currency.fromCode(priceCurrency)
+        val currency = Amount.Currency.fromCode(currencyCode)
         return Amount(minorUnits, currency).toString()
     }
 
     /**
      * Get formatted gross price (including VAT).
      */
-    fun getFormattedGrossPrice(): String {
+    fun getFormattedGrossPrice(currencyCode: String): String {
         if (priceType != PriceType.FIAT) return ""
         val grossPrice = getGrossPrice()
         val minorUnits = (grossPrice * 100).roundToLong()
-        val currency = Amount.Currency.fromCode(priceCurrency)
+        val currency = Amount.Currency.fromCode(currencyCode)
         return Amount(minorUnits, currency).toString()
     }
 

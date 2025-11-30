@@ -55,6 +55,11 @@ class LightningMintHandler(
         
         /** Called when an error occurs in the Lightning flow */
         fun onError(message: String)
+        
+        /** Optional status message for long-running operations */
+        fun onStatusUpdate(message: String) {
+            // Default no-op so existing callers don't need to implement it
+        }
     }
 
     private var mintQuote: MintQuote? = null

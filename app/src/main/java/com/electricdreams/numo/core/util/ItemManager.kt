@@ -113,9 +113,6 @@ class ItemManager private constructor(context: Context) {
                                 com.electricdreams.numo.core.model.PriceType.FIAT
                             }
                         }
-                        if (!obj.isNull("priceCurrency")) {
-                            priceCurrency = obj.getString("priceCurrency")
-                        }
                         if (!obj.isNull("trackInventory")) {
                             trackInventory = obj.getBoolean("trackInventory")
                         }
@@ -165,7 +162,6 @@ class ItemManager private constructor(context: Context) {
                     // New fields for sats/fiat pricing
                     put("priceSats", item.priceSats)
                     put("priceType", item.priceType.name)
-                    put("priceCurrency", item.priceCurrency)
                     put("trackInventory", item.trackInventory)
                     
                     // VAT fields
