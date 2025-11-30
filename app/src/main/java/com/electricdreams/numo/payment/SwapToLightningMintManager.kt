@@ -99,6 +99,11 @@ object SwapToLightningMintManager {
         // proofs for this mint. We receive the provided Cashu token into the
         // temporary wallet and use the returned Amount as the received
         // balance for this swap.
+        Log.d(
+            TAG,
+            "swapFromUnknownMint: starting receive into temp wallet; expectedAmount=$expectedAmount sats"
+        )
+
         val walletBalance: Long = try {
             val cdkToken = org.cashudevkit.Token.decode(cashuToken)
 
@@ -111,7 +116,13 @@ object SwapToLightningMintManager {
 
             Log.d(TAG, "Receiving payer token into temporary wallet for mint=$unknownMintUrl")
             val receivedAmount = tempWallet.receive(cdkToken, receiveOptions)
-            receivedAmount.value.toLong()
+            val receivedSats = receivedAmount.value.toLong()
+
+            Log.d(
+                TAG,
+                "swapFromUnknownMint: receive completed; receivedSats=$receivedSats, tokenStringLength=${cashuToken.length}"
+            )
+            receivedSats
         } catch (t: Throwable) {
             val msg = "Failed to receive payer token into temporary wallet: ${t.message}"
             Log.e(TAG, msg, t)
@@ -126,8 +137,15 @@ object SwapToLightningMintManager {
             return@withContext SwapResult.Failure(msg)
         }
 
-        val feeBuffer = (walletBalance.toDouble() * MAX_FEE_RESERVE_RATIO).toLong() // 3% fee buffer
+        val feeBuffer = (walletBalance.toDouble() * MAX_FEE_RESERVE_RATIO).toLong()
         val lightningAmount = walletBalance - feeBuffer
+
+        Log.d(
+            TAG,
+            "swapFromUnknownMint: fee buffer + Lightning amount: " +
+                "walletBalance=$walletBalance, feeBuffer=$feeBuffer (ratio=${"%.2f".format(MAX_FEE_RESERVE_RATIO * 100)}%), " +
+                "lightningAmount=$lightningAmount"
+        )
         if (lightningAmount <= 0L) {
             val msg = "Received amount $walletBalance is too small after 3% fee buffer"
             Log.e(TAG, msg)
@@ -167,6 +185,14 @@ object SwapToLightningMintManager {
 
         val quoteAmount = meltQuote.amount.value.toLong()
         val feeReserve = meltQuote.feeReserve.value.toLong()
+
+        Log.d(
+            TAG,
+            "swapFromUnknownMint: melt quote details: " +
+                "quoteAmount=$quoteAmount, feeReserve=$feeReserve, " +
+                "totalMeltRequired=${quoteAmount + feeReserve}, " +
+                "walletBalance=$walletBalance, feeBuffer=$feeBuffer"
+        )
 
         if (quoteAmount <= 0) {
             val msg = "Invalid melt quote amount (zero or negative)"
