@@ -108,8 +108,8 @@ object SwapToLightningMintManager {
         // Then, we take the fee estimate from the melt quote response and
         // ask for a new mint quote with the adjusted amount
 
-        val feeBuffer = (expectedAmount * MAX_FEE_RESERVE_RATIO).toLong()
-        var lightningAmount = expectedAmount - feeBuffer
+        val feeBuffer = (paymentContext.amountSats * MAX_FEE_RESERVE_RATIO).toLong()
+        var lightningAmount = paymentContext.amountSats - feeBuffer
 
         if (lightningAmount <= 0L) {
             val msg = "Received amount $lightningAmount is too small after 5% fee buffer"
@@ -145,7 +145,7 @@ object SwapToLightningMintManager {
             return@withContext SwapResult.Failure(msg)
         }
 
-        lightningAmount = expectedAmount - (expectedAmount * MIN_FEE_OVERHEAD).roundToLong() - feeReserveEstimate
+        lightningAmount = paymentContext.amountSats - (paymentContext.amountSats * MIN_FEE_OVERHEAD).roundToLong() - feeReserveEstimate
         val adjustedPaymentContext = paymentContext.copy(amountSats = lightningAmount)
 
         Log.d(
@@ -272,10 +272,7 @@ object SwapToLightningMintManager {
         //    (e.g. LightningMintHandler) may also mint the quote if they
         //    were started from a separate Lightning-receive UI flow.
         try {
-            val wallet = CashuWalletManager.getWallet()
-                ?: return@withContext SwapResult.Failure("Wallet not initialized for Lightning mint")
-
-            val lightningMint = org.cashudevkit.MintUrl(lightningMintUrl)
+            val lightningMint = MintUrl(lightningMintUrl)
 
             Log.d(TAG, "Checking Lightning mint quote state for quoteId=${lightningInvoiceInfo.quoteId}")
             val lightningQuote = wallet.checkMintQuote(lightningMint, lightningInvoiceInfo.quoteId)
@@ -287,7 +284,7 @@ object SwapToLightningMintManager {
             ) {
                 Log.d(TAG, "Lightning quote is paid; attempting wallet.mint for quoteId=${lightningInvoiceInfo.quoteId}")
                 try {
-                    val proofs = wallet.mint(lightningMint, lightningInvoiceInfo.quoteId, null)
+                    wallet.mint(lightningMint, lightningInvoiceInfo.quoteId, null)
                     Log.d(TAG, "Minted ${'$'}{proofs.size} proofs on Lightning mint as part of swap flow")
                 } catch (mintError: Throwable) {
                     // Not fatal for the POS payment itself; the Lightning
