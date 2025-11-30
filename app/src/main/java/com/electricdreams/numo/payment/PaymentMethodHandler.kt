@@ -22,27 +22,9 @@ class PaymentMethodHandler(
     fun showPaymentMethodDialog(amount: Long, formattedAmount: String, checkoutBasketJson: String? = null) {
         val tipsManager = TipsManager.getInstance(activity)
         
-        if (tipsManager.tipsEnabled) {
-            // Route through tip selection activity first
-            val intent = Intent(activity, TipSelectionActivity::class.java).apply {
-                putExtra(TipSelectionActivity.EXTRA_PAYMENT_AMOUNT, amount)
-                putExtra(TipSelectionActivity.EXTRA_FORMATTED_AMOUNT, formattedAmount)
-                checkoutBasketJson?.let {
-                    putExtra(TipSelectionActivity.EXTRA_CHECKOUT_BASKET_JSON, it)
-                }
-            }
-            activity.startActivityForResult(intent, REQUEST_CODE_PAYMENT)
-        } else {
-            // Go directly to payment request
-            val intent = Intent(activity, PaymentRequestActivity::class.java).apply {
-                putExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, amount)
-                putExtra(PaymentRequestActivity.EXTRA_FORMATTED_AMOUNT, formattedAmount)
-                checkoutBasketJson?.let {
-                    putExtra(PaymentRequestActivity.EXTRA_CHECKOUT_BASKET_JSON, it)
-                }
-            }
-            activity.startActivityForResult(intent, REQUEST_CODE_PAYMENT)
-        }
+        val routing = PaymentRoutingCore.determinePaymentRoute(tipsManager.tipsEnabled)
+        val intent = routing.buildIntent(activity, amount, formattedAmount, checkoutBasketJson)
+        activity.startActivityForResult(intent, REQUEST_CODE_PAYMENT)
     }
 
     /** Proceed with NDEF payment (HCE) - preserved but not currently invoked in main flow */

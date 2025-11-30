@@ -41,7 +41,6 @@ class ItemBuilder {
         sku: String,
         gtin: String,
         priceType: PriceType,
-        currency: String,
         vatEnabled: Boolean,
         vatRate: Int,
         trackInventory: Boolean,
@@ -70,7 +69,6 @@ class ItemBuilder {
 
             // Pricing
             this.priceType = priceType
-            priceCurrency = currency
             when (priceType) {
                 PriceType.FIAT -> {
                     price = validationResult.fiatPrice // Always store net price (excluding VAT)

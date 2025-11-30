@@ -131,7 +131,10 @@ data class CheckoutBasket(
             totalSatoshis: Long,
         ): CheckoutBasket {
             val items = basketManager.getBasketItems().map { basketItem ->
-                CheckoutBasketItem.fromBasketItem(basketItem)
+                CheckoutBasketItem.fromBasketItem(
+                    basketItem = basketItem,
+                    currencyCode = currency,
+                )
             }
 
             return CheckoutBasket(
