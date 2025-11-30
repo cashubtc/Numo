@@ -16,6 +16,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -66,15 +67,6 @@ class ItemListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_item_list)
 
-        // Set up back button
-        findViewById<View?>(R.id.back_button)?.setOnClickListener {
-            if (isReorderingMode) {
-                exitReorderingMode()
-            } else {
-                finish()
-            }
-        }
-
         recyclerView = findViewById(R.id.items_recycler_view)
         emptyView = findViewById(R.id.empty_view)
         bottomActions = findViewById(R.id.bottom_actions)
@@ -92,6 +84,7 @@ class ItemListActivity : AppCompatActivity() {
         // Set up drag-and-drop reordering
         setupDragAndDrop()
 
+        setupBackHandler()
         updateEmptyViewVisibility()
 
         fabAddItem.setOnClickListener {
@@ -115,6 +108,27 @@ class ItemListActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         refreshItems()
+    }
+
+    private fun setupBackHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (isReorderingMode) {
+                    exitReorderingMode()
+                } else {
+                    finish()
+                }
+            }
+        })
+
+        // Top-left back button mirrors system back
+        findViewById<View?>(R.id.back_button)?.setOnClickListener {
+            if (isReorderingMode) {
+                exitReorderingMode()
+            } else {
+                finish()
+            }
+        }
     }
 
     private fun refreshItems() {
@@ -311,15 +325,6 @@ class ItemListActivity : AppCompatActivity() {
 
         // Refresh adapter to hide drag handles
         adapter.setReorderingMode(false)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
-        if (isReorderingMode) {
-            exitReorderingMode()
-        } else {
-            super.onBackPressed()
-        }
     }
 
     private inner class ItemAdapter(items: List<Item>) :

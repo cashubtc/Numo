@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -53,6 +54,7 @@ class PinEntryActivity : AppCompatActivity() {
         pinManager = PinManager.getInstance(this)
         initViews()
         initLaunchers()
+        setupBackHandler()
         setupListeners()
         setupCustomization()
         checkLockout()
@@ -85,6 +87,19 @@ class PinEntryActivity : AppCompatActivity() {
                 finish()
             }
         }
+    }
+
+    private fun setupBackHandler() {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val allowBack = intent.getBooleanExtra(EXTRA_ALLOW_BACK, true)
+                if (allowBack) {
+                    setResult(RESULT_CANCELLED)
+                    finish()
+                }
+                // If back is not allowed, we just swallow the back press
+            }
+        })
     }
 
     private fun setupCustomization() {
@@ -259,14 +274,6 @@ class PinEntryActivity : AppCompatActivity() {
         super.onDestroy()
         lockoutUpdateRunnable?.let { handler.removeCallbacks(it) }
         cooldownTimer?.cancel()
-    }
-
-    override fun onBackPressed() {
-        val allowBack = intent.getBooleanExtra(EXTRA_ALLOW_BACK, true)
-        if (allowBack) {
-            setResult(RESULT_CANCELLED)
-            super.onBackPressed()
-        }
     }
 
     companion object {
