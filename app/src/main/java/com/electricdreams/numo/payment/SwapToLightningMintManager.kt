@@ -9,8 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.cashudevkit.Amount as CdkAmount
 import org.cashudevkit.MeltQuote
-import org.cashudevkit.MintUrl
-import org.cashudevkit.QuoteState
+import org.cashudevkit.Melted
 import java.security.MessageDigest
 
 /**
@@ -175,29 +174,13 @@ object SwapToLightningMintManager {
             }
         }
 
-        val unknownMint = MintUrl(unknownMintUrl)
-
-        // 5) Execute melt on unknown mint using the temporary single-mint wallet
-        val finalQuote: MeltQuote = try {
-            try {
-                // Pay the bolt11 invoice using the single-mint Wallet by its
-                // local melt quote id.
-                tempWallet.melt(meltQuote.id)
-            } catch (t: Throwable) {
-                val msg = "Melt execution failed on unknown mint: ${t.message}"
-                Log.e(TAG, msg, t)
-                return@withContext SwapResult.Failure(msg)
-            }
-
-            // 6) Fetch final melt quote from our main MultiMintWallet and ensure it is PAID.
-            //    We rely on the MultiMintWallet's view of the quote for
-            //    paymentPreimage and state.
-            val mainWallet = CashuWalletManager.getWallet()
-                ?: return@withContext SwapResult.Failure("Wallet not initialized")
-
-            mainWallet.checkMeltQuote(unknownMint, meltQuote.id)
+        // 5) Execute melt on unknown mint using the temporary single-mint wallet.
+        //    The Melted result carries the final state, preimage, and fee info
+        //    for this Lightning payment.
+        val melted: Melted = try {
+            tempWallet.melt(meltQuote.id)
         } catch (t: Throwable) {
-            val msg = "Failed to check final melt quote: ${t.message}"
+            val msg = "Melt execution failed on unknown mint: ${t.message}"
             Log.e(TAG, msg, t)
             return@withContext SwapResult.Failure(msg)
         } finally {
@@ -207,15 +190,15 @@ object SwapToLightningMintManager {
             }
         }
 
-        if (finalQuote.state != QuoteState.PAID) {
-            val msg = "Unknown-mint melt did not complete: state=${finalQuote.state}"
+        if (melted.state != org.cashudevkit.QuoteState.PAID) {
+            val msg = "Unknown-mint melt did not complete: state=${melted.state}"
             Log.w(TAG, msg)
             return@withContext SwapResult.Failure(msg)
         }
 
-        val preimageHex = finalQuote.paymentPreimage
+        val preimageHex = melted.preimage
             ?: run {
-                val msg = "Unknown-mint melt quote is PAID but has no paymentPreimage"
+                val msg = "Unknown-mint melt result is PAID but has no preimage"
                 Log.e(TAG, msg)
                 return@withContext SwapResult.Failure(msg)
             }
