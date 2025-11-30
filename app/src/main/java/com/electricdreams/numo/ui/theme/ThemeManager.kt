@@ -6,6 +6,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowInsetsControllerCompat
 import com.electricdreams.numo.R
+import com.electricdreams.numo.core.prefs.PreferenceStore
 
 /**
  * Manages theme application and color management for activities.
@@ -22,7 +23,7 @@ class ThemeManager(
         switchCurrencyButton: android.view.View,
         submitButton: Button
     ) {
-        val prefs = activity.getSharedPreferences("app_prefs", AppCompatActivity.MODE_PRIVATE)
+        val prefs = PreferenceStore.app(activity)
         val theme = prefs.getString("app_theme", "green") ?: "green"
         val isDarkMode = prefs.getBoolean(KEY_DARK_MODE, false)
         
@@ -110,7 +111,7 @@ class ThemeManager(
          * in sync with the same color used by ThemeManager for the root view.
          */
         fun resolveBackgroundColor(activity: AppCompatActivity): Int {
-            val prefs = activity.getSharedPreferences("app_prefs", AppCompatActivity.MODE_PRIVATE)
+            val prefs = PreferenceStore.app(activity)
             val theme = prefs.getString("app_theme", "green") ?: "green"
             return resolveBackgroundColor(theme)
         }

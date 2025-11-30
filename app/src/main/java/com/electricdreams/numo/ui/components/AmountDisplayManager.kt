@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 
@@ -31,7 +32,7 @@ class AmountDisplayManager(
 
     /** Initialize input mode from preferences */
     fun initializeInputMode() {
-        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = PreferenceStore.app(context)
         isUsdInputMode = prefs.getBoolean(KEY_INPUT_MODE, false)
     }
 
@@ -76,9 +77,7 @@ class AmountDisplayManager(
 
         isUsdInputMode = !isUsdInputMode
         // Persist the input mode preference
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
-            .putBoolean(KEY_INPUT_MODE, isUsdInputMode)
-            .apply()
+        PreferenceStore.app(context).putBoolean(KEY_INPUT_MODE, isUsdInputMode)
 
         return true
     }
@@ -307,7 +306,6 @@ class AmountDisplayManager(
     }
 
     companion object {
-        private const val PREFS_NAME = "NumoPrefs"
         private const val KEY_INPUT_MODE = "inputMode" // true = fiat, false = satoshi
     }
 }

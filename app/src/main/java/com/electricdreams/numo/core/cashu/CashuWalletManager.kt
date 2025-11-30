@@ -3,6 +3,7 @@ package com.electricdreams.numo.core.cashu
 import android.content.Context
 import android.util.Log
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.prefs.PreferenceStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -61,7 +62,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
      */
     fun getMnemonic(): String? {
         if (!this::appContext.isInitialized) return null
-        val prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val prefs = PreferenceStore.wallet(appContext)
         return prefs.getString(KEY_MNEMONIC, null)
     }
 
@@ -114,8 +115,8 @@ object CashuWalletManager : MintManager.MintChangeListener {
         }
 
         // Save new mnemonic
-        val prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        prefs.edit().putString(KEY_MNEMONIC, newMnemonic).apply()
+        val prefs = PreferenceStore.wallet(appContext)
+        prefs.putString(KEY_MNEMONIC, newMnemonic)
         Log.i(TAG, "Saved new mnemonic for restore")
 
         // Recreate database
@@ -382,12 +383,12 @@ object CashuWalletManager : MintManager.MintChangeListener {
             val db = WalletSqliteDatabase(dbFile.absolutePath)
 
             // 2) Load or create the mnemonic (seed phrase).
-            val prefs = appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val prefs = PreferenceStore.wallet(appContext)
             var mnemonic = prefs.getString(KEY_MNEMONIC, null)
             if (mnemonic.isNullOrBlank()) {
                 mnemonic = generateMnemonic()
                 // Persist immediately so the same seed is reused on future launches.
-                prefs.edit().putString(KEY_MNEMONIC, mnemonic).apply()
+                prefs.putString(KEY_MNEMONIC, mnemonic)
                 Log.i(TAG, "Generated and stored new wallet mnemonic")
             } else {
                 Log.i(TAG, "Loaded existing wallet mnemonic from preferences")
