@@ -323,7 +323,6 @@ class ItemEntryActivity : AppCompatActivity() {
             sku = skuHandler.getSku(),
             gtin = gtinHandler.getGtin(),
             priceType = pricingHandler.getCurrentPriceType(),
-            currency = currencyManager.getCurrentCurrency(),
             vatEnabled = pricingHandler.isVatEnabled(),
             vatRate = pricingHandler.getVatRate(),
             trackInventory = inventoryHandler.isTrackingEnabled(),

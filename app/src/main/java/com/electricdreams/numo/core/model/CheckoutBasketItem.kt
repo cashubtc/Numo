@@ -1,9 +1,10 @@
 package com.electricdreams.numo.core.model
 
 import com.google.gson.annotations.SerializedName
+import com.electricdreams.numo.core.util.CurrencyManager
 
 /**
- * Immutable snapshot of a basket item at checkout time.
+ * Immutable snapshot of an item in the checkout basket.
  * Used for persisting the checkout basket with payment history.
  * 
  * This captures all the information needed to reconstruct
@@ -50,7 +51,7 @@ data class CheckoutBasketItem(
     @SerializedName("priceSats")
     val priceSats: Long,
 
-    /** Currency code for fiat pricing (e.g., "USD", "EUR") */
+    /** Currency code for fiat pricing (e.g., "USD", "EUR") - now tied to global fiat setting */
     @SerializedName("priceCurrency")
     val priceCurrency: String,
 
@@ -120,7 +121,10 @@ data class CheckoutBasketItem(
         /**
          * Create a CheckoutBasketItem from a BasketItem snapshot.
          */
-        fun fromBasketItem(basketItem: BasketItem): CheckoutBasketItem {
+        fun fromBasketItem(
+            basketItem: BasketItem,
+            currencyCode: String
+        ): CheckoutBasketItem {
             val item = basketItem.item
             return CheckoutBasketItem(
                 itemId = item.id ?: "",
@@ -133,7 +137,7 @@ data class CheckoutBasketItem(
                 priceType = item.priceType.name,
                 netPriceCents = (item.price * 100).toLong(),
                 priceSats = item.priceSats,
-                priceCurrency = item.priceCurrency,
+                priceCurrency = currencyCode,
                 vatEnabled = item.vatEnabled,
                 vatRate = item.vatRate,
             )

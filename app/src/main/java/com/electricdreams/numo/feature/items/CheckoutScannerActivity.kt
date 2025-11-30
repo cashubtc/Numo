@@ -372,7 +372,11 @@ class CheckoutScannerActivity : AppCompatActivity() {
             itemVariation.visibility = View.GONE
         }
 
-        itemPrice.text = item.getFormattedPrice()
+        val currencyCode = com.electricdreams.numo.core.util.CurrencyManager
+            .getInstance(this)
+            .getCurrentCurrency()
+        itemPrice.text = item.getFormattedPrice(currencyCode)
+
         updateQuantityDisplay()
 
         // Load image
