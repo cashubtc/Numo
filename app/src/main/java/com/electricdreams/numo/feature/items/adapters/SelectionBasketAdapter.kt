@@ -78,8 +78,10 @@ class SelectionBasketAdapter(
             }
 
             removeButton.setOnClickListener {
-                val itemId = item.id!!
-                onItemRemoved(itemId)
+                val itemId = item.id
+                if (itemId != null) {
+                    onItemRemoved(itemId)
+                }
             }
         }
     }

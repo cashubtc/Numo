@@ -149,17 +149,23 @@ class BalanceCheckActivity : AppCompatActivity() {
             try {
                 Log.d(TAG, "1. Creating Satocash client...")
                 satocashClient = SatocashNfcClient(tag)
+                val client = satocashClient
+                if (client == null) {
+                    Log.e(TAG, "❌ Failed to create Satocash client")
+                    handleBalanceCheckError(getString(R.string.balance_check_error_invalid_nfc_tag))
+                    return@Thread
+                }
 
                 Log.d(TAG, "2. Connecting to NFC card...")
-                satocashClient!!.connect()
+                client.connect()
                 Log.d(TAG, "✅ Successfully connected to NFC card")
 
                 Log.d(TAG, "3. Selecting Satocash applet...")
-                satocashClient!!.selectApplet(SatocashNfcClient.SATOCASH_AID)
+                client.selectApplet(SatocashNfcClient.SATOCASH_AID)
                 Log.d(TAG, "✅ Satocash Applet found and selected!")
 
                 Log.d(TAG, "4. Initializing secure channel...")
-                satocashClient!!.initSecureChannel()
+                client.initSecureChannel()
                 Log.d(TAG, "✅ Secure Channel Initialized!")
 
                 Log.d(TAG, "5. Getting accurate card balance (no PIN authentication)...")
@@ -191,8 +197,15 @@ class BalanceCheckActivity : AppCompatActivity() {
     private val cardBalance: Long
         get() {
             Log.d(TAG, "Getting card balance using getProofInfo (no PIN required)...")
+            val client = satocashClient
+            if (client == null) {
+                Log.e(TAG, "Satocash client is null when reading balance")
+                updateCardInfoDisplay(getString(R.string.balance_check_info_no_state_data))
+                return 0
+            }
+
             return try {
-                val status = satocashClient!!.status
+                val status = client.status
                 Log.d(TAG, "Card status: $status")
 
                 val nbProofsUnspent = status.getOrDefault("nb_proofs_unspent", 0) as Int
@@ -207,7 +220,7 @@ class BalanceCheckActivity : AppCompatActivity() {
 
                 Log.d(TAG, "Total proofs in card: $totalProofs ($nbProofsUnspent unspent, $nbProofsSpent spent)")
 
-                val proofStates = satocashClient!!.getProofInfo(
+                val proofStates = client.getProofInfo(
                     SatocashNfcClient.Unit.SAT,
                     SatocashNfcClient.ProofInfoType.METADATA_STATE,
                     0,
@@ -222,7 +235,7 @@ class BalanceCheckActivity : AppCompatActivity() {
                     return 0
                 }
 
-                val amounts = satocashClient!!.getProofInfo(
+                val amounts = client.getProofInfo(
                     SatocashNfcClient.Unit.SAT,
                     SatocashNfcClient.ProofInfoType.METADATA_AMOUNT_EXPONENT,
                     0,

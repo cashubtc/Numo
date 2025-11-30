@@ -92,8 +92,9 @@ class SelectionItemsAdapter(
      */
     fun addCustomVariation(baseItem: Item, variationName: String) {
         // Create a new item with custom variation and unique ID
+        val customItemId = baseItem.id ?: UUID.randomUUID().toString()
         val customItem = baseItem.copy(
-            id = "custom_${baseItem.id}_${UUID.randomUUID().toString().take(8)}",
+            id = "custom_${customItemId}_${UUID.randomUUID().toString().take(8)}",
             uuid = UUID.randomUUID().toString(),
             variationName = variationName
         )
@@ -113,7 +114,9 @@ class SelectionItemsAdapter(
         
         // Add to basket with quantity 1
         basketManager.addItem(customItem, 1)
-        basketQuantities[customItem.id!!] = 1
+        customItem.id?.let { id ->
+            basketQuantities[id] = 1
+        }
         
         // Refresh basket UI
         onQuantityChanged()
@@ -164,7 +167,9 @@ class SelectionItemsAdapter(
     private fun refreshBasketQuantities() {
         basketQuantities.clear()
         for (basketItem in basketManager.getBasketItems()) {
-            basketQuantities[basketItem.item.id!!] = basketItem.quantity
+            basketItem.item.id?.let { id ->
+                basketQuantities[id] = basketItem.quantity
+            }
         }
     }
 
@@ -178,7 +183,7 @@ class SelectionItemsAdapter(
 
     override fun onBindViewHolder(holder: ItemViewHolder, position: Int) {
         val item = items[position]
-        val quantity = basketQuantities[item.id] ?: 0
+        val quantity = item.id?.let { basketQuantities[it] } ?: 0
         val isExpanded = position == expandedPosition
         val isCustomVariation = item.id?.startsWith("custom_") == true
         holder.bind(item, quantity, position == items.lastIndex, isExpanded, isCustomVariation, position)
@@ -406,8 +411,9 @@ class SelectionItemsAdapter(
         }
 
         private fun loadItemImage(item: Item) {
-            if (!item.imagePath.isNullOrEmpty()) {
-                val imageFile = File(item.imagePath!!)
+            val path = item.imagePath
+            if (!path.isNullOrEmpty()) {
+                val imageFile = File(path)
                 if (imageFile.exists()) {
                     val bitmap = BitmapFactory.decodeFile(imageFile.absolutePath)
                     if (bitmap != null) {
@@ -422,14 +428,20 @@ class SelectionItemsAdapter(
         }
 
         private fun updateBasketItem(item: Item, newQuantity: Int, isCustomVariation: Boolean) {
+            val itemId = item.id
+            if (itemId == null) {
+                Toast.makeText(itemView.context, "Item ID missing", Toast.LENGTH_SHORT).show()
+                return
+            }
+
             if (newQuantity <= 0) {
-                basketManager.removeItem(item.id!!)
-                basketQuantities.remove(item.id!!)
+                basketManager.removeItem(itemId)
+                basketQuantities.remove(itemId)
                 
                 // Remove custom variation items from the list when quantity reaches 0
                 if (isCustomVariation) {
-                    customVariationItems.removeAll { it.id == item.id }
-                    val index = items.indexOfFirst { it.id == item.id }
+                    customVariationItems.removeAll { it.id == itemId }
+                    val index = items.indexOfFirst { it.id == itemId }
                     if (index >= 0) {
                         items.removeAt(index)
                         // Adjust expanded position if needed
@@ -444,11 +456,11 @@ class SelectionItemsAdapter(
                     }
                 }
             } else {
-                val updated = basketManager.updateItemQuantity(item.id!!, newQuantity)
+                val updated = basketManager.updateItemQuantity(itemId, newQuantity)
                 if (!updated) {
                     basketManager.addItem(item, newQuantity)
                 }
-                basketQuantities[item.id!!] = newQuantity
+                basketQuantities[itemId] = newQuantity
             }
 
             // Animate quantity change

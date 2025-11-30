@@ -194,11 +194,16 @@ class CheckoutScannerActivity : AppCompatActivity() {
 
     private fun updateBasketForCurrentItem() {
         val item = currentItem ?: return
+        val itemId = item.id
+        if (itemId == null) {
+            Toast.makeText(this, "Item ID missing", Toast.LENGTH_SHORT).show()
+            return
+        }
 
         if (currentQuantity <= 0) {
-            basketManager.removeItem(item.id!!)
+            basketManager.removeItem(itemId)
         } else {
-            val updated = basketManager.updateItemQuantity(item.id!!, currentQuantity)
+            val updated = basketManager.updateItemQuantity(itemId, currentQuantity)
             if (!updated) {
                 basketManager.addItem(item, currentQuantity)
             }
@@ -380,8 +385,9 @@ class CheckoutScannerActivity : AppCompatActivity() {
         updateQuantityDisplay()
 
         // Load image
-        if (!item.imagePath.isNullOrEmpty()) {
-            val imageFile = File(item.imagePath!!)
+        val path = item.imagePath
+        if (!path.isNullOrEmpty()) {
+            val imageFile = File(path)
             if (imageFile.exists()) {
                 val bitmap: Bitmap? = BitmapFactory.decodeFile(imageFile.absolutePath)
                 if (bitmap != null) {

@@ -229,7 +229,7 @@ class PinEntryActivity : AppCompatActivity() {
                 }
             }
         }
-        handler.post(lockoutUpdateRunnable!!)
+        lockoutUpdateRunnable?.let { handler.post(it) }
     }
 
     private fun openPinReset() {

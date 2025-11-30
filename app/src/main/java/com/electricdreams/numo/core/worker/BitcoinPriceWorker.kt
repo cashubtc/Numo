@@ -122,7 +122,8 @@ class BitcoinPriceWorker private constructor(context: Context) {
     }
 
     fun start() {
-        if (scheduler != null && !scheduler!!.isShutdown) return
+        val currentScheduler = scheduler
+        if (currentScheduler != null && !currentScheduler.isShutdown) return
 
         scheduler = Executors.newSingleThreadScheduledExecutor().also { exec ->
             exec.scheduleAtFixedRate(
@@ -210,7 +211,9 @@ class BitcoinPriceWorker private constructor(context: Context) {
                     reader = BufferedReader(InputStreamReader(connection.inputStream))
                     val response = buildString {
                         var line: String?
-                        while (reader!!.readLine().also { line = it } != null) {
+                        while (true) {
+                            line = reader?.readLine()
+                            if (line == null) break
                             append(line)
                         }
                     }

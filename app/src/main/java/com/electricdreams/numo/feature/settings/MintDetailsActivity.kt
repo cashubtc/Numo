@@ -98,7 +98,7 @@ class MintDetailsActivity : AppCompatActivity() {
     private var hasFetchError: Boolean = false
     
     // Balance refresh broadcast receiver
-    private val balanceRefreshReceiver: BroadcastReceiver = BalanceRefreshBroadcast.createReceiver { reason ->
+    private val balanceRefreshReceiver: BroadcastReceiver = BalanceRefreshBroadcast.createReceiver { _ ->
         // Refresh balance when we receive a broadcast (e.g., from withdrawal success)
         loadBalance()
     }
@@ -294,7 +294,7 @@ class MintDetailsActivity : AppCompatActivity() {
                     displayCachedMintInfo(info)
                 }
             } catch (e: Exception) {
-                Log.w(TAG, "Failed to parse cached mint info: ${'$'}{e.message}")
+                Log.w(TAG, "Failed to parse cached mint info: ${e.message}")
             }
         }
     }
@@ -313,23 +313,27 @@ class MintDetailsActivity : AppCompatActivity() {
 
         // Version from cached structured data - show as separate rows
         val versionInfo = info.versionInfo
-        val hasSoftware = !versionInfo?.name.isNullOrBlank()
-        val hasVersion = !versionInfo?.version.isNullOrBlank()
+        val softwareName = versionInfo?.name
+        val versionNumber = versionInfo?.version
+        val hasSoftware = !softwareName.isNullOrBlank()
+        val hasVersion = !versionNumber.isNullOrBlank()
         
         if (hasSoftware) {
-            softwareRow.visibility = View.VISIBLE
-            softwareDivider.visibility = View.VISIBLE
-            softwareValue.text = versionInfo?.name
+            if (!softwareRow.isVisible || softwareValue.text.toString() != softwareName) {
+                softwareRow.visibility = View.VISIBLE
+                softwareDivider.visibility = View.VISIBLE
+                softwareValue.text = softwareName
+            }
         } else {
             softwareRow.visibility = View.GONE
             softwareDivider.visibility = View.GONE
         }
         
         if (hasVersion) {
-            versionRow.visibility = View.VISIBLE
-            versionValue.text = versionInfo?.version
-            // Only show URL divider if no software row above
-            urlDivider.visibility = if (hasSoftware) View.VISIBLE else View.VISIBLE
+            if (!versionRow.isVisible || versionValue.text.toString() != versionNumber) {
+                versionRow.visibility = View.VISIBLE
+                versionValue.text = versionNumber
+            }
         } else {
             versionRow.visibility = View.GONE
         }
@@ -464,7 +468,7 @@ class MintDetailsActivity : AppCompatActivity() {
         val hasVersion = !versionNumberVal.isNullOrBlank()
         
         if (hasSoftware) {
-            val newSoftwareValue = versionName!!
+            val newSoftwareValue = versionName
             if (!softwareRow.isVisible || softwareValue.text.toString() != newSoftwareValue) {
                 softwareRow.visibility = View.VISIBLE
                 softwareDivider.visibility = View.VISIBLE
@@ -476,7 +480,7 @@ class MintDetailsActivity : AppCompatActivity() {
         }
         
         if (hasVersion) {
-            val newVersionValue = versionNumberVal!!
+            val newVersionValue = versionNumberVal
             if (!versionRow.isVisible || versionValue.text.toString() != newVersionValue) {
                 versionRow.visibility = View.VISIBLE
                 versionValue.text = newVersionValue

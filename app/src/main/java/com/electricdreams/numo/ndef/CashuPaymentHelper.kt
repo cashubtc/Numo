@@ -110,7 +110,7 @@ object CashuPaymentHelper {
         }
     }
 
-    // === Token helpers ======================================================
+    // === Token helpers =====================================================
 
     @JvmStatic
     fun isCashuToken(text: String?): Boolean =
@@ -316,22 +316,25 @@ object CashuPaymentHelper {
             )
                 ?: throw RedemptionException("Failed to parse PaymentRequestPayload")
 
-            if (payload.mint.isNullOrEmpty()) {
+            val mintUrl = payload.mint
+            val unit = payload.unit
+            val proofs = payload.proofs
+
+            if (mintUrl.isNullOrEmpty()) {
                 throw RedemptionException("PaymentRequestPayload is missing mint")
             }
-            if (payload.unit == null || payload.unit != "sat") {
-                throw RedemptionException("Unsupported unit in PaymentRequestPayload: ${payload.unit}")
+            if (unit == null || unit != "sat") {
+                throw RedemptionException("Unsupported unit in PaymentRequestPayload: $unit")
             }
-            if (payload.proofs.isNullOrEmpty()) {
+            if (proofs.isNullOrEmpty()) {
                 throw RedemptionException("PaymentRequestPayload contains no proofs")
             }
 
-            val mintUrl = payload.mint!!
             if (!allowedMints.isNullOrEmpty() && !allowedMints.contains(mintUrl)) {
                 throw RedemptionException("Mint $mintUrl not in allowed list")
             }
 
-            val totalAmount = payload.proofs!!.sumOf { it.amount }
+            val totalAmount = proofs.sumOf { it.amount }
             if (totalAmount < expectedAmount) {
                 throw RedemptionException(
                     "Insufficient amount in payload proofs: $totalAmount < expected $expectedAmount",
@@ -340,7 +343,7 @@ object CashuPaymentHelper {
 
             // Build a legacy cashu-jdk Token from proofs, then let CDK wallet
             // handle the redemption via redeemToken(encoded).
-            val tempToken = com.cashujdk.nut00.Token(payload.proofs!!, payload.unit!!, mintUrl)
+            val tempToken = com.cashujdk.nut00.Token(proofs, unit, mintUrl)
             val encoded = tempToken.encode()
             return redeemToken(encoded)
         } catch (e: JsonSyntaxException) {

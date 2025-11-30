@@ -298,12 +298,16 @@ class ItemEntryActivity : AppCompatActivity() {
             dialog.dismiss() 
         }
         dialogView.findViewById<Button>(R.id.dialog_confirm_button).setOnClickListener {
-            currentItem?.let { item ->
-                itemManager.removeItem(item.id!!)
+            val item = currentItem
+            val itemId = item?.id
+            if (item != null && itemId != null) {
+                itemManager.removeItem(itemId)
                 setResult(RESULT_OK)
-                dialog.dismiss()
-                finish()
+            } else {
+                Toast.makeText(this, "Unable to delete item: missing ID", Toast.LENGTH_SHORT).show()
             }
+            dialog.dismiss()
+            finish()
         }
         dialog.show()
     }

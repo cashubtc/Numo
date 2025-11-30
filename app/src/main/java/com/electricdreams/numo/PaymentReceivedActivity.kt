@@ -78,8 +78,9 @@ class PaymentReceivedActivity : AppCompatActivity() {
         amount = intent.getLongExtra(EXTRA_AMOUNT, 0)
         
         // Parse token to extract amount and unit if not provided
-        if (amount == 0L && tokenString != null) {
-            parseToken(tokenString!!)
+        val token = tokenString
+        if (amount == 0L && token != null) {
+            parseToken(token)
         }
         
         // Set up UI
@@ -196,13 +197,14 @@ class PaymentReceivedActivity : AppCompatActivity() {
     }
     
     private fun shareToken() {
-        if (tokenString.isNullOrEmpty()) {
+        val token = tokenString
+        if (token.isNullOrEmpty()) {
             Toast.makeText(this, R.string.payment_received_error_no_token, Toast.LENGTH_SHORT).show()
             return
         }
         
         // Create intent to share/export the token
-        val cashuUri = "cashu:$tokenString"
+        val cashuUri = "cashu:$token"
         
         // Create intent for viewing the URI
         val uriIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(cashuUri)).apply {

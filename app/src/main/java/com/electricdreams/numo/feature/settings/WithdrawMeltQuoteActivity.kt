@@ -108,12 +108,13 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
 
     private fun displayQuoteInfo() {
         val destination = when {
-            !lightningAddress.isNullOrBlank() -> lightningAddress!!
+            !lightningAddress.isNullOrBlank() -> lightningAddress
             !invoice.isNullOrBlank() -> {
-                if (invoice!!.length > 24) {
-                    "${invoice!!.take(12)}...${invoice!!.takeLast(12)}"
+                val inv = invoice
+                if (inv != null && inv.length > 24) {
+                    "${inv.take(12)}...${inv.takeLast(12)}"
                 } else {
-                    invoice!!
+                    inv ?: getString(R.string.withdraw_melt_destination_unknown)
                 }
             }
             else -> getString(R.string.withdraw_melt_destination_unknown)
@@ -159,7 +160,7 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
                 val destinationLabel = lightningAddress ?: request
                 val destinationType = when {
                     !lightningAddress.isNullOrBlank() -> "manual_address"
-                    !request.isBlank() -> "manual_invoice"
+                    request.isNotBlank() -> "manual_invoice"
                     else -> "manual_unknown"
                 }
 

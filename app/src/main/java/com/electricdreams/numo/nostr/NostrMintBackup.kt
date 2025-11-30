@@ -272,9 +272,10 @@ object NostrMintBackup {
                         relayUrl = relayUrl,
                         publicKeyHex = publicKeyHex,
                         onEvent = { event ->
-                            if (event.id != null) {
-                                receivedEvents[event.id!!] = Pair(relayUrl, event)
-                                Log.d(TAG, "Received backup event ${event.id} from $relayUrl")
+                            val id = event.id
+                            if (id != null) {
+                                receivedEvents[id] = Pair(relayUrl, event)
+                                Log.d(TAG, "Received backup event $id from $relayUrl")
                             }
                         },
                         onComplete = {
