@@ -164,6 +164,12 @@ object SwapToLightningMintManager {
 
         val adjustedPaymentContext = paymentContext.copy(amountSats = lightningAmount)
 
+        Log.d(
+            TAG,
+            "swapFromUnknownMint: requesting Lightning mint quote: " +
+                "lightningMintUrl=$lightningMintUrl, mintQuoteAmount=$lightningAmount"
+        )
+
         val lightningInvoiceInfo = LightningMintInvoiceManager.getOrCreateInvoiceForPayment(
             appContext = appContext,
             lightningMintUrl = lightningMintUrl,
@@ -189,9 +195,12 @@ object SwapToLightningMintManager {
         Log.d(
             TAG,
             "swapFromUnknownMint: melt quote details: " +
-                "quoteAmount=$quoteAmount, feeReserve=$feeReserve, " +
+                "meltQuoteAmount=$quoteAmount, " +
+                "meltQuoteFeeReserve=$feeReserve, " +
                 "totalMeltRequired=${quoteAmount + feeReserve}, " +
-                "walletBalance=$walletBalance, feeBuffer=$feeBuffer"
+                "receivedSats=$walletBalance, " +
+                "feeBufferReserved=$feeBuffer (ratio=${"%.2f".format(MAX_FEE_RESERVE_RATIO * 100)}%), " +
+                "lightningMintQuoteAmount=$lightningAmount"
         )
 
         if (quoteAmount <= 0) {
