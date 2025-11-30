@@ -212,6 +212,44 @@ object SwapToLightningMintManager {
             return@withContext SwapResult.Failure(msg)
         }
 
+        // 7) Attempt to mint the Lightning mint quote so that the merchant
+        //    receives ecash on their Lightning mint. This is done
+        //    opportunistically as part of the swap flow; other components
+        //    (e.g. LightningMintHandler) may also mint the quote if they
+        //    were started from a separate Lightning-receive UI flow.
+        try {
+            val wallet = CashuWalletManager.getWallet()
+                ?: return@withContext SwapResult.Failure("Wallet not initialized for Lightning mint")
+
+            val lightningMint = org.cashudevkit.MintUrl(lightningMintUrl)
+
+            Log.d(TAG, "Checking Lightning mint quote state for quoteId=${lightningInvoiceInfo.quoteId}")
+            val lightningQuote = wallet.checkMintQuote(lightningMint, lightningInvoiceInfo.quoteId)
+            val stateStr = lightningQuote.state.toString()
+            Log.d(TAG, "Lightning mint quote state=$stateStr")
+
+            if (stateStr.equals("PAID", ignoreCase = true) ||
+                stateStr.equals("ISSUED", ignoreCase = true)
+            ) {
+                Log.d(TAG, "Lightning quote is paid; attempting wallet.mint for quoteId=${lightningInvoiceInfo.quoteId}")
+                try {
+                    val proofs = wallet.mint(lightningMint, lightningInvoiceInfo.quoteId, null)
+                    Log.d(TAG, "Minted ${'$'}{proofs.size} proofs on Lightning mint as part of swap flow")
+                } catch (mintError: Throwable) {
+                    // Not fatal for the POS payment itself; the Lightning
+                    // handler / operator can reconcile, but we log loudly.
+                    Log.e(TAG, "Failed to mint proofs on Lightning mint for quoteId=${'$'}{lightningInvoiceInfo.quoteId}: ${'$'}{mintError.message}", mintError)
+                }
+            } else {
+                Log.d(TAG, "Lightning mint quote not yet paid (state=${'$'}stateStr), skipping immediate mint")
+            }
+        } catch (t: Throwable) {
+            // Swallow non-fatal errors here; payment is already secured by
+            // the unknown-mint melt + preimage verification. LightningMintHandler
+            // or manual reconciliation can still complete the mint later.
+            Log.w(TAG, "Error while attempting to mint Lightning quote after swap: ${'$'}{t.message}", t)
+        }
+
         // At this point, we know the unknown mint has paid the exact invoice
         // we generated from our Lightning mint. The LightningMintHandler is
         // responsible for monitoring the quote and minting proofs. From the

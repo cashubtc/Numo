@@ -32,6 +32,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Numo"
         android:localeConfig="@xml/locales_config"
+        android:name=".NumoApplication"
         tools:targetApi="33">
         <!-- Onboarding Activity - First Launch -->
         <activity

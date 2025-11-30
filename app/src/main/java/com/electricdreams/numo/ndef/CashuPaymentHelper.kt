@@ -298,7 +298,6 @@ object CashuPaymentHelper {
             TokenValidationResult.InvalidFormat
         }
     }
-
     // === Redemption using CDK MultiMintWallet ===============================
 
     @JvmStatic
@@ -319,80 +318,6 @@ object CashuPaymentHelper {
             val cdkToken = org.cashudevkit.Token.Companion.decode(
                 tokenString ?: error("tokenString is null"),
             )
-
-
-    // === High-level redemption with optional swap-to-Lightning-mint ========
-
-    /**
-     * High-level redemption entry point used by payment flows (NDEF, Nostr).
-     *
-     * Behavior:
-     * - Validates the token structure and amount against expectedAmount.
-     * - If mint is in allowedMints → normal Cashu redemption via MultiMintWallet.
-     * - If mint is *not* in allowedMints but amount is sufficient →
-     *   runs the SwapToLightningMint flow and treats Lightning receipt as
-     *   payment success (returns empty string as token, Lightning-style).
-     *
-     * @param appContext Android application context.
-     * @param tokenString Encoded Cashu token from payer.
-     * @param expectedAmount Amount in sats the POS expects for this payment.
-     * @param allowedMints Optional list of allowed mint URLs; if null/empty,
-     *                     all mints are treated as allowed.
-     * @param paymentContext Context tying this redemption to a payment
-     *                       history entry (paymentId, amount).
-     * @return Redeemed token string (for pure Cashu) or empty string when the
-     *         payment was fulfilled via a Lightning swap.
-     */
-    @Throws(RedemptionException::class)
-    suspend fun redeemTokenWithSwap(
-        appContext: Context,
-        tokenString: String?,
-        expectedAmount: Long,
-        allowedMints: List<String>?,
-        paymentContext: SwapToLightningMintManager.PaymentContext
-    ): String {
-        val result = validateTokenDetailed(tokenString, expectedAmount, allowedMints)
-
-        return when (result) {
-            is TokenValidationResult.InvalidFormat -> {
-                throw RedemptionException("Invalid Cashu token")
-            }
-
-            is TokenValidationResult.InsufficientAmount -> {
-                throw RedemptionException(
-                    "Insufficient amount: required=${result.required}, got=${result.actual}"
-                )
-            }
-
-            is TokenValidationResult.ValidKnownMint -> {
-                // Standard Cashu redemption path
-                redeemToken(tokenString)
-            }
-
-            is TokenValidationResult.ValidUnknownMint -> {
-                Log.i(TAG, "Token from unknown mint detected - starting SwapToLightningMint flow")
-
-                val swapResult = SwapToLightningMintManager.swapFromUnknownMint(
-                    appContext = appContext,
-                    cashuToken = tokenString ?: error("tokenString is null"),
-                    expectedAmount = expectedAmount,
-                    unknownMintUrl = result.mintUrl,
-                    paymentContext = paymentContext,
-                )
-
-                when (swapResult) {
-                    is SwapToLightningMintManager.SwapResult.Success -> {
-                        Log.i(TAG, "SwapToLightningMint succeeded for unknown mint token")
-                        // Lightning-style: no Cashu token is imported into our wallet
-                        ""
-                    }
-                    is SwapToLightningMintManager.SwapResult.Failure -> {
-                        throw RedemptionException("Swap to Lightning mint failed: ${swapResult.errorMessage}")
-                    }
-                }
-            }
-        }
-    }
 
             if (cdkToken.unit() != org.cashudevkit.CurrencyUnit.Sat) {
                 throw RedemptionException("Unsupported token unit: ${cdkToken.unit()}")
@@ -418,13 +343,13 @@ object CashuPaymentHelper {
                 wallet.receive(cdkToken, mmReceive)
             }
 
-            Log.d(TAG, "Token received via CDK successfully")
+            Log.d(TAG, "Token received via CDK successfully (mintUrl=${'$'}{mintUrl.url})")
             // Return the original token instead of sending a new one
             return tokenString ?: error("tokenString is null")
         } catch (e: RedemptionException) {
             throw e
         } catch (e: Exception) {
-            val errorMsg = "Token redemption via CDK failed: ${e.message}"
+            val errorMsg = "Token redemption via CDK failed: ${'$'}{e.message}"
             Log.e(TAG, errorMsg, e)
             throw RedemptionException(errorMsg, e)
         }
@@ -502,15 +427,16 @@ object CashuPaymentHelper {
             }
         }
     }
-
     // === Redemption from PaymentRequestPayload (still cashu-jdk proofs) ==== 
 
     @JvmStatic
     @Throws(RedemptionException::class)
-    fun redeemFromPRPayload(
+    suspend fun redeemFromPRPayloadWithSwap(
+        appContext: Context,
         payloadJson: String?,
         expectedAmount: Long,
         allowedMints: List<String>?,
+        paymentContext: SwapToLightningMintManager.PaymentContext
     ): String {
         if (payloadJson == null) {
             throw RedemptionException("PaymentRequestPayload JSON is null")
@@ -520,8 +446,7 @@ object CashuPaymentHelper {
             val payload = PaymentRequestPayload.GSON.fromJson(
                 payloadJson,
                 PaymentRequestPayload::class.java,
-            )
-                ?: throw RedemptionException("Failed to parse PaymentRequestPayload")
+            ) ?: throw RedemptionException("Failed to parse PaymentRequestPayload")
 
             if (payload.mint.isNullOrEmpty()) {
                 throw RedemptionException("PaymentRequestPayload is missing mint")
@@ -545,11 +470,18 @@ object CashuPaymentHelper {
                 )
             }
 
-            // Build a legacy cashu-jdk Token from proofs, then let CDK wallet
-            // handle the redemption via redeemToken(encoded).
+            // Build a legacy cashu-jdk Token from proofs, then delegate to the
+            // high-level swap-aware redemption path so that unknown mints can be
+            // swapped to the merchant's Lightning mint.
             val tempToken = com.cashujdk.nut00.Token(payload.proofs!!, payload.unit!!, mintUrl)
             val encoded = tempToken.encode()
-            return redeemToken(encoded)
+            return redeemTokenWithSwap(
+                appContext = appContext,
+                tokenString = encoded,
+                expectedAmount = expectedAmount,
+                allowedMints = allowedMints,
+                paymentContext = paymentContext,
+            )
         } catch (e: JsonSyntaxException) {
             throw RedemptionException("Invalid JSON for PaymentRequestPayload: ${e.message}", e)
         } catch (e: JsonIOException) {
@@ -564,8 +496,6 @@ object CashuPaymentHelper {
             throw RedemptionException(errorMsg, e)
         }
     }
-
-    // === DTO for PaymentRequestPayload ====================================== 
 
     class PaymentRequestPayload {
         var id: String? = null
