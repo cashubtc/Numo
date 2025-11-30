@@ -312,8 +312,10 @@ class ItemSelectionActivity : AppCompatActivity() {
             val basketId = ensureBasketSaved()
             if (basketId != null) {
                 checkoutHandler.savedBasketId = basketId
+                checkoutHandler.proceedToCheckout()
+            } else {
+                Toast.makeText(this, R.string.item_selection_toast_save_basket_first, Toast.LENGTH_SHORT).show()
             }
-            checkoutHandler.proceedToCheckout()
         }
         
         saveButton.setOnClickListener {

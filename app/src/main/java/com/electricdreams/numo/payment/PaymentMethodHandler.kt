@@ -19,11 +19,11 @@ class PaymentMethodHandler(
 ) {
 
     /** Show payment method dialog for the specified amount */
-    fun showPaymentMethodDialog(amount: Long, formattedAmount: String, checkoutBasketJson: String? = null) {
+    fun showPaymentMethodDialog(amount: Long, formattedAmount: String, basketId: String? = null) {
         val tipsManager = TipsManager.getInstance(activity)
         
         val routing = PaymentRoutingCore.determinePaymentRoute(tipsManager.tipsEnabled)
-        val intent = routing.buildIntent(activity, amount, formattedAmount, checkoutBasketJson)
+        val intent = routing.buildIntent(activity, amount, formattedAmount, basketId)
         activity.startActivityForResult(intent, REQUEST_CODE_PAYMENT)
     }
 
