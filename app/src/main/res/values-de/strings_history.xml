@@ -1,0 +1,52 @@
+<resources>
+    <!-- Main menu -->
+    <string name="menu_toggle_theme_title">Cambiar tema</string>
+    <string name="menu_history_title">Historial</string>
+
+    <!-- History list row titles & status -->
+    <string name="history_row_title_pending_payment">Pago pendiente</string>
+    <string name="history_row_title_lightning_payment">Pago Lightning</string>
+    <string name="history_row_title_cashu_payment">Pago Cashu</string>
+    <string name="history_row_title_cash_in">Entrada de efectivo</string>
+    <string name="history_row_title_cash_out">Salida de efectivo</string>
+    <string name="history_row_status_tap_to_resume">Toca para reanudar</string>
+
+    <!-- History: dialogs, toasts, chooser titles -->
+    <string name="history_open_with_title">Abrir pago con...</string>
+    <string name="history_toast_no_app">No hay aplicaciones disponibles para gestionar este pago</string>
+    <string name="history_toast_token_copied">Token copiado al portapapeles</string>
+    <string name="history_toast_invoice_copied">Factura copiada al portapapeles</string>
+
+    <string name="history_dialog_delete_title">Eliminar pago</string>
+    <string name="history_dialog_delete_message">¿Seguro que quieres eliminar este pago del historial?</string>
+    <string name="history_dialog_delete_positive">Eliminar</string>
+    <string name="history_dialog_delete_negative">Cancelar</string>
+
+    <string name="history_dialog_clear_title">Borrar historial</string>
+    <string name="history_dialog_clear_message">¿Seguro que quieres borrar todo el historial de pagos? Esta acción no se puede deshacer.</string>
+    <string name="history_dialog_clear_positive">Borrar todo</string>
+    <string name="history_dialog_clear_negative">Cancelar</string>
+
+    <!-- Transaction detail: types and mint info -->
+    <string name="transaction_detail_type_lightning_payment">Pago Lightning</string>
+    <string name="transaction_detail_type_cashu_payment">Pago Cashu</string>
+    <string name="transaction_detail_mint_from_name">Desde %1$s</string>
+    <string name="transaction_detail_mint_unknown">Desconocido</string>
+    <string name="transaction_detail_payment_type_lightning_value">⚡ Lightning</string>
+    <string name="transaction_detail_payment_type_cashu_value">🥜 Cashu</string>
+
+    <!-- Transaction detail: tip label -->
+    <string name="transaction_detail_tip_added_label">Propina añadida</string>
+    <string name="transaction_detail_tip_added_with_percentage">Propina añadida (%1$d%%)</string>
+
+    <!-- History sharing -->
+    <string name="history_share_title">Compartir transacción</string>
+    <string name="history_share_type_lightning">Lightning</string>
+    <string name="history_share_type_cashu">Cashu</string>
+    <string name="history_share_line_amount">Importe: %1$s</string>
+    <string name="history_share_line_token">Token: %1$s</string>
+    <string name="history_share_line_invoice">Factura: %1$s</string>
+
+    <!-- Basket receipt -->
+    <string name="basket_receipt_title">Recibo</string>
+</resources>

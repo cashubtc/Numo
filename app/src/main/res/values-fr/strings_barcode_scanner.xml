@@ -1,0 +1,25 @@
+<resources>
+    <!-- Barcode scanner (item entry) -->
+    <string name="barcode_scanner_title">Escanear código de barras</string>
+    <string name="barcode_scanner_instruction_position_barcode">Coloca el código de barras dentro del recuadro</string>
+    <string name="barcode_scanner_error_camera_permission_required">Se necesita permiso de cámara para escanear códigos de barras</string>
+
+    <!-- Checkout scanner (basket add items) -->
+    <string name="checkout_scanner_title">Escanear para añadir</string>
+    <string name="checkout_scanner_done_button">Listo</string>
+    <string name="checkout_scanner_instruction_scan_to_add">Escanea un código de barras para añadir un artículo</string>
+
+    <!-- Barcode format labels (for debugging / result data) -->
+    <string name="barcode_format_ean_13">EAN-13</string>
+    <string name="barcode_format_ean_8">EAN-8</string>
+    <string name="barcode_format_upc_a">UPC-A</string>
+    <string name="barcode_format_upc_e">UPC-E</string>
+    <string name="barcode_format_code_128">Código 128</string>
+    <string name="barcode_format_code_39">Código 39</string>
+    <string name="barcode_format_code_93">Código 93</string>
+    <string name="barcode_format_itf">ITF</string>
+    <string name="barcode_format_codabar">Codabar</string>
+    <string name="barcode_format_qr_code">Código QR</string>
+    <string name="barcode_format_data_matrix">Data Matrix</string>
+    <string name="barcode_format_unknown">Desconocido</string>
+</resources>

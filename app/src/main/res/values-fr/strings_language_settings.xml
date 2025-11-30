@@ -1,0 +1,8 @@
+<resources>
+    <!-- Language settings screen -->
+    <string name="language_settings_title">Idioma</string>
+    <string name="language_settings_section_app_language">IDIOMA DE LA APLICACIÓN</string>
+    <string name="language_settings_option_english">Inglés</string>
+    <string name="language_settings_option_spanish">Español</string>
+    <string name="language_settings_summary_current">Idioma actual: %1$s</string>
+</resources>

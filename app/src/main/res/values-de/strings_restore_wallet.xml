@@ -1,0 +1,10 @@
+<resources>
+    <!-- Restore wallet: confirm dialog + summaries -->
+    <string name="restore_confirm_dialog_title">Confirmar restauración</string>
+    <string name="restore_confirm_dialog_positive">Restaurar</string>
+
+    <string name="restore_success_recovered_summary">Se han recuperado %1$d sats en %2$d mint(s)</string>
+    <string name="restore_success_balance_changed_summary">El saldo ha cambiado en %1$d sats</string>
+    <string name="restore_success_restored_with_balance_summary">Monedero restaurado con un total de %1$d sats</string>
+    <string name="restore_success_balance_change_line">%1$d → %2$d sats</string>
+</resources>

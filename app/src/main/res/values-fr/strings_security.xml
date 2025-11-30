@@ -1,0 +1,41 @@
+<resources>
+    <!-- Security &amp; Privacy screen: info card -->
+    <string name="security_settings_card_title">Protege tu monedero</string>
+    <string name="security_settings_card_body">Tu frase semilla es la única forma de recuperar tu monedero si pierdes el acceso a este dispositivo. Mantenla a salvo y no la compartas con nadie.</string>
+
+    <!-- Security &amp; Privacy screen: sections -->
+    <string name="security_settings_section_backup">Copia de seguridad del monedero</string>
+    <string name="security_settings_section_recovery">Recuperación del monedero</string>
+
+    <!-- Security &amp; Privacy screen: backup mnemonic row -->
+    <string name="security_settings_backup_mnemonic_title">Copia de seguridad de la frase semilla</string>
+    <string name="security_settings_backup_mnemonic_subtitle">Ver tu frase semilla de 12 palabras</string>
+
+    <!-- Security &amp; Privacy screen: restore wallet row -->
+    <string name="security_settings_restore_wallet_title">Restaurar monedero</string>
+    <string name="security_settings_restore_wallet_subtitle">Recuperar desde una frase semilla</string>
+
+    <!-- Security &amp; Privacy screen: PIN protection section -->
+    <string name="security_settings_section_pin_protection">Protección con PIN</string>
+    <string name="security_settings_pin_info_title">Modo empleado</string>
+    <string name="security_settings_pin_info_body">Configura un PIN para permitir que los empleados usen Numo de forma segura. Pueden aceptar pagos y gestionar transacciones, pero no podrán retirar fondos, acceder a los mints, ver tu frase semilla o modificar los precios de los artículos.</string>
+
+    <!-- Security &amp; Privacy screen: PIN setup row -->
+    <string name="security_settings_setup_pin_title">Configurar PIN</string>
+    <string name="security_settings_setup_pin_subtitle">Protege funciones sensibles</string>
+
+    <!-- Security &amp; Privacy screen: Change PIN row -->
+    <string name="security_settings_change_pin_title">Cambiar PIN</string>
+    <string name="security_settings_change_pin_subtitle">Actualiza tu PIN de seguridad</string>
+
+    <!-- Security &amp; Privacy screen: Remove PIN row -->
+    <string name="security_settings_remove_pin_title">Eliminar PIN</string>
+    <string name="security_settings_remove_pin_subtitle">Desactivar protección con PIN</string>
+
+    <!-- Security &amp; Privacy screen: dialogs & actions -->
+    <string name="security_settings_enter_pin_title">Introduce el PIN</string>
+    <string name="security_settings_enter_pin_subtitle">Verifica tu identidad para continuar</string>
+    <string name="security_settings_remove_pin_dialog_title">¿Eliminar PIN?</string>
+    <string name="security_settings_remove_pin_dialog_message">Esto desactivará la protección con PIN. Cualquiera que tenga acceso a este dispositivo podrá acceder a funciones sensibles como retirar fondos y ver tu frase semilla.</string>
+    <string name="security_settings_remove_pin_confirm">Eliminar</string>
+</resources>

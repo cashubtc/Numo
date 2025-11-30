@@ -1,0 +1,25 @@
+<resources>
+    <!-- POS main screen - navigation content descriptions -->
+    <string name="pos_nav_catalog_content_description">Lista de artículos</string>
+    <string name="pos_nav_history_content_description">Historial</string>
+    <string name="pos_nav_settings_content_description">Ajustes</string>
+    <string name="pos_nav_more_options_content_description">Más opciones</string>
+
+    <!-- POS main screen - amount & errors -->
+    <string name="pos_error_amount_required">Debes introducir un importe para cobrar</string>
+    <string name="pos_amount_placeholder_main">$0</string>
+    <string name="pos_amount_placeholder_secondary">$0.00 USD</string>
+    <string name="pos_currency_switch_content_description">Cambiar de moneda</string>
+
+    <!-- POS main screen - charge button -->
+    <string name="pos_charge_button">Cobrar</string>
+    <string name="pos_charge_button_with_amount">Cobrar %1$s</string>
+
+    <!-- POS main screen - secondary BTC label when no fiat price -->
+    <string name="pos_secondary_amount_btc_label">BTC</string>
+
+    <!-- Basket checkout button text -->
+    <string name="basket_charge_fiat_and_sats">Cobrar %1$s + %2$s</string>
+    <string name="basket_charge_sats_only">Cobrar %1$s</string>
+    <string name="basket_charge_fiat_only">Cobrar %1$s</string>
+</resources>

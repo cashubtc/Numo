@@ -1,0 +1,6 @@
+<resources>
+    <!-- Item selection: clear basket dialog -->
+    <string name="item_selection_dialog_clear_basket_title">Vaciar cesta</string>
+    <string name="item_selection_dialog_clear_basket_message">¿Quieres eliminar todos los artículos de la cesta?</string>
+    <string name="item_selection_dialog_clear_basket_positive">Vaciar</string>
+</resources>

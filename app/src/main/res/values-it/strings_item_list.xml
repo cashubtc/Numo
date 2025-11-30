@@ -1,0 +1,14 @@
+<resources>
+    <!-- Item list: clear all items dialog + toasts -->
+    <string name="item_list_dialog_clear_all_title">Borrar todos los artículos</string>
+    <string name="item_list_dialog_clear_all_message">
+        ¿Seguro que quieres borrar TODOS los artículos de tu catálogo? Esta acción no se puede deshacer.
+    </string>
+    <string name="item_list_dialog_clear_all_positive">Borrar todo</string>
+
+    <string name="item_list_toast_all_items_cleared">Se han borrado todos los artículos</string>
+    <string name="item_list_toast_failed_open_csv">No se pudo abrir el archivo CSV</string>
+    <string name="item_list_toast_imported_items">Se han importado %1$d artículos</string>
+    <string name="item_list_toast_no_items_imported">No se importaron artículos desde el CSV</string>
+    <string name="item_list_toast_error_importing_csv">Error al importar el archivo CSV: %1$s</string>
+</resources>

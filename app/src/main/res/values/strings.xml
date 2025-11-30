@@ -7,6 +7,9 @@
     <!-- Host Card Emulation strings -->
     <string name="service_description">Cashu Payment Service</string>
     <string name="ndef_aid_description">NDEF Tag Type 4</string>
+    <string name="dialog_confirmation_default_title">Confirm</string>
+    <string name="dialog_confirmation_default_message">Are you sure you want to proceed?</string>
+
 
     <!-- QR-based PaymentRequest -->
     <string name="payment_request_qr_description">Cashu payment request QR code</string>
@@ -258,6 +261,10 @@
     <string name="top_up_status_operation_cancelled">Operation cancelled</string>
     <string name="top_up_status_nfc_error">NFC Communication Error: %1$s</string>
     <string name="top_up_status_card_error">Satocash Card Error: %1$s</string>
+    <string name="mint_selection_item_name_placeholder">Mint Name</string>
+    <string name="mint_selection_item_url_placeholder">mint.example.com</string>
+    <string name="mint_selection_item_balance_placeholder">₿1,234</string>
+
     <string name="top_up_status_generic_error">Error: %1$s</string>
     <string name="top_up_status_success_imported">Success: Imported %1$d proofs</string>
     <string name="top_up_status_pin_verification_failed">PIN Verification Failed</string>
