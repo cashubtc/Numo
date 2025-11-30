@@ -322,9 +322,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         fun updatePendingWithLightningInfo(
             context: Context,
             paymentId: String,
-            lightningInvoice: String,
-            lightningQuoteId: String,
-            lightningMintUrl: String,
+            lightningInvoice: String? = null,
+            lightningQuoteId: String? = null,
+            lightningMintUrl: String? = null,
             swapToLightningMintJson: String? = null,
         ) {
             val history = getPaymentHistory(context).toMutableList()
@@ -345,9 +345,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     paymentRequest = existing.paymentRequest,
                     rawStatus = existing.getStatus(),
                     paymentType = existing.paymentType,
-                    lightningInvoice = lightningInvoice,
-                    lightningQuoteId = lightningQuoteId,
-                    lightningMintUrl = lightningMintUrl,
+                    lightningInvoice = lightningInvoice ?: existing.lightningInvoice,
+                    lightningQuoteId = lightningQuoteId ?: existing.lightningQuoteId,
+                    lightningMintUrl = lightningMintUrl ?: existing.lightningMintUrl,
                     formattedAmount = existing.formattedAmount,
                     nostrNprofile = existing.nostrNprofile,
                     nostrSecretHex = existing.nostrSecretHex,

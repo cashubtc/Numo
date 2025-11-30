@@ -10,7 +10,10 @@ import kotlinx.coroutines.withContext
 import org.cashudevkit.Amount as CdkAmount
 import org.cashudevkit.MeltQuote
 import org.cashudevkit.Melted
+import org.cashudevkit.MintUrl
 import java.security.MessageDigest
+import kotlin.math.roundToLong
+import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 
 /**
  * Coordinates swapping a Cashu payment from an unknown mint into the
@@ -35,6 +38,7 @@ object SwapToLightningMintManager {
 
     /** Maximum allowed melt fee reserve as a fraction of the quote amount (5%). */
     private const val MAX_FEE_RESERVE_RATIO = 0.05
+    private const val MIN_FEE_OVERHEAD = 0.01
 
     /**
      * Result of attempting to swap a payment from an unknown mint.
@@ -95,65 +99,25 @@ object SwapToLightningMintManager {
             return@withContext SwapResult.Failure(msg)
         }
 
-        // Before we can melt, CDK requires that the wallet actually holds
-        // proofs for this mint. We receive the provided Cashu token into the
-        // temporary wallet and use the returned Amount as the received
-        // balance for this swap.
-        Log.d(
-            TAG,
-            "swapFromUnknownMint: starting receive into temp wallet; expectedAmount=$expectedAmount sats"
-        )
+        val wallet = CashuWalletManager.getWallet()
+                ?: return@withContext SwapResult.Failure("Wallet not initialized for Lightning mint")
 
-        val walletBalance: Long = try {
-            val cdkToken = org.cashudevkit.Token.decode(cashuToken)
+        val cdkToken = org.cashudevkit.Token.decode(cashuToken)
 
-            val receiveOptions = org.cashudevkit.ReceiveOptions(
-                amountSplitTarget = org.cashudevkit.SplitTarget.None,
-                p2pkSigningKeys = emptyList(),
-                preimages = emptyList(),
-                metadata = emptyMap(),
-            )
+        // We request a mint quote, just to have the bolt11 request to feed to the melt quote request
+        // Then, we take the fee estimate from the melt quote response and
+        // ask for a new mint quote with the adjusted amount
 
-            Log.d(TAG, "Receiving payer token into temporary wallet for mint=$unknownMintUrl")
-            val receivedAmount = tempWallet.receive(cdkToken, receiveOptions)
-            val receivedSats = receivedAmount.value.toLong()
+        val feeBuffer = (expectedAmount * MAX_FEE_RESERVE_RATIO).toLong()
+        var lightningAmount = expectedAmount - feeBuffer
 
-            Log.d(
-                TAG,
-                "swapFromUnknownMint: receive completed; receivedSats=$receivedSats, tokenStringLength=${cashuToken.length}"
-            )
-            receivedSats
-        } catch (t: Throwable) {
-            val msg = "Failed to receive payer token into temporary wallet: ${t.message}"
-            Log.e(TAG, msg, t)
-            try { tempWallet.close() } catch (_: Throwable) {}
-            return@withContext SwapResult.Failure(msg)
-        }
-
-        if (walletBalance <= 0L) {
-            val msg = "Temporary wallet has zero balance after receive"
-            Log.e(TAG, msg)
-            try { tempWallet.close() } catch (_: Throwable) {}
-            return@withContext SwapResult.Failure(msg)
-        }
-
-        val feeBuffer = (walletBalance.toDouble() * MAX_FEE_RESERVE_RATIO).toLong()
-        val lightningAmount = walletBalance - feeBuffer
-
-        Log.d(
-            TAG,
-            "swapFromUnknownMint: fee buffer + Lightning amount: " +
-                "walletBalance=$walletBalance, feeBuffer=$feeBuffer (ratio=${"%.2f".format(MAX_FEE_RESERVE_RATIO * 100)}%), " +
-                "lightningAmount=$lightningAmount"
-        )
         if (lightningAmount <= 0L) {
-            val msg = "Received amount $walletBalance is too small after 3% fee buffer"
+            val msg = "Received amount $lightningAmount is too small after 5% fee buffer"
             Log.e(TAG, msg)
             try { tempWallet.close() } catch (_: Throwable) {}
             return@withContext SwapResult.Failure(msg)
         }
 
-        // 3) Obtain or reuse a Lightning mint quote for `lightningAmount`.
         val mintManager = MintManager.getInstance(appContext)
         val lightningMintUrl = mintManager.getPreferredLightningMint()
             ?: run {
@@ -162,6 +126,26 @@ object SwapToLightningMintManager {
                 return@withContext SwapResult.Failure("No Lightning mint configured")
             }
 
+        val mintQuote = wallet.mintQuote(MintUrl(lightningMintUrl), CdkAmount(lightningAmount.toULong()), null)
+
+        var meltQuote: MeltQuote = try {
+            tempWallet.meltQuote(mintQuote.request, null)
+        } catch (t: Throwable) {
+            val msg = "Failed to request melt quote from unknown mint: ${'$'}{t.message}"
+            Log.e(TAG, msg, t)
+            tempWallet.close()
+            return@withContext SwapResult.Failure(msg)
+        }
+
+        val feeReserveEstimate = meltQuote.feeReserve.value.toLong()
+        if (feeReserveEstimate > feeBuffer) {
+            val msg = "Lightning fee reserve estimate is too big ($feeReserveEstimate)"
+            Log.e(TAG, msg)
+            try { tempWallet.close() } catch (_: Throwable) {}
+            return@withContext SwapResult.Failure(msg)
+        }
+
+        lightningAmount = expectedAmount - (expectedAmount * MIN_FEE_OVERHEAD).roundToLong() - feeReserveEstimate
         val adjustedPaymentContext = paymentContext.copy(amountSats = lightningAmount)
 
         Log.d(
@@ -180,7 +164,7 @@ object SwapToLightningMintManager {
         Log.d(TAG, "Using Lightning invoice for swap: quoteId=${'$'}{lightningInvoiceInfo.quoteId} bolt11=$bolt11")
 
         // 4) Request a melt quote from the unknown mint for this bolt11.
-        val meltQuote: MeltQuote = try {
+        meltQuote = try {
             tempWallet.meltQuote(bolt11, null)
         } catch (t: Throwable) {
             val msg = "Failed to request melt quote from unknown mint: ${'$'}{t.message}"
@@ -198,7 +182,7 @@ object SwapToLightningMintManager {
                 "meltQuoteAmount=$quoteAmount, " +
                 "meltQuoteFeeReserve=$feeReserve, " +
                 "totalMeltRequired=${quoteAmount + feeReserve}, " +
-                "receivedSats=$walletBalance, " +
+                "receivedSats=${paymentContext.amountSats}, " +
                 "feeBufferReserved=$feeBuffer (ratio=${"%.2f".format(MAX_FEE_RESERVE_RATIO * 100)}%), " +
                 "lightningMintQuoteAmount=$lightningAmount"
         )
@@ -210,8 +194,8 @@ object SwapToLightningMintManager {
         }
 
         val totalMeltRequired = quoteAmount + feeReserve
-        if (totalMeltRequired > walletBalance) {
-            val msg = "Unknown-mint melt requires $totalMeltRequired sats but temp wallet balance is $walletBalance"
+        if (totalMeltRequired > paymentContext.amountSats) {
+            val msg = "Unknown-mint melt requires $totalMeltRequired sats but temp wallet balance is ${paymentContext.amountSats}"
             Log.w(TAG, msg)
             try { tempWallet.close() } catch (_: Throwable) {}
             return@withContext SwapResult.Failure(msg)
@@ -232,13 +216,10 @@ object SwapToLightningMintManager {
                 )
                 val frameJson = com.google.gson.Gson().toJson(frame)
 
-                com.electricdreams.numo.feature.history.PaymentsHistoryActivity
+                PaymentsHistoryActivity
                     .updatePendingWithLightningInfo(
                         context = appContext,
                         paymentId = paymentContext.paymentId,
-                        lightningInvoice = lightningInvoiceInfo.bolt11,
-                        lightningQuoteId = lightningInvoiceInfo.quoteId,
-                        lightningMintUrl = lightningMintUrl,
                         swapToLightningMintJson = frameJson,
                     )
             } catch (t: Throwable) {
@@ -250,6 +231,7 @@ object SwapToLightningMintManager {
         //    The Melted result carries the final state, preimage, and fee info
         //    for this Lightning payment.
         val melted: Melted = try {
+            // TODO: extract the proofs and pass them to `tempWallet.meltProofs` 
             tempWallet.melt(meltQuote.id)
         } catch (t: Throwable) {
             val msg = "Melt execution failed on unknown mint: ${t.message}"
