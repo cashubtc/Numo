@@ -1,12 +1,11 @@
 package com.electricdreams.numo.ui.components
 
 import android.content.Context
-import android.os.Build
-import android.os.Vibrator
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.GridLayout
 import com.electricdreams.numo.R
+import com.electricdreams.numo.ui.util.VibrationHelper
 
 /**
  * Manages keypad creation, input handling, and vibration feedback.
@@ -17,10 +16,7 @@ class KeypadManager(
     private val onKeyPressed: (String) -> Unit
 ) {
 
-    private var vibrator: Vibrator? = null
-
     init {
-        vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator?
         setupKeypad()
     }
 
@@ -92,17 +88,6 @@ class KeypadManager(
 
     /** Vibrate for keypad feedback */
     private fun vibrateKeypad() {
-        vibrator?.let { v ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                v.vibrate(android.os.VibrationEffect.createPredefined(android.os.VibrationEffect.EFFECT_CLICK))
-            } else {
-                @Suppress("DEPRECATION")
-                v.vibrate(VIBRATE_KEYPAD)
-            }
-        }
-    }
-
-    companion object {
-        private const val VIBRATE_KEYPAD = 20L
+        VibrationHelper.performClick(context)
     }
 }

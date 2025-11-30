@@ -1,9 +1,6 @@
 package com.electricdreams.numo.feature.pin
 
 import android.content.Context
-import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.Button
@@ -11,19 +8,19 @@ import android.widget.GridLayout
 import android.widget.ImageButton
 import androidx.core.content.ContextCompat
 import com.electricdreams.numo.R
+import com.electricdreams.numo.ui.util.VibrationHelper
 
 /**
  * Custom numeric keypad for PIN entry, styled to match the POS keypad.
  * This is a GridLayout that creates digit buttons 1-9, 0, and backspace.
  * Features haptic feedback on button press.
  */
-class PinKeypadView @JvmOverloads constructor(
+class PinKeypadView @JvmOverloads constructor( 
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : GridLayout(context, attrs, defStyleAttr) {
 
-    private var vibrator: Vibrator? = null
     private var onKeyListener: OnKeyListener? = null
 
     interface OnKeyListener {
@@ -38,7 +35,6 @@ class PinKeypadView @JvmOverloads constructor(
         useDefaultMargins = false
         alignmentMode = ALIGN_BOUNDS
 
-        vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator?
         setupKeypad()
     }
 
@@ -128,13 +124,6 @@ class PinKeypadView @JvmOverloads constructor(
     }
 
     private fun vibrateKeypad() {
-        vibrator?.let { v ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
-            } else {
-                @Suppress("DEPRECATION")
-                v.vibrate(15L)
-            }
-        }
+        VibrationHelper.performClick(context)
     }
 }
