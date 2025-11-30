@@ -34,13 +34,13 @@ class PaymentRoutingCoreTest {
         val decision = PaymentRoutingCore.RoutingDecision(PaymentRoutingCore.TargetActivity.PAYMENT_REQUEST)
         val context: Context = ApplicationProvider.getApplicationContext()
 
-        val intent = decision.buildIntent(context, amount = 42L, formattedAmount = "42 sats", checkoutBasketJson = "{}")
+        val intent = decision.buildIntent(context, amount = 42L, formattedAmount = "42 sats", basketId = "basket-123")
 
         val component = intent.component
         assertNotNull(component)
         assertEquals(ComponentName(context, PaymentRequestActivity::class.java), component)
         assertEquals(42L, intent.getLongExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, -1))
         assertEquals("42 sats", intent.getStringExtra(PaymentRequestActivity.EXTRA_FORMATTED_AMOUNT))
-        assertEquals("{}", intent.getStringExtra(PaymentRequestActivity.EXTRA_CHECKOUT_BASKET_JSON))
+        assertEquals("basket-123", intent.getStringExtra(PaymentRequestActivity.EXTRA_SAVED_BASKET_ID))
     }
 }

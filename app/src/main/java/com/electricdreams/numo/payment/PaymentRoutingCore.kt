@@ -19,7 +19,7 @@ object PaymentRoutingCore {
             context: Context,
             amount: Long,
             formattedAmount: String,
-            checkoutBasketJson: String?
+            basketId: String?
         ): Intent {
             val targetClass = when (targetActivity) {
                 TargetActivity.TIP_SELECTION -> TipSelectionActivity::class.java
@@ -28,9 +28,7 @@ object PaymentRoutingCore {
             return Intent(context, targetClass).apply {
                 putExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, amount)
                 putExtra(PaymentRequestActivity.EXTRA_FORMATTED_AMOUNT, formattedAmount)
-                checkoutBasketJson?.let {
-                    putExtra(PaymentRequestActivity.EXTRA_CHECKOUT_BASKET_JSON, it)
-                }
+                basketId?.let { putExtra(PaymentRequestActivity.EXTRA_SAVED_BASKET_ID, it) }
             }
         }
     }

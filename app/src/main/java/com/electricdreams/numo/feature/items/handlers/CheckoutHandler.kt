@@ -51,45 +51,17 @@ class CheckoutHandler(
         // Determine how to format the amount for PaymentRequestActivity
         val formattedAmount = formatPaymentAmount(fiatTotal, satsTotal)
 
-        // Create a snapshot of the basket BEFORE clearing it
-        // This preserves the checkout data for receipt generation
-        val checkoutBasket = CheckoutBasket.fromBasketManager(
-            basketManager = basketManager,
-            currency = currencyManager.getCurrentCurrency(),
-            bitcoinPrice = if (btcPrice > 0) btcPrice else null,
-            totalSatoshis = totalSatoshis,
-        )
-        val checkoutBasketJson = checkoutBasket.toJson()
-        
-        android.util.Log.d("CheckoutHandler", "Captured basket with ${checkoutBasket.items.size} items, total: $totalSatoshis sats")
-        android.util.Log.d("CheckoutHandler", "Basket JSON size: ${checkoutBasketJson.length} chars")
-
         // Clear basket before navigating away so UI state is clean when we return
         basketManager.clearBasket()
 
-        // Decide whether to show tip selection first or go directly to payment request
         val tipsManager = TipsManager.getInstance(activity)
-        if (tipsManager.tipsEnabled) {
-            // Route through beautiful tip selection screen first
-            val intent = Intent(activity, TipSelectionActivity::class.java).apply {
-                putExtra(TipSelectionActivity.EXTRA_PAYMENT_AMOUNT, totalSatoshis)
-                putExtra(TipSelectionActivity.EXTRA_FORMATTED_AMOUNT, formattedAmount)
-                putExtra(TipSelectionActivity.EXTRA_CHECKOUT_BASKET_JSON, checkoutBasketJson)
-                // Preserve saved basket association all the way through to PaymentRequestActivity
-                savedBasketId?.let { putExtra(PaymentRequestActivity.EXTRA_SAVED_BASKET_ID, it) }
-            }
-            activity.startActivity(intent)
-        } else {
-            // Go directly to payment request without tips
-            val intent = Intent(activity, PaymentRequestActivity::class.java).apply {
-                putExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, totalSatoshis)
-                putExtra(PaymentRequestActivity.EXTRA_FORMATTED_AMOUNT, formattedAmount)
-                putExtra(PaymentRequestActivity.EXTRA_CHECKOUT_BASKET_JSON, checkoutBasketJson)
-                savedBasketId?.let { putExtra(PaymentRequestActivity.EXTRA_SAVED_BASKET_ID, it) }
-            }
-            activity.startActivity(intent)
+        val intent = Intent(activity, if (tipsManager.tipsEnabled) TipSelectionActivity::class.java else PaymentRequestActivity::class.java).apply {
+            putExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, totalSatoshis)
+            putExtra(PaymentRequestActivity.EXTRA_FORMATTED_AMOUNT, formattedAmount)
+            savedBasketId?.let { putExtra(PaymentRequestActivity.EXTRA_SAVED_BASKET_ID, it) }
         }
 
+        activity.startActivity(intent)
         activity.finish()
     }
 

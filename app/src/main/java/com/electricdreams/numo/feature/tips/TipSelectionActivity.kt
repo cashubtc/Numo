@@ -42,7 +42,7 @@ class TipSelectionActivity : AppCompatActivity() {
     private var formattedAmount: String = ""
     private var entryCurrency: Currency = Currency.USD
     private var enteredAmountFiat: Long = 0
-    private var checkoutBasketJson: String? = null
+    private var basketId: String? = null
 
     // State
     private var selectedTipSats: Long = 0
@@ -123,7 +123,7 @@ class TipSelectionActivity : AppCompatActivity() {
     private fun initializeFromIntent() {
         paymentAmountSats = intent.getLongExtra(EXTRA_PAYMENT_AMOUNT, 0)
         formattedAmount = intent.getStringExtra(EXTRA_FORMATTED_AMOUNT) ?: ""
-        checkoutBasketJson = intent.getStringExtra(EXTRA_CHECKOUT_BASKET_JSON)
+        basketId = intent.getStringExtra(EXTRA_BASKET_ID)
 
         // Parse entry currency
         val parsedAmount = Amount.parse(formattedAmount)
@@ -852,9 +852,7 @@ class TipSelectionActivity : AppCompatActivity() {
             putExtra(EXTRA_TIP_PERCENTAGE, selectedTipPercentage)
             putExtra(EXTRA_BASE_AMOUNT_SATS, paymentAmountSats)
             putExtra(EXTRA_BASE_FORMATTED_AMOUNT, formattedAmount)
-            checkoutBasketJson?.let {
-                putExtra(PaymentRequestActivity.EXTRA_CHECKOUT_BASKET_JSON, it)
-            }
+            basketId?.let { putExtra(PaymentRequestActivity.EXTRA_SAVED_BASKET_ID, it) }
         }
         
         startActivityForResult(intent, REQUEST_CODE_PAYMENT)
@@ -902,7 +900,7 @@ class TipSelectionActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_PAYMENT_AMOUNT = "payment_amount"
         const val EXTRA_FORMATTED_AMOUNT = "formatted_amount"
-        const val EXTRA_CHECKOUT_BASKET_JSON = "checkout_basket_json"
+        const val EXTRA_BASKET_ID = "basket_id"
         const val EXTRA_TIP_AMOUNT_SATS = "tip_amount_sats"
         const val EXTRA_TIP_PERCENTAGE = "tip_percentage"
         const val EXTRA_BASE_AMOUNT_SATS = "base_amount_sats"

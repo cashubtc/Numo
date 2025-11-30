@@ -1,3 +1,4 @@
+
 package com.electricdreams.numo.feature.items
 
 import android.animation.AnimatorSet
@@ -13,6 +14,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import com.google.android.flexbox.FlexboxLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -312,8 +314,10 @@ class ItemSelectionActivity : AppCompatActivity() {
             val basketId = ensureBasketSaved()
             if (basketId != null) {
                 checkoutHandler.savedBasketId = basketId
+                checkoutHandler.proceedToCheckout()
+            } else {
+                Toast.makeText(this, R.string.item_selection_toast_save_basket_first, Toast.LENGTH_SHORT).show()
             }
-            checkoutHandler.proceedToCheckout()
         }
         
         saveButton.setOnClickListener {
