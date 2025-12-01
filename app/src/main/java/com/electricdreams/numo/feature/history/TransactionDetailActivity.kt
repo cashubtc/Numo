@@ -178,11 +178,16 @@ class TransactionDetailActivity : AppCompatActivity() {
         val mintNameText: TextView = findViewById(R.id.mint_name)
         val mintUrlText: TextView = findViewById(R.id.detail_mint_url)
 
-        val mintUrl = entry.mintUrl
-        if (!mintUrl.isNullOrEmpty()) {
-            val mintName = getMintDisplayName(mintUrl)
+        // Prefer the primary mint URL recorded on the entry; if that is
+        // missing, fall back to the Lightning mint URL (for Lightning or
+        // swap-to-Lightning-mint flows) so we never display a generic
+        // "Unknown" when we actually know which mint was involved.
+        val primaryMintUrl = entry.mintUrl ?: entry.lightningMintUrl
+
+        if (!primaryMintUrl.isNullOrEmpty()) {
+            val mintName = getMintDisplayName(primaryMintUrl)
             mintNameText.text = getString(R.string.transaction_detail_mint_from_name, mintName)
-            mintUrlText.text = mintUrl
+            mintUrlText.text = primaryMintUrl
         } else {
             mintNameText.visibility = View.GONE
             mintUrlText.text = getString(R.string.transaction_detail_mint_unknown)
