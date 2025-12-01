@@ -85,11 +85,7 @@ dependencies {
 
     // Project specific dependencies
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
-    
-    // Bitcoin & Lightning utils (full BOLT11 / invoices, etc.)
-    implementation("fr.acinq.lightning:lightning-kmp-jvm:1.8.4")
 
-    // OkHttp for HTTP/WebSocket (used across the app)
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
     implementation(files("libs/cashu-java-sdk-1.0-SNAPSHOT.jar"))

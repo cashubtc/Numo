@@ -5,7 +5,6 @@ import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.nostr.Bech32
-import fr.acinq.lightning.payment.Bolt11Invoice
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.cashudevkit.Amount as CdkAmount
@@ -126,7 +125,7 @@ object SwapToLightningMintManager {
         // Then, we take the fee estimate from the melt quote response and
         // ask for a new mint quote with the adjusted amount
 
-        val feeBuffer = (paymentContext.amountSats * MAX_FEE_RESERVE_RATIO).toLong()
+        val feeBuffer = kotlin.math.ceil(paymentContext.amountSats * MAX_FEE_RESERVE_RATIO).toLong()
         var lightningAmount = paymentContext.amountSats - feeBuffer
 
         Log.d(
@@ -188,12 +187,13 @@ object SwapToLightningMintManager {
             return@withContext SwapResult.Failure(msg)
         }
 
-        lightningAmount = paymentContext.amountSats - (paymentContext.amountSats * MIN_FEE_OVERHEAD).roundToLong() - feeReserveEstimate
+        val minOverhead = kotlin.math.ceil(paymentContext.amountSats * MIN_FEE_OVERHEAD).toLong()
+        lightningAmount = paymentContext.amountSats - minOverhead - feeReserveEstimate
 
         Log.d(
             TAG,
             "swapFromUnknownMint: adjusted Lightning amount=$lightningAmount after applying " +
-                "minFeeOverheadRatio=$MIN_FEE_OVERHEAD and feeReserveEstimate=$feeReserveEstimate"
+                "minFeeOverheadCeil=$minOverhead and feeReserveEstimate=$feeReserveEstimate"
         )
         val adjustedPaymentContext = paymentContext.copy(amountSats = lightningAmount)
 
@@ -310,22 +310,11 @@ object SwapToLightningMintManager {
             return@withContext SwapResult.Failure(msg)
         }
 
-        val preimageHex = melted.preimage
-            ?: run {
-                val msg = "Unknown-mint melt result is PAID but has no preimage"
-                Log.e(TAG, msg)
-                return@withContext SwapResult.Failure(msg)
-            }
-
-        // 6) Verify preimage vs. Lightning invoice payment hash
-        try {
-            Log.d(TAG, "swapFromUnknownMint: verifying preimage against Lightning invoice payment hash")
-            verifyMeltPreimageMatchesInvoice(preimageHex, bolt11)
-        } catch (t: Throwable) {
-            val msg = "Payment preimage verification failed: ${t.message}"
-            Log.e(TAG, msg, t)
-            return@withContext SwapResult.Failure(msg)
-        }
+        // 6) We no longer verify the preimage against the BOLT11 invoice
+        // payment hash here. The Lightning mint will only mint proofs if the
+        // invoice was actually paid, so a successful mint later implicitly
+        // confirms the payment. We rely on that instead of doing an explicit
+        // SHA-256(preimage) vs. payment_hash comparison.
 
         // 7) Attempt to mint the Lightning mint quote so that the merchant
         //    receives ecash on their Lightning mint. This is done
@@ -380,96 +369,10 @@ object SwapToLightningMintManager {
             amountSats = expectedAmount
         )
     }
-
-    // ---------------------------------------------------------------------
-    // BOLT11 + preimage verification utilities
-    // ---------------------------------------------------------------------
-
-    /**
-     * Verify that the preimage reported by the unknown mint for a given melt
-     * quote matches the payment hash encoded in the BOLT11 invoice.
-     *
-     * @throws IllegalStateException if the hashes do not match or parsing fails.
-     */
-    fun verifyMeltPreimageMatchesInvoice(
-        preimageHex: String,
-        bolt11Invoice: String
-    ) {
-        Log.d(
-            TAG,
-            "verifyMeltPreimageMatchesInvoice: start preimageHexLength=${preimageHex.length}, bolt11Length=${bolt11Invoice.length}"
-        )
-        val preimageBytes = hexToBytes(preimageHex)
-        val digest = MessageDigest.getInstance("SHA-256")
-        val computedHash = digest.digest(preimageBytes)
-        val invoiceHash = extractPaymentHashFromBolt11(bolt11Invoice)
-
-        if (!computedHash.contentEquals(invoiceHash)) {
-            throw IllegalStateException("Payment preimage does not match invoice payment hash")
-        }
-
-        Log.d(TAG, "verifyMeltPreimageMatchesInvoice: preimage hash matches invoice payment hash")
-    }
-
-    /**
-     * Extract the 32-byte payment hash from a BOLT11 invoice.
-     *
-     * Uses ACINQ's Bolt11Invoice implementation to fully parse the invoice
-     * and extract the payment hash.
-     *
-     * @throws IllegalArgumentException if the invoice is invalid or does
-     *         not contain a payment hash.
-     */
-    fun extractPaymentHashFromBolt11(bolt11: String): ByteArray {
-        if (bolt11.isBlank()) {
-            throw IllegalArgumentException("Empty BOLT11 invoice")
-        }
-
-        // Normalize the invoice for the BOLT11 parser:
-        // - trim whitespace
-        // - case-insensitive "lightning:" prefix
-        // - lowercase the BOLT11 string (Bolt11Invoice expects canonical lowercase)
-        val cleaned = bolt11.trim()
-        val lower = cleaned.lowercase()
-        val normalized = lower.removePrefix("lightning:")
-
-        Log.d(
-            TAG,
-            "extractPaymentHashFromBolt11: parsing invoice: " +
-                "origLength=${bolt11.length}, cleanedLength=${cleaned.length}, " +
-                "normalizedPrefix=${normalized.take(8)}..."
-        )
-
-        // ACINQ's Bolt11Invoice does full BOLT11 decoding (HRP, tags, signature, etc.)
-        val parsed = try {
-            val result = Bolt11Invoice.read(normalized)
-            if (result.isFailure) {
-                throw IllegalArgumentException("Invalid BOLT11: decode failed")
-            }
-            result.get() // Bolt11Invoice
-        } catch (t: Throwable) {
-            throw IllegalArgumentException("Invalid BOLT11: decode failed: ${t.message}", t)
-        }
-        val paymentHash = parsed.paymentHash
-            ?: throw IllegalArgumentException("BOLT11 invoice does not contain a payment hash")
-
-        Log.d(TAG, "extractPaymentHashFromBolt11: successfully extracted 32-byte payment hash via Bolt11Invoice")
-        return paymentHash.toByteArray()
-    }
-
-    /** Decode a hex string into a ByteArray. */
-    private fun hexToBytes(hex: String): ByteArray {
-        val cleaned = hex.trim().lowercase()
-        if (cleaned.length % 2 != 0) {
-            throw IllegalArgumentException("Hex string must have even length")
-        }
-        val out = ByteArray(cleaned.length / 2)
-        var i = 0
-        while (i < cleaned.length) {
-            val byte = cleaned.substring(i, i + 2).toInt(16)
-            out[i / 2] = byte.toByte()
-            i += 2
-        }
-        return out
-    }
+    // Note: previously we had explicit BOLT11 payment-hash verification
+    // utilities here (verifyMeltPreimageMatchesInvoice +
+    // extractPaymentHashFromBolt11 + hexToBytes). Since the Lightning mint
+    // will only mint proofs if the invoice is actually paid, we now rely on
+    // that as the source of truth and have removed this additional layer of
+    // verification to simplify the swap flow.
 }
