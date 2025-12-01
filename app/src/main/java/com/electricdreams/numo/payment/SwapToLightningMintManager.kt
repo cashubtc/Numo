@@ -195,7 +195,6 @@ object SwapToLightningMintManager {
             "swapFromUnknownMint: adjusted Lightning amount=$lightningAmount after applying " +
                 "minFeeOverheadCeil=$minOverhead and feeReserveEstimate=$feeReserveEstimate"
         )
-        val adjustedPaymentContext = paymentContext.copy(amountSats = lightningAmount)
 
         Log.d(
             TAG,
@@ -203,17 +202,13 @@ object SwapToLightningMintManager {
                 "lightningMintUrl=$lightningMintUrl, mintQuoteAmount=$lightningAmount"
         )
 
-        val lightningInvoiceInfo = LightningMintInvoiceManager.getOrCreateInvoiceForPayment(
-            appContext = appContext,
-            lightningMintUrl = lightningMintUrl,
-            paymentContext = adjustedPaymentContext
-        )
+        val finalMintQuote = wallet.mintQuote(MintUrl(lightningMintUrl), CdkAmount(lightningAmount.toULong()), null)
 
-        val bolt11 = lightningInvoiceInfo.bolt11
+        val bolt11 = finalMintQuote.request
         Log.d(
             TAG,
             "swapFromUnknownMint: using Lightning invoice for swap: " +
-                "quoteId=${lightningInvoiceInfo.quoteId}, bolt11Length=${bolt11.length}"
+                "quoteId=${finalMintQuote.id}, bolt11Length=${bolt11.length}"
         )
 
         // 4) Request a melt quote from the unknown mint for this bolt11.
@@ -266,7 +261,7 @@ object SwapToLightningMintManager {
                     unknownMintUrl = unknownMintUrl,
                     meltQuoteId = meltQuote.id,
                     lightningMintUrl = lightningMintUrl,
-                    lightningQuoteId = lightningInvoiceInfo.quoteId,
+                    lightningQuoteId = finalMintQuote.id,
                 )
                 val frameJson = com.google.gson.Gson().toJson(frame)
 
@@ -324,22 +319,22 @@ object SwapToLightningMintManager {
         try {
             val lightningMint = MintUrl(lightningMintUrl)
 
-            Log.d(TAG, "Checking Lightning mint quote state for quoteId=${lightningInvoiceInfo.quoteId}")
-            val lightningQuote = wallet.checkMintQuote(lightningMint, lightningInvoiceInfo.quoteId)
+            Log.d(TAG, "Checking Lightning mint quote state for quoteId=${finalMintQuote.id}")
+            val lightningQuote = wallet.checkMintQuote(lightningMint, finalMintQuote.id)
             val stateStr = lightningQuote.state.toString()
             Log.d(TAG, "Lightning mint quote state=$stateStr")
 
             if (stateStr.equals("PAID", ignoreCase = true) ||
                 stateStr.equals("ISSUED", ignoreCase = true)
             ) {
-                Log.d(TAG, "Lightning quote is paid; attempting wallet.mint for quoteId=${lightningInvoiceInfo.quoteId}")
+                Log.d(TAG, "Lightning quote is paid; attempting wallet.mint for quoteId=${finalMintQuote.id}")
                 try {
-                    val mintedProofs = wallet.mint(lightningMint, lightningInvoiceInfo.quoteId, null)
+                    val mintedProofs = wallet.mint(lightningMint, finalMintQuote.id, null)
                     Log.d(TAG, "Minted ${mintedProofs.size} proofs on Lightning mint as part of swap flow")
                 } catch (mintError: Throwable) {
                     // Not fatal for the POS payment itself; the Lightning
                     // handler / operator can reconcile, but we log loudly.
-                    Log.e(TAG, "Failed to mint proofs on Lightning mint for quoteId=${lightningInvoiceInfo.quoteId}: ${mintError.message}", mintError)
+                    Log.e(TAG, "Failed to mint proofs on Lightning mint for quoteId=${finalMintQuote.id}: ${mintError.message}", mintError)
                 }
             } else {
                 Log.d(TAG, "Lightning mint quote not yet paid (state=$stateStr), skipping immediate mint")
