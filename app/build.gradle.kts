@@ -82,12 +82,18 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    
+
     // Project specific dependencies
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
-    implementation(files("libs/cashu-java-sdk-1.0-SNAPSHOT.jar"))
-    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     
+    // Bitcoin & Lightning utils (full BOLT11 / invoices, etc.)
+    implementation("fr.acinq.lightning:lightning-kmp-jvm:1.8.4")
+
+    // OkHttp for HTTP/WebSocket (used across the app)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    implementation(files("libs/cashu-java-sdk-1.0-SNAPSHOT.jar"))
+
     // Jackson for JSON and CBOR processing
     implementation("com.fasterxml.jackson.core:jackson-databind:2.16.1")
     implementation("com.fasterxml.jackson.core:jackson-core:2.16.1")
@@ -104,7 +110,7 @@ dependencies {
     implementation("com.google.zxing:core:3.5.3")
 
     // CDK Kotlin bindings
-    implementation("org.cashudevkit:cdk-kotlin:0.14.2-rc.3")
+    implementation("org.cashudevkit:cdk-kotlin:0.14.2-rc.4")
     
     // ML Kit Barcode Scanning
     implementation("com.google.mlkit:barcode-scanning:17.2.0")

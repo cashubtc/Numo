@@ -5,6 +5,7 @@ import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.nostr.Bech32
+import fr.acinq.lightning.payment.Bolt11Invoice
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.cashudevkit.Amount as CdkAmount
@@ -85,7 +86,15 @@ object SwapToLightningMintManager {
         unknownMintUrl: String,
         paymentContext: PaymentContext
     ): SwapResult = withContext(Dispatchers.IO) {
-        Log.d(TAG, "Starting swapFromUnknownMint for mint=$unknownMintUrl amount=$expectedAmount sats")
+        Log.d(
+            TAG,
+            "swapFromUnknownMint: start " +
+                "unknownMintUrl=$unknownMintUrl, " +
+                "expectedAmount=$expectedAmount, " +
+                "paymentContext.paymentId=${paymentContext.paymentId}, " +
+                "paymentContext.amountSats=${paymentContext.amountSats}, " +
+                "cashuTokenLength=${cashuToken.length}"
+        )
 
         // 1) Create a temporary single-mint Wallet and receive the payer's
         //    token so that it holds the proofs we want to melt. This wallet
@@ -99,10 +108,19 @@ object SwapToLightningMintManager {
             return@withContext SwapResult.Failure(msg)
         }
 
+        Log.d(TAG, "swapFromUnknownMint: temporary wallet created for mint=$unknownMintUrl")
+
         val wallet = CashuWalletManager.getWallet()
-                ?: return@withContext SwapResult.Failure("Wallet not initialized for Lightning mint")
+            ?: run {
+                Log.e(TAG, "swapFromUnknownMint: main wallet not initialized for Lightning mint")
+                return@withContext SwapResult.Failure("Wallet not initialized for Lightning mint")
+            }
+
+        Log.d(TAG, "swapFromUnknownMint: main wallet for Lightning mint is available")
 
         val cdkToken = org.cashudevkit.Token.decode(cashuToken)
+        val proofs = cdkToken.proofsSimple()
+        Log.d(TAG, "swapFromUnknownMint: decoded Cashu token with ${proofs.size} proofs")
 
         // We request a mint quote, just to have the bolt11 request to feed to the melt quote request
         // Then, we take the fee estimate from the melt quote response and
@@ -110,6 +128,12 @@ object SwapToLightningMintManager {
 
         val feeBuffer = (paymentContext.amountSats * MAX_FEE_RESERVE_RATIO).toLong()
         var lightningAmount = paymentContext.amountSats - feeBuffer
+
+        Log.d(
+            TAG,
+            "swapFromUnknownMint: initial fee buffer=$feeBuffer (ratio=${"%.2f".format(MAX_FEE_RESERVE_RATIO * 100)}%), " +
+                "initialLightningAmount=$lightningAmount from received=${paymentContext.amountSats}"
+        )
 
         if (lightningAmount <= 0L) {
             val msg = "Received amount $lightningAmount is too small after 5% fee buffer"
@@ -125,10 +149,24 @@ object SwapToLightningMintManager {
                 try { tempWallet.close() } catch (_: Throwable) {}
                 return@withContext SwapResult.Failure("No Lightning mint configured")
             }
+        Log.d(TAG, "swapFromUnknownMint: preferred Lightning mint is $lightningMintUrl")
+
+        Log.d(
+            TAG,
+            "swapFromUnknownMint: requesting initial Lightning mint quote for fee estimation: " +
+                "lightningMintUrl=$lightningMintUrl, amount=$lightningAmount"
+        )
 
         val mintQuote = wallet.mintQuote(MintUrl(lightningMintUrl), CdkAmount(lightningAmount.toULong()), null)
 
+        Log.d(
+            TAG,
+            "swapFromUnknownMint: received initial Lightning mint quote: " +
+                "quoteId=${mintQuote.id}, requestLength=${mintQuote.request.length}"
+        )
+
         var meltQuote: MeltQuote = try {
+            Log.d(TAG, "swapFromUnknownMint: requesting initial melt quote from unknown mint for preliminary Lightning invoice")
             tempWallet.meltQuote(mintQuote.request, null)
         } catch (t: Throwable) {
             val msg = "Failed to request melt quote from unknown mint: ${'$'}{t.message}"
@@ -138,6 +176,11 @@ object SwapToLightningMintManager {
         }
 
         val feeReserveEstimate = meltQuote.feeReserve.value.toLong()
+        Log.d(
+            TAG,
+            "swapFromUnknownMint: initial melt quote from unknown mint: " +
+                "meltQuoteId=${meltQuote.id}, amount=${meltQuote.amount.value.toLong()}, feeReserveEstimate=$feeReserveEstimate"
+        )
         if (feeReserveEstimate > feeBuffer) {
             val msg = "Lightning fee reserve estimate is too big ($feeReserveEstimate)"
             Log.e(TAG, msg)
@@ -146,6 +189,12 @@ object SwapToLightningMintManager {
         }
 
         lightningAmount = paymentContext.amountSats - (paymentContext.amountSats * MIN_FEE_OVERHEAD).roundToLong() - feeReserveEstimate
+
+        Log.d(
+            TAG,
+            "swapFromUnknownMint: adjusted Lightning amount=$lightningAmount after applying " +
+                "minFeeOverheadRatio=$MIN_FEE_OVERHEAD and feeReserveEstimate=$feeReserveEstimate"
+        )
         val adjustedPaymentContext = paymentContext.copy(amountSats = lightningAmount)
 
         Log.d(
@@ -161,10 +210,15 @@ object SwapToLightningMintManager {
         )
 
         val bolt11 = lightningInvoiceInfo.bolt11
-        Log.d(TAG, "Using Lightning invoice for swap: quoteId=${'$'}{lightningInvoiceInfo.quoteId} bolt11=$bolt11")
+        Log.d(
+            TAG,
+            "swapFromUnknownMint: using Lightning invoice for swap: " +
+                "quoteId=${lightningInvoiceInfo.quoteId}, bolt11Length=${bolt11.length}"
+        )
 
         // 4) Request a melt quote from the unknown mint for this bolt11.
         meltQuote = try {
+            Log.d(TAG, "swapFromUnknownMint: requesting final melt quote from unknown mint using Lightning bolt11 invoice")
             tempWallet.meltQuote(bolt11, null)
         } catch (t: Throwable) {
             val msg = "Failed to request melt quote from unknown mint: ${'$'}{t.message}"
@@ -231,8 +285,12 @@ object SwapToLightningMintManager {
         //    The Melted result carries the final state, preimage, and fee info
         //    for this Lightning payment.
         val melted: Melted = try {
-            // TODO: extract the proofs and pass them to `tempWallet.meltProofs` 
-            tempWallet.melt(meltQuote.id)
+            Log.d(
+                TAG,
+                "swapFromUnknownMint: executing melt on unknown mint: " +
+                    "meltQuoteId=${meltQuote.id}, proofsCount=${proofs.size}, totalMeltRequired=$totalMeltRequired"
+            )
+            tempWallet.meltProofs(meltQuote.id, proofs)
         } catch (t: Throwable) {
             val msg = "Melt execution failed on unknown mint: ${t.message}"
             Log.e(TAG, msg, t)
@@ -243,6 +301,8 @@ object SwapToLightningMintManager {
             } catch (_: Throwable) {
             }
         }
+
+        Log.d(TAG, "swapFromUnknownMint: melt result state=${melted.state}, preimagePresent=${melted.preimage != null}")
 
         if (melted.state != org.cashudevkit.QuoteState.PAID) {
             val msg = "Unknown-mint melt did not complete: state=${melted.state}"
@@ -259,6 +319,7 @@ object SwapToLightningMintManager {
 
         // 6) Verify preimage vs. Lightning invoice payment hash
         try {
+            Log.d(TAG, "swapFromUnknownMint: verifying preimage against Lightning invoice payment hash")
             verifyMeltPreimageMatchesInvoice(preimageHex, bolt11)
         } catch (t: Throwable) {
             val msg = "Payment preimage verification failed: ${t.message}"
@@ -284,21 +345,21 @@ object SwapToLightningMintManager {
             ) {
                 Log.d(TAG, "Lightning quote is paid; attempting wallet.mint for quoteId=${lightningInvoiceInfo.quoteId}")
                 try {
-                    wallet.mint(lightningMint, lightningInvoiceInfo.quoteId, null)
-                    Log.d(TAG, "Minted ${'$'}{proofs.size} proofs on Lightning mint as part of swap flow")
+                    val mintedProofs = wallet.mint(lightningMint, lightningInvoiceInfo.quoteId, null)
+                    Log.d(TAG, "Minted ${mintedProofs.size} proofs on Lightning mint as part of swap flow")
                 } catch (mintError: Throwable) {
                     // Not fatal for the POS payment itself; the Lightning
                     // handler / operator can reconcile, but we log loudly.
-                    Log.e(TAG, "Failed to mint proofs on Lightning mint for quoteId=${'$'}{lightningInvoiceInfo.quoteId}: ${'$'}{mintError.message}", mintError)
+                    Log.e(TAG, "Failed to mint proofs on Lightning mint for quoteId=${lightningInvoiceInfo.quoteId}: ${mintError.message}", mintError)
                 }
             } else {
-                Log.d(TAG, "Lightning mint quote not yet paid (state=${'$'}stateStr), skipping immediate mint")
+                Log.d(TAG, "Lightning mint quote not yet paid (state=$stateStr), skipping immediate mint")
             }
         } catch (t: Throwable) {
             // Swallow non-fatal errors here; payment is already secured by
             // the unknown-mint melt + preimage verification. LightningMintHandler
             // or manual reconciliation can still complete the mint later.
-            Log.w(TAG, "Error while attempting to mint Lightning quote after swap: ${'$'}{t.message}", t)
+            Log.w(TAG, "Error while attempting to mint Lightning quote after swap: ${t.message}", t)
         }
 
         // At this point, we know the unknown mint has paid the exact invoice
@@ -307,7 +368,11 @@ object SwapToLightningMintManager {
         // POS perspective, we can treat the swap as successful and rely on
         // the Lightning flow to finalize balances.
 
-        Log.d(TAG, "Swap from unknown mint completed successfully for paymentId=${paymentContext.paymentId}")
+        Log.d(
+            TAG,
+            "Swap from unknown mint completed successfully for paymentId=${paymentContext.paymentId} " +
+                "(unknownMintUrl=$unknownMintUrl, lightningMintUrl=$lightningMintUrl, amountSats=$expectedAmount)"
+        )
 
         return@withContext SwapResult.Success(
             finalToken = cashuToken,
@@ -330,6 +395,10 @@ object SwapToLightningMintManager {
         preimageHex: String,
         bolt11Invoice: String
     ) {
+        Log.d(
+            TAG,
+            "verifyMeltPreimageMatchesInvoice: start preimageHexLength=${preimageHex.length}, bolt11Length=${bolt11Invoice.length}"
+        )
         val preimageBytes = hexToBytes(preimageHex)
         val digest = MessageDigest.getInstance("SHA-256")
         val computedHash = digest.digest(preimageBytes)
@@ -338,6 +407,8 @@ object SwapToLightningMintManager {
         if (!computedHash.contentEquals(invoiceHash)) {
             throw IllegalStateException("Payment preimage does not match invoice payment hash")
         }
+
+        Log.d(TAG, "verifyMeltPreimageMatchesInvoice: preimage hash matches invoice payment hash")
     }
 
     /**
@@ -359,60 +430,23 @@ object SwapToLightningMintManager {
             throw IllegalArgumentException("Empty BOLT11 invoice")
         }
 
-        // 1) Decode Bech32 invoice
-        val bech = bolt11.lowercase().removePrefix("lightning:")
-        val bechData = Bech32.decode(bech)
-        val data5 = bechData.data
+        val normalized = bolt11.removePrefix("lightning:")
+        Log.d(TAG, "extractPaymentHashFromBolt11: parsing invoice with length=${bolt11.length}")
 
-        // 2) Convert 5-bit groups to 8-bit bytes
-        val dataBytes = Bech32.convertBits(data5, 5, 8, false)
-        if (dataBytes.isEmpty()) {
-            throw IllegalArgumentException("Invalid BOLT11: empty data payload")
+        // ACINQ's Bolt11Invoice does full BOLT11 decoding (HRP, tags, signature, etc.)
+        val parsed = try {
+            val result = Bolt11Invoice.read(normalized)
+            if (result.isFailure) throw IllegalArgumentException("Invalid BOLT11: decode failed")
+            result.get() // Bolt11Invoice
+        } catch (t: Throwable) {
+            throw IllegalArgumentException("Invalid BOLT11: decode failed: ${t.message}", t)
         }
 
-        // 3) Separate the payment data (timestamp + tagged fields) from the
-        // signature and recovery id at the end (65 bytes total).
-        if (dataBytes.size < 65) {
-            throw IllegalArgumentException("Invalid BOLT11: payload too short for signature")
-        }
-        val payload = dataBytes.copyOf(dataBytes.size - 65)
+        val paymentHash = parsed.paymentHash
+            ?: throw IllegalArgumentException("BOLT11 invoice does not contain a payment hash")
 
-        // First 7 bytes of payload are the 35-bit timestamp (big-endian).
-        if (payload.size <= 7) {
-            throw IllegalArgumentException("Invalid BOLT11: payload too short for timestamp")
-        }
-        var idx = 7 // start after timestamp
-
-        // 4) Iterate tagged fields until we find tag 'p' (payment hash)
-        while (idx < payload.size) {
-            val tag = payload[idx].toInt().toChar()
-            idx += 1
-            if (idx + 1 > payload.size) {
-                break
-            }
-
-            // length is 10 bits stored in 2 bytes (big-endian), measured in 5-bit groups
-            val dataLength = ((payload[idx].toInt() and 0xFF) shl 5) or
-                (payload[idx + 1].toInt() and 0xFF)
-            idx += 2
-
-            val byteLength = (dataLength * 5 + 7) / 8
-            if (idx + byteLength > payload.size) {
-                break
-            }
-
-            if (tag == 'p') {
-                val hashBytes = payload.copyOfRange(idx, idx + byteLength)
-                if (hashBytes.size != 32) {
-                    throw IllegalArgumentException("Invalid BOLT11: payment hash length ${hashBytes.size} != 32")
-                }
-                return hashBytes
-            }
-
-            idx += byteLength
-        }
-
-        throw IllegalArgumentException("BOLT11 invoice does not contain a payment hash")
+        Log.d(TAG, "extractPaymentHashFromBolt11: successfully extracted 32-byte payment hash via Bolt11Invoice")
+        return paymentHash.toByteArray()
     }
 
     /** Decode a hex string into a ByteArray. */
