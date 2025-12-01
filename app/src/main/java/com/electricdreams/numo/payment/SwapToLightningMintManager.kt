@@ -38,7 +38,7 @@ object SwapToLightningMintManager {
 
     /** Maximum allowed melt fee reserve as a fraction of the quote amount (5%). */
     private const val MAX_FEE_RESERVE_RATIO = 0.05
-    private const val MIN_FEE_OVERHEAD = 0.01
+    private const val MIN_FEE_OVERHEAD = 0.005
 
     /**
      * Result of attempting to swap a payment from an unknown mint.

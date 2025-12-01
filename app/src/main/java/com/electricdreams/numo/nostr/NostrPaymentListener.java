@@ -162,14 +162,19 @@ public final class NostrPaymentListener {
                     }
             );
 
-            if (token != null && !token.isEmpty()) {
-                Log.i(TAG, "Redemption (with possible swap) successful via nostr DM; stopping listener");
+            // For swap-to-Lightning-mint flows, a successful redemption may
+            // legitimately return an empty token string (Lightning-style
+            // payment, no Cashu token imported). Treat both non-empty and
+            // empty strings as success and let higher layers decide how to
+            // handle the result.
+            if (token != null) {
+                Log.i(TAG, "Redemption (with possible swap) successful via nostr DM; stopping listener. tokenLength=" + token.length());
                 stop();
                 if (successHandler != null) {
                     successHandler.onSuccess(token);
                 }
             } else {
-                Log.w(TAG, "Redemption returned empty token; ignoring");
+                Log.w(TAG, "Redemption returned null token; ignoring");
             }
         } catch (RuntimeException re) {
             Throwable cause = re.getCause();
