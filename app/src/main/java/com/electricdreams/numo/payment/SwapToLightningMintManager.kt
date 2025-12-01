@@ -414,13 +414,8 @@ object SwapToLightningMintManager {
     /**
      * Extract the 32-byte payment hash from a BOLT11 invoice.
      *
-     * This implementation performs a minimal BOLT11 parse:
-     * - Decodes Bech32 to obtain HRP and 5-bit data part.
-     * - Converts 5-bit groups to 8-bit bytes.
-     * - Walks the tagged field stream to locate the 'p' tag (payment hash).
-     *
-     * It intentionally supports only the subset of BOLT11 used for typical
-     * Lightning invoices and does not implement every optional tag.
+     * Uses ACINQ's Bolt11Invoice implementation to fully parse the invoice
+     * and extract the payment hash.
      *
      * @throws IllegalArgumentException if the invoice is invalid or does
      *         not contain a payment hash.
@@ -430,18 +425,31 @@ object SwapToLightningMintManager {
             throw IllegalArgumentException("Empty BOLT11 invoice")
         }
 
-        val normalized = bolt11.removePrefix("lightning:")
-        Log.d(TAG, "extractPaymentHashFromBolt11: parsing invoice with length=${bolt11.length}")
+        // Normalize the invoice for the BOLT11 parser:
+        // - trim whitespace
+        // - case-insensitive "lightning:" prefix
+        // - lowercase the BOLT11 string (Bolt11Invoice expects canonical lowercase)
+        val cleaned = bolt11.trim()
+        val lower = cleaned.lowercase()
+        val normalized = lower.removePrefix("lightning:")
+
+        Log.d(
+            TAG,
+            "extractPaymentHashFromBolt11: parsing invoice: " +
+                "origLength=${bolt11.length}, cleanedLength=${cleaned.length}, " +
+                "normalizedPrefix=${normalized.take(8)}..."
+        )
 
         // ACINQ's Bolt11Invoice does full BOLT11 decoding (HRP, tags, signature, etc.)
         val parsed = try {
             val result = Bolt11Invoice.read(normalized)
-            if (result.isFailure) throw IllegalArgumentException("Invalid BOLT11: decode failed")
+            if (result.isFailure) {
+                throw IllegalArgumentException("Invalid BOLT11: decode failed")
+            }
             result.get() // Bolt11Invoice
         } catch (t: Throwable) {
             throw IllegalArgumentException("Invalid BOLT11: decode failed: ${t.message}", t)
         }
-
         val paymentHash = parsed.paymentHash
             ?: throw IllegalArgumentException("BOLT11 invoice does not contain a payment hash")
 
