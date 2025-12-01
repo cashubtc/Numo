@@ -79,7 +79,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
         
         // Parse token to extract amount and unit if not provided
         if (amount == 0L && tokenString != null) {
-            parseToken(tokenString!!)
+            parseToken(tokenString)
         }
         
         // Set up UI

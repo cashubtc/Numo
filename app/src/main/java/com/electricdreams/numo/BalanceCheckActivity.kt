@@ -148,18 +148,19 @@ class BalanceCheckActivity : AppCompatActivity() {
         Thread {
             try {
                 Log.d(TAG, "1. Creating Satocash client...")
-                satocashClient = SatocashNfcClient(tag)
+                val client = SatocashNfcClient(tag)
+                satocashClient = client
 
                 Log.d(TAG, "2. Connecting to NFC card...")
-                satocashClient!!.connect()
+                client.connect()
                 Log.d(TAG, "✅ Successfully connected to NFC card")
 
                 Log.d(TAG, "3. Selecting Satocash applet...")
-                satocashClient!!.selectApplet(SatocashNfcClient.SATOCASH_AID)
+                client.selectApplet(SatocashNfcClient.SATOCASH_AID)
                 Log.d(TAG, "✅ Satocash Applet found and selected!")
 
                 Log.d(TAG, "4. Initializing secure channel...")
-                satocashClient!!.initSecureChannel()
+                client.initSecureChannel()
                 Log.d(TAG, "✅ Secure Channel Initialized!")
 
                 Log.d(TAG, "5. Getting accurate card balance (no PIN authentication)...")
@@ -191,8 +192,9 @@ class BalanceCheckActivity : AppCompatActivity() {
     private val cardBalance: Long
         get() {
             Log.d(TAG, "Getting card balance using getProofInfo (no PIN required)...")
-            return try {
-                val status = satocashClient!!.status
+            try {
+                val status = satocashClient?.status
+                    ?: throw IllegalStateException("Satocash client not initialized")
                 Log.d(TAG, "Card status: $status")
 
                 val nbProofsUnspent = status.getOrDefault("nb_proofs_unspent", 0) as Int
@@ -206,13 +208,12 @@ class BalanceCheckActivity : AppCompatActivity() {
                 }
 
                 Log.d(TAG, "Total proofs in card: $totalProofs ($nbProofsUnspent unspent, $nbProofsSpent spent)")
-
-                val proofStates = satocashClient!!.getProofInfo(
+                val proofStates = satocashClient?.getProofInfo(
                     SatocashNfcClient.Unit.SAT,
                     SatocashNfcClient.ProofInfoType.METADATA_STATE,
                     0,
                     totalProofs
-                )
+                ) ?: emptyList<Long>()
 
                 Log.d(TAG, "Retrieved state info for ${proofStates.size} proofs")
                 Log.d(TAG, "ProofState: $proofStates")
@@ -222,14 +223,14 @@ class BalanceCheckActivity : AppCompatActivity() {
                     return 0
                 }
 
-                val amounts = satocashClient!!.getProofInfo(
+                val amountExponents = satocashClient?.getProofInfo(
                     SatocashNfcClient.Unit.SAT,
                     SatocashNfcClient.ProofInfoType.METADATA_AMOUNT_EXPONENT,
                     0,
                     totalProofs
-                )
+                ) ?: emptyList<Long>()
 
-                if (amounts.isEmpty()) {
+                if (amountExponents.isEmpty()) {
                     Log.e(TAG, "Amounts data missing or mismatched")
                     updateCardInfoDisplay(getString(R.string.balance_check_info_inconsistent_proofs))
                     return 0
@@ -241,9 +242,9 @@ class BalanceCheckActivity : AppCompatActivity() {
                 for (i in proofStates.indices) {
                     val state = proofStates[i]
                     Log.d(TAG, "state: $state")
-                    if (state == 1) {
+                    if (state == 1L) {
                         unspentCount++
-                        val amountExponent = amounts[i]
+                        val amountExponent = amountExponents.getOrNull(i) ?: continue
                         val amount = 2.0.pow(amountExponent.toDouble()).toLong()
                         totalBalance += amount
                         Log.d(TAG, "Proof $i: $amount ₿ (exp=$amountExponent)")

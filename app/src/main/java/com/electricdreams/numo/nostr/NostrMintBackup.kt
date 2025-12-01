@@ -272,9 +272,10 @@ object NostrMintBackup {
                         relayUrl = relayUrl,
                         publicKeyHex = publicKeyHex,
                         onEvent = { event ->
-                            if (event.id != null) {
-                                receivedEvents[event.id!!] = Pair(relayUrl, event)
-                                Log.d(TAG, "Received backup event ${event.id} from $relayUrl")
+                            val id = event.id
+                            if (id != null) {
+                                receivedEvents[id] = Pair(relayUrl, event)
+                                Log.d(TAG, "Received backup event $id from $relayUrl")
                             }
                         },
                         onComplete = {
@@ -495,12 +496,11 @@ object NostrMintBackup {
         arr.add(JsonPrimitive(event.pubkey ?: ""))
         arr.add(JsonPrimitive(event.created_at))
         arr.add(JsonPrimitive(event.kind))
-        
-        val tagsArray = JsonArray()
-        event.tags?.forEach { tag ->
-            val t = JsonArray()
-            tag.forEach { v -> t.add(JsonPrimitive(v ?: "")) }
-            tagsArray.add(t)
+        val arr = JsonArray()
+        arr.add(JsonPrimitive(0))
+        arr.add(JsonPrimitive(event.pubkey ?: ""))
+        arr.add(JsonPrimitive(event.created_at))
+        arr.add(JsonPrimitive(event.kind))
         }
         arr.add(tagsArray)
         arr.add(JsonPrimitive(event.content ?: ""))
@@ -575,10 +575,9 @@ object NostrMintBackup {
             onFailure(e.message ?: "failed to connect")
         }
     }
-
-    /**
-     * BIP39 mnemonic to seed (simplified implementation using PBKDF2-HMAC-SHA512).
-     */
+        val combined = ByteArray(seed.size + domainBytes.size)
+        System.arraycopy(seed, 0, combined, 0, seed.size)
+        System.arraycopy(domainBytes, 0, combined, seed.size, domainBytes.size)
     private fun mnemonicToSeed(mnemonic: String, passphrase: String = ""): ByteArray {
         val salt = "mnemonic$passphrase".toByteArray(StandardCharsets.UTF_8)
         val mnemonicBytes = mnemonic.toByteArray(StandardCharsets.UTF_8)

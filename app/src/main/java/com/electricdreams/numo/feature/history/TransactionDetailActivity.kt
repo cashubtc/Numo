@@ -369,7 +369,7 @@ class TransactionDetailActivity : AppCompatActivity() {
     private fun openBasketReceipt() {
         // Use saved basket data if available, otherwise fall back to checkoutBasketJson
         val basketJsonToUse = if (savedBasket != null) {
-            convertSavedBasketToCheckoutBasket(savedBasket!!).toJson()
+            savedBasket?.let { convertSavedBasketToCheckoutBasket(it).toJson() }
         } else {
             checkoutBasketJson
         }

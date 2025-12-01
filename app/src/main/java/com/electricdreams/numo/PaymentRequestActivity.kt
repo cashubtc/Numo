@@ -473,7 +473,13 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         if (isResumingPayment && resumeNostrSecretHex != null && resumeNostrNprofile != null) {
             // Resume with stored keys
-            handler.resume(paymentAmount, resumeNostrSecretHex!!, resumeNostrNprofile!!, callback)
+            val secret = resumeNostrSecretHex
+            val nprofile = resumeNostrNprofile
+            if (secret != null && nprofile != null) {
+                handler.resume(paymentAmount, secret, nprofile, callback)
+            } else {
+                callback(false)
+            }
         } else {
             // Start fresh
             handler.start(paymentAmount, pendingPaymentId, callback)
@@ -488,9 +494,9 @@ class PaymentRequestActivity : AppCompatActivity() {
             Log.d(TAG, "Resuming Lightning quote: id=$resumeLightningQuoteId")
             
             lightningHandler?.resume(
-                quoteId = resumeLightningQuoteId!!,
-                mintUrlStr = resumeLightningMintUrl!!,
-                invoice = resumeLightningInvoice!!,
+                quoteId = resumeLightningQuoteId ?: return@also,
+                mintUrlStr = resumeLightningMintUrl ?: return@also,
+                invoice = resumeLightningInvoice ?: return@also,
                 callback = createLightningCallback()
             )
         } else {

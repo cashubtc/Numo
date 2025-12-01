@@ -187,13 +187,14 @@ class BasketReceiptActivity : AppCompatActivity() {
         val fiatTotal = b.getFiatGrossTotalCents()
         val satsItems = b.getSatsItems()
         
-        if (satsItems.isEmpty() || bitcoinPrice == null || bitcoinPrice!! <= 0) {
+        val price = bitcoinPrice
+        if (satsItems.isEmpty() || price == null || price <= 0) {
             return fiatTotal
         }
-        
+
         // Convert sats items to fiat
         val satsTotal = b.getSatsDirectTotal()
-        val satsInFiat = ((satsTotal.toDouble() / 100_000_000.0) * bitcoinPrice!! * 100).toLong()
+        val satsInFiat = ((satsTotal.toDouble() / 100_000_000.0) * price * 100).toLong()
         
         return fiatTotal + satsInFiat
     }
@@ -354,8 +355,9 @@ class BasketReceiptActivity : AppCompatActivity() {
             totalText.text = lineTotalSats.toString()
             
             // Show fiat equivalent in VAT row
-            if (bitcoinPrice != null && bitcoinPrice!! > 0) {
-                val satsInFiat = ((item.getNetTotalSats().toDouble() / 100_000_000.0) * bitcoinPrice!! * 100).toLong()
+            val price = bitcoinPrice
+            if (price != null && price > 0) {
+                val satsInFiat = ((item.getNetTotalSats().toDouble() / 100_000_000.0) * price * 100).toLong()
                 val fiatEquiv = Amount(satsInFiat, currency)
                 
                 val vatLabel = view.findViewById<TextView>(R.id.vat_label)
@@ -454,8 +456,9 @@ class BasketReceiptActivity : AppCompatActivity() {
             if (hasSatsItems) {
                 satsItemsValue.text = Amount(b.getSatsDirectTotal(), Amount.Currency.BTC).toString()
                 
-                if (bitcoinPrice != null && bitcoinPrice!! > 0) {
-                    val satsInFiat = ((b.getSatsDirectTotal().toDouble() / 100_000_000.0) * bitcoinPrice!! * 100).toLong()
+                val price = bitcoinPrice
+                if (price != null && price > 0) {
+                    val satsInFiat = ((b.getSatsDirectTotal().toDouble() / 100_000_000.0) * price * 100).toLong()
                     satsItemsEquiv.text = "≈ ${Amount(satsInFiat, currency)}"
                     satsItemsEquiv.visibility = View.VISIBLE
                 } else {

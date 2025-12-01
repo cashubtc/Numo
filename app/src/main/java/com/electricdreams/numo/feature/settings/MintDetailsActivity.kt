@@ -464,8 +464,8 @@ class MintDetailsActivity : AppCompatActivity() {
         val hasVersion = !versionNumberVal.isNullOrBlank()
         
         if (hasSoftware) {
-            val newSoftwareValue = versionName!!
-            if (!softwareRow.isVisible || softwareValue.text.toString() != newSoftwareValue) {
+            val newSoftwareValue = versionName ?: return
+            val oldSoftwareValue = softwareValue.text?.toString()
                 softwareRow.visibility = View.VISIBLE
                 softwareDivider.visibility = View.VISIBLE
                 softwareValue.text = newSoftwareValue
@@ -476,8 +476,8 @@ class MintDetailsActivity : AppCompatActivity() {
         }
         
         if (hasVersion) {
-            val newVersionValue = versionNumberVal!!
-            if (!versionRow.isVisible || versionValue.text.toString() != newVersionValue) {
+            val newVersionValue = versionNumberVal ?: return
+            val oldVersionValue = versionValue.text?.toString()
                 versionRow.visibility = View.VISIBLE
                 versionValue.text = newVersionValue
             }

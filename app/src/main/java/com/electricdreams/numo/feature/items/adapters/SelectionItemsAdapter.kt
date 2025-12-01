@@ -112,8 +112,11 @@ class SelectionItemsAdapter(
         }
         
         // Add to basket with quantity 1
-        basketManager.addItem(customItem, 1)
-        basketQuantities[customItem.id!!] = 1
+        val customId = customItem.id
+        if (customId != null) {
+            basketManager.addItem(customItem, 1)
+            basketQuantities[customId] = 1
+        }
         
         // Refresh basket UI
         onQuantityChanged()
@@ -164,7 +167,11 @@ class SelectionItemsAdapter(
     private fun refreshBasketQuantities() {
         basketQuantities.clear()
         for (basketItem in basketManager.getBasketItems()) {
-            basketQuantities[basketItem.item.id!!] = basketItem.quantity
+            basketItem.item.id?.let { itemId ->
+            item.id?.let { itemId ->
+                basketQuantities[itemId] = newQuantity
+            }
+        }
         }
     }
 
@@ -403,28 +410,31 @@ class SelectionItemsAdapter(
         private fun hideKeyboard() {
             val imm = itemView.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(variationInput.windowToken, 0)
-        }
-
-        private fun loadItemImage(item: Item) {
-            if (!item.imagePath.isNullOrEmpty()) {
-                val imageFile = File(item.imagePath!!)
-                if (imageFile.exists()) {
-                    val bitmap = BitmapFactory.decodeFile(imageFile.absolutePath)
-                    if (bitmap != null) {
-                        itemImageView.setImageBitmap(bitmap)
-                        imagePlaceholder?.visibility = View.GONE
-                        return
+                val imagePath = item.imagePath
+                if (imagePath != null) {
+                    val imageFile = File(imagePath)
+                    if (imageFile.exists()) {
+                        imageRequestBuilder.load(imageFile).into(itemImageView)
+                    } else {
+                        Log.w(TAG, "Image file does not exist at path: $imagePath")
+                        loadPlaceholderImage()
                     }
+                } else {
+                    loadPlaceholderImage()
                 }
             }
+        }
             itemImageView.setImageBitmap(null)
             imagePlaceholder?.visibility = View.VISIBLE
         }
 
         private fun updateBasketItem(item: Item, newQuantity: Int, isCustomVariation: Boolean) {
             if (newQuantity <= 0) {
-                basketManager.removeItem(item.id!!)
-                basketQuantities.remove(item.id!!)
+                val itemId = item.id
+                if (itemId != null) {
+                    basketManager.removeItem(itemId)
+                    basketQuantities.remove(itemId)
+                }
                 
                 // Remove custom variation items from the list when quantity reaches 0
                 if (isCustomVariation) {
@@ -444,13 +454,14 @@ class SelectionItemsAdapter(
                     }
                 }
             } else {
-                val updated = basketManager.updateItemQuantity(item.id!!, newQuantity)
-                if (!updated) {
-                    basketManager.addItem(item, newQuantity)
+                val itemId = item.id
+                val updated = if (itemId != null) basketManager.updateItemQuantity(itemId, newQuantity) else null
+                if (updated != null) {
+                    basketQuantities[itemId] = newQuantity
+                    onQuantityChanged()
                 }
-                basketQuantities[item.id!!] = newQuantity
             }
-
+        }
             // Animate quantity change
             quantityView.text = newQuantity.toString()
             onQuantityAnimation(quantityView)

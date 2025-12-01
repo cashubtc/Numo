@@ -56,14 +56,22 @@ class NfcPaymentProcessor(
         
         Thread {
             try {
-                val tempClient = SatocashNfcClient(tag).also { it.connect() }
-                satocashClient = tempClient
-                satocashWallet = SatocashWallet(satocashClient)
-                satocashClient?.selectApplet(SatocashNfcClient.SATOCASH_AID)
-                satocashClient?.initSecureChannel()
+                val client = SatocashNfcClient(tag).also { it.connect() }
+                satocashClient = client
+
+                satocashWallet = SatocashWallet(client)
+
+                client.selectApplet(SatocashNfcClient.SATOCASH_AID)
+                client.initSecureChannel()
                 
                 try {
-                    val token = satocashWallet!!.getPayment(requestedAmount, "SAT").join()
+                    val wallet = satocashWallet
+                    if (wallet == null) {
+                        onPaymentError(activity.getString(R.string.nfc_payment_error_generic, "Wallet not initialized"))
+                        return@Thread
+                    }
+
+                    val token = wallet.getPayment(requestedAmount, "SAT").join()
                     onPaymentSuccess(token)
                     return@Thread
                 } catch (e: RuntimeException) {

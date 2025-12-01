@@ -29,9 +29,16 @@ class SeedPhraseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_seed_phrase)
+        mnemonic = CashuWalletManager.getMnemonic()
+        if (mnemonic.isNullOrBlank()) {
+            Toast.makeText(this, "Wallet not initialized", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
 
-        seedWordsGrid = findViewById(R.id.seed_words_grid)
+        words = mnemonic?.split(" ") ?: emptyList()
+
+        recyclerView = findViewById(R.id.seed_phrase_recycler)
         copyButton = findViewById(R.id.copy_button)
         toggleVisibilityButton = findViewById(R.id.toggle_visibility_button)
 
@@ -39,11 +46,9 @@ class SeedPhraseActivity : AppCompatActivity() {
             finish()
         }
 
-        // Load the mnemonic but keep it hidden initially
-        loadMnemonic()
+        // Keep seed hidden initially
         displaySeedWords(blur = true)
         updateToggleButton()
-
         copyButton.setOnClickListener {
             if (!isRevealed) {
                 Toast.makeText(
@@ -61,18 +66,6 @@ class SeedPhraseActivity : AppCompatActivity() {
             displaySeedWords(blur = !isRevealed)
             updateToggleButton()
         }
-    }
-
-    private fun loadMnemonic() {
-        mnemonic = CashuWalletManager.getMnemonic()
-
-        if (mnemonic.isNullOrBlank()) {
-            Toast.makeText(this, "Wallet not initialized", Toast.LENGTH_SHORT).show()
-            finish()
-            return
-        }
-
-        words = mnemonic!!.split(" ")
     }
 
     private fun displaySeedWords(blur: Boolean) {

@@ -196,9 +196,9 @@ class CheckoutScannerActivity : AppCompatActivity() {
         val item = currentItem ?: return
 
         if (currentQuantity <= 0) {
-            basketManager.removeItem(item.id!!)
+                item.id?.let { basketManager.removeItem(it) }
         } else {
-            val updated = basketManager.updateItemQuantity(item.id!!, currentQuantity)
+                val updated = item.id?.let { basketManager.updateItemQuantity(it, currentQuantity) }
             if (!updated) {
                 basketManager.addItem(item, currentQuantity)
             }
@@ -380,8 +380,9 @@ class CheckoutScannerActivity : AppCompatActivity() {
         updateQuantityDisplay()
 
         // Load image
-        if (!item.imagePath.isNullOrEmpty()) {
-            val imageFile = File(item.imagePath!!)
+        val imagePath = item.imagePath
+        if (!imagePath.isNullOrEmpty()) {
+            val imageFile = File(imagePath)
             if (imageFile.exists()) {
                 val bitmap: Bitmap? = BitmapFactory.decodeFile(imageFile.absolutePath)
                 if (bitmap != null) {

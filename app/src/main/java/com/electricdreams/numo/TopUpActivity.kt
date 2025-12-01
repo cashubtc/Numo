@@ -348,20 +348,29 @@ class TopUpActivity : AppCompatActivity() {
             var tempClient: SatocashNfcClient? = null
             try {
                 tempClient = SatocashNfcClient(tag)
-                tempClient.connect()
+                tempClient?.connect()
                 Log.d(TAG, "Connected to NFC card")
 
-                satocashClient = tempClient
-                satocashWallet = SatocashWallet(satocashClient!!)
+                val client = tempClient
+                if (client == null) {
+                    showStatusMessage(
+                        getString(R.string.top_up_status_nfc_error, "Client init failed"),
+                        success = false
+                    )
+                    return@Thread
+                }
+                satocashClient = client
+                satocashWallet = SatocashWallet(client)
 
-                satocashClient!!.selectApplet(SatocashNfcClient.SATOCASH_AID)
+                client.selectApplet(SatocashNfcClient.SATOCASH_AID)
                 Log.d(TAG, "Satocash Applet found and selected!")
 
-                satocashClient!!.initSecureChannel()
+                client.initSecureChannel()
                 Log.d(TAG, "Secure Channel Initialized!")
 
                 try {
-                    val importedCount = satocashWallet!!.importProofsFromToken(token).join()
+                    val wallet = satocashWallet ?: throw IllegalStateException("Wallet not initialized")
+                    val importedCount = wallet.importProofsFromToken(token).join()
                     showStatusMessage(
                         getString(R.string.top_up_status_success_imported, importedCount),
                         success = true
@@ -474,26 +483,32 @@ class TopUpActivity : AppCompatActivity() {
                 mainHandler.post { showProcessingDialog() }
 
                 tempClient = SatocashNfcClient(tag)
-                tempClient.connect()
+                tempClient?.connect()
                 Log.d(TAG, "Connected to NFC card for PIN import")
 
-                satocashClient = tempClient
-                satocashWallet = SatocashWallet(satocashClient!!)
+                val client = tempClient
+                if (client == null) {
+                    Log.e(TAG, "Client initialization failed for PIN import")
+                    showStatusMessage(getString(R.string.top_up_status_nfc_error, "Client init failed"), success = false)
+                    return@Thread
+                }
 
-                satocashClient!!.selectApplet(SatocashNfcClient.SATOCASH_AID)
+                satocashClient = client
+                satocashWallet = SatocashWallet(client)
+
+                client.selectApplet(SatocashNfcClient.SATOCASH_AID)
                 Log.d(TAG, "Satocash Applet found and selected!")
 
-                satocashClient!!.initSecureChannel()
+                client.initSecureChannel()
                 Log.d(TAG, "Secure Channel Initialized!")
 
                 Log.d(TAG, "Authenticating with saved PIN...")
-                val authenticated = satocashWallet!!.authenticatePIN(pin).join()
+                val wallet = satocashWallet
+                    ?: throw IllegalStateException("Wallet not initialized before PIN auth")
+                val authenticated = wallet.authenticatePIN(pin).join()
 
-                if (authenticated) {
-                    Log.d(TAG, "PIN Verified! Card Ready.")
-
-                    val token = pendingProofToken ?: ""
-                    val importedCount = satocashWallet!!.importProofsFromToken(token).join()
+                    val tokenValue = pendingProofToken ?: ""
+                    val importedCount = wallet.importProofsFromToken(tokenValue).join()
 
                     waitingForRescan = false
                     savedPin = null

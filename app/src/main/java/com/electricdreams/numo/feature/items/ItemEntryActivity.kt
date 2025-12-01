@@ -299,7 +299,7 @@ class ItemEntryActivity : AppCompatActivity() {
         }
         dialogView.findViewById<Button>(R.id.dialog_confirm_button).setOnClickListener {
             currentItem?.let { item ->
-                itemManager.removeItem(item.id!!)
+                item.id?.let { itemManager.removeItem(it) }
                 setResult(RESULT_OK)
                 dialog.dismiss()
                 finish()
