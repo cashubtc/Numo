@@ -774,6 +774,12 @@
     <string name="mints_set_as_lightning">Set as Lightning Mint</string>
     <string name="mints_lightning_changed">Lightning mint updated</string>
 
+    <!-- Swap-to-Lightning-mint option -->
+    <string name="mints_swap_unknown_mints_title">Accept payments from unknown mints</string>
+    <string name="mints_swap_unknown_mints_subtitle">
+        When enabled, tokens from unknown mints are automatically swapped into your Lightning mint.
+    </string>
+
     <!-- Content descriptions -->
     <string name="cd_mint_icon">Mint icon</string>
     <string name="cd_mint_selected">Selected as Lightning mint</string>

@@ -28,6 +28,7 @@ import com.electricdreams.numo.ui.components.AddMintInputCard
 import com.electricdreams.numo.ui.components.MintListItem
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
+import androidx.appcompat.widget.SwitchCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -61,6 +62,7 @@ class MintsSettingsActivity : AppCompatActivity() {
     private lateinit var lightningMintName: TextView
     private lateinit var lightningMintUrlText: TextView
     private lateinit var lightningMintBalance: TextView
+    private lateinit var swapUnknownMintsSwitch: SwitchCompat
     private lateinit var allMintsHeader: TextView
     private lateinit var mintsCard: CardView
     private lateinit var totalBalanceHeader: LinearLayout
@@ -127,7 +129,11 @@ class MintsSettingsActivity : AppCompatActivity() {
         // Load saved Lightning mint preference from MintManager (single source of truth)
         selectedLightningMint = mintManager.getPreferredLightningMint()
 
+        // Initialize swap-from-unknown-mints toggle from MintManager
+        // (view binding happens in initViews())
         initViews()
+        swapUnknownMintsSwitch.isChecked = mintManager.isSwapFromUnknownMintsEnabled()
+
         setupListeners()
         loadMintsAndBalances()
         startEntranceAnimations()
@@ -160,6 +166,7 @@ class MintsSettingsActivity : AppCompatActivity() {
         lightningMintName = findViewById(R.id.lightning_mint_name)
         lightningMintUrlText = findViewById(R.id.lightning_mint_url)
         lightningMintBalance = findViewById(R.id.lightning_mint_balance)
+        swapUnknownMintsSwitch = findViewById(R.id.swap_unknown_mints_switch)
         allMintsHeader = findViewById(R.id.all_mints_header)
         mintsCard = findViewById(R.id.mints_card)
         totalBalanceHeader = findViewById(R.id.total_balance_header)
@@ -174,6 +181,10 @@ class MintsSettingsActivity : AppCompatActivity() {
     private fun setupListeners() {
         backButton.setOnClickListener { 
             finish() 
+        }
+
+        swapUnknownMintsSwitch.setOnCheckedChangeListener { _, isChecked ->
+            mintManager.setSwapFromUnknownMintsEnabled(isChecked)
         }
 
         resetButton.setOnClickListener {

@@ -23,6 +23,7 @@ class MintManager private constructor(context: Context) {
         private const val PREFS_NAME = "MintPreferences"
         private const val KEY_MINTS = "allowedMints"
         private const val KEY_PREFERRED_LIGHTNING_MINT = "preferredLightningMint"
+        private const val KEY_ENABLE_SWAP_UNKNOWN_MINTS = "enableSwapUnknownMints"
         private const val KEY_MINT_INFO_PREFIX = "mintInfo_"
         private const val KEY_MINT_REFRESH_PREFIX = "mintRefresh_"
         private const val REFRESH_INTERVAL_MS = 24 * 60 * 60 * 1000L // 24 hours
@@ -60,6 +61,9 @@ class MintManager private constructor(context: Context) {
 
     private var preferredLightningMint: String? =
         preferences.getString(KEY_PREFERRED_LIGHTNING_MINT, null)
+
+    private var enableSwapFromUnknownMints: Boolean =
+        preferences.getBoolean(KEY_ENABLE_SWAP_UNKNOWN_MINTS, true)
 
     private var listener: MintChangeListener? = null
 
@@ -129,6 +133,26 @@ class MintManager private constructor(context: Context) {
     /** Save preferred Lightning mint to preferences. */
     private fun savePreferredLightningMint() {
         preferences.edit().putString(KEY_PREFERRED_LIGHTNING_MINT, preferredLightningMint).apply()
+    }
+
+    /**
+     * Whether the POS should accept payments from unknown mints by swapping
+     * them into the configured Lightning mint.
+     *
+     * Default: true (current behavior).
+     */
+    fun isSwapFromUnknownMintsEnabled(): Boolean = enableSwapFromUnknownMints
+
+    /** Enable or disable SwapToLightningMint for unknown-mint payments. */
+    fun setSwapFromUnknownMintsEnabled(enabled: Boolean) {
+        if (enableSwapFromUnknownMints == enabled) return
+
+        enableSwapFromUnknownMints = enabled
+        preferences.edit()
+            .putBoolean(KEY_ENABLE_SWAP_UNKNOWN_MINTS, enabled)
+            .apply()
+
+        Log.d(TAG, "Swap from unknown mints setting changed: $enabled")
     }
 
     /**

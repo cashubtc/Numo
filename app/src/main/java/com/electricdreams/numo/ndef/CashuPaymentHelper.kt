@@ -10,6 +10,7 @@ import com.cashujdk.nut18.PaymentRequest
 import com.cashujdk.nut18.Transport
 import com.cashujdk.nut18.TransportTag
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.payment.SwapToLightningMintManager
 import com.google.gson.*
 import kotlinx.coroutines.runBlocking
@@ -416,6 +417,15 @@ object CashuPaymentHelper {
             }
 
             is TokenValidationResult.ValidUnknownMint -> {
+                // If swap from unknown mints is disabled, fall back to the
+                // legacy behavior of rejecting unknown mints instead of
+                // attempting a SwapToLightningMint flow.
+                val mintManager = MintManager.getInstance(appContext)
+                if (!mintManager.isSwapFromUnknownMintsEnabled()) {
+                    Log.w(TAG, "Token from unknown mint encountered but swap-to-Lightning-mint is disabled - rejecting payment")
+                    throw RedemptionException("Payments from unknown mints are disabled in Settings  Mints.")
+                }
+
                 Log.i(TAG, "Token from unknown mint detected - starting SwapToLightningMint flow")
 
                 val swapResult = SwapToLightningMintManager.swapFromUnknownMint(
