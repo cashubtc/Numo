@@ -2,13 +2,9 @@ package com.electricdreams.numo.nostr;
 
 import android.util.Log;
 
-
-
-import com.electricdreams.numo.ndef.CashuPaymentHelper;
-import com.electricdreams.numo.nostr.Nip59;
-import com.electricdreams.numo.payment.SwapToLightningMintManager;
-
 import com.electricdreams.numo.AppGlobals;
+import com.electricdreams.numo.ndef.CashuPaymentHelper;
+import com.electricdreams.numo.payment.SwapToLightningMintManager;
 
 import java.util.List;
 import java.util.Set;
@@ -32,8 +28,8 @@ public final class NostrPaymentListener {
     private final byte[] secretKey32;
     private final String pubkeyHex;
     private final long expectedAmount;
-    private final java.util.List<String> allowedMints;
-    private final java.util.List<String> relays;
+    private final List<String> allowedMints;
+    private final List<String> relays;
     private final SuccessHandler successHandler;
     private final ErrorHandler errorHandler;
 
@@ -55,8 +51,8 @@ public final class NostrPaymentListener {
     public NostrPaymentListener(byte[] secretKey32,
                                 String pubkeyHex,
                                 long expectedAmount,
-                                java.util.List<String> allowedMints,
-                                java.util.List<String> relays,
+                                List<String> allowedMints,
+                                List<String> relays,
                                 SuccessHandler successHandler,
                                 ErrorHandler errorHandler) {
         if (secretKey32 == null || secretKey32.length != 32) {
