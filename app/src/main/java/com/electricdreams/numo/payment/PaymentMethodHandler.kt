@@ -36,7 +36,15 @@ class PaymentMethodHandler(
 
         val mintManager = MintManager.getInstance(activity)
         val allowedMints = mintManager.getAllowedMints()
-        val paymentRequest = CashuPaymentHelper.createPaymentRequest(amount, "Payment of $amount sats", allowedMints)
+        // When "Accept payments from unknown mints" is enabled we intentionally
+        // omit the mints field from the PaymentRequest. Some wallets interpret
+        // an explicit mints list as a strict requirement rather than a
+        // preference, which would prevent them from paying with other mints
+        // even though the POS will accept them via swap.
+        val mintsForPaymentRequest =
+            if (mintManager.isSwapFromUnknownMintsEnabled()) null else allowedMints
+
+        val paymentRequest = CashuPaymentHelper.createPaymentRequest(amount, "Payment of $amount sats", mintsForPaymentRequest)
             ?: run {
                 Toast.makeText(activity, "Failed to create payment request", Toast.LENGTH_SHORT).show()
                 return
