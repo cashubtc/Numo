@@ -95,20 +95,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
         }
 
         // Close existing wallet
-        try {
-            wallet?.close()
-        } catch (t: Throwable) {
-            Log.w(TAG, "Error closing wallet during restore", t)
-        }
-
-        try {
-            database?.close()
-        } catch (t: Throwable) {
-            Log.w(TAG, "Error closing database during restore", t)
-        }
-
-        wallet = null
-        database = null
+        closeResources()
 
         // Delete existing database to start fresh
         val dbFile = appContext.getDatabasePath(DB_FILE_NAME)
@@ -391,20 +378,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
     private suspend fun rebuildWallet(mints: List<String>) {
         try {
             // Close any previous instances
-            try {
-                wallet?.close()
-            } catch (t: Throwable) {
-                Log.w(TAG, "Error closing previous wallet", t)
-            }
-
-            try {
-                database?.close()
-            } catch (t: Throwable) {
-                Log.w(TAG, "Error closing previous DB", t)
-            }
-
-            wallet = null
-            database = null
+            closeResources()
 
             if (mints.isEmpty()) {
                 Log.w(TAG, "No allowed mints configured, skipping wallet init")
@@ -456,6 +430,24 @@ object CashuWalletManager : MintManager.MintChangeListener {
             Log.d(TAG, "Initialized MultiMintWallet with ${'$'}{mints.size} mints; DB=${'$'}{dbFile.absolutePath}")
         } catch (t: Throwable) {
             Log.e(TAG, "Failed to initialize MultiMintWallet", t)
+        }
+    }
+
+    private fun closeResources() {
+        try {
+            wallet?.close()
+        } catch (t: Throwable) {
+            Log.w(TAG, "Error closing wallet", t)
+        } finally {
+            wallet = null
+        }
+
+        try {
+            database?.close()
+        } catch (t: Throwable) {
+            Log.w(TAG, "Error closing database", t)
+        } finally {
+            database = null
         }
     }
 }

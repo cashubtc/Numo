@@ -497,10 +497,8 @@ class ItemManager private constructor(context: Context) {
             }
 
             // Copy the image from the Uri to the file
-            val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
-            if (inputStream != null) {
+            context.contentResolver.openInputStream(imageUri)?.use { inputStream ->
                 var bitmap = BitmapFactory.decodeStream(inputStream)
-                inputStream.close()
 
                 // Scale down if the image is too large
                 if (bitmap.width > 1024 || bitmap.height > 1024) {
@@ -522,9 +520,9 @@ class ItemManager private constructor(context: Context) {
                 updateItem(item)
 
                 true
-            } else {
-                false
             }
+
+            false
         } catch (e: IOException) {
             Log.e(TAG, "Error saving item image: ${e.message}", e)
             false
