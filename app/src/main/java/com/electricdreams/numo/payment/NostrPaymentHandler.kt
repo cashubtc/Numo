@@ -3,6 +3,7 @@ package com.electricdreams.numo.payment
 import android.content.Context
 import android.util.Log
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
+import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.ndef.CashuPaymentHelper
 import com.electricdreams.numo.nostr.Nip19
 import com.electricdreams.numo.nostr.NostrKeyPair
@@ -121,11 +122,22 @@ class NostrPaymentHandler(
         val nostrSecret = eph.secretKeyBytes
         val relayList = NOSTR_RELAYS.toList()
 
+        // Derive the mint list to embed into the PaymentRequest depending on
+        // the user's setting. When "Accept payments from unknown mints" is
+        // enabled, we deliberately omit the mints field entirely so paying
+        // wallets do not treat it as a strict requirement. The listener still
+        // enforces the expected amount, and unknown-mint tokens can be
+        // swapped into the configured Lightning mint if that feature is
+        // enabled.
+        val mintManager = MintManager.getInstance(context)
+        val mintsForPaymentRequest =
+            if (mintManager.isSwapFromUnknownMintsEnabled()) null else allowedMints
+
         // Create payment request with Nostr transport
         val request = CashuPaymentHelper.createPaymentRequestWithNostr(
             paymentAmount,
             "Payment of $paymentAmount sats",
-            allowedMints,
+            mintsForPaymentRequest,
             profile
         )
 

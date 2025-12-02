@@ -377,10 +377,19 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // HCE (NDEF) PaymentRequest
         if (ndefAvailable) {
+            // When "Accept payments from unknown mints" is enabled we
+            // intentionally omit the mints field from the PaymentRequest for
+            // HCE as well. Some wallets interpret an explicit mints list as a
+            // strict requirement rather than a preference, which would
+            // prevent them from paying with other mints even though the POS
+            // will accept them via swap.
+            val mintsForPaymentRequest =
+                if (mintManager.isSwapFromUnknownMintsEnabled()) null else allowedMints
+
             hcePaymentRequest = CashuPaymentHelper.createPaymentRequest(
                 paymentAmount,
                 "Payment of $paymentAmount sats",
-                allowedMints
+                mintsForPaymentRequest
             )
 
             if (hcePaymentRequest == null) {

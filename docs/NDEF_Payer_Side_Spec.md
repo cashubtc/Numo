@@ -378,6 +378,49 @@ any of the following conditions are met (all derived from
      between indices 2 and `newLength + 1`).
    - Result: `processMessageAndReset(ndefData)` is called.
 
+### 4.3 Mint List Semantics in Payment Requests
+
+The Cashu payment request string (`creqA…`) MAY contain a list of allowed mints
+as part of its encoded payload. How this field is populated depends on the
+merchant’s settings in the Numo app:
+
+- **Setting: “Accept payments from unknown mints” ENABLED**  
+  (internally: `MintManager.isSwapFromUnknownMintsEnabled() == true`)
+
+  - The PoS **omits** the `mints` field entirely from the `PaymentRequest`.
+  - Rationale: some paying wallets interpret an explicit `mints` list as a
+    **strict requirement**, not a hint. Omitting the field allows any wallet to
+    pay with tokens from mints it chooses, including mints that are not yet
+    configured on the merchant’s device.
+  - Enforcement still happens on the PoS side:
+    - The PoS checks that the received ecash covers the **expected amount**.
+    - If the token’s mint is not in the merchant’s configured list, and the
+      swap feature is enabled, the PoS will attempt to **swap** the incoming
+      ecash into the merchant’s configured Lightning mint.
+
+- **Setting: “Accept payments from unknown mints” DISABLED**  
+  (`MintManager.isSwapFromUnknownMintsEnabled() == false`)
+
+  - The PoS **includes** the configured **allowed mints** in the
+    `PaymentRequest.mints` field.
+  - From the paying wallet’s perspective this can be treated as a strict
+    allow‑list: only these mints are expected to be used when constructing the
+    payment.
+
+This behavior applies uniformly to:
+
+- NDEF/HCE payment requests created via
+  `CashuPaymentHelper.createPaymentRequest(…)` (used by
+  `PaymentMethodHandler` and `PaymentRequestActivity`).
+- Nostr‑transport payment requests created via
+  `CashuPaymentHelper.createPaymentRequestWithNostr(…)` (used by
+  `NostrPaymentHandler`).
+
+In all cases, **omitting** the mints field does *not* weaken the PoS’s
+validation logic; it only relaxes the *hint* given to the paying wallet about
+which mints it should prefer.
+
+
 2. **Header + full body present in a single UPDATE**:
 
    - `offset == 0`, `Lc >= 2`,
