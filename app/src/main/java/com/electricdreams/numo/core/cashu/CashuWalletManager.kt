@@ -55,7 +55,12 @@ object CashuWalletManager : MintManager.MintChangeListener {
         // Build initial wallet
         val initialMints = mintManager.getAllowedMints()
         scope.launch {
-            rebuildWallet(initialMints)
+            try {
+                rebuildWallet(initialMints)
+            } catch (t: Throwable) {
+                Log.e(TAG, "Failed to rebuild wallet during init", t)
+                notifyWalletError("Wallet initialization failed: ${t.localizedMessage ?: "Unknown error"}")
+            }
         }
     }
 
@@ -214,12 +219,22 @@ object CashuWalletManager : MintManager.MintChangeListener {
     override fun onMintsChanged(newMints: List<String>) {
         Log.d(TAG, "Mint list changed, rebuilding wallet with ${'$'}{newMints.size} mints")
         scope.launch {
-            rebuildWallet(newMints)
+            try {
+                rebuildWallet(newMints)
+            } catch (t: Throwable) {
+                Log.e(TAG, "Failed to rebuild wallet after mint change", t)
+                notifyWalletError("Unable to update wallet: ${t.localizedMessage ?: "Unknown error"}")
+            }
         }
     }
 
     /** Current MultiMintWallet instance, or null if initialization failed or not complete. */
     fun getWallet(): MultiMintWallet? = wallet
+
+    /** Set an optional callback that surfaces wallet errors to the UI layer. */
+    fun setErrorListener(listener: WalletErrorListener?) {
+        walletErrorListener = listener
+    }
 
     /** Current database instance, mostly for debugging or future use. */
     fun getDatabase(): WalletSqliteDatabase? = database
@@ -456,6 +471,17 @@ object CashuWalletManager : MintManager.MintChangeListener {
             Log.d(TAG, "Initialized MultiMintWallet with ${'$'}{mints.size} mints; DB=${'$'}{dbFile.absolutePath}")
         } catch (t: Throwable) {
             Log.e(TAG, "Failed to initialize MultiMintWallet", t)
+            notifyWalletError("Wallet initialization failed: ${t.localizedMessage ?: "Unknown error"}")
         }
     }
+
+    private fun notifyWalletError(message: String) {
+        walletErrorListener?.onWalletError(message)
+    }
+
+    interface WalletErrorListener {
+        fun onWalletError(message: String)
+    }
+
+    private var walletErrorListener: WalletErrorListener? = null
 }
