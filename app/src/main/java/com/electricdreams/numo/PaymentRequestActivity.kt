@@ -478,7 +478,14 @@ class PaymentRequestActivity : AppCompatActivity() {
 
             override fun onError(message: String) {
                 Log.e(TAG, "Nostr payment error: $message")
+
+                // Show inline status and delegate to unified failure handling
                 statusText.text = getString(R.string.payment_request_status_error_generic, message)
+
+                // Treat this as a terminal failure for this payment request
+                // and show the global payment failure screen so the user can
+                // explicitly retry the latest pending payment.
+                handlePaymentError("Nostr payment failed: $message")
             }
         }
 
@@ -739,13 +746,20 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         statusText.visibility = View.VISIBLE
         statusText.text = getString(R.string.payment_request_status_failed, errorMessage)
-        Toast.makeText(this, getString(R.string.payment_request_status_failed, errorMessage), Toast.LENGTH_LONG).show()
+        Toast.makeText(
+            this,
+            getString(R.string.payment_request_status_failed, errorMessage),
+            Toast.LENGTH_LONG,
+        ).show()
 
         setResult(Activity.RESULT_CANCELED)
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            cleanupAndFinish()
-        }, 3000)
+        // Navigate to the global payment failure screen, which will allow
+        // the user to try the latest pending entry again.
+        startActivity(Intent(this, PaymentFailureActivity::class.java))
+
+        // Clean up payment resources and finish this Activity.
+        cleanupAndFinish()
     }
 
     private fun cancelPayment() {

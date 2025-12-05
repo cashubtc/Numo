@@ -108,6 +108,16 @@
     <string name="payment_received_error_no_share_app">No apps available to share this token</string>
     <string name="payment_received_error_no_details">Transaction details not available</string>
 
+    <!-- Payment failure -->
+    <string name="payment_failure_title">Payment failed</string>
+    <string name="payment_failure_message">Something went wrong while processing this payment.</string>
+    <string name="payment_failure_button_try_again">Try again</string>
+    <string name="payment_failure_button_close">Close</string>
+    <string name="payment_failure_close_content_description">Close</string>
+    <string name="payment_failure_error_background_description">Error background</string>
+    <string name="payment_failure_error_icon_description">Error</string>
+    <string name="payment_failure_error_no_pending">No pending payment to retry</string>
+
     <!-- Onboarding / Welcome -->
     <string name="onboarding_welcome_tagline">Bitcoin POS with Cashu ecash</string>
     <string name="onboarding_welcome_message">Accept Bitcoin payments instantly with zero fees using Cashu ecash technology.</string>

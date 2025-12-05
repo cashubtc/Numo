@@ -84,7 +84,13 @@ class PaymentMethodHandler(
                 override fun onCashuPaymentError(errorMessage: String) {
                     activity.runOnUiThread {
                         onComplete()
-                        Toast.makeText(activity, "Payment failed: $errorMessage", Toast.LENGTH_LONG).show()
+                        // Delegate error handling to the unified payment
+                        // result handler so we also show the global
+                        // PaymentFailure screen and allow retry.
+                        PaymentResultHandler(activity, null).handlePaymentError(
+                            message = "NDEF Payment failed: $errorMessage",
+                            onComplete = {},
+                        )
                     }
                 }
 

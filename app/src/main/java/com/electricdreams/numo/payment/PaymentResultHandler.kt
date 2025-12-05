@@ -2,10 +2,13 @@ package com.electricdreams.numo.payment
 
 import android.os.Handler
 import android.os.Looper
+import android.widget.Toast
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
+import com.electricdreams.numo.PaymentFailureActivity
 
 /**
  * Handles payment success and error scenarios.
@@ -60,11 +63,26 @@ class PaymentResultHandler(
         }
     }
 
-    /** Handle payment error */
+    /**
+     * Handle payment error in a centralized way.
+     *
+     * This implementation:
+     * - Invokes the caller's completion callback so any local cleanup can run
+     * - Shows a brief toast with the low-level error message
+     * - Navigates to the global [PaymentFailureActivity], which will present
+     *   a dedicated failure UI and allow the user to retry the latest
+     *   pending payment.
+     */
     fun handlePaymentError(message: String, onComplete: () -> Unit) {
         mainHandler.post {
             onComplete()
-            android.widget.Toast.makeText(activity, "Payment error: $message", android.widget.Toast.LENGTH_LONG).show()
+
+            // Brief, inline feedback for context
+            Toast.makeText(activity, "Payment error: $message", Toast.LENGTH_LONG).show()
+
+            // Global failure screen with explicit recovery actions
+            val intent = Intent(activity, PaymentFailureActivity::class.java)
+            activity.startActivity(intent)
         }
     }
 
