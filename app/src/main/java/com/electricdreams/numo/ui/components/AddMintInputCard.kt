@@ -6,6 +6,7 @@ import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
@@ -14,6 +15,7 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
+import android.widget.ScrollView
 import com.electricdreams.numo.R
 import com.google.android.material.card.MaterialCardView
 
@@ -112,6 +114,9 @@ class AddMintInputCard @JvmOverloads constructor(
         urlInput.setText(url)
         if (!isExpanded) {
             expand()
+        } else {
+            // If already expanded, ensure the input is visible when setting URL programmatically
+            scrollIntoView()
         }
     }
 
@@ -181,6 +186,8 @@ class AddMintInputCard @JvmOverloads constructor(
         // Focus input
         urlInput.postDelayed({
             urlInput.requestFocus()
+            // Ensure the expanded card and keyboard are fully visible by scrolling
+            scrollIntoView()
         }, 200)
     }
 
@@ -222,6 +229,33 @@ class AddMintInputCard @JvmOverloads constructor(
                     .start()
             }
             .start()
+    }
+
+    /**
+     * Smoothly scrolls the parent ScrollView (if any) so that this card is fully visible
+     * above the keyboard. This makes the add‑mint experience feel polished on small screens.
+     */
+    private fun scrollIntoView() {
+        val scrollView = findParentScrollView(this) ?: return
+
+        scrollView.post {
+            var targetTop = top
+            var parent = parent
+            while (parent is View && parent !== scrollView) {
+                targetTop += parent.top
+                parent = parent.parent
+            }
+            scrollView.smoothScrollTo(0, targetTop)
+        }
+    }
+
+    private fun findParentScrollView(view: View): ScrollView? {
+        var currentParent = view.parent
+        while (currentParent is ViewGroup) {
+            if (currentParent is ScrollView) return currentParent
+            currentParent = currentParent.parent
+        }
+        return null
     }
 
     fun animateEntrance(delay: Long) {

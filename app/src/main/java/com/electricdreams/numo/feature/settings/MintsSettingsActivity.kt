@@ -13,10 +13,13 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.google.android.material.imageview.ShapeableImageView
 import android.widget.Toast
+import android.widget.ScrollView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.lifecycle.lifecycleScope
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
@@ -27,7 +30,6 @@ import com.electricdreams.numo.feature.scanner.QRScannerActivity
 import com.electricdreams.numo.ui.components.AddMintInputCard
 import com.electricdreams.numo.ui.components.MintListItem
 import com.electricdreams.numo.ui.util.DialogHelper
-import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import androidx.appcompat.widget.SwitchCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -72,6 +74,7 @@ class MintsSettingsActivity : AppCompatActivity() {
     private lateinit var addMintHeader: TextView
     private lateinit var addMintCard: AddMintInputCard
     private lateinit var emptyState: View
+    private lateinit var mintsScroll: ScrollView
 
     // State
     private lateinit var mintManager: MintManager
@@ -120,9 +123,6 @@ class MintsSettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mints_settings)
 
-        // Global helper: draw content under system bars so nav pill floats over cards
-        enableEdgeToEdgeWithPill(this, lightNavIcons = true)
-
         MintIconCache.initialize(this)
         mintManager = MintManager.getInstance(this)
 
@@ -132,6 +132,7 @@ class MintsSettingsActivity : AppCompatActivity() {
         // Initialize swap-from-unknown-mints toggle from MintManager
         // (view binding happens in initViews())
         initViews()
+        setupInsetHandling()
         swapUnknownMintsSwitch.isChecked = mintManager.isSwapFromUnknownMintsEnabled()
 
         setupListeners()
@@ -159,6 +160,7 @@ class MintsSettingsActivity : AppCompatActivity() {
     private fun initViews() {
         backButton = findViewById(R.id.back_button)
         resetButton = findViewById(R.id.reset_button)
+        mintsScroll = findViewById(R.id.mints_scroll)
         lightningMintSection = findViewById(R.id.lightning_mint_section)
         lightningMintCard = findViewById(R.id.lightning_mint_card)
         lightningIconContainer = findViewById(R.id.lightning_icon_container)
@@ -176,6 +178,27 @@ class MintsSettingsActivity : AppCompatActivity() {
         addMintHeader = findViewById(R.id.add_mint_header)
         addMintCard = findViewById(R.id.add_mint_card)
         emptyState = findViewById(R.id.empty_state)
+    }
+
+    /**
+     * Ensure the scroll container adds bottom padding equal to the larger of
+     * system navigation bars and the on-screen keyboard (IME). This guarantees
+     * that the Add Mint input is never obscured, even on small screens.
+     */
+    private fun setupInsetHandling() {
+        ViewCompat.setOnApplyWindowInsetsListener(mintsScroll) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val bottomInset = maxOf(systemBars.bottom, imeInsets.bottom)
+
+            view.setPadding(
+                view.paddingLeft,
+                view.paddingTop,
+                view.paddingRight,
+                bottomInset,
+            )
+            insets
+        }
     }
 
     private fun setupListeners() {
