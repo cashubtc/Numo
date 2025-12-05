@@ -197,13 +197,14 @@
             android:exported="false"
             android:label="@string/settings_mints_title"
             android:theme="@style/Theme.Numo"
+            android:windowSoftInputMode="adjustResize"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.SettingsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.settings.MintDetailsActivity"
             android:exported="false"
             android:label="@string/mint_details_title"
