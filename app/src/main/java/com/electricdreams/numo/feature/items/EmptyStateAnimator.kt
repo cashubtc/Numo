@@ -77,7 +77,8 @@ class EmptyStateAnimator(
         var startOffset: Float,  // Mutable - set after pop-in completes
         val containerHeight: Float,
         val tileSize: Float,
-        val rotationSpeed: Float
+        val rotationSpeed: Float,
+        var baseRotation: Float  // Mutable - set after pop-in completes
     )
 
     fun start() {
@@ -188,7 +189,8 @@ class EmptyStateAnimator(
                 startOffset = startOffset,
                 containerHeight = containerHeight,
                 tileSize = tileSize,
-                rotationSpeed = rotationSpeed
+                rotationSpeed = rotationSpeed,
+                baseRotation = 0f  // Will be set after pop-in completes
             )
             
             floatingTiles.add(floatingTile)
@@ -246,6 +248,9 @@ class EmptyStateAnimator(
                     val wrapHeight = tile.containerHeight + tile.tileSize
                     tile.startOffset = (tile.containerHeight - targetY) % wrapHeight
                     
+                    // Store the final rotation so floating animation continues from it
+                    tile.baseRotation = initialRotation
+                    
                     completedCount++
                     // Start floating only after ALL tiles have finished pop-in
                     if (completedCount == floatingTiles.size) {
@@ -291,13 +296,13 @@ class EmptyStateAnimator(
             // Base Y position that rises and wraps
             val rawY = tile.containerHeight - (totalRise % wrapHeight)
             
-            // Subtle rotation oscillation
-            val rotationOffset = sin((animationTime * tile.rotationSpeed + tile.phaseOffset).toDouble()).toFloat() * 3f
+            // Subtle rotation oscillation added to the base rotation from pop-in
+            val rotationOscillation = sin((animationTime * tile.rotationSpeed + tile.phaseOffset).toDouble()).toFloat() * 2f
             
             // Apply positions
             tile.view.translationX = tile.baseX + driftOffset
             tile.view.translationY = rawY + bobOffset
-            tile.view.rotation = rotationOffset
+            tile.view.rotation = tile.baseRotation + rotationOscillation
         }
     }
 
