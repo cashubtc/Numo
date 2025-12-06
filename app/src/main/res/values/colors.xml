@@ -73,4 +73,25 @@
 
     <!-- Icon Colors -->
     <color name="iconTint">@color/navigationIconTint</color>
+
+    <!-- Chip Ribbon Colors (for Empty State Animation) -->
+    <color name="chip_ribbon_lime">#BEFF3D</color>
+    <color name="chip_ribbon_green">#00C244</color>
+    <color name="chip_ribbon_cyan">#83E8FC</color>
+    <color name="chip_ribbon_purple">#8420F4</color>
+    <color name="chip_ribbon_orange">#F7931A</color>
+    <color name="chip_ribbon_pink">#FF6B9D</color>
+    <color name="chip_ribbon_yellow">#FFDD00</color>
+    <color name="chip_ribbon_white">#FFFFFF</color>
+
+    <!-- Empty State Theme Colors (Light Mode - white background) -->
+    <color name="empty_state_background">#FFFFFF</color>
+    <color name="empty_state_title">#000000</color>
+    <color name="empty_state_subtitle">#6F6F73</color>
+    <color name="empty_state_button_primary_bg">#000000</color>
+    <color name="empty_state_button_primary_text">#FFFFFF</color>
+    <color name="empty_state_button_secondary_bg">@android:color/transparent</color>
+    <color name="empty_state_button_secondary_text">#6F6F73</color>
+    <color name="empty_state_button_secondary_border">#4D6F6F73</color>
+    <color name="empty_state_close_icon">#000000</color>
 </resources>

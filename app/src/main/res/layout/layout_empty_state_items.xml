@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/empty_state_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/empty_state_background"
+    android:clipChildren="false"
+    android:clipToPadding="false">
+
+    <!-- Main Content -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:clipChildren="false"
+        android:clipToPadding="false">
+
+        <!-- Spacer for navigation area -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="56dp" />
+
+        <!-- Animated Chip Ribbon Area -->
+        <FrameLayout
+            android:id="@+id/ribbon_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipChildren="false"
+            android:clipToPadding="false">
+
+            <!-- Container for floating chips animation -->
+            <FrameLayout
+                android:id="@+id/ribbon_rows_wrapper"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="false"
+                android:clipToPadding="false" />
+            
+            <!-- Chips are added programmatically by EmptyStateAnimator -->
+
+            <!-- Gradient Fade at Bottom -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/bg_empty_state_fade" />
+
+        </FrameLayout>
+
+        <!-- Content Area -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingHorizontal="@dimen/margin_screen_horizontal"
+            android:paddingBottom="@dimen/space_3xl"
+            android:background="@color/empty_state_background">
+
+            <!-- Main Heading -->
+            <TextView
+                android:id="@+id/empty_state_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/empty_state_items_title"
+                android:textColor="@color/empty_state_title"
+                android:textSize="28sp"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:lineSpacingMultiplier="1.1" />
+
+            <!-- Subheading -->
+            <TextView
+                android:id="@+id/empty_state_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_m"
+                android:text="@string/empty_state_items_subtitle"
+                android:textColor="@color/empty_state_subtitle"
+                android:textSize="16sp"
+                android:fontFamily="sans-serif"
+                android:gravity="center"
+                android:lineSpacingMultiplier="1.3"
+                android:paddingHorizontal="@dimen/space_l" />
+
+            <!-- Primary Button - Add Item -->
+            <Button
+                android:id="@+id/empty_state_add_button"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:layout_marginTop="@dimen/space_xl"
+                android:background="@drawable/bg_button_empty_state_primary"
+                android:text="@string/empty_state_items_add_button"
+                android:textColor="@color/empty_state_button_primary_text"
+                android:textSize="17sp"
+                android:fontFamily="sans-serif-medium"
+                android:textAllCaps="false"
+                android:stateListAnimator="@null" />
+
+            <!-- Secondary Button - Import from CSV -->
+            <TextView
+                android:id="@+id/empty_state_import_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_l"
+                android:paddingVertical="@dimen/space_m"
+                android:paddingHorizontal="@dimen/space_l"
+                android:text="@string/empty_state_items_import_button"
+                android:textColor="@color/empty_state_button_secondary_text"
+                android:textSize="16sp"
+                android:fontFamily="sans-serif-medium"
+                android:background="?attr/selectableItemBackgroundBorderless" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Navigation Button Container (Top Left) -->
+    <FrameLayout
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="top|start"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="8dp"
+        android:elevation="10dp">
+        
+        <!-- Back Arrow (shown when from Settings → Items) -->
+        <ImageButton
+            android:id="@+id/empty_state_back_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/common_back"
+            android:padding="12dp"
+            android:src="@drawable/ic_chevron_back"
+            android:visibility="gone"
+            app:tint="@color/empty_state_close_icon" />
+
+        <!-- Close Button (shown when from Home → Items) -->
+        <ImageButton
+            android:id="@+id/empty_state_close_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/common_close"
+            android:padding="12dp"
+            android:src="@drawable/ic_close"
+            android:visibility="visible"
+            app:tint="@color/empty_state_close_icon" />
+
+    </FrameLayout>
+
+</FrameLayout>
+

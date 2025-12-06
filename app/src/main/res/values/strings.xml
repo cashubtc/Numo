@@ -236,6 +236,12 @@
     <string name="dialog_terms_body">NUMO WALLET - TERMS OF SERVICE&#x0A;&#x0A;1. ACCEPTANCE&#x0A;By using this wallet application, you agree to these terms.&#x0A;&#x0A;2. NATURE OF SERVICE&#x0A;This is a self-custodial Bitcoin wallet using Cashu ecash technology. You are solely responsible for your funds and seed phrase.&#x0A;&#x0A;3. SEED PHRASE&#x0A;Your 12-word seed phrase is the ONLY way to recover your wallet. Never share it. Store it securely offline. We cannot recover lost seed phrases.&#x0A;&#x0A;4. NO WARRANTY&#x0A;This software is provided "as is" without warranty of any kind. Use at your own risk.&#x0A;&#x0A;5. LIMITATION OF LIABILITY&#x0A;We are not liable for any loss of funds, whether through bugs, user error, or third-party mint failures.&#x0A;&#x0A;6. ECASH MINTS&#x0A;Ecash tokens are held by third-party mints. These mints may fail or become unavailable. Diversify across multiple mints.&#x0A;&#x0A;7. PRIVACY&#x0A;This wallet does not collect personal data. Transactions are processed through ecash mints which may have their own privacy policies.&#x0A;&#x0A;8. UPDATES&#x0A;These terms may be updated. Continued use constitutes acceptance.&#x0A;&#x0A;Last updated: November 2024</string>
     <string name="common_close">Close</string>
 
+    <!-- Empty State - Items -->
+    <string name="empty_state_items_title">Create your catalog</string>
+    <string name="empty_state_items_subtitle">Add products to start accepting payments with your POS.</string>
+    <string name="empty_state_items_add_button">Add item</string>
+    <string name="empty_state_items_import_button">Import from CSV</string>
+
     <!-- Developer settings -->
     <string name="common_back">Back</string>
     <string name="developer_settings_title">Developer Settings</string>

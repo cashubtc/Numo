@@ -19,6 +19,8 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -38,11 +40,17 @@ class ItemListActivity : AppCompatActivity() {
     private lateinit var itemManager: ItemManager
     private lateinit var recyclerView: RecyclerView
     private lateinit var emptyView: View
+    private lateinit var itemsContent: View
     private lateinit var bottomActions: LinearLayout
     private lateinit var fabAddItem: ImageButton
     private lateinit var doneReorderButton: ImageButton
+    private lateinit var headerDivider: View
+    private lateinit var topBar: View
     private lateinit var adapter: ItemAdapter
     private lateinit var itemTouchHelper: ItemTouchHelper
+    
+    // Empty state animator
+    private var emptyStateAnimator: EmptyStateAnimator? = null
 
     // Reordering mode state
     private var isReorderingMode = false
@@ -77,9 +85,12 @@ class ItemListActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.items_recycler_view)
         emptyView = findViewById(R.id.empty_view)
+        itemsContent = findViewById(R.id.items_content)
         bottomActions = findViewById(R.id.bottom_actions)
         fabAddItem = findViewById(R.id.fab_add_item)
         doneReorderButton = findViewById(R.id.done_reorder_button)
+        headerDivider = findViewById(R.id.header_divider)
+        topBar = findViewById(R.id.top_bar)
         val importCsvButton: Button = findViewById(R.id.import_csv_button)
         val clearItemsButton: TextView = findViewById(R.id.clear_items_button)
 
@@ -91,6 +102,9 @@ class ItemListActivity : AppCompatActivity() {
 
         // Set up drag-and-drop reordering
         setupDragAndDrop()
+        
+        // Set up empty state buttons
+        setupEmptyStateButtons()
 
         updateEmptyViewVisibility()
 
@@ -115,6 +129,45 @@ class ItemListActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         refreshItems()
+        // Start animation if empty state is visible
+        if (emptyView.visibility == View.VISIBLE) {
+            emptyStateAnimator?.start()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        emptyStateAnimator?.stop()
+    }
+
+    private fun setupEmptyStateButtons() {
+        // Find buttons in the included empty state layout
+        val addButton = emptyView.findViewById<Button>(R.id.empty_state_add_button)
+        val importButton = emptyView.findViewById<View>(R.id.empty_state_import_button)
+        val closeButton = emptyView.findViewById<ImageButton>(R.id.empty_state_close_button)
+        val backButton = emptyView.findViewById<ImageButton>(R.id.empty_state_back_button)
+        val ribbonContainer = emptyView.findViewById<View>(R.id.ribbon_container)
+
+        addButton?.setOnClickListener {
+            val intent = Intent(this, ItemEntryActivity::class.java)
+            addItemLauncher.launch(intent)
+        }
+
+        importButton?.setOnClickListener {
+            csvPickerLauncher.launch("text/csv")
+        }
+        
+        // Settings → Items: Show back arrow, hide close button
+        closeButton?.visibility = View.GONE
+        backButton?.visibility = View.VISIBLE
+        backButton?.setOnClickListener {
+            finish()
+        }
+
+        // Initialize the animator
+        ribbonContainer?.let {
+            emptyStateAnimator = EmptyStateAnimator(this, it)
+        }
     }
 
     private fun refreshItems() {
@@ -125,11 +178,59 @@ class ItemListActivity : AppCompatActivity() {
     private fun updateEmptyViewVisibility() {
         val hasItems = adapter.itemCount > 0
         if (hasItems) {
+            // Show items list, hide empty state
             emptyView.visibility = View.GONE
-            recyclerView.visibility = View.VISIBLE
+            itemsContent.visibility = View.VISIBLE
+            fabAddItem.visibility = View.VISIBLE
+            headerDivider.visibility = View.VISIBLE
+            topBar.visibility = View.VISIBLE
+            topBar.setBackgroundResource(R.color.color_bg_white)
+            
+            // Reset navigation bar to normal
+            setNavigationBarStyle(isDarkBackground = false)
+            
+            // Stop animation
+            emptyStateAnimator?.stop()
         } else {
+            // Show empty state, hide items list
             emptyView.visibility = View.VISIBLE
-            recyclerView.visibility = View.GONE
+            itemsContent.visibility = View.GONE
+            fabAddItem.visibility = View.GONE
+            headerDivider.visibility = View.GONE
+            topBar.visibility = View.GONE
+            
+            // Set navigation bar to match empty state background
+            setNavigationBarStyle(isDarkBackground = true)
+            
+            // Start animation
+            emptyStateAnimator?.start()
+        }
+    }
+    
+    /**
+     * Set the navigation bar style to match the current screen background.
+     */
+    private fun setNavigationBarStyle(isDarkBackground: Boolean) {
+        window.navigationBarColor = if (isDarkBackground) {
+            ContextCompat.getColor(this, R.color.empty_state_background)
+        } else {
+            ContextCompat.getColor(this, R.color.color_bg_white)
+        }
+        
+        // Set light/dark icons in navigation bar
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightNavigationBars = !isDarkBackground
+        }
+        
+        // Also update status bar
+        window.statusBarColor = if (isDarkBackground) {
+            ContextCompat.getColor(this, R.color.empty_state_background)
+        } else {
+            ContextCompat.getColor(this, R.color.color_bg_white)
+        }
+        
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = !isDarkBackground
         }
     }
 

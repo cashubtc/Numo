@@ -28,4 +28,15 @@
     
     <!-- Accent Colors for dark mode -->
     <color name="color_accent_blue">#409CFF</color>
+    
+    <!-- Empty State Theme Colors (Dark Mode - black background) -->
+    <color name="empty_state_background">#000000</color>
+    <color name="empty_state_title">#FFFFFF</color>
+    <color name="empty_state_subtitle">#9B9B9F</color>
+    <color name="empty_state_button_primary_bg">#FFFFFF</color>
+    <color name="empty_state_button_primary_text">#000000</color>
+    <color name="empty_state_button_secondary_bg">@android:color/transparent</color>
+    <color name="empty_state_button_secondary_text">#9B9B9F</color>
+    <color name="empty_state_button_secondary_border">#4D9B9B9F</color>
+    <color name="empty_state_close_icon">#FFFFFF</color>
 </resources>

@@ -4,9 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
+    android:background="@color/color_bg_white"
+    android:fitsSystemWindows="true">
 
-    <!-- Top App Bar -->
+    <!-- Top App Bar (hidden when showing empty state) -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
@@ -39,7 +40,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Add Item Button (shown in normal mode) -->
+        <!-- Add Item Button (shown when items exist, in normal mode) -->
         <ImageButton
             android:id="@+id/fab_add_item"
             android:layout_width="48dp"
@@ -48,10 +49,12 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/item_list_add_item"
             android:src="@drawable/ic_add"
+            android:visibility="gone"
             app:tint="@color/color_primary_green"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
 
         <!-- Done Button (shown in reordering mode) -->
         <ImageButton
@@ -79,67 +82,27 @@
         app:layout_anchor="@id/top_bar"
         app:layout_anchorGravity="bottom" />
 
-    <!-- Main Content Area -->
+    <!-- Regular Content: Items List (shown when items exist) -->
     <LinearLayout
+        android:id="@+id/items_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="56dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <!-- Items RecyclerView -->
-        <FrameLayout
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/items_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:overScrollMode="never"
+            tools:listitem="@layout/item_product" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/items_recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:overScrollMode="never"
-                tools:listitem="@layout/item_product" />
-
-            <!-- Empty State -->
-            <LinearLayout
-                android:id="@+id/empty_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:padding="32dp"
-                android:visibility="gone">
-
-                <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:src="@drawable/ic_image_placeholder"
-                    app:tint="@color/color_icon_tertiary"
-                    android:contentDescription="@string/item_list_empty_icon_description" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:text="@string/item_list_empty_title"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="20sp"
-                    android:fontFamily="sans-serif-medium" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/item_list_empty_subtitle"
-                    android:textAlignment="center"
-                    android:textColor="@color/color_text_tertiary"
-                    android:textSize="15sp" />
-
-            </LinearLayout>
-
-        </FrameLayout>
-
-        <!-- Bottom Actions Section -->
+        <!-- Bottom Actions Section (only shown when items exist) -->
         <LinearLayout
             android:id="@+id/bottom_actions"
             android:layout_width="match_parent"
@@ -181,5 +144,13 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <!-- Empty State (Full Screen - NO margin, positioned at root level) -->
+    <include
+        android:id="@+id/empty_view"
+        layout="@layout/layout_empty_state_items"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="visible" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
