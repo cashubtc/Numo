@@ -85,10 +85,22 @@
                 android:resource="@xml/nfc_tech_filter" />
         </activity>
 
-        <!-- Payment Request Activity -->
+        <!-- Payment Request Activity (QR / Nostr / Lightning request screen) -->
         <activity android:name="com.electricdreams.numo.PaymentRequestActivity"
             android:exported="false"
             android:label="Payment Request"
+            android:theme="@style/Theme.Numo"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName="com.electricdreams.numo.ModernPOSActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.electricdreams.numo.ModernPOSActivity" />
+        </activity>
+
+        <!-- Payment Received Activity (success screen) -->
+        <activity android:name="com.electricdreams.numo.PaymentReceivedActivity"
+            android:exported="false"
+            android:label="Payment Received"
             android:theme="@style/Theme.Numo"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName="com.electricdreams.numo.ModernPOSActivity">
@@ -101,18 +113,6 @@
         <activity android:name="com.electricdreams.numo.PaymentFailureActivity"
             android:exported="false"
             android:label="Payment Failed"
-            android:theme="@style/Theme.Numo"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName="com.electricdreams.numo.ModernPOSActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.electricdreams.numo.ModernPOSActivity" />
-        </activity>
-
-        <!-- Payment Request Activity -->
-        <activity android:name="com.electricdreams.numo.PaymentRequestActivity"
-            android:exported="false"
-            android:label="Payment Request"
             android:theme="@style/Theme.Numo"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName="com.electricdreams.numo.ModernPOSActivity">

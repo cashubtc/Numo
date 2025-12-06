@@ -103,6 +103,9 @@ class PaymentRequestActivity : AppCompatActivity() {
     // Saved basket ID (for basket-payment association)
     private var savedBasketId: String? = null
 
+    // Tracks whether this payment flow has already reached a terminal outcome
+    private var hasTerminalOutcome: Boolean = false
+
     private val uiScope = CoroutineScope(Dispatchers.Main)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -663,6 +666,11 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun handlePaymentSuccess(token: String) {
+        // Only process the first terminal outcome (success or failure). Late
+        // callbacks from Nostr/HCE after we've already completed this payment
+        // should be ignored so we don't show a failure screen after success.
+        if (!beginTerminalOutcome("cashu_success")) return
+
         Log.d(TAG, "Payment successful! Token: $token")
 
         statusText.visibility = View.VISIBLE
@@ -703,6 +711,10 @@ class PaymentRequestActivity : AppCompatActivity() {
      * token field effectively blank.
      */
     private fun handleLightningPaymentSuccess() {
+        // Guard against late callbacks so we don't surface a failure screen
+        // after a successful Lightning payment has already been processed.
+        if (!beginTerminalOutcome("lightning_success")) return
+
         Log.d(TAG, "Lightning payment successful (no Cashu token)")
 
         statusText.visibility = View.VISIBLE
@@ -732,6 +744,28 @@ class PaymentRequestActivity : AppCompatActivity() {
         showPaymentSuccess("", paymentAmount)
     }
 
+    /**
+     * Mark the payment flow as having reached a terminal outcome
+     * (success, failure, or user cancellation).
+     *
+     * Only the first caller wins; any subsequent attempts (for example, late
+     * error callbacks from Nostr or HCE after a successful payment) will be
+     * ignored to prevent showing a failure screen after success.
+     *
+     * @param reason Short description used for logging why the terminal
+     * outcome is being set.
+     * @return true if this is the first terminal outcome and should be
+     * handled; false if a terminal outcome has already been processed.
+     */
+    private fun beginTerminalOutcome(reason: String): Boolean {
+        if (hasTerminalOutcome) {
+            Log.w(TAG, "Ignoring terminal outcome after completion. reason=$reason")
+            return false
+        }
+        hasTerminalOutcome = true
+        return true
+    }
+
     private fun showPaymentReceivedActivity(token: String) {
         val intent = Intent(this, PaymentReceivedActivity::class.java).apply {
             putExtra(PaymentReceivedActivity.EXTRA_TOKEN, token)
@@ -742,6 +776,11 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun handlePaymentError(errorMessage: String) {
+        // If we've already processed a terminal outcome (e.g. a successful
+        // payment), ignore late errors so we don't show the failure screen
+        // on top of a genuine success.
+        if (!beginTerminalOutcome("error: $errorMessage")) return
+
         Log.e(TAG, "Payment error: $errorMessage")
 
         statusText.visibility = View.VISIBLE
@@ -768,11 +807,19 @@ class PaymentRequestActivity : AppCompatActivity() {
         // Note: We don't cancel the pending payment here - user might want to resume it later
         // Only cancel if explicitly requested or if it's an error
 
+        // Treat user cancellation as a terminal outcome for this Activity so
+        // any late error callbacks from background flows are ignored.
+        hasTerminalOutcome = true
+
         setResult(Activity.RESULT_CANCELED)
         cleanupAndFinish()
     }
 
     private fun cleanupAndFinish() {
+        // Once cleanup starts, this payment flow is effectively over. This is
+        // a safety net for any paths that might reach cleanup without having
+        // called [beginTerminalOutcome] explicitly.
+        hasTerminalOutcome = true
         // Stop Nostr handler
         nostrHandler?.stop()
         nostrHandler = null
@@ -797,6 +844,10 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        // onDestroy can be invoked as part of a normal lifecycle (e.g. when
+        // the system reclaims the Activity). Avoid calling finish() again
+        // from here; simply ensure resources are cleaned up if they haven't
+        // been already.
         cleanupAndFinish()
         super.onDestroy()
     }
