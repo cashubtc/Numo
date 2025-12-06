@@ -9,6 +9,7 @@ import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -20,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -54,6 +56,8 @@ class ItemSelectionActivity : AppCompatActivity() {
 
     // ----- Views -----
     private lateinit var mainScrollView: NestedScrollView
+    private lateinit var mainContent: FrameLayout
+    private lateinit var animatedEmptyState: View
     private lateinit var toolbarTitle: TextView
     private lateinit var savedBasketsButton: TextView
     private lateinit var searchInput: EditText
@@ -78,6 +82,9 @@ class ItemSelectionActivity : AppCompatActivity() {
     private lateinit var bottomSpacer: View
     private lateinit var bottomBasketCheckoutContainer: LinearLayout
     private var originalBottomSpacerHeight: Int = 0
+    
+    // ----- Empty State Animation -----
+    private var emptyStateAnimator: EmptyStateAnimator? = null
     
     // ----- Basket Header & Expandable Views -----
     private lateinit var basketHeader: ConstraintLayout
@@ -117,6 +124,16 @@ class ItemSelectionActivity : AppCompatActivity() {
             }
         }
     }
+    
+    private val itemEntryLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            // Items may have been added/modified, refresh and check empty state
+            searchHandler.loadItems()
+            updateAnimatedEmptyStateVisibility()
+        }
+    }
 
     companion object {
         const val EXTRA_BASKET_ID = "basket_id"
@@ -134,6 +151,7 @@ class ItemSelectionActivity : AppCompatActivity() {
         initializeAdapters()
         setupRecyclerViews()
         setupClickListeners()
+        setupAnimatedEmptyState()
 
         // Check if we're loading a saved basket from intent
         val basketIdFromIntent = intent.getStringExtra(EXTRA_BASKET_ID)
@@ -141,10 +159,11 @@ class ItemSelectionActivity : AppCompatActivity() {
             loadSavedBasket(basketIdFromIntent)
         }
 
-        // Load initial data
+        // Load initial data and check empty state
         searchHandler.loadItems()
         refreshBasket()
         updateEditingState()
+        updateAnimatedEmptyStateVisibility()
 
         bitcoinPriceWorker.start()
     }
@@ -155,6 +174,17 @@ class ItemSelectionActivity : AppCompatActivity() {
         searchHandler.loadItems()
         refreshBasket()
         updateEditingState()
+        updateAnimatedEmptyStateVisibility()
+        
+        // Start animation if empty state is visible
+        if (animatedEmptyState.visibility == View.VISIBLE) {
+            emptyStateAnimator?.start()
+        }
+    }
+    
+    override fun onPause() {
+        super.onPause()
+        emptyStateAnimator?.stop()
     }
 
     // ----- Initialization -----
@@ -172,6 +202,8 @@ class ItemSelectionActivity : AppCompatActivity() {
             handleBackPress()
         }
 
+        mainContent = findViewById(R.id.main_content)
+        animatedEmptyState = findViewById(R.id.animated_empty_state)
         mainScrollView = findViewById(R.id.main_scroll_view)
         toolbarTitle = findViewById(R.id.toolbar_title)
         savedBasketsButton = findViewById(R.id.saved_baskets_button)
@@ -340,6 +372,95 @@ class ItemSelectionActivity : AppCompatActivity() {
         basketHeader.setOnClickListener {
             animationHandler.toggleBasketExpansion()
             updateBottomSpacer()
+        }
+    }
+    
+    private fun setupAnimatedEmptyState() {
+        // Find buttons in the included empty state layout
+        val addButton = animatedEmptyState.findViewById<Button>(R.id.empty_state_add_button)
+        val importButton = animatedEmptyState.findViewById<View>(R.id.empty_state_import_button)
+        val closeButton = animatedEmptyState.findViewById<ImageButton>(R.id.empty_state_close_button)
+        val backButton = animatedEmptyState.findViewById<ImageButton>(R.id.empty_state_back_button)
+        val ribbonContainer = animatedEmptyState.findViewById<View>(R.id.ribbon_container)
+
+        addButton?.setOnClickListener {
+            val intent = Intent(this, ItemEntryActivity::class.java)
+            itemEntryLauncher.launch(intent)
+        }
+
+        importButton?.setOnClickListener {
+            // Navigate to ItemListActivity where CSV import is available
+            val intent = Intent(this, ItemListActivity::class.java)
+            itemEntryLauncher.launch(intent)
+        }
+        
+        // Home → Items: Show close button (X), hide back arrow
+        closeButton?.visibility = View.VISIBLE
+        backButton?.visibility = View.GONE
+        closeButton?.setOnClickListener {
+            finish()
+        }
+
+        // Initialize the animator
+        ribbonContainer?.let {
+            emptyStateAnimator = EmptyStateAnimator(this, it)
+        }
+    }
+    
+    /**
+     * Updates visibility of the animated empty state vs main content.
+     * Shows animated empty state when there are no items in the catalog.
+     */
+    private fun updateAnimatedEmptyStateVisibility() {
+        val hasItems = itemManager.getAllItems().isNotEmpty()
+        
+        if (hasItems) {
+            // Show main content, hide animated empty state
+            animatedEmptyState.visibility = View.GONE
+            mainContent.visibility = View.VISIBLE
+            
+            // Reset navigation bar to normal
+            setNavigationBarStyle(isDarkBackground = false)
+            
+            // Stop animation
+            emptyStateAnimator?.stop()
+        } else {
+            // Show animated empty state, hide main content
+            animatedEmptyState.visibility = View.VISIBLE
+            mainContent.visibility = View.GONE
+            
+            // Set navigation bar to match empty state background
+            setNavigationBarStyle(isDarkBackground = true)
+            
+            // Start animation
+            emptyStateAnimator?.start()
+        }
+    }
+    
+    /**
+     * Set the navigation bar style to match the current screen background.
+     */
+    private fun setNavigationBarStyle(isDarkBackground: Boolean) {
+        window.navigationBarColor = if (isDarkBackground) {
+            ContextCompat.getColor(this, R.color.empty_state_background)
+        } else {
+            ContextCompat.getColor(this, R.color.color_bg_white)
+        }
+        
+        // Set light/dark icons in navigation bar
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightNavigationBars = !isDarkBackground
+        }
+        
+        // Also update status bar
+        window.statusBarColor = if (isDarkBackground) {
+            ContextCompat.getColor(this, R.color.empty_state_background)
+        } else {
+            ContextCompat.getColor(this, R.color.color_bg_white)
+        }
+        
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = !isDarkBackground
         }
     }
 
