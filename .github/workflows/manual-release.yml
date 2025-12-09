@@ -8,10 +8,6 @@ on:
         description: 'Release version (e.g., v1.0.0)'
         required: true
         type: string
-      release_notes:
-        description: 'Release notes or description'
-        required: true
-        type: string
       pre_release:
         description: 'Is this a pre-release?'
         required: false
@@ -93,18 +89,46 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew bundleRelease
 
-      # Create a GitHub release with the signed APK and Bundle
-      - name: Create Release
+      # Rename output artifacts to include numo and the version
+      - name: Rename artifacts with numo and version
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          APK_DIR="app/build/outputs/apk/release"
+          BUNDLE_DIR="app/build/outputs/bundle/release"
+
+          echo "Using version: $VERSION"
+
+          if compgen -G "$APK_DIR/*.apk" > /dev/null; then
+            for f in "$APK_DIR"/*.apk; do
+              echo "Renaming $f to $APK_DIR/numo-${VERSION}.apk"
+              mv "$f" "$APK_DIR/numo-${VERSION}.apk"
+              break
+            done
+          else
+            echo "No APK files found in $APK_DIR"
+          fi
+
+          if compgen -G "$BUNDLE_DIR/*.aab" > /dev/null; then
+            for f in "$BUNDLE_DIR"/*.aab; do
+              echo "Renaming $f to $BUNDLE_DIR/numo-${VERSION}.aab"
+              mv "$f" "$BUNDLE_DIR/numo-${VERSION}.aab"
+              break
+            done
+          else
+            echo "No AAB files found in $BUNDLE_DIR"
+          fi
+
+      # Create a GitHub release draft with the signed APK and Bundle
+      - name: Create Release Draft
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.event.inputs.version }}
           name: Release ${{ github.event.inputs.version }}
-          body: ${{ github.event.inputs.release_notes }}
-          draft: false
+          draft: true
           prerelease: ${{ github.event.inputs.pre_release }}
           files: |
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/bundle/release/*.aab
+            app/build/outputs/apk/release/numo-${{ github.event.inputs.version }}.apk
+            app/build/outputs/bundle/release/numo-${{ github.event.inputs.version }}.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
