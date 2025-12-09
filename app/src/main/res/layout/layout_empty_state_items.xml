@@ -49,6 +49,13 @@
                 android:layout_gravity="bottom"
                 android:background="@drawable/bg_empty_state_fade" />
 
+            <!-- Gradient Fade at Top -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_gravity="top"
+                android:background="@drawable/bg_empty_state_fade_top" />
+
         </FrameLayout>
 
         <!-- Content Area -->
