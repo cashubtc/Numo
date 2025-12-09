@@ -29,7 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:clipChildren="false"
+            android:clipChildren="true"
             android:clipToPadding="false">
 
             <!-- Container for floating chips animation -->
@@ -37,7 +37,7 @@
                 android:id="@+id/ribbon_rows_wrapper"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:clipChildren="false"
+                android:clipChildren="true"
                 android:clipToPadding="false" />
             
             <!-- Chips are added programmatically by EmptyStateAnimator -->
