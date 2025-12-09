@@ -285,26 +285,40 @@ class EmptyStateAnimator(
     
     private fun updateTilePositions() {
         floatingTiles.forEach { tile ->
+            // Smoothly ramp in bob, drift, and rotation over the first few frames
+            // so that the tiles continue seamlessly from their pop-in positions.
+            val introDurationSeconds = 0.5f
+            val introFactor = kotlin.math.min(1f, animationTime / introDurationSeconds)
+
             // Calculate smooth sine wave offsets for gentle movement
-            val bobOffset = sin((animationTime * tile.bobSpeed + tile.phaseOffset).toDouble()).toFloat() * tile.bobAmplitude
-            val driftOffset = sin((animationTime * tile.driftSpeed + tile.phaseOffset + Math.PI.toFloat() / 2f).toDouble()).toFloat() * tile.driftAmplitude
-            
+            val bobOffset = sin(
+                (animationTime * tile.bobSpeed + tile.phaseOffset).toDouble()
+            ).toFloat() * tile.bobAmplitude * introFactor
+
+            val driftOffset = sin(
+                (animationTime * tile.driftSpeed + tile.phaseOffset + Math.PI.toFloat() / 2f)
+                    .toDouble()
+            ).toFloat() * tile.driftAmplitude * introFactor
+
             // Calculate upward movement with wrap-around
             val wrapHeight = tile.containerHeight + tile.tileSize
             val totalRise = animationTime * tile.riseSpeed + tile.startOffset
-            
+
             // Base Y position that rises and wraps
             val rawY = tile.containerHeight - (totalRise % wrapHeight)
-            
+
             // Subtle rotation oscillation added to the base rotation from pop-in
-            val rotationOscillation = sin((animationTime * tile.rotationSpeed + tile.phaseOffset).toDouble()).toFloat() * 2f
-            
+            val rotationOscillation = sin(
+                (animationTime * tile.rotationSpeed + tile.phaseOffset).toDouble()
+            ).toFloat() * 2f * introFactor
+
             // Apply positions
             tile.view.translationX = tile.baseX + driftOffset
             tile.view.translationY = rawY + bobOffset
             tile.view.rotation = tile.baseRotation + rotationOscillation
         }
     }
+
 
     fun stop() {
         isSettingUp = false
