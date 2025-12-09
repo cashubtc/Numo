@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.Item
 import com.electricdreams.numo.core.util.ItemManager
+import com.electricdreams.numo.feature.items.CsvImportHelper
 import com.electricdreams.numo.ui.util.DialogHelper
 import java.io.File
 import java.io.FileOutputStream
@@ -66,7 +67,17 @@ class ItemListActivity : AppCompatActivity() {
     private val csvPickerLauncher: ActivityResultLauncher<String> =
         registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
             if (uri != null) {
-                importCsvFile(uri)
+                CsvImportHelper.importItemsFromCsvUri(
+                    context = this,
+                    itemManager = itemManager,
+                    uri = uri,
+                    clearExisting = true
+                ) { importedCount ->
+                    if (importedCount > 0) {
+                        refreshItems()
+                        setResult(Activity.RESULT_OK)
+                    }
+                }
             }
         }
 
@@ -253,43 +264,7 @@ class ItemListActivity : AppCompatActivity() {
         )
     }
 
-    private fun importCsvFile(uri: Uri) {
-        try {
-            val tempFile = File(cacheDir, "import_catalog.csv")
-
-            contentResolver.openInputStream(uri)?.use { inputStream ->
-                FileOutputStream(tempFile).use { outputStream ->
-                    copyStream(inputStream, outputStream)
-                }
-            } ?: run {
-                Toast.makeText(this, getString(R.string.item_list_toast_failed_open_csv), Toast.LENGTH_SHORT).show()
-                return
-            }
-
-            val importedCount = itemManager.importItemsFromCsv(tempFile.absolutePath, true)
-
-            if (importedCount > 0) {
-                Toast.makeText(this, getString(R.string.item_list_toast_imported_items, importedCount), Toast.LENGTH_SHORT).show()
-                refreshItems()
-                setResult(Activity.RESULT_OK)
-            } else {
-                Toast.makeText(this, getString(R.string.item_list_toast_no_items_imported), Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: IOException) {
-            Log.e(TAG, "Error importing CSV file: ${e.message}", e)
-            Toast.makeText(this, getString(R.string.item_list_toast_error_importing_csv, e.message), Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private fun copyStream(inputStream: InputStream, outputStream: OutputStream) {
-        val buffer = ByteArray(4096)
-        var bytesRead: Int
-        while (true) {
-            bytesRead = inputStream.read(buffer)
-            if (bytesRead == -1) break
-            outputStream.write(buffer, 0, bytesRead)
-        }
-    }
+    
 
     private fun setupDragAndDrop() {
         val callback = object : ItemTouchHelper.Callback() {

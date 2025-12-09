@@ -13,6 +13,7 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.Toast
 import android.widget.TextView
 import com.google.android.flexbox.FlexboxLayout
 import androidx.activity.result.contract.ActivityResultContracts
@@ -35,6 +36,7 @@ import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.feature.baskets.SavedBasketsActivity
 import com.electricdreams.numo.feature.baskets.BasketNamesManager
 import com.electricdreams.numo.feature.items.adapters.SelectionBasketAdapter
+import com.electricdreams.numo.feature.items.CsvImportHelper
 import com.electricdreams.numo.feature.items.adapters.SelectionItemsAdapter
 import com.electricdreams.numo.feature.items.handlers.BasketUIHandler
 import com.electricdreams.numo.feature.items.handlers.CheckoutHandler
@@ -132,6 +134,25 @@ class ItemSelectionActivity : AppCompatActivity() {
             // Items may have been added/modified, refresh and check empty state
             searchHandler.loadItems()
             updateAnimatedEmptyStateVisibility()
+        }
+    }
+
+    private val csvPickerLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) {
+            CsvImportHelper.importItemsFromCsvUri(
+                context = this,
+                itemManager = itemManager,
+                uri = uri,
+                clearExisting = true
+            ) { importedCount ->
+                if (importedCount > 0) {
+                    // Refresh catalog and switch from empty state to main content
+                    searchHandler.loadItems()
+                    updateAnimatedEmptyStateVisibility()
+                }
+            }
         }
     }
 
@@ -389,9 +410,8 @@ class ItemSelectionActivity : AppCompatActivity() {
         }
 
         importButton?.setOnClickListener {
-            // Navigate to ItemListActivity where CSV import is available
-            val intent = Intent(this, ItemListActivity::class.java)
-            itemEntryLauncher.launch(intent)
+            // Import from CSV directly into the catalog without leaving this screen
+            csvPickerLauncher.launch("text/csv")
         }
         
         // Home → Items: Show close button (X), hide back arrow
