@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Light mode: fade from transparent to white at the top -->
+<!-- Light mode: fade from solid white at the top to transparent below -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <gradient
         android:type="linear"
         android:angle="270"
-        android:startColor="#00FFFFFF"
-        android:endColor="#FFFFFFFF" />
+        android:startColor="#FFFFFFFF"
+        android:endColor="#00FFFFFF" />
 </shape>
