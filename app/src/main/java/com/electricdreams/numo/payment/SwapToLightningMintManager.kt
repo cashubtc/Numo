@@ -106,6 +106,7 @@ object SwapToLightningMintManager {
             Log.e(TAG, msg, t)
             return@withContext SwapResult.Failure(msg)
         }
+        val keysetsInfos = tempWallet.refreshKeysets()
 
         Log.d(TAG, "swapFromUnknownMint: temporary wallet created for mint=$unknownMintUrl")
 
@@ -118,7 +119,8 @@ object SwapToLightningMintManager {
         Log.d(TAG, "swapFromUnknownMint: main wallet for Lightning mint is available")
 
         val cdkToken = org.cashudevkit.Token.decode(cashuToken)
-        val proofs = cdkToken.proofsSimple()
+
+        val proofs = cdkToken.proofs(keysetsInfos)
         Log.d(TAG, "swapFromUnknownMint: decoded Cashu token with ${proofs.size} proofs")
 
         // We request a mint quote, just to have the bolt11 request to feed to the melt quote request
