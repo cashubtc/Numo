@@ -323,29 +323,43 @@ object SwapToLightningMintManager {
 
             Log.d(TAG, "Checking Lightning mint quote state for quoteId=${finalMintQuote.id}")
             val lightningQuote = wallet.checkMintQuote(lightningMint, finalMintQuote.id)
-            val stateStr = lightningQuote.state.toString()
-            Log.d(TAG, "Lightning mint quote state=$stateStr")
+            val state = lightningQuote.state
+            Log.d(TAG, "Lightning mint quote state=$state")
 
-            if (stateStr.equals("PAID", ignoreCase = true) ||
-                stateStr.equals("ISSUED", ignoreCase = true)
-            ) {
-                Log.d(TAG, "Lightning quote is paid; attempting wallet.mint for quoteId=${finalMintQuote.id}")
-                try {
-                    val mintedProofs = wallet.mint(lightningMint, finalMintQuote.id, null)
+            when (state) {
+                org.cashudevkit.QuoteState.PAID -> {
+                    Log.d(TAG, "Lightning quote is PAID; attempting wallet.mint for quoteId=${finalMintQuote.id}")
+                    val mintedProofs = try {
+                        wallet.mint(lightningMint, finalMintQuote.id, null)
+                    } catch (mintError: Throwable) {
+                        val msg = "Failed to mint proofs on Lightning mint for quoteId=${finalMintQuote.id}: ${mintError.message}"
+                        Log.e(TAG, msg, mintError)
+                        return@withContext SwapResult.Failure(msg)
+                    }
+
+                    if (mintedProofs.isEmpty()) {
+                        val msg = "Lightning mint returned no proofs for paid quoteId=${finalMintQuote.id}"
+                        Log.e(TAG, msg)
+                        return@withContext SwapResult.Failure(msg)
+                    }
+
                     Log.d(TAG, "Minted ${mintedProofs.size} proofs on Lightning mint as part of swap flow")
-                } catch (mintError: Throwable) {
-                    // Not fatal for the POS payment itself; the Lightning
-                    // handler / operator can reconcile, but we log loudly.
-                    Log.e(TAG, "Failed to mint proofs on Lightning mint for quoteId=${finalMintQuote.id}: ${mintError.message}", mintError)
                 }
-            } else {
-                Log.d(TAG, "Lightning mint quote not yet paid (state=$stateStr), skipping immediate mint")
+                org.cashudevkit.QuoteState.ISSUED -> {
+                    // Quote already issued/minted by another component (e.g. LightningMintHandler).
+                    // We consider this a success condition for the swap.
+                    Log.d(TAG, "Lightning mint quote already ISSUED; assuming proofs are available for quoteId=${finalMintQuote.id}")
+                }
+                else -> {
+                    val msg = "Lightning mint quote not paid after unknown-mint melt (state=$state)"
+                    Log.w(TAG, msg)
+                    return@withContext SwapResult.Failure(msg)
+                }
             }
         } catch (t: Throwable) {
-            // Swallow non-fatal errors here; payment is already secured by
-            // the unknown-mint melt + preimage verification. LightningMintHandler
-            // or manual reconciliation can still complete the mint later.
-            Log.w(TAG, "Error while attempting to mint Lightning quote after swap: ${t.message}", t)
+            val msg = "Error while finalizing Lightning mint quote after swap: ${t.message}"
+            Log.w(TAG, msg, t)
+            return@withContext SwapResult.Failure(msg)
         }
 
         // At this point, we know the unknown mint has paid the exact invoice
