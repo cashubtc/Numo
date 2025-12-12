@@ -182,70 +182,47 @@
         .container.expanding .shape {
             width: 200px;
             height: 200px;
+            border-radius: 50%;
             animation: none;
         }
         
         .container.expanding .spinner {
             opacity: 1;
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
         }
         
         .container.expanding .status {
             opacity: 0;
         }
         
-        /* Phase 2: Morphing to rounded square */
+        /* Phase 2: Growing circle */
         .container.morphing .shape {
             width: 300px;
             height: 300px;
-            border-radius: 30%;
-            transform: rotate(45deg);
+            border-radius: 50%;
             animation: none;
         }
         
         .container.morphing .spinner {
             opacity: 1;
-            width: 60px;
-            height: 60px;
-            transform: rotate(0deg);
-            animation: spin 0.6s linear infinite;
+            width: 56px;
+            height: 56px;
         }
         
-        /* Phase 3: Full screen blob */
+        /* Phase 3: Full screen circle */
         .container.blob .shape {
             width: 250vmax;
             height: 250vmax;
-            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-            animation: blobMorph 3s ease-in-out infinite;
-            transform: rotate(0deg);
+            border-radius: 50%;
+            animation: none;
         }
         
         .container.blob .spinner {
             opacity: 1;
-            width: 80px;
-            height: 80px;
-            border-width: 5px;
-            animation: spin 0.5s linear infinite;
-        }
-        
-        @keyframes blobMorph {
-            0%, 100% { 
-                border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-                transform: rotate(0deg);
-            }
-            25% { 
-                border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%;
-                transform: rotate(90deg);
-            }
-            50% { 
-                border-radius: 50% 60% 30% 60% / 70% 40% 50% 40%;
-                transform: rotate(180deg);
-            }
-            75% { 
-                border-radius: 30% 50% 70% 40% / 50% 60% 30% 60%;
-                transform: rotate(270deg);
-            }
+            width: 64px;
+            height: 64px;
+            border-width: 4px;
         }
         
         /* Phase 4: Success */
