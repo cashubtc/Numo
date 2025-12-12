@@ -193,22 +193,42 @@ class OnboardingActivity : AppCompatActivity() {
         // Enable edge-to-edge display
         WindowCompat.setDecorFitsSystemWindows(window, false)
         
-        // Set the background color for status and nav bars to fluorescent green
-        val greenColor = android.graphics.Color.parseColor("#5EFFC2")
-        window.statusBarColor = greenColor
-        window.navigationBarColor = greenColor
-
-        // Dark status bar icons (light icons on bright green background)
-        WindowInsetsControllerCompat(window, window.decorView).apply {
-            isAppearanceLightStatusBars = false
-            isAppearanceLightNavigationBars = false
-        }
+        // Default to white/light bars (will be updated per screen)
+        updateWindowBarsForStep(OnboardingStep.WELCOME)
 
         // Apply insets as padding to content, but don't consume them
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, insets.top, 0, insets.bottom)
             windowInsets
+        }
+    }
+
+    /**
+     * Updates the status bar and navigation bar colors based on the current onboarding step.
+     * Green bars only appear on the welcome screen; all other screens use white/light bars.
+     */
+    private fun updateWindowBarsForStep(step: OnboardingStep) {
+        val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
+        
+        if (step == OnboardingStep.WELCOME) {
+            // Green bars for welcome screen
+            val greenColor = android.graphics.Color.parseColor("#5EFFC2")
+            window.statusBarColor = greenColor
+            window.navigationBarColor = greenColor
+            
+            // Dark icons (light icons on bright green background)
+            windowInsetsController.isAppearanceLightStatusBars = false
+            windowInsetsController.isAppearanceLightNavigationBars = false
+        } else {
+            // White/light bars for all other screens
+            val bgColor = android.graphics.Color.parseColor("#F6F7F8")
+            window.statusBarColor = bgColor
+            window.navigationBarColor = bgColor
+            
+            // Light icons (dark icons on light background)
+            windowInsetsController.isAppearanceLightStatusBars = true
+            windowInsetsController.isAppearanceLightNavigationBars = true
         }
     }
 
@@ -444,6 +464,9 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun showStep(step: OnboardingStep) {
         currentStep = step
+
+        // Update window bars based on the step (green only for welcome screen)
+        updateWindowBarsForStep(step)
 
         // Hide all containers
         welcomeContainer.visibility = View.GONE
