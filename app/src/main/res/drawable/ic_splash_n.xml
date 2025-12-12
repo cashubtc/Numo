@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
+    android:width="98dp"
+    android:height="198dp"
+    android:viewportWidth="98"
+    android:viewportHeight="198">
     
-    <!-- "N" letter centered in white for splash screen -->
-    <!-- Based on the Numo wordmark N, scaled and centered -->
+    <!-- "N" letter from Numo wordmark - white for splash screen -->
     <path
-        android:pathData="M32,22 L48,22 L60,68 L60.2,68 L60.2,22 L71,22 L71,86 L58,86 L44,30 L43.8,30 L43.8,86 L32,86 Z"
+        android:pathData="M0,0H38.9411L69.1345,118.234H69.6989V0H97.3527V197.527H65.4661L28.2182,53.3323H27.6538V197.527H0V0Z"
         android:fillColor="#FFFFFF"/>
     
 </vector>
+
