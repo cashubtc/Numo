@@ -29,6 +29,16 @@
         <!-- Icon tint -->
         <item name="colorControlNormal">@color/color_text_secondary</item>
     </style>
+    
+    <!-- Splash Screen Theme for Android 12+ -->
+    <style name="Theme.Numo.Splash" parent="Theme.Numo">
+        <!-- Splash screen background: Navy -->
+        <item name="android:windowBackground">@color/numo_navy</item>
+        <item name="android:statusBarColor">@color/numo_navy</item>
+        <item name="android:navigationBarColor">@color/numo_navy</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
 
     <!-- Variant Styles (not duplicated in styles.xml) -->
     

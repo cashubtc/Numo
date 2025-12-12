@@ -3,6 +3,10 @@
     <!-- Dark mode color overrides -->
     <!-- When dark mode is enabled, these colors replace the default light mode colors -->
     
+    <!-- Numo Brand Colors (same in dark mode) -->
+    <color name="numo_fluorescent_green">#5EFFC2</color>
+    <color name="numo_navy">#0A2540</color>
+    
     <!-- Primary Colors - WHITE for UI elements in dark mode -->
     <color name="color_primary_green">#FFFFFF</color>
     <color name="color_primary_green_light">#FFFFFF</color>
