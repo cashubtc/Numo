@@ -119,7 +119,7 @@
     <string name="payment_failure_error_no_pending">No pending payment to retry</string>
 
     <!-- Onboarding / Welcome -->
-    <string name="onboarding_welcome_tagline">Bitcoin POS with Cashu ecash</string>
+    <string name="onboarding_welcome_tagline">Accept Bitcoin payments instantly with zero fees.</string>
     <string name="onboarding_welcome_message">Accept Bitcoin payments instantly with zero fees using Cashu ecash technology.</string>
     <string name="onboarding_terms_text">By continuing, you agree to our Terms of Service and Privacy Policy</string>
     <string name="onboarding_get_started">Get Started</string>
