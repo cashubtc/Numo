@@ -109,6 +109,7 @@ class OnboardingActivity : AppCompatActivity() {
     // Step 1: Welcome
     private lateinit var welcomeContainer: FrameLayout
     private lateinit var welcomeBackgroundOverlay: View
+    private lateinit var welcomeNavyCurve: ImageView
     private lateinit var welcomeWordmark: ImageView
     private lateinit var welcomeTagline: TextView
     private lateinit var termsText: TextView
@@ -206,18 +207,20 @@ class OnboardingActivity : AppCompatActivity() {
 
     /**
      * Updates the status bar and navigation bar colors based on the current onboarding step.
-     * Green bars only appear on the welcome screen; all other screens use white/light bars.
+     * Welcome screen: Navy status bar (top matches navy curve), green nav bar (bottom matches green).
+     * All other screens: White/light bars.
      */
     private fun updateWindowBarsForStep(step: OnboardingStep) {
         val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
         
         if (step == OnboardingStep.WELCOME) {
-            // Green bars for welcome screen
+            // Navy status bar (matches curved navy section at top)
+            val navyColor = android.graphics.Color.parseColor("#0A2540")
             val greenColor = android.graphics.Color.parseColor("#5EFFC2")
-            window.statusBarColor = greenColor
+            window.statusBarColor = navyColor
             window.navigationBarColor = greenColor
             
-            // Dark icons (light icons on bright green background)
+            // Light icons on navy status bar, dark icons on green nav bar
             windowInsetsController.isAppearanceLightStatusBars = false
             windowInsetsController.isAppearanceLightNavigationBars = false
         } else {
@@ -226,7 +229,7 @@ class OnboardingActivity : AppCompatActivity() {
             window.statusBarColor = bgColor
             window.navigationBarColor = bgColor
             
-            // Light icons (dark icons on light background)
+            // Dark icons on light background
             windowInsetsController.isAppearanceLightStatusBars = true
             windowInsetsController.isAppearanceLightNavigationBars = true
         }
@@ -236,6 +239,7 @@ class OnboardingActivity : AppCompatActivity() {
         // Welcome
         welcomeContainer = findViewById(R.id.welcome_container)
         welcomeBackgroundOverlay = findViewById(R.id.welcome_background_overlay)
+        welcomeNavyCurve = findViewById(R.id.welcome_navy_curve)
         welcomeWordmark = findViewById(R.id.welcome_wordmark)
         welcomeTagline = findViewById(R.id.welcome_tagline)
         termsText = findViewById(R.id.terms_text)
@@ -517,80 +521,81 @@ class OnboardingActivity : AppCompatActivity() {
 
     /**
      * Elegant Apple-like animation for the welcome screen.
-     * 1. Background animates from white to fluorescent green
+     * Two-tone design: Navy curved section at top, fluorescent green at bottom.
+     * 1. Navy curve slides/fades in from top
      * 2. Wordmark fades in with scale animation
      * 3. Tagline fades in with slide up
      * 4. Button fades in
      */
     private fun animateWelcomeScreen() {
-        val whiteColor = android.graphics.Color.WHITE
-        val greenColor = android.graphics.Color.parseColor("#5EFFC2")
-
         // Reset all views to initial state
-        welcomeBackgroundOverlay.setBackgroundColor(whiteColor)
+        welcomeNavyCurve.alpha = 0f
+        welcomeNavyCurve.translationY = -50f
         welcomeWordmark.alpha = 0f
-        welcomeWordmark.scaleX = 0.8f
-        welcomeWordmark.scaleY = 0.8f
+        welcomeWordmark.scaleX = 0.85f
+        welcomeWordmark.scaleY = 0.85f
         welcomeTagline.alpha = 0f
-        welcomeTagline.translationY = 20f
+        welcomeTagline.translationY = 15f
         acceptButton.alpha = 0f
         acceptButton.translationY = 20f
 
-        // 1. Animate background color from white to fluorescent green
-        val backgroundAnimator = ValueAnimator.ofObject(ArgbEvaluator(), whiteColor, greenColor).apply {
-            duration = 800
-            startDelay = 200
+        // 1. Animate navy curve sliding down and fading in
+        val navyCurveAlpha = ObjectAnimator.ofFloat(welcomeNavyCurve, "alpha", 0f, 1f).apply {
+            duration = 700
+            startDelay = 150
             interpolator = DecelerateInterpolator()
-            addUpdateListener { animator ->
-                welcomeBackgroundOverlay.setBackgroundColor(animator.animatedValue as Int)
-            }
+        }
+        val navyCurveTranslate = ObjectAnimator.ofFloat(welcomeNavyCurve, "translationY", -50f, 0f).apply {
+            duration = 700
+            startDelay = 150
+            interpolator = DecelerateInterpolator()
         }
 
         // 2. Animate wordmark fade in with subtle scale
         val wordmarkAlpha = ObjectAnimator.ofFloat(welcomeWordmark, "alpha", 0f, 1f).apply {
             duration = 600
-            startDelay = 600
+            startDelay = 500
             interpolator = DecelerateInterpolator()
         }
-        val wordmarkScaleX = ObjectAnimator.ofFloat(welcomeWordmark, "scaleX", 0.8f, 1f).apply {
-            duration = 700
-            startDelay = 600
+        val wordmarkScaleX = ObjectAnimator.ofFloat(welcomeWordmark, "scaleX", 0.85f, 1f).apply {
+            duration = 650
+            startDelay = 500
             interpolator = DecelerateInterpolator()
         }
-        val wordmarkScaleY = ObjectAnimator.ofFloat(welcomeWordmark, "scaleY", 0.8f, 1f).apply {
-            duration = 700
-            startDelay = 600
+        val wordmarkScaleY = ObjectAnimator.ofFloat(welcomeWordmark, "scaleY", 0.85f, 1f).apply {
+            duration = 650
+            startDelay = 500
             interpolator = DecelerateInterpolator()
         }
 
         // 3. Animate tagline fade in with slide up
         val taglineAlpha = ObjectAnimator.ofFloat(welcomeTagline, "alpha", 0f, 1f).apply {
-            duration = 500
-            startDelay = 1000
+            duration = 450
+            startDelay = 850
             interpolator = DecelerateInterpolator()
         }
-        val taglineTranslate = ObjectAnimator.ofFloat(welcomeTagline, "translationY", 20f, 0f).apply {
-            duration = 500
-            startDelay = 1000
+        val taglineTranslate = ObjectAnimator.ofFloat(welcomeTagline, "translationY", 15f, 0f).apply {
+            duration = 450
+            startDelay = 850
             interpolator = DecelerateInterpolator()
         }
 
         // 4. Animate button fade in
         val buttonAlpha = ObjectAnimator.ofFloat(acceptButton, "alpha", 0f, 1f).apply {
             duration = 400
-            startDelay = 1300
+            startDelay = 1150
             interpolator = DecelerateInterpolator()
         }
         val buttonTranslate = ObjectAnimator.ofFloat(acceptButton, "translationY", 20f, 0f).apply {
             duration = 400
-            startDelay = 1300
+            startDelay = 1150
             interpolator = DecelerateInterpolator()
         }
 
         // Play all animations
         AnimatorSet().apply {
             playTogether(
-                backgroundAnimator,
+                navyCurveAlpha, navyCurveTranslate,
                 wordmarkAlpha, wordmarkScaleX, wordmarkScaleY,
                 taglineAlpha, taglineTranslate,
                 buttonAlpha, buttonTranslate

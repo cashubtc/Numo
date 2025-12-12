@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="360dp"
+    android:height="640dp"
+    android:viewportWidth="360"
+    android:viewportHeight="640">
+    
+    <!-- Navy background with curved bottom edge -->
+    <!-- The curve creates an elegant oval-like transition to the green below -->
+    <path
+        android:pathData="M0,0 L360,0 L360,280 Q180,380 0,280 Z"
+        android:fillColor="@color/numo_navy"/>
+    
+</vector>
