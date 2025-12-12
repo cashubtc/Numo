@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Splash Screen Theme for Android 12+ (API 31+) - Dark Mode -->
+    <style name="Theme.Numo.Splash" parent="Theme.Numo">
+        <!-- Splash screen background: Navy -->
+        <item name="android:windowSplashScreenBackground">@color/numo_navy</item>
+        <!-- Splash screen icon: Just the N -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_splash_n</item>
+        <!-- Navy icon background to blend with the splash background -->
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/numo_navy</item>
+        <!-- Match window background -->
+        <item name="android:windowBackground">@color/numo_navy</item>
+        <item name="android:statusBarColor">@color/numo_navy</item>
+        <item name="android:navigationBarColor">@color/numo_navy</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+</resources>
