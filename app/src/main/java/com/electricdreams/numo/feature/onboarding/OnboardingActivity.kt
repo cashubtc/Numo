@@ -500,7 +500,7 @@ class OnboardingActivity : AppCompatActivity() {
         if (step == OnboardingStep.WELCOME) {
             animateWelcomeScreen()
         } else {
-            animateContainerIn(containerToShow)
+        animateContainerIn(containerToShow)
         }
     }
 
@@ -532,8 +532,8 @@ class OnboardingActivity : AppCompatActivity() {
         welcomeNavyCurve.alpha = 0f
         welcomeNavyCurve.translationY = -50f
         welcomeWordmark.alpha = 0f
-        welcomeWordmark.scaleX = 0.85f
-        welcomeWordmark.scaleY = 0.85f
+        welcomeWordmark.scaleX = 0.95f
+        welcomeWordmark.scaleY = 0.95f
         welcomeTagline.alpha = 0f
         welcomeTagline.translationY = 15f
         acceptButton.alpha = 0f
@@ -551,20 +551,20 @@ class OnboardingActivity : AppCompatActivity() {
             interpolator = DecelerateInterpolator()
         }
 
-        // 2. Animate wordmark fade in with subtle scale
+        // 2. Animate wordmark fade in with subtle scale - appears immediately (no delay)
         val wordmarkAlpha = ObjectAnimator.ofFloat(welcomeWordmark, "alpha", 0f, 1f).apply {
-            duration = 600
-            startDelay = 500
+            duration = 400
+            startDelay = 0
             interpolator = DecelerateInterpolator()
         }
-        val wordmarkScaleX = ObjectAnimator.ofFloat(welcomeWordmark, "scaleX", 0.85f, 1f).apply {
-            duration = 650
-            startDelay = 500
+        val wordmarkScaleX = ObjectAnimator.ofFloat(welcomeWordmark, "scaleX", 0.95f, 1f).apply {
+            duration = 400
+            startDelay = 0
             interpolator = DecelerateInterpolator()
         }
-        val wordmarkScaleY = ObjectAnimator.ofFloat(welcomeWordmark, "scaleY", 0.85f, 1f).apply {
-            duration = 650
-            startDelay = 500
+        val wordmarkScaleY = ObjectAnimator.ofFloat(welcomeWordmark, "scaleY", 0.95f, 1f).apply {
+            duration = 400
+            startDelay = 0
             interpolator = DecelerateInterpolator()
         }
 
