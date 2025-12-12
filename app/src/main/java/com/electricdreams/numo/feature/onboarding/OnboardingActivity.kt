@@ -1,7 +1,9 @@
 package com.electricdreams.numo.feature.onboarding
 
 import android.animation.AnimatorSet
+import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
@@ -106,6 +108,9 @@ class OnboardingActivity : AppCompatActivity() {
     // === Views ===
     // Step 1: Welcome
     private lateinit var welcomeContainer: FrameLayout
+    private lateinit var welcomeBackgroundOverlay: View
+    private lateinit var welcomeWordmark: ImageView
+    private lateinit var welcomeTagline: TextView
     private lateinit var termsText: TextView
     private lateinit var acceptButton: MaterialButton
 
@@ -188,15 +193,15 @@ class OnboardingActivity : AppCompatActivity() {
         // Enable edge-to-edge display
         WindowCompat.setDecorFitsSystemWindows(window, false)
         
-        // Set the background color for status and nav bars to match content
-        val bgColor = android.graphics.Color.parseColor("#F6F7F8")
-        window.statusBarColor = bgColor
-        window.navigationBarColor = bgColor
+        // Set the background color for status and nav bars to fluorescent green
+        val greenColor = android.graphics.Color.parseColor("#5EFFC2")
+        window.statusBarColor = greenColor
+        window.navigationBarColor = greenColor
 
-        // Light status bar icons (dark icons on light background)
+        // Dark status bar icons (light icons on bright green background)
         WindowInsetsControllerCompat(window, window.decorView).apply {
-            isAppearanceLightStatusBars = true
-            isAppearanceLightNavigationBars = true
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
         }
 
         // Apply insets as padding to content, but don't consume them
@@ -210,6 +215,9 @@ class OnboardingActivity : AppCompatActivity() {
     private fun initViews() {
         // Welcome
         welcomeContainer = findViewById(R.id.welcome_container)
+        welcomeBackgroundOverlay = findViewById(R.id.welcome_background_overlay)
+        welcomeWordmark = findViewById(R.id.welcome_wordmark)
+        welcomeTagline = findViewById(R.id.welcome_tagline)
         termsText = findViewById(R.id.terms_text)
         acceptButton = findViewById(R.id.accept_button)
 
@@ -460,7 +468,13 @@ class OnboardingActivity : AppCompatActivity() {
         }
 
         containerToShow.visibility = View.VISIBLE
-        animateContainerIn(containerToShow)
+        
+        // Use special animation for welcome screen
+        if (step == OnboardingStep.WELCOME) {
+            animateWelcomeScreen()
+        } else {
+            animateContainerIn(containerToShow)
+        }
     }
 
     private fun animateContainerIn(container: View) {
@@ -476,6 +490,90 @@ class OnboardingActivity : AppCompatActivity() {
             duration = 300
             interpolator = DecelerateInterpolator()
         }.start()
+    }
+
+    /**
+     * Elegant Apple-like animation for the welcome screen.
+     * 1. Background animates from white to fluorescent green
+     * 2. Wordmark fades in with scale animation
+     * 3. Tagline fades in with slide up
+     * 4. Button fades in
+     */
+    private fun animateWelcomeScreen() {
+        val whiteColor = android.graphics.Color.WHITE
+        val greenColor = android.graphics.Color.parseColor("#5EFFC2")
+
+        // Reset all views to initial state
+        welcomeBackgroundOverlay.setBackgroundColor(whiteColor)
+        welcomeWordmark.alpha = 0f
+        welcomeWordmark.scaleX = 0.8f
+        welcomeWordmark.scaleY = 0.8f
+        welcomeTagline.alpha = 0f
+        welcomeTagline.translationY = 20f
+        acceptButton.alpha = 0f
+        acceptButton.translationY = 20f
+
+        // 1. Animate background color from white to fluorescent green
+        val backgroundAnimator = ValueAnimator.ofObject(ArgbEvaluator(), whiteColor, greenColor).apply {
+            duration = 800
+            startDelay = 200
+            interpolator = DecelerateInterpolator()
+            addUpdateListener { animator ->
+                welcomeBackgroundOverlay.setBackgroundColor(animator.animatedValue as Int)
+            }
+        }
+
+        // 2. Animate wordmark fade in with subtle scale
+        val wordmarkAlpha = ObjectAnimator.ofFloat(welcomeWordmark, "alpha", 0f, 1f).apply {
+            duration = 600
+            startDelay = 600
+            interpolator = DecelerateInterpolator()
+        }
+        val wordmarkScaleX = ObjectAnimator.ofFloat(welcomeWordmark, "scaleX", 0.8f, 1f).apply {
+            duration = 700
+            startDelay = 600
+            interpolator = DecelerateInterpolator()
+        }
+        val wordmarkScaleY = ObjectAnimator.ofFloat(welcomeWordmark, "scaleY", 0.8f, 1f).apply {
+            duration = 700
+            startDelay = 600
+            interpolator = DecelerateInterpolator()
+        }
+
+        // 3. Animate tagline fade in with slide up
+        val taglineAlpha = ObjectAnimator.ofFloat(welcomeTagline, "alpha", 0f, 1f).apply {
+            duration = 500
+            startDelay = 1000
+            interpolator = DecelerateInterpolator()
+        }
+        val taglineTranslate = ObjectAnimator.ofFloat(welcomeTagline, "translationY", 20f, 0f).apply {
+            duration = 500
+            startDelay = 1000
+            interpolator = DecelerateInterpolator()
+        }
+
+        // 4. Animate button fade in
+        val buttonAlpha = ObjectAnimator.ofFloat(acceptButton, "alpha", 0f, 1f).apply {
+            duration = 400
+            startDelay = 1300
+            interpolator = DecelerateInterpolator()
+        }
+        val buttonTranslate = ObjectAnimator.ofFloat(acceptButton, "translationY", 20f, 0f).apply {
+            duration = 400
+            startDelay = 1300
+            interpolator = DecelerateInterpolator()
+        }
+
+        // Play all animations
+        AnimatorSet().apply {
+            playTogether(
+                backgroundAnimator,
+                wordmarkAlpha, wordmarkScaleX, wordmarkScaleY,
+                taglineAlpha, taglineTranslate,
+                buttonAlpha, buttonTranslate
+            )
+            start()
+        }
     }
 
     // === New Wallet Flow ===

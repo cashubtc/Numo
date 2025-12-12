@@ -109,7 +109,7 @@
     <string name="payment_failure_error_no_pending">No hay ningún pago pendiente para reintentar</string>
 
     <!-- Onboarding / Welcome -->
-    <string name="onboarding_welcome_tagline">TPV de Bitcoin con Cashu ecash</string>
+    <string name="onboarding_welcome_tagline">Acepta pagos en Bitcoin al instante y sin comisiones.</string>
     <string name="onboarding_welcome_message">Acepta pagos en Bitcoin al instante y sin comisiones usando la tecnología Cashu ecash.</string>
     <string name="onboarding_terms_text">Al continuar, aceptas nuestros Términos de servicio y Política de privacidad</string>
     <string name="onboarding_get_started">Comenzar</string>

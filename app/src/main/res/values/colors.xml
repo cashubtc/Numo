@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Numo Brand Colors -->
+    <color name="numo_fluorescent_green">#5EFFC2</color>
+    <color name="numo_navy">#0A2540</color>
+    
     <!-- Cash App Brand Colors -->
     <color name="color_primary_green">#0B1215</color>
     <color name="color_primary_green_light">#0B1215</color>

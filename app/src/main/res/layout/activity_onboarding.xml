@@ -15,6 +15,13 @@
         android:layout_height="match_parent"
         android:visibility="gone">
 
+        <!-- Animated background overlay - starts white, animates to fluorescent green -->
+        <View
+            android:id="@+id/welcome_background_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/color_bg_white" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -25,52 +32,36 @@
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.25" />
+                android:layout_weight="0.35" />
 
-            <!-- App Icon -->
+            <!-- Numo Wordmark - Navy -->
             <ImageView
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:src="@mipmap/ic_launcher_round"
-                android:contentDescription="@string/app_name" />
+                android:id="@+id/welcome_wordmark"
+                android:layout_width="180dp"
+                android:layout_height="80dp"
+                android:src="@drawable/ic_numo_wordmark_navy"
+                android:contentDescription="@string/app_name"
+                android:alpha="0" />
 
+            <!-- Tagline - Animated in after wordmark -->
             <TextView
+                android:id="@+id/welcome_tagline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="@string/app_name"
-                android:textSize="32sp"
-                android:textColor="@color/color_text_primary"
-                android:fontFamily="sans-serif-medium" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
                 android:text="@string/onboarding_welcome_tagline"
-                android:textSize="16sp"
-                android:textColor="@color/color_text_secondary"
-                android:gravity="center" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.35" />
-
-            <!-- Welcome Message -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/onboarding_welcome_message"
                 android:textSize="17sp"
                 android:lineHeight="24sp"
-                android:textColor="@color/color_text_secondary"
-                android:gravity="center" />
+                android:textColor="@color/numo_navy"
+                android:gravity="center"
+                android:fontFamily="sans-serif-medium"
+                android:alpha="0"
+                android:paddingHorizontal="16dp" />
 
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.4" />
+                android:layout_weight="0.45" />
 
             <!-- Terms Text -->
             <TextView
@@ -79,22 +70,25 @@
                 android:layout_height="wrap_content"
                 android:text="@string/onboarding_terms_text"
                 android:textSize="13sp"
-                android:textColor="@color/color_text_tertiary"
+                android:textColor="@color/numo_navy"
+                android:alpha="0.6"
                 android:gravity="center"
                 android:paddingHorizontal="16dp" />
 
-            <!-- Accept Button -->
+            <!-- Accept Button - Navy background -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/accept_button"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="64dp"
                 android:layout_marginTop="16dp"
                 android:text="@string/onboarding_get_started"
-                android:textSize="17sp"
+                android:textSize="18sp"
                 android:textColor="#FFFFFF"
                 android:textAllCaps="false"
-                app:cornerRadius="28dp"
-                app:backgroundTint="#000000" />
+                android:alpha="0"
+                android:paddingVertical="4dp"
+                app:cornerRadius="32dp"
+                app:backgroundTint="@color/numo_navy" />
 
             <Space
                 android:layout_width="match_parent"
