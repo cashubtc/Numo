@@ -93,6 +93,7 @@
     <string name="payment_request_tip_info_no_percentage">includes %1$s tip</string>
 
     <string name="payment_request_share_chooser_title">Share Payment Request</string>
+    <string name="payment_request_animation_close">Close</string>
 
     <!-- Payment received -->
     <string name="payment_received_amount">%1$s received.</string>
