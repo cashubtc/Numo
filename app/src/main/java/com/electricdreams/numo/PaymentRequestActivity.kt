@@ -755,6 +755,9 @@ class PaymentRequestActivity : AppCompatActivity() {
         if (!beginTerminalOutcome("lightning_success")) return
 
         Log.d(TAG, "Lightning payment successful (no Cashu token)")
+        
+        // Cancel the safety timeout
+        cancelNfcSafetyTimeout()
 
         statusText.visibility = View.VISIBLE
         statusText.text = getString(R.string.payment_request_status_success)
@@ -779,8 +782,17 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
-        // Use unified success handler
-        showPaymentSuccess("", paymentAmount)
+        // Check if NFC animation is visible - if so, show success animation
+        // This can happen when Lightning payment comes via NFC swap path
+        if (nfcAnimationContainer.visibility == View.VISIBLE) {
+            // Store data for post-animation processing (empty token for Lightning)
+            pendingNfcSuccessToken = ""
+            pendingNfcSuccessAmount = paymentAmount
+            showNfcAnimationSuccess(formattedAmountString)
+        } else {
+            // Non-NFC payment - use normal success flow
+            showPaymentSuccess("", paymentAmount)
+        }
     }
 
     /**
@@ -1037,18 +1049,14 @@ class PaymentRequestActivity : AppCompatActivity() {
         animationCloseButton.isEnabled = false
         
         // Clean up and finish with fade transition
-        cleanupAndFinishWithSlide()
-        
-        // Fade out the success screen, fade in the home screen
-        @Suppress("DEPRECATION")
-        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
+        cleanupAndFinishWithFade()
     }
     
     /**
-     * Cleanup and finish specifically for the slide-down animation.
-     * Does NOT exit full-screen mode so the green success screen stays full during the slide.
+     * Cleanup and finish with fade animation.
+     * Does NOT exit full-screen mode so the green success screen stays full during the fade.
      */
-    private fun cleanupAndFinishWithSlide() {
+    private fun cleanupAndFinishWithFade() {
         // Stop Nostr handler
         nostrHandler?.stop()
         nostrHandler = null
@@ -1070,6 +1078,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
 
         finish()
+        
+        // Fade out the success screen, fade in the home screen
+        // Must be called immediately after finish() to take effect
+        @Suppress("DEPRECATION")
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
     }
 
     private fun showNfcAnimationOverlay() {

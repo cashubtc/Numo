@@ -143,22 +143,19 @@
             }
         }
         
+        /* Blob morph only animates border-radius to avoid transform conflicts */
         @keyframes blobMorph {
             0%, 100% { 
                 border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
-                transform: rotate(0deg);
             }
             25% { 
                 border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%;
-                transform: rotate(90deg);
             }
             50% { 
                 border-radius: 50% 60% 30% 60% / 70% 40% 50% 40%;
-                transform: rotate(180deg);
             }
             75% { 
                 border-radius: 30% 50% 70% 40% / 50% 60% 30% 60%;
-                transform: rotate(270deg);
             }
         }
         
@@ -237,6 +234,7 @@
             height: 250vmax;
             border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
             animation: blobMorph 3s ease-in-out infinite;
+            /* Let CSS transition handle the rotation from 45deg to 0deg smoothly */
             transform: rotate(0deg);
         }
         
