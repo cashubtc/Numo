@@ -93,19 +93,26 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback,
         // Use the same resolved background color as ThemeManager so the
         // ModernPOS window background matches the active theme selection
         // (obsidian, green, bitcoin orange, white, etc.). This ensures the
-        // navigation pill always floats above the correct themed background
-        // instead of a hardcoded "green".
+        // navigation bar always matches the current theme.
         val bgColor = com.electricdreams.numo.ui.theme.ThemeManager.resolveBackgroundColor(this)
         window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(bgColor))
 
-        window.statusBarColor = android.graphics.Color.TRANSPARENT
-        window.navigationBarColor = android.graphics.Color.TRANSPARENT
+        // Set both status bar and navigation bar to match the theme background.
+        // Note: We use the actual color instead of TRANSPARENT because some devices
+        // (like Sunmi POS terminals) don't properly support transparent system bars
+        // and will show a system default color instead.
+        window.statusBarColor = bgColor
+        window.navigationBarColor = bgColor
+
+        // Determine if this is a light theme (white) to set appropriate icon colors
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        val theme = prefs.getString("app_theme", "green") ?: "green"
+        val isLightTheme = (theme == "white")
 
         WindowInsetsControllerCompat(window, window.decorView).apply {
-            // For the dark themes we keep icons light; for white theme the
-            // ThemeManager will already have set light/dark appropriately.
-            isAppearanceLightStatusBars = false
-            isAppearanceLightNavigationBars = false
+            // Light icons for dark themes, dark icons for white theme
+            isAppearanceLightStatusBars = isLightTheme
+            isAppearanceLightNavigationBars = isLightTheme
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->

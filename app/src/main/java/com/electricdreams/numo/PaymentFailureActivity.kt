@@ -48,8 +48,12 @@ class PaymentFailureActivity : AppCompatActivity() {
 
         // Enable edge-to-edge, mirroring PaymentReceivedActivity
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.statusBarColor = android.graphics.Color.TRANSPARENT
-        window.navigationBarColor = android.graphics.Color.TRANSPARENT
+        
+        // Use solid white for both status and navigation bars.
+        // Note: TRANSPARENT doesn't work well on some devices (like Sunmi POS terminals).
+        val bgColor = android.graphics.Color.WHITE
+        window.statusBarColor = bgColor
+        window.navigationBarColor = bgColor
 
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.isAppearanceLightStatusBars = true

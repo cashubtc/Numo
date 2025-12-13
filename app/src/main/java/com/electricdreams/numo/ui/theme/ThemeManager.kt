@@ -74,10 +74,11 @@ class ThemeManager(
         // Update status bar and navigation bar colors
         activity.window.statusBarColor = backgroundColor
 
-        // Let the system navigation bar be fully transparent so the gesture pill
-        // floats above whatever content/background we're drawing, instead of
-        // sitting on a solid-colored nav bar.
-        activity.window.navigationBarColor = android.graphics.Color.TRANSPARENT
+        // Set navigation bar to match the theme background color.
+        // Note: We use the actual color instead of TRANSPARENT because some devices
+        // (like Sunmi POS terminals) don't properly support transparent navigation
+        // bars and will show a system default color instead.
+        activity.window.navigationBarColor = backgroundColor
         
         // Update status bar appearance based on theme
         val windowInsetsController = WindowInsetsControllerCompat(activity.window, activity.window.decorView)

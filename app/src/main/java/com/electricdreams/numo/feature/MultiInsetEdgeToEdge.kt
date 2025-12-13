@@ -15,13 +15,23 @@ import androidx.core.view.WindowInsetsControllerCompat
  * Usage from an Activity:
  *
  *     enableEdgeToEdgeWithPill(this)
+ *     enableEdgeToEdgeWithPill(this, backgroundColor = Color.WHITE)
+ *
+ * @param backgroundColor The background color to use for status and navigation bars.
+ *                        Defaults to WHITE. Note: We use solid colors instead of TRANSPARENT
+ *                        because some devices (like Sunmi POS terminals) don't properly
+ *                        support transparent system bars.
  */
-fun enableEdgeToEdgeWithPill(activity: Activity, lightNavIcons: Boolean = true) {
+fun enableEdgeToEdgeWithPill(
+    activity: Activity,
+    lightNavIcons: Boolean = true,
+    backgroundColor: Int = Color.WHITE
+) {
     val window = activity.window
 
     WindowCompat.setDecorFitsSystemWindows(window, false)
-    window.statusBarColor = Color.TRANSPARENT
-    window.navigationBarColor = Color.TRANSPARENT
+    window.statusBarColor = backgroundColor
+    window.navigationBarColor = backgroundColor
 
     val controller = WindowInsetsControllerCompat(window, window.decorView)
     controller.isAppearanceLightStatusBars = lightNavIcons

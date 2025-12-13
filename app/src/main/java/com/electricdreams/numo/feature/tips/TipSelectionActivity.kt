@@ -104,8 +104,12 @@ class TipSelectionActivity : AppCompatActivity() {
 
     private fun setupWindowSettings() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.statusBarColor = Color.TRANSPARENT
-        window.navigationBarColor = Color.TRANSPARENT
+        
+        // Use solid white for both status and navigation bars.
+        // Note: TRANSPARENT doesn't work well on some devices (like Sunmi POS terminals).
+        val bgColor = Color.WHITE
+        window.statusBarColor = bgColor
+        window.navigationBarColor = bgColor
 
         // Light status bar (dark icons) since we have white background
         WindowInsetsControllerCompat(window, window.decorView).apply {
