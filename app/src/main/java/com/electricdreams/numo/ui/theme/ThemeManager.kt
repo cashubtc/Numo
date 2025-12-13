@@ -8,13 +8,18 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.electricdreams.numo.R
 
 /**
- * Manages theme application and color management for activities.
+ * Manages theme application and color management for activities, including
+ * coordinating the POS surface background with system UI chrome (status and
+ * navigation bars).
  */
 class ThemeManager(
     private val activity: AppCompatActivity
 ) {
 
-    /** Apply theme to the activity */
+    /**
+     * Apply the currently selected POS theme to the activity UI and the
+     * surrounding system chrome (status and navigation bars).
+     */
     fun applyTheme(
         amountDisplay: TextView,
         secondaryAmountDisplay: TextView,
@@ -71,16 +76,16 @@ class ThemeManager(
             button?.setTextColor(textColor)
         }
         
-        // Update status bar and navigation bar colors
-        activity.window.statusBarColor = backgroundColor
+        // Update status bar and navigation bar colors so the system chrome
+        // matches the currently selected POS theme (green, obsidian,
+        // bitcoin orange, white). This also fixes older 3-button devices
+        // where a transparent nav bar could get tinted by the OEM skin.
+        val window = activity.window
+        window.statusBarColor = backgroundColor
+        window.navigationBarColor = backgroundColor
 
-        // Let the system navigation bar be fully transparent so the gesture pill
-        // floats above whatever content/background we're drawing, instead of
-        // sitting on a solid-colored nav bar.
-        activity.window.navigationBarColor = android.graphics.Color.TRANSPARENT
-        
-        // Update status bar appearance based on theme
-        val windowInsetsController = WindowInsetsControllerCompat(activity.window, activity.window.decorView)
+        // Update system bar icon appearance based on theme
+        val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
         windowInsetsController.isAppearanceLightStatusBars = isWhiteTheme
         windowInsetsController.isAppearanceLightNavigationBars = isWhiteTheme
         

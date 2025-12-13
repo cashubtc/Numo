@@ -13,9 +13,10 @@
         <!-- Status bar color - matches window background for seamless edge-to-edge -->
         <item name="android:statusBarColor">@color/color_bg_white</item>
         <item name="android:windowLightStatusBar">true</item>
-        <!-- Navigation bar: transparent so gesture pill truly floats over content/background -->
-        <!-- Content views should handle bottom insets where needed. -->
-        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <!-- Navigation bar: solid white so it follows the light theme
+             everywhere except the POS screen (which overrides it to use
+             the per-theme background color). -->
+        <item name="android:navigationBarColor">@color/color_bg_white</item>
         <item name="android:windowLightNavigationBar">true</item>
         <!-- Text colors -->
         <item name="android:textColor">@color/color_text_primary</item>
