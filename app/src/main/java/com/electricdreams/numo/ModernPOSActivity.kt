@@ -110,7 +110,9 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback,
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, 0)
+            // Apply top inset so content sits below the status bar and bottom inset so
+            // the charge button is never obscured by the system navigation bar or gesture pill.
+            v.setPadding(0, insets.top, 0, insets.bottom)
             WindowInsetsCompat.CONSUMED
         }
     }
