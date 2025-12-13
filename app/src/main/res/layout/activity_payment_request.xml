@@ -297,7 +297,7 @@
             android:background="@android:color/transparent" />
 
         <!-- Close button appears after animation completes -->
-        <Button
+        <TextView
             android:id="@+id/animation_close_button"
             android:layout_width="match_parent"
             android:layout_height="52dp"
@@ -306,13 +306,14 @@
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="48dp"
             android:background="@drawable/bg_button_black_pill"
-            android:elevation="0dp"
-            android:stateListAnimator="@null"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground"
             android:text="@string/payment_request_animation_close"
             android:textColor="#FFFFFF"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textAllCaps="false"
             android:visibility="gone" />
     </FrameLayout>
 

@@ -61,7 +61,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     // NFC Animation views
     private lateinit var nfcAnimationContainer: View
     private lateinit var nfcAnimationWebView: WebView
-    private lateinit var animationCloseButton: Button
+    private lateinit var animationCloseButton: TextView
     
     // Tip-related views
     private lateinit var tipInfoText: TextView
