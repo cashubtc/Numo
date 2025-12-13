@@ -1201,6 +1201,10 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun showCloseButtonAnimated() {
+        // Exit full-screen mode to show navigation bar (important for Sunmi V2 and similar devices)
+        // This ensures users can tap the close button once without needing to first bring up the nav bar
+        exitFullScreen()
+        
         // Start from invisible and below
         animationCloseButton.alpha = 0f
         animationCloseButton.translationY = 60f
