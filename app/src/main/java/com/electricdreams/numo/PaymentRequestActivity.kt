@@ -118,6 +118,10 @@ class PaymentRequestActivity : AppCompatActivity() {
     // Tracks whether this payment flow has already reached a terminal outcome
     private var hasTerminalOutcome: Boolean = false
 
+    // Pending NFC animation success data (to call showPaymentSuccess after animation completes)
+    private var pendingNfcSuccessToken: String? = null
+    private var pendingNfcSuccessAmount: Long = 0
+
     private val uiScope = CoroutineScope(Dispatchers.Main)
     
     // NFC Animation state
@@ -729,6 +733,9 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // NFC-ONLY: Show animation success if NFC animation is visible
         if (nfcAnimationContainer.visibility == View.VISIBLE) {
+            // Store data for post-animation processing
+            pendingNfcSuccessToken = token
+            pendingNfcSuccessAmount = paymentAmount
             showNfcAnimationSuccess(formattedAmountString)
         } else {
             // Non-NFC payment (Nostr/QR) - use normal success flow
@@ -1171,6 +1178,19 @@ class PaymentRequestActivity : AppCompatActivity() {
             runOnUiThread {
                 Log.d(TAG, "Animation complete, success: $success")
                 showCloseButtonAnimated()
+                
+                // Trigger post-payment operations after animation completes
+                if (success && pendingNfcSuccessToken != null) {
+                    val token = pendingNfcSuccessToken!!
+                    val amount = pendingNfcSuccessAmount
+                    pendingNfcSuccessToken = null
+                    pendingNfcSuccessAmount = 0
+                    
+                    // Archive basket, trigger auto-withdraw, etc.
+                    markBasketAsPaid()
+                    AutoWithdrawManager.getInstance(this@PaymentRequestActivity)
+                        .onPaymentReceived(token, lightningMintUrl)
+                }
             }
         }
     }

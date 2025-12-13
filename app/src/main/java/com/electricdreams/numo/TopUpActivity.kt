@@ -136,6 +136,9 @@ class TopUpActivity : AppCompatActivity() {
             val dialogView = layoutInflater.inflate(R.layout.dialog_nfc_modern, null)
             builder.setView(dialogView)
 
+            dialogView.findViewById<TextView>(R.id.nfc_amount_display)?.text =
+                getString(R.string.top_up_dialog_ready_message)
+
             builder.setCancelable(true)
             nfcDialog = builder.create().also { it.show() }
         }
