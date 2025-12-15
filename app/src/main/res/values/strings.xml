@@ -258,38 +258,6 @@
     <string name="nfc_dialog_waiting_message">Waiting for NFC...</string>
     <string name="common_cancel">Cancel</string>
 
-    <!-- Top up / import Cashu token -->
-    <string name="top_up_toolbar_back">Back</string>
-    <string name="top_up_title">Top Up</string>
-    <string name="top_up_instruction_title">Enter Cashu Token</string>
-    <string name="top_up_instruction_subtitle">Paste a Cashu token to add funds to the card</string>
-    <string name="top_up_hint_token">cashuA...</string>
-    <string name="top_up_button_submit">Submit</string>
-
-    <string name="top_up_status_token_ready">Token ready to be imported</string>
-    <string name="top_up_status_nfc_not_available">NFC is not available on this device</string>
-    <string name="top_up_status_tap_card">Tap your card to import the proofs</string>
-    <string name="top_up_status_missing_token">Please enter a Cashu proof token</string>
-    <string name="top_up_status_no_token_set">No proof token set to import</string>
-    <string name="top_up_status_operation_cancelled">Operation cancelled</string>
-    <string name="top_up_status_nfc_error">NFC Communication Error: %1$s</string>
-    <string name="top_up_status_card_error">Satocash Card Error: %1$s</string>
-    <string name="top_up_status_generic_error">Error: %1$s</string>
-    <string name="top_up_status_success_imported">Success: Imported %1$d proofs</string>
-    <string name="top_up_status_pin_verification_failed">PIN Verification Failed</string>
-    <string name="top_up_status_pin_verification_failed_detail">PIN Verification Failed: %1$s</string>
-    <string name="top_up_status_auth_failed">Authentication Failed: %1$s</string>
-    <string name="top_up_status_unexpected_error">An unexpected error occurred: %1$s</string>
-    <string name="top_up_status_no_saved_pin">No saved PIN available</string>
-
-    <!-- Top up NFC dialogs -->
-    <string name="top_up_dialog_ready_title">Scan NFC Card</string>
-    <string name="top_up_dialog_ready_message">Ready to import proofs</string>
-    <string name="top_up_dialog_rescan_title">Scan Card Again</string>
-    <string name="top_up_dialog_rescan_hint">PIN accepted. Please scan your card again to complete import.</string>
-    <string name="top_up_dialog_processing_title">Processing Import</string>
-    <string name="top_up_dialog_processing_message">Importing proofs...</string>
-
     <!-- Common PIN dialog -->
     <string name="dialog_title_enter_pin">Enter PIN</string>
     <string name="dialog_pin_hint">PIN</string>

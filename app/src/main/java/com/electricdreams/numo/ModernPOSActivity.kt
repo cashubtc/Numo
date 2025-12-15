@@ -226,7 +226,6 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback,
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
-        R.id.action_top_up -> { startActivity(Intent(this, TopUpActivity::class.java)); true }
         R.id.action_balance_check -> { startActivity(Intent(this, BalanceCheckActivity::class.java)); true }
         R.id.action_history -> { startActivity(Intent(this, PaymentsHistoryActivity::class.java)); true }
         else -> super.onOptionsItemSelected(item)
