@@ -7,11 +7,6 @@
         android:icon="@drawable/ic_light_mode"
         app:showAsAction="always" />
     <item
-        android:id="@+id/action_top_up"
-        android:title="@string/top_up_title"
-        android:icon="@drawable/ic_top_up"
-        app:showAsAction="ifRoom" />
-    <item
         android:id="@+id/action_balance_check"
         android:title="@string/balance_check_title"
         android:icon="@drawable/ic_balance_check"
