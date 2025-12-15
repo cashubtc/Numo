@@ -336,7 +336,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="numo.cash"
+                        android:text="numopay.org"
                         android:textSize="14sp"
                         android:textColor="@color/color_text_secondary" />
                 </LinearLayout>
@@ -383,7 +383,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="support@numo.cash"
+                        android:text="numopay@proton.me"
                         android:textSize="14sp"
                         android:textColor="@color/color_text_secondary" />
                 </LinearLayout>

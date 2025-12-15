@@ -79,12 +79,12 @@ class AboutActivity : AppCompatActivity() {
 
         // Website
         findViewById<View>(R.id.website_item).setOnClickListener {
-            openUrl("https://numo.cash")
+            openUrl("https://numopay.org")
         }
 
         // Contact
         findViewById<View>(R.id.contact_item).setOnClickListener {
-            sendEmail("support@numo.cash")
+            sendEmail("numopay@proton.me")
         }
     }
 
@@ -215,7 +215,7 @@ class AboutActivity : AppCompatActivity() {
             If you enable Nostr backup, encrypted wallet data is published to Nostr relays. Only you can decrypt this data with your seed phrase.
             
             7. CONTACT
-            For privacy questions: support@numo.cash
+            For privacy questions: numopay@proton.me
             
             Last updated: November 2024
         """.trimIndent()
