@@ -33,6 +33,15 @@
     <!-- Accent Colors for dark mode -->
     <color name="color_accent_blue">#409CFF</color>
     
+    <!-- Surface & Card mappings -->
+    <color name="color_bg_surface">@color/dark_surfaceColor</color>
+    <color name="color_bg_tertiary">@color/dark_color_bg_secondary</color>
+    <color name="color_bg_elevated">@color/dark_surfaceColor</color>
+
+    <!-- Info/Warning Card Backgrounds (dark variants) -->
+    <color name="color_warning_card_bg">#3A2810</color>
+    <color name="color_pin_info_card_bg">#103321</color>
+
     <!-- Empty State Theme Colors (Dark Mode - black background) -->
     <color name="empty_state_background">#000000</color>
     <color name="empty_state_title">#FFFFFF</color>

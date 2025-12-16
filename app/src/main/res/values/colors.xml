@@ -88,6 +88,10 @@
     <color name="chip_ribbon_yellow">#FFDD00</color>
     <color name="chip_ribbon_white">#FFFFFF</color>
 
+    <!-- Info/Warning Card Backgrounds -->
+    <color name="color_warning_card_bg">#FFF3E0</color>
+    <color name="color_pin_info_card_bg">#E8F5E9</color>
+
     <!-- Empty State Theme Colors (Light Mode - white background) -->
     <color name="empty_state_background">#FFFFFF</color>
     <color name="empty_state_title">#000000</color>

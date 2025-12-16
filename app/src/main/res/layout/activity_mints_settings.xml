@@ -94,7 +94,7 @@
                     android:id="@+id/lightning_mint_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardBackgroundColor="@color/color_bg_white"
+                    app:cardBackgroundColor="@color/color_bg_card"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp">
 
@@ -290,7 +290,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
-                app:cardBackgroundColor="@color/color_bg_white"
+                app:cardBackgroundColor="@color/color_bg_card"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp">
 

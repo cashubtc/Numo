@@ -188,7 +188,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    app:cardBackgroundColor="@color/color_bg_white"
+                    app:cardBackgroundColor="@color/color_bg_card"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp">
 
@@ -531,7 +531,7 @@
                     android:id="@+id/manual_withdraw_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardBackgroundColor="@color/color_bg_white"
+                    app:cardBackgroundColor="@color/color_bg_card"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp">
 
@@ -642,7 +642,7 @@
                     android:id="@+id/history_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardBackgroundColor="@color/color_bg_white"
+                    app:cardBackgroundColor="@color/color_bg_card"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp">
 
