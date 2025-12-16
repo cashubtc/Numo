@@ -1,19 +1,19 @@
 <resources>
     <!-- Security &amp; Privacy screen: info card -->
-    <string name="security_settings_card_title">Protege tu monedero</string>
-    <string name="security_settings_card_body">Tu frase semilla es la única forma de recuperar tu monedero si pierdes el acceso a este dispositivo. Mantenla a salvo y no la compartas con nadie.</string>
+    <string name="security_settings_card_title">Protege tu cartera</string>
+    <string name="security_settings_card_body">Tu frase semilla es la única forma de recuperar tu cartera si pierdes el acceso a este dispositivo. Mantenla a salvo y no la compartas con nadie.</string>
 
     <!-- Security &amp; Privacy screen: sections -->
-    <string name="security_settings_section_backup">Copia de seguridad del monedero</string>
-    <string name="security_settings_section_recovery">Recuperación del monedero</string>
+    <string name="security_settings_section_backup">Copia de seguridad del cartera</string>
+    <string name="security_settings_section_recovery">Recuperación del cartera</string>
 
     <!-- Security &amp; Privacy screen: backup mnemonic row -->
     <string name="security_settings_backup_mnemonic_title">Copia de seguridad de la frase semilla</string>
     <string name="security_settings_backup_mnemonic_subtitle">Ver tu frase semilla de 12 palabras</string>
 
     <!-- Security &amp; Privacy screen: restore wallet row -->
-    <string name="security_settings_restore_wallet_title">Restaurar monedero</string>
-    <string name="security_settings_restore_wallet_subtitle">Recuperar desde una frase semilla</string>
+    <string name="security_settings_restore_wallet_title">Restaurar cartera</string>
+    <string name="security_settings_restore_wallet_subtitle">Recupera con una frase semilla</string>
 
     <!-- Security &amp; Privacy screen: PIN protection section -->
     <string name="security_settings_section_pin_protection">Protección con PIN</string>

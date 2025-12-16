@@ -43,7 +43,7 @@
 
     <!-- Settings items: security -->
     <string name="settings_item_security_title">Seguridad y privacidad</string>
-    <string name="settings_item_security_subtitle">Copia de la frase semilla, restaurar monedero</string>
+    <string name="settings_item_security_subtitle">Copia de la frase semilla, restaurar cartera</string>
 
     <!-- Settings items: developer -->
     <string name="settings_item_developer_title">Opciones de desarrollo</string>
