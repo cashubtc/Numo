@@ -8,7 +8,6 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -24,6 +23,7 @@ import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.nostr.NostrMintBackup
+import com.electricdreams.numo.ui.seed.SeedWordEditText
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -97,7 +97,7 @@ class RestoreWalletActivity : AppCompatActivity() {
     private lateinit var doneButton: MaterialButton
 
     // === Data ===
-    private val seedInputs = mutableListOf<EditText>()
+    private val seedInputs = mutableListOf<SeedWordEditText>()
     private val mintProgressViews = mutableMapOf<String, View>()
 
     // Mints discovered from backup + existing configured mints
@@ -193,7 +193,7 @@ class RestoreWalletActivity : AppCompatActivity() {
             gravity = android.view.Gravity.CENTER
         }
 
-        val input = EditText(this).apply {
+        val input = SeedWordEditText(this).apply {
             hint = ""
             setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
             setHintTextColor(ContextCompat.getColor(context, R.color.color_text_tertiary))
@@ -222,6 +222,13 @@ class RestoreWalletActivity : AppCompatActivity() {
                     context,
                     if (hasFocus) R.drawable.bg_seed_input_focused else R.drawable.bg_seed_input
                 )
+            }
+
+            // Allow pasting an entire seed phrase into a single cell. When
+            // multi-word text is detected, distribute it across all 12
+            // fields (or show a toast if we cannot).
+            onSeedPasteListener = { pastedText ->
+                handleSeedPhrasePaste(pastedText)
             }
         }
 
@@ -325,22 +332,43 @@ class RestoreWalletActivity : AppCompatActivity() {
         }
 
         val pastedText = clipData.getItemAt(0).text?.toString()?.trim() ?: ""
-        val words = pastedText.split("\\s+".toRegex()).filter { it.isNotBlank() }
+        handleSeedPhrasePaste(pastedText)
+    }
 
+    /**
+     * Handle a seed phrase paste operation.
+     *
+     * This method is shared by both the dedicated "Paste from Clipboard"
+     * button and direct pastes into individual seed word fields.
+     *
+     * @param pastedText Raw text from the clipboard.
+     * @return `true` if the paste was handled and default insertion should be
+     * suppressed, `false` otherwise.
+     */
+    private fun handleSeedPhrasePaste(pastedText: String): Boolean {
+        val words = pastedText
+            .split("\\s+".toRegex())
+            .filter { it.isNotBlank() }
+
+        // We only support full 12-word phrases. If the clipboard content
+        // cannot be mapped cleanly, show a friendly error and leave the
+        // existing input unchanged.
         if (words.size != 12) {
-            Toast.makeText(this, getString(R.string.restore_error_failed), Toast.LENGTH_LONG).show()
-            return
+            Toast.makeText(this, getString(R.string.onboarding_seed_paste_invalid), Toast.LENGTH_LONG).show()
+            return true
         }
 
-        // Fill all inputs
+        // Distribute all 12 words across the grid, regardless of which
+        // individual cell triggered the paste.
         words.forEachIndexed { index, word ->
             if (index < seedInputs.size) {
-                seedInputs[index].setText(word.lowercase())
+                seedInputs[index].setText(word.lowercase(Locale.getDefault()))
             }
         }
 
         validateInputs()
         Toast.makeText(this, getString(R.string.onboarding_seed_paste_success), Toast.LENGTH_SHORT).show()
+        return true
     }
 
     private fun validateInputs(): Boolean {
