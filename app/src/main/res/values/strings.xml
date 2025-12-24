@@ -11,21 +11,6 @@
     <!-- QR-based PaymentRequest -->
     <string name="payment_request_qr_description">Cashu payment request QR code</string>
 
-    <!-- Balance check -->
-    <string name="balance_check_toolbar_back">Back</string>
-    <string name="balance_check_actionbar_title">NFC Balance Check</string>
-    <string name="balance_check_title">Check Balance</string>
-    <string name="balance_check_cta_tap_card">Tap Card</string>
-    <string name="balance_check_instructions">Hold your NFC card near the back of the device to check balance</string>
-    <string name="balance_check_card_info_tap_card">Tap your NFC card to check balance</string>
-    <string name="balance_check_status_balance">Balance: %1$s</string>
-    <string name="balance_check_status_error">Error: %1$s</string>
-    <string name="balance_check_info_no_proofs">Card has no proofs</string>
-    <string name="balance_check_info_no_state_data">No proof state data available</string>
-    <string name="balance_check_info_inconsistent_proofs">Proof data inconsistent</string>
-    <string name="balance_check_error_card_does_not_support_isodep">Card does not support IsoDep</string>
-    <string name="balance_check_error_invalid_nfc_tag">Invalid NFC tag</string>
-
     <!-- Tips settings -->
     <string name="tips_settings_toolbar_back">Back</string>
     <string name="tips_settings_title">Tips</string>
@@ -220,6 +205,7 @@
     <string name="restore_success_done_button">Done</string>
 
     <string name="restore_error_failed">Restore failed: %1$s</string>
+    <string name="restore_error_no_mints_selected">Please select at least one mint to restore.</string>
 
     <!-- Seed Phrase screen -->
     <string name="seed_phrase_toolbar_back">Back</string>

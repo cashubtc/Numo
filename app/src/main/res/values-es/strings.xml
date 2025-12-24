@@ -1,20 +1,6 @@
 <resources>
     <string name="app_name">Numo</string>
-
-    <!-- Balance check -->
-    <string name="balance_check_toolbar_back">Atrás</string>
-    <string name="balance_check_actionbar_title">Comprobar saldo NFC</string>
-    <string name="balance_check_title">Ver saldo</string>
-    <string name="balance_check_cta_tap_card">Acerca la tarjeta</string>
-    <string name="balance_check_instructions">Acerca tu tarjeta NFC a la parte trasera del dispositivo para ver el saldo</string>
-    <string name="balance_check_card_info_tap_card">Acerca tu tarjeta NFC para ver el saldo</string>
-    <string name="balance_check_status_balance">Saldo: %1$s</string>
-    <string name="balance_check_status_error">Error: %1$s</string>
-    <string name="balance_check_info_no_proofs">La tarjeta no tiene pruebas</string>
-    <string name="balance_check_info_no_state_data">No hay datos de estado de pruebas disponibles</string>
-    <string name="balance_check_info_inconsistent_proofs">Los datos de pruebas son inconsistentes</string>
-    <string name="balance_check_error_card_does_not_support_isodep">La tarjeta no admite IsoDep</string>
-    <string name="balance_check_error_invalid_nfc_tag">Etiqueta NFC no válida</string>
+    
 
     <!-- Tips settings -->
     <string name="tips_settings_toolbar_back">Atrás</string>

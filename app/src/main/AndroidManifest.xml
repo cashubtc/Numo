@@ -92,24 +92,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.electricdreams.numo.ModernPOSActivity" />
         </activity>
-
-        <activity android:name=".BalanceCheckActivity"
-            android:exported="false"
-            android:label="Check Balance"
-            android:theme="@style/Theme.Numo"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".ModernPOSActivity" >
-            <!-- Parent meta-data for up navigation -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ModernPOSActivity" />
-            <!-- NFC intent filters -->
-            <intent-filter>
-                <action android:name="android.nfc.action.TECH_DISCOVERED" />
-            </intent-filter>
-            <meta-data android:name="android.nfc.action.TECH_DISCOVERED"
-                android:resource="@xml/nfc_tech_filter" />
-        </activity>
         
         <activity android:name="com.electricdreams.numo.feature.history.PaymentsHistoryActivity"
             android:exported="false"

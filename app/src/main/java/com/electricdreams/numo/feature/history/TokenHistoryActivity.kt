@@ -31,14 +31,6 @@ class TokenHistoryActivity : AppCompatActivity() {
         // Edge-to-edge so token history list runs behind the nav pill as well
         enableEdgeToEdgeWithPill(this, lightNavIcons = true)
 
-        // Setup toolbar
-        val toolbar: Toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true)
-            title = getString(R.string.token_history_toolbar_title)
-        }
-
         val recyclerView: RecyclerView = findViewById(R.id.history_recycler_view)
         emptyView = findViewById(R.id.empty_view)
 

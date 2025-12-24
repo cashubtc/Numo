@@ -1,6 +1,7 @@
 package com.electricdreams.numo
 import com.electricdreams.numo.R
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
@@ -27,7 +28,6 @@ import com.electricdreams.numo.ui.components.PosUiCoordinator
 
 class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback, AutoWithdrawProgressListener {
 
-    private var nfcAdapter: android.nfc.NfcAdapter? = null
     private var bitcoinPriceWorker: BitcoinPriceWorker? = null
     private var vibrator: Vibrator? = null
 
@@ -55,6 +55,9 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback,
         CashuWalletManager.init(this)
         setContentView(R.layout.activity_modern_pos)
 
+        // Initialize vibrator for haptic feedback used in auto-withdraw UI
+        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator?
+
         val paymentAmount = intent.getLongExtra("EXTRA_PAYMENT_AMOUNT", 0L)
         Log.d(TAG, "Created ModernPOSActivity with payment amount from basket: $paymentAmount")
 
@@ -63,9 +66,6 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback,
         
         // Setup Bitcoin price worker
         setupBitcoinPriceWorker()
-        
-        // Setup NFC
-        setupNfcAdapter()
 
         // Initialize UI coordinator which handles all UI logic
         uiCoordinator = PosUiCoordinator(this, bitcoinPriceWorker)
@@ -124,11 +124,6 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback,
         }
     }
 
-    private fun setupNfcAdapter() {
-        nfcAdapter = android.nfc.NfcAdapter.getDefaultAdapter(this)
-        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator?
-    }
-
     private fun setupAutoWithdrawProgress() {
         autoWithdrawManager = AutoWithdrawManager.getInstance(this)
         autoWithdrawManager.setProgressListener(this)
@@ -169,19 +164,10 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback,
         
         // Refresh display to update currency formatting when returning from settings
         uiCoordinator.refreshDisplay()
-        
-        nfcAdapter?.let { adapter ->
-            val pendingIntent = PendingIntent.getActivity(
-                this, 0, Intent(this, javaClass).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), PendingIntent.FLAG_MUTABLE,
-            )
-            val techList = arrayOf(arrayOf(android.nfc.tech.IsoDep::class.java.name))
-            adapter.enableForegroundDispatch(this, pendingIntent, null, techList)
-        }
     }
 
     override fun onPause() {
         super.onPause()
-        nfcAdapter?.disableForegroundDispatch(this)
     }
 
     override fun onDestroy() {
@@ -194,17 +180,6 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback,
         super.onConfigurationChanged(newConfig)
         // Dialog layout handled by managers
     }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        if (android.nfc.NfcAdapter.ACTION_TECH_DISCOVERED == intent.action) {
-            val tag: android.nfc.Tag? = intent.getParcelableExtra(android.nfc.NfcAdapter.EXTRA_TAG)
-            if (tag != null) {
-                uiCoordinator.handleNfcPayment(tag)
-            }
-        }
-    }
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PaymentMethodHandler.REQUEST_CODE_PAYMENT) {
@@ -226,7 +201,6 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback,
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean = when (item.itemId) {
-        R.id.action_balance_check -> { startActivity(Intent(this, BalanceCheckActivity::class.java)); true }
         R.id.action_history -> { startActivity(Intent(this, PaymentsHistoryActivity::class.java)); true }
         else -> super.onOptionsItemSelected(item)
     }

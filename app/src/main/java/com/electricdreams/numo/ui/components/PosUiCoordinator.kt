@@ -281,13 +281,7 @@ class PosUiCoordinator(
         val popup = androidx.appcompat.widget.PopupMenu(activity, anchor)
         popup.menuInflater.inflate(R.menu.overflow_menu, popup.menu)
         popup.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_overflow_balance_check -> { 
-                    activity.startActivity(Intent(activity, com.electricdreams.numo.BalanceCheckActivity::class.java))
-                    true 
-                }
-                else -> false
-            }
+            false
         }
         popup.show()
     }
