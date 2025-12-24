@@ -74,42 +74,40 @@ object MintIconCache {
                 .get()
                 .build()
             
-            val response = client.newCall(request).execute()
-            
-            if (!response.isSuccessful) {
-                Log.w(TAG, "Failed to download icon: HTTP ${response.code}")
-                response.close()
-                return@withContext null
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    Log.w(TAG, "Failed to download icon: HTTP ${response.code}")
+                    return@withContext null
+                }
+                
+                val bytes = response.body?.bytes()
+
+                if (bytes == null || bytes.isEmpty()) {
+                    Log.w(TAG, "Empty response when downloading icon")
+                    return@withContext null
+                }
+
+                // Decode to bitmap to validate it's a valid image
+                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                if (bitmap == null) {
+                    Log.w(TAG, "Failed to decode icon as bitmap")
+                    return@withContext null
+                }
+
+                // Save to cache
+                val fileName = getIconFileName(mintUrl)
+                val file = File(cacheDir, fileName)
+
+                FileOutputStream(file).use { out ->
+                    // Save as PNG for consistent format
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+                }
+                
+                bitmap.recycle()
+                
+                Log.d(TAG, "Successfully cached icon for $mintUrl at ${file.absolutePath}")
+                return@withContext file
             }
-            
-            val bytes = response.body?.bytes()
-            response.close()
-            
-            if (bytes == null || bytes.isEmpty()) {
-                Log.w(TAG, "Empty response when downloading icon")
-                return@withContext null
-            }
-            
-            // Decode to bitmap to validate it's a valid image
-            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-            if (bitmap == null) {
-                Log.w(TAG, "Failed to decode icon as bitmap")
-                return@withContext null
-            }
-            
-            // Save to cache
-            val fileName = getIconFileName(mintUrl)
-            val file = File(cacheDir, fileName)
-            
-            FileOutputStream(file).use { out ->
-                // Save as PNG for consistent format
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-            }
-            
-            bitmap.recycle()
-            
-            Log.d(TAG, "Successfully cached icon for $mintUrl at ${file.absolutePath}")
-            return@withContext file
             
         } catch (e: Exception) {
             Log.e(TAG, "Error downloading/caching icon for $mintUrl: ${e.message}", e)
