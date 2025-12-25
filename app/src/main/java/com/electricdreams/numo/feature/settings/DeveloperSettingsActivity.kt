@@ -20,6 +20,10 @@ class DeveloperSettingsActivity : AppCompatActivity() {
         findViewById<View>(R.id.restart_onboarding_item).setOnClickListener {
             showRestartOnboardingDialog()
         }
+
+        findViewById<View>(R.id.error_logs_item).setOnClickListener {
+            startActivity(Intent(this, ErrorLogsActivity::class.java))
+        }
     }
 
     private fun showRestartOnboardingDialog() {

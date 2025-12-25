@@ -2,8 +2,7 @@ package com.electricdreams.numo
 
 import android.app.Application
 import android.util.Log
-import com.electricdreams.numo.core.cashu.CashuWalletManager
-import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.dev.ErrorLogCollector
 
 /**
  * Custom Application class for global initialisation.
@@ -17,5 +16,12 @@ class NumoApplication : Application() {
         AppGlobals.init(this)
         // Wallet initialisation is handled by onboarding / ModernPOS flows.
         Log.d("NumoApplication", "Application initialised")
+
+        // Start developer error log collection in debug builds so the
+        // Developer Settings > Error Logs screen can show recent errors
+        // without modifying existing Log.e() sites.
+        if (BuildConfig.DEBUG) {
+            ErrorLogCollector.start()
+        }
     }
 }
