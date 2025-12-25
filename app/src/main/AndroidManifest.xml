@@ -253,7 +253,18 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
         </activity>
-        
+
+        <activity android:name="com.electricdreams.numo.feature.settings.ErrorLogsActivity"
+            android:exported="false"
+            android:label="@string/developer_error_logs_title"
+            android:theme="@style/Theme.Numo"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.settings.DeveloperSettingsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.settings.DeveloperSettingsActivity" />
+        </activity>
+
         <activity android:name="com.electricdreams.numo.feature.settings.SeedPhraseActivity"
             android:exported="false"
             android:label="@string/seed_phrase_toolbar_title"

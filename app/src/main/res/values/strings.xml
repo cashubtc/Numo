@@ -236,6 +236,18 @@
     <string name="developer_settings_restart_onboarding_subtitle">Start the onboarding flow again</string>
     <string name="developer_settings_warning">⚠️ Developer settings are for testing and debugging purposes only. Use with caution.</string>
 
+    <!-- Developer - Error Logs -->
+    <string name="developer_error_logs_title">Error Logs</string>
+    <string name="developer_error_logs_subtitle">View and export recent error logs</string>
+    <string name="developer_error_logs_section_title">ERROR LOGS</string>
+    <string name="developer_error_logs_filter_label">Show errors up to</string>
+    <string name="developer_error_logs_filter_today">Today</string>
+    <string name="developer_error_logs_copy_all">Copy All</string>
+    <string name="developer_error_logs_share">Share</string>
+    <string name="developer_error_logs_empty">No error logs available.</string>
+    <string name="developer_error_logs_copied">Error logs copied to clipboard</string>
+    <string name="developer_error_logs_share_title">Share Error Logs</string>
+
     <!-- NFC dialogs -->
     <string name="nfc_dialog_title_scan_to_pay">Scan to Pay</string>
     <string name="nfc_dialog_content_description_contactless">Contactless payment</string>
@@ -781,4 +793,10 @@
     <string name="mint_details_version_value">Version: %1$s</string>
     <string name="mint_details_software_unknown">Software: Unknown</string>
     <string name="mint_details_version_unknown">Version: Unknown</string>
+
+    <!-- Developer - Error Logs entry details -->
+    <string name="developer_error_logs_entry_details_title">Error Details</string>
+    <string name="developer_error_logs_entry_copy">Copy Entry</string>
+    <string name="developer_error_logs_clear_dialog_title">Clear Error Logs</string>
+    <string name="developer_error_logs_clear_dialog_message">Clear all stored error logs? This cannot be undone.</string>
 </resources>
