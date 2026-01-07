@@ -1,21 +1,24 @@
 name: Android CI with Coverage
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    types: [opened, synchronize, reopened]
+  workflow_run:
+    workflows: ["Android unit tests"]
+    types:
+      - completed
 
 jobs:
-  build:
+  report-coverage:
 
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.workflow_run.head_sha }}
     
     - name: set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -28,7 +31,7 @@ jobs:
       run: ./gradlew jacocoTestReport
 
     - name: Upload Coverage Report
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: coverage-report
         path: app/build/reports/jacoco/jacocoTestReport/html/
