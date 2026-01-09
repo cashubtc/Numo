@@ -5,6 +5,7 @@ import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -41,8 +42,16 @@ import kotlin.coroutines.resumeWithException
 class LightningMintHandler(
     private val preferredMint: String?,
     private val allowedMints: List<String>,
-    private val uiScope: CoroutineScope
+    private val uiScope: CoroutineScope,
+    // Allows injecting a mock dispatcher for testing
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
+    // Secondary constructor to maintain compatibility
+    constructor(
+        preferredMint: String?,
+        allowedMints: List<String>,
+        uiScope: CoroutineScope
+    ) : this(preferredMint, allowedMints, uiScope, Dispatchers.IO)
     /**
      * Callback interface for Lightning mint events.
      */
@@ -70,7 +79,7 @@ class LightningMintHandler(
             .readTimeout(0, TimeUnit.MILLISECONDS) // no timeout, rely on WS pings
             .build()
     }
-
+    
     /** The current mint quote, if any */
     val currentQuote: MintQuote? get() = mintQuote
 
@@ -130,7 +139,7 @@ class LightningMintHandler(
         mintCalled.set(false)
 
         mintJob?.cancel()
-        mintJob = uiScope.launch(Dispatchers.IO) {
+        mintJob = uiScope.launch(ioDispatcher) {
             try {
                 // CDK Amount is in minor units of wallet's CurrencyUnit (we constructed wallet in sats)
                 val quoteAmount = CdkAmount(paymentAmount.toULong())
