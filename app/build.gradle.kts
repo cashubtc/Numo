@@ -135,6 +135,13 @@ dependencies {
     implementation("com.google.android.flexbox:flexbox:3.0.0")
 }
 
+tasks.withType<Test>().configureEach {
+    configure<org.gradle.testing.jacoco.plugins.JacocoTaskExtension> {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
 tasks.register<JacocoReport>("jacocoTestReport") {
     dependsOn("testDebugUnitTest")
 
