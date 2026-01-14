@@ -74,15 +74,23 @@ object CashuWalletManager : MintManager.MintChangeListener {
      * Restore wallet with a new mnemonic.
      * This will replace the current wallet with one derived from the provided seed phrase.
      * @param newMnemonic The 12-word seed phrase to restore from
+     * @param context Optional context to initialize the manager if not already initialized
      * @param onMintProgress Callback for progress updates: (mintUrl, status, balanceBefore, balanceAfter)
      * @return Map of mint URLs to their balance changes (newBalance - oldBalance)
      */
     suspend fun restoreFromMnemonic(
         newMnemonic: String,
+        context: Context? = null,
         onMintProgress: suspend (mintUrl: String, status: String, balanceBefore: Long, balanceAfter: Long) -> Unit
     ): Map<String, Pair<Long, Long>> {
         if (!this::appContext.isInitialized) {
-            throw IllegalStateException("CashuWalletManager not initialized")
+            if (context != null) {
+                appContext = context.applicationContext
+                val mintManager = MintManager.getInstance(appContext)
+                mintManager.setMintChangeListener(this)
+            } else {
+                throw IllegalStateException("CashuWalletManager not initialized")
+            }
         }
 
         val mintManager = MintManager.getInstance(appContext)
