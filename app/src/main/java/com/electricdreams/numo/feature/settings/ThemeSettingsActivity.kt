@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SwitchCompat
 import com.electricdreams.numo.R
+import com.electricdreams.numo.core.prefs.PreferenceStore
 
 class ThemeSettingsActivity : AppCompatActivity() {
 
@@ -17,7 +18,6 @@ class ThemeSettingsActivity : AppCompatActivity() {
         const val THEME_BITCOIN_ORANGE = "bitcoin_orange"
         const val THEME_GREEN = "green"
         const val THEME_WHITE = "white"
-        private const val PREFS_NAME = "NumoPrefs"
         private const val KEY_DARK_MODE = "darkMode"
     }
 
@@ -36,12 +36,12 @@ class ThemeSettingsActivity : AppCompatActivity() {
 
         // Initialize dark mode switch
         darkModeSwitch = findViewById(R.id.dark_mode_switch)
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val prefs = PreferenceStore.app(this)
         val isDarkMode = prefs.getBoolean(KEY_DARK_MODE, false)
         darkModeSwitch.isChecked = isDarkMode
 
         darkModeSwitch.setOnCheckedChangeListener { _, isChecked ->
-            prefs.edit().putBoolean(KEY_DARK_MODE, isChecked).apply()
+            prefs.putBoolean(KEY_DARK_MODE, isChecked)
             AppCompatDelegate.setDefaultNightMode(
                 if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO
             )
@@ -63,7 +63,7 @@ class ThemeSettingsActivity : AppCompatActivity() {
     }
 
     private fun getCurrentTheme(): String {
-        return getSharedPreferences("app_prefs", MODE_PRIVATE)
+        return PreferenceStore.app(this)
             .getString(PREF_THEME, THEME_GREEN) ?: THEME_GREEN
     }
 
@@ -88,10 +88,7 @@ class ThemeSettingsActivity : AppCompatActivity() {
     }
 
     private fun saveTheme(theme: String) {
-        getSharedPreferences("app_prefs", MODE_PRIVATE)
-            .edit()
-            .putString(PREF_THEME, theme)
-            .apply()
+        PreferenceStore.app(this).putString(PREF_THEME, theme)
     }
 }
 
