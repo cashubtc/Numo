@@ -39,6 +39,7 @@ import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.ModernPOSActivity
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.nostr.NostrMintBackup
 import com.google.android.material.button.MaterialButton
@@ -674,8 +675,7 @@ class OnboardingActivity : AppCompatActivity() {
                 val mnemonic = generatedMnemonic ?: throw IllegalStateException("No mnemonic generated")
 
                 // Initialize CashuWalletManager with the generated mnemonic
-                val prefs = getSharedPreferences("CashuWalletPrefs", Context.MODE_PRIVATE)
-                prefs.edit().putString("wallet_mnemonic", mnemonic).apply()
+                PreferenceStore.wallet(this@OnboardingActivity).putString("wallet_mnemonic", mnemonic)
 
                 withContext(Dispatchers.Main) {
                     generatingStatus.text = getString(R.string.onboarding_status_connecting_mints)

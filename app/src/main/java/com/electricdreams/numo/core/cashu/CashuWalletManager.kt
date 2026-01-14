@@ -30,7 +30,6 @@ import org.cashudevkit.generateMnemonic
 object CashuWalletManager : MintManager.MintChangeListener {
 
     private const val TAG = "CashuWalletManager"
-    private const val PREFS_NAME = "CashuWalletPrefs"
     private const val KEY_MNEMONIC = "wallet_mnemonic"
     private const val DB_FILE_NAME = "cashu_wallet.db"
 
