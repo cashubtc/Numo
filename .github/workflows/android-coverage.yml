@@ -30,6 +30,22 @@ jobs:
     - name: Run Unit Tests with Coverage
       run: ./gradlew jacocoTestReport
 
+    - name: Generate JaCoCo Badge
+      uses: cicirello/jacoco-badge-generator@v2
+      with:
+        jacoco-csv-file: app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.csv
+        badges-directory: badges
+        generate-branches-badge: true
+        generate-summary: true
+
+    - name: Push Badge to Branch
+      if: github.event.workflow_run.head_branch == 'main'
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: badges
+        folder: badges
+        clean: false
+
     - name: Upload Coverage Report
       uses: actions/upload-artifact@v4
       with:

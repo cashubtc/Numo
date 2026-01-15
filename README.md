@@ -1,5 +1,7 @@
 # Numo 🥜⚡
 
+![Coverage](https://raw.githubusercontent.com/cashubtc/Numo/badges/jacoco.svg)
+
 Numo is an Android Point-of-Sale application that enables merchants to receive Cashu ecash payments via tap-2-pay.
 
 > [!WARNING]
