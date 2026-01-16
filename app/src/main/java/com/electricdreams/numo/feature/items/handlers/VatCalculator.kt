@@ -79,12 +79,12 @@ object VatCalculator {
         if (priceIncludesVat) {
             // Entered price is gross (includes VAT) - need to calculate net
             grossSats = enteredSats
-            netSats = Item.calculateNetFromGross(grossSats.toDouble(), vatRate.toDouble()).toLong()
+            netSats = kotlin.math.round(Item.calculateNetFromGross(grossSats.toDouble(), vatRate.toDouble())).toLong()
             vatSats = grossSats - netSats
         } else {
             // Entered price is net (excludes VAT) - need to calculate gross
             netSats = enteredSats
-            grossSats = Item.calculateGrossFromNet(netSats.toDouble(), vatRate.toDouble()).toLong()
+            grossSats = kotlin.math.round(Item.calculateGrossFromNet(netSats.toDouble(), vatRate.toDouble())).toLong()
             vatSats = grossSats - netSats
         }
 
