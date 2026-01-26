@@ -102,4 +102,8 @@
     <color name="empty_state_button_secondary_text">#6F6F73</color>
     <color name="empty_state_button_secondary_border">#4D6F6F73</color>
     <color name="empty_state_close_icon">#000000</color>
+
+    <!-- Button Colors (extracted from bg_button_primary_green.xml) -->
+    <color name="color_button_primary_pressed">#1A2529</color>
+    <color name="color_button_primary_disabled">#33000000</color>
 </resources>

@@ -52,4 +52,8 @@
     <color name="empty_state_button_secondary_text">#9B9B9F</color>
     <color name="empty_state_button_secondary_border">#4D9B9B9F</color>
     <color name="empty_state_close_icon">#FFFFFF</color>
+
+    <!-- Button Colors (Dark Mode) -->
+    <color name="color_button_primary_pressed">#E0E0E0</color>
+    <color name="color_button_primary_disabled">#33FFFFFF</color>
 </resources>

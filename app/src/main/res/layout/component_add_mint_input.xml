@@ -135,7 +135,7 @@
                         android:background="@drawable/bg_button_primary_green"
                         android:gravity="center"
                         android:text="@string/mints_add_button"
-                        android:textColor="@android:color/white"
+                        android:textColor="@color/color_bg_white"
                         android:textSize="15sp"
                         android:fontFamily="sans-serif-medium"
                         android:enabled="false"

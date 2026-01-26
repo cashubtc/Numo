@@ -93,7 +93,7 @@ class ThemeManager(
         // Special button handling for different themes
         when (theme) {
             "white" -> {
-                submitButton.setBackgroundResource(R.drawable.bg_button_primary_green)
+                submitButton.setBackgroundResource(R.drawable.bg_button_black)
                 submitButton.setTextColor(android.graphics.Color.WHITE)
             }
             "obsidian" -> {
