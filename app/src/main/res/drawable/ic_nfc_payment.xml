@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- NFC payment icon - contactless payment symbol -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    
+    <!-- Central device/card point -->
+    <path
+        android:fillColor="#111111"
+        android:pathData="M12 10.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
+    
+    <!-- Inner wave -->
+    <path
+        android:fillColor="#111111"
+        android:pathData="M8.46 15.54a1 1 0 0 1-0.71-1.71 4.24 4.24 0 0 1 6 0 1 1 0 0 1-1.42 1.42 2.24 2.24 0 0 0-3.16 0 1 1 0 0 1-0.71 0.29z" />
+    <path
+        android:fillColor="#111111"
+        android:pathData="M15.54 15.54a1 1 0 0 1-0.71-0.29 2.24 2.24 0 0 0-3.16 0 1 1 0 0 1-1.42-1.42 4.24 4.24 0 0 1 6 0 1 1 0 0 1-0.71 1.71z" />
+    
+    <!-- Middle wave -->
+    <path
+        android:fillColor="#111111"
+        android:pathData="M6.34 17.66a1 1 0 0 1-0.71-0.29 1 1 0 0 1 0-1.42 7.07 7.07 0 0 1 10 0 1 1 0 0 1-1.42 1.42 5.07 5.07 0 0 0-7.16 0 1 1 0 0 1-0.71 0.29z" />
+    <path
+        android:fillColor="#111111"
+        android:pathData="M17.66 17.66a1 1 0 0 1-0.71-0.29 5.07 5.07 0 0 0-7.16 0 1 1 0 0 1-1.42-1.42 7.07 7.07 0 0 1 10 0 1 1 0 0 1 0 1.42 1 1 0 0 1-0.71 0.29z" />
+    
+    <!-- Outer wave -->
+    <path
+        android:fillColor="#111111"
+        android:pathData="M4.22 19.78a1 1 0 0 1-0.71-0.29 1 1 0 0 1 0-1.42 10 10 0 0 1 14.14 0 1 1 0 0 1-1.42 1.42 8 8 0 0 0-11.3 0 1 1 0 0 1-0.71 0.29z" />
+    <path
+        android:fillColor="#111111"
+        android:pathData="M19.78 19.78a1 1 0 0 1-0.71-0.29 8 8 0 0 0-11.3 0 1 1 0 0 1-1.42-1.42 10 10 0 0 1 14.14 0 1 1 0 0 1 0 1.42 1 1 0 0 1-0.71 0.29z" />
+    
+</vector>
+
+

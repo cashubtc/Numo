@@ -61,6 +61,7 @@
     <string name="payment_request_pay_label">Pay</string>
     <string name="payment_request_instruction_scan_or_tap">Scan or Tap to Pay</string>
     <string name="payment_request_nfc_reading">Reading from NFC...</string>
+    <string name="payment_request_animation_close">Done</string>
 
     <string name="payment_request_error_invalid_amount">Invalid payment amount</string>
     <string name="payment_request_error_ndef_prepare">Failed to prepare NDEF payment data</string>

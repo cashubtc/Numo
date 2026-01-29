@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NFC Payment Animation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html, body {
+            background: transparent;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        .container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .shape {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #f7931a 0%, #ffab40 100%);
+            border-radius: 50%;
+            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 
+                0 0 60px rgba(247, 147, 26, 0.4),
+                0 0 100px rgba(247, 147, 26, 0.2);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .icon {
+            position: relative;
+            z-index: 10;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Simple, clean loading spinner */
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #FFFFFF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .check-circle {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background: #FFFFFF;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        opacity 0.3s ease;
+            z-index: 20;
+        }
+        
+        .check-mark {
+            width: 60px;
+            height: 60px;
+            opacity: 0;
+            transform: scale(0);
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s,
+                        opacity 0.3s ease 0.2s;
+        }
+        
+        .check-mark svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .check-mark path {
+            fill: #22c55e;
+        }
+        
+        .error-x {
+            position: absolute;
+            font-size: 100px;
+            color: #FFFFFF;
+            opacity: 0;
+            transform: scale(0);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        opacity 0.3s ease;
+            font-weight: 300;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 
+                    0 0 60px rgba(247, 147, 26, 0.4),
+                    0 0 100px rgba(247, 147, 26, 0.2);
+            }
+            50% { 
+                transform: scale(1.08);
+                box-shadow: 
+                    0 0 80px rgba(247, 147, 26, 0.6),
+                    0 0 120px rgba(247, 147, 26, 0.3);
+            }
+        }
+        
+        /* Blob morph only animates border-radius to avoid transform conflicts */
+        @keyframes blobMorph {
+            0%, 100% { 
+                border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            }
+            25% { 
+                border-radius: 70% 30% 50% 50% / 30% 30% 70% 70%;
+            }
+            50% { 
+                border-radius: 50% 60% 30% 60% / 70% 40% 50% 40%;
+            }
+            75% { 
+                border-radius: 30% 50% 70% 40% / 50% 60% 30% 60%;
+            }
+        }
+        
+        .status {
+            position: absolute;
+            bottom: 20%;
+            color: rgba(255,255,255,0.9);
+            font-size: 32px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: opacity 0.5s ease;
+        }
+        
+        .result-amount {
+            position: absolute;
+            top: 50%;
+            margin-top: -180px;
+            color: #FFFFFF;
+            font-size: 48px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: transform 0.5s ease 0.3s,
+                        opacity 0.5s ease 0.3s;
+            text-align: center;
+        }
+        
+        .result-label {
+            position: absolute;
+            top: 50%;
+            margin-top: -120px;
+            color: rgba(255,255,255,0.9);
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: transform 0.5s ease 0.4s,
+                        opacity 0.5s ease 0.4s;
+            text-align: center;
+        }
+        
+        /* Phase 1: Expanding */
+        .container.expanding .shape {
+            width: 200px;
+            height: 200px;
+            animation: none;
+        }
+        
+        .container.expanding .spinner {
+            opacity: 1;
+        }
+        
+        .container.expanding .status {
+            opacity: 0;
+        }
+        
+        /* Phase 2: Morphing to rounded square */
+        .container.morphing .shape {
+            width: 300px;
+            height: 300px;
+            border-radius: 30%;
+            transform: rotate(45deg);
+            animation: none;
+        }
+        
+        .container.morphing .spinner {
+            opacity: 1;
+        }
+        
+        /* Phase 3: Full screen blob with organic morphing */
+        .container.blob .shape {
+            width: 250vmax;
+            height: 250vmax;
+            border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+            animation: blobMorph 3s ease-in-out infinite;
+            /* Let CSS transition handle the rotation from 45deg to 0deg smoothly */
+            transform: rotate(0deg);
+        }
+        
+        .container.blob .spinner {
+            opacity: 1;
+        }
+        
+        /* Phase 4: Success */
+        .container.success .shape {
+            width: 250vmax;
+            height: 250vmax;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22c55e 0%, #4ade80 100%);
+            animation: none;
+            transform: rotate(0deg);
+            box-shadow: 
+                0 0 100px rgba(34, 197, 94, 0.5),
+                0 0 200px rgba(34, 197, 94, 0.3);
+        }
+        
+        .container.success .spinner {
+            opacity: 0;
+        }
+        
+        .container.success .check-circle {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .container.success .check-mark {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .container.success .result-amount {
+            opacity: 1;
+            transform: translateY(0);
+            margin-top: -180px;
+        }
+        
+        .container.success .result-label {
+            opacity: 1;
+            transform: translateY(0);
+            margin-top: -120px;
+        }
+        
+        /* Phase 4 alternate: Error */
+        .container.error .shape {
+            width: 250vmax;
+            height: 250vmax;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+            animation: none;
+            transform: rotate(0deg);
+            box-shadow: 
+                0 0 100px rgba(239, 68, 68, 0.5),
+                0 0 200px rgba(239, 68, 68, 0.3);
+        }
+        
+        .container.error .spinner {
+            opacity: 0;
+        }
+        
+        .container.error .error-x {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .container.error .result-amount {
+            opacity: 0;
+        }
+        
+        .container.error .result-label {
+            opacity: 1;
+            transform: translateY(0);
+            margin-top: 80px;
+            padding: 0 24px;
+            line-height: 1.3;
+        }
+        
+        /* Hidden state - waiting to start */
+        .container.hidden .shape {
+            opacity: 0;
+            transform: scale(0);
+        }
+        
+        .container.hidden .status {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container hidden" id="container">
+        <div class="shape"></div>
+        <div class="icon">
+            <div class="spinner"></div>
+            <div class="check-circle">
+                <div class="check-mark">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M9.86 18a1 1 0 0 1-.73-.32l-4.86-5.17a1 1 0 1 1 1.46-1.37l4.12 4.39 8.41-9.2a1 1 0 1 1 1.48 1.34l-9.14 10a1 1 0 0 1-.73.33z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="error-x">&#x2715;</div>
+        </div>
+        <div class="status" id="status"></div>
+        <div class="result-amount" id="resultAmount"></div>
+        <div class="result-label" id="resultLabel"></div>
+    </div>
+    
+    <script>
+        const container = document.getElementById('container');
+        const status = document.getElementById('status');
+        const resultAmount = document.getElementById('resultAmount');
+        const resultLabel = document.getElementById('resultLabel');
+        
+        const phases = ['expanding', 'morphing', 'blob'];
+        let currentPhase = -1;
+        let isAnimating = false;
+        let pendingResult = null;
+        let phaseTimeout = null;
+        let resultTimeout = null;
+        let animationStartTime = 0;
+        let resultShown = false;
+        
+        const MIN_ANIMATION_TIME = 1200; // Minimum time before showing result
+        const PHASE_DURATION = 600;
+        const RESULT_DELAY = 400;
+        
+        // Clear all pending timeouts
+        function clearTimeouts() {
+            if (phaseTimeout) {
+                clearTimeout(phaseTimeout);
+                phaseTimeout = null;
+            }
+            if (resultTimeout) {
+                clearTimeout(resultTimeout);
+                resultTimeout = null;
+            }
+        }
+        
+        // Called from Android to start the animation
+        function startAnimation() {
+            if (isAnimating) return;
+            
+            clearTimeouts();
+            isAnimating = true;
+            resultShown = false;
+            pendingResult = null;
+            animationStartTime = Date.now();
+            
+            container.classList.remove('hidden', 'success', 'error', ...phases);
+            currentPhase = -1;
+            resultAmount.textContent = '';
+            resultLabel.textContent = '';
+            status.textContent = '';
+            
+            // Use requestAnimationFrame for smoother start
+            requestAnimationFrame(() => {
+                nextPhase();
+            });
+        }
+        
+        function nextPhase() {
+            if (resultShown) return;
+            
+            if (currentPhase >= 0) {
+                container.classList.remove(phases[currentPhase]);
+            }
+            
+            currentPhase++;
+            
+            if (currentPhase < phases.length) {
+                container.classList.add(phases[currentPhase]);
+                
+                // Check if we have a pending result and we're at the blob phase
+                if (pendingResult && currentPhase === phases.length - 1) {
+                    scheduleResult();
+                } else {
+                    phaseTimeout = setTimeout(nextPhase, PHASE_DURATION);
+                }
+            } else if (!pendingResult) {
+                // Stay in blob phase if no result yet
+                currentPhase = phases.length - 1;
+                container.classList.add(phases[currentPhase]);
+            }
+        }
+        
+        function scheduleResult() {
+            if (resultShown) return;
+            
+            clearTimeouts();
+            
+            // Ensure minimum animation time has passed
+            const elapsed = Date.now() - animationStartTime;
+            const delay = Math.max(RESULT_DELAY, MIN_ANIMATION_TIME - elapsed);
+            
+            resultTimeout = setTimeout(() => {
+                if (pendingResult && !resultShown) {
+                    showResult(pendingResult.success, pendingResult.amount, pendingResult.message);
+                }
+            }, delay);
+        }
+        
+        // Called from Android when payment succeeds
+        function showSuccess(amount) {
+            if (resultShown) return;
+            
+            pendingResult = { success: true, amount: amount, message: null };
+            
+            if (!isAnimating) {
+                startAnimation();
+            }
+            
+            // If we're already in blob phase, schedule result
+            if (currentPhase >= phases.length - 1) {
+                scheduleResult();
+            }
+        }
+        
+        // Called from Android when payment fails
+        function showError(message) {
+            if (resultShown) return;
+            
+            pendingResult = { success: false, amount: null, message: message };
+            
+            if (!isAnimating) {
+                startAnimation();
+            }
+            
+            if (currentPhase >= phases.length - 1) {
+                scheduleResult();
+            }
+        }
+        
+        function showResult(success, amount, message) {
+            if (resultShown) return;
+            resultShown = true;
+            
+            clearTimeouts();
+            
+            // Use requestAnimationFrame for smooth transition
+            requestAnimationFrame(() => {
+                container.classList.remove(...phases);
+                status.textContent = '';
+                
+                if (success) {
+                    container.classList.add('success');
+                    resultAmount.textContent = amount;
+                    resultLabel.textContent = 'Payment Received';
+                } else {
+                    container.classList.add('error');
+                    resultAmount.textContent = '';
+                    resultLabel.textContent = message || 'Payment Failed';
+                }
+                
+                // Notify Android that animation is complete
+                setTimeout(() => {
+                    if (window.Android) {
+                        window.Android.onAnimationComplete(success);
+                    }
+                }, 800);
+            });
+        }
+        
+        // Called from Android to reset
+        function reset() {
+            clearTimeouts();
+            container.classList.remove('success', 'error', ...phases);
+            container.classList.add('hidden');
+            currentPhase = -1;
+            isAnimating = false;
+            pendingResult = null;
+            resultShown = false;
+            animationStartTime = 0;
+            status.textContent = '';
+            resultAmount.textContent = '';
+            resultLabel.textContent = '';
+        }
+    </script>
+</body>
+</html>

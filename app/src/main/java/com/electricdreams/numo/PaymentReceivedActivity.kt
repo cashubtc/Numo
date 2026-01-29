@@ -3,6 +3,7 @@ import com.electricdreams.numo.R
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.animation.AnimatorListenerAdapter
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -28,6 +29,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_TOKEN = "extra_token"
         const val EXTRA_AMOUNT = "extra_amount"
+        const val EXTRA_FROM_NFC_ANIMATION = "extra_from_nfc_animation"
         private const val TAG = "PaymentReceivedActivity"
     }
     
@@ -42,6 +44,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
     private var tokenString: String? = null
     private var amount: Long = 0
     private var unit: String = "sat"
+    private var fromNfcAnimation: Boolean = false
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +79,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
         // Get token from intent
         tokenString = intent.getStringExtra(EXTRA_TOKEN)
         amount = intent.getLongExtra(EXTRA_AMOUNT, 0)
+        fromNfcAnimation = intent.getBooleanExtra(EXTRA_FROM_NFC_ANIMATION, false)
         
         // Parse token to extract amount and unit if not provided
         if (amount == 0L && tokenString != null) {
@@ -102,10 +106,19 @@ class PaymentReceivedActivity : AppCompatActivity() {
             finish()
         }
         
-        // Start the checkmark animation after a short delay
-        checkmarkIcon.postDelayed({
-            animateCheckmark()
-        }, 100)
+        if (fromNfcAnimation) {
+            // Start with content hidden so the checkmark can lead the reveal.
+            setContentVisibility(alpha = 0f)
+            animateCheckmark {
+                // After the checkmark, softly reveal the rest of the screen.
+                fadeInContent()
+            }
+        } else {
+            // Start the checkmark animation after a short delay.
+            checkmarkIcon.postDelayed({
+                animateCheckmark()
+            }, 100)
+        }
     }
     
     private fun parseToken(token: String) {
@@ -137,7 +150,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
         amountText.text = getString(R.string.payment_received_amount, formattedAmount)
     }
     
-    private fun animateCheckmark() {
+    private fun animateCheckmark(onComplete: (() -> Unit)? = null) {
         // Simple, elegant success animation
         // 1. Green circle scales in smoothly
         // 2. White checkmark pops in with overshoot
@@ -192,7 +205,35 @@ class PaymentReceivedActivity : AppCompatActivity() {
             circleScaleX, circleScaleY, circleFadeIn,
             iconScaleX, iconScaleY, iconFadeIn
         )
+        animatorSet.addListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: android.animation.Animator) {
+                onComplete?.invoke()
+            }
+        })
         animatorSet.start()
+    }
+
+    /**
+     * Set the alpha for the content parts we want to reveal after the checkmark.
+     */
+    private fun setContentVisibility(alpha: Float) {
+        amountText.alpha = alpha
+        viewDetailsButton.alpha = alpha
+        closeButton.alpha = alpha
+        shareIconButton.alpha = alpha
+        closeIconButton.alpha = alpha
+    }
+
+    /**
+     * Fade in the content after the success icon is shown.
+     */
+    private fun fadeInContent() {
+        val fadeDuration = 280L
+        amountText.animate().alpha(1f).setDuration(fadeDuration).start()
+        viewDetailsButton.animate().alpha(1f).setDuration(fadeDuration).start()
+        closeButton.animate().alpha(1f).setDuration(fadeDuration).start()
+        shareIconButton.animate().alpha(1f).setDuration(fadeDuration).start()
+        closeIconButton.animate().alpha(1f).setDuration(fadeDuration).start()
     }
     
     private fun shareToken() {
