@@ -47,6 +47,14 @@
             </intent-filter>
         </activity>
 
+        <!-- NFC Enable Activity -->
+        <activity
+            android:name=".NfcEnableActivity"
+            android:exported="false"
+            android:label="@string/nfc_enable_title"
+            android:theme="@style/Theme.Numo"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden" />
+
         <!-- Modern POS Activity - Main App -->
         <activity
             android:name="com.electricdreams.numo.ModernPOSActivity"
