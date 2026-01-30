@@ -6,6 +6,7 @@ import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.nfc.NfcManager
 import android.os.Bundle
 import android.os.Vibrator
 import android.util.Log
@@ -159,6 +160,14 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback,
     // Lifecycle methods
     override fun onResume() {
         super.onResume()
+        
+        // Check if NFC is enabled - if not, redirect to enable screen
+        val nfcManager = getSystemService(Context.NFC_SERVICE) as? NfcManager
+        val adapter = nfcManager?.defaultAdapter
+        if (adapter != null && !adapter.isEnabled) {
+            startActivity(Intent(this, NfcEnableActivity::class.java))
+            return
+        }
         
         // Reapply theme when returning from settings
         uiCoordinator.applyTheme()

@@ -254,6 +254,9 @@
     <string name="nfc_dialog_content_description_cashu">Cashu</string>
     <string name="nfc_dialog_subtitle_or_scan_qr">or scan QR code</string>
     <string name="nfc_dialog_waiting_message">Waiting for NFC...</string>
+    <string name="nfc_enable_title">Enable NFC</string>
+    <string name="nfc_enable_message">NFC is required for tap to pay. Please enable it in settings.</string>
+    <string name="nfc_enable_button">Settings</string>
     <string name="common_cancel">Cancel</string>
 
     <!-- Common PIN dialog -->
