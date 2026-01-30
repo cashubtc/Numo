@@ -125,8 +125,6 @@ class PaymentRequestActivity : AppCompatActivity() {
     
     // NFC Animation state
     private var webViewReady = false
-    private var nfcAnimationTimeoutRunnable: Runnable? = null
-    private val nfcTimeoutHandler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -698,9 +696,6 @@ class PaymentRequestActivity : AppCompatActivity() {
      */
     private fun runNfcSuccessAnimation(onComplete: () -> Unit) {
         if (nfcAnimationContainer.visibility == View.VISIBLE) {
-            // Cancel the safety timeout
-            cancelNfcSafetyTimeout()
-            
             // Store the completion callback for after animation
             // The onComplete will be called from AnimationBridge.onAnimationComplete
             pendingNfcSuccessToken = ""  // Mark that we have a pending success
@@ -720,9 +715,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         if (!beginTerminalOutcome("cashu_success")) return
 
         Log.d(TAG, "Payment successful! Token: $token")
-        
-        // Cancel the safety timeout
-        cancelNfcSafetyTimeout()
 
         statusText.visibility = View.VISIBLE
         statusText.text = getString(R.string.payment_request_status_success)
@@ -775,9 +767,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         if (!beginTerminalOutcome("lightning_success")) return
 
         Log.d(TAG, "Lightning payment successful (no Cashu token)")
-        
-        // Cancel the safety timeout
-        cancelNfcSafetyTimeout()
 
         statusText.visibility = View.VISIBLE
         statusText.text = getString(R.string.payment_request_status_success)
@@ -853,9 +842,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         if (!beginTerminalOutcome("error: $errorMessage")) return
 
         Log.e(TAG, "Payment error: $errorMessage")
-        
-        // Cancel the safety timeout
-        cancelNfcSafetyTimeout()
 
         if (nfcAnimationContainer.visibility == View.VISIBLE) {
             nfcAnimationWebView.evaluateJavascript("reset()", null)
@@ -900,10 +886,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         // a safety net for any paths that might reach cleanup without having
         // called [beginTerminalOutcome] explicitly.
         hasTerminalOutcome = true
-        
-        // Cancel any pending timeout
-        cancelNfcSafetyTimeout()
-        
+
         // Stop Nostr handler
         nostrHandler?.stop()
         nostrHandler = null
@@ -1125,33 +1108,10 @@ class PaymentRequestActivity : AppCompatActivity() {
         nfcAnimationContainer.visibility = View.VISIBLE
         animationCloseButton.visibility = View.GONE
         
-        // Start safety timeout - if no result in 10 seconds, show error
-        startNfcSafetyTimeout()
-        
         // Start the animation
         if (webViewReady) {
             nfcAnimationWebView.evaluateJavascript("startAnimation()", null)
         }
-    }
-    
-    private fun startNfcSafetyTimeout() {
-        // Cancel any existing timeout
-        cancelNfcSafetyTimeout()
-        
-        nfcAnimationTimeoutRunnable = Runnable {
-            if (nfcAnimationContainer.visibility == View.VISIBLE) {
-                Log.e(TAG, "NFC safety timeout triggered - payment took too long")
-                handlePaymentError("Payment failed. Please try again.")
-            }
-        }
-        nfcTimeoutHandler.postDelayed(nfcAnimationTimeoutRunnable!!, 10000) // 10 seconds
-    }
-    
-    private fun cancelNfcSafetyTimeout() {
-        nfcAnimationTimeoutRunnable?.let { 
-            nfcTimeoutHandler.removeCallbacks(it) 
-        }
-        nfcAnimationTimeoutRunnable = null
     }
     
     private fun makeFullScreen() {
