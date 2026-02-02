@@ -1,0 +1,76 @@
+version: "3"
+services:
+  plugin-builder:
+    build:
+      context: .
+      dockerfile: Dockerfile.builder
+    volumes:
+      - plugin-data:/plugins
+    command: ["/bin/bash", "-c", "cp -r /output/BTCPayServer.Plugins.Cashu /plugins/"]
+
+  btcpayserver:
+    image: btcpayserver/btcpayserver:2.2.1
+    restart: unless-stopped
+    environment:
+      BTCPAY_NETWORK: "regtest"
+      BTCPAY_BIND: "0.0.0.0:49392"
+      BTCPAY_DATADIR: "/datadir"
+      BTCPAY_PLUGINDIR: "/datadir/Plugins"
+      BTCPAY_POSTGRES: "User ID=postgres;Password=postgres;Host=postgres;Port=5432;Database=btcpayserver"
+      BTCPAY_CHAINS: "btc"
+      BTCPAY_BTCEXPLORERURL: "http://nbxplorer:32838/"
+      # Disable registration for security in public setups, but enable for dev
+      BTCPAY_ENABLE_REGISTRATION: "true" 
+    ports:
+      - "49392:49392"
+    volumes:
+      - btcpay-data:/datadir
+      - plugin-data:/datadir/Plugins
+    depends_on:
+      - postgres
+      - nbxplorer
+
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: btcpayserver
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  nbxplorer:
+    image: nicolasdorier/nbxplorer:2.5.30
+    restart: unless-stopped
+    environment:
+      NBXPLORER_NETWORK: "regtest"
+      NBXPLORER_CHAINS: "btc"
+      NBXPLORER_BIND: "0.0.0.0:32838"
+      NBXPLORER_POSTGRES: "User ID=postgres;Password=postgres;Host=postgres;Port=5432;Database=btcpayserver"
+      NBXPLORER_BTC_RPCUSER: "btcpay"
+      NBXPLORER_BTC_RPCPASSWORD: "btcpay"
+      NBXPLORER_BTC_RPCHOST: "bitcoind"
+    volumes:
+      - nbxplorer-data:/datadir
+    depends_on:
+      - postgres
+      - bitcoind
+
+  bitcoind:
+    image: btcpayserver/bitcoin:26.0
+    restart: unless-stopped
+    environment:
+      BITCOIN_NETWORK: "regtest"
+      BITCOIN_EXTRA_ARGS: "rpcport=18443\nrpcbind=0.0.0.0:18443\nrpcallowip=0.0.0.0/0\nrpcuser=btcpay\nrpcpassword=btcpay"
+    ports:
+      - "18443:18443"
+    volumes:
+      - bitcoind-data:/data
+
+volumes:
+  btcpay-data:
+  postgres-data:
+  nbxplorer-data:
+  plugin-data:
+  bitcoind-data:
