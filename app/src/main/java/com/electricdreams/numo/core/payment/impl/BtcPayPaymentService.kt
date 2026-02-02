@@ -87,7 +87,8 @@ class BtcPayPaymentService(
                 val request = authorizedGet(url)
                 val body = executeForBody(request)
                 val json = JsonParser.parseString(body).asJsonObject
-                val status = json.get("status")?.asString ?: "Invalid"
+                val status = json.get("status")?.takeIf { !it.isJsonNull }?.asString ?: "Invalid"
+                Log.d(TAG, "Invoice $paymentId status: $status")
                 mapInvoiceStatus(status)
             }
         }
