@@ -646,7 +646,6 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     /**
      * Poll BTCPay invoice status every 2 seconds until terminal state.
-     * TODO: use btcpay webhooooooks
      */
     private fun startBtcPayPolling(paymentId: String) {
         btcPayPollingActive = true
@@ -664,11 +663,11 @@ class PaymentRequestActivity : AppCompatActivity() {
                         }
                         PaymentState.EXPIRED -> {
                             btcPayPollingActive = false
-                            handlePaymentError("BTCPay invoice expired")
+                            handlePaymentError("Invoice expired")
                         }
                         PaymentState.FAILED -> {
                             btcPayPollingActive = false
-                            handlePaymentError("BTCPay invoice failed")
+                            handlePaymentError("Invoice invalid")
                         }
                         PaymentState.PENDING -> {
                             // Continue polling
