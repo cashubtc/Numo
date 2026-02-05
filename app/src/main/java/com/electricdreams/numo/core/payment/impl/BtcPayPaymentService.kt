@@ -9,6 +9,7 @@ import com.electricdreams.numo.core.payment.RedeemResult
 import com.electricdreams.numo.core.wallet.Satoshis
 import com.electricdreams.numo.core.wallet.WalletError
 import com.electricdreams.numo.core.wallet.WalletResult
+
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -112,6 +113,30 @@ class BtcPayPaymentService(
 
             // BTCNutServer does not return detailed amount info; return a
             // placeholder so the caller knows the operation succeeded.
+            RedeemResult(amount = Satoshis(0), proofsCount = 0)
+        }
+    }
+
+    suspend fun redeemTokenToPostEndpoint(
+        token: String,
+        requestId: String,
+        postUrl: String
+    ): WalletResult<RedeemResult> = withContext(Dispatchers.IO) {
+        WalletResult.runCatching {
+            // Simplified payload: send ID and the raw token string
+            val payload = JsonObject()
+            payload.addProperty("id", requestId)
+            payload.addProperty("token", token)
+            val payloadJson = payload.toString()
+            
+            val request = Request.Builder()
+                .url(postUrl)
+                .post(payloadJson.toRequestBody(jsonMediaType))
+                .addHeader("Authorization", "token ${config.apiKey}")
+                .build()
+
+            executeForBody(request)
+
             RedeemResult(amount = Satoshis(0), proofsCount = 0)
         }
     }
