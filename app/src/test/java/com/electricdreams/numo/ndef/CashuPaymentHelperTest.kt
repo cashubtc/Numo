@@ -3,6 +3,8 @@ package com.electricdreams.numo.ndef
 import com.electricdreams.numo.ndef.CashuPaymentHelper.extractCashuToken
 import com.electricdreams.numo.ndef.CashuPaymentHelper.isCashuPaymentRequest
 import com.electricdreams.numo.ndef.CashuPaymentHelper.isCashuToken
+
+import com.google.gson.JsonParser
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -66,4 +68,5 @@ class CashuPaymentHelperTest {
 
         assertNull(token)
     }
+
 }
