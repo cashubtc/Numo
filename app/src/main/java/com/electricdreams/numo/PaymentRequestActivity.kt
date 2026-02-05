@@ -110,6 +110,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     // BTCPay payment tracking
     private var btcPayPaymentId: String? = null
+    private var btcPayCashuPR: String? = null
     private var btcPayPollingActive = false
 
     // Lightning quote info for history
@@ -458,6 +459,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
                 // Show Cashu QR (cashuPR from BTCNutServer)
                 if (!payment.cashuPR.isNullOrBlank()) {
+                    btcPayCashuPR = payment.cashuPR
                     try {
                         val qrBitmap = QrCodeGenerator.generate(payment.cashuPR, 512)
                         cashuQrImageView.setImageBitmap(qrBitmap)
@@ -466,7 +468,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     }
 
                     // Also use cashuPR for HCE
-                    hcePaymentRequest = payment.cashuPR
+                    hcePaymentRequest = CashuPaymentHelper.stripTransports(payment.cashuPR) ?: payment.cashuPR
                     if (NdefHostCardEmulationService.isHceAvailable(this@PaymentRequestActivity)) {
                         val serviceIntent = Intent(this@PaymentRequestActivity, NdefHostCardEmulationService::class.java)
                         startService(serviceIntent)
@@ -790,6 +792,33 @@ class PaymentRequestActivity : AppCompatActivity() {
                             Log.d(TAG, "NFC token received, cancelled safety timeout")
 
                             try {
+                                // If using BTCPay, we must send the token to the POST endpoint
+                                // specified in the original payment request.
+                                if (paymentService is BtcPayPaymentService) {
+                                    val pr = btcPayCashuPR
+                                    if (pr != null) {
+                                        val postUrl = CashuPaymentHelper.getPostUrl(pr)
+                                        val requestId = CashuPaymentHelper.getId(pr)
+
+                                        if (postUrl != null && requestId != null) {
+                                            Log.d(TAG, "Redeeming NFC token via BTCPay NUT-18 POST endpoint")
+                                            val result = (paymentService as BtcPayPaymentService).redeemTokenToPostEndpoint(
+                                                token, requestId, postUrl
+                                            )
+                                            result.onSuccess {
+                                                withContext(Dispatchers.Main) {
+                                                    handleLightningPaymentSuccess()
+                                                }
+                                            }.onFailure { e ->
+                                                throw Exception("BTCPay redemption failed: ${e.message}")
+                                            }
+                                            return@launch
+                                        } else {
+                                            Log.w(TAG, "BTCPay PR missing postUrl or id, falling back to local flow (likely to fail)")
+                                        }
+                                    }
+                                }
+
                                 val paymentId = pendingPaymentId
                                 val paymentContext = com.electricdreams.numo.payment.SwapToLightningMintManager.PaymentContext(
                                     paymentId = paymentId,
