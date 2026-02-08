@@ -75,6 +75,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     // HCE mode for deciding which payload to emulate (Cashu vs Lightning)
     private enum class HceMode { CASHU, LIGHTNING }
+    private enum class OverlayActionMode { SUCCESS, ERROR }
 
     private var paymentAmount: Long = 0
     private var bitcoinPriceWorker: BitcoinPriceWorker? = null
@@ -128,7 +129,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     // Pending NFC animation outcome data consumed when native animation reaches terminal frame.
     private var pendingNfcSuccessToken: String? = null
     private var pendingNfcSuccessAmount: Long = 0
-    private var pendingNfcErrorMessage: String? = null
+    private var currentOverlayActionMode: OverlayActionMode = OverlayActionMode.SUCCESS
 
     private val uiScope = CoroutineScope(Dispatchers.Main)
 
@@ -836,7 +837,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         setResult(Activity.RESULT_CANCELED)
 
         if (nfcAnimationContainer.visibility == View.VISIBLE) {
-            pendingNfcErrorMessage = errorMessage
             showNfcAnimationError(errorMessage)
             return
         }
@@ -896,7 +896,6 @@ class PaymentRequestActivity : AppCompatActivity() {
             Log.e(TAG, "Error cleaning up HCE service: ${e.message}", e)
         }
 
-        pendingNfcErrorMessage = null
         nfcAnimationView.reset()
         nfcAnimationContainer.visibility = View.GONE
         resetResultTextViews()
@@ -1000,7 +999,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         } else {
             applyFullscreenForAnimationOverlay()
         }
-        pendingNfcErrorMessage = null
         pendingNfcSuccessToken = token
         pendingNfcSuccessAmount = amount
         showNfcAnimationSuccess(formattedAmountString)
@@ -1015,7 +1013,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             animateSuccessScreenOut()
         }
         animationViewDetailsButton.setOnClickListener {
-            openLatestTransactionDetails()
+            onOverlaySecondaryActionPressed()
         }
 
         nfcAnimationView.setOnResultDisplayedListener { success ->
@@ -1033,17 +1031,12 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
     
     /**
-     * Elegant fade-out animation when closing the success screen.
+     * Elegant fade-out animation when closing the terminal result screen.
      */
     private fun animateSuccessScreenOut() {
         // Disable the button to prevent multiple taps
         animationCloseButton.isEnabled = false
         animationViewDetailsButton.isEnabled = false
-
-        if (pendingNfcErrorMessage != null) {
-            pendingNfcErrorMessage = null
-            startActivity(Intent(this, PaymentFailureActivity::class.java))
-        }
         
         // Clean up and finish with fade transition
         cleanupAndFinishWithFade()
@@ -1051,7 +1044,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     
     /**
      * Cleanup and finish with fade animation.
-     * Does NOT exit full-screen mode so the green success screen stays full during the fade.
+     * Does NOT exit full-screen mode so the terminal result screen stays full during the fade.
      */
     private fun cleanupAndFinishWithFade() {
         cancelNfcSafetyTimeout()
@@ -1096,7 +1089,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         resetResultActionButtons()
         pendingNfcSuccessToken = null
         pendingNfcSuccessAmount = 0
-        pendingNfcErrorMessage = null
 
         nfcAnimationView.reset()
         nfcAnimationView.startReading()
@@ -1128,7 +1120,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     private fun showNfcAnimationSuccess(amountText: String) {
         if (nfcAnimationContainer.visibility != View.VISIBLE) return
 
-        pendingNfcErrorMessage = null
+        currentOverlayActionMode = OverlayActionMode.SUCCESS
         animationResultAmountText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 56f)
         animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
         animationResultLabelText.maxLines = 1
@@ -1156,10 +1148,11 @@ class PaymentRequestActivity : AppCompatActivity() {
     private fun showNfcAnimationError(message: String) {
         if (nfcAnimationContainer.visibility != View.VISIBLE) return
 
-        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-        animationResultLabelText.maxLines = 3
+        currentOverlayActionMode = OverlayActionMode.ERROR
+        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
+        animationResultLabelText.maxLines = 2
         animationResultAmountText.text = ""
-        animationResultLabelText.text = message
+        animationResultLabelText.text = formatErrorLabel(message)
         nfcAnimationView.showError(message)
     }
 
@@ -1171,8 +1164,9 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         Log.d(TAG, "success_rendered_ms=$elapsedMs")
 
+        val mode = if (success) OverlayActionMode.SUCCESS else OverlayActionMode.ERROR
         animateResultTextIn(showAmount = success)
-        showResultActionsAnimated(success = success)
+        showResultActionsAnimated(mode)
 
         if (success && pendingNfcSuccessToken != null) {
             val token = pendingNfcSuccessToken!!
@@ -1185,12 +1179,28 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
     }
 
-    private fun showResultActionsAnimated(success: Boolean) {
+    private fun showResultActionsAnimated(mode: OverlayActionMode) {
         applyFullscreenForAnimationOverlay()
         ViewCompat.requestApplyInsets(nfcAnimationContainer)
 
-        animationViewDetailsButton.visibility = if (success) View.VISIBLE else View.GONE
-        animationViewDetailsButton.isEnabled = success
+        currentOverlayActionMode = mode
+        animationViewDetailsButton.text = getString(
+            if (mode == OverlayActionMode.SUCCESS) {
+                R.string.payment_received_button_view_details
+            } else {
+                R.string.payment_failure_button_try_again
+            }
+        )
+        animationCloseButton.text = getString(
+            if (mode == OverlayActionMode.SUCCESS) {
+                R.string.payment_request_animation_close
+            } else {
+                R.string.payment_failure_button_close
+            }
+        )
+
+        animationViewDetailsButton.visibility = View.VISIBLE
+        animationViewDetailsButton.isEnabled = true
         animationCloseButton.visibility = View.VISIBLE
         animationCloseButton.isEnabled = true
 
@@ -1267,19 +1277,30 @@ class PaymentRequestActivity : AppCompatActivity() {
         animationResultLabelText.visibility = View.GONE
         animationResultLabelText.alpha = 0f
         animationResultLabelText.translationY = animationLabelBaseTranslationY
-        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
         animationResultLabelText.maxLines = 3
         animationResultLabelText.text = ""
     }
 
+    private fun formatErrorLabel(message: String): String {
+        return if (message.contains(". ")) {
+            message.replaceFirst(". ", ".\n")
+        } else {
+            message
+        }
+    }
+
     private fun resetResultActionButtons() {
+        currentOverlayActionMode = OverlayActionMode.SUCCESS
         animationActionsContainer.visibility = View.GONE
         animationActionsContainer.alpha = 0f
         animationActionsContainer.translationY = 0f
         animationViewDetailsButton.visibility = View.GONE
         animationViewDetailsButton.isEnabled = false
+        animationViewDetailsButton.text = getString(R.string.payment_received_button_view_details)
         animationCloseButton.visibility = View.GONE
         animationCloseButton.isEnabled = true
+        animationCloseButton.text = getString(R.string.payment_request_animation_close)
     }
 
     private fun applyFullscreenForAnimationOverlay() {
@@ -1309,6 +1330,51 @@ class PaymentRequestActivity : AppCompatActivity() {
             layoutParams.bottomMargin = targetBottomMargin
             animationActionsContainer.layoutParams = layoutParams
         }
+    }
+
+    private fun onOverlaySecondaryActionPressed() {
+        if (currentOverlayActionMode == OverlayActionMode.ERROR) {
+            retryLatestPendingPayment()
+        } else {
+            openLatestTransactionDetails()
+        }
+    }
+
+    private fun retryLatestPendingPayment() {
+        val history = PaymentsHistoryActivity.getPaymentHistory(this)
+        val latestPending: PaymentHistoryEntry? = history
+            .filter { it.isPending() }
+            .maxByOrNull { it.date.time }
+
+        if (latestPending == null) {
+            Toast.makeText(this, R.string.payment_failure_error_no_pending, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val intent = Intent(this, PaymentRequestActivity::class.java).apply {
+            putExtra(EXTRA_PAYMENT_AMOUNT, latestPending.amount)
+            putExtra(EXTRA_FORMATTED_AMOUNT, latestPending.formattedAmount)
+            putExtra(EXTRA_RESUME_PAYMENT_ID, latestPending.id)
+
+            latestPending.lightningQuoteId?.let {
+                putExtra(EXTRA_LIGHTNING_QUOTE_ID, it)
+            }
+            latestPending.lightningMintUrl?.let {
+                putExtra(EXTRA_LIGHTNING_MINT_URL, it)
+            }
+            latestPending.lightningInvoice?.let {
+                putExtra(EXTRA_LIGHTNING_INVOICE, it)
+            }
+            latestPending.nostrSecretHex?.let {
+                putExtra(EXTRA_NOSTR_SECRET_HEX, it)
+            }
+            latestPending.nostrNprofile?.let {
+                putExtra(EXTRA_NOSTR_NPROFILE, it)
+            }
+        }
+
+        startActivity(intent)
+        cleanupAndFinish()
     }
 
     private fun openLatestTransactionDetails() {

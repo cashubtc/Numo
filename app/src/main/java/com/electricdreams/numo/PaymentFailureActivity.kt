@@ -52,8 +52,8 @@ class PaymentFailureActivity : AppCompatActivity() {
         window.navigationBarColor = android.graphics.Color.TRANSPARENT
 
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
-        windowInsetsController.isAppearanceLightStatusBars = true
-        windowInsetsController.isAppearanceLightNavigationBars = true
+        windowInsetsController.isAppearanceLightStatusBars = false
+        windowInsetsController.isAppearanceLightNavigationBars = false
 
         // Adjust padding for system bars
         findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { v, windowInsets ->
