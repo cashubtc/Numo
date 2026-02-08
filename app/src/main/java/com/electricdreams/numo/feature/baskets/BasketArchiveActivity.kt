@@ -1,6 +1,5 @@
 package com.electricdreams.numo.feature.baskets
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +15,7 @@ import com.electricdreams.numo.core.model.SavedBasket
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
-import com.electricdreams.numo.feature.history.TransactionDetailActivity
+import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import java.text.SimpleDateFormat
@@ -109,24 +108,13 @@ class BasketArchiveActivity : AppCompatActivity() {
         val payment = payments.find { it.id == paymentId }
 
         if (payment != null) {
-            val intent = Intent(this, TransactionDetailActivity::class.java).apply {
-                putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TOKEN, payment.token)
-                putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_AMOUNT, payment.amount)
-                putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_DATE, payment.date.time)
-                putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_UNIT, payment.getUnit())
-                putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ENTRY_UNIT, payment.getEntryUnit())
-                putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ENTERED_AMOUNT, payment.enteredAmount)
-                payment.bitcoinPrice?.let { 
-                    putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_BITCOIN_PRICE, it) 
-                }
-                putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_MINT_URL, payment.mintUrl)
-                putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_TYPE, payment.paymentType)
-                putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_LIGHTNING_INVOICE, payment.lightningInvoice)
-                putExtra(TransactionDetailActivity.EXTRA_CHECKOUT_BASKET_JSON, payment.checkoutBasketJson)
-                putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_AMOUNT, payment.tipAmountSats)
-                putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_PERCENTAGE, payment.tipPercentage)
-            }
-            startActivity(intent)
+            startActivity(
+                PaymentIntentFactory.createTransactionDetailIntent(
+                    context = this,
+                    entry = payment,
+                    position = -1,
+                ),
+            )
         }
     }
 

@@ -78,8 +78,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:contentDescription="@string/payment_failure_error_background_description"
-                    android:src="@drawable/ic_circle_solid_white"
-                    android:visibility="invisible" />
+                    android:src="@drawable/ic_circle_solid_red"
+                    android:visibility="invisible"
+                    app:tint="@color/color_bg_white" />
 
                 <!-- White close/cross icon -->
                 <ImageView
@@ -120,7 +121,7 @@
         android:layout_height="52dp"
         android:layout_marginHorizontal="24dp"
         android:layout_marginBottom="24dp"
-        android:background="@drawable/bg_button_black_pill"
+        android:background="@drawable/bg_button_black"
         android:text="@string/payment_failure_button_close"
         android:textAllCaps="false"
         android:textColor="@color/color_bg_white"

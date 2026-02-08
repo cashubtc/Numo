@@ -18,7 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import com.cashujdk.nut00.Token
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
-import com.electricdreams.numo.feature.history.TransactionDetailActivity
+import com.electricdreams.numo.payment.PaymentIntentFactory
 
 /**
  * Activity that displays a beautiful success screen when a payment is received
@@ -277,27 +277,12 @@ class PaymentReceivedActivity : AppCompatActivity() {
             return
         }
         
-        val intent = Intent(this, TransactionDetailActivity::class.java).apply {
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TOKEN, entry.token)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_AMOUNT, entry.amount)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_DATE, entry.date.time)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_UNIT, entry.getUnit())
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ENTRY_UNIT, entry.getEntryUnit())
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ENTERED_AMOUNT, entry.enteredAmount)
-            entry.bitcoinPrice?.let {
-                putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_BITCOIN_PRICE, it)
-            }
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_MINT_URL, entry.mintUrl)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_REQUEST, entry.paymentRequest)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_POSITION, history.size - 1)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_TYPE, entry.paymentType)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_LIGHTNING_INVOICE, entry.lightningInvoice)
-            putExtra(TransactionDetailActivity.EXTRA_CHECKOUT_BASKET_JSON, entry.checkoutBasketJson)
-            // FIXED: Include tip information so transaction details display correctly
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_AMOUNT, entry.tipAmountSats)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_PERCENTAGE, entry.tipPercentage)
-        }
-        
-        startActivity(intent)
+        startActivity(
+            PaymentIntentFactory.createTransactionDetailIntent(
+                context = this,
+                entry = entry,
+                position = history.size - 1,
+            ),
+        )
     }
 }

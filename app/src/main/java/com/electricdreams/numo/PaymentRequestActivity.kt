@@ -30,12 +30,12 @@ import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
-import com.electricdreams.numo.feature.history.TransactionDetailActivity
 import com.electricdreams.numo.feature.tips.TipSelectionActivity
 import com.electricdreams.numo.ndef.CashuPaymentHelper
 import com.electricdreams.numo.ndef.NdefHostCardEmulationService
 import com.electricdreams.numo.payment.LightningMintHandler
 import com.electricdreams.numo.payment.NostrPaymentHandler
+import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.payment.PaymentTabManager
 import com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
 import com.electricdreams.numo.ui.util.QrCodeGenerator
@@ -1351,29 +1351,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             return
         }
 
-        val intent = Intent(this, PaymentRequestActivity::class.java).apply {
-            putExtra(EXTRA_PAYMENT_AMOUNT, latestPending.amount)
-            putExtra(EXTRA_FORMATTED_AMOUNT, latestPending.formattedAmount)
-            putExtra(EXTRA_RESUME_PAYMENT_ID, latestPending.id)
-
-            latestPending.lightningQuoteId?.let {
-                putExtra(EXTRA_LIGHTNING_QUOTE_ID, it)
-            }
-            latestPending.lightningMintUrl?.let {
-                putExtra(EXTRA_LIGHTNING_MINT_URL, it)
-            }
-            latestPending.lightningInvoice?.let {
-                putExtra(EXTRA_LIGHTNING_INVOICE, it)
-            }
-            latestPending.nostrSecretHex?.let {
-                putExtra(EXTRA_NOSTR_SECRET_HEX, it)
-            }
-            latestPending.nostrNprofile?.let {
-                putExtra(EXTRA_NOSTR_NPROFILE, it)
-            }
-        }
-
-        startActivity(intent)
+        startActivity(PaymentIntentFactory.createResumePaymentIntent(this, latestPending))
         cleanupAndFinish()
     }
 
@@ -1386,27 +1364,13 @@ class PaymentRequestActivity : AppCompatActivity() {
             return
         }
 
-        val intent = Intent(this, TransactionDetailActivity::class.java).apply {
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TOKEN, entry.token)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_AMOUNT, entry.amount)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_DATE, entry.date.time)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_UNIT, entry.getUnit())
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ENTRY_UNIT, entry.getEntryUnit())
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ENTERED_AMOUNT, entry.enteredAmount)
-            entry.bitcoinPrice?.let {
-                putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_BITCOIN_PRICE, it)
-            }
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_MINT_URL, entry.mintUrl)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_REQUEST, entry.paymentRequest)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_POSITION, history.size - 1)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_TYPE, entry.paymentType)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_LIGHTNING_INVOICE, entry.lightningInvoice)
-            putExtra(TransactionDetailActivity.EXTRA_CHECKOUT_BASKET_JSON, entry.checkoutBasketJson)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_AMOUNT, entry.tipAmountSats)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_PERCENTAGE, entry.tipPercentage)
-        }
-
-        startActivity(intent)
+        startActivity(
+            PaymentIntentFactory.createTransactionDetailIntent(
+                context = this,
+                entry = entry,
+                position = history.size - 1,
+            ),
+        )
     }
 
     private fun dpToPx(dp: Float): Int {
