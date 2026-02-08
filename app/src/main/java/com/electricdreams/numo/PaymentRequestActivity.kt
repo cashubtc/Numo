@@ -30,6 +30,7 @@ import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
+import com.electricdreams.numo.feature.history.TransactionDetailActivity
 import com.electricdreams.numo.feature.tips.TipSelectionActivity
 import com.electricdreams.numo.ndef.CashuPaymentHelper
 import com.electricdreams.numo.ndef.NdefHostCardEmulationService
@@ -65,6 +66,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var nfcAnimationView: NfcPaymentAnimationView
     private lateinit var animationResultAmountText: TextView
     private lateinit var animationResultLabelText: TextView
+    private lateinit var animationActionsContainer: View
+    private lateinit var animationViewDetailsButton: TextView
     private lateinit var animationCloseButton: TextView
     
     // Tip-related views
@@ -161,6 +164,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         nfcAnimationView = findViewById(R.id.nfc_animation_view)
         animationResultAmountText = findViewById(R.id.animation_result_amount)
         animationResultLabelText = findViewById(R.id.animation_result_label)
+        animationActionsContainer = findViewById(R.id.animation_actions_container)
+        animationViewDetailsButton = findViewById(R.id.animation_view_details_button)
         animationCloseButton = findViewById(R.id.animation_close_button)
         animationAmountBaseTranslationY = animationResultAmountText.translationY
         animationLabelBaseTranslationY = animationResultLabelText.translationY
@@ -752,16 +757,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
-        // Check if NFC animation is visible - if so, show success animation
-        if (nfcAnimationContainer.visibility == View.VISIBLE) {
-            // Store data for post-animation processing
-            pendingNfcSuccessToken = token
-            pendingNfcSuccessAmount = paymentAmount
-            showNfcAnimationSuccess(formattedAmountString)
-        } else {
-            // Non-NFC payment (Nostr/QR) - use normal success flow
-            showPaymentSuccess(token, paymentAmount)
-        }
+        showPaymentSuccess(token, paymentAmount)
     }
 
     /**
@@ -801,17 +797,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
-        // Check if NFC animation is visible - if so, show success animation
-        // This can happen when Lightning payment comes via NFC swap path
-        if (nfcAnimationContainer.visibility == View.VISIBLE) {
-            // Store data for post-animation processing (empty token for Lightning)
-            pendingNfcSuccessToken = ""
-            pendingNfcSuccessAmount = paymentAmount
-            showNfcAnimationSuccess(formattedAmountString)
-        } else {
-            // Non-NFC payment - use normal success flow
-            showPaymentSuccess("", paymentAmount)
-        }
+        showPaymentSuccess("", paymentAmount)
     }
 
     /**
@@ -834,15 +820,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         hasTerminalOutcome = true
         return true
-    }
-
-    private fun showPaymentReceivedActivity(token: String) {
-        val intent = Intent(this, PaymentReceivedActivity::class.java).apply {
-            putExtra(PaymentReceivedActivity.EXTRA_TOKEN, token)
-            putExtra(PaymentReceivedActivity.EXTRA_AMOUNT, paymentAmount)
-        }
-        startActivity(intent)
-        cleanupAndFinish()
     }
 
     private fun handlePaymentError(errorMessage: String) {
@@ -923,6 +900,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         nfcAnimationView.reset()
         nfcAnimationContainer.visibility = View.GONE
         resetResultTextViews()
+        resetResultActionButtons()
         restoreSystemBarsAfterAnimation()
 
         finish()
@@ -1006,32 +984,26 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     /**
-     * Unified success handler - plays feedback, triggers auto-withdrawal check, and shows success screen.
-     * This is the single source of truth for payment success handling.
+     * Unified success handler for all payment types.
+     * Always renders the native success overlay so NFC and non-NFC success paths stay consistent.
      */
     private fun showPaymentSuccess(token: String, amount: Long) {
-        // Trigger post-payment operations (basket archiving + auto-withdrawal)
-        triggerPostPaymentOperations(token)
-        
-        // Play success sound
-        try {
-            val mediaPlayer = android.media.MediaPlayer.create(this, R.raw.success_sound)
-            mediaPlayer?.setOnCompletionListener { it.release() }
-            mediaPlayer?.start()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error playing success sound: ${e.message}")
+        if (nfcAnimationContainer.visibility != View.VISIBLE) {
+            nfcOverlayShownAtMs = SystemClock.elapsedRealtime()
+            Log.d(TAG, "overlay_shown_ms=$nfcOverlayShownAtMs")
+            applyFullscreenForAnimationOverlay()
+            nfcAnimationContainer.visibility = View.VISIBLE
+            nfcAnimationView.reset()
+            resetResultTextViews()
+            resetResultActionButtons()
+            ViewCompat.requestApplyInsets(nfcAnimationContainer)
+        } else {
+            applyFullscreenForAnimationOverlay()
         }
-        
-        // Vibrate
-        try {
-            val vibrator = getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator?
-            vibrator?.vibrate(PATTERN_SUCCESS, -1)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error vibrating: ${e.message}")
-        }
-
-        // Show success screen
-        showPaymentReceivedActivity(token)
+        pendingNfcErrorMessage = null
+        pendingNfcSuccessToken = token
+        pendingNfcSuccessAmount = amount
+        showNfcAnimationSuccess(formattedAmountString)
     }
 
     // ============================================================
@@ -1042,6 +1014,9 @@ class PaymentRequestActivity : AppCompatActivity() {
         animationCloseButton.setOnClickListener {
             animateSuccessScreenOut()
         }
+        animationViewDetailsButton.setOnClickListener {
+            openLatestTransactionDetails()
+        }
 
         nfcAnimationView.setOnResultDisplayedListener { success ->
             runOnUiThread {
@@ -1050,7 +1025,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(nfcAnimationContainer) { _, insets ->
-            adjustAnimationCloseButtonBottomMargin(insets)
+            adjustAnimationActionsBottomMargin(insets)
             insets
         }
 
@@ -1063,6 +1038,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     private fun animateSuccessScreenOut() {
         // Disable the button to prevent multiple taps
         animationCloseButton.isEnabled = false
+        animationViewDetailsButton.isEnabled = false
 
         if (pendingNfcErrorMessage != null) {
             pendingNfcErrorMessage = null
@@ -1116,8 +1092,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         applyFullscreenForAnimationOverlay()
         
         nfcAnimationContainer.visibility = View.VISIBLE
-        animationCloseButton.visibility = View.GONE
         resetResultTextViews()
+        resetResultActionButtons()
         pendingNfcSuccessToken = null
         pendingNfcSuccessAmount = 0
         pendingNfcErrorMessage = null
@@ -1196,7 +1172,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         Log.d(TAG, "success_rendered_ms=$elapsedMs")
 
         animateResultTextIn(showAmount = success)
-        showCloseButtonAnimated()
+        showResultActionsAnimated(success = success)
 
         if (success && pendingNfcSuccessToken != null) {
             val token = pendingNfcSuccessToken!!
@@ -1209,18 +1185,22 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
     }
 
-    private fun showCloseButtonAnimated() {
+    private fun showResultActionsAnimated(success: Boolean) {
         applyFullscreenForAnimationOverlay()
         ViewCompat.requestApplyInsets(nfcAnimationContainer)
-        
-        // Start from invisible and below
-        animationCloseButton.alpha = 0f
-        animationCloseButton.translationY = 60f
-        animationCloseButton.isEnabled = true
+
+        animationViewDetailsButton.visibility = if (success) View.VISIBLE else View.GONE
+        animationViewDetailsButton.isEnabled = success
         animationCloseButton.visibility = View.VISIBLE
-        
+        animationCloseButton.isEnabled = true
+
+        // Start from invisible and below
+        animationActionsContainer.alpha = 0f
+        animationActionsContainer.translationY = 60f
+        animationActionsContainer.visibility = View.VISIBLE
+
         // Animate in with fade + slide up
-        animationCloseButton.animate()
+        animationActionsContainer.animate()
             .alpha(1f)
             .translationY(0f)
             .setDuration(400)
@@ -1292,6 +1272,16 @@ class PaymentRequestActivity : AppCompatActivity() {
         animationResultLabelText.text = ""
     }
 
+    private fun resetResultActionButtons() {
+        animationActionsContainer.visibility = View.GONE
+        animationActionsContainer.alpha = 0f
+        animationActionsContainer.translationY = 0f
+        animationViewDetailsButton.visibility = View.GONE
+        animationViewDetailsButton.isEnabled = false
+        animationCloseButton.visibility = View.GONE
+        animationCloseButton.isEnabled = true
+    }
+
     private fun applyFullscreenForAnimationOverlay() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsControllerCompat(window, window.decorView).apply {
@@ -1307,18 +1297,50 @@ class PaymentRequestActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, true)
     }
 
-    private fun adjustAnimationCloseButtonBottomMargin(insets: WindowInsetsCompat) {
+    private fun adjustAnimationActionsBottomMargin(insets: WindowInsetsCompat) {
         val systemInsets = insets.getInsetsIgnoringVisibility(
             WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
         )
         val minBottomSpacingPx = dpToPx(72f)
         val targetBottomMargin = maxOf(minBottomSpacingPx, systemInsets.bottom + dpToPx(24f))
 
-        val layoutParams = animationCloseButton.layoutParams as? ViewGroup.MarginLayoutParams ?: return
+        val layoutParams = animationActionsContainer.layoutParams as? ViewGroup.MarginLayoutParams ?: return
         if (layoutParams.bottomMargin != targetBottomMargin) {
             layoutParams.bottomMargin = targetBottomMargin
-            animationCloseButton.layoutParams = layoutParams
+            animationActionsContainer.layoutParams = layoutParams
         }
+    }
+
+    private fun openLatestTransactionDetails() {
+        val history = PaymentsHistoryActivity.getPaymentHistory(this)
+        val entry = history.lastOrNull()
+
+        if (entry == null) {
+            Toast.makeText(this, R.string.payment_received_error_no_details, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val intent = Intent(this, TransactionDetailActivity::class.java).apply {
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TOKEN, entry.token)
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_AMOUNT, entry.amount)
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_DATE, entry.date.time)
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_UNIT, entry.getUnit())
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ENTRY_UNIT, entry.getEntryUnit())
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ENTERED_AMOUNT, entry.enteredAmount)
+            entry.bitcoinPrice?.let {
+                putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_BITCOIN_PRICE, it)
+            }
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_MINT_URL, entry.mintUrl)
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_REQUEST, entry.paymentRequest)
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_POSITION, history.size - 1)
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_TYPE, entry.paymentType)
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_LIGHTNING_INVOICE, entry.lightningInvoice)
+            putExtra(TransactionDetailActivity.EXTRA_CHECKOUT_BASKET_JSON, entry.checkoutBasketJson)
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_AMOUNT, entry.tipAmountSats)
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_PERCENTAGE, entry.tipPercentage)
+        }
+
+        startActivity(intent)
     }
 
     private fun dpToPx(dp: Float): Int {
@@ -1327,7 +1349,6 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "PaymentRequestActivity"
-        private val PATTERN_SUCCESS = longArrayOf(0, 50, 100, 50)
         private const val NFC_ANIMATION_SAFETY_TIMEOUT_MS = 10_000L
 
 
