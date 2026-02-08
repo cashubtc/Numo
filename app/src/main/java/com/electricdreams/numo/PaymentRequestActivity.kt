@@ -1,25 +1,27 @@
 package com.electricdreams.numo
 import com.electricdreams.numo.R
 
-import android.annotation.SuppressLint
+import android.animation.AnimatorSet
+import android.animation.ObjectAnimator
 import android.app.Activity
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
+import android.util.TypedValue
 import android.view.MenuItem
 import android.view.View
-import android.view.WindowInsetsController
-import android.view.WindowManager
-import android.webkit.JavascriptInterface
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.Amount.Currency
@@ -34,6 +36,7 @@ import com.electricdreams.numo.ndef.NdefHostCardEmulationService
 import com.electricdreams.numo.payment.LightningMintHandler
 import com.electricdreams.numo.payment.NostrPaymentHandler
 import com.electricdreams.numo.payment.PaymentTabManager
+import com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
 import com.electricdreams.numo.ui.util.QrCodeGenerator
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import kotlinx.coroutines.CoroutineScope
@@ -59,7 +62,9 @@ class PaymentRequestActivity : AppCompatActivity() {
     
     // NFC Animation views
     private lateinit var nfcAnimationContainer: View
-    private lateinit var nfcAnimationWebView: WebView
+    private lateinit var nfcAnimationView: NfcPaymentAnimationView
+    private lateinit var animationResultAmountText: TextView
+    private lateinit var animationResultLabelText: TextView
     private lateinit var animationCloseButton: TextView
     
     // Tip-related views
@@ -117,14 +122,20 @@ class PaymentRequestActivity : AppCompatActivity() {
     // Tracks whether this payment flow has already reached a terminal outcome
     private var hasTerminalOutcome: Boolean = false
 
-    // Pending NFC animation success data (to call showPaymentSuccess after animation completes)
+    // Pending NFC animation outcome data consumed when native animation reaches terminal frame.
     private var pendingNfcSuccessToken: String? = null
     private var pendingNfcSuccessAmount: Long = 0
+    private var pendingNfcErrorMessage: String? = null
 
     private val uiScope = CoroutineScope(Dispatchers.Main)
-    
-    // NFC Animation state
-    private var webViewReady = false
+
+    // NFC animation timing diagnostics
+    private var nfcOverlayShownAtMs: Long = 0
+    private var nfcAnimationStartedAtMs: Long = 0
+    private var animationAmountBaseTranslationY: Float = 0f
+    private var animationLabelBaseTranslationY: Float = 0f
+    private var nfcAnimationTimeoutRunnable: Runnable? = null
+    private val nfcTimeoutHandler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -147,11 +158,14 @@ class PaymentRequestActivity : AppCompatActivity() {
         
         // NFC Animation views
         nfcAnimationContainer = findViewById(R.id.nfc_animation_container)
-        nfcAnimationWebView = findViewById(R.id.nfc_animation_webview)
+        nfcAnimationView = findViewById(R.id.nfc_animation_view)
+        animationResultAmountText = findViewById(R.id.animation_result_amount)
+        animationResultLabelText = findViewById(R.id.animation_result_label)
         animationCloseButton = findViewById(R.id.animation_close_button)
-        
-        // Setup WebView for NFC animation
-        setupAnimationWebView()
+        animationAmountBaseTranslationY = animationResultAmountText.translationY
+        animationLabelBaseTranslationY = animationResultLabelText.translationY
+
+        setupNfcAnimationOverlay()
 
         // Initialize tab manager
         tabManager = PaymentTabManager(
@@ -385,6 +399,13 @@ class PaymentRequestActivity : AppCompatActivity() {
     override fun onBackPressed() {
         cancelPayment()
         super.onBackPressed()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus && nfcAnimationContainer.visibility == View.VISIBLE) {
+            applyFullscreenForAnimationOverlay()
+        }
     }
 
     private fun initializePaymentRequest() {
@@ -643,9 +664,9 @@ class PaymentRequestActivity : AppCompatActivity() {
                                 // Lightning swap.
                                 withContext(Dispatchers.Main) {
                                     if (redeemedToken.isNotEmpty()) {
-                                        runNfcSuccessAnimation { handlePaymentSuccess(redeemedToken) }
+                                        handlePaymentSuccess(redeemedToken)
                                     } else {
-                                        runNfcSuccessAnimation { handleLightningPaymentSuccess() }
+                                        handleLightningPaymentSuccess()
                                     }
                                 }
                             } catch (e: CashuPaymentHelper.RedemptionException) {
@@ -678,9 +699,14 @@ class PaymentRequestActivity : AppCompatActivity() {
                     }
 
                     override fun onNfcReadingStopped() {
-                        // Don't hide overlay - let the animation complete
                         runOnUiThread {
-                            Log.d(TAG, "NFC reading stopped - animation continues")
+                            Log.w(TAG, "NFC reading stopped callback received")
+                            if (hasTerminalOutcome) {
+                                Log.d(TAG, "NFC reading stopped ignored - terminal outcome already set")
+                                return@runOnUiThread
+                            }
+
+                            Log.d(TAG, "NFC reading stopped - keeping animation overlay active")
                         }
                     }
                 })
@@ -690,24 +716,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         }, 1000)
     }
 
-    /**
-     * Play the NFC success animation when the payment came from NFC.
-     * Now uses WebView-based animation.
-     */
-    private fun runNfcSuccessAnimation(onComplete: () -> Unit) {
-        if (nfcAnimationContainer.visibility == View.VISIBLE) {
-            // Store the completion callback for after animation
-            // The onComplete will be called from AnimationBridge.onAnimationComplete
-            pendingNfcSuccessToken = ""  // Mark that we have a pending success
-            showNfcAnimationSuccess(formattedAmountString)
-            
-            // For NFC payments that go through runNfcSuccessAnimation, we need to 
-            // handle the callback differently - store it and call from AnimationBridge
-        } else {
-            onComplete()
-        }
-    }
-
     private fun handlePaymentSuccess(token: String) {
         // Only process the first terminal outcome (success or failure). Late
         // callbacks from Nostr/HCE after we've already completed this payment
@@ -715,6 +723,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         if (!beginTerminalOutcome("cashu_success")) return
 
         Log.d(TAG, "Payment successful! Token: $token")
+        cancelNfcSafetyTimeout()
 
         statusText.visibility = View.VISIBLE
         statusText.text = getString(R.string.payment_request_status_success)
@@ -767,6 +776,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         if (!beginTerminalOutcome("lightning_success")) return
 
         Log.d(TAG, "Lightning payment successful (no Cashu token)")
+        cancelNfcSafetyTimeout()
 
         statusText.visibility = View.VISIBLE
         statusText.text = getString(R.string.payment_request_status_success)
@@ -842,22 +852,23 @@ class PaymentRequestActivity : AppCompatActivity() {
         if (!beginTerminalOutcome("error: $errorMessage")) return
 
         Log.e(TAG, "Payment error: $errorMessage")
-
-        if (nfcAnimationContainer.visibility == View.VISIBLE) {
-            nfcAnimationWebView.evaluateJavascript("reset()", null)
-            nfcAnimationContainer.visibility = View.GONE
-            exitFullScreen()
-        }
+        cancelNfcSafetyTimeout()
 
         statusText.visibility = View.VISIBLE
         statusText.text = getString(R.string.payment_request_status_failed, errorMessage)
+        setResult(Activity.RESULT_CANCELED)
+
+        if (nfcAnimationContainer.visibility == View.VISIBLE) {
+            pendingNfcErrorMessage = errorMessage
+            showNfcAnimationError(errorMessage)
+            return
+        }
+
         Toast.makeText(
             this,
             getString(R.string.payment_request_status_failed, errorMessage),
             Toast.LENGTH_LONG,
         ).show()
-
-        setResult(Activity.RESULT_CANCELED)
 
         // Navigate to the global payment failure screen, which will allow
         // the user to try the latest pending entry again.
@@ -886,6 +897,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         // a safety net for any paths that might reach cleanup without having
         // called [beginTerminalOutcome] explicitly.
         hasTerminalOutcome = true
+        cancelNfcSafetyTimeout()
 
         // Stop Nostr handler
         nostrHandler?.stop()
@@ -907,17 +919,17 @@ class PaymentRequestActivity : AppCompatActivity() {
             Log.e(TAG, "Error cleaning up HCE service: ${e.message}", e)
         }
 
+        pendingNfcErrorMessage = null
+        nfcAnimationView.reset()
+        nfcAnimationContainer.visibility = View.GONE
+        resetResultTextViews()
+        restoreSystemBarsAfterAnimation()
+
         finish()
     }
 
     override fun onDestroy() {
-        // Clean up WebView to prevent memory leaks
-        nfcAnimationWebView.apply {
-            stopLoading()
-            loadUrl("about:blank")
-            removeAllViews()
-            destroy()
-        }
+        nfcAnimationView.reset()
         
         // onDestroy can be invoked as part of a normal lifecycle (e.g. when
         // the system reclaims the Activity). Avoid calling finish() again
@@ -1026,35 +1038,23 @@ class PaymentRequestActivity : AppCompatActivity() {
     // NFC Animation Methods
     // ============================================================
 
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun setupAnimationWebView() {
-        nfcAnimationWebView.settings.apply {
-            javaScriptEnabled = true
-            loadWithOverviewMode = true
-            useWideViewPort = true
-        }
-        
-        // Make WebView background transparent
-        nfcAnimationWebView.setBackgroundColor(android.graphics.Color.TRANSPARENT)
-        
-        // Add JavaScript interface for communication
-        nfcAnimationWebView.addJavascriptInterface(AnimationBridge(), "Android")
-        
-        nfcAnimationWebView.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-                webViewReady = true
-                Log.d(TAG, "WebView animation page loaded")
-            }
-        }
-        
-        // Load the animation HTML
-        nfcAnimationWebView.loadUrl("file:///android_asset/nfc_animation.html")
-        
-        // Setup close button - animate out then close
+    private fun setupNfcAnimationOverlay() {
         animationCloseButton.setOnClickListener {
             animateSuccessScreenOut()
         }
+
+        nfcAnimationView.setOnResultDisplayedListener { success ->
+            runOnUiThread {
+                onNfcAnimationResultDisplayed(success)
+            }
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(nfcAnimationContainer) { _, insets ->
+            adjustAnimationCloseButtonBottomMargin(insets)
+            insets
+        }
+
+        Log.d(TAG, "webview_ready_ms=0 (native renderer)")
     }
     
     /**
@@ -1063,6 +1063,11 @@ class PaymentRequestActivity : AppCompatActivity() {
     private fun animateSuccessScreenOut() {
         // Disable the button to prevent multiple taps
         animationCloseButton.isEnabled = false
+
+        if (pendingNfcErrorMessage != null) {
+            pendingNfcErrorMessage = null
+            startActivity(Intent(this, PaymentFailureActivity::class.java))
+        }
         
         // Clean up and finish with fade transition
         cleanupAndFinishWithFade()
@@ -1073,6 +1078,8 @@ class PaymentRequestActivity : AppCompatActivity() {
      * Does NOT exit full-screen mode so the green success screen stays full during the fade.
      */
     private fun cleanupAndFinishWithFade() {
+        cancelNfcSafetyTimeout()
+
         // Stop Nostr handler
         nostrHandler?.stop()
         nostrHandler = null
@@ -1093,6 +1100,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             Log.e(TAG, "Error cleaning up HCE service: ${e.message}", e)
         }
 
+        restoreSystemBarsAfterAnimation()
         finish()
         
         // Fade out the success screen, fade in the home screen
@@ -1102,53 +1110,58 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun showNfcAnimationOverlay() {
-        // Make activity full screen for animation
-        makeFullScreen()
+        nfcOverlayShownAtMs = SystemClock.elapsedRealtime()
+        Log.d(TAG, "overlay_shown_ms=$nfcOverlayShownAtMs")
+
+        applyFullscreenForAnimationOverlay()
         
         nfcAnimationContainer.visibility = View.VISIBLE
         animationCloseButton.visibility = View.GONE
-        
-        // Start the animation
-        if (webViewReady) {
-            nfcAnimationWebView.evaluateJavascript("startAnimation()", null)
-        }
+        resetResultTextViews()
+        pendingNfcSuccessToken = null
+        pendingNfcSuccessAmount = 0
+        pendingNfcErrorMessage = null
+
+        nfcAnimationView.reset()
+        nfcAnimationView.startReading()
+        nfcAnimationStartedAtMs = SystemClock.elapsedRealtime()
+        Log.d(TAG, "animation_started_ms=${nfcAnimationStartedAtMs - nfcOverlayShownAtMs}")
+        startNfcSafetyTimeout()
+        ViewCompat.requestApplyInsets(nfcAnimationContainer)
     }
-    
-    private fun makeFullScreen() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.insetsController?.let { controller ->
-                controller.hide(android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars())
-                controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+
+    private fun startNfcSafetyTimeout() {
+        cancelNfcSafetyTimeout()
+
+        nfcAnimationTimeoutRunnable = Runnable {
+            if (hasTerminalOutcome || nfcAnimationContainer.visibility != View.VISIBLE) {
+                return@Runnable
             }
-        } else {
-            @Suppress("DEPRECATION")
-            window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-            )
+            Log.e(TAG, "NFC safety timeout triggered - payment did not reach terminal state")
+            handlePaymentError("Payment failed. Please try again.")
         }
-        window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+
+        nfcTimeoutHandler.postDelayed(nfcAnimationTimeoutRunnable!!, NFC_ANIMATION_SAFETY_TIMEOUT_MS)
     }
-    
-    private fun exitFullScreen() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.insetsController?.show(android.view.WindowInsets.Type.statusBars() or android.view.WindowInsets.Type.navigationBars())
-        } else {
-            @Suppress("DEPRECATION")
-            window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
-        }
-        window.clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+
+    private fun cancelNfcSafetyTimeout() {
+        nfcAnimationTimeoutRunnable?.let { nfcTimeoutHandler.removeCallbacks(it) }
+        nfcAnimationTimeoutRunnable = null
     }
 
     private fun showNfcAnimationSuccess(amountText: String) {
-        if (webViewReady) {
-            val escapedAmount = amountText.replace("'", "\\'")
-            nfcAnimationWebView.evaluateJavascript("showSuccess('$escapedAmount')", null)
-            
-            // Play success sound and vibration
-            playNfcSuccessFeedback()
-        }
+        if (nfcAnimationContainer.visibility != View.VISIBLE) return
+
+        pendingNfcErrorMessage = null
+        animationResultAmountText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 56f)
+        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
+        animationResultLabelText.maxLines = 1
+        animationResultAmountText.text = amountText
+        animationResultLabelText.text = getString(R.string.transaction_detail_type_payment_received)
+        nfcAnimationView.showSuccess(amountText)
+
+        // Play success sound and vibration
+        playNfcSuccessFeedback()
     }
 
     private fun playNfcSuccessFeedback() {
@@ -1165,42 +1178,45 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun showNfcAnimationError(message: String) {
-        if (webViewReady) {
-            val escapedMessage = message.replace("'", "\\'")
-            nfcAnimationWebView.evaluateJavascript("showError('$escapedMessage')", null)
-        }
+        if (nfcAnimationContainer.visibility != View.VISIBLE) return
+
+        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        animationResultLabelText.maxLines = 3
+        animationResultAmountText.text = ""
+        animationResultLabelText.text = message
+        nfcAnimationView.showError(message)
     }
 
-    /** JavaScript interface for communication from WebView */
-    inner class AnimationBridge {
-        @JavascriptInterface
-        fun onAnimationComplete(success: Boolean) {
-            runOnUiThread {
-                Log.d(TAG, "Animation complete, success: $success")
-                showCloseButtonAnimated()
-                
-                // Trigger post-payment operations after animation completes
-                if (success && pendingNfcSuccessToken != null) {
-                    val token = pendingNfcSuccessToken!!
-                    pendingNfcSuccessToken = null
-                    pendingNfcSuccessAmount = 0
-                    
-                    // Trigger auto-withdrawal and basket archiving (same as showPaymentSuccess does)
-                    // but don't show PaymentReceivedActivity since we're already showing animation
-                    triggerPostPaymentOperations(token)
-                }
-            }
+    private fun onNfcAnimationResultDisplayed(success: Boolean) {
+        val elapsedMs = if (nfcOverlayShownAtMs > 0) {
+            SystemClock.elapsedRealtime() - nfcOverlayShownAtMs
+        } else {
+            0L
+        }
+        Log.d(TAG, "success_rendered_ms=$elapsedMs")
+
+        animateResultTextIn(showAmount = success)
+        showCloseButtonAnimated()
+
+        if (success && pendingNfcSuccessToken != null) {
+            val token = pendingNfcSuccessToken!!
+            pendingNfcSuccessToken = null
+            pendingNfcSuccessAmount = 0
+
+            // Trigger auto-withdrawal and basket archiving (same as showPaymentSuccess does)
+            // but don't show PaymentReceivedActivity since we're already showing animation
+            triggerPostPaymentOperations(token)
         }
     }
 
     private fun showCloseButtonAnimated() {
-        // Exit full-screen mode to show navigation bar (important for Sunmi V2 and similar devices)
-        // This ensures users can tap the close button once without needing to first bring up the nav bar
-        exitFullScreen()
+        applyFullscreenForAnimationOverlay()
+        ViewCompat.requestApplyInsets(nfcAnimationContainer)
         
         // Start from invisible and below
         animationCloseButton.alpha = 0f
         animationCloseButton.translationY = 60f
+        animationCloseButton.isEnabled = true
         animationCloseButton.visibility = View.VISIBLE
         
         // Animate in with fade + slide up
@@ -1212,9 +1228,107 @@ class PaymentRequestActivity : AppCompatActivity() {
             .start()
     }
 
+    private fun animateResultTextIn(showAmount: Boolean) {
+        val amountStartTranslation = animationAmountBaseTranslationY - dpToPx(16f).toFloat()
+        val labelStartTranslation = animationLabelBaseTranslationY - dpToPx(12f).toFloat()
+
+        if (showAmount) {
+            animationResultAmountText.visibility = View.VISIBLE
+            animationResultAmountText.alpha = 0f
+            animationResultAmountText.translationY = amountStartTranslation
+        } else {
+            animationResultAmountText.visibility = View.GONE
+        }
+
+        animationResultLabelText.visibility = View.VISIBLE
+        animationResultLabelText.alpha = 0f
+        animationResultLabelText.translationY = labelStartTranslation
+
+        val animators = mutableListOf<android.animation.Animator>().apply {
+            if (showAmount) {
+                add(ObjectAnimator.ofFloat(animationResultAmountText, View.ALPHA, 0f, 1f))
+                add(
+                    ObjectAnimator.ofFloat(
+                        animationResultAmountText,
+                        View.TRANSLATION_Y,
+                        amountStartTranslation,
+                        animationAmountBaseTranslationY,
+                    ),
+                )
+            }
+            add(ObjectAnimator.ofFloat(animationResultLabelText, View.ALPHA, 0f, 1f))
+            add(
+                ObjectAnimator.ofFloat(
+                    animationResultLabelText,
+                    View.TRANSLATION_Y,
+                    labelStartTranslation,
+                    animationLabelBaseTranslationY,
+                ),
+            )
+        }
+
+        AnimatorSet().apply {
+            if (showAmount) {
+                startDelay = 120L
+            }
+            duration = 320L
+            interpolator = android.view.animation.DecelerateInterpolator()
+            playTogether(animators)
+            start()
+        }
+    }
+
+    private fun resetResultTextViews() {
+        animationResultAmountText.visibility = View.GONE
+        animationResultAmountText.alpha = 0f
+        animationResultAmountText.translationY = animationAmountBaseTranslationY
+        animationResultAmountText.text = ""
+
+        animationResultLabelText.visibility = View.GONE
+        animationResultLabelText.alpha = 0f
+        animationResultLabelText.translationY = animationLabelBaseTranslationY
+        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+        animationResultLabelText.maxLines = 3
+        animationResultLabelText.text = ""
+    }
+
+    private fun applyFullscreenForAnimationOverlay() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            hide(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
+            systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+    }
+
+    private fun restoreSystemBarsAfterAnimation() {
+        WindowInsetsControllerCompat(window, window.decorView).show(
+            WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars()
+        )
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+    }
+
+    private fun adjustAnimationCloseButtonBottomMargin(insets: WindowInsetsCompat) {
+        val systemInsets = insets.getInsetsIgnoringVisibility(
+            WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+        )
+        val minBottomSpacingPx = dpToPx(72f)
+        val targetBottomMargin = maxOf(minBottomSpacingPx, systemInsets.bottom + dpToPx(24f))
+
+        val layoutParams = animationCloseButton.layoutParams as? ViewGroup.MarginLayoutParams ?: return
+        if (layoutParams.bottomMargin != targetBottomMargin) {
+            layoutParams.bottomMargin = targetBottomMargin
+            animationCloseButton.layoutParams = layoutParams
+        }
+    }
+
+    private fun dpToPx(dp: Float): Int {
+        return (dp * resources.displayMetrics.density).toInt()
+    }
+
     companion object {
         private const val TAG = "PaymentRequestActivity"
         private val PATTERN_SUCCESS = longArrayOf(0, 50, 100, 50)
+        private const val NFC_ANIMATION_SAFETY_TIMEOUT_MS = 10_000L
 
 
 

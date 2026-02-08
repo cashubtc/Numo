@@ -275,7 +275,7 @@
             android:background="@android:color/transparent" />
     </LinearLayout>
 
-    <!-- NFC Animation Overlay (WebView) - ONLY for NFC payments -->
+    <!-- NFC Animation Overlay (Native View) - ONLY for NFC payments -->
     <FrameLayout
         android:id="@+id/nfc_animation_container"
         android:layout_width="match_parent"
@@ -290,11 +290,38 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <WebView
-            android:id="@+id/nfc_animation_webview"
+        <com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
+            android:id="@+id/nfc_animation_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@android:color/transparent" />
+
+        <TextView
+            android:id="@+id/animation_result_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:translationY="-180dp"
+            android:textColor="@android:color/white"
+            android:textSize="56sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/animation_result_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|center_vertical"
+            android:gravity="center"
+            android:maxLines="3"
+            android:textAlignment="center"
+            android:translationY="-120dp"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
 
         <!-- Close button appears after animation completes -->
         <TextView
