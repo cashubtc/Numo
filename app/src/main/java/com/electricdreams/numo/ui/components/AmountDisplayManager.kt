@@ -53,12 +53,20 @@ class AmountDisplayManager(
 
         // Convert current input value to the other unit before switching
         val currentInputStr = getCurrentInput(satoshiInput, fiatInput).toString()
+        val currencyCode = CurrencyManager.getInstance(context).getCurrentCurrency()
+        val currency = Amount.Currency.fromCode(currencyCode)
+
         if (currentInputStr.isNotEmpty()) {
             try {
                 if (isUsdInputMode) {
                     // Currently in fiat mode, converting to satoshi mode
-                    val fiatCents = currentInputStr.toLong()
-                    val fiatAmount = fiatCents / 100.0
+                    val rawInput = currentInputStr.toLong()
+                    // JPY input is already whole units, others are cents
+                    val fiatAmount = if (currency == Amount.Currency.JPY) {
+                        rawInput.toDouble()
+                    } else {
+                        rawInput / 100.0
+                    }
                     val satoshis = fiatToSatoshis(fiatAmount)
                     satoshiInput.clear()
                     satoshiInput.append(satoshis.toString())
@@ -66,9 +74,14 @@ class AmountDisplayManager(
                     // Currently in satoshi mode, converting to fiat mode
                     val satoshis = currentInputStr.toLong()
                     val fiatAmount = bitcoinPriceWorker?.satoshisToFiat(satoshis) ?: 0.0
-                    val fiatCents = (fiatAmount * 100).toLong()
+                    // JPY stored as whole units, others as cents
+                    val storedValue = if (currency == Amount.Currency.JPY) {
+                        fiatAmount.toLong()
+                    } else {
+                        (fiatAmount * 100).toLong()
+                    }
                     fiatInput.clear()
-                    fiatInput.append(fiatCents.toString())
+                    fiatInput.append(storedValue.toString())
                 }
             } catch (e: NumberFormatException) {
                 // If conversion fails, don't change anything
@@ -98,9 +111,18 @@ class AmountDisplayManager(
 
         if (isUsdInputMode) {
             // Input mode: fiat, display fiat as primary, sats as secondary
-            val fiatCents = if (currentInputStr.isEmpty()) 0L else currentInputStr.toLong()
             val currencyCode = CurrencyManager.getInstance(context).getCurrentCurrency()
             val currency = Amount.Currency.fromCode(currencyCode)
+            
+            val rawInput = if (currentInputStr.isEmpty()) 0L else currentInputStr.toLong()
+            
+            // For JPY, input is whole units, but Amount expects cents (value * 100)
+            // For others, input is cents
+            val fiatCents = if (currency == Amount.Currency.JPY) {
+                rawInput * 100
+            } else {
+                rawInput
+            }
             
             amountDisplayText = Amount(fiatCents, currency).toString()
             
