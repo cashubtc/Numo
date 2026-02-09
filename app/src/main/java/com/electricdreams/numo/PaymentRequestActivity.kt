@@ -647,6 +647,12 @@ class PaymentRequestActivity : AppCompatActivity() {
                         // validation, swap-to-Lightning-mint (if needed),
                         // and redemption to CashuPaymentHelper.
                         uiScope.launch {
+                            // Cancel the NFC safety timeout immediately as we have received data.
+                            // The subsequent processing (swap/redemption) may take longer than
+                            // the NFC timeout allows, but that is a network operation, not an NFC one.
+                            cancelNfcSafetyTimeout()
+                            Log.d(TAG, "NFC token received, cancelled safety timeout")
+
                             try {
                                 val paymentId = pendingPaymentId
                                 val paymentContext = com.electricdreams.numo.payment.SwapToLightningMintManager.PaymentContext(
@@ -1109,7 +1115,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             handlePaymentError("Payment failed. Please try again.")
         }
 
-        nfcTimeoutHandler.postDelayed(nfcAnimationTimeoutRunnable!!, NFC_ANIMATION_SAFETY_TIMEOUT_MS)
+        nfcTimeoutHandler.postDelayed(nfcAnimationTimeoutRunnable!!, NFC_READ_TIMEOUT_MS)
     }
 
     private fun cancelNfcSafetyTimeout() {
@@ -1379,7 +1385,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "PaymentRequestActivity"
-        private const val NFC_ANIMATION_SAFETY_TIMEOUT_MS = 10_000L
+        private const val NFC_READ_TIMEOUT_MS = 10_000L
 
 
 
