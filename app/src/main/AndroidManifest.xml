@@ -40,6 +40,7 @@
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.Numo.Splash"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -54,6 +55,7 @@
             android:label="@string/app_name"
             android:theme="@style/Theme.Numo"
             android:launchMode="singleTop"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden">
         </activity>
 
@@ -62,6 +64,7 @@
             android:exported="false"
             android:label="Payment Request"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName="com.electricdreams.numo.ModernPOSActivity">
             <meta-data
@@ -74,6 +77,7 @@
             android:exported="false"
             android:label="Payment Received"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName="com.electricdreams.numo.ModernPOSActivity">
             <meta-data
@@ -86,6 +90,7 @@
             android:exported="false"
             android:label="Payment Failed"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName="com.electricdreams.numo.ModernPOSActivity">
             <meta-data
@@ -97,6 +102,7 @@
             android:exported="false"
             android:label="@string/history_toolbar_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".ModernPOSActivity">
             <meta-data
@@ -108,6 +114,7 @@
             android:exported="false"
             android:label="@string/transaction_detail_toolbar_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.history.PaymentsHistoryActivity">
             <meta-data
@@ -119,6 +126,7 @@
             android:exported="false"
             android:label="@string/basket_receipt_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.history.TransactionDetailActivity">
             <meta-data
@@ -130,6 +138,7 @@
             android:exported="false"
             android:label="@string/settings_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".ModernPOSActivity">
             <meta-data
@@ -141,6 +150,7 @@
             android:exported="false"
             android:label="@string/settings_theme_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.SettingsActivity">
             <meta-data
@@ -152,6 +162,7 @@
             android:exported="false"
             android:label="@string/settings_currency_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.SettingsActivity">
             <meta-data
@@ -164,6 +175,7 @@
             android:label="@string/settings_mints_title"
             android:theme="@style/Theme.Numo"
             android:windowSoftInputMode="adjustResize"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.SettingsActivity">
             <meta-data
@@ -175,6 +187,7 @@
             android:exported="false"
             android:label="@string/mint_details_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.MintsSettingsActivity">
             <meta-data
@@ -185,6 +198,7 @@
             android:exported="false"
             android:label="@string/settings_security_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.SettingsActivity">
             <meta-data
@@ -196,6 +210,7 @@
             android:exported="false"
             android:label="@string/language_settings_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.SettingsActivity">
             <meta-data
@@ -208,12 +223,14 @@
             android:exported="false"
             android:label="Enter PIN"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden" />
         
         <activity android:name="com.electricdreams.numo.feature.pin.PinSetupActivity"
             android:exported="false"
             android:label="Set Up PIN"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.SecuritySettingsActivity">
             <meta-data
@@ -225,6 +242,7 @@
             android:exported="false"
             android:label="Reset PIN"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.pin.PinEntryActivity">
             <meta-data
@@ -236,6 +254,7 @@
             android:exported="false"
             android:label="About"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.SettingsActivity">
             <meta-data
@@ -247,6 +266,7 @@
             android:exported="false"
             android:label="@string/developer_settings_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.SettingsActivity">
             <meta-data
@@ -258,6 +278,7 @@
             android:exported="false"
             android:label="@string/developer_error_logs_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.DeveloperSettingsActivity">
             <meta-data
@@ -269,6 +290,7 @@
             android:exported="false"
             android:label="@string/seed_phrase_toolbar_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.SecuritySettingsActivity">
             <meta-data
@@ -280,6 +302,7 @@
             android:exported="false"
             android:label="@string/restore_progress_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.SecuritySettingsActivity">
             <meta-data
@@ -292,6 +315,7 @@
             android:exported="false"
             android:label="Withdraw"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.MintsSettingsActivity">
             <meta-data
@@ -303,6 +327,7 @@
             android:exported="false"
             android:label="Confirm Withdrawal"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.WithdrawLightningActivity">
             <meta-data
@@ -314,6 +339,7 @@
             android:exported="false"
             android:label="Withdrawal Complete"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".ModernPOSActivity">
             <meta-data
@@ -326,6 +352,7 @@
             android:exported="false"
             android:label="Add Item"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:windowSoftInputMode="adjustResize"
             android:parentActivityName=".feature.items.ItemListActivity">
@@ -356,6 +383,7 @@
             android:exported="false"
             android:label="Items"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.SettingsActivity">
             <meta-data
@@ -367,6 +395,7 @@
             android:exported="false"
             android:label="Tips"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.SettingsActivity">
             <meta-data
@@ -378,6 +407,7 @@
             android:exported="false"
             android:label="Add a Tip"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".ModernPOSActivity">
             <meta-data
@@ -389,6 +419,7 @@
             android:exported="false"
             android:label="Checkout"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".ModernPOSActivity">
             <meta-data
@@ -411,6 +442,7 @@
             android:exported="false"
             android:label="@string/saved_baskets_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.items.ItemSelectionActivity">
             <meta-data
@@ -422,6 +454,7 @@
             android:exported="false"
             android:label="@string/basket_archive_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.baskets.SavedBasketsActivity">
             <meta-data
@@ -433,6 +466,7 @@
             android:exported="false"
             android:label="@string/basket_names_settings_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.SettingsActivity">
             <meta-data
@@ -444,6 +478,7 @@
             android:exported="false"
             android:label="@string/auto_withdraw_title"
             android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.SettingsActivity">
             <meta-data
