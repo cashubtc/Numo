@@ -130,6 +130,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var pendingNfcSuccessToken: String? = null
     private var pendingNfcSuccessAmount: Long = 0
     private var currentOverlayActionMode: OverlayActionMode = OverlayActionMode.SUCCESS
+    private var isProcessingNfcPayment = false
 
     private val uiScope = CoroutineScope(Dispatchers.Main)
 
@@ -647,6 +648,15 @@ class PaymentRequestActivity : AppCompatActivity() {
                         // validation, swap-to-Lightning-mint (if needed),
                         // and redemption to CashuPaymentHelper.
                         uiScope.launch {
+                            // Check if we are already processing a payment to avoid double-processing
+                            if (isProcessingNfcPayment) {
+                                Log.d(TAG, "NFC token received but ignored - already processing a payment")
+                                return@launch
+                            }
+                            
+                            // Mark as processing immediately to lock out subsequent NFC reads
+                            isProcessingNfcPayment = true
+
                             // Cancel the NFC safety timeout immediately as we have received data.
                             // The subsequent processing (swap/redemption) may take longer than
                             // the NFC timeout allows, but that is a network operation, not an NFC one.
@@ -705,6 +715,10 @@ class PaymentRequestActivity : AppCompatActivity() {
 
                     override fun onNfcReadingStarted() {
                         runOnUiThread {
+                            if (isProcessingNfcPayment || hasTerminalOutcome) {
+                                Log.d(TAG, "NFC reading started ignored - already processing or done")
+                                return@runOnUiThread
+                            }
                             Log.d(TAG, "NFC reading started - showing animation overlay")
                             showNfcAnimationOverlay()
                         }
