@@ -1172,7 +1172,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
         animationResultLabelText.maxLines = 2
         animationResultAmountText.text = ""
-        animationResultLabelText.text = formatErrorLabel(message)
+        animationResultLabelText.text = getString(R.string.payment_failure_title)
         nfcAnimationView.showError(message)
     }
 
