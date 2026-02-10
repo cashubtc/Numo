@@ -20,6 +20,10 @@ import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.ui.adapter.PaymentsHistoryAdapter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.reflect.Type
 import java.util.Collections
 
@@ -81,13 +85,58 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         }
     }
 
+
     private fun handleEntryClick(entry: PaymentHistoryEntry, position: Int) {
         if (entry.isPending()) {
-            // Resume the pending payment
-            resumePendingPayment(entry)
+            // Check if this is a pending swap-to-lightning-mint flow
+            if (entry.getSwapLightningQuoteId() != null) {
+                checkAndFinalizeSwap(entry)
+            } else {
+                // Resume the pending payment normally
+                resumePendingPayment(entry)
+            }
         } else {
             // Show transaction details
             showTransactionDetails(entry, position)
+        }
+    }
+
+    private fun checkAndFinalizeSwap(entry: PaymentHistoryEntry) {
+        val progressDialog = android.app.ProgressDialog(this).apply {
+            setMessage(getString(R.string.history_checking_payment_status))
+            setCancelable(false)
+            show()
+        }
+
+        CoroutineScope(Dispatchers.IO).launch {
+            val success = com.electricdreams.numo.payment.SwapToLightningMintManager.tryFinalizePendingSwap(
+                this@PaymentsHistoryActivity,
+                entry
+            )
+
+            withContext(Dispatchers.Main) {
+                progressDialog.dismiss()
+                if (success) {
+                    Toast.makeText(
+                        this@PaymentsHistoryActivity,
+                        R.string.payment_request_status_success,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    
+                    // Launch success screen
+                    val intent = Intent(this@PaymentsHistoryActivity, com.electricdreams.numo.PaymentReceivedActivity::class.java).apply {
+                        putExtra(com.electricdreams.numo.PaymentReceivedActivity.EXTRA_TOKEN, "")
+                        putExtra(com.electricdreams.numo.PaymentReceivedActivity.EXTRA_AMOUNT, entry.amount)
+                    }
+                    startActivity(intent)
+                    
+                    // Reload list
+                    loadHistory()
+                } else {
+                    // Fall back to resume if not finalized
+                    resumePendingPayment(entry)
+                }
+            }
         }
     }
 

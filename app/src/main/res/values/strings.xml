@@ -364,6 +364,7 @@
 
     <string name="payment_history_title">Payment</string>
     <string name="payment_history_status_pending">Pending</string>
+    <string name="history_checking_payment_status">Checking payment status...</string>
 
     <string name="transaction_detail_toolbar_back">Back</string>
     <string name="transaction_detail_toolbar_title">Transaction Details</string>
