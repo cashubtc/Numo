@@ -145,11 +145,8 @@ class PaymentRequestActivity : AppCompatActivity() {
             override fun onLightningTabSelected() {
                 Log.d(TAG, "onLightningTabSelected() called. lightningStarted=$lightningStarted, lightningInvoice=$lightningInvoice")
 
-                // Start lightning quote flow once when tab first selected
-                if (!lightningStarted) {
-                    startLightningMintFlow()
-                } else if (lightningInvoice != null) {
-                    // If invoice is already known, try to switch HCE now
+                // If invoice is already known, try to switch HCE now
+                if (lightningInvoice != null) {
                     setHceToLightning()
                 }
             }
@@ -374,6 +371,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         // Initialize Lightning handler with preferred mint (will be started when tab is selected)
         val preferredLightningMint = mintManager.getPreferredLightningMint()
         lightningHandler = LightningMintHandler(preferredLightningMint, allowedMints, uiScope)
+        startLightningMintFlow()
 
         // Check if NDEF is available
         val ndefAvailable = NdefHostCardEmulationService.isHceAvailable(this)
@@ -412,8 +410,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         nostrHandler = NostrPaymentHandler(this, allowedMints)
         startNostrPaymentFlow()
 
-        // Lightning flow is started only when user switches to Lightning tab
-        // (see TabSelectionListener.onLightningTabSelected())
+        // Lightning flow is now also started immediately (see startLightningMintFlow() call above)
     }
 
     private fun setHceToCashu() {
