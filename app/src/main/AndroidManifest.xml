@@ -482,6 +482,17 @@
                 android:value=".feature.settings.SettingsActivity" />
         </activity>
         
+        <activity android:name="com.electricdreams.numo.feature.settings.BtcPaySettingsActivity"
+            android:exported="false"
+            android:label="@string/btcpay_settings_title"
+            android:theme="@style/Theme.Numo"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.settings.SettingsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.settings.SettingsActivity" />
+        </activity>
+
         <activity android:name="com.electricdreams.numo.feature.autowithdraw.AutoWithdrawSettingsActivity"
             android:exported="false"
             android:label="@string/auto_withdraw_title"

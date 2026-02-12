@@ -152,6 +152,63 @@ object CashuPaymentHelper {
         }
     }
 
+    /**
+     * Parse a NUT-18 Payment Request, remove any transport methods (making it suitable for NFC/HCE),
+     * and return the re-encoded string.
+     */
+    @JvmStatic
+    fun stripTransports(paymentRequest: String): String? {
+        return try {
+            val decoded = PaymentRequest.decode(paymentRequest)
+            // Clear transports
+            decoded.transport = Optional.empty()
+            decoded.encode()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error stripping transports from payment request: ${e.message}", e)
+            null
+        }
+    }
+
+    /**
+     * Parse a NUT-18 Payment Request and extract the 'post' transport URL if available.
+     */
+    @JvmStatic
+    fun getPostUrl(paymentRequest: String): String? {
+        return try {
+            val decoded = PaymentRequest.decode(paymentRequest)
+            if (decoded.transport.isPresent) {
+                val transports = decoded.transport.get()
+                for (t in transports) {
+                    if (t.type.equals("post", ignoreCase = true)) {
+                        return t.target
+                    }
+                }
+            }
+            null
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting POST URL from payment request: ${e.message}", e)
+            null
+        }
+    }
+
+    /**
+     * Parse a NUT-18 Payment Request and extract the ID.
+     */
+    @JvmStatic
+    fun getId(paymentRequest: String): String? {
+        return try {
+            val decoded = PaymentRequest.decode(paymentRequest)
+            if (decoded.id.isPresent) {
+                decoded.id.get()
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting ID from payment request: ${e.message}", e)
+            null
+        }
+    }
+
     // === Token helpers =====================================================
 
     @JvmStatic

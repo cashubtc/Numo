@@ -802,4 +802,25 @@
     <string name="developer_error_logs_entry_copy">Copy Entry</string>
     <string name="developer_error_logs_clear_dialog_title">Clear Error Logs</string>
     <string name="developer_error_logs_clear_dialog_message">Clear all stored error logs? This cannot be undone.</string>
+
+    <!-- BTCPay Server Settings -->
+    <string name="btcpay_settings_title">BTCPay Server</string>
+    <string name="btcpay_settings_subtitle">BTCPay Server integration</string>
+    <string name="btcpay_enable_title">BTCPay Server</string>
+    <string name="btcpay_enable_subtitle">Enable BTCPay Server integration</string>
+    <string name="btcpay_section_connection">Connection</string>
+    <string name="btcpay_server_url_label">Server URL</string>
+    <string name="btcpay_server_url_hint">https://btcpay.example.com</string>
+    <string name="btcpay_api_key_label">API Key</string>
+    <string name="btcpay_api_key_hint">Enter your API key</string>
+    <string name="btcpay_store_id_label">Store ID</string>
+    <string name="btcpay_store_id_hint">Enter your store ID</string>
+    <string name="btcpay_section_test">Test</string>
+    <string name="btcpay_test_connection_title">Test Connection</string>
+    <string name="btcpay_test_connection_subtitle">Verify your server settings</string>
+    <string name="btcpay_test_connecting">Connecting...</string>
+    <string name="btcpay_test_success">Connected successfully</string>
+    <string name="btcpay_test_failed">Connection failed: %1$s</string>
+    <string name="btcpay_test_fill_all_fields">Please fill in all fields</string>
+    <string name="btcpay_test_unknown_error">Unknown error</string>
 </resources>

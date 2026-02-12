@@ -98,6 +98,11 @@ class SettingsActivity : AppCompatActivity() {
             openProtectedActivity(AutoWithdrawSettingsActivity::class.java)
         }
 
+        // BTCPay Server - protected (holds API key)
+        findViewById<View>(R.id.btcpay_settings_item).setOnClickListener {
+            openProtectedActivity(BtcPaySettingsActivity::class.java)
+        }
+
         // === Security Section ===
 
         // Security settings - always accessible (contains PIN setup itself)

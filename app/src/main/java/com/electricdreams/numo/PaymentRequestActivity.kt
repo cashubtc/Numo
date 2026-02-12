@@ -29,8 +29,13 @@ import com.electricdreams.numo.payment.NostrPaymentHandler
 import com.electricdreams.numo.payment.PaymentTabManager
 import com.electricdreams.numo.ui.util.QrCodeGenerator
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
+import com.electricdreams.numo.core.payment.PaymentService
+import com.electricdreams.numo.core.payment.PaymentServiceFactory
+import com.electricdreams.numo.core.payment.PaymentState
+import com.electricdreams.numo.core.payment.impl.BtcPayPaymentService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -74,10 +79,18 @@ class PaymentRequestActivity : AppCompatActivity() {
     // Tab manager for Cashu/Lightning tab switching
     private lateinit var tabManager: PaymentTabManager
 
+    // Payment service abstraction (Local CDK or BTCPay)
+    private lateinit var paymentService: PaymentService
+
     // Payment handlers
     private var nostrHandler: NostrPaymentHandler? = null
     private var lightningHandler: LightningMintHandler? = null
     private var lightningStarted = false
+
+    // BTCPay payment tracking
+    private var btcPayPaymentId: String? = null
+    private var btcPayCashuPR: String? = null
+    private var btcPayPollingActive = false
 
     // Lightning quote info for history
     private var lightningInvoice: String? = null
@@ -366,6 +379,77 @@ class PaymentRequestActivity : AppCompatActivity() {
         statusText.visibility = View.VISIBLE
         statusText.text = getString(R.string.payment_request_status_preparing)
 
+        // Create the payment service (BTCPay or Local)
+        paymentService = PaymentServiceFactory.create(this)
+
+        val isBtcPay = paymentService is BtcPayPaymentService
+
+        if (isBtcPay) {
+            initializeBtcPayPaymentRequest()
+        } else {
+            initializeLocalPaymentRequest()
+        }
+    }
+
+    /**
+     * BTCPay mode: create an invoice via BTCPay Server, display the bolt11 /
+     * cashu QR codes from the response, and poll for payment status.
+     */
+    private fun initializeBtcPayPaymentRequest() {
+        uiScope.launch {
+            val result = paymentService.createPayment(paymentAmount, "Payment of $paymentAmount sats")
+            result.onSuccess { payment ->
+                btcPayPaymentId = payment.paymentId
+
+                // Show Cashu QR (cashuPR from BTCNutServer)
+                if (!payment.cashuPR.isNullOrBlank()) {
+                    btcPayCashuPR = payment.cashuPR
+                    try {
+                        val qrBitmap = QrCodeGenerator.generate(payment.cashuPR, 512)
+                        cashuQrImageView.setImageBitmap(qrBitmap)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error generating BTCPay Cashu QR: ${e.message}", e)
+                    }
+
+                    // Also use cashuPR for HCE
+                    hcePaymentRequest = CashuPaymentHelper.stripTransports(payment.cashuPR) ?: payment.cashuPR
+                    if (NdefHostCardEmulationService.isHceAvailable(this@PaymentRequestActivity)) {
+                        val serviceIntent = Intent(this@PaymentRequestActivity, NdefHostCardEmulationService::class.java)
+                        startService(serviceIntent)
+                        setupNdefPayment()
+                    }
+                }
+
+                // Show Lightning QR
+                if (!payment.bolt11.isNullOrBlank()) {
+                    lightningInvoice = payment.bolt11
+                    try {
+                        val qrBitmap = QrCodeGenerator.generate(payment.bolt11, 512)
+                        lightningQrImageView.setImageBitmap(qrBitmap)
+                        lightningLoadingSpinner.visibility = View.GONE
+                        lightningLogoCard.visibility = View.VISIBLE
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error generating BTCPay Lightning QR: ${e.message}", e)
+                        lightningLoadingSpinner.visibility = View.GONE
+                    }
+                    lightningStarted = true
+                }
+
+                statusText.text = getString(R.string.payment_request_status_waiting_for_payment)
+
+                // Start polling BTCPay for payment status
+                startBtcPayPolling(payment.paymentId)
+            }.onFailure { error ->
+                Log.e(TAG, "BTCPay createPayment failed: ${error.message}", error)
+                statusText.text = getString(R.string.payment_request_status_error_generic, error.message ?: "Unknown error")
+            }
+        }
+    }
+
+    /**
+     * Local (CDK) mode: the original flow – NDEF, Nostr, and Lightning tab.
+     */
+    private fun initializeLocalPaymentRequest() {
         // Get allowed mints
         val mintManager = MintManager.getInstance(this)
         val allowedMints = mintManager.getAllowedMints()
@@ -414,6 +498,43 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Lightning flow is started only when user switches to Lightning tab
         // (see TabSelectionListener.onLightningTabSelected())
+    }
+
+    /**
+     * Poll BTCPay invoice status every 2 seconds until terminal state.
+     */
+    private fun startBtcPayPolling(paymentId: String) {
+        btcPayPollingActive = true
+        uiScope.launch {
+            while (btcPayPollingActive && !hasTerminalOutcome) {
+                delay(2000)
+                if (!btcPayPollingActive || hasTerminalOutcome) break
+
+                val statusResult = paymentService.checkPaymentStatus(paymentId)
+                statusResult.onSuccess { state ->
+                    when (state) {
+                        PaymentState.PAID -> {
+                            btcPayPollingActive = false
+                            handleLightningPaymentSuccess()
+                        }
+                        PaymentState.EXPIRED -> {
+                            btcPayPollingActive = false
+                            handlePaymentError("Invoice expired")
+                        }
+                        PaymentState.FAILED -> {
+                            btcPayPollingActive = false
+                            handlePaymentError("Invoice invalid")
+                        }
+                        PaymentState.PENDING -> {
+                            // Continue polling
+                        }
+                    }
+                }.onFailure { error ->
+                    Log.w(TAG, "BTCPay poll error: ${error.message}")
+                    // Continue polling on transient errors
+                }
+            }
+        }
     }
 
     private fun setHceToCashu() {
@@ -596,6 +717,33 @@ class PaymentRequestActivity : AppCompatActivity() {
                         // and redemption to CashuPaymentHelper.
                         uiScope.launch {
                             try {
+                                // If using BTCPay, we must send the token to the POST endpoint
+                                // specified in the original payment request.
+                                if (paymentService is BtcPayPaymentService) {
+                                    val pr = btcPayCashuPR
+                                    if (pr != null) {
+                                        val postUrl = CashuPaymentHelper.getPostUrl(pr)
+                                        val requestId = CashuPaymentHelper.getId(pr)
+
+                                        if (postUrl != null && requestId != null) {
+                                            Log.d(TAG, "Redeeming NFC token via BTCPay NUT-18 POST endpoint")
+                                            val result = (paymentService as BtcPayPaymentService).redeemTokenToPostEndpoint(
+                                                token, requestId, postUrl
+                                            )
+                                            result.onSuccess {
+                                                withContext(Dispatchers.Main) {
+                                                    handleLightningPaymentSuccess()
+                                                }
+                                            }.onFailure { e ->
+                                                throw Exception("BTCPay redemption failed: ${e.message}")
+                                            }
+                                            return@launch
+                                        } else {
+                                            Log.w(TAG, "BTCPay PR missing postUrl or id, falling back to local flow (likely to fail)")
+                                        }
+                                    }
+                                }
+
                                 val paymentId = pendingPaymentId
                                 val paymentContext = com.electricdreams.numo.payment.SwapToLightningMintManager.PaymentContext(
                                     paymentId = paymentId,
@@ -820,6 +968,10 @@ class PaymentRequestActivity : AppCompatActivity() {
         // a safety net for any paths that might reach cleanup without having
         // called [beginTerminalOutcome] explicitly.
         hasTerminalOutcome = true
+
+        // Stop BTCPay polling
+        btcPayPollingActive = false
+
         // Stop Nostr handler
         nostrHandler?.stop()
         nostrHandler = null
