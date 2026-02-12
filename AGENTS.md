@@ -6,8 +6,8 @@ This repository contains the source code for the Numo Android application. These
 - **Platform:** Android (Min SDK 24, Target SDK 34)
 - **Language:** Kotlin (primary), Java (legacy/interop)
 - **Build System:** Gradle (Kotlin DSL)
-- **Architecture:** Standard Android MVC/MVVM mix.
-- **Key Libraries:** AndroidX, Material Components, Coroutines, Jackson/Gson, Cashu SDK (CDK), ZXing.
+- **Architecture:** Standard Android MVC/MVVM mix
+- **Key Libraries:** AndroidX, Material Components, Coroutines, Jackson/Gson, Cashu SDK (CDK), ZXing
 
 ## 2. Operational Commands
 
