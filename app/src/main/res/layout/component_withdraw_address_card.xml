@@ -44,10 +44,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/withdraw_address_card_title"
-                android:textAppearance="@style/Text.Body"
                 android:textColor="@color/color_text_primary"
                 android:textSize="17sp"
-                android:textStyle="bold" />
+                android:fontFamily="sans-serif-medium" />
 
             <TextView
                 android:id="@+id/subtitle_text"
@@ -88,7 +87,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:background="@drawable/bg_search_field"
+            android:background="@drawable/bg_input_pill"
             android:hint="@string/withdraw_lightning_address_hint_value"
             android:inputType="textEmailAddress"
             android:minHeight="52dp"
@@ -116,7 +115,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:background="@drawable/bg_search_field"
+            android:background="@drawable/bg_input_pill"
             android:hint="@string/withdraw_amount_placeholder"
             android:inputType="number"
             android:minHeight="52dp"
