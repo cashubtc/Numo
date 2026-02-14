@@ -45,7 +45,8 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
     private lateinit var feeText: TextView
     private lateinit var totalText: TextView
     private lateinit var confirmButton: Button
-    private lateinit var progressOverlay: View
+    private lateinit var confirmationScroll: View
+    private lateinit var processingContainer: View
     private lateinit var processingStatusText: TextView
     private lateinit var processingAmountValue: TextView
     private lateinit var processingDestinationValue: TextView
@@ -92,7 +93,8 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
         feeText = findViewById(R.id.fee_text)
         totalText = findViewById(R.id.total_text)
         confirmButton = findViewById(R.id.confirm_button)
-        progressOverlay = findViewById(R.id.progress_overlay)
+        confirmationScroll = findViewById(R.id.confirmation_scroll)
+        processingContainer = findViewById(R.id.processing_container)
         processingStatusText = findViewById(R.id.processing_status_text)
         processingAmountValue = findViewById(R.id.processing_amount_value)
         processingDestinationValue = findViewById(R.id.processing_destination_value)
@@ -349,14 +351,34 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
             processingAmountValue.text = totalText.text
             processingDestinationValue.text = destinationText.text
             updateProcessingState(ProcessingStep.PREPARING)
-            progressOverlay.alpha = 0f
-            progressOverlay.visibility = View.VISIBLE
-            progressOverlay.animate().alpha(1f).setDuration(200).start()
+
+            // Fade out confirmation content
+            confirmationScroll.animate().alpha(0f).setDuration(200).withEndAction {
+                confirmationScroll.visibility = View.GONE
+            }.start()
+            confirmButton.animate().alpha(0f).setDuration(200).withEndAction {
+                confirmButton.visibility = View.GONE
+            }.start()
+
+            // Fade in processing content (matching OnboardingActivity pattern)
+            processingContainer.alpha = 0f
+            processingContainer.translationY = 30f
+            processingContainer.visibility = View.VISIBLE
+            processingContainer.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setStartDelay(100)
+                .setDuration(300)
+                .setInterpolator(android.view.animation.DecelerateInterpolator())
+                .start()
         } else {
-            if (progressOverlay.visibility == View.VISIBLE) {
-                progressOverlay.animate().alpha(0f).setDuration(150).withEndAction {
-                    progressOverlay.visibility = View.GONE
-                }.start()
+            // Handle edge case where loading is cancelled (e.g. wallet not initialized)
+            if (processingContainer.visibility == View.VISIBLE) {
+                processingContainer.visibility = View.GONE
+                confirmationScroll.alpha = 1f
+                confirmationScroll.visibility = View.VISIBLE
+                confirmButton.alpha = 1f
+                confirmButton.visibility = View.VISIBLE
             }
         }
         confirmButton.isEnabled = !loading
