@@ -12,6 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.cashudevkit.CurrencyUnit
+import org.cashudevkit.FinalizedMelt
 import org.cashudevkit.MintUrl
 import org.cashudevkit.QuoteState
 import java.util.Date
@@ -282,10 +284,14 @@ class AutoWithdrawManager private constructor(private val context: Context) {
             val amountMsat = withdrawAmount * 1000
             Log.d(TAG, "   Requesting quote for $withdrawAmount sats ($amountMsat msat) to $lightningAddress")
             
+            // Get the wallet for this mint first
+            val mintWallet = wallet.getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)
+                ?: throw Exception("Failed to get wallet for mint: $mintUrl")
+            
             val meltQuote = withContext(Dispatchers.IO) {
                 Log.d(TAG, "   Making CDK call: wallet.meltLightningAddressQuote()")
                 try {
-                    val quote = wallet.meltLightningAddressQuote(MintUrl(mintUrl), lightningAddress, amountMsat.toULong())
+                    val quote = mintWallet.meltLightningAddressQuote(lightningAddress, org.cashudevkit.Amount(amountMsat.toULong()))
                     Log.d(TAG, "   ✅ Quote received: id=${quote.id}")
                     quote
                 } catch (e: Exception) {
@@ -318,52 +324,46 @@ class AutoWithdrawManager private constructor(private val context: Context) {
                 feeSats = feeReserve
             )
 
-            // Execute melt
+            // Execute melt using simplified API
             Log.d(TAG, "📋 Step 4: Executing melt operation...")
             withContext(Dispatchers.Main) {
                 progressListener?.onWithdrawProgress("Sending", "Sending payment...")
             }
 
-            val melted = withContext(Dispatchers.IO) {
-                Log.d(TAG, "   Making CDK call: wallet.meltWithMint()")
+            val finalized: FinalizedMelt = withContext(Dispatchers.IO) {
+                Log.d(TAG, "   Making CDK call: wallet.prepareMelt() + confirm()")
                 try {
-                    val result = wallet.meltWithMint(MintUrl(mintUrl), meltQuote.id)
-                    Log.d(TAG, "   ✅ Melt completed")
+                    val prepared = mintWallet.prepareMelt(meltQuote.id)
+                    val result = prepared.confirm()
+                    Log.d(TAG, "   Melt confirm returned: state=${result.state}, feePaid=${result.feePaid.value}, preimage=${result.preimage != null}")
                     result
                 } catch (e: Exception) {
-                    Log.e(TAG, "   ❌ Melt failed: ${e.message}", e)
+                    Log.e(TAG, "   Melt failed: ${e.message}", e)
                     throw e
                 }
             }
 
             // Check melt state
-            Log.d(TAG, "📋 Step 5: Checking final quote state...")
-            val finalQuote = withContext(Dispatchers.IO) {
-                Log.d(TAG, "   Making CDK call: wallet.checkMeltQuote()")
-                try {
-                    val quote = wallet.checkMeltQuote(MintUrl(mintUrl), meltQuote.id)
-                    Log.d(TAG, "   ✅ Final quote state: ${quote.state}")
-                    quote
-                } catch (e: Exception) {
-                    Log.e(TAG, "   ❌ Quote check failed: ${e.message}", e)
-                    throw e
-                }
-            }
+            Log.d(TAG, "📋 Step 5: Checking melt result state...")
+            val actualFee = finalized.feePaid.value.toLong()
 
-            when (finalQuote.state) {
+            when (finalized.state) {
                 QuoteState.PAID -> {
                     Log.d(TAG, "🎉 AUTO-WITHDRAWAL SUCCESSFUL!")
                     Log.d(TAG, "   Amount withdrawn: $withdrawAmount sats")
-                    Log.d(TAG, "   Fee paid: $feeReserve sats")
+                    Log.d(TAG, "   Fee paid: $actualFee sats (reserved: $feeReserve)")
                     Log.d(TAG, "   Lightning address: $lightningAddress")
                     
-                    historyEntry = historyEntry.copy(status = WithdrawHistoryEntry.STATUS_COMPLETED)
+                    historyEntry = historyEntry.copy(
+                        status = WithdrawHistoryEntry.STATUS_COMPLETED,
+                        feeSats = actualFee
+                    )
                     
                     // Broadcast balance change so other activities can refresh
                     BalanceRefreshBroadcast.send(context, BalanceRefreshBroadcast.REASON_AUTO_WITHDRAWAL)
                     
                     withContext(Dispatchers.Main) {
-                        progressListener?.onWithdrawCompleted(mintUrl, withdrawAmount, feeReserve)
+                        progressListener?.onWithdrawCompleted(mintUrl, withdrawAmount, actualFee)
                     }
                 }
                 QuoteState.PENDING -> {
@@ -381,8 +381,8 @@ class AutoWithdrawManager private constructor(private val context: Context) {
                     throw Exception("Payment failed: Quote state is UNPAID")
                 }
                 else -> {
-                    Log.e(TAG, "❌ Auto-withdrawal failed: Unknown quote state ${finalQuote.state}")
-                    throw Exception("Payment failed: Unknown quote state ${finalQuote.state}")
+                    Log.e(TAG, "❌ Auto-withdrawal failed: Unknown quote state ${finalized.state}")
+                    throw Exception("Payment failed: Unknown quote state ${finalized.state}")
                 }
             }
 
@@ -493,14 +493,15 @@ class AutoWithdrawManager private constructor(private val context: Context) {
     /**
      * Update the status (and optional error message) of a withdrawal entry.
      */
-    fun updateWithdrawalStatus(id: String, status: String, errorMessage: String? = null) {
+    fun updateWithdrawalStatus(id: String, status: String, errorMessage: String? = null, feeSats: Long? = null) {
         val history = getHistory().toMutableList()
         val index = history.indexOfFirst { it.id == id }
         if (index >= 0) {
             val existing = history[index]
             val updated = existing.copy(
                 status = status,
-                errorMessage = errorMessage ?: existing.errorMessage
+                errorMessage = errorMessage ?: existing.errorMessage,
+                feeSats = feeSats ?: existing.feeSats
             )
             history[index] = updated
             saveHistory(history)

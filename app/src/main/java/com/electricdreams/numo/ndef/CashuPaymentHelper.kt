@@ -16,7 +16,6 @@ import com.google.gson.*
 import kotlinx.coroutines.runBlocking
 import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.MintUrl
-import org.cashudevkit.MultiMintReceiveOptions
 import org.cashudevkit.ReceiveOptions
 import org.cashudevkit.SplitTarget
 import org.cashudevkit.Token as CdkToken
@@ -348,6 +347,11 @@ object CashuPaymentHelper {
 
             val mintUrl: MintUrl = cdkToken.mintUrl()
 
+            // Receive into wallet - getWallet is suspend so use runBlocking
+            val mintWallet = runBlocking {
+                wallet.getWallet(mintUrl, CurrencyUnit.Sat)
+            } ?: throw RedemptionException("Failed to get wallet for mint: ${mintUrl.url}")
+
             // Receive into wallet
             val receiveOptions = ReceiveOptions(
                 amountSplitTarget = SplitTarget.None,
@@ -355,15 +359,10 @@ object CashuPaymentHelper {
                 preimages = emptyList(),
                 metadata = emptyMap(),
             )
-            val mmReceive = MultiMintReceiveOptions(
-                allowUntrusted = false,
-                transferToMint = null,
-                receiveOptions = receiveOptions,
-            )
 
             // Receive into wallet
             runBlocking {
-                wallet.receive(cdkToken, mmReceive)
+                mintWallet.receive(cdkToken, receiveOptions)
             }
 
             Log.d(TAG, "Token received via CDK successfully (mintUrl=${mintUrl.url})")
@@ -385,7 +384,7 @@ object CashuPaymentHelper {
      *
      * Behavior:
      * - Validates the token structure and amount against expectedAmount.
-     * - If mint is in allowedMints → normal Cashu redemption via MultiMintWallet.
+     * - If mint is in allowedMints → normal Cashu redemption via WalletRepository.
      * - If mint is *not* in allowedMints but amount is sufficient →
      *   runs the SwapToLightningMint flow and treats Lightning receipt as
      *   payment success (returns empty string as token, Lightning-style).

@@ -18,8 +18,11 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.cashudevkit.Amount as CdkAmount
+import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.MintQuote
 import org.cashudevkit.MintUrl
+import org.cashudevkit.PaymentMethod
+import org.cashudevkit.QuoteState
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -101,7 +104,7 @@ class LightningMintHandler(
     fun start(paymentAmount: Long, callback: Callback) {
         val wallet = CashuWalletManager.getWallet()
         if (wallet == null) {
-            Log.w(TAG, "MultiMintWallet not ready, skipping Lightning")
+            Log.w(TAG, "WalletRepository not ready, skipping Lightning")
             callback.onError("Wallet not ready")
             return
         }
@@ -145,7 +148,9 @@ class LightningMintHandler(
                 val quoteAmount = CdkAmount(paymentAmount.toULong())
 
                 Log.d(TAG, "Requesting Lightning mint quote from ${mintUrl.url} for $paymentAmount sats")
-                val quote = wallet.mintQuote(mintUrl, quoteAmount, "Numo POS payment of $paymentAmount sats")
+                val mintWallet = wallet.getWallet(mintUrl, CurrencyUnit.Sat)
+                val quote = mintWallet?.mintQuote(org.cashudevkit.PaymentMethod.Bolt11, quoteAmount, "Numo POS payment of $paymentAmount sats", null)
+                    ?: throw Exception("Failed to get wallet for mint: ${mintUrl.url}")
                 mintQuote = quote
 
                 val bolt11 = quote.request
@@ -478,7 +483,15 @@ class LightningMintHandler(
         }
 
         Log.d(TAG, "Mint quote $quoteId is paid (detected by $source), calling wallet.mint")
-        val proofs = wallet.mint(mintUrl, quoteId, null)
+        val mintWallet = wallet.getWallet(mintUrl, CurrencyUnit.Sat)
+        val proofs = mintWallet?.mint(quoteId, org.cashudevkit.SplitTarget.None, null)
+            ?: run {
+                Log.e(TAG, "Failed to get wallet for mint: ${mintUrl.url}")
+                uiScope.launch(Dispatchers.Main) {
+                    callback.onError("Wallet not ready")
+                }
+                return false
+            }
         Log.d(TAG, "Lightning mint completed with ${proofs.size} proofs ($source)")
 
         uiScope.launch(Dispatchers.Main) {
@@ -515,16 +528,27 @@ class LightningMintHandler(
                 }
                 
                 Log.v(TAG, "Polling mint quote state for $quoteId")
-                val quote = wallet.checkMintQuote(mintUrl, quoteId)
-                val stateStr = quote.state.toString()
                 
-                Log.d(TAG, "Poll result for $quoteId: state=$stateStr")
+                // Check quote state using checkMintQuote API
+                val mintWallet = wallet.getWallet(mintUrl, CurrencyUnit.Sat)
+                    ?: throw Exception("Failed to get wallet for mint: ${mintUrl.url}")
                 
-                // Compare state as string (consistent with WebSocket handling)
-                if (stateStr.equals("PAID", ignoreCase = true) || 
-                    stateStr.equals("ISSUED", ignoreCase = true)) {
-                    tryMintOnce(mintUrl, quoteId, callback, "polling")
-                    break
+                val quote = mintWallet.checkMintQuote( quoteId)
+                
+                when (quote.state) {
+                    QuoteState.PAID, QuoteState.ISSUED -> {
+                        Log.d(TAG, "Quote $quoteId is ${quote.state} (detected via polling)")
+                        tryMintOnce(mintUrl, quoteId, callback, "polling")
+                        break
+                    }
+                    QuoteState.UNPAID -> {
+                        Log.v(TAG, "Quote $quoteId still UNPAID, continuing poll")
+                        // Continue polling
+                    }
+                    else -> {
+                        Log.w(TAG, "Quote $quoteId in unexpected state: ${quote.state}")
+                        // Continue polling for other states
+                    }
                 }
             } catch (ce: CancellationException) {
                 Log.d(TAG, "Polling cancelled for quote $quoteId")

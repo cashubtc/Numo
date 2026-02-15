@@ -25,6 +25,7 @@ import com.google.android.material.card.MaterialCardView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.MintUrl
 
 /**
@@ -199,8 +200,11 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 }
 
                 // Get melt quote
+                val meltQuoteObj = MintUrl(mintUrl)
+                val mintWallet = wallet.getWallet(meltQuoteObj, CurrencyUnit.Sat)
+                    ?: throw Exception("Failed to get wallet for mint: $mintUrl")
                 val meltQuote = withContext(Dispatchers.IO) {
-                    wallet.meltQuote(MintUrl(mintUrl), invoice, null)
+                    mintWallet.meltQuote(org.cashudevkit.PaymentMethod.Bolt11, invoice, null,null)
                 }
 
                 withContext(Dispatchers.Main) {
@@ -273,8 +277,10 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
                 // Get melt quote for Lightning address
                 val amountMsat = amountSats * 1000
+                val mintWallet = wallet.getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)
+                    ?: throw Exception("Failed to get wallet for mint: $mintUrl")
                 val meltQuote = withContext(Dispatchers.IO) {
-                    wallet.meltLightningAddressQuote(MintUrl(mintUrl), address, amountMsat.toULong())
+                    mintWallet.meltLightningAddressQuote(address, org.cashudevkit.Amount(amountMsat.toULong()))
                 }
 
                 withContext(Dispatchers.Main) {

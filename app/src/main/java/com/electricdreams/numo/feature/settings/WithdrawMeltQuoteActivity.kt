@@ -18,6 +18,9 @@ import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.cashudevkit.CurrencyUnit
+import org.cashudevkit.FinalizedMelt
+import org.cashudevkit.MintUrl
 import org.cashudevkit.QuoteState
 
 class WithdrawMeltQuoteActivity : AppCompatActivity() {
@@ -179,32 +182,34 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
                     updateProcessingState(ProcessingStep.CONTACTING)
                 }
 
-                val melted = withContext(Dispatchers.IO) {
-                    wallet.meltWithMint(org.cashudevkit.MintUrl(mintUrl), quoteId)
+                // Get the wallet for this mint
+                val mintWallet = wallet.getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)
+                    ?: throw Exception("Failed to get wallet for mint: $mintUrl")
+
+                // Prepare and confirm melt
+                val finalized: FinalizedMelt = withContext(Dispatchers.IO) {
+                    val prepared = mintWallet.prepareMelt(quoteId)
+                    prepared.confirm()
                 }
 
-                val state = melted.state
-                Log.d(TAG, "Melt state after melt: $state")
-
-                val meltQuote = withContext(Dispatchers.IO) {
-                    wallet.checkMeltQuote(org.cashudevkit.MintUrl(mintUrl), quoteId)
-                }
-
-                Log.d(TAG, "Melt state after check: ${meltQuote.state}")
+                Log.d(TAG, "Melt completed: state=${finalized.state}, feePaid=${finalized.feePaid.value}, preimage=${finalized.preimage != null}")
 
                 withContext(Dispatchers.Main) {
                     updateProcessingState(ProcessingStep.SETTLING)
                 }
 
+                val actualFee = finalized.feePaid.value.toLong()
+
                 withContext(Dispatchers.Main) {
                     setLoading(false)
 
-                    when (meltQuote.state) {
+                    when (finalized.state) {
                         QuoteState.PAID -> {
                             withdrawEntryId?.let {
                                 autoWithdrawManager.updateWithdrawalStatus(
                                     id = it,
-                                    status = com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry.STATUS_COMPLETED
+                                    status = com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry.STATUS_COMPLETED,
+                                    feeSats = actualFee
                                 )
                             }
                             showPaymentSuccess()

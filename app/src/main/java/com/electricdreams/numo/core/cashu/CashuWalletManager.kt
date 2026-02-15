@@ -10,16 +10,16 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.MintUrl
-import org.cashudevkit.MultiMintWallet
 import org.cashudevkit.Wallet
 import org.cashudevkit.WalletConfig
 import org.cashudevkit.WalletDatabaseImpl
 import org.cashudevkit.NoPointer
 import org.cashudevkit.WalletSqliteDatabase
+import org.cashudevkit.WalletRepository
 import org.cashudevkit.generateMnemonic
 
 /**
- * Global owner of the CDK MultiMintWallet and its backing SQLite database.
+ * Global owner of the CDK WalletRepository and its backing SQLite database.
  *
  * - Initialized from ModernPOSActivity.onCreate().
  * - Re-initialized whenever the allowed mint list changes.
@@ -40,7 +40,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
     private var database: WalletSqliteDatabase? = null
 
     @Volatile
-    private var wallet: MultiMintWallet? = null
+    private var wallet: WalletRepository? = null
 
     /** Initialize from ModernPOSActivity. Safe to call multiple times. */
     fun init(context: Context) {
@@ -127,26 +127,22 @@ object CashuWalletManager : MintManager.MintChangeListener {
         val db = WalletSqliteDatabase(dbFile.absolutePath)
 
         // Create new wallet with restored mnemonic
-        val newWallet = MultiMintWallet(
-            CurrencyUnit.Sat,
-            newMnemonic,
-            db,
-        )
+        val newWallet = WalletRepository(newMnemonic, db)
 
         // Add mints and restore each one
-        val targetProofCount: UInt = 10u
         for (mintUrl in mints) {
             try {
                 onMintProgress(mintUrl, "Connecting...", balancesBefore[mintUrl] ?: 0L, 0L)
                 
-                newWallet.addMint(MintUrl(mintUrl), targetProofCount)
+                newWallet.createWallet(MintUrl(mintUrl), CurrencyUnit.Sat, 10u)
                 
                 onMintProgress(mintUrl, "Restoring proofs...", balancesBefore[mintUrl] ?: 0L, 0L)
                 
                 // Use CDK's restore function to recover proofs
-                val recoveredAmount = newWallet.restore(MintUrl(mintUrl))
-                val newBalance = recoveredAmount.value.toLong()
+                val mintWallet = newWallet.getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)
+                val recoveredAmount = mintWallet?.restore()?.unspent?.value?.toLong() ?: 0L
                 val oldBalance = balancesBefore[mintUrl] ?: 0L
+                val newBalance = recoveredAmount
                 
                 balanceChanges[mintUrl] = Pair(oldBalance, newBalance)
                 
@@ -170,7 +166,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
 
     /**
      * Create a temporary, single-mint wallet instance for interacting with a
-     * mint that is not part of the main MultiMintWallet's allowed-mints set.
+     * mint that is not part of the main WalletRepository's allowed-mints set.
      *
      * This is used for swap-to-Lightning flows where we want to:
      *  - keep our main wallet and balances untouched, and
@@ -213,9 +209,9 @@ object CashuWalletManager : MintManager.MintChangeListener {
         }
     }
 
-    /** Current MultiMintWallet instance, or null if initialization failed or not complete. */
+    /** Current WalletRepository instance, or null if initialization failed or not complete. */
     @JvmStatic
-    fun getWallet(): MultiMintWallet? = wallet
+    fun getWallet(): WalletRepository? = wallet
 
     /** Current database instance, mostly for debugging or future use. */
     fun getDatabase(): WalletSqliteDatabase? = database
@@ -226,8 +222,15 @@ object CashuWalletManager : MintManager.MintChangeListener {
     suspend fun getBalanceForMint(mintUrl: String): Long {
         val w = wallet ?: return 0L
         return try {
-            val balanceMap = w.getBalances()
-            balanceMap[mintUrl]?.value?.toLong() ?: 0L
+            val balances = w.getBalances()
+            val normalizedInput = mintUrl.removeSuffix("/")
+            for (entry in balances) {
+                val cdkUrl = entry.key.mintUrl.url.removeSuffix("/")
+                if (cdkUrl == normalizedInput && entry.key.unit == CurrencyUnit.Sat) {
+                    return entry.value.value.toLong()
+                }
+            }
+            0L
         } catch (e: Exception) {
             Log.e(TAG, "Error getting balance for mint $mintUrl: ${e.message}", e)
             0L
@@ -242,7 +245,10 @@ object CashuWalletManager : MintManager.MintChangeListener {
         val w = wallet ?: return emptyMap()
         return try {
             val balanceMap = w.getBalances()
-            balanceMap.mapValues { (_, amount) -> amount.value.toLong() }
+            balanceMap
+                .filter { it.key.unit == CurrencyUnit.Sat }
+                .mapKeys { it.key.mintUrl.url.removeSuffix("/") }
+                .mapValues { it.value.value.toLong() }
         } catch (e: Exception) {
             Log.e(TAG, "Error getting mint balances: ${e.message}", e)
             emptyMap()
@@ -256,7 +262,8 @@ object CashuWalletManager : MintManager.MintChangeListener {
     suspend fun fetchMintInfo(mintUrl: String): org.cashudevkit.MintInfo? {
         val w = wallet ?: return null
         return try {
-            w.fetchMintInfo(MintUrl(mintUrl))
+            val mintWallet = w.getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)
+            mintWallet?.fetchMintInfo()
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching mint info for $mintUrl: ${e.message}", e)
             null
@@ -416,18 +423,13 @@ object CashuWalletManager : MintManager.MintChangeListener {
                 Log.i(TAG, "Loaded existing wallet mnemonic from preferences")
             }
 
-            // 3) Construct MultiMintWallet in sats.
-            val newWallet = MultiMintWallet(
-                CurrencyUnit.Sat,
-                mnemonic,
-                db,
-            )
+            // 3) Construct WalletRepository in sats.
+            val newWallet = WalletRepository(mnemonic, db)
 
-            // 4) Register allowed mints with a default target proof count.
-            val targetProofCount: UInt = 10u
+            // 4) Register allowed mints.
             for (url in mints) {
                 try {
-                    newWallet.addMint(MintUrl(url), targetProofCount)
+                    newWallet.createWallet(MintUrl(url), CurrencyUnit.Sat, 10u)
                 } catch (t: Throwable) {
                     Log.w(TAG, "Failed to add mint to wallet: ${'$'}url", t)
                 }
@@ -436,9 +438,9 @@ object CashuWalletManager : MintManager.MintChangeListener {
             database = db
             wallet = newWallet
 
-            Log.d(TAG, "Initialized MultiMintWallet with ${'$'}{mints.size} mints; DB=${'$'}{dbFile.absolutePath}")
+            Log.d(TAG, "Initialized WalletRepository with ${'$'}{mints.size} mints; DB=${'$'}{dbFile.absolutePath}")
         } catch (t: Throwable) {
-            Log.e(TAG, "Failed to initialize MultiMintWallet", t)
+            Log.e(TAG, "Failed to initialize WalletRepository", t)
         }
     }
 
