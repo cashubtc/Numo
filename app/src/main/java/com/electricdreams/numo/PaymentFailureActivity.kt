@@ -2,7 +2,6 @@ package com.electricdreams.numo
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -16,7 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
-import com.electricdreams.numo.feature.history.TransactionDetailActivity
+import com.electricdreams.numo.payment.PaymentIntentFactory
 
 /**
  * Activity that displays a payment failure screen when a payment fails or hangs.
@@ -52,8 +51,8 @@ class PaymentFailureActivity : AppCompatActivity() {
         window.navigationBarColor = android.graphics.Color.TRANSPARENT
 
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
-        windowInsetsController.isAppearanceLightStatusBars = true
-        windowInsetsController.isAppearanceLightNavigationBars = true
+        windowInsetsController.isAppearanceLightStatusBars = false
+        windowInsetsController.isAppearanceLightNavigationBars = false
 
         // Adjust padding for system bars
         findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { v, windowInsets ->
@@ -104,29 +103,7 @@ class PaymentFailureActivity : AppCompatActivity() {
         Log.d(TAG, "Retrying payment for pending entry id=${latestPending.id}")
 
         // Reuse same behavior as PaymentsHistoryActivity.resumePendingPayment
-        val intent = Intent(this, PaymentRequestActivity::class.java).apply {
-            putExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, latestPending.amount)
-            putExtra(PaymentRequestActivity.EXTRA_FORMATTED_AMOUNT, latestPending.formattedAmount)
-            putExtra(PaymentRequestActivity.EXTRA_RESUME_PAYMENT_ID, latestPending.id)
-
-            latestPending.lightningQuoteId?.let {
-                putExtra(PaymentRequestActivity.EXTRA_LIGHTNING_QUOTE_ID, it)
-            }
-            latestPending.lightningMintUrl?.let {
-                putExtra(PaymentRequestActivity.EXTRA_LIGHTNING_MINT_URL, it)
-            }
-            latestPending.lightningInvoice?.let {
-                putExtra(PaymentRequestActivity.EXTRA_LIGHTNING_INVOICE, it)
-            }
-            latestPending.nostrSecretHex?.let {
-                putExtra(PaymentRequestActivity.EXTRA_NOSTR_SECRET_HEX, it)
-            }
-            latestPending.nostrNprofile?.let {
-                putExtra(PaymentRequestActivity.EXTRA_NOSTR_NPROFILE, it)
-            }
-        }
-
-        startActivity(intent)
+        startActivity(PaymentIntentFactory.createResumePaymentIntent(this, latestPending))
         // Close the failure screen so the user returns to the normal payment flow
         finish()
     }

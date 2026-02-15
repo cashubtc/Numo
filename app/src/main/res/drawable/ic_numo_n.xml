@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="32dp"
+    android:height="32dp"
+    android:viewportWidth="42"
+    android:viewportHeight="87">
+
+    <!-- Letter N -->
+    <path
+        android:pathData="M0,1.20001H16.56L29.4,51.48H29.64V1.20001H41.4V85.2H27.84L12,23.88H11.76V85.2H0V1.20001Z"
+        android:fillColor="@color/numo_navy"/>
+
+</vector>

@@ -85,8 +85,8 @@ class PaymentMethodHandler(
                     activity.runOnUiThread {
                         onComplete()
                         // Delegate error handling to the unified payment
-                        // result handler so we also show the global
-                        // PaymentFailure screen and allow retry.
+                        // result handler so we show the app-wide failure
+                        // screen and allow retry.
                         PaymentResultHandler(activity, null).handlePaymentError(
                             message = "NDEF Payment failed: $errorMessage",
                             onComplete = {},

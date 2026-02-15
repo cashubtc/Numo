@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_bg_white"
+    android:background="@color/color_error"
     android:clipChildren="false"
     tools:context=".PaymentFailureActivity">
 
@@ -20,7 +20,7 @@
         android:src="@drawable/ic_close"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/color_text_primary" />
+        app:tint="@color/color_bg_white" />
 
     <!-- Center content container -->
     <FrameLayout
@@ -45,23 +45,26 @@
                 android:id="@+id/payment_failure_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
+                android:layout_marginBottom="16dp"
                 android:gravity="center"
                 android:text="@string/payment_failure_title"
-                android:textColor="@color/color_text_primary"
-                android:textSize="28sp"
+                android:textColor="@color/color_bg_white"
+                android:textSize="30sp"
                 android:textStyle="bold" />
 
             <!-- Optional failure message text -->
             <TextView
                 android:id="@+id/payment_failure_message"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:layout_marginStart="32dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginBottom="32dp"
                 android:gravity="center"
                 android:text="@string/payment_failure_message"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="16sp" />
+                android:textAlignment="center"
+                android:textColor="@color/color_bg_white"
+                android:textSize="18sp" />
 
             <!-- Animated error icon container with clipChildren disabled -->
             <FrameLayout
@@ -76,7 +79,8 @@
                     android:layout_height="match_parent"
                     android:contentDescription="@string/payment_failure_error_background_description"
                     android:src="@drawable/ic_circle_solid_red"
-                    android:visibility="invisible" />
+                    android:visibility="invisible"
+                    app:tint="@color/color_bg_white" />
 
                 <!-- White close/cross icon -->
                 <ImageView
@@ -87,7 +91,7 @@
                     android:contentDescription="@string/payment_failure_error_icon_description"
                     android:src="@drawable/ic_close"
                     android:visibility="invisible"
-                    app:tint="@color/color_bg_white" />
+                    app:tint="@color/color_error" />
 
             </FrameLayout>
 
@@ -105,19 +109,19 @@
         android:background="?attr/selectableItemBackground"
         android:text="@string/payment_failure_button_try_again"
         android:textAllCaps="false"
-        android:textColor="@color/color_primary_green"
+        android:textColor="@color/color_bg_white"
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/close_button" />
 
-    <!-- Close button at bottom (full width, grey background) -->
+    <!-- Close button at bottom -->
     <Button
         android:id="@+id/close_button"
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_marginHorizontal="24dp"
         android:layout_marginBottom="24dp"
-        android:background="@drawable/bg_button_secondary_gray"
+        android:background="@drawable/bg_button_black"
         android:text="@string/payment_failure_button_close"
         android:textAllCaps="false"
         android:textColor="@color/color_bg_white"

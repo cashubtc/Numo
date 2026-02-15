@@ -69,8 +69,8 @@ class PaymentResultHandler(
      * This implementation:
      * - Invokes the caller's completion callback so any local cleanup can run
      * - Shows a brief toast with the low-level error message
-     * - Navigates to the global [PaymentFailureActivity], which will present
-     *   a dedicated failure UI and allow the user to retry the latest
+     * - Navigates to the global [PaymentFailureActivity], which presents
+     *   the app-wide failure UI and allows the user to retry the latest
      *   pending payment.
      */
     fun handlePaymentError(message: String, onComplete: () -> Unit) {
