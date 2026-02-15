@@ -21,12 +21,13 @@ import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
-import com.electricdreams.numo.feature.tips.TipSelectionActivity
-import com.electricdreams.numo.ndef.CashuPaymentHelper
-import com.electricdreams.numo.ndef.NdefHostCardEmulationService
 import com.electricdreams.numo.payment.LightningMintHandler
 import com.electricdreams.numo.payment.NostrPaymentHandler
+import com.electricdreams.numo.payment.PaymentRequestHceManager
+import com.electricdreams.numo.payment.PaymentRequestIntentData
 import com.electricdreams.numo.payment.PaymentTabManager
+import com.electricdreams.numo.payment.PendingPaymentRegistrar
+import com.electricdreams.numo.payment.ui.PaymentRequestUi
 import com.electricdreams.numo.ui.util.QrCodeGenerator
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import kotlinx.coroutines.CoroutineScope
