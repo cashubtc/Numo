@@ -28,7 +28,7 @@ import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.payment.PaymentMethodHandler
 import com.electricdreams.numo.ui.components.PosUiCoordinator
 
-class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback, AutoWithdrawProgressListener {
+class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
 
     private var bitcoinPriceWorker: BitcoinPriceWorker? = null
     private var vibrator: Vibrator? = null
@@ -215,18 +215,9 @@ class ModernPOSActivity : AppCompatActivity(), SatocashWallet.OperationFeedback,
         else -> super.onOptionsItemSelected(item)
     }
 
-    // SatocashWallet.OperationFeedback implementation
-    override fun onOperationSuccess() { 
-        runOnUiThread { 
-            // Feedback handled by PaymentResultHandler
-        } 
-    }
-    
-    override fun onOperationError() { 
-        runOnUiThread { 
-            // Feedback handled by PaymentResultHandler  
-        } 
-    }
+    // SatocashWallet.OperationFeedback implementation - DISABLED (2026-02-14)
+    // override fun onOperationSuccess() { } 
+    // override fun onOperationError() { }
 
     // AutoWithdrawProgressListener implementation
     override fun onWithdrawStarted(mintUrl: String, amount: Long, lightningAddress: String) {

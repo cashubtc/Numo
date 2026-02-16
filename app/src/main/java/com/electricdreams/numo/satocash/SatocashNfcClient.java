@@ -1,3 +1,9 @@
+/*
+ * SATOCASH CLIENT - DISABLED
+ * This file is no longer used. Kept for reference only.
+ * 
+ * Removed 2026-02-14 - SATOCASH card support is no longer needed.
+ * 
 package com.electricdreams.numo;
 import com.electricdreams.numo.R;
 
@@ -1259,3 +1265,4 @@ public class SatocashNfcClient {
         return new byte[]{(byte) ((s >> 8) & 0xFF), (byte) (s & 0xFF)};
     }
 }
+*/

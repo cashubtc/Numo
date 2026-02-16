@@ -1,3 +1,9 @@
+/*
+ * SATOCASH WALLET - DISABLED
+ * This file is no longer used. Kept for reference only.
+ * 
+ * Removed 2026-02-14 - SATOCASH card support is no longer needed.
+ * 
 package com.electricdreams.numo;
 
 import android.media.MediaPlayer;
@@ -485,3 +491,4 @@ public class SatocashWallet {
         return new Pair<>(changeOutputAmounts, receiveOutputAmounts);
     }
 }
+*/
