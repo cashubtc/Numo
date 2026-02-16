@@ -2,7 +2,8 @@ package com.electricdreams.numo.payment
 
 import android.util.Log
 import com.electricdreams.numo.core.cashu.CashuWalletManager
-import org.cashudevkit.MultiMintWallet
+import org.cashudevkit.WalletRepository
+import org.cashudevkit.Wallet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
@@ -54,7 +55,9 @@ import java.util.concurrent.atomic.AtomicBoolean
 class LightningMintHandlerTest {
 
     @Mock
-    private lateinit var mockWallet: MultiMintWallet
+    private lateinit var mockWalletRepository: WalletRepository
+    @Mock
+    private lateinit var mockWallet: Wallet
     @Mock
     private lateinit var mockCallback: LightningMintHandler.Callback
     @Mock
@@ -90,7 +93,12 @@ class LightningMintHandlerTest {
         
         // Mock static CashuWalletManager
         cashuWalletManagerMock = mockStatic(CashuWalletManager::class.java)
-        cashuWalletManagerMock.`when`<MultiMintWallet> { CashuWalletManager.getWallet() }.thenReturn(mockWallet)
+            cashuWalletManagerMock.`when`<WalletRepository> { CashuWalletManager.getWallet() }.thenReturn(mockWalletRepository)
+        
+        // Mock WalletRepository.getWallet() to return our mock Wallet (it's a suspend function)
+        runBlocking {
+            `when`(mockWalletRepository.getWallet(org.mockito.kotlin.any(), org.mockito.kotlin.any())).thenReturn(mockWallet)
+        }
         
         // Setup handler with dynamic server url and injected dispatcher
         handler = LightningMintHandler(useUrl, listOf(useUrl), testScope, UnconfinedTestDispatcher())
@@ -117,7 +125,7 @@ class LightningMintHandlerTest {
             // Unset wallet
             cashuWalletManagerMock.close()
             cashuWalletManagerMock = mockStatic(CashuWalletManager::class.java)
-            cashuWalletManagerMock.`when`<MultiMintWallet> { CashuWalletManager.getWallet() }.thenReturn(null)
+            cashuWalletManagerMock.`when`<WalletRepository> { CashuWalletManager.getWallet() }.thenReturn(null)
             
             // Re-setup logs if needed since we closed mocks
             
@@ -125,7 +133,7 @@ class LightningMintHandlerTest {
             
             // Then
             verify(mockCallback).onError("Wallet not ready")
-            verify(mockWallet, never()).mintQuote(any(), any(), any())
+            verify(mockWallet, never()).mintQuote(any(), any(), any(), any())
         }
     }
 
@@ -148,10 +156,10 @@ class LightningMintHandlerTest {
         runBlocking {
             // Re-assert that wallet IS ready (from setup), so we pass the first check
             
-            cashuWalletManagerMock.`when`<MultiMintWallet> { CashuWalletManager.getWallet() }.thenReturn(mockWallet)
+        cashuWalletManagerMock.`when`<WalletRepository> { CashuWalletManager.getWallet() }.thenReturn(mockWalletRepository)
 
             // Stub wallet to throw if called, avoiding NPE and verifying error propagation
-            `when`(mockWallet.mintQuote(any(), any(), any())).thenThrow(RuntimeException("Wallet rejected URL"))
+            `when`(mockWallet.mintQuote(any(), any(), any(), any())).thenThrow(RuntimeException("Wallet rejected URL"))
 
             // Given invalid mint URL
             val invalidHandler = LightningMintHandler("http://exa mple.com", listOf("http://exa mple.com"), testScope, UnconfinedTestDispatcher())
@@ -177,10 +185,10 @@ class LightningMintHandlerTest {
             val handler = LightningMintHandler(mintUrlStr, listOf(mintUrlStr), testScope, testDispatcher)
 
             // We stub mintQuote to return successfully
-            doReturn(mockMintQuote).`when`(mockWallet).mintQuote(anyOrNull(), anyOrNull(), anyOrNull())
+            doReturn(mockMintQuote).`when`(mockWallet).mintQuote(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
             
             // First check returns unpaid
-            doReturn(mockMintQuote).`when`(mockWallet).checkMintQuote(org.mockito.kotlin.any(), org.mockito.kotlin.any())
+            doReturn(mockMintQuote).`when`(mockWallet).checkMintQuote(org.mockito.kotlin.any())
             
             // Start process
             handler.start(paymentAmount, mockCallback)
@@ -195,7 +203,7 @@ class LightningMintHandlerTest {
             
             // Wait - we need to ensure the coroutines that are polling get to run
             // We'll update the mock to return PAID for checkMintQuote
-            doReturn(paidQuote).`when`(mockWallet).checkMintQuote(org.mockito.kotlin.any(), org.mockito.kotlin.any())
+            doReturn(paidQuote).`when`(mockWallet).checkMintQuote(org.mockito.kotlin.any())
             
             // And return proofs for mint
             doReturn(listOf<Proof>()).`when`(mockWallet).mint(org.mockito.kotlin.any(), org.mockito.kotlin.any(), org.mockito.kotlin.anyOrNull())

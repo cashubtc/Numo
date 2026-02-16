@@ -7,7 +7,7 @@ import com.electricdreams.numo.core.util.MintManager
 import kotlinx.coroutines.test.runTest
 import org.cashudevkit.Amount
 import org.cashudevkit.CurrencyUnit
-import org.cashudevkit.MultiMintWallet
+import org.cashudevkit.WalletRepository
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -35,7 +35,7 @@ class AutoWithdrawManagerTest {
     private lateinit var mockMintManager: MintManager
     
     // We also need to control CashuWalletManager singleton
-    private lateinit var mockWallet: MultiMintWallet
+    private lateinit var mockWallet: WalletRepository
 
     @Before
     fun setUp() {
