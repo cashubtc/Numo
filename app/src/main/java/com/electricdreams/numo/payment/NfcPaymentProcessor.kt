@@ -12,11 +12,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.R
 import com.electricdreams.numo.ndef.NdefHostCardEmulationService
-import com.electricdreams.numo.SatocashNfcClient
-import com.electricdreams.numo.SatocashWallet
 
 /**
- * Handles NFC payment processing, including PIN dialogs and card communication.
+ * Handles NFC payment processing via HCE (Host Card Emulation).
+ * 
+ * SATOCASH card support has been removed (2026-02-14).
  */
 class NfcPaymentProcessor(
     private val activity: AppCompatActivity,
@@ -24,104 +24,21 @@ class NfcPaymentProcessor(
     private val onPaymentError: (String) -> Unit
 ) {
 
-    private var satocashClient: SatocashNfcClient? = null
-    private var satocashWallet: SatocashWallet? = null
     private var savedPin: String? = null
     private var waitingForRescan: Boolean = false
     private var rescanDialog: AlertDialog? = null
     private var processingDialog: AlertDialog? = null
 
-    /** Handle NFC tag for payment */
+    /** Handle NFC tag for payment - SATOCASH disabled */
+    @Deprecated("SATOCASH card support has been removed", ReplaceWith("Unit"))
     fun handleNfcPayment(tag: Tag, requestedAmount: Long) {
-        if (requestedAmount <= 0) {
-            Toast.makeText(
-                activity,
-                activity.getString(R.string.nfc_payment_error_enter_amount_first),
-                Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
-        
-        if (waitingForRescan && savedPin != null) {
-            // TODO: Re-implement full PIN-based rescan flow
-            Toast.makeText(
-                activity,
-                activity.getString(R.string.nfc_payment_error_rescan_not_supported),
-                Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
-        
-        waitingForRescan = false
-        
-        Thread {
-            try {
-                val tempClient = SatocashNfcClient(tag).also { it.connect() }
-                satocashClient = tempClient
-                satocashWallet = SatocashWallet(satocashClient)
-                satocashClient?.selectApplet(SatocashNfcClient.SATOCASH_AID)
-                satocashClient?.initSecureChannel()
-                
-                try {
-                    val token = satocashWallet!!.getPayment(requestedAmount, "SAT").join()
-                    onPaymentSuccess(token)
-                    return@Thread
-                } catch (e: RuntimeException) {
-                    if (e.message?.contains("not enough funds") == true) {
-                        onPaymentError(
-                            activity.getString(R.string.nfc_payment_error_insufficient_funds)
-                        )
-                        return@Thread
-                    }
-                    
-                    val cause = e.cause
-                    if (cause is SatocashNfcClient.SatocashException) {
-                        val statusWord = cause.sw
-                        if (statusWord == SW.UNAUTHORIZED) {
-                            // TODO: Restore PIN entry + rescan UX
-                            onPaymentError(
-                                activity.getString(R.string.nfc_payment_error_pin_flow_not_implemented)
-                            )
-                        } else {
-                            onPaymentError(
-                                activity.getString(
-                                    R.string.nfc_payment_error_card_sw,
-                                    statusWord
-                                )
-                            )
-                        }
-                    } else {
-                        onPaymentError(
-                            activity.getString(
-                                R.string.nfc_payment_error_generic,
-                                e.message ?: ""
-                            )
-                        )
-                    }
-                }
-            } catch (e: java.io.IOException) {
-                onPaymentError(
-                    activity.getString(R.string.nfc_payment_error_nfc_comm, e.message ?: "")
-                )
-            } catch (e: SatocashNfcClient.SatocashException) {
-                onPaymentError(
-                    activity.getString(
-                        R.string.nfc_payment_error_satocash,
-                        e.message ?: "",
-                        e.sw
-                    )
-                )
-            } catch (e: Exception) {
-                onPaymentError(
-                    activity.getString(R.string.nfc_payment_error_unexpected, e.message ?: "")
-                )
-            } finally {
-                try {
-                    satocashClient?.close()
-                    satocashClient = null
-                } catch (_: java.io.IOException) {}
-            }
-        }.start()
+        // SATOCASH support has been removed
+        // This function is kept for API compatibility but does nothing
+        Toast.makeText(
+            activity,
+            "SATOCASH card support has been disabled",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     /** Show rescan dialog */
@@ -311,9 +228,5 @@ class NfcPaymentProcessor(
     fun dismissDialogs() {
         rescanDialog?.dismiss()
         processingDialog?.dismiss()
-    }
-
-    private object SW {
-        const val UNAUTHORIZED = 0x9C06
     }
 }
