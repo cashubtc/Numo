@@ -235,6 +235,8 @@
     <string name="developer_settings_section_debugging">Debugging</string>
     <string name="developer_settings_restart_onboarding_title">Restart Onboarding</string>
     <string name="developer_settings_restart_onboarding_subtitle">Start the onboarding flow again</string>
+    <string name="developer_settings_lightning_invoice_title">Delay Lightning Invoice</string>
+    <string name="developer_settings_lightning_invoice_subtitle">Only fetch invoice when Lightning tab is selected</string>
     <string name="developer_settings_warning">⚠️ Developer settings are for testing and debugging purposes only. Use with caution.</string>
 
     <!-- Developer - Error Logs -->

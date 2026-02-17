@@ -40,6 +40,7 @@ import com.electricdreams.numo.payment.PaymentTabManager
 import com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
 import com.electricdreams.numo.ui.util.QrCodeGenerator
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
+import com.electricdreams.numo.feature.settings.DeveloperPrefs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -190,6 +191,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         tabManager.setup(object : PaymentTabManager.TabSelectionListener {
             override fun onLightningTabSelected() {
                 Log.d(TAG, "onLightningTabSelected() called. lightningStarted=$lightningStarted, lightningInvoice=$lightningInvoice")
+
+                // If invoice is delayed (dev setting), start it now if not already started
+                if (!lightningStarted && DeveloperPrefs.isLightningInvoiceDelayed(this@PaymentRequestActivity)) {
+                    startLightningMintFlow()
+                }
 
                 // If invoice is already known, try to switch HCE now
                 if (lightningInvoice != null) {
@@ -424,7 +430,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         // Initialize Lightning handler with preferred mint (will be started when tab is selected)
         val preferredLightningMint = mintManager.getPreferredLightningMint()
         lightningHandler = LightningMintHandler(preferredLightningMint, allowedMints, uiScope)
-        startLightningMintFlow()
+
+        // Unless developer setting to delay it is enabled, start it immediately
+        if (!DeveloperPrefs.isLightningInvoiceDelayed(this)) {
+            startLightningMintFlow()
+        }
 
         // Check if NDEF is available
         val ndefAvailable = NdefHostCardEmulationService.isHceAvailable(this)

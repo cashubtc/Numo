@@ -24,6 +24,20 @@ class DeveloperSettingsActivity : AppCompatActivity() {
         findViewById<View>(R.id.error_logs_item).setOnClickListener {
             startActivity(Intent(this, ErrorLogsActivity::class.java))
         }
+
+        // Delay Lightning Invoice
+        val delayLightningInvoiceSwitch = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.delay_lightning_invoice_switch)
+        val delayLightningInvoiceItem = findViewById<View>(R.id.delay_lightning_invoice_item)
+
+        delayLightningInvoiceSwitch.isChecked = DeveloperPrefs.isLightningInvoiceDelayed(this)
+
+        delayLightningInvoiceSwitch.setOnCheckedChangeListener { _, isChecked ->
+            DeveloperPrefs.setLightningInvoiceDelayed(this, isChecked)
+        }
+
+        delayLightningInvoiceItem.setOnClickListener {
+            delayLightningInvoiceSwitch.toggle()
+        }
     }
 
     private fun showRestartOnboardingDialog() {
