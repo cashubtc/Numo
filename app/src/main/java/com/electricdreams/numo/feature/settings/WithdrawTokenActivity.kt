@@ -235,20 +235,36 @@ class WithdrawTokenActivity : AppCompatActivity() {
                     throw Exception("Failed to get wallet for mint: $mintUrl")
                 }
 
-                // Create a mint quote for Cashu tokens
+                // Create a mint quote to get tokens from the mint
+                // This is similar to how LightningMintHandler works - you create a quote,
+                // then "mint" the tokens. However, for token withdrawal we want to
+                // extract existing tokens from the wallet.
+                
+                // For now, create a quote and immediately mint (simulating receiving tokens)
+                // TODO: Implement proper token extraction from wallet proofs
                 val splitTarget = SplitTarget(
                     CdkAmount(amount.toULong()),
                     CdkAmount(0u)
                 )
 
-                // Request tokens from the mint
-                val token = withContext(Dispatchers.IO) {
+                // Create a mint quote - this creates a quote for minting tokens
+                val mintQuote = withContext(Dispatchers.IO) {
                     mintWallet.mintQuote(
                         PaymentMethod.Cashu,
                         CdkAmount(amount.toULong()),
                         "Numo token withdrawal",
                         null
                     )
+                }
+
+                // Now "mint" the tokens - this creates proofs which become our token
+                val proofs = withContext(Dispatchers.IO) {
+                    mintWallet.mint(mintQuote.id, splitTarget, null)
+                }
+
+                // Create a Token from the proofs
+                val token = withContext(Dispatchers.IO) {
+                    org.cashudevkit.Token.fromProofs(proofs, mintUrl)
                 }
 
                 withContext(Dispatchers.Main) {
