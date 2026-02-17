@@ -596,6 +596,75 @@
 
                     </LinearLayout>
 
+                    <!-- Divider -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginStart="76dp"
+                        android:background="@color/color_divider" />
+
+                    <!-- Token Withdrawal Row -->
+                    <LinearLayout
+                        android:id="@+id/manual_withdraw_token_row"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="20dp">
+
+                        <!-- Icon -->
+                        <FrameLayout
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/bg_circle"
+                            android:backgroundTint="#E8F5E9">
+
+                            <ImageView
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_cashu_symbol"
+                                app:tint="@color/color_success_green" />
+                        </FrameLayout>
+
+                        <!-- Text -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="@string/manual_withdraw_token_title"
+                                android:textColor="@color/color_text_primary"
+                                android:textSize="17sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/manual_withdraw_token_subtitle"
+                                android:textColor="@color/color_text_secondary"
+                                android:textSize="14sp" />
+
+                        </LinearLayout>
+
+                        <!-- Chevron -->
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/ic_chevron_right"
+                            app:tint="@color/color_text_tertiary" />
+
+                    </LinearLayout>
+
                 </androidx.cardview.widget.CardView>
 
                 <!-- ==================== -->

@@ -355,6 +355,30 @@
                 android:value=".ModernPOSActivity" />
         </activity>
         
+        <activity android:name="com.electricdreams.numo.feature.settings.WithdrawTokenActivity"
+            android:exported="false"
+            android:label="Withdraw as Token"
+            android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.settings.AutoWithdrawSettingsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.settings.AutoWithdrawSettingsActivity" />
+        </activity>
+        
+        <activity android:name="com.electricdreams.numo.feature.settings.WithdrawTokenSuccessActivity"
+            android:exported="false"
+            android:label="Token Created"
+            android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.settings.WithdrawTokenActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.settings.WithdrawTokenActivity" />
+        </activity>
+        
         <!-- Item Management Activities -->
         <activity android:name="com.electricdreams.numo.feature.items.ItemEntryActivity"
             android:exported="false"

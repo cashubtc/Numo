@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Cashu "N" symbol stylized -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M6,4h2v16h-2v-6h2l4,6h2.5l-4.5,-6.5h-1v-6h2v-3.5h-5z"/>
+</vector>

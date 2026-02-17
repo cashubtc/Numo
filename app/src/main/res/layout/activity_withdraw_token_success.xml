@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_bg_white">
+
+    <!-- Checkmark Animation -->
+    <ImageView
+        android:id="@+id/checkmark_circle"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_marginTop="80dp"
+        android:src="@drawable/ic_circle_solid_green"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="@string/withdraw_token_success_title" />
+
+    <ImageView
+        android:id="@+id/checkmark_icon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/ic_check"
+        android:tint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@id/checkmark_circle"
+        app:layout_constraintEnd_toEndOf="@id/checkmark_circle"
+        app:layout_constraintStart_toStartOf="@id/checkmark_circle"
+        app:layout_constraintTop_toTopOf="@id/checkmark_circle"
+        android:contentDescription="@null" />
+
+    <!-- Success Title -->
+    <TextView
+        android:id="@+id/success_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/withdraw_token_success_title"
+        android:textAppearance="@style/Text.DisplayAmount"
+        android:textColor="@color/color_text_primary"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/checkmark_circle" />
+
+    <!-- Amount -->
+    <TextView
+        android:id="@+id/amount_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="₿0"
+        android:textAppearance="@style/Text.Caption"
+        android:textColor="@color/color_text_secondary"
+        android:textSize="17sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/success_title" />
+
+    <!-- Token Container -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/token_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="32dp"
+        app:cardBackgroundColor="@color/color_bg_card"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="2dp"
+        app:layout_constraintTop_toBottomOf="@id/amount_text"
+        app:strokeWidth="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/withdraw_token_success_subtitle"
+                android:textAppearance="@style/Text.Caption"
+                android:textColor="@color/color_text_secondary"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/token_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_search_field"
+                android:ellipsize="middle"
+                android:fontFamily="monospace"
+                android:gravity="center"
+                android:padding="12dp"
+                android:singleLine="false"
+                android:text="cashu..."
+                android:textColor="@color/color_text_primary"
+                android:textIsSelectable="true"
+                android:textSize="12sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:text="@string/withdraw_token_success_copied"
+                android:textAppearance="@style/Text.Caption"
+                android:textColor="@color/color_text_tertiary"
+                android:textSize="11sp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:id="@+id/button_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/token_container">
+
+        <Button
+            android:id="@+id/copy_button"
+            style="@style/Widget.Button.Secondary"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="@string/withdraw_token_success_copy"
+            android:textAllCaps="false"
+            android:textSize="17sp" />
+
+        <Button
+            android:id="@+id/share_button"
+            style="@style/Widget.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="@string/withdraw_token_success_share"
+            android:textAllCaps="false"
+            android:textSize="17sp" />
+
+    </LinearLayout>
+
+    <!-- Close Button -->
+    <Button
+        android:id="@+id/close_button"
+        style="@style/Widget.Button.Text"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginBottom="32dp"
+        android:text="@string/withdraw_token_success_close"
+        android:textAllCaps="false"
+        android:textSize="17sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

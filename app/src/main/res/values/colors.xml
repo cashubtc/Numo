@@ -43,6 +43,11 @@
     <color name="color_error">#FF4B4B</color>
     <color name="color_error_bg">#14FF4B4B</color>
     <color name="color_info_blue">#83E8FC</color>
+    
+    <!-- Info Colors -->
+    <color name="color_info_background">#E3F2FD</color>
+    <color name="color_info_icon">#1976D2</color>
+    <color name="color_info_text">#1565C0</color>
     <color name="color_bitcoin_orange">#F7931A</color>
     <color name="color_accent_blue">#007AFF</color>
     <color name="color_accent_blue_light">#E5F2FF</color>

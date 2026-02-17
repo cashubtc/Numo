@@ -33,6 +33,7 @@ import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.feature.settings.WithdrawLightningActivity
+import com.electricdreams.numo.feature.settings.WithdrawTokenActivity
 import com.electricdreams.numo.ui.components.MintSelectionBottomSheet
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.google.android.material.slider.Slider
@@ -78,6 +79,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
 
     // Manual withdraw
     private lateinit var manualWithdrawRow: LinearLayout
+    private lateinit var manualWithdrawTokenRow: LinearLayout
     
     // Manager for mint info
     private lateinit var mintManager: MintManager
@@ -139,6 +141,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         
         // Manual withdraw
         manualWithdrawRow = findViewById(R.id.manual_withdraw_row)
+        manualWithdrawTokenRow = findViewById(R.id.manual_withdraw_token_row)
 
         historyRecyclerView.layoutManager = LinearLayoutManager(this)
     }
@@ -191,6 +194,11 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         manualWithdrawRow.setOnClickListener {
             showMintSelectionDialog()
         }
+        
+        // Token withdraw row
+        manualWithdrawTokenRow.setOnClickListener {
+            showMintSelectionDialogForToken()
+        }
     }
     
     /**
@@ -235,6 +243,53 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
      */
     private fun openWithdrawScreen(mintUrl: String, balance: Long) {
         val intent = Intent(this, WithdrawLightningActivity::class.java).apply {
+            putExtra("mint_url", mintUrl)
+            putExtra("balance", balance)
+        }
+        startActivity(intent)
+    }
+    
+    /**
+     * Show mint selection dialog for token withdrawal.
+     */
+    private fun showMintSelectionDialogForToken() {
+        lifecycleScope.launch {
+            // Fetch mint balances
+            val balances = withContext(Dispatchers.IO) {
+                CashuWalletManager.getAllMintBalances()
+            }
+            
+            // Filter mints with positive balance
+            val mintsWithBalance = balances.filter { it.value > 0 }
+            
+            if (mintsWithBalance.isEmpty()) {
+                // No balance to withdraw - show a nice toast instead of dialog
+                Toast.makeText(
+                    this@AutoWithdrawSettingsActivity,
+                    R.string.manual_withdraw_no_balance,
+                    Toast.LENGTH_LONG
+                ).show()
+                return@launch
+            }
+            
+            // Show beautiful bottom sheet
+            val bottomSheet = MintSelectionBottomSheet.newInstance(
+                mintBalances = mintsWithBalance,
+                listener = object : MintSelectionBottomSheet.OnMintSelectedListener {
+                    override fun onMintSelected(mintUrl: String, balance: Long) {
+                        openWithdrawTokenScreen(mintUrl, balance)
+                    }
+                }
+            )
+            bottomSheet.show(supportFragmentManager, "MintSelectionBottomSheet")
+        }
+    }
+    
+    /**
+     * Open the token withdraw screen for the selected mint
+     */
+    private fun openWithdrawTokenScreen(mintUrl: String, balance: Long) {
+        val intent = Intent(this, WithdrawTokenActivity::class.java).apply {
             putExtra("mint_url", mintUrl)
             putExtra("balance", balance)
         }

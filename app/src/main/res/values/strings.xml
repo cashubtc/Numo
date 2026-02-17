@@ -346,6 +346,30 @@
     <string name="withdraw_success_background_description">Success background</string>
     <string name="withdraw_success_icon_description">Success</string>
 
+    <!-- Withdraw - Token (Cashu) -->
+    <string name="withdraw_token_toolbar_back">Back</string>
+    <string name="withdraw_token_title">Withdraw as Token</string>
+    <string name="withdraw_token_balance_label">Available Balance</string>
+    <string name="withdraw_token_mint_name_label">Mint Name</string>
+    <string name="withdraw_token_info_text">Create a Cashu token that you can share or transfer to another wallet.</string>
+    <string name="withdraw_section_amount">AMOUNT</string>
+    <string name="withdraw_token_amount_label">Amount to withdraw</string>
+    <string name="withdraw_token_amount_hint">1000</string>
+    <string name="withdraw_token_max">MAX</string>
+    <string name="withdraw_token_button">Create Token</string>
+    <string name="withdraw_token_error_invalid_amount">Please enter a valid amount</string>
+    <string name="withdraw_token_error_insufficient_balance">Insufficient balance. Amount exceeds your balance of %1$d sats.</string>
+    <string name="withdraw_token_error_generic">Error: %1$s</string>
+    <string name="withdraw_token_error_wallet_not_initialized">Wallet not initialized</string>
+
+    <!-- Withdraw Token - Success -->
+    <string name="withdraw_token_success_title">Token Created!</string>
+    <string name="withdraw_token_success_subtitle">Share this token or save it for later</string>
+    <string name="withdraw_token_success_copy">Copy</string>
+    <string name="withdraw_token_success_share">Share</string>
+    <string name="withdraw_token_success_copied">Token copied to clipboard</string>
+    <string name="withdraw_token_success_close">Done</string>
+
     <!-- History & transaction rows/dialogs -->
     <string name="history_toolbar_title">Activity</string>
     <string name="history_section_payment_history">PAYMENT HISTORY</string>
@@ -689,6 +713,8 @@
     <string name="manual_withdraw_section_title">Manual Withdraw</string>
     <string name="manual_withdraw_title">Withdraw Now</string>
     <string name="manual_withdraw_subtitle">Send funds to Lightning invoice or address</string>
+    <string name="manual_withdraw_token_title">Withdraw as Token</string>
+    <string name="manual_withdraw_token_subtitle">Create a Cashu token to transfer to another wallet</string>
     <string name="manual_withdraw_select_mint">Select Mint</string>
     <string name="manual_withdraw_no_balance">No balance available to withdraw. Add funds to your wallet first.</string>
 
