@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
+    android:background="@color/color_bg_white"
+    android:fitsSystemWindows="true">
 
     <!-- Top App Bar -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -24,7 +25,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/withdraw_lightning_toolbar_back"
             android:src="@drawable/ic_chevron_back"
-            android:tint="@color/color_text_primary"
+            app:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -45,6 +46,8 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
+        android:clipToPadding="false"
+        android:clipChildren="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/top_bar">
 
@@ -52,7 +55,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:clipToPadding="false"
+            android:clipChildren="false"
+            android:paddingBottom="100dp">
 
             <!-- Balance Hero Section -->
             <com.google.android.material.card.MaterialCardView
@@ -111,63 +116,276 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Section Header -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="28dp"
-                android:layout_marginBottom="12dp"
-                android:text="@string/withdraw_section_send_to"
-                android:textAppearance="@style/Text.SectionHeader" />
-
-            <!-- Invoice Card -->
-            <com.electricdreams.numo.ui.components.WithdrawInvoiceCard
-                android:id="@+id/invoice_card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp" />
-
-            <!-- OR Divider -->
+            <!-- Tabs -->
             <LinearLayout
+                android:id="@+id/tabs_container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="40dp"
-                android:layout_marginVertical="20dp"
-                android:gravity="center_vertical"
+                android:layout_height="48dp"
+                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/bg_input_pill"
+                android:padding="4dp"
                 android:orientation="horizontal">
 
-                <View
+                <TextView
+                    android:id="@+id/tab_lightning"
                     android:layout_width="0dp"
-                    android:layout_height="1dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="@color/color_divider" />
+                    android:background="@drawable/bg_segment_tab_selected"
+                    android:gravity="center"
+                    android:text="@string/withdraw_tab_lightning"
+                    android:textColor="@color/color_text_primary"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-medium" />
 
                 <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
-                    android:text="@string/common_or"
-                    android:textAppearance="@style/Text.Caption"
-                    android:textColor="@color/color_text_tertiary"
-                    android:textSize="12sp"
-                    android:textAllCaps="true"
-                    android:letterSpacing="0.1" />
-
-                <View
+                    android:id="@+id/tab_cashu"
                     android:layout_width="0dp"
-                    android:layout_height="1dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="@color/color_divider" />
+                    android:background="@null"
+                    android:gravity="center"
+                    android:text="@string/withdraw_tab_cashu"
+                    android:textColor="@color/color_text_tertiary"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-medium" />
 
             </LinearLayout>
 
-            <!-- Address Card -->
-            <com.electricdreams.numo.ui.components.WithdrawAddressCard
-                android:id="@+id/address_card"
+            <!-- Lightning Container -->
+            <LinearLayout
+                android:id="@+id/lightning_options_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp" />
+                android:orientation="vertical">
+
+                <!-- Section Header -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="28dp"
+                    android:layout_marginBottom="12dp"
+                    android:text="@string/withdraw_section_send_to"
+                    android:textAppearance="@style/Text.SectionHeader" />
+
+                <!-- Invoice Card -->
+                <com.electricdreams.numo.ui.components.WithdrawInvoiceCard
+                    android:id="@+id/invoice_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="20dp" />
+
+                <!-- OR Divider -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="40dp"
+                    android:layout_marginVertical="20dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:background="@color/color_divider" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:text="@string/common_or"
+                        android:textAppearance="@style/Text.Caption"
+                        android:textColor="@color/color_text_tertiary"
+                        android:textSize="12sp"
+                        android:textAllCaps="true"
+                        android:letterSpacing="0.1" />
+
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:background="@color/color_divider" />
+
+                </LinearLayout>
+
+                <!-- Address Card -->
+                <com.electricdreams.numo.ui.components.WithdrawAddressCard
+                    android:id="@+id/address_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="20dp" />
+
+            </LinearLayout>
+
+            <!-- Cashu Token Container -->
+            <LinearLayout
+                android:id="@+id/cashu_token_options_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <!-- Amount Input Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cashu_input_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="20dp"
+                    app:cardBackgroundColor="@color/color_bg_white"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    app:strokeWidth="0dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp">
+
+                        <!-- Header -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <FrameLayout
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:background="@drawable/bg_circle_accent_light">
+
+                                <ImageView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_qr_scan"
+                                    app:tint="@color/color_primary" />
+                            </FrameLayout>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="16dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/withdraw_cashu_amount_card_title"
+                                    android:textAppearance="@style/Text.Body"
+                                    android:textStyle="bold"
+                                    android:textSize="17sp" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:text="@string/withdraw_cashu_amount_card_subtitle"
+                                    android:textAppearance="@style/Text.Caption"
+                                    android:textColor="@color/color_text_secondary"
+                                    android:textSize="13sp" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- Amount Input -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="20dp"
+                            android:text="@string/withdraw_lightning_amount_label"
+                            android:textAppearance="@style/Text.Caption"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="12sp"
+                            android:textAllCaps="true"
+                            android:letterSpacing="0.05" />
+
+                        <EditText
+                            android:id="@+id/cashu_amount_input"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:background="@drawable/bg_search_field"
+                            android:hint="@string/withdraw_amount_placeholder"
+                            android:inputType="number"
+                            android:minHeight="52dp"
+                            android:padding="14dp"
+                            android:textAppearance="@style/Text.Body"
+                            android:textColor="@color/color_text_primary"
+                            android:textColorHint="@color/color_text_tertiary"
+                            android:textSize="15sp" />
+
+                        <!-- Create Button -->
+                        <Button
+                            android:id="@+id/create_token_button"
+                            style="@style/Widget.Button.Primary.Green"
+                            android:layout_width="match_parent"
+                            android:layout_height="52dp"
+                            android:layout_marginTop="16dp"
+                            android:text="@string/withdraw_cashu_create_button"
+                            android:textAllCaps="false"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            android:enabled="false"
+                            android:alpha="0.5"/>
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Result Card -->
+                 <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/token_result_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="24dp"
+                    app:cardBackgroundColor="@color/color_bg_white"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="24dp"
+                        android:gravity="center">
+
+                        <ImageView
+                            android:id="@+id/token_qr_code"
+                            android:layout_width="200dp"
+                            android:layout_height="200dp"
+                            android:layout_marginBottom="16dp"/>
+
+                        <TextView
+                            android:id="@+id/token_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:maxLines="2"
+                            android:ellipsize="end"
+                            android:background="@drawable/bg_input_pill"
+                            android:padding="12dp"
+                            android:fontFamily="monospace"
+                            android:textSize="12sp"
+                            android:textColor="@color/color_text_secondary"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/copy_token_button"
+                            android:layout_width="match_parent"
+                            android:layout_height="56dp"
+                            android:layout_marginTop="16dp"
+                            android:text="@string/withdraw_cashu_copy_token"
+                            app:cornerRadius="28dp"/>
+
+                    </LinearLayout>
+                 </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
 
         </LinearLayout>
 
