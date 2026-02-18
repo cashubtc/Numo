@@ -715,6 +715,18 @@
     <string name="withdraw_section_send_to">Send To</string>
     <string name="withdraw_balance_available">Available: %1$s</string>
 
+    <string name="withdraw_tab_lightning">Lightning</string>
+    <string name="withdraw_tab_cashu">Cashu Token</string>
+    
+    <string name="withdraw_cashu_amount_card_title">Amount</string>
+    <string name="withdraw_cashu_amount_card_subtitle">Enter amount to create token</string>
+    <string name="withdraw_cashu_create_button">Create Token</string>
+    <string name="withdraw_cashu_result_title">Cashu Token</string>
+    <string name="withdraw_cashu_result_subtitle">Share this token to withdraw</string>
+    <string name="withdraw_cashu_copy_token">Copy Token</string>
+    <string name="withdraw_cashu_copied">Token copied to clipboard</string>
+    <string name="withdraw_cashu_creating">Creating token...</string>
+
     <!-- QR Scanner -->
     <string name="qr_scanner_title">Scan QR Code</string>
     <string name="qr_scanner_instruction">Point camera at QR code</string>

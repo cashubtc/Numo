@@ -21,11 +21,18 @@ object QrCodeGenerator {
      *
      * @param text The content to encode in the QR code
      * @param size The desired size of the output bitmap in pixels
+     * @param foregroundColor The color of the QR dots
+     * @param backgroundColor The color of the background
      * @return A bitmap containing the QR code with rounded dots
      * @throws Exception if encoding fails
      */
     @Throws(Exception::class)
-    fun generate(text: String, size: Int): Bitmap {
+    fun generate(
+        text: String, 
+        size: Int, 
+        foregroundColor: Int = 0xFF000000.toInt(), 
+        backgroundColor: Int = 0xFFFFFFFF.toInt()
+    ): Bitmap {
         val hints: MutableMap<EncodeHintType, Any> = mutableMapOf()
         hints[EncodeHintType.ERROR_CORRECTION] = ErrorCorrectionLevel.L
         hints[EncodeHintType.MARGIN] = 1 // Small margin so dots aren't cut off
@@ -42,10 +49,10 @@ object QrCodeGenerator {
 
         val outputBitmap = Bitmap.createBitmap(outputWidth, outputHeight, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(outputBitmap)
-        canvas.drawColor(0xFFFFFFFF.toInt())
+        canvas.drawColor(backgroundColor)
 
         val paint = Paint().apply {
-            color = 0xFF000000.toInt()
+            color = foregroundColor
             isAntiAlias = true
         }
 

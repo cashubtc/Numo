@@ -224,6 +224,19 @@
     <string name="items_settings_import_csv">Importar CSV</string>
     <string name="items_settings_manage">Gestionar</string>
     <string name="items_settings_clear_all">Eliminar todos los artículos</string>
+
+    <!-- Withdraw Lightning / Cashu -->
+    <string name="withdraw_tab_lightning">Lightning</string>
+    <string name="withdraw_tab_cashu">Token Cashu</string>
+
+    <string name="withdraw_cashu_amount_card_title">Cantidad</string>
+    <string name="withdraw_cashu_amount_card_subtitle">Ingresa la cantidad para crear el token</string>
+    <string name="withdraw_cashu_create_button">Crear Token</string>
+    <string name="withdraw_cashu_result_title">Token Cashu</string>
+    <string name="withdraw_cashu_result_subtitle">Comparte este token para retirar</string>
+    <string name="withdraw_cashu_copy_token">Copiar Token</string>
+    <string name="withdraw_cashu_copied">Token copiado al portapapeles</string>
+    <string name="withdraw_cashu_creating">Creando token...</string>
 </resources>
     
     

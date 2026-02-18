@@ -1,17 +1,28 @@
 package com.electricdreams.numo.feature.settings
 
 import android.content.BroadcastReceiver
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.OvershootInterpolator
+import android.widget.Button
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
@@ -21,12 +32,16 @@ import com.electricdreams.numo.core.util.LightningAddressManager
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.ui.components.WithdrawAddressCard
 import com.electricdreams.numo.ui.components.WithdrawInvoiceCard
+import com.electricdreams.numo.ui.util.QrCodeGenerator
 import com.google.android.material.card.MaterialCardView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.MintUrl
+import org.cashudevkit.SendKind
+import org.cashudevkit.SendOptions
+import org.cashudevkit.SplitTarget
 
 /**
  * Premium Apple-like activity for withdrawing balance from a mint via Lightning.
@@ -59,6 +74,21 @@ class WithdrawLightningActivity : AppCompatActivity() {
     private lateinit var invoiceCard: WithdrawInvoiceCard
     private lateinit var addressCard: WithdrawAddressCard
     private lateinit var loadingOverlay: FrameLayout
+
+    // Tabs
+    private lateinit var tabsContainer: View
+    private lateinit var tabLightning: TextView
+    private lateinit var tabCashu: TextView
+    private lateinit var lightningOptionsContainer: View
+    private lateinit var cashuTokenOptionsContainer: View
+
+    // Cashu Token UI
+    private lateinit var cashuAmountInput: EditText
+    private lateinit var createTokenButton: Button
+    private lateinit var tokenResultCard: View
+    private lateinit var tokenQrCode: ImageView
+    private lateinit var tokenText: TextView
+    private lateinit var copyTokenButton: Button
 
     // Balance refresh receiver
     private val balanceRefreshReceiver: BroadcastReceiver = BalanceRefreshBroadcast.createReceiver { reason ->
@@ -100,6 +130,20 @@ class WithdrawLightningActivity : AppCompatActivity() {
         invoiceCard = findViewById(R.id.invoice_card)
         addressCard = findViewById(R.id.address_card)
         loadingOverlay = findViewById(R.id.loading_overlay)
+
+        // Initialize new views
+        tabsContainer = findViewById(R.id.tabs_container)
+        tabLightning = findViewById(R.id.tab_lightning)
+        tabCashu = findViewById(R.id.tab_cashu)
+        lightningOptionsContainer = findViewById(R.id.lightning_options_container)
+        cashuTokenOptionsContainer = findViewById(R.id.cashu_token_options_container)
+        
+        cashuAmountInput = findViewById(R.id.cashu_amount_input)
+        createTokenButton = findViewById(R.id.create_token_button)
+        tokenResultCard = findViewById(R.id.token_result_card)
+        tokenQrCode = findViewById(R.id.token_qr_code)
+        tokenText = findViewById(R.id.token_text)
+        copyTokenButton = findViewById(R.id.copy_token_button)
     }
 
     private fun setupListeners() {
@@ -120,6 +164,159 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 processLightningAddress(address, amountSats)
             }
         })
+
+        // Tab Listeners
+        tabLightning.setOnClickListener {
+            switchTab(isLightning = true)
+        }
+        tabCashu.setOnClickListener {
+            switchTab(isLightning = false)
+        }
+
+        // Cashu Token Logic
+        createTokenButton.setOnClickListener {
+            val amountStr = cashuAmountInput.text.toString()
+            val amount = amountStr.toLongOrNull() ?: 0L
+            if (amount > 0) {
+                createCashuToken(amount)
+            } else {
+                Toast.makeText(this, getString(R.string.withdraw_lightning_error_enter_valid_amount), Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Watch cashu amount input to enable button
+        cashuAmountInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                val amount = s?.toString()?.toLongOrNull() ?: 0L
+                createTokenButton.isEnabled = amount > 0
+                createTokenButton.alpha = if (amount > 0) 1f else 0.5f
+            }
+        })
+
+        copyTokenButton.setOnClickListener {
+            val token = tokenText.text.toString()
+            if (token.isNotEmpty()) {
+                val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText("Cashu Token", token)
+                clipboard.setPrimaryClip(clip)
+                Toast.makeText(this, getString(R.string.withdraw_cashu_copied), Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun switchTab(isLightning: Boolean) {
+        if (isLightning) {
+            tabLightning.setBackgroundResource(R.drawable.bg_segment_tab_selected)
+            tabLightning.setTextColor(getColor(R.color.color_text_primary))
+            
+            tabCashu.background = null
+            tabCashu.setTextColor(getColor(R.color.color_text_tertiary))
+            
+            lightningOptionsContainer.visibility = View.VISIBLE
+            cashuTokenOptionsContainer.visibility = View.GONE
+        } else {
+            tabCashu.setBackgroundResource(R.drawable.bg_segment_tab_selected)
+            tabCashu.setTextColor(getColor(R.color.color_text_primary))
+            
+            tabLightning.background = null
+            tabLightning.setTextColor(getColor(R.color.color_text_tertiary))
+            
+            lightningOptionsContainer.visibility = View.GONE
+            cashuTokenOptionsContainer.visibility = View.VISIBLE
+        }
+    }
+
+    private fun createCashuToken(amountSats: Long) {
+        if (amountSats > balance) {
+            Toast.makeText(this, "Insufficient balance", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        setLoading(true)
+        
+        lifecycleScope.launch {
+            try {
+                val walletRepo = CashuWalletManager.getWallet()
+                if (walletRepo == null) {
+                    throw Exception("Wallet not initialized")
+                }
+
+                // Get single mint wallet
+                val mintWallet = walletRepo.getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)
+                    ?: throw Exception("Failed to get wallet for mint: $mintUrl")
+
+                // Prepare Send
+                val amount = org.cashudevkit.Amount(amountSats.toULong())
+                val options = SendOptions(
+                    memo = null,
+                    conditions = null,
+                    amountSplitTarget = SplitTarget.None,
+                    sendKind = SendKind.OnlineTolerance(org.cashudevkit.Amount(0UL)),
+                    includeFee = true,
+                    maxProofs = null,
+                    metadata = emptyMap()
+                )
+
+                val preparedSend = withContext(Dispatchers.IO) {
+                    mintWallet.prepareSend(amount, options)
+                }
+
+                // Confirm and get token
+                val token = withContext(Dispatchers.IO) {
+                    preparedSend.confirm(null)
+                }
+                
+                val tokenString = token.encode()
+
+                // Resolve theme colors
+                val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+                val isDarkTheme = currentNightMode == Configuration.UI_MODE_NIGHT_YES
+                val qrForeground = if (isDarkTheme) Color.WHITE else Color.BLACK
+                val qrBackground = Color.TRANSPARENT
+
+                // Generate QR - handle potential size overflow gracefully
+                var qrBitmap: Bitmap? = null
+                try {
+                    qrBitmap = QrCodeGenerator.generate(tokenString, 512, qrForeground, qrBackground)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to generate QR code for token (likely too large)", e)
+                }
+
+                withContext(Dispatchers.Main) {
+                    if (qrBitmap != null) {
+                        tokenQrCode.setImageBitmap(qrBitmap)
+                        tokenQrCode.visibility = View.VISIBLE
+                    } else {
+                        tokenQrCode.visibility = View.GONE
+                    }
+
+                    tokenText.text = tokenString
+                    tokenResultCard.visibility = View.VISIBLE
+                    
+                    // Hide input to focus on result
+                    cashuAmountInput.isEnabled = false
+                    createTokenButton.isEnabled = false
+                    createTokenButton.alpha = 0.5f
+                    createTokenButton.text = "Token Created"
+                    
+                    setLoading(false)
+                    refreshBalance()
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Error creating token", e)
+                withContext(Dispatchers.Main) {
+                    setLoading(false)
+                    Toast.makeText(
+                        this@WithdrawLightningActivity,
+                        getString(R.string.withdraw_lightning_error_generic, e.message ?: ""),
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
     }
 
     private fun displayMintInfo() {
