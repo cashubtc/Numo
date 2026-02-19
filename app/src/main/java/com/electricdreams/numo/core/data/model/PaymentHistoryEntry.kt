@@ -165,6 +165,18 @@ data class PaymentHistoryEntry(
     }
 
     /**
+     * Helper to retrieve the Lightning quote ID from the swapToLightningMintJson frame.
+     */
+    fun getSwapLightningQuoteId(): String? {
+        if (swapToLightningMintJson == null) return null
+        return try {
+            com.google.gson.Gson().fromJson(swapToLightningMintJson, SwapToLightningMintFrame::class.java).lightningQuoteId
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    /**
      * Legacy-like secondary constructor for backward compatibility.
      */
     constructor(token: String, amount: Long, date: Date) : this(
