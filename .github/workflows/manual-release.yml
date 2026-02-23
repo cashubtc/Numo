@@ -100,9 +100,27 @@ jobs:
 
           if compgen -G "$APK_DIR/*.apk" > /dev/null; then
             for f in "$APK_DIR"/*.apk; do
-              echo "Renaming $f to $APK_DIR/numo-${VERSION}.apk"
-              mv "$f" "$APK_DIR/numo-${VERSION}.apk"
-              break
+              FILENAME=$(basename "$f")
+              
+              if [[ "$FILENAME" == *"universal"* ]]; then
+                 SUFFIX="universal"
+              elif [[ "$FILENAME" == *"armeabi-v7a"* ]]; then
+                 SUFFIX="armeabi-v7a"
+              elif [[ "$FILENAME" == *"arm64-v8a"* ]]; then
+                 SUFFIX="arm64-v8a"
+              elif [[ "$FILENAME" == *"x86_64"* ]]; then
+                 SUFFIX="x86_64"
+              elif [[ "$FILENAME" == *"x86"* ]]; then
+                 SUFFIX="x86"
+              else
+                 # Default fallback if no specific architecture is found in the name
+                 # This handles the case where it might just be 'app-release.apk'
+                 SUFFIX="universal"
+              fi
+              
+              NEW_NAME="numo-${VERSION}-${SUFFIX}.apk"
+              echo "Renaming $f to $APK_DIR/$NEW_NAME"
+              mv "$f" "$APK_DIR/$NEW_NAME"
             done
           else
             echo "No APK files found in $APK_DIR"
@@ -128,7 +146,7 @@ jobs:
           draft: true
           prerelease: ${{ github.event.inputs.pre_release }}
           files: |
-            app/build/outputs/apk/release/numo-${{ github.event.inputs.version }}.apk
+            app/build/outputs/apk/release/*.apk
             app/build/outputs/bundle/release/numo-${{ github.event.inputs.version }}.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
