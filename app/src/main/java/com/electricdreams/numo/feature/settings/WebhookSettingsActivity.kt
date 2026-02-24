@@ -68,9 +68,10 @@ class WebhookSettingsActivity : AppCompatActivity() {
         }
 
         val divider = View(this).apply {
+            val dividerHeightPx = maxOf(1, (0.5f * resources.displayMetrics.density).toInt())
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                (0.5f * resources.displayMetrics.density).toInt(),
+                dividerHeightPx,
             ).apply {
                 marginStart = (52 * resources.displayMetrics.density).toInt()
             }

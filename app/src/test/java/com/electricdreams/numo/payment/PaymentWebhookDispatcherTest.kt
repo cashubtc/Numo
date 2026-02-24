@@ -2,6 +2,10 @@ package com.electricdreams.numo.payment
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
+import com.electricdreams.numo.core.model.CheckoutBasket
+import com.electricdreams.numo.core.model.CheckoutBasketItem
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
@@ -14,6 +18,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.util.Date
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
@@ -46,7 +51,7 @@ class PaymentWebhookDispatcherTest {
             retryDelaysMs = listOf(0L),
         )
 
-        val result = dispatcher.dispatchPaymentReceivedNow(sampleEvent())
+        val result = dispatcher.dispatchPaymentReceivedNow(sampleEntry())
         val request = server.takeRequest()
 
         assertEquals(1, result.totalEndpoints)
@@ -56,8 +61,17 @@ class PaymentWebhookDispatcherTest {
 
         val body = request.body.readUtf8()
         assertTrue(body.contains("\"event\":\"payment.received\""))
+        assertTrue(body.contains("\"payloadVersion\":2"))
         assertTrue(body.contains("\"paymentType\":\"cashu\""))
         assertTrue(body.contains("\"amountSats\":2100"))
+        assertTrue(body.contains("\"baseAmountSats\":2000"))
+        assertTrue(body.contains("\"entryUnit\":\"USD\""))
+        assertTrue(body.contains("\"checkout\":{"))
+        assertTrue(body.contains("\"checkoutBasketId\":\"checkout-basket-1\""))
+        assertTrue(body.contains("\"items\":[{"))
+        assertTrue(body.contains("\"itemId\":\"item-123\""))
+        assertTrue(body.contains("\"swapToLightningMint\":{"))
+        assertTrue(body.contains("\"meltQuoteId\":\"melt-q-1\""))
         assertTrue(!body.contains("\"token\""))
     }
 
@@ -74,7 +88,7 @@ class PaymentWebhookDispatcherTest {
             retryDelaysMs = listOf(0L, 0L),
         )
 
-        val result = dispatcher.dispatchPaymentReceivedNow(sampleEvent())
+        val result = dispatcher.dispatchPaymentReceivedNow(sampleEntry())
 
         assertEquals(1, result.totalEndpoints)
         assertEquals(1, result.successCount)
@@ -90,26 +104,92 @@ class PaymentWebhookDispatcherTest {
             retryDelaysMs = listOf(0L),
         )
 
-        val result = dispatcher.dispatchPaymentReceivedNow(sampleEvent())
+        val result = dispatcher.dispatchPaymentReceivedNow(sampleEntry())
 
         assertEquals(0, result.totalEndpoints)
         assertEquals(0, result.successCount)
         assertEquals(0, server.requestCount)
     }
 
-    private fun sampleEvent(): PaymentWebhookDispatcher.PaymentReceivedEvent {
-        return PaymentWebhookDispatcher.PaymentReceivedEvent(
-            paymentId = "payment-123",
-            amountSats = 2100,
-            paymentType = "cashu",
-            status = "completed",
+    @Test
+    fun `dispatch includes null checkout when basket absent`() = runTest {
+        server.enqueue(MockResponse().setResponseCode(200))
+
+        val endpoint = server.url("/no-checkout").toString()
+        val dispatcher = PaymentWebhookDispatcher(
+            context = context,
+            endpointProvider = { listOf(endpoint) },
+            ioDispatcher = Dispatchers.IO,
+            retryDelaysMs = listOf(0L),
+        )
+
+        val result = dispatcher.dispatchPaymentReceivedNow(sampleEntry(checkoutBasketJson = null))
+        val body = server.takeRequest().body.readUtf8()
+
+        assertEquals(1, result.totalEndpoints)
+        assertTrue(body.contains("\"transaction\":{"))
+        assertTrue(!body.contains("\"checkout\":{"))
+    }
+
+    private fun sampleEntry(checkoutBasketJson: String? = sampleCheckoutBasketJson()): PaymentHistoryEntry {
+        val swapFrame = PaymentHistoryEntry.Companion.SwapToLightningMintFrame(
+            unknownMintUrl = "https://unknown-mint.example.com",
+            meltQuoteId = "melt-q-1",
+            lightningMintUrl = "https://mint.example.com",
+            lightningQuoteId = "lightning-q-1",
+        )
+
+        return PaymentHistoryEntry(
+            id = "payment-123",
+            token = "",
+            amount = 2100,
+            date = Date(1_706_000_000_000),
+            rawUnit = "sat",
+            rawEntryUnit = "USD",
+            enteredAmount = 500,
+            bitcoinPrice = 65000.0,
             mintUrl = "https://mint.example.com",
-            tipAmountSats = 100,
-            tipPercentage = 5,
-            basketId = "basket-1",
+            paymentRequest = "creqAexample",
+            rawStatus = PaymentHistoryEntry.STATUS_COMPLETED,
+            paymentType = PaymentHistoryEntry.TYPE_CASHU,
             lightningInvoice = null,
             lightningQuoteId = null,
             lightningMintUrl = null,
+            formattedAmount = "\$5.00",
+            checkoutBasketJson = checkoutBasketJson,
+            basketId = "saved-basket-1",
+            tipAmountSats = 100,
+            tipPercentage = 5,
+            swapToLightningMintJson = Gson().toJson(swapFrame),
         )
+    }
+
+    private fun sampleCheckoutBasketJson(): String {
+        val basket = CheckoutBasket(
+            id = "checkout-basket-1",
+            checkoutTimestamp = 1_706_000_000_123,
+            items = listOf(
+                CheckoutBasketItem(
+                    itemId = "item-123",
+                    uuid = "uuid-123",
+                    name = "Coffee",
+                    variationName = "Large",
+                    sku = "COF-L",
+                    category = "Drinks",
+                    quantity = 2,
+                    priceType = "FIAT",
+                    netPriceCents = 250,
+                    priceSats = 0,
+                    priceCurrency = "USD",
+                    vatEnabled = true,
+                    vatRate = 10,
+                ),
+            ),
+            currency = "USD",
+            bitcoinPrice = 65000.0,
+            totalSatoshis = 2100,
+        )
+
+        return basket.toJson()
     }
 }

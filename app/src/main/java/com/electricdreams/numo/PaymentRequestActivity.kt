@@ -780,14 +780,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             )
         }
 
-        dispatchPaymentReceivedWebhook(
-            paymentType = PaymentHistoryEntry.TYPE_CASHU,
-            status = PaymentHistoryEntry.STATUS_COMPLETED,
-            mintUrl = mintUrl,
-            lightningInvoice = null,
-            lightningQuoteId = null,
-            lightningMintUrl = null,
-        )
+        dispatchPaymentReceivedWebhook()
 
         val resultIntent = Intent().apply {
             putExtra(RESULT_EXTRA_TOKEN, token)
@@ -829,14 +822,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             )
         }
 
-        dispatchPaymentReceivedWebhook(
-            paymentType = PaymentHistoryEntry.TYPE_LIGHTNING,
-            status = PaymentHistoryEntry.STATUS_COMPLETED,
-            mintUrl = lightningMintUrl,
-            lightningInvoice = lightningInvoice,
-            lightningQuoteId = lightningQuoteId,
-            lightningMintUrl = lightningMintUrl,
-        )
+        dispatchPaymentReceivedWebhook()
 
         val resultIntent = Intent().apply {
             putExtra(RESULT_EXTRA_TOKEN, "")
@@ -1028,29 +1014,19 @@ class PaymentRequestActivity : AppCompatActivity() {
         AutoWithdrawManager.getInstance(this).onPaymentReceived(token, lightningMintUrl)
     }
 
-    private fun dispatchPaymentReceivedWebhook(
-        paymentType: String,
-        status: String,
-        mintUrl: String?,
-        lightningInvoice: String?,
-        lightningQuoteId: String?,
-        lightningMintUrl: String?,
-    ) {
-        PaymentWebhookDispatcher.getInstance(this).dispatchPaymentReceived(
-            PaymentWebhookDispatcher.PaymentReceivedEvent(
-                paymentId = pendingPaymentId,
-                amountSats = paymentAmount,
-                paymentType = paymentType,
-                status = status,
-                mintUrl = mintUrl,
-                tipAmountSats = tipAmountSats,
-                tipPercentage = tipPercentage,
-                basketId = savedBasketId,
-                lightningInvoice = lightningInvoice,
-                lightningQuoteId = lightningQuoteId,
-                lightningMintUrl = lightningMintUrl,
-            ),
-        )
+    private fun dispatchPaymentReceivedWebhook() {
+        val paymentId = pendingPaymentId ?: run {
+            Log.w(TAG, "Skipping webhook dispatch: pendingPaymentId is null")
+            return
+        }
+
+        val completedEntry = PaymentsHistoryActivity.getPaymentEntryById(this, paymentId)
+        if (completedEntry == null) {
+            Log.w(TAG, "Skipping webhook dispatch: no history entry found for paymentId=$paymentId")
+            return
+        }
+
+        PaymentWebhookDispatcher.getInstance(this).dispatchPaymentReceived(completedEntry)
     }
 
     /**
