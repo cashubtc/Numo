@@ -1,0 +1,28 @@
+<resources>
+    <string name="webhook_settings_title">Webhooks</string>
+    <string name="webhook_settings_description">Send a POST request with payment metadata each time this terminal receives a payment.</string>
+    <string name="webhook_settings_section_endpoints">Endpoints</string>
+    <string name="webhook_settings_empty">No webhook endpoints configured yet.</string>
+    <string name="webhook_settings_add_endpoint">Add Endpoint</string>
+    <string name="webhook_settings_edit_hint">Tap to edit endpoint</string>
+    <string name="webhook_settings_delete_endpoint">Delete endpoint</string>
+
+    <string name="webhook_settings_add_dialog_title">Add Webhook Endpoint</string>
+    <string name="webhook_settings_add_dialog_description">A JSON payload will be posted on every successful payment.</string>
+    <string name="webhook_settings_add_dialog_hint">https://example.com/webhooks/numo</string>
+    <string name="webhook_settings_add_dialog_confirm">Add</string>
+
+    <string name="webhook_settings_edit_dialog_title">Edit Endpoint</string>
+    <string name="webhook_settings_edit_dialog_description">Update where payment metadata is sent.</string>
+
+    <string name="webhook_settings_delete_dialog_title">Remove Endpoint?</string>
+    <string name="webhook_settings_delete_dialog_message">This endpoint will no longer receive payment events.\n\n%1$s</string>
+    <string name="webhook_settings_delete_dialog_confirm">Remove</string>
+
+    <string name="webhook_settings_add_success">Webhook endpoint added</string>
+    <string name="webhook_settings_edit_success">Webhook endpoint updated</string>
+    <string name="webhook_settings_delete_success">Webhook endpoint removed</string>
+    <string name="webhook_settings_error_invalid_url">Please enter a valid http(s) URL</string>
+    <string name="webhook_settings_error_duplicate">That endpoint is already configured</string>
+    <string name="webhook_settings_error_not_found">Endpoint no longer exists</string>
+</resources>

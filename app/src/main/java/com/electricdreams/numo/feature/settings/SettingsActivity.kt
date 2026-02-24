@@ -93,6 +93,10 @@ class SettingsActivity : AppCompatActivity() {
             openProtectedActivity(MintsSettingsActivity::class.java)
         }
 
+        findViewById<View>(R.id.webhooks_settings_item).setOnClickListener {
+            startActivity(Intent(this, WebhookSettingsActivity::class.java))
+        }
+
         // Withdrawals - protected (handles funds)
         findViewById<View>(R.id.withdrawals_settings_item).setOnClickListener {
             openProtectedActivity(AutoWithdrawSettingsActivity::class.java)

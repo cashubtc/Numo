@@ -37,6 +37,7 @@ import com.electricdreams.numo.payment.LightningMintHandler
 import com.electricdreams.numo.payment.NostrPaymentHandler
 import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.payment.PaymentTabManager
+import com.electricdreams.numo.payment.PaymentWebhookDispatcher
 import com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
 import com.electricdreams.numo.ui.util.QrCodeGenerator
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
@@ -779,6 +780,15 @@ class PaymentRequestActivity : AppCompatActivity() {
             )
         }
 
+        dispatchPaymentReceivedWebhook(
+            paymentType = PaymentHistoryEntry.TYPE_CASHU,
+            status = PaymentHistoryEntry.STATUS_COMPLETED,
+            mintUrl = mintUrl,
+            lightningInvoice = null,
+            lightningQuoteId = null,
+            lightningMintUrl = null,
+        )
+
         val resultIntent = Intent().apply {
             putExtra(RESULT_EXTRA_TOKEN, token)
             putExtra(RESULT_EXTRA_AMOUNT, paymentAmount)
@@ -818,6 +828,15 @@ class PaymentRequestActivity : AppCompatActivity() {
                 lightningMintUrl = lightningMintUrl,
             )
         }
+
+        dispatchPaymentReceivedWebhook(
+            paymentType = PaymentHistoryEntry.TYPE_LIGHTNING,
+            status = PaymentHistoryEntry.STATUS_COMPLETED,
+            mintUrl = lightningMintUrl,
+            lightningInvoice = lightningInvoice,
+            lightningQuoteId = lightningQuoteId,
+            lightningMintUrl = lightningMintUrl,
+        )
 
         val resultIntent = Intent().apply {
             putExtra(RESULT_EXTRA_TOKEN, "")
@@ -1007,6 +1026,31 @@ class PaymentRequestActivity : AppCompatActivity() {
         
         // Check for auto-withdrawal after successful payment (runs in background, survives activity destruction)
         AutoWithdrawManager.getInstance(this).onPaymentReceived(token, lightningMintUrl)
+    }
+
+    private fun dispatchPaymentReceivedWebhook(
+        paymentType: String,
+        status: String,
+        mintUrl: String?,
+        lightningInvoice: String?,
+        lightningQuoteId: String?,
+        lightningMintUrl: String?,
+    ) {
+        PaymentWebhookDispatcher.getInstance(this).dispatchPaymentReceived(
+            PaymentWebhookDispatcher.PaymentReceivedEvent(
+                paymentId = pendingPaymentId,
+                amountSats = paymentAmount,
+                paymentType = paymentType,
+                status = status,
+                mintUrl = mintUrl,
+                tipAmountSats = tipAmountSats,
+                tipPercentage = tipPercentage,
+                basketId = savedBasketId,
+                lightningInvoice = lightningInvoice,
+                lightningQuoteId = lightningQuoteId,
+                lightningMintUrl = lightningMintUrl,
+            ),
+        )
     }
 
     /**

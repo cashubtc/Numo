@@ -29,6 +29,10 @@
     <string name="settings_item_mints_title">Mints</string>
     <string name="settings_item_mints_subtitle">Gestiona los mints de Cashu y los ajustes de Lightning</string>
 
+    <!-- Settings items: webhooks -->
+    <string name="settings_item_webhooks_title">Webhooks</string>
+    <string name="settings_item_webhooks_subtitle">Enviar metadatos de pago a endpoints externos</string>
+
     <!-- Settings items: items catalog -->
     <string name="settings_item_items_title">Artículos</string>
     <string name="settings_item_items_subtitle">Crea y gestiona artículos del catálogo</string>
