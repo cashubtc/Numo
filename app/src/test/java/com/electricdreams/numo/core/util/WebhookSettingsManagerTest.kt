@@ -77,4 +77,91 @@ class WebhookSettingsManagerTest {
         assertTrue(removed)
         assertTrue(manager.getEndpoints().isEmpty())
     }
+
+    @Test
+    fun `addEndpoint preserves complex URL components`() {
+        val complexUrl = "http://user:pass@example.com:8080/path/to/resource?query=1#fragment"
+        val result = manager.addEndpoint(complexUrl)
+
+        assertEquals(WebhookSettingsManager.SaveResult.SUCCESS, result)
+        assertEquals(listOf(complexUrl), manager.getEndpoints())
+    }
+
+    @Test
+    fun `addEndpoint strips trailing slash`() {
+        manager.addEndpoint("https://example.com/")
+        assertEquals(listOf("https://example.com"), manager.getEndpoints())
+    }
+
+    @Test
+    fun `addEndpoint lowercases host and scheme but preserves path casing`() {
+        manager.addEndpoint("HTTP://EXAMPLE.COM/Path/To/Resource")
+        assertEquals(listOf("http://example.com/Path/To/Resource"), manager.getEndpoints())
+    }
+
+    @Test
+    fun `getEndpoints returns empty list when JSON is malformed`() {
+        context.getSharedPreferences("WebhookSettings", Context.MODE_PRIVATE)
+            .edit()
+            .putString("endpoints", "{ invalid_json: ]")
+            .apply()
+
+        assertTrue(manager.getEndpoints().isEmpty())
+    }
+
+    @Test
+    fun `getEndpoints ignores blank entries in JSON`() {
+        context.getSharedPreferences("WebhookSettings", Context.MODE_PRIVATE)
+            .edit()
+            .putString("endpoints", """["https://example.com", "", "   "]""")
+            .apply()
+
+        assertEquals(listOf("https://example.com"), manager.getEndpoints())
+    }
+
+    @Test
+    fun `isValidEndpoint correctly identifies valid and invalid URLs`() {
+        assertTrue(manager.isValidEndpoint("example.com"))
+        assertTrue(manager.isValidEndpoint("https://example.com/hook"))
+        assertTrue(manager.isValidEndpoint("http://example.com:8080"))
+        
+        // Invalid
+        assertTrue(!manager.isValidEndpoint("ftp://example.com"))
+        assertTrue(!manager.isValidEndpoint(""))
+        assertTrue(!manager.isValidEndpoint("   "))
+    }
+
+    @Test
+    fun `updateEndpoint returns NOT_FOUND if old endpoint does not exist`() {
+        manager.addEndpoint("https://example.com")
+        val result = manager.updateEndpoint("nonexistent.com", "https://new.com")
+        assertEquals(WebhookSettingsManager.SaveResult.NOT_FOUND, result)
+    }
+
+    @Test
+    fun `updateEndpoint returns SUCCESS without changing if old and new are the same`() {
+        manager.addEndpoint("https://example.com")
+        val result = manager.updateEndpoint("example.com", "https://example.com/")
+        assertEquals(WebhookSettingsManager.SaveResult.SUCCESS, result)
+        assertEquals(listOf("https://example.com"), manager.getEndpoints())
+    }
+
+    @Test
+    fun `updateEndpoint returns DUPLICATE if new endpoint already exists elsewhere`() {
+        manager.addEndpoint("https://example.com")
+        manager.addEndpoint("https://other.com")
+        val result = manager.updateEndpoint("example.com", "other.com")
+        assertEquals(WebhookSettingsManager.SaveResult.DUPLICATE, result)
+    }
+
+    @Test
+    fun `endpoints are serialized correctly to JSON in SharedPreferences`() {
+        manager.addEndpoint("https://example.com")
+        manager.addEndpoint("https://another.com")
+
+        val json = context.getSharedPreferences("WebhookSettings", Context.MODE_PRIVATE)
+            .getString("endpoints", null)
+
+        assertEquals("""["https://example.com","https://another.com"]""", json)
+    }
 }
