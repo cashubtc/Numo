@@ -51,7 +51,7 @@ To build the debug version of the app:
 
 ```bash
 # Clone the repository
-git clone https://github.com/lollerfirst/numo.git
+git clone https://github.com/cashubtc/numo.git
 cd numo
 
 # Build debug APK
