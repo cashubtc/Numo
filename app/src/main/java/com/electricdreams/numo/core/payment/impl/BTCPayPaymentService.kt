@@ -1,7 +1,7 @@
 package com.electricdreams.numo.core.payment.impl
 
 import android.util.Log
-import com.electricdreams.numo.core.payment.BtcPayConfig
+import com.electricdreams.numo.core.payment.BTCPayConfig
 import com.electricdreams.numo.core.payment.PaymentData
 import com.electricdreams.numo.core.payment.PaymentService
 import com.electricdreams.numo.core.payment.PaymentState
@@ -31,8 +31,8 @@ import java.util.concurrent.TimeUnit
  * 2. `checkPaymentStatus()` polls the invoice status.
  * 3. `redeemToken()` posts the Cashu token to BTCNutServer to settle the invoice.
  */
-class BtcPayPaymentService(
-    private val config: BtcPayConfig
+class BTCPayPaymentService(
+    private val config: BTCPayConfig
 ) : PaymentService {
 
     private val client = OkHttpClient.Builder()
@@ -62,11 +62,13 @@ class BtcPayPaymentService(
             var bolt11: String? = null
             var cashuPR: String? = null
 
-            for (attempt in 1..5) {
+            // Cashu is almost always faster than Lightning — break as soon as cashuPR
+            // is available. bolt11 is fetched in the background by the caller if needed.
+            for (attempt in 1..3) {
                 val (b, c) = fetchPaymentMethods(invoiceId)
                 if (b != null) bolt11 = b
                 if (c != null) cashuPR = c
-                if (bolt11 != null && cashuPR != null) break
+                if (cashuPR != null) break
                 Log.d(TAG, "Payment methods attempt $attempt: bolt11=${bolt11 != null}, cashuPR=${cashuPR != null}")
                 delay(1000)
             }
@@ -139,6 +141,14 @@ class BtcPayPaymentService(
 
             RedeemResult(amount = Satoshis(0), proofsCount = 0)
         }
+    }
+
+    /**
+     * Fetch the Lightning bolt11 invoice for an already-created invoice.
+     * Used when [createPayment] returned before bolt11 was ready.
+     */
+    suspend fun fetchLightningInvoice(invoiceId: String): String? = withContext(Dispatchers.IO) {
+        fetchPaymentMethods(invoiceId).first
     }
 
     override fun isReady(): Boolean {
