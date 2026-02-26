@@ -4,5 +4,6 @@
     <string name="language_settings_section_app_language">APP LANGUAGE</string>
     <string name="language_settings_option_english">English</string>
     <string name="language_settings_option_spanish">Español</string>
+    <string name="language_settings_option_portuguese">Português</string>
     <string name="language_settings_summary_current">Current language: %1$s</string>
 </resources>
