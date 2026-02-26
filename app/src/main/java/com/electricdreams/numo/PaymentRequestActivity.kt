@@ -645,8 +645,12 @@ class PaymentRequestActivity : AppCompatActivity() {
             if (hceService != null) {
                 Log.d(TAG, "Setting up NDEF payment with HCE service")
 
-                // Set the payment request to the HCE service with expected amount (Cashu by default)
-                setHceToCashu()
+                // Set the payment request to the HCE service based on current tab selection
+                if (tabManager.isLightningTabSelected() && lightningInvoice != null) {
+                    setHceToLightning()
+                } else {
+                    setHceToCashu()
+                }
 
                 // Set up callback for when a token is received or an error occurs
                 hceService.setPaymentCallback(object : NdefHostCardEmulationService.CashuPaymentCallback {
