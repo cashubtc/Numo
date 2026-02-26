@@ -34,13 +34,24 @@
             android:fontFamily="sans-serif-medium" />
 
         <TextView
+            android:id="@+id/endpoint_auth_status_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="@string/webhook_settings_edit_hint"
+            android:text="@string/webhook_settings_auth_not_set"
             android:textColor="@color/color_text_secondary"
             android:textSize="13sp" />
     </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/edit_auth_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/webhook_settings_edit_auth_key"
+        android:padding="8dp"
+        android:src="@drawable/ic_key"
+        app:tint="@color/color_text_tertiary" />
 
     <ImageButton
         android:id="@+id/delete_button"

@@ -12,6 +12,13 @@ import java.util.Locale
  */
 class WebhookSettingsManager private constructor(context: Context) {
 
+    data class WebhookEndpointConfig(
+        val url: String,
+        val authKey: String? = null,
+    ) {
+        fun hasAuthKey(): Boolean = !authKey.isNullOrBlank()
+    }
+
     enum class SaveResult {
         SUCCESS,
         INVALID_URL,
@@ -39,54 +46,108 @@ class WebhookSettingsManager private constructor(context: Context) {
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val gson = Gson()
 
-    fun getEndpoints(): List<String> {
+    fun getEndpoints(): List<WebhookEndpointConfig> {
         val json = prefs.getString(KEY_ENDPOINTS, null) ?: return emptyList()
         return try {
-            val type = object : TypeToken<List<String>>() {}.type
-            gson.fromJson<List<String>>(json, type)?.filter { it.isNotBlank() } ?: emptyList()
+            val type = object : TypeToken<List<WebhookEndpointConfig>>() {}.type
+            gson.fromJson<List<WebhookEndpointConfig>>(json, type)
+                ?.filter { it.url.isNotBlank() }
+                ?.map { endpoint ->
+                    endpoint.copy(
+                        url = normalizeEndpointUrl(endpoint.url) ?: endpoint.url,
+                        authKey = normalizeAuthKey(endpoint.authKey),
+                    )
+                }
+                ?: emptyList()
         } catch (_: Exception) {
             emptyList()
         }
     }
 
-    fun addEndpoint(rawUrl: String): SaveResult {
-        val normalized = normalizeEndpointUrl(rawUrl) ?: return SaveResult.INVALID_URL
+    fun addEndpoint(rawUrl: String, rawAuthKey: String? = null): SaveResult {
+        val normalizedUrl = normalizeEndpointUrl(rawUrl) ?: return SaveResult.INVALID_URL
+        val normalizedAuthKey = normalizeAuthKey(rawAuthKey)
         val endpoints = getEndpoints().toMutableList()
-        if (endpoints.contains(normalized)) {
+        if (endpoints.any { it.url == normalizedUrl }) {
             return SaveResult.DUPLICATE
         }
-        endpoints.add(normalized)
+        endpoints.add(
+            WebhookEndpointConfig(
+                url = normalizedUrl,
+                authKey = normalizedAuthKey,
+            ),
+        )
         saveEndpoints(endpoints)
         return SaveResult.SUCCESS
     }
 
-    fun updateEndpoint(currentEndpoint: String, newRawUrl: String): SaveResult {
+    fun updateEndpoint(
+        currentEndpoint: String,
+        newRawUrl: String,
+        newRawAuthKey: String?,
+    ): SaveResult {
         val normalizedCurrent = normalizeEndpointUrl(currentEndpoint) ?: return SaveResult.NOT_FOUND
-        val normalizedNew = normalizeEndpointUrl(newRawUrl) ?: return SaveResult.INVALID_URL
+        val normalizedNewUrl = normalizeEndpointUrl(newRawUrl) ?: return SaveResult.INVALID_URL
+        val normalizedNewAuthKey = normalizeAuthKey(newRawAuthKey)
         val endpoints = getEndpoints().toMutableList()
-        val currentIndex = endpoints.indexOf(normalizedCurrent)
+        val currentIndex = endpoints.indexOfFirst { it.url == normalizedCurrent }
 
         if (currentIndex < 0) {
             return SaveResult.NOT_FOUND
         }
 
-        if (normalizedCurrent == normalizedNew) {
+        if (normalizedCurrent == normalizedNewUrl &&
+            endpoints[currentIndex].authKey == normalizedNewAuthKey
+        ) {
             return SaveResult.SUCCESS
         }
 
-        if (endpoints.contains(normalizedNew)) {
+        if (normalizedCurrent != normalizedNewUrl && endpoints.any { it.url == normalizedNewUrl }) {
             return SaveResult.DUPLICATE
         }
 
-        endpoints[currentIndex] = normalizedNew
+        endpoints[currentIndex] = WebhookEndpointConfig(
+            url = normalizedNewUrl,
+            authKey = normalizedNewAuthKey,
+        )
         saveEndpoints(endpoints)
         return SaveResult.SUCCESS
+    }
+
+    fun updateEndpoint(currentEndpoint: String, newRawUrl: String): SaveResult {
+        val existingEndpoint = getEndpoint(currentEndpoint) ?: return SaveResult.NOT_FOUND
+        return updateEndpoint(
+            currentEndpoint = currentEndpoint,
+            newRawUrl = newRawUrl,
+            newRawAuthKey = existingEndpoint.authKey,
+        )
+    }
+
+    fun updateAuthKey(endpointUrl: String, newRawAuthKey: String?): SaveResult {
+        val normalizedUrl = normalizeEndpointUrl(endpointUrl) ?: return SaveResult.NOT_FOUND
+        val endpoints = getEndpoints().toMutableList()
+        val endpointIndex = endpoints.indexOfFirst { it.url == normalizedUrl }
+
+        if (endpointIndex < 0) {
+            return SaveResult.NOT_FOUND
+        }
+
+        endpoints[endpointIndex] = endpoints[endpointIndex].copy(
+            authKey = normalizeAuthKey(newRawAuthKey),
+        )
+        saveEndpoints(endpoints)
+        return SaveResult.SUCCESS
+    }
+
+    fun getEndpoint(endpointUrl: String): WebhookEndpointConfig? {
+        val normalizedUrl = normalizeEndpointUrl(endpointUrl) ?: return null
+        return getEndpoints().firstOrNull { it.url == normalizedUrl }
     }
 
     fun removeEndpoint(endpoint: String): Boolean {
         val normalized = normalizeEndpointUrl(endpoint) ?: return false
         val endpoints = getEndpoints().toMutableList()
-        val removed = endpoints.remove(normalized)
+        val removed = endpoints.removeAll { it.url == normalized }
         if (removed) {
             saveEndpoints(endpoints)
         }
@@ -95,8 +156,13 @@ class WebhookSettingsManager private constructor(context: Context) {
 
     fun isValidEndpoint(rawUrl: String): Boolean = normalizeEndpointUrl(rawUrl) != null
 
-    private fun saveEndpoints(endpoints: List<String>) {
+    private fun saveEndpoints(endpoints: List<WebhookEndpointConfig>) {
         prefs.edit().putString(KEY_ENDPOINTS, gson.toJson(endpoints)).apply()
+    }
+
+    private fun normalizeAuthKey(rawAuthKey: String?): String? {
+        val normalized = rawAuthKey?.trim().orEmpty()
+        return if (normalized.isBlank()) null else normalized
     }
 
     private fun normalizeEndpointUrl(rawUrl: String): String? {

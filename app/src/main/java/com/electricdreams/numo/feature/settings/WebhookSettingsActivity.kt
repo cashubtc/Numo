@@ -47,11 +47,22 @@ class WebhookSettingsActivity : AppCompatActivity() {
         endpoints.forEachIndexed { index, endpoint ->
             val item = inflater.inflate(R.layout.item_webhook_endpoint, endpointsList, false)
             val endpointText = item.findViewById<TextView>(R.id.endpoint_url_text)
+            val authStatusText = item.findViewById<TextView>(R.id.endpoint_auth_status_text)
+            val editAuthButton = item.findViewById<ImageButton>(R.id.edit_auth_button)
             val deleteButton = item.findViewById<ImageButton>(R.id.delete_button)
 
-            endpointText.text = endpoint
+            endpointText.text = endpoint.url
+            authStatusText.text = if (endpoint.hasAuthKey()) {
+                getString(R.string.webhook_settings_auth_set)
+            } else {
+                getString(R.string.webhook_settings_auth_not_set)
+            }
+
             item.setOnClickListener {
                 showEditEndpointDialog(endpoint)
+            }
+            editAuthButton.setOnClickListener {
+                showEditAuthKeyDialog(endpoint)
             }
             deleteButton.setOnClickListener {
                 showDeleteConfirmation(endpoint)
@@ -88,9 +99,29 @@ class WebhookSettingsActivity : AppCompatActivity() {
                 description = getString(R.string.webhook_settings_add_dialog_description),
                 hint = getString(R.string.webhook_settings_add_dialog_hint),
                 inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI,
-                saveText = getString(R.string.webhook_settings_add_dialog_confirm),
+                saveText = getString(R.string.webhook_settings_dialog_continue),
                 onSave = { rawUrl ->
-                    when (webhookSettingsManager.addEndpoint(rawUrl)) {
+                    showAddAuthKeyDialog(rawUrl)
+                },
+                validator = { value ->
+                    webhookSettingsManager.isValidEndpoint(value)
+                },
+            ),
+        )
+    }
+
+    private fun showAddAuthKeyDialog(rawUrl: String) {
+        DialogHelper.showInput(
+            context = this,
+            config = DialogHelper.InputConfig(
+                title = getString(R.string.webhook_settings_auth_dialog_title),
+                description = getString(R.string.webhook_settings_auth_dialog_description),
+                hint = getString(R.string.webhook_settings_auth_dialog_hint),
+                helperText = getString(R.string.webhook_settings_auth_dialog_helper),
+                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+                saveText = getString(R.string.webhook_settings_add_dialog_confirm),
+                onSave = { authKey ->
+                    when (webhookSettingsManager.addEndpoint(rawUrl, authKey)) {
                         WebhookSettingsManager.SaveResult.SUCCESS -> {
                             refreshEndpoints()
                             Toast.makeText(
@@ -116,24 +147,27 @@ class WebhookSettingsActivity : AppCompatActivity() {
                         }
                     }
                 },
-                validator = { value ->
-                    webhookSettingsManager.isValidEndpoint(value)
-                },
             ),
         )
     }
 
-    private fun showEditEndpointDialog(currentEndpoint: String) {
+    private fun showEditEndpointDialog(endpoint: WebhookSettingsManager.WebhookEndpointConfig) {
         DialogHelper.showInput(
             context = this,
             config = DialogHelper.InputConfig(
                 title = getString(R.string.webhook_settings_edit_dialog_title),
                 description = getString(R.string.webhook_settings_edit_dialog_description),
-                initialValue = currentEndpoint,
+                initialValue = endpoint.url,
                 inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_URI,
                 saveText = getString(R.string.common_save),
                 onSave = { updatedUrl ->
-                    when (webhookSettingsManager.updateEndpoint(currentEndpoint, updatedUrl)) {
+                    when (
+                        webhookSettingsManager.updateEndpoint(
+                            currentEndpoint = endpoint.url,
+                            newRawUrl = updatedUrl,
+                            newRawAuthKey = endpoint.authKey,
+                        )
+                    ) {
                         WebhookSettingsManager.SaveResult.SUCCESS -> {
                             refreshEndpoints()
                             Toast.makeText(
@@ -173,17 +207,60 @@ class WebhookSettingsActivity : AppCompatActivity() {
         )
     }
 
-    private fun showDeleteConfirmation(endpoint: String) {
+    private fun showEditAuthKeyDialog(endpoint: WebhookSettingsManager.WebhookEndpointConfig) {
+        DialogHelper.showInput(
+            context = this,
+            config = DialogHelper.InputConfig(
+                title = getString(R.string.webhook_settings_auth_dialog_title),
+                description = getString(R.string.webhook_settings_auth_dialog_description),
+                hint = getString(R.string.webhook_settings_auth_dialog_hint),
+                initialValue = endpoint.authKey.orEmpty(),
+                helperText = getString(R.string.webhook_settings_auth_dialog_helper),
+                inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+                saveText = getString(R.string.common_save),
+                onSave = { authKey ->
+                    when (webhookSettingsManager.updateAuthKey(endpoint.url, authKey)) {
+                        WebhookSettingsManager.SaveResult.SUCCESS -> {
+                            refreshEndpoints()
+                            Toast.makeText(
+                                this,
+                                getString(R.string.webhook_settings_auth_success),
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        }
+                        WebhookSettingsManager.SaveResult.NOT_FOUND -> {
+                            refreshEndpoints()
+                            Toast.makeText(
+                                this,
+                                getString(R.string.webhook_settings_error_not_found),
+                                Toast.LENGTH_LONG,
+                            ).show()
+                        }
+                        WebhookSettingsManager.SaveResult.INVALID_URL,
+                        WebhookSettingsManager.SaveResult.DUPLICATE -> {
+                            Toast.makeText(
+                                this,
+                                getString(R.string.webhook_settings_error_invalid_url),
+                                Toast.LENGTH_LONG,
+                            ).show()
+                        }
+                    }
+                },
+            ),
+        )
+    }
+
+    private fun showDeleteConfirmation(endpoint: WebhookSettingsManager.WebhookEndpointConfig) {
         DialogHelper.showConfirmation(
             context = this,
             config = DialogHelper.ConfirmationConfig(
                 title = getString(R.string.webhook_settings_delete_dialog_title),
-                message = getString(R.string.webhook_settings_delete_dialog_message, endpoint),
+                message = getString(R.string.webhook_settings_delete_dialog_message, endpoint.url),
                 confirmText = getString(R.string.webhook_settings_delete_dialog_confirm),
                 cancelText = getString(R.string.common_cancel),
                 isDestructive = true,
                 onConfirm = {
-                    if (webhookSettingsManager.removeEndpoint(endpoint)) {
+                    if (webhookSettingsManager.removeEndpoint(endpoint.url)) {
                         refreshEndpoints()
                         Toast.makeText(
                             this,

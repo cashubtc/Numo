@@ -31,7 +31,7 @@ import java.util.concurrent.TimeUnit
  */
 class PaymentWebhookDispatcher(
     context: Context,
-    private val endpointProvider: () -> List<String> = {
+    private val endpointProvider: () -> List<WebhookSettingsManager.WebhookEndpointConfig> = {
         WebhookSettingsManager.getInstance(context.applicationContext).getEndpoints()
     },
     private val httpClient: OkHttpClient = defaultHttpClient,
@@ -213,7 +213,11 @@ class PaymentWebhookDispatcher(
             )
         }
 
-    private suspend fun postWithRetry(url: String, jsonBody: String, eventId: String): Boolean {
+    private suspend fun postWithRetry(
+        endpoint: WebhookSettingsManager.WebhookEndpointConfig,
+        jsonBody: String,
+        eventId: String,
+    ): Boolean {
         retryDelaysMs.forEachIndexed { attemptIndex, delayMs ->
             if (delayMs > 0) {
                 delay(delayMs)
@@ -221,15 +225,20 @@ class PaymentWebhookDispatcher(
 
             try {
                 val requestBody = jsonBody.toRequestBody(JSON_MEDIA_TYPE)
-                val request = Request.Builder()
-                    .url(url)
+                val requestBuilder = Request.Builder()
+                    .url(endpoint.url)
                     .post(requestBody)
                     .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
                     .header("User-Agent", "Numo/${BuildConfig.VERSION_NAME}")
                     .header("X-Numo-Event", EVENT_PAYMENT_RECEIVED)
                     .header("X-Numo-Event-Id", eventId)
-                    .build()
+
+                endpoint.authKey?.takeIf { it.isNotBlank() }?.let { authKey ->
+                    requestBuilder.header("Authorization", authKey)
+                }
+
+                val request = requestBuilder.build()
 
                 httpClient.newCall(request).execute().use { response ->
                     if (response.isSuccessful) {
@@ -238,13 +247,13 @@ class PaymentWebhookDispatcher(
 
                     Log.w(
                         TAG,
-                        "Webhook POST failed url=$url status=${response.code} attempt=${attemptIndex + 1}/${retryDelaysMs.size}",
+                        "Webhook POST failed url=${endpoint.url} status=${response.code} attempt=${attemptIndex + 1}/${retryDelaysMs.size}",
                     )
                 }
             } catch (e: Exception) {
                 Log.w(
                     TAG,
-                    "Webhook POST error url=$url attempt=${attemptIndex + 1}/${retryDelaysMs.size}: ${e.message}",
+                    "Webhook POST error url=${endpoint.url} attempt=${attemptIndex + 1}/${retryDelaysMs.size}: ${e.message}",
                 )
             }
         }

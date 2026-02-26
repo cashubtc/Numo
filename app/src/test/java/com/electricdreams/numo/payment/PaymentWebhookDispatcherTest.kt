@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.CheckoutBasket
 import com.electricdreams.numo.core.model.CheckoutBasketItem
+import com.electricdreams.numo.core.util.WebhookSettingsManager
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
@@ -46,7 +47,14 @@ class PaymentWebhookDispatcherTest {
         val endpoint = server.url("/webhook").toString()
         val dispatcher = PaymentWebhookDispatcher(
             context = context,
-            endpointProvider = { listOf(endpoint) },
+            endpointProvider = {
+                listOf(
+                    endpointConfig(
+                        url = endpoint,
+                        authKey = "Bearer test-secret",
+                    ),
+                )
+            },
             ioDispatcher = Dispatchers.IO,
             retryDelaysMs = listOf(0L),
         )
@@ -58,6 +66,7 @@ class PaymentWebhookDispatcherTest {
         assertEquals(1, result.successCount)
         assertEquals("POST", request.method)
         assertEquals("payment.received", request.getHeader("X-Numo-Event"))
+        assertEquals("Bearer test-secret", request.getHeader("Authorization"))
 
         val body = request.body.readUtf8()
         assertTrue(body.contains("\"event\":\"payment.received\""))
@@ -83,7 +92,7 @@ class PaymentWebhookDispatcherTest {
         val endpoint = server.url("/retry").toString()
         val dispatcher = PaymentWebhookDispatcher(
             context = context,
-            endpointProvider = { listOf(endpoint) },
+            endpointProvider = { listOf(endpointConfig(endpoint)) },
             ioDispatcher = Dispatchers.IO,
             retryDelaysMs = listOf(0L, 0L),
         )
@@ -118,17 +127,29 @@ class PaymentWebhookDispatcherTest {
         val endpoint = server.url("/no-checkout").toString()
         val dispatcher = PaymentWebhookDispatcher(
             context = context,
-            endpointProvider = { listOf(endpoint) },
+            endpointProvider = { listOf(endpointConfig(endpoint)) },
             ioDispatcher = Dispatchers.IO,
             retryDelaysMs = listOf(0L),
         )
 
         val result = dispatcher.dispatchPaymentReceivedNow(sampleEntry(checkoutBasketJson = null))
-        val body = server.takeRequest().body.readUtf8()
+        val request = server.takeRequest()
+        val body = request.body.readUtf8()
 
         assertEquals(1, result.totalEndpoints)
+        assertEquals(null, request.getHeader("Authorization"))
         assertTrue(body.contains("\"transaction\":{"))
         assertTrue(!body.contains("\"checkout\":{"))
+    }
+
+    private fun endpointConfig(
+        url: String,
+        authKey: String? = null,
+    ): WebhookSettingsManager.WebhookEndpointConfig {
+        return WebhookSettingsManager.WebhookEndpointConfig(
+            url = url,
+            authKey = authKey,
+        )
     }
 
     private fun sampleEntry(checkoutBasketJson: String? = sampleCheckoutBasketJson()): PaymentHistoryEntry {

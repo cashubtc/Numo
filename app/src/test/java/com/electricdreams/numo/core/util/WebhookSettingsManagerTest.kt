@@ -32,15 +32,23 @@ class WebhookSettingsManagerTest {
 
     @Test
     fun `addEndpoint normalizes and stores endpoint`() {
-        val result = manager.addEndpoint("example.com/hook")
+        val result = manager.addEndpoint("example.com/hook", "Bearer secret")
 
         assertEquals(WebhookSettingsManager.SaveResult.SUCCESS, result)
-        assertEquals(listOf("https://example.com/hook"), manager.getEndpoints())
+        assertEquals(
+            listOf(
+                WebhookSettingsManager.WebhookEndpointConfig(
+                    url = "https://example.com/hook",
+                    authKey = "Bearer secret",
+                ),
+            ),
+            manager.getEndpoints(),
+        )
     }
 
     @Test
     fun `addEndpoint rejects duplicate normalized url`() {
-        manager.addEndpoint("https://Example.com/hook/")
+        manager.addEndpoint("https://Example.com/hook/", "Key One")
         val result = manager.addEndpoint("example.com/hook")
 
         assertEquals(WebhookSettingsManager.SaveResult.DUPLICATE, result)
@@ -57,20 +65,29 @@ class WebhookSettingsManagerTest {
 
     @Test
     fun `updateEndpoint updates an existing endpoint`() {
-        manager.addEndpoint("https://example.com/hook")
+        manager.addEndpoint("https://example.com/hook", "Bearer old")
 
         val result = manager.updateEndpoint(
             currentEndpoint = "https://example.com/hook",
             newRawUrl = "api.example.com/events",
+            newRawAuthKey = "Bearer new",
         )
 
         assertEquals(WebhookSettingsManager.SaveResult.SUCCESS, result)
-        assertEquals(listOf("https://api.example.com/events"), manager.getEndpoints())
+        assertEquals(
+            listOf(
+                WebhookSettingsManager.WebhookEndpointConfig(
+                    url = "https://api.example.com/events",
+                    authKey = "Bearer new",
+                ),
+            ),
+            manager.getEndpoints(),
+        )
     }
 
     @Test
     fun `removeEndpoint removes stored endpoint`() {
-        manager.addEndpoint("https://example.com/hook")
+        manager.addEndpoint("https://example.com/hook", "Bearer secret")
 
         val removed = manager.removeEndpoint("example.com/hook")
 
@@ -84,19 +101,43 @@ class WebhookSettingsManagerTest {
         val result = manager.addEndpoint(complexUrl)
 
         assertEquals(WebhookSettingsManager.SaveResult.SUCCESS, result)
-        assertEquals(listOf(complexUrl), manager.getEndpoints())
+        assertEquals(
+            listOf(
+                WebhookSettingsManager.WebhookEndpointConfig(
+                    url = complexUrl,
+                    authKey = null,
+                ),
+            ),
+            manager.getEndpoints(),
+        )
     }
 
     @Test
     fun `addEndpoint strips trailing slash`() {
         manager.addEndpoint("https://example.com/")
-        assertEquals(listOf("https://example.com"), manager.getEndpoints())
+        assertEquals(
+            listOf(
+                WebhookSettingsManager.WebhookEndpointConfig(
+                    url = "https://example.com",
+                    authKey = null,
+                ),
+            ),
+            manager.getEndpoints(),
+        )
     }
 
     @Test
     fun `addEndpoint lowercases host and scheme but preserves path casing`() {
         manager.addEndpoint("HTTP://EXAMPLE.COM/Path/To/Resource")
-        assertEquals(listOf("http://example.com/Path/To/Resource"), manager.getEndpoints())
+        assertEquals(
+            listOf(
+                WebhookSettingsManager.WebhookEndpointConfig(
+                    url = "http://example.com/Path/To/Resource",
+                    authKey = null,
+                ),
+            ),
+            manager.getEndpoints(),
+        )
     }
 
     @Test
@@ -113,10 +154,21 @@ class WebhookSettingsManagerTest {
     fun `getEndpoints ignores blank entries in JSON`() {
         context.getSharedPreferences("WebhookSettings", Context.MODE_PRIVATE)
             .edit()
-            .putString("endpoints", """["https://example.com", "", "   "]""")
+            .putString(
+                "endpoints",
+                """[{"url":"https://example.com"},{"url":""},{"url":"   "}]""",
+            )
             .apply()
 
-        assertEquals(listOf("https://example.com"), manager.getEndpoints())
+        assertEquals(
+            listOf(
+                WebhookSettingsManager.WebhookEndpointConfig(
+                    url = "https://example.com",
+                    authKey = null,
+                ),
+            ),
+            manager.getEndpoints(),
+        )
     }
 
     @Test
@@ -140,10 +192,18 @@ class WebhookSettingsManagerTest {
 
     @Test
     fun `updateEndpoint returns SUCCESS without changing if old and new are the same`() {
-        manager.addEndpoint("https://example.com")
+        manager.addEndpoint("https://example.com", "Bearer secret")
         val result = manager.updateEndpoint("example.com", "https://example.com/")
         assertEquals(WebhookSettingsManager.SaveResult.SUCCESS, result)
-        assertEquals(listOf("https://example.com"), manager.getEndpoints())
+        assertEquals(
+            listOf(
+                WebhookSettingsManager.WebhookEndpointConfig(
+                    url = "https://example.com",
+                    authKey = "Bearer secret",
+                ),
+            ),
+            manager.getEndpoints(),
+        )
     }
 
     @Test
@@ -156,12 +216,28 @@ class WebhookSettingsManagerTest {
 
     @Test
     fun `endpoints are serialized correctly to JSON in SharedPreferences`() {
-        manager.addEndpoint("https://example.com")
+        manager.addEndpoint("https://example.com", "Bearer abc")
         manager.addEndpoint("https://another.com")
 
         val json = context.getSharedPreferences("WebhookSettings", Context.MODE_PRIVATE)
             .getString("endpoints", null)
 
-        assertEquals("""["https://example.com","https://another.com"]""", json)
+        assertEquals(
+            """[{"url":"https://example.com","authKey":"Bearer abc"},{"url":"https://another.com"}]""",
+            json,
+        )
+    }
+
+    @Test
+    fun `updateAuthKey updates and clears auth key`() {
+        manager.addEndpoint("https://example.com/hook", "Bearer secret")
+
+        val updateResult = manager.updateAuthKey("example.com/hook", "ApiKey 123")
+        assertEquals(WebhookSettingsManager.SaveResult.SUCCESS, updateResult)
+        assertEquals("ApiKey 123", manager.getEndpoints().first().authKey)
+
+        val clearResult = manager.updateAuthKey("https://example.com/hook", "  ")
+        assertEquals(WebhookSettingsManager.SaveResult.SUCCESS, clearResult)
+        assertEquals(null, manager.getEndpoints().first().authKey)
     }
 }
