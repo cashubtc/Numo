@@ -1,5 +1,4 @@
 package com.electricdreams.numo
-import com.electricdreams.numo.R
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
@@ -44,7 +43,7 @@ import com.electricdreams.numo.feature.settings.DeveloperPrefs
 import com.electricdreams.numo.core.payment.PaymentService
 import com.electricdreams.numo.core.payment.PaymentServiceFactory
 import com.electricdreams.numo.core.payment.PaymentState
-import com.electricdreams.numo.core.payment.impl.BtcPayPaymentService
+import com.electricdreams.numo.core.payment.impl.BTCPayPaymentService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -66,6 +65,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var shareButton: View
     private lateinit var lightningLoadingSpinner: View
     private lateinit var lightningLogoCard: View
+    private lateinit var cashuLoadingSpinner: View
+    private lateinit var cashuLogoCard: View
     
     // NFC Animation views
     private lateinit var nfcAnimationContainer: View
@@ -174,7 +175,9 @@ class PaymentRequestActivity : AppCompatActivity() {
         shareButton = findViewById(R.id.share_button)
         lightningLoadingSpinner = findViewById(R.id.lightning_loading_spinner)
         lightningLogoCard = findViewById(R.id.lightning_logo_card)
-        
+        cashuLoadingSpinner = findViewById(R.id.cashu_loading_spinner)
+        cashuLogoCard = findViewById(R.id.cashu_logo_card)
+
         // NFC Animation views
         nfcAnimationContainer = findViewById(R.id.nfc_animation_container)
         nfcAnimationView = findViewById(R.id.nfc_animation_view)
@@ -438,7 +441,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         // Create the payment service (BTCPay or Local)
         paymentService = PaymentServiceFactory.create(this)
 
-        val isBtcPay = paymentService is BtcPayPaymentService
+        val isBtcPay = paymentService is BTCPayPaymentService
 
         if (isBtcPay) {
             initializeBtcPayPaymentRequest()
@@ -452,43 +455,58 @@ class PaymentRequestActivity : AppCompatActivity() {
      * cashu QR codes from the response, and poll for payment status.
      */
     private fun initializeBtcPayPaymentRequest() {
+        // Show spinner, hide QR and logo while createPayment() runs
+        cashuQrImageView.visibility = View.INVISIBLE
+        cashuLogoCard.visibility = View.GONE
+        cashuLoadingSpinner.visibility = View.VISIBLE
+
         uiScope.launch {
             val result = paymentService.createPayment(paymentAmount, "Payment of $paymentAmount sats")
             result.onSuccess { payment ->
                 btcPayPaymentId = payment.paymentId
 
+                val hasCashu = !payment.cashuPR.isNullOrBlank()
+                val hasLightning = !payment.bolt11.isNullOrBlank()
+
+                if (!hasCashu && !hasLightning) {
+                    Log.e(TAG, "BTCPay returned no cashuPR and no bolt11 — cannot display payment")
+                    cashuLoadingSpinner.visibility = View.GONE
+                    handlePaymentError("BTCPay returned no payment methods")
+                    return@onSuccess
+                }
+
                 // Show Cashu QR (cashuPR from BTCNutServer)
-                if (!payment.cashuPR.isNullOrBlank()) {
+                if (hasCashu) {
                     btcPayCashuPR = payment.cashuPR
                     try {
-                        val qrBitmap = QrCodeGenerator.generate(payment.cashuPR, 512)
+                        val qrBitmap = QrCodeGenerator.generate(payment.cashuPR!!, 512)
                         cashuQrImageView.setImageBitmap(qrBitmap)
+                        cashuQrImageView.visibility = View.VISIBLE
+                        cashuLogoCard.visibility = View.VISIBLE
                     } catch (e: Exception) {
                         Log.e(TAG, "Error generating BTCPay Cashu QR: ${e.message}", e)
                     }
+                    cashuLoadingSpinner.visibility = View.GONE
 
                     // Also use cashuPR for HCE
-                    hcePaymentRequest = CashuPaymentHelper.stripTransports(payment.cashuPR) ?: payment.cashuPR
+                    hcePaymentRequest = CashuPaymentHelper.stripTransports(payment.cashuPR!!) ?: payment.cashuPR
                     if (NdefHostCardEmulationService.isHceAvailable(this@PaymentRequestActivity)) {
                         val serviceIntent = Intent(this@PaymentRequestActivity, NdefHostCardEmulationService::class.java)
                         startService(serviceIntent)
                         setupNdefPayment()
                     }
+                } else {
+                    // No cashuPR — disable Cashu tab and switch to Lightning
+                    cashuLoadingSpinner.visibility = View.GONE
+                    tabManager.disableTab(PaymentTabManager.Tab.CASHU)
                 }
 
-                // Show Lightning QR
-                if (!payment.bolt11.isNullOrBlank()) {
-                    lightningInvoice = payment.bolt11
-                    try {
-                        val qrBitmap = QrCodeGenerator.generate(payment.bolt11, 512)
-                        lightningQrImageView.setImageBitmap(qrBitmap)
-                        lightningLoadingSpinner.visibility = View.GONE
-                        lightningLogoCard.visibility = View.VISIBLE
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Error generating BTCPay Lightning QR: ${e.message}", e)
-                        lightningLoadingSpinner.visibility = View.GONE
-                    }
-                    lightningStarted = true
+                // Show Lightning QR (may already be in the response, or fetch in background)
+                if (hasLightning) {
+                    showBtcPayLightningQr(payment.bolt11!!)
+                } else {
+                    // createPayment() broke early on cashuPR — fetch bolt11 in background
+                    fetchBtcPayLightningInBackground(payment.paymentId)
                 }
 
                 statusText.text = getString(R.string.payment_request_status_waiting_for_payment)
@@ -497,7 +515,39 @@ class PaymentRequestActivity : AppCompatActivity() {
                 startBtcPayPolling(payment.paymentId)
             }.onFailure { error ->
                 Log.e(TAG, "BTCPay createPayment failed: ${error.message}", error)
+                cashuLoadingSpinner.visibility = View.GONE
                 statusText.text = getString(R.string.payment_request_status_error_generic, error.message ?: "Unknown error")
+            }
+        }
+    }
+
+    private fun showBtcPayLightningQr(bolt11: String) {
+        lightningInvoice = bolt11
+        try {
+            val qrBitmap = QrCodeGenerator.generate(bolt11, 512)
+            lightningQrImageView.setImageBitmap(qrBitmap)
+            lightningLoadingSpinner.visibility = View.GONE
+            lightningLogoCard.visibility = View.VISIBLE
+        } catch (e: Exception) {
+            Log.e(TAG, "Error generating BTCPay Lightning QR: ${e.message}", e)
+            lightningLoadingSpinner.visibility = View.GONE
+        }
+        lightningStarted = true
+    }
+
+    private fun fetchBtcPayLightningInBackground(invoiceId: String) {
+        val btcPay = paymentService as? BTCPayPaymentService ?: return
+        uiScope.launch {
+            for (attempt in 1..10) {
+                delay(1500)
+                if (hasTerminalOutcome) break
+                val bolt11 = btcPay.fetchLightningInvoice(invoiceId)
+                if (bolt11 != null) {
+                    Log.d(TAG, "Got bolt11 in background after $attempt attempt(s)")
+                    showBtcPayLightningQr(bolt11)
+                    break
+                }
+                Log.d(TAG, "Background bolt11 fetch attempt $attempt — not ready yet")
             }
         }
     }
@@ -794,7 +844,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                             try {
                                 // If using BTCPay, we must send the token to the POST endpoint
                                 // specified in the original payment request.
-                                if (paymentService is BtcPayPaymentService) {
+                                if (paymentService is BTCPayPaymentService) {
                                     val pr = btcPayCashuPR
                                     if (pr != null) {
                                         val postUrl = CashuPaymentHelper.getPostUrl(pr)
@@ -802,7 +852,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
                                         if (postUrl != null && requestId != null) {
                                             Log.d(TAG, "Redeeming NFC token via BTCPay NUT-18 POST endpoint")
-                                            val result = (paymentService as BtcPayPaymentService).redeemTokenToPostEndpoint(
+                                            val result = (paymentService as BTCPayPaymentService).redeemTokenToPostEndpoint(
                                                 token, requestId, postUrl
                                             )
                                             result.onSuccess {

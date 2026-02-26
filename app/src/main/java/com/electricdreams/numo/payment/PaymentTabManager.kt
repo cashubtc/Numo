@@ -31,6 +31,8 @@ class PaymentTabManager(
         fun onCashuTabSelected()
     }
 
+    enum class Tab { CASHU, LIGHTNING }
+
     private var listener: TabSelectionListener? = null
     private var isLightningSelected = false
 
@@ -91,6 +93,18 @@ class PaymentTabManager(
 
         // Notify listener that Cashu tab is now selected
         listener?.onCashuTabSelected()
+    }
+
+    /**
+     * Disable a tab (e.g. when BTCPay returns no cashuPR, disable [Tab.CASHU]).
+     * Greys it out, removes its click listener, and auto-selects the other tab.
+     */
+    fun disableTab(tab: Tab) {
+        val view = if (tab == Tab.CASHU) cashuTab else lightningTab
+        view.isEnabled = false
+        view.alpha = 0.35f
+        view.setOnClickListener(null)
+        if (tab == Tab.CASHU) selectLightningTab() else selectCashuTab()
     }
 
     /**

@@ -171,8 +171,17 @@
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter" />
 
+            <ProgressBar
+                android:id="@+id/cashu_loading_spinner"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
             <!-- Center Logo Overlay for Cashu -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cashu_logo_card"
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_gravity="center"
