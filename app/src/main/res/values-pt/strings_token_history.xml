@@ -1,0 +1,12 @@
+<resources>
+    <!-- Token history: toolbar title & dialogs -->
+    <string name="token_history_toolbar_title">Histórico de tokens</string>
+
+    <string name="token_history_dialog_delete_title">Excluir token</string>
+    <string name="token_history_dialog_delete_message">Tem certeza de que deseja excluir este token do histórico?</string>
+    <string name="token_history_dialog_delete_positive">Excluir</string>
+
+    <string name="token_history_dialog_clear_title">Limpar histórico</string>
+    <string name="token_history_dialog_clear_message">Tem certeza de que deseja limpar todo o histórico de tokens? Esta ação não pode ser desfeita.</string>
+    <string name="token_history_dialog_clear_positive">Limpar tudo</string>
+</resources>

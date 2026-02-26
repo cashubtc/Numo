@@ -1,0 +1,69 @@
+<resources>
+    <!-- Settings main screen -->
+    <string name="settings_title">Configurações</string>
+
+    <!-- Settings sections -->
+    <string name="settings_section_terminal">Terminal</string>
+    <string name="settings_section_payments">Pagamentos</string>
+    <string name="settings_section_security">Segurança e privacidade</string>
+    <string name="settings_section_appearance">Aparência</string>
+    <string name="settings_section_general">Geral</string>
+    <string name="settings_section_developer">Desenvolvedor</string>
+
+    <!-- Settings items: language -->
+    <string name="settings_item_language_title">Idioma</string>
+    <string name="settings_item_language_subtitle">Escolha o idioma do aplicativo</string>
+
+    <!-- Settings items: currency -->
+    <string name="settings_item_currency_title">Moeda fiduciária</string>
+    <string name="settings_item_currency_subtitle">Escolha sua moeda fiduciária padrão</string>
+
+    <!-- Currency settings screen -->
+    <string name="currency_settings_section_preferred_currency">MOEDA PREFERIDA</string>
+    <string name="currency_settings_option_usd">Dólar americano (USD)</string>
+    <string name="currency_settings_option_eur">Euro (EUR)</string>
+    <string name="currency_settings_option_gbp">Libra esterlina (GBP)</string>
+    <string name="currency_settings_option_jpy">Iene japonês (JPY)</string>
+
+    <!-- Settings items: mints -->
+    <string name="settings_item_mints_title">Mints</string>
+    <string name="settings_item_mints_subtitle">Gerencie os mints Cashu e as configurações Lightning</string>
+
+    <!-- Settings items: items catalog -->
+    <string name="settings_item_items_title">Itens</string>
+    <string name="settings_item_items_subtitle">Crie e gerencie itens do catálogo</string>
+
+    <!-- Settings items: tips -->
+    <string name="settings_item_tips_title">Gorjetas</string>
+    <string name="settings_item_tips_subtitle">Configure as opções de gorjeta no checkout</string>
+
+    <!-- Settings items: basket names -->
+    <string name="settings_item_basket_names_title">Nomes de cestas</string>
+    <string name="settings_item_basket_names_subtitle">Crie nomes predefinidos para salvar cestas rapidamente</string>
+
+    <!-- Settings items: theme -->
+    <string name="settings_item_theme_title">Tema</string>
+    <string name="settings_item_theme_subtitle">Alternar entre modo claro e escuro</string>
+
+    <!-- Settings items: security -->
+    <string name="settings_item_security_title">Segurança e privacidade</string>
+    <string name="settings_item_security_subtitle">Backup da frase semente, restaurar carteira</string>
+
+    <!-- Settings items: developer -->
+    <string name="settings_item_developer_title">Opções de desenvolvimento</string>
+    <string name="settings_item_developer_subtitle">Opções avançadas e ferramentas de depuração</string>
+
+    <!-- Settings items: about -->
+    <string name="settings_item_about_title">Sobre</string>
+    <string name="settings_item_about_subtitle">Versão, termos e contato</string>
+
+    <!-- Settings sub-activity labels -->
+    <string name="settings_theme_title">Tema</string>
+    <string name="settings_currency_title">Moeda fiduciária</string>
+    <string name="settings_language_title">Idioma</string>
+    <string name="settings_mints_title">Mints</string>
+    <string name="settings_security_title">Segurança e privacidade</string>
+
+    <!-- Settings PIN verification -->
+    <string name="settings_verify_pin_subtitle">Verifique para acessar as configurações</string>
+</resources>

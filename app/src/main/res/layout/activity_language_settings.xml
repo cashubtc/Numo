@@ -99,6 +99,19 @@
                     android:text="@string/language_settings_option_spanish"
                     android:textAppearance="@style/Text.BodyBold" />
 
+                <RadioButton
+                    android:id="@+id/radio_portuguese"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:button="@null"
+                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
+                    android:drawableTint="@color/color_primary_green"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="24dp"
+                    android:text="@string/language_settings_option_portuguese"
+                    android:textAppearance="@style/Text.BodyBold" />
+
             </RadioGroup>
 
             <!-- Current language summary -->
