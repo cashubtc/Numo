@@ -14,6 +14,7 @@ import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.feature.tips.TipsSettingsActivity
 import com.electricdreams.numo.feature.baskets.BasketNamesSettingsActivity
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawSettingsActivity
+import com.electricdreams.numo.core.prefs.PreferenceStore
 
 /**
  * Main Settings screen.
@@ -47,10 +48,36 @@ class SettingsActivity : AppCompatActivity() {
         super.onResume()
         // Update developer section visibility when returning from About
         updateDeveloperSectionVisibility()
+        // Update mints/withdrawals availability based on BTCPay state
+        updateBtcPayDependentItems()
     }
 
     private fun setupViews() {
         updateDeveloperSectionVisibility()
+        updateBtcPayDependentItems()
+    }
+
+    private fun updateBtcPayDependentItems() {
+        val btcPayEnabled = PreferenceStore.app(this).getBoolean("btcpay_enabled", false)
+
+        val mintsItem = findViewById<View>(R.id.mints_settings_item)
+        val withdrawalsItem = findViewById<View>(R.id.withdrawals_settings_item)
+
+        if (btcPayEnabled) {
+            mintsItem.alpha = 0.4f
+            mintsItem.isEnabled = false
+            mintsItem.setOnClickListener(null)
+            withdrawalsItem.alpha = 0.4f
+            withdrawalsItem.isEnabled = false
+            withdrawalsItem.setOnClickListener(null)
+        } else {
+            mintsItem.alpha = 1f
+            mintsItem.isEnabled = true
+            mintsItem.setOnClickListener { openProtectedActivity(MintsSettingsActivity::class.java) }
+            withdrawalsItem.alpha = 1f
+            withdrawalsItem.isEnabled = true
+            withdrawalsItem.setOnClickListener { openProtectedActivity(AutoWithdrawSettingsActivity::class.java) }
+        }
     }
 
     private fun updateDeveloperSectionVisibility() {
@@ -88,15 +115,7 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(Intent(this, CurrencySettingsActivity::class.java))
         }
 
-        // Mints - protected (can withdraw funds)
-        findViewById<View>(R.id.mints_settings_item).setOnClickListener {
-            openProtectedActivity(MintsSettingsActivity::class.java)
-        }
-
-        // Withdrawals - protected (handles funds)
-        findViewById<View>(R.id.withdrawals_settings_item).setOnClickListener {
-            openProtectedActivity(AutoWithdrawSettingsActivity::class.java)
-        }
+        // Mints and Withdrawals listeners are managed by updateBtcPayDependentItems()
 
         // BTCPay Server - protected (holds API key)
         findViewById<View>(R.id.btcpay_settings_item).setOnClickListener {
