@@ -7,7 +7,7 @@ import com.electricdreams.numo.core.wallet.WalletResult
  *
  * Implementations:
  * - [com.electricdreams.numo.core.payment.impl.LocalPaymentService] – wraps existing CDK flow
- * - [com.electricdreams.numo.core.payment.impl.BtcPayPaymentService] – BTCPay Greenfield API + BTCNutServer
+ * - [com.electricdreams.numo.core.payment.impl.BTCPayPaymentService] – BTCPay Greenfield API + BTCNutServer
  */
 interface PaymentService {
 

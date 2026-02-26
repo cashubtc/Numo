@@ -2,16 +2,13 @@ package com.electricdreams.numo.core.payment
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import com.electricdreams.numo.core.cashu.CashuWalletManager
-import com.electricdreams.numo.core.payment.impl.BtcPayPaymentService
+import com.electricdreams.numo.core.payment.impl.BTCPayPaymentService
 import com.electricdreams.numo.core.payment.impl.LocalPaymentService
 import com.electricdreams.numo.core.prefs.PreferenceStore
-import com.electricdreams.numo.core.util.MintManager
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
@@ -46,7 +43,7 @@ class PaymentServiceFactoryTest {
         prefs.putString("btcpay_store_id", "store-id")
 
         val service = PaymentServiceFactory.create(context)
-        assertTrue(service is BtcPayPaymentService)
+        assertTrue(service is BTCPayPaymentService)
     }
 
     @Test
