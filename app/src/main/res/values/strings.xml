@@ -415,6 +415,7 @@
     <string name="items_settings_status_empty">No items in catalog</string>
     <string name="items_settings_description">Manage your product catalog for quick checkout.</string>
     <string name="items_settings_import_csv">Import CSV</string>
+    <string name="items_settings_export_csv">Export CSV</string>
     <string name="items_settings_manage">Manage</string>
     <string name="items_settings_clear_all">Clear All Items</string>
 
@@ -427,6 +428,9 @@
     <string name="item_list_empty_title">No Items</string>
     <string name="item_list_empty_subtitle">Tap + to add your first item</string>
     <string name="item_list_import_from_csv">Import from CSV</string>
+    <string name="item_list_export_to_csv">Export to CSV</string>
+    <string name="item_list_toast_exported">Catalog exported to CSV</string>
+    <string name="item_list_toast_error_exporting">Error exporting catalog</string>
     <string name="item_list_clear_all">Clear All Items</string>
 
     <!-- Item entry / edit -->
