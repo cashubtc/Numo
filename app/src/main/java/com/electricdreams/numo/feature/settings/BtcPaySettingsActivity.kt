@@ -109,10 +109,8 @@ class BtcPaySettingsActivity : AppCompatActivity() {
                         .readTimeout(10, TimeUnit.SECONDS)
                         .build()
 
-                    //todo check which permissions does it require.
-                    // probably shouldn't be used for hearbeat check
                     val request = Request.Builder()
-                        .url("$serverUrl/api/v1/stores/$storeId")
+                        .url("$serverUrl/api/v1/stores/$storeId/invoices")
                         .header("Authorization", "token $apiKey")
                         .get()
                         .build()
