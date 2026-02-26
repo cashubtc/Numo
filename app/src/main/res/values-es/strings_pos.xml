@@ -22,4 +22,10 @@
     <string name="basket_charge_fiat_and_sats">Cobrar %1$s + %2$s</string>
     <string name="basket_charge_sats_only">Cobrar %1$s</string>
     <string name="basket_charge_fiat_only">Cobrar %1$s</string>
+
+    <!-- Basket undo/redo controls -->
+    <string name="item_selection_undo_button">Deshacer último cambio</string>
+    <string name="item_selection_redo_button">Rehacer cambio</string>
+    <string name="item_selection_undo_button_short">Deshacer</string>
+    <string name="item_selection_redo_button_short">Rehacer</string>
 </resources>
