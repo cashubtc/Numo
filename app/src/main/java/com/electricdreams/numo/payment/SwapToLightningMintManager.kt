@@ -393,10 +393,95 @@ object SwapToLightningMintManager {
             amountSats = expectedAmount
         )
     }
-    // Note: previously we had explicit BOLT11 payment-hash verification
-    // utilities here (verifyMeltPreimageMatchesInvoice +
-    // extractPaymentHashFromBolt11 + hexToBytes). Since the Lightning mint
-    // will only mint proofs if the invoice is actually paid, we now rely on
-    // that as the source of truth and have removed this additional layer of
-    // verification to simplify the swap flow.
+
+    /**
+     * Attempts to finalize a pending swap-to-Lightning-mint transaction by checking if the
+     * associated Lightning invoice has been paid.
+     *
+     * @return true if the payment was successfully finalized (minted), false otherwise.
+     */
+    suspend fun tryFinalizePendingSwap(
+        context: android.content.Context,
+        entry: PaymentHistoryEntry
+    ): Boolean = withContext(Dispatchers.IO) {
+        val swapJson = entry.swapToLightningMintJson ?: return@withContext false
+        val frame = try {
+            com.google.gson.Gson().fromJson(swapJson, PaymentHistoryEntry.Companion.SwapToLightningMintFrame::class.java)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse SwapToLightningMintFrame", e)
+            return@withContext false
+        }
+
+        val lightningQuoteId = frame.lightningQuoteId
+        val lightningMintUrl = frame.lightningMintUrl
+        
+        Log.d(TAG, "tryFinalizePendingSwap: Checking status for quoteId=$lightningQuoteId on mint=$lightningMintUrl")
+
+        val wallet = CashuWalletManager.getWallet()
+        if (wallet == null) {
+            Log.e(TAG, "tryFinalizePendingSwap: Wallet not initialized")
+            return@withContext false
+        }
+
+        try {
+            val mintUrl = MintUrl(lightningMintUrl)
+            val quote = wallet.checkMintQuote(mintUrl, lightningQuoteId)
+            
+            Log.d(TAG, "tryFinalizePendingSwap: Quote state is ${quote.state}")
+
+            when (quote.state) {
+                org.cashudevkit.QuoteState.PAID -> {
+                    Log.d(TAG, "tryFinalizePendingSwap: Quote PAID. Minting tokens...")
+                    val proofs = try {
+                        wallet.mint(mintUrl, lightningQuoteId, null)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "tryFinalizePendingSwap: Minting failed", e)
+                        emptyList()
+                    }
+                    
+                    if (proofs.isNotEmpty()) {
+                        Log.d(TAG, "tryFinalizePendingSwap: Mint successful. Updating history.")
+                        
+                        withContext(Dispatchers.Main) {
+                            PaymentsHistoryActivity.completePendingPayment(
+                                context = context,
+                                paymentId = entry.id,
+                                token = "", // Lightning payments have no token string
+                                paymentType = PaymentHistoryEntry.TYPE_LIGHTNING,
+                                mintUrl = lightningMintUrl,
+                                lightningQuoteId = lightningQuoteId,
+                                lightningMintUrl = lightningMintUrl
+                            )
+                        }
+                        return@withContext true
+                    } else {
+                        Log.e(TAG, "tryFinalizePendingSwap: Mint returned no proofs")
+                        return@withContext false
+                    }
+                }
+                org.cashudevkit.QuoteState.ISSUED -> {
+                    Log.d(TAG, "tryFinalizePendingSwap: Quote already ISSUED. Marking as complete.")
+                     withContext(Dispatchers.Main) {
+                        PaymentsHistoryActivity.completePendingPayment(
+                            context = context,
+                            paymentId = entry.id,
+                            token = "",
+                            paymentType = PaymentHistoryEntry.TYPE_LIGHTNING,
+                            mintUrl = lightningMintUrl,
+                            lightningQuoteId = lightningQuoteId,
+                            lightningMintUrl = lightningMintUrl
+                        )
+                    }
+                    return@withContext true
+                }
+                else -> {
+                    Log.d(TAG, "tryFinalizePendingSwap: Quote state ${quote.state} is not terminal success.")
+                    return@withContext false
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "tryFinalizePendingSwap: Error checking/minting quote", e)
+            return@withContext false
+        }
+    }
 }
