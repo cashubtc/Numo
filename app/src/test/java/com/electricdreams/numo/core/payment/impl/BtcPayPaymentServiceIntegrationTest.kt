@@ -1,6 +1,6 @@
 package com.electricdreams.numo.core.payment.impl
 
-import com.electricdreams.numo.core.payment.BtcPayConfig
+import com.electricdreams.numo.core.payment.BTCPayConfig
 import com.electricdreams.numo.core.payment.PaymentState
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -19,7 +19,7 @@ import java.util.Properties
 @Config(sdk = [34])
 class BtcPayPaymentServiceIntegrationTest {
 
-    private lateinit var config: BtcPayConfig
+    private lateinit var config: BTCPayConfig
 
     @Before
     fun setup() {
@@ -36,7 +36,7 @@ class BtcPayPaymentServiceIntegrationTest {
         if (envFile.exists()) {
             println("Loading config from ${envFile.absolutePath}")
             props.load(FileInputStream(envFile))
-            config = BtcPayConfig(
+            config = BTCPayConfig(
                 serverUrl = props.getProperty("BTCPAY_SERVER_URL"),
                 apiKey = props.getProperty("BTCPAY_API_KEY"),
                 storeId = props.getProperty("BTCPAY_STORE_ID")
@@ -44,7 +44,7 @@ class BtcPayPaymentServiceIntegrationTest {
         } else {
             println("btcpay_env.properties not found")
             // Fallback for CI if env vars are set directly (optional)
-            config = BtcPayConfig(
+            config = BTCPayConfig(
                 serverUrl = System.getenv("BTCPAY_SERVER_URL") ?: "http://localhost:49392",
                 apiKey = System.getenv("BTCPAY_API_KEY") ?: "",
                 storeId = System.getenv("BTCPAY_STORE_ID") ?: ""
@@ -59,7 +59,7 @@ class BtcPayPaymentServiceIntegrationTest {
             return@runBlocking
         }
 
-        val service = BtcPayPaymentService(config)
+        val service = BTCPayPaymentService(config)
         assertTrue("Service should be ready", service.isReady())
 
         // 1. Create Payment
