@@ -501,7 +501,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             Log.w(TAG, "setHceToLightning() called but lightningInvoice is null")
             return
         }
-        val payload = "lightning:$invoice"
+        val payload = invoice
 
         try {
             val hceService = NdefHostCardEmulationService.getInstance()
@@ -724,6 +724,10 @@ class PaymentRequestActivity : AppCompatActivity() {
                         runOnUiThread {
                             if (isProcessingNfcPayment || hasTerminalOutcome) {
                                 Log.d(TAG, "NFC reading started ignored - already processing or done")
+                                return@runOnUiThread
+                            }
+                            if (currentHceMode == HceMode.LIGHTNING) {
+                                Log.d(TAG, "NFC reading started ignored - currently in Lightning mode")
                                 return@runOnUiThread
                             }
                             Log.d(TAG, "NFC reading started - showing animation overlay")
