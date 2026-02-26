@@ -501,7 +501,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             Log.w(TAG, "setHceToLightning() called but lightningInvoice is null")
             return
         }
-        val payload = invoice
+        val payload = "lightning:$invoice"
 
         try {
             val hceService = NdefHostCardEmulationService.getInstance()
@@ -645,12 +645,8 @@ class PaymentRequestActivity : AppCompatActivity() {
             if (hceService != null) {
                 Log.d(TAG, "Setting up NDEF payment with HCE service")
 
-                // Set the payment request to the HCE service based on current tab selection
-                if (tabManager.isLightningTabSelected() && lightningInvoice != null) {
-                    setHceToLightning()
-                } else {
-                    setHceToCashu()
-                }
+                // Set the payment request to the HCE service with expected amount (Cashu by default)
+                setHceToCashu()
 
                 // Set up callback for when a token is received or an error occurs
                 hceService.setPaymentCallback(object : NdefHostCardEmulationService.CashuPaymentCallback {
@@ -728,10 +724,6 @@ class PaymentRequestActivity : AppCompatActivity() {
                         runOnUiThread {
                             if (isProcessingNfcPayment || hasTerminalOutcome) {
                                 Log.d(TAG, "NFC reading started ignored - already processing or done")
-                                return@runOnUiThread
-                            }
-                            if (currentHceMode == HceMode.LIGHTNING) {
-                                Log.d(TAG, "NFC reading started ignored - currently in Lightning mode")
                                 return@runOnUiThread
                             }
                             Log.d(TAG, "NFC reading started - showing animation overlay")
