@@ -4,15 +4,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.data.model.TokenHistoryEntry
+import com.electricdreams.numo.databinding.ActivityHistoryBinding
 import com.electricdreams.numo.ui.adapter.TokenHistoryAdapter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -21,18 +19,16 @@ import java.util.Collections
 
 class TokenHistoryActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityHistoryBinding
     private lateinit var adapter: TokenHistoryAdapter
-    private lateinit var emptyView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_history)
+        binding = ActivityHistoryBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // Edge-to-edge so token history list runs behind the nav pill as well
         enableEdgeToEdgeWithPill(this, lightNavIcons = true)
-
-        val recyclerView: RecyclerView = findViewById(R.id.history_recycler_view)
-        emptyView = findViewById(R.id.empty_view)
 
         adapter = TokenHistoryAdapter().apply {
             setOnDeleteClickListener { entry, position ->
@@ -45,8 +41,8 @@ class TokenHistoryActivity : AppCompatActivity() {
             }
         }
 
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        binding.historyRecyclerView.adapter = adapter
+        binding.historyRecyclerView.layoutManager = LinearLayoutManager(this)
 
         // Load and display history
         loadHistory()
@@ -63,7 +59,7 @@ class TokenHistoryActivity : AppCompatActivity() {
         adapter.setEntries(history)
 
         val isEmpty = history.isEmpty()
-        emptyView.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        binding.emptyView.visibility = if (isEmpty) View.VISIBLE else View.GONE
     }
 
     private fun showClearHistoryConfirmation() {
