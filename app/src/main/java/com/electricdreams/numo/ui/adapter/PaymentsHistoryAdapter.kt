@@ -197,6 +197,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             val entry = item.entry
             val context = itemView.context
             val isPending = entry.isPending()
+            val isExpired = entry.isExpired()
 
             // Reset translation immediately without animation to prevent recycled views from staying open
             mainContent.translationX = if (position == openItemPosition) -getDeleteWidth(context) else 0f
@@ -248,7 +249,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 satAmount.toString()
             }
 
-            val displayAmount = if (isPending) {
+            val displayAmount = if (isPending || isExpired) {
                 formattedAmount
             } else if (entry.amount >= 0) {
                 "+$formattedAmount"
@@ -263,6 +264,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             // ── Title: direction-based labels ──
             titleText.text = when {
                 isPending -> context.getString(R.string.history_row_title_pending_payment)
+                isExpired -> context.getString(R.string.history_row_title_pending_payment)
                 entry.amount >= 0 -> context.getString(R.string.history_row_title_payment_received)
                 else -> context.getString(R.string.history_row_title_withdrawal)
             }
@@ -276,22 +278,37 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             icon.setColorFilter(context.getColor(R.color.color_text_primary))
 
             // ── Status badge ──
-            if (isPending) {
-                statusBadge.setBackgroundResource(R.drawable.bg_status_badge_orange)
-                statusBadgeIcon.setImageResource(R.drawable.ic_clock_small)
-            } else {
-                statusBadge.setBackgroundResource(R.drawable.bg_status_badge_green)
-                statusBadgeIcon.setImageResource(R.drawable.ic_check_small)
+            when {
+                isPending -> {
+                    statusBadge.setBackgroundResource(R.drawable.bg_status_badge_orange)
+                    statusBadgeIcon.setImageResource(R.drawable.ic_clock_small)
+                }
+                isExpired -> {
+                    statusBadge.setBackgroundResource(R.drawable.bg_status_badge_red)
+                    statusBadgeIcon.setImageResource(R.drawable.ic_clock_small)
+                }
+                else -> {
+                    statusBadge.setBackgroundResource(R.drawable.bg_status_badge_green)
+                    statusBadgeIcon.setImageResource(R.drawable.ic_check_small)
+                }
             }
             statusBadge.visibility = View.VISIBLE
 
-            // ── Status text (pending only) ──
-            if (isPending) {
-                statusText.visibility = View.VISIBLE
-                statusText.text = context.getString(R.string.history_row_status_tap_to_resume)
-                statusText.setTextColor(context.getColor(R.color.color_warning))
-            } else {
-                statusText.visibility = View.GONE
+            // ── Status text (pending/expired) ──
+            when {
+                isPending -> {
+                    statusText.visibility = View.VISIBLE
+                    statusText.text = context.getString(R.string.history_row_status_tap_to_resume)
+                    statusText.setTextColor(context.getColor(R.color.color_warning))
+                }
+                isExpired -> {
+                    statusText.visibility = View.VISIBLE
+                    statusText.text = context.getString(R.string.history_row_status_expired)
+                    statusText.setTextColor(context.getColor(R.color.color_error))
+                }
+                else -> {
+                    statusText.visibility = View.GONE
+                }
             }
 
             // ── Label subtitle ──
