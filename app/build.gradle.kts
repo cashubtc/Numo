@@ -149,6 +149,9 @@ dependencies {
     
     // Flexbox layout for tag-based category selection
     implementation("com.google.android.flexbox:flexbox:3.0.0")
+
+    // LeakCanary
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.14")
 }
 
 tasks.withType<Test>().configureEach {
