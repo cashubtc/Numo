@@ -629,10 +629,16 @@ class PaymentRequestActivity : AppCompatActivity() {
                         }
                         PaymentState.EXPIRED -> {
                             btcPayPollingActive = false
+                            pendingPaymentId?.let {
+                                PaymentsHistoryActivity.markPaymentExpired(this@PaymentRequestActivity, it)
+                            }
                             handlePaymentError("Invoice expired")
                         }
                         PaymentState.FAILED -> {
                             btcPayPollingActive = false
+                            pendingPaymentId?.let {
+                                PaymentsHistoryActivity.markPaymentExpired(this@PaymentRequestActivity, it)
+                            }
                             handlePaymentError("Invoice invalid")
                         }
                         PaymentState.PENDING -> {

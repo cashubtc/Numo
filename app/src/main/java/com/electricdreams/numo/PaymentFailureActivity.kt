@@ -78,6 +78,12 @@ class PaymentFailureActivity : AppCompatActivity() {
             handleTryAgain()
         }
 
+        // Hide "Try Again" if there are no resumable pending payments
+        val hasPending = PaymentsHistoryActivity.getPaymentHistory(this).any { it.isPending() }
+        if (!hasPending) {
+            tryAgainButton.visibility = View.GONE
+        }
+
         // Start the error animation after a short delay
         errorIcon.postDelayed({
             animateErrorIcon()
