@@ -4,8 +4,8 @@
     <string name="security_settings_card_body">Tu frase semilla es la única forma de recuperar tu cartera si pierdes el acceso a este dispositivo. Mantenla a salvo y no la compartas con nadie.</string>
 
     <!-- Security &amp; Privacy screen: sections -->
-    <string name="security_settings_section_backup">Copia de seguridad del cartera</string>
-    <string name="security_settings_section_recovery">Recuperación del cartera</string>
+    <string name="security_settings_section_backup">Copia de seguridad de la cartera</string>
+    <string name="security_settings_section_recovery">Recuperación de la cartera</string>
 
     <!-- Security &amp; Privacy screen: backup mnemonic row -->
     <string name="security_settings_backup_mnemonic_title">Copia de seguridad de la frase semilla</string>
