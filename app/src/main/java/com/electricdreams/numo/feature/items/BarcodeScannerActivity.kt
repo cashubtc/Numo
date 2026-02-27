@@ -5,19 +5,16 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
-import android.view.View
-import android.widget.ImageButton
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.electricdreams.numo.R
+import com.electricdreams.numo.databinding.ActivityBarcodeScannerBinding
 import com.google.mlkit.vision.barcode.BarcodeScanner
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
@@ -39,10 +36,7 @@ class BarcodeScannerActivity : AppCompatActivity() {
         const val EXTRA_BARCODE_FORMAT = "barcode_format"
     }
 
-    private lateinit var previewView: PreviewView
-    private lateinit var overlayView: View
-    private lateinit var instructionText: TextView
-    private lateinit var closeButton: ImageButton
+    private lateinit var binding: ActivityBarcodeScannerBinding
 
     private lateinit var cameraExecutor: ExecutorService
     private var barcodeScanner: BarcodeScanner? = null
@@ -50,14 +44,10 @@ class BarcodeScannerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_barcode_scanner)
+        binding = ActivityBarcodeScannerBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        previewView = findViewById(R.id.preview_view)
-        overlayView = findViewById(R.id.scanner_overlay)
-        instructionText = findViewById(R.id.instruction_text)
-        closeButton = findViewById(R.id.close_button)
-
-        closeButton.setOnClickListener {
+        binding.closeButton.setOnClickListener {
             setResult(RESULT_CANCELED)
             finish()
         }
@@ -134,7 +124,7 @@ class BarcodeScannerActivity : AppCompatActivity() {
             val preview = Preview.Builder()
                 .build()
                 .also {
-                    it.setSurfaceProvider(previewView.surfaceProvider)
+                    it.setSurfaceProvider(binding.previewView.surfaceProvider)
                 }
 
             val imageAnalysis = ImageAnalysis.Builder()
@@ -197,7 +187,7 @@ class BarcodeScannerActivity : AppCompatActivity() {
     private fun onBarcodeDetected(value: String, format: Int) {
         runOnUiThread {
             // Provide haptic feedback
-            previewView.performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM)
+            binding.previewView.performHapticFeedback(android.view.HapticFeedbackConstants.CONFIRM)
 
             val intent = Intent().apply {
                 putExtra(EXTRA_BARCODE_VALUE, value)
