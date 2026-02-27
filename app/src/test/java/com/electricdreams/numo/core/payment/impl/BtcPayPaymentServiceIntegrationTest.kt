@@ -69,7 +69,7 @@ class BtcPayPaymentServiceIntegrationTest {
     /**
      * Uses the BTCPay Greenfield API to force an invoice into a specific status.
      * Requires btcpay.store.canmodifystoresettings permission.
-     * Supported values: "MarkSettled", "MarkInvalid"
+     * Supported values: "Settled", "Invalid"
      */
     private fun markInvoiceStatus(invoiceId: String, status: String) {
         val url = "${config.serverUrl.trimEnd('/')}/api/v1/stores/${config.storeId}/invoices/$invoiceId/status"
@@ -81,6 +81,8 @@ class BtcPayPaymentServiceIntegrationTest {
             .build()
         httpClient.newCall(request).execute().use { response ->
             println("markInvoiceStatus($invoiceId, $status) → HTTP ${response.code}")
+            check(response.isSuccessful) { "markInvoiceStatus failed: HTTP ${response.code} ${response.body?.string()}"
+            }
         }
     }
 
@@ -216,7 +218,7 @@ class BtcPayPaymentServiceIntegrationTest {
     fun testCheckPaymentStatus_afterMarkSettled_isPaid() = runBlocking {
         if (skipIfNotConfigured()) return@runBlocking
         val paymentId = createInvoiceId(1000L, "Status settled test")
-        markInvoiceStatus(paymentId, "MarkSettled")
+        markInvoiceStatus(paymentId, "Settled")
         val status = service.checkPaymentStatus(paymentId).getOrThrow()
         assertEquals("Settled invoice should be PAID", PaymentState.PAID, status)
     }
@@ -225,7 +227,7 @@ class BtcPayPaymentServiceIntegrationTest {
     fun testCheckPaymentStatus_afterMarkInvalid_isFailed() = runBlocking {
         if (skipIfNotConfigured()) return@runBlocking
         val paymentId = createInvoiceId(1000L, "Status invalid test")
-        markInvoiceStatus(paymentId, "MarkInvalid")
+        markInvoiceStatus(paymentId, "Invalid")
         val status = service.checkPaymentStatus(paymentId).getOrThrow()
         assertEquals("Invalidated invoice should be FAILED", PaymentState.FAILED, status)
     }
@@ -269,7 +271,7 @@ class BtcPayPaymentServiceIntegrationTest {
     fun testFetchLightningInvoice_settledInvoice_doesNotThrow() = runBlocking {
         if (skipIfNotConfigured()) return@runBlocking
         val paymentId = createInvoiceId(1000L, "LN fetch settled test")
-        markInvoiceStatus(paymentId, "MarkSettled")
+        markInvoiceStatus(paymentId, "Settled")
         // Should not throw — result may be null or the original bolt11
         val bolt11 = service.fetchLightningInvoice(paymentId)
         println("bolt11 for settled invoice: ${bolt11?.take(40) ?: "null"}")
@@ -325,7 +327,7 @@ class BtcPayPaymentServiceIntegrationTest {
     fun testRedeemTokenToPostEndpoint_settledInvoice_returnsFailure() = runBlocking {
         if (skipIfNotConfigured()) return@runBlocking
         val paymentId = createInvoiceId(1000L, "NUT-18 settled test")
-        markInvoiceStatus(paymentId, "MarkSettled")
+        markInvoiceStatus(paymentId, "Settled")
         val postUrl = "${config.serverUrl.trimEnd('/')}/cashu/pay-invoice"
         val result = service.redeemTokenToPostEndpoint(
             token = "cashuAinvalidtoken",

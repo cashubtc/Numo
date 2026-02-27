@@ -22,25 +22,21 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Build and Start BTCPay Server
+      - name: Start BTCPay Server
         working-directory: integration-tests/btcpay
-        run: |
-          docker compose up -d
-          # Give it some time to start up initially
-          sleep 10
+        run: docker compose up -d
 
       - name: Provision BTCPay Server
         working-directory: integration-tests/btcpay
         run: |
-          sudo apt-get update && sudo apt-get install -y jq curl
           chmod +x provision.sh
           ./provision.sh
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+          cp btcpay_env.properties ../../btcpay_env.properties
 
       - name: Run Integration Tests
-        run: ./gradlew testDebugUnitTest --tests "com.electricdreams.numo.core.payment.impl.BtcPayPaymentServiceIntegrationTest.*"
+        run: |
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest --tests "com.electricdreams.numo.core.payment.impl.BtcPayPaymentServiceIntegrationTest.*"
 
       - name: Cleanup
         if: always()
