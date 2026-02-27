@@ -10,6 +10,7 @@
     <string name="history_row_title_cash_in">Cash In</string>
     <string name="history_row_title_cash_out">Cash Out</string>
     <string name="history_row_status_tap_to_resume">Tap to resume</string>
+    <string name="history_row_status_expired">Expired</string>
 
     <!-- History: dialogs, toasts, chooser titles -->
     <string name="history_open_with_title">Open payment with...</string>

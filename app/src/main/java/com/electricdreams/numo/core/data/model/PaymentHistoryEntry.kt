@@ -148,6 +148,9 @@ data class PaymentHistoryEntry(
     /** Check if this payment is completed */
     fun isCompleted(): Boolean = getStatus() == STATUS_COMPLETED
 
+    /** Check if this payment expired (BTCPay invoice expired before payment) */
+    fun isExpired(): Boolean = getStatus() == STATUS_EXPIRED
+
     /** Check if this payment was via Lightning */
     fun isLightning(): Boolean = paymentType == TYPE_LIGHTNING
 
@@ -186,6 +189,7 @@ data class PaymentHistoryEntry(
         const val STATUS_PENDING = "pending"
         const val STATUS_COMPLETED = "completed"
         const val STATUS_CANCELLED = "cancelled"
+        const val STATUS_EXPIRED = "expired"
 
         const val TYPE_CASHU = "cashu"
         const val TYPE_LIGHTNING = "lightning"
