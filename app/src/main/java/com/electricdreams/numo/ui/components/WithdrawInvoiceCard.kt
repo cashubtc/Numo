@@ -51,7 +51,7 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
         
         // Setup card styling
         radius = resources.getDimension(R.dimen.card_corner_radius)
-        cardElevation = resources.getDimension(R.dimen.card_elevation_small)
+        cardElevation = 0f
         setCardBackgroundColor(context.getColor(R.color.color_bg_card))
         
         // Find views
