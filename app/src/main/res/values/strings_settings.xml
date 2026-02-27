@@ -31,7 +31,7 @@
 
     <!-- Settings items: webhooks -->
     <string name="settings_item_webhooks_title">Webhooks</string>
-    <string name="settings_item_webhooks_subtitle">Send payment metadata to external endpoints</string>
+    <string name="settings_item_webhooks_subtitle">Feed sales data to external admin dashboards</string>
 
     <!-- Settings items: items catalog -->
     <string name="settings_item_items_title">Items</string>
