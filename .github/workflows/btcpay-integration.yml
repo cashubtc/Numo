@@ -1,0 +1,44 @@
+name: BTCPay Integration Tests
+
+on:
+  push:
+    branches: [ "main", "master", "feat/*", "fix/*" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Start BTCPay Server
+        working-directory: integration-tests/btcpay
+        run: docker compose up -d
+
+      - name: Provision BTCPay Server
+        working-directory: integration-tests/btcpay
+        run: |
+          chmod +x provision.sh
+          ./provision.sh
+          cp btcpay_env.properties ../../btcpay_env.properties
+
+      - name: Run Integration Tests
+        run: |
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest --tests "com.electricdreams.numo.core.payment.impl.BtcPayPaymentServiceIntegrationTest.*"
+
+      - name: Cleanup
+        if: always()
+        working-directory: integration-tests/btcpay
+        run: docker compose down -v

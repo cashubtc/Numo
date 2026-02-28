@@ -1,0 +1,129 @@
+version: "3"
+services:
+  plugin-builder:
+    build:
+      context: .
+      dockerfile: Dockerfile.builder
+    volumes:
+      - plugin-data:/plugins
+    command: ["/bin/bash", "-c", "cp -r /output/BTCPayServer.Plugins.Cashu /plugins/"]
+
+  btcpayserver:
+    image: btcpayserver/btcpayserver:2.2.1
+    restart: unless-stopped
+    environment:
+      BTCPAY_NETWORK: "regtest"
+      BTCPAY_BIND: "0.0.0.0:49392"
+      BTCPAY_DATADIR: "/datadir"
+      BTCPAY_PLUGINDIR: "/datadir/Plugins"
+      BTCPAY_POSTGRES: "User ID=postgres;Password=postgres;Host=postgres;Port=5432;Database=btcpayserver"
+      BTCPAY_CHAINS: "btc"
+      BTCPAY_BTCEXPLORERURL: "http://nbxplorer:32838/"
+      BTCPAY_BTCLIGHTNING: "type=lnd-rest;server=http://lnd_bitcoin:8080/;allowinsecure=true"
+      BTCPAY_ENABLE_REGISTRATION: "true"
+    ports:
+      - "49392:49392"
+    volumes:
+      - btcpay-data:/datadir
+      - plugin-data:/datadir/Plugins
+    depends_on:
+      plugin-builder:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_started
+      nbxplorer:
+        condition: service_started
+      lnd_bitcoin:
+        condition: service_started
+
+  lnd_bitcoin:
+    image: btcpayserver/lnd:v0.19.3-beta
+    restart: unless-stopped
+    environment:
+      LND_CHAIN: "btc"
+      LND_ENVIRONMENT: "regtest"
+      LND_EXPLORERURL: "http://nbxplorer:32838/"
+      LND_REST_LISTEN_HOST: "http://lnd_bitcoin:8080"
+      LND_EXTRA_ARGS: |
+        restlisten=lnd_bitcoin:8080
+        rpclisten=127.0.0.1:10008
+        rpclisten=lnd_bitcoin:10009
+        bitcoin.node=bitcoind
+        bitcoind.rpchost=bitcoind:18443
+        bitcoind.rpcuser=btcpay
+        bitcoind.rpcpass=btcpay
+        bitcoind.zmqpubrawblock=tcp://bitcoind:28332
+        bitcoind.zmqpubrawtx=tcp://bitcoind:28333
+        bitcoin.defaultchanconfs=1
+        no-macaroons=1
+        no-rest-tls=1
+        noseedbackup=1
+    volumes:
+      - lnd-bitcoin-data:/data
+      - bitcoind-data:/deps/.bitcoin
+    depends_on:
+      - bitcoind
+      - nbxplorer
+
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: btcpayserver
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  nbxplorer:
+    image: nicolasdorier/nbxplorer:2.5.30
+    restart: unless-stopped
+    environment:
+      NBXPLORER_NETWORK: "regtest"
+      NBXPLORER_CHAINS: "btc"
+      NBXPLORER_BIND: "0.0.0.0:32838"
+      NBXPLORER_POSTGRES: "User ID=postgres;Password=postgres;Host=postgres;Port=5432;Database=btcpayserver"
+      NBXPLORER_BTCRPCURL: "http://bitcoind:18443/"
+      NBXPLORER_BTCNODEENDPOINT: "bitcoind:39388"
+      NBXPLORER_BTCRPCUSER: "btcpay"
+      NBXPLORER_BTCRPCPASSWORD: "btcpay"
+      NBXPLORER_NOAUTH: 1
+      NBXPLORER_EXPOSERPC: 1
+    volumes:
+      - nbxplorer-data:/datadir
+    depends_on:
+      - postgres
+      - bitcoind
+
+  bitcoind:
+    image: btcpayserver/bitcoin:26.0
+    restart: unless-stopped
+    environment:
+      BITCOIN_NETWORK: "regtest"
+      BITCOIN_EXTRA_ARGS: |-
+        rpcport=18443
+        rpcbind=0.0.0.0:18443
+        rpcallowip=0.0.0.0/0
+        rpcuser=btcpay
+        rpcpassword=btcpay
+        port=39388
+        whitelist=0.0.0.0/0
+        zmqpubrawblock=tcp://0.0.0.0:28332
+        zmqpubrawtx=tcp://0.0.0.0:28333
+        fallbackfee=0.0002
+    ports:
+      - "18443:18443"
+    expose:
+      - "39388"
+      - "28332"
+      - "28333"
+    volumes:
+      - bitcoind-data:/data
+
+volumes:
+  btcpay-data:
+  postgres-data:
+  nbxplorer-data:
+  plugin-data:
+  bitcoind-data:
+  lnd-bitcoin-data:
