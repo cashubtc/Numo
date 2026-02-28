@@ -266,8 +266,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
 
         shareButton.setOnClickListener {
-            // By default, share the Cashu (Nostr) payment request; fall back to Lightning invoice
-            val toShare = nostrHandler?.paymentRequest ?: lightningHandler?.currentInvoice ?: lightningInvoice
+            val toShare = if (tabManager.isLightningTabSelected()) {
+                lightningHandler?.currentInvoice ?: lightningInvoice
+            } else {
+                nostrHandler?.paymentRequest ?: lightningHandler?.currentInvoice ?: lightningInvoice
+            }
             if (toShare != null) {
                 sharePaymentRequest(toShare)
             } else {
