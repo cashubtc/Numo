@@ -6,7 +6,10 @@ import android.app.Activity
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.nfc.NfcAdapter
 import android.nfc.NfcManager
+import android.nfc.cardemulation.CardEmulation
+import android.content.ComponentName
 import android.os.Bundle
 import android.os.Vibrator
 import android.util.Log
@@ -169,6 +172,19 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
             return
         }
         
+        // Set this app's HCE service as the preferred one while the app is open
+        try {
+            val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+            if (nfcAdapter != null) {
+                val cardEmulation = CardEmulation.getInstance(nfcAdapter)
+                val componentName = ComponentName(this, com.electricdreams.numo.ndef.NdefHostCardEmulationService::class.java)
+                cardEmulation.setPreferredService(this, componentName)
+                Log.d(TAG, "setPreferredService to NdefHostCardEmulationService")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to set preferred HCE service: ${e.message}", e)
+        }
+        
         // Reapply theme when returning from settings
         uiCoordinator.applyTheme()
         
@@ -177,6 +193,16 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
     }
 
     override fun onPause() {
+        try {
+            val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+            if (nfcAdapter != null) {
+                val cardEmulation = CardEmulation.getInstance(nfcAdapter)
+                cardEmulation.unsetPreferredService(this)
+                Log.d(TAG, "unsetPreferredService for HCE")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to unset preferred HCE service: ${e.message}", e)
+        }
         super.onPause()
     }
 
