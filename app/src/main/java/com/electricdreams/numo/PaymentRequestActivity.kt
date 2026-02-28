@@ -5,6 +5,9 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.app.Activity
 import android.content.Intent
+import android.content.ComponentName
+import android.nfc.NfcAdapter
+import android.nfc.cardemulation.CardEmulation
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -416,6 +419,35 @@ class PaymentRequestActivity : AppCompatActivity() {
         if (hasFocus && nfcAnimationContainer.visibility == View.VISIBLE) {
             applyFullscreenForAnimationOverlay()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        try {
+            val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+            if (nfcAdapter != null) {
+                val cardEmulation = CardEmulation.getInstance(nfcAdapter)
+                val componentName = ComponentName(this, com.electricdreams.numo.ndef.NdefHostCardEmulationService::class.java)
+                cardEmulation.setPreferredService(this, componentName)
+                Log.d(TAG, "setPreferredService to NdefHostCardEmulationService")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to set preferred HCE service: ${e.message}", e)
+        }
+    }
+
+    override fun onPause() {
+        try {
+            val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+            if (nfcAdapter != null) {
+                val cardEmulation = CardEmulation.getInstance(nfcAdapter)
+                cardEmulation.unsetPreferredService(this)
+                Log.d(TAG, "unsetPreferredService for HCE")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to unset preferred HCE service: ${e.message}", e)
+        }
+        super.onPause()
     }
 
     private fun initializePaymentRequest() {
