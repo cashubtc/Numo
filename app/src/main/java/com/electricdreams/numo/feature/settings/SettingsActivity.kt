@@ -21,6 +21,7 @@ import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawSettingsActivity
  * PIN-protected items:
  * - Mints Settings (can withdraw funds)
  * - Items Settings (can modify prices)
+ * - Webhooks Settings (can exfiltrate payment metadata)
  * 
  * Developer section is hidden by default and only shown when
  * developer mode is enabled (by tapping version 5 times in About).
@@ -91,6 +92,10 @@ class SettingsActivity : AppCompatActivity() {
         // Mints - protected (can withdraw funds)
         findViewById<View>(R.id.mints_settings_item).setOnClickListener {
             openProtectedActivity(MintsSettingsActivity::class.java)
+        }
+
+        findViewById<View>(R.id.webhooks_settings_item).setOnClickListener {
+            openProtectedActivity(WebhookSettingsActivity::class.java)
         }
 
         // Withdrawals - protected (handles funds)

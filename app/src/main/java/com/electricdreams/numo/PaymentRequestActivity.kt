@@ -37,6 +37,7 @@ import com.electricdreams.numo.payment.LightningMintHandler
 import com.electricdreams.numo.payment.NostrPaymentHandler
 import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.payment.PaymentTabManager
+import com.electricdreams.numo.payment.PaymentWebhookDispatcher
 import com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
 import com.electricdreams.numo.ui.util.QrCodeGenerator
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
@@ -787,6 +788,8 @@ class PaymentRequestActivity : AppCompatActivity() {
             )
         }
 
+        dispatchPaymentReceivedWebhook()
+
         val resultIntent = Intent().apply {
             putExtra(RESULT_EXTRA_TOKEN, token)
             putExtra(RESULT_EXTRA_AMOUNT, paymentAmount)
@@ -826,6 +829,8 @@ class PaymentRequestActivity : AppCompatActivity() {
                 lightningMintUrl = lightningMintUrl,
             )
         }
+
+        dispatchPaymentReceivedWebhook()
 
         val resultIntent = Intent().apply {
             putExtra(RESULT_EXTRA_TOKEN, "")
@@ -1015,6 +1020,21 @@ class PaymentRequestActivity : AppCompatActivity() {
         
         // Check for auto-withdrawal after successful payment (runs in background, survives activity destruction)
         AutoWithdrawManager.getInstance(this).onPaymentReceived(token, lightningMintUrl)
+    }
+
+    private fun dispatchPaymentReceivedWebhook() {
+        val paymentId = pendingPaymentId ?: run {
+            Log.w(TAG, "Skipping webhook dispatch: pendingPaymentId is null")
+            return
+        }
+
+        val completedEntry = PaymentsHistoryActivity.getPaymentEntryById(this, paymentId)
+        if (completedEntry == null) {
+            Log.w(TAG, "Skipping webhook dispatch: no history entry found for paymentId=$paymentId")
+            return
+        }
+
+        PaymentWebhookDispatcher.getInstance(this).dispatchPaymentReceived(completedEntry)
     }
 
     /**

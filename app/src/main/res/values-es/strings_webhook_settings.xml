@@ -1,0 +1,37 @@
+<resources>
+    <string name="webhook_settings_title">Webhooks</string>
+    <string name="webhook_settings_description">Envía una solicitud POST con metadatos del pago cada vez que este terminal recibe un pago.</string>
+    <string name="webhook_settings_section_endpoints">Endpoints</string>
+    <string name="webhook_settings_empty">Aún no hay endpoints de webhook configurados.</string>
+    <string name="webhook_settings_add_endpoint">Agregar endpoint</string>
+    <string name="webhook_settings_dialog_continue">Continuar</string>
+    <string name="webhook_settings_auth_set">Clave de auth configurada</string>
+    <string name="webhook_settings_auth_not_set">Sin clave de auth</string>
+    <string name="webhook_settings_edit_auth_key">Editar clave de auth</string>
+    <string name="webhook_settings_delete_endpoint">Eliminar endpoint</string>
+
+    <string name="webhook_settings_add_dialog_title">Agregar endpoint de webhook</string>
+    <string name="webhook_settings_add_dialog_description">Ingresa la URL del webhook. Puedes agregar una clave de auth opcional en el siguiente paso.</string>
+    <string name="webhook_settings_add_dialog_hint">https://example.com/webhooks/numo</string>
+    <string name="webhook_settings_add_dialog_confirm">Agregar</string>
+
+    <string name="webhook_settings_edit_dialog_title">Editar endpoint</string>
+    <string name="webhook_settings_edit_dialog_description">Actualiza a dónde se envían los metadatos del pago.</string>
+
+    <string name="webhook_settings_auth_dialog_title">Clave de auth (opcional)</string>
+    <string name="webhook_settings_auth_dialog_description">Si se configura, este valor se envía en el header Authorization.</string>
+    <string name="webhook_settings_auth_dialog_hint">Bearer tu-clave-secreta</string>
+    <string name="webhook_settings_auth_dialog_helper">Déjalo vacío para quitar la clave de auth de este endpoint.</string>
+
+    <string name="webhook_settings_delete_dialog_title">¿Eliminar endpoint?</string>
+    <string name="webhook_settings_delete_dialog_message">Este endpoint ya no recibirá eventos de pago.\n\n%1$s</string>
+    <string name="webhook_settings_delete_dialog_confirm">Eliminar</string>
+
+    <string name="webhook_settings_add_success">Endpoint de webhook agregado</string>
+    <string name="webhook_settings_edit_success">Endpoint de webhook actualizado</string>
+    <string name="webhook_settings_auth_success">Clave de auth actualizada</string>
+    <string name="webhook_settings_delete_success">Endpoint de webhook eliminado</string>
+    <string name="webhook_settings_error_invalid_url">Ingresa una URL http(s) valida</string>
+    <string name="webhook_settings_error_duplicate">Ese endpoint ya esta configurado</string>
+    <string name="webhook_settings_error_not_found">El endpoint ya no existe</string>
+</resources>

@@ -186,6 +186,11 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             return Gson().fromJson(json, type)
         }
 
+        @JvmStatic
+        fun getPaymentEntryById(context: Context, paymentId: String): PaymentHistoryEntry? {
+            return getPaymentHistory(context).firstOrNull { it.id == paymentId }
+        }
+
         /**
          * Add a pending payment to history when payment request is initiated.
          * Returns the ID of the created entry.
@@ -262,10 +267,13 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     lightningQuoteId = lightningQuoteId,
                     lightningMintUrl = lightningMintUrl,
                     formattedAmount = existing.formattedAmount,
+                    nostrNprofile = existing.nostrNprofile,
+                    nostrSecretHex = existing.nostrSecretHex,
                     checkoutBasketJson = existing.checkoutBasketJson, // Preserve basket data
                     basketId = existing.basketId, // Preserve basket ID
                     tipAmountSats = existing.tipAmountSats, // Preserve tip info
                     tipPercentage = existing.tipPercentage, // Preserve tip info
+                    swapToLightningMintJson = existing.swapToLightningMintJson, // Preserve swap metadata
                 )
                 history[index] = updated
 
@@ -443,26 +451,27 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             bitcoinPrice: Double?,
             mintUrl: String?,
             paymentRequest: String?,
-        ) {
+        ): String {
             val history = getPaymentHistory(context).toMutableList()
-            history.add(
-                PaymentHistoryEntry(
-                    token = token,
-                    amount = amount,
-                    date = java.util.Date(),
-                    rawUnit = unit,
-                    rawEntryUnit = entryUnit,
-                    enteredAmount = enteredAmount,
-                    bitcoinPrice = bitcoinPrice,
-                    mintUrl = mintUrl,
-                    paymentRequest = paymentRequest,
-                    rawStatus = PaymentHistoryEntry.STATUS_COMPLETED,
-                    paymentType = PaymentHistoryEntry.TYPE_CASHU,
-                ),
+            val entry = PaymentHistoryEntry(
+                token = token,
+                amount = amount,
+                date = java.util.Date(),
+                rawUnit = unit,
+                rawEntryUnit = entryUnit,
+                enteredAmount = enteredAmount,
+                bitcoinPrice = bitcoinPrice,
+                mintUrl = mintUrl,
+                paymentRequest = paymentRequest,
+                rawStatus = PaymentHistoryEntry.STATUS_COMPLETED,
+                paymentType = PaymentHistoryEntry.TYPE_CASHU,
             )
+            history.add(entry)
 
             val prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
             prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
+
+            return entry.id
         }
 
         /**

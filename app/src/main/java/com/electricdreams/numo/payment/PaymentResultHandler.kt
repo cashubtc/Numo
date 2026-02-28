@@ -42,7 +42,7 @@ class PaymentResultHandler(
         val bitcoinPrice = bitcoinPriceWorker?.getCurrentPrice()?.takeIf { it > 0 }
         
         val mintUrl = extractMintUrlFromToken(token)
-        PaymentsHistoryActivity.addToHistory(
+        val historyEntryId = PaymentsHistoryActivity.addToHistory(
             activity, 
             token, 
             amount, 
@@ -56,7 +56,11 @@ class PaymentResultHandler(
         
         // Check for auto-withdrawal after successful payment (runs in background)
         AutoWithdrawManager.getInstance(activity).onPaymentReceived(token, mintUrl)
-        
+
+        PaymentsHistoryActivity.getPaymentEntryById(activity, historyEntryId)?.let { historyEntry ->
+            PaymentWebhookDispatcher.getInstance(activity).dispatchPaymentReceived(historyEntry)
+        }
+
         // Delegate to callback for unified success handling (feedback + screen)
         mainHandler.post {
             onComplete(token, amount)
