@@ -120,7 +120,6 @@ class WithdrawAddressCard @JvmOverloads constructor(
         val enabled = hasAddress && hasValidAmount
         
         continueButton.isEnabled = enabled
-        continueButton.alpha = if (enabled) 1f else 0.5f
     }
 
     /**

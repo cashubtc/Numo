@@ -55,5 +55,5 @@
 
     <!-- Button Colors (Dark Mode) -->
     <color name="color_button_primary_pressed">#E0E0E0</color>
-    <color name="color_button_primary_disabled">#33FFFFFF</color>
+    <color name="color_button_primary_disabled">#8E8E93</color>
 </resources>

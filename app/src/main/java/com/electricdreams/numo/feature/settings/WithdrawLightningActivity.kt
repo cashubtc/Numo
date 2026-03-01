@@ -191,7 +191,6 @@ class WithdrawLightningActivity : AppCompatActivity() {
             override fun afterTextChanged(s: android.text.Editable?) {
                 val amount = s?.toString()?.toLongOrNull() ?: 0L
                 createTokenButton.isEnabled = amount > 0
-                createTokenButton.alpha = if (amount > 0) 1f else 0.5f
             }
         })
 
@@ -208,21 +207,21 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
     private fun switchTab(isLightning: Boolean) {
         if (isLightning) {
-            tabLightning.setBackgroundResource(R.drawable.bg_segment_tab_selected)
-            tabLightning.setTextColor(getColor(R.color.color_text_primary))
-            
-            tabCashu.background = null
-            tabCashu.setTextColor(getColor(R.color.color_text_tertiary))
-            
+            tabLightning.setBackgroundResource(R.drawable.bg_button_primary_green)
+            tabLightning.setTextColor(getColor(R.color.color_bg_white))
+
+            tabCashu.setBackgroundResource(android.R.color.transparent)
+            tabCashu.setTextColor(getColor(R.color.color_text_secondary))
+
             lightningOptionsContainer.visibility = View.VISIBLE
             cashuTokenOptionsContainer.visibility = View.GONE
         } else {
-            tabCashu.setBackgroundResource(R.drawable.bg_segment_tab_selected)
-            tabCashu.setTextColor(getColor(R.color.color_text_primary))
-            
-            tabLightning.background = null
-            tabLightning.setTextColor(getColor(R.color.color_text_tertiary))
-            
+            tabCashu.setBackgroundResource(R.drawable.bg_button_primary_green)
+            tabCashu.setTextColor(getColor(R.color.color_bg_white))
+
+            tabLightning.setBackgroundResource(android.R.color.transparent)
+            tabLightning.setTextColor(getColor(R.color.color_text_secondary))
+
             lightningOptionsContainer.visibility = View.GONE
             cashuTokenOptionsContainer.visibility = View.VISIBLE
         }
@@ -298,7 +297,6 @@ class WithdrawLightningActivity : AppCompatActivity() {
                     // Hide input to focus on result
                     cashuAmountInput.isEnabled = false
                     createTokenButton.isEnabled = false
-                    createTokenButton.alpha = 0.5f
                     createTokenButton.text = "Token Created"
                     
                     setLoading(false)

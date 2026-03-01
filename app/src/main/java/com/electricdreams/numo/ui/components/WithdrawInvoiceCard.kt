@@ -103,7 +103,6 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
     
     private fun updateButtonState(enabled: Boolean) {
         continueButton.isEnabled = enabled
-        continueButton.alpha = if (enabled) 1f else 0.5f
     }
 
     /**

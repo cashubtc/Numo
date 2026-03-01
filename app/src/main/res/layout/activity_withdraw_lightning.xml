@@ -124,37 +124,39 @@
             <!-- Tabs -->
             <LinearLayout
                 android:id="@+id/tabs_container"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginHorizontal="20dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:background="@drawable/bg_input_pill"
-                android:padding="4dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/bg_button_secondary_pill"
+                android:padding="5dp"
                 android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/tab_lightning"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/bg_segment_tab_selected"
+                    android:layout_width="wrap_content"
+                    android:layout_height="42dp"
+                    android:minWidth="125dp"
                     android:gravity="center"
+                    android:paddingHorizontal="21dp"
                     android:text="@string/withdraw_tab_lightning"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="14sp"
-                    android:fontFamily="sans-serif-medium" />
+                    android:textColor="@color/color_bg_white"
+                    android:background="@drawable/bg_button_primary_green"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/tab_cashu"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@null"
+                    android:layout_width="wrap_content"
+                    android:layout_height="42dp"
+                    android:minWidth="125dp"
                     android:gravity="center"
+                    android:paddingHorizontal="21dp"
                     android:text="@string/withdraw_tab_cashu"
-                    android:textColor="@color/color_text_tertiary"
-                    android:textSize="14sp"
-                    android:fontFamily="sans-serif-medium" />
+                    android:textColor="@color/color_text_secondary"
+                    android:background="@android:color/transparent"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 
@@ -353,8 +355,7 @@
                             android:textAllCaps="false"
                             android:textSize="17sp"
                             android:textStyle="bold"
-                            android:enabled="false"
-                            android:alpha="0.5"/>
+                            android:enabled="false"/>
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>

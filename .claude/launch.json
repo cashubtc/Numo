@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Unit Tests",
+      "runtimeExecutable": "./gradlew",
+      "runtimeArgs": ["app:test"],
+      "port": null
+    },
+    {
+      "name": "Instrumented Tests (Connected Device)",
+      "runtimeExecutable": "./gradlew",
+      "runtimeArgs": ["app:connectedDebugAndroidTest"],
+      "port": null
+    },
+    {
+      "name": "Debug Build",
+      "runtimeExecutable": "./gradlew",
+      "runtimeArgs": ["assembleDebug"],
+      "port": null
+    },
+    {
+      "name": "Full Build",
+      "runtimeExecutable": "./gradlew",
+      "runtimeArgs": ["app:build"],
+      "port": null
+    }
+  ]
+}
