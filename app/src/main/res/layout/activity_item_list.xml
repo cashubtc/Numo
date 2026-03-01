@@ -128,6 +128,15 @@
                 android:layout_height="wrap_content"
                 android:text="@string/item_list_import_from_csv" />
 
+            <!-- Export to CSV Button -->
+            <Button
+                android:id="@+id/export_csv_button"
+                style="@style/Widget.Button.Secondary.Outlined"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/item_list_export_to_csv" />
+
             <!-- Clear All Items Link -->
             <TextView
                 android:id="@+id/clear_items_button"

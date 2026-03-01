@@ -14,6 +14,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.File
+import java.io.FileOutputStream
 import java.lang.reflect.Field
 
 @RunWith(RobolectricTestRunner::class)
@@ -177,5 +178,49 @@ class ItemManagerTest {
         assertEquals(20, items[0].quantity)
         assertTrue(items[0].alertEnabled)
         assertEquals(5, items[0].alertThreshold)
+    }
+
+    @Test
+    fun testCsvExport() {
+        // Add a test item
+        val item = Item(
+            name = "Exported Item",
+            sku = "SKU-EXP",
+            description = "Export Description",
+            price = 25.75,
+            priceType = PriceType.FIAT,
+            quantity = 10,
+            trackInventory = true,
+            alertEnabled = true,
+            alertThreshold = 2
+        )
+        itemManager.addItem(item)
+
+        // Create an output stream to a temporary file
+        val file = File(context.cacheDir, "test_export.csv")
+        val outputStream = FileOutputStream(file)
+
+        // Export to CSV
+        val success = itemManager.exportItemsToCsv(outputStream)
+        outputStream.close()
+
+        assertTrue(success)
+        assertTrue(file.exists())
+
+        // Read the exported file and verify contents
+        val lines = file.readLines()
+        
+        // 1 header + 4 empty rows + 1 data row = 6 lines
+        assertEquals(6, lines.size)
+        
+        val dataRow = lines.last()
+        // Format should be properly escaped with quotes where necessary
+        assertTrue(dataRow.contains("Exported Item"))
+        assertTrue(dataRow.contains("SKU-EXP"))
+        assertTrue(dataRow.contains("Export Description"))
+        assertTrue(dataRow.contains("25.75"))
+        assertTrue(dataRow.contains("10")) // Quantity at index 20
+        assertTrue(dataRow.contains("Y")) // Alert enabled at index 22
+        assertTrue(dataRow.contains("2")) // Alert threshold at index 23
     }
 }

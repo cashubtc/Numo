@@ -59,6 +59,15 @@
 
         </LinearLayout>
 
+        <!-- Export CSV Button -->
+        <Button
+            android:id="@+id/export_items_button"
+            style="@style/Widget.Button.Secondary.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/items_settings_export_csv" />
+
         <TextView
             android:id="@+id/clear_items_button"
             android:layout_width="wrap_content"

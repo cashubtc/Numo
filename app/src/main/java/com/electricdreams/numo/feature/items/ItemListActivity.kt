@@ -81,6 +81,17 @@ class ItemListActivity : AppCompatActivity() {
             }
         }
 
+    private val csvExportLauncher: ActivityResultLauncher<String> =
+        registerForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+            if (uri != null) {
+                CsvExportHelper.exportItemsToCsvUri(
+                    context = this,
+                    itemManager = itemManager,
+                    uri = uri
+                )
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_item_list)
@@ -103,6 +114,7 @@ class ItemListActivity : AppCompatActivity() {
         headerDivider = findViewById(R.id.header_divider)
         topBar = findViewById(R.id.top_bar)
         val importCsvButton: Button = findViewById(R.id.import_csv_button)
+        val exportCsvButton: Button = findViewById(R.id.export_csv_button)
         val clearItemsButton: TextView = findViewById(R.id.clear_items_button)
 
         itemManager = ItemManager.getInstance(this)
@@ -130,6 +142,10 @@ class ItemListActivity : AppCompatActivity() {
 
         importCsvButton.setOnClickListener {
             csvPickerLauncher.launch("text/csv")
+        }
+
+        exportCsvButton.setOnClickListener {
+            csvExportLauncher.launch("catalog_export.csv")
         }
 
         clearItemsButton.setOnClickListener {

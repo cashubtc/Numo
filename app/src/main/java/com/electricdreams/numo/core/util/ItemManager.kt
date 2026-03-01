@@ -11,11 +11,14 @@ import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.BufferedReader
+import java.io.BufferedWriter
 import java.io.File
 import java.io.FileOutputStream
 import java.io.FileReader
 import java.io.IOException
 import java.io.InputStream
+import java.io.OutputStream
+import java.io.OutputStreamWriter
 import java.util.UUID
 
 /**
@@ -439,6 +442,85 @@ class ItemManager private constructor(context: Context) {
         }
 
         return importedCount
+    }
+
+    /**
+     * Export items to a CSV file.
+     *
+     * @param outputStream The stream to write the CSV data to.
+     * @return True if successful, false otherwise.
+     */
+    fun exportItemsToCsv(outputStream: OutputStream): Boolean {
+        try {
+            val writer = BufferedWriter(OutputStreamWriter(outputStream))
+
+            // Write 5 header lines to match the Square template import expectations
+            val header = arrayOfNulls<String>(24)
+            header[0] = "Token"
+            header[1] = "Item Name"
+            header[2] = "Variation Name"
+            header[3] = "SKU"
+            header[4] = "Description"
+            header[5] = "Category"
+            header[7] = "GTIN"
+            header[12] = "Price"
+            header[20] = "Current Quantity"
+            header[22] = "Stock Alert Enabled"
+            header[23] = "Stock Alert Threshold"
+
+            val headerString = header.joinToString(",") { it ?: "" }
+            writer.write(headerString + "\n")
+            writer.write(",,,,,,,,,,,,,,,,,,,,,,,\n")
+            writer.write(",,,,,,,,,,,,,,,,,,,,,,,\n")
+            writer.write(",,,,,,,,,,,,,,,,,,,,,,,\n")
+            writer.write(",,,,,,,,,,,,,,,,,,,,,,,\n")
+
+            for (item in items) {
+                val csvLine = arrayOfNulls<String>(24)
+                csvLine[0] = "" // Token
+                csvLine[1] = item.name ?: ""
+                csvLine[2] = item.variationName ?: ""
+                csvLine[3] = item.sku ?: ""
+                csvLine[4] = item.description ?: ""
+                csvLine[5] = item.category ?: ""
+                csvLine[7] = item.gtin ?: ""
+
+                // Export price
+                if (item.priceType == com.electricdreams.numo.core.model.PriceType.FIAT) {
+                    csvLine[12] = item.price.toString()
+                } else {
+                    csvLine[12] = item.priceSats.toString()
+                }
+
+                if (item.trackInventory) {
+                    csvLine[20] = item.quantity.toString()
+                } else {
+                    csvLine[20] = ""
+                }
+
+                csvLine[22] = if (item.alertEnabled) "Y" else "N"
+                csvLine[23] = item.alertThreshold.toString()
+
+                val formattedLine = csvLine.joinToString(",") { formatCsvField(it ?: "") }
+                writer.write(formattedLine + "\n")
+            }
+            writer.flush()
+            return true
+        } catch (e: Exception) {
+            Log.e(TAG, "Error exporting CSV: ${e.message}", e)
+            return false
+        }
+    }
+
+    private fun formatCsvField(field: String): String {
+        var result = field
+        if (result.contains("\"")) {
+            result = result.replace("\"", "\"\"")
+        }
+        if (result.contains(",") || result.contains("\"") || result.contains("\n")) {
+            result = "\"$result\""
+        }
+        return result
     }
 
     /**
