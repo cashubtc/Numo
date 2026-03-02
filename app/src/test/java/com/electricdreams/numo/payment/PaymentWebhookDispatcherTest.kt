@@ -51,7 +51,7 @@ class PaymentWebhookDispatcherTest {
                 listOf(
                     endpointConfig(
                         url = endpoint,
-                        authKey = "Bearer test-secret",
+                        authKey = "test-secret",
                     ),
                 )
             },
