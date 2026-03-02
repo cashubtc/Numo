@@ -11,7 +11,7 @@
     <string name="webhook_settings_delete_endpoint">Delete endpoint</string>
 
     <string name="webhook_settings_add_dialog_title">Add Webhook Endpoint</string>
-    <string name="webhook_settings_add_dialog_description">Enter the webhook URL. You can add an optional auth key in the next step.</string>
+    <string name="webhook_settings_add_dialog_description">Enter the webhook URL or scan a QR code.</string>
     <string name="webhook_settings_add_dialog_hint">https://example.com/webhooks/numo</string>
     <string name="webhook_settings_add_dialog_confirm">Add</string>
 
@@ -34,4 +34,7 @@
     <string name="webhook_settings_error_invalid_url">Please enter a valid http(s) URL</string>
     <string name="webhook_settings_error_duplicate">That endpoint is already configured</string>
     <string name="webhook_settings_error_not_found">Endpoint no longer exists</string>
+
+    <string name="webhook_settings_scan_title">Scan Webhook</string>
+    <string name="webhook_settings_scan_instruction">Scan a QR code with a webhook URL or JSON configuration.</string>
 </resources>

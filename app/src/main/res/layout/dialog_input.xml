@@ -120,6 +120,18 @@
                 android:imeOptions="actionDone"
                 tools:text="50000" />
 
+            <!-- Optional Scan Button -->
+            <ImageButton
+                android:id="@+id/input_scan_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_qr_code"
+                android:padding="12dp"
+                app:tint="@color/color_text_secondary"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
             <!-- Optional Suffix (e.g., % symbol) -->
             <TextView
                 android:id="@+id/input_suffix"

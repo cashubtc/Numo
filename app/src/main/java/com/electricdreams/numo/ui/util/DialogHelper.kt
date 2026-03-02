@@ -57,7 +57,8 @@ object DialogHelper {
         val saveText: String = "Save",
         val onSave: (String) -> Unit,
         val onCancel: (() -> Unit)? = null,
-        val validator: ((String) -> Boolean)? = null
+        val validator: ((String) -> Boolean)? = null,
+        val onScan: (() -> Unit)? = null
     )
     
     /**
@@ -135,6 +136,7 @@ object DialogHelper {
         val inputField = dialogView.findViewById<EditText>(R.id.dialog_input)
         val suffixText = dialogView.findViewById<TextView>(R.id.input_suffix)
         val helperText = dialogView.findViewById<TextView>(R.id.dialog_helper)
+        val scanButton = dialogView.findViewById<ImageButton>(R.id.input_scan_button)
         val saveButton = dialogView.findViewById<Button>(R.id.save_button)
         
         // Configure content
@@ -182,6 +184,16 @@ object DialogHelper {
         if (config.helperText != null) {
             helperText.text = config.helperText
             helperText.visibility = View.VISIBLE
+        }
+        
+        if (config.onScan != null) {
+            scanButton.visibility = View.VISIBLE
+            scanButton.setOnClickListener {
+                hideKeyboard(context, inputField)
+                config.onScan.invoke()
+            }
+        } else {
+            scanButton.visibility = View.GONE
         }
         
         saveButton.text = config.saveText

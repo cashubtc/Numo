@@ -1,17 +1,25 @@
 package com.electricdreams.numo.feature.settings
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.util.WebhookSettingsManager
+import com.electricdreams.numo.feature.scanner.QRScannerActivity
 import com.electricdreams.numo.ui.util.DialogHelper
+import com.google.gson.Gson
+import com.google.gson.JsonSyntaxException
 
 /**
  * Settings screen for configuring payment-received webhooks.
@@ -21,12 +29,25 @@ class WebhookSettingsActivity : AppCompatActivity() {
     private lateinit var webhookSettingsManager: WebhookSettingsManager
     private lateinit var endpointsList: LinearLayout
     private lateinit var emptyStateText: TextView
+    private lateinit var qrScannerLauncher: ActivityResultLauncher<Intent>
+    private var currentDialog: AlertDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_webhook_settings)
 
         webhookSettingsManager = WebhookSettingsManager.getInstance(this)
+
+        qrScannerLauncher = registerForActivityResult(
+            ActivityResultContracts.StartActivityForResult()
+        ) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val qrValue = result.data?.getStringExtra(QRScannerActivity.EXTRA_QR_VALUE)
+                if (!qrValue.isNullOrBlank()) {
+                    handleScannedQr(qrValue)
+                }
+            }
+        }
 
         findViewById<ImageButton>(R.id.back_button).setOnClickListener { finish() }
         findViewById<View>(R.id.add_endpoint_button).setOnClickListener { showAddEndpointDialog() }
@@ -91,8 +112,57 @@ class WebhookSettingsActivity : AppCompatActivity() {
         container.addView(divider)
     }
 
+    private fun handleScannedQr(qrValue: String) {
+        val gson = Gson()
+        try {
+            // Try to parse as JSON first
+            val payload = gson.fromJson(qrValue, WebhookQrPayload::class.java)
+            val url = payload?.url
+            if (payload != null && !url.isNullOrBlank()) {
+                // Auto-add
+                when (webhookSettingsManager.addEndpoint(url, payload.token)) {
+                    WebhookSettingsManager.SaveResult.SUCCESS -> {
+                        refreshEndpoints()
+                        Toast.makeText(
+                            this,
+                            getString(R.string.webhook_settings_add_success),
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                        currentDialog?.dismiss()
+                    }
+                    WebhookSettingsManager.SaveResult.DUPLICATE -> {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.webhook_settings_error_duplicate),
+                            Toast.LENGTH_LONG,
+                        ).show()
+                        populateDialogInput(url)
+                    }
+                    else -> {
+                        // Invalid URL in JSON or other error
+                        populateDialogInput(url)
+                    }
+                }
+            } else {
+                // Fallback to simple string
+                populateDialogInput(qrValue)
+            }
+        } catch (e: Exception) {
+            // Not JSON, assume raw URL
+            populateDialogInput(qrValue)
+        }
+    }
+
+    private fun populateDialogInput(value: String?) {
+        if (value.isNullOrBlank()) return
+        currentDialog?.findViewById<EditText>(R.id.dialog_input)?.let { editText ->
+            editText.setText(value)
+            editText.setSelection(editText.text.length)
+        }
+    }
+
     private fun showAddEndpointDialog() {
-        DialogHelper.showInput(
+        currentDialog = DialogHelper.showInput(
             context = this,
             config = DialogHelper.InputConfig(
                 title = getString(R.string.webhook_settings_add_dialog_title),
@@ -106,9 +176,27 @@ class WebhookSettingsActivity : AppCompatActivity() {
                 validator = { value ->
                     webhookSettingsManager.isValidEndpoint(value)
                 },
+                onScan = {
+                    val intent = Intent(this, QRScannerActivity::class.java).apply {
+                        putExtra(
+                            QRScannerActivity.EXTRA_TITLE,
+                            getString(R.string.webhook_settings_scan_title)
+                        )
+                        putExtra(
+                            QRScannerActivity.EXTRA_INSTRUCTION,
+                            getString(R.string.webhook_settings_scan_instruction)
+                        )
+                    }
+                    qrScannerLauncher.launch(intent)
+                }
             ),
         )
     }
+
+    private data class WebhookQrPayload(
+        val url: String?,
+        val token: String?
+    )
 
     private fun showAddAuthKeyDialog(rawUrl: String) {
         DialogHelper.showInput(
