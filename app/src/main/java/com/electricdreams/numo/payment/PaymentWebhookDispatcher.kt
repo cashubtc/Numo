@@ -235,7 +235,7 @@ class PaymentWebhookDispatcher(
                     .header("X-Numo-Event-Id", eventId)
 
                 endpoint.authKey?.takeIf { it.isNotBlank() }?.let { authKey ->
-                    requestBuilder.header("Authorization", authKey)
+                    requestBuilder.header("Authorization", "Bearer $authKey")
                 }
 
                 val request = requestBuilder.build()
