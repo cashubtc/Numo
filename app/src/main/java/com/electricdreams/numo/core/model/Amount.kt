@@ -25,7 +25,10 @@ data class Amount(
         USD("$"),
         EUR("€"),
         GBP("£"),
-        JPY("¥");
+        JPY("¥"),
+        DKK("kr."),
+        SEK("kr"),
+        NOK("kr");
 
         /**
          * Get the appropriate locale for formatting this currency.
@@ -37,6 +40,9 @@ data class Amount(
             GBP -> Locale.UK          // Period decimal: £4.20
             JPY -> Locale.JAPAN       // No decimals: ¥420
             BTC -> Locale.US          // Comma thousand separator: ₿1,000
+            DKK -> Locale("da", "DK") // Comma decimal: DKK 100,00
+            SEK -> Locale("sv", "SE") // Comma decimal: SEK 100,00
+            NOK -> Locale("nb", "NO") // Comma decimal: NOK 100,00
         }
 
         companion object {
@@ -115,17 +121,39 @@ data class Amount(
          * Handles formats like "$0.25", "€1,50", "₿24", "¥100", etc.
          * Accepts both period and comma as decimal separators for input flexibility.
          * Returns null if parsing fails.
+         * 
+         * @param formatted The formatted string to parse (e.g. "$10.50")
+         * @param defaultCurrency Optional default currency to use if the symbol is ambiguous (e.g. "kr" could be SEK or NOK).
          */
         @JvmStatic
-        fun parse(formatted: String): Amount? {
+        @JvmOverloads
+        fun parse(formatted: String, defaultCurrency: Currency? = null): Amount? {
             if (formatted.isEmpty()) return null
 
-            // Find the currency by the first character (symbol)
-            val symbol = formatted.take(1)
-            val currency = Currency.fromSymbol(symbol) ?: return null
+            // Find matching currencies by matching the start of the string
+            // We sort by symbol length descending to match longest symbols first (e.g. "kr." vs "kr")
+            val matchingCurrencies = Currency.entries
+                .filter { formatted.startsWith(it.symbol) }
+                .sortedByDescending { it.symbol.length }
+            
+            if (matchingCurrencies.isEmpty()) return null
+            
+            // If we have multiple matches (e.g. SEK and NOK both use "kr"), try to use the default currency
+            // Otherwise, pick the first one (which is deterministic but might be wrong if ambiguous)
+            // Note: Since we sorted by length, "kr." (DKK) will come before "kr" (SEK/NOK), which is correct behavior.
+            // The ambiguity is mainly between SEK and NOK.
+            val currency = if (matchingCurrencies.size > 1 && defaultCurrency != null) {
+                if (matchingCurrencies.contains(defaultCurrency)) {
+                    defaultCurrency
+                } else {
+                    matchingCurrencies.first()
+                }
+            } else {
+                matchingCurrencies.first()
+            }
             
             // Extract the numeric part (remove symbol)
-            var numericPart = formatted.drop(1).trim()
+            var numericPart = formatted.drop(currency.symbol.length).trim()
             
             // Normalize the input: handle both comma and period as decimal separators
             // First, determine if comma is used as thousand separator or decimal separator

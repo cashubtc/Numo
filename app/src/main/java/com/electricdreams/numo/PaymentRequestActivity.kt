@@ -318,10 +318,14 @@ class PaymentRequestActivity : AppCompatActivity() {
         val entryUnit: String
         val enteredAmount: Long
         
+        // Get current preferred currency to help resolve ambiguous symbols (like "kr" for SEK/NOK)
+        val currentCurrencyCode = CurrencyManager.getInstance(this).getCurrentCurrency()
+        val currentCurrency = Amount.Currency.fromCode(currentCurrencyCode)
+        
         if (tipAmountSats > 0 && baseAmountSats > 0) {
             // Tip is present - use base amounts for accounting
             // Parse base formatted amount to get the original entry unit
-            val parsedBase = Amount.parse(baseFormattedAmount)
+            val parsedBase = Amount.parse(baseFormattedAmount, currentCurrency)
             if (parsedBase != null) {
                 entryUnit = if (parsedBase.currency == Currency.BTC) "sat" else parsedBase.currency.name
                 enteredAmount = parsedBase.value
@@ -333,7 +337,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             Log.d(TAG, "Creating pending payment with tip: base=$enteredAmount $entryUnit, tip=$tipAmountSats sats, total=$paymentAmount sats")
         } else {
             // No tip - parse the formatted amount string
-            val parsedAmount = Amount.parse(formattedAmountString)
+            val parsedAmount = Amount.parse(formattedAmountString, currentCurrency)
             if (parsedAmount != null) {
                 entryUnit = if (parsedAmount.currency == Currency.BTC) "sat" else parsedAmount.currency.name
                 enteredAmount = parsedAmount.value

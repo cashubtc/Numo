@@ -101,6 +101,9 @@ class BitcoinPriceWorker private constructor(context: Context) {
             CurrencyManager.CURRENCY_EUR,
             CurrencyManager.CURRENCY_GBP,
             CurrencyManager.CURRENCY_JPY,
+            CurrencyManager.CURRENCY_DKK,
+            CurrencyManager.CURRENCY_SEK,
+            CurrencyManager.CURRENCY_NOK,
         )
 
         for (currency in supportedCurrencies) {

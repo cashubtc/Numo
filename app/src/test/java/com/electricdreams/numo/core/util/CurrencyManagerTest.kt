@@ -109,4 +109,35 @@ class CurrencyManagerTest {
         currencyManager.setPreferredCurrency("USD")
         assertEquals("https://api.coinbase.com/v2/prices/BTC-USD/spot", currencyManager.getCoinbaseApiUrl())
     }
+
+    @Test
+    fun `isValidCurrency supports Nordic currencies`() {
+        assertTrue(currencyManager.isValidCurrency("DKK"))
+        assertTrue(currencyManager.isValidCurrency("SEK"))
+        assertTrue(currencyManager.isValidCurrency("NOK"))
+    }
+
+    @Test
+    fun `getCurrentSymbol returns correct symbols for Nordic currencies`() {
+        currencyManager.setPreferredCurrency("DKK")
+        assertEquals("kr.", currencyManager.getCurrentSymbol())
+
+        currencyManager.setPreferredCurrency("SEK")
+        assertEquals("kr", currencyManager.getCurrentSymbol())
+
+        currencyManager.setPreferredCurrency("NOK")
+        assertEquals("kr", currencyManager.getCurrentSymbol())
+    }
+
+    @Test
+    fun `getCoinbaseApiUrl returns correct URL for Nordic currencies`() {
+        currencyManager.setPreferredCurrency("DKK")
+        assertEquals("https://api.coinbase.com/v2/prices/BTC-DKK/spot", currencyManager.getCoinbaseApiUrl())
+
+        currencyManager.setPreferredCurrency("SEK")
+        assertEquals("https://api.coinbase.com/v2/prices/BTC-SEK/spot", currencyManager.getCoinbaseApiUrl())
+
+        currencyManager.setPreferredCurrency("NOK")
+        assertEquals("https://api.coinbase.com/v2/prices/BTC-NOK/spot", currencyManager.getCoinbaseApiUrl())
+    }
 }

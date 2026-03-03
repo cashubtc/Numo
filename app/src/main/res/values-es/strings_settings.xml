@@ -24,6 +24,9 @@
     <string name="currency_settings_option_eur">Euro (EUR)</string>
     <string name="currency_settings_option_gbp">Libra esterlina (GBP)</string>
     <string name="currency_settings_option_jpy">Yen japonés (JPY)</string>
+    <string name="currency_settings_option_dkk">Corona danesa (DKK)</string>
+    <string name="currency_settings_option_sek">Corona sueca (SEK)</string>
+    <string name="currency_settings_option_nok">Corona noruega (NOK)</string>
 
     <!-- Settings items: mints -->
     <string name="settings_item_mints_title">Mints</string>

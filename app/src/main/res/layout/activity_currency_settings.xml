@@ -120,6 +120,45 @@
                     android:paddingHorizontal="24dp"
                     android:text="@string/currency_settings_option_jpy"
                     android:textAppearance="@style/Text.BodyBold" />
+
+                <RadioButton
+                    android:id="@+id/radio_dkk"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:button="@null"
+                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
+                    android:drawableTint="@color/color_primary_green"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="24dp"
+                    android:text="@string/currency_settings_option_dkk"
+                    android:textAppearance="@style/Text.BodyBold" />
+
+                <RadioButton
+                    android:id="@+id/radio_sek"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:button="@null"
+                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
+                    android:drawableTint="@color/color_primary_green"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="24dp"
+                    android:text="@string/currency_settings_option_sek"
+                    android:textAppearance="@style/Text.BodyBold" />
+
+                <RadioButton
+                    android:id="@+id/radio_nok"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:button="@null"
+                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
+                    android:drawableTint="@color/color_primary_green"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="24dp"
+                    android:text="@string/currency_settings_option_nok"
+                    android:textAppearance="@style/Text.BodyBold" />
             </RadioGroup>
 
         </LinearLayout>

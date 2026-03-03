@@ -132,6 +132,20 @@ class TipSelectionActivity : AppCompatActivity() {
             if (entryCurrency != Currency.BTC) {
                 enteredAmountFiat = parsedAmount.value
             }
+        } else {
+            // Fallback parsing with current system currency if implicit parsing fails
+            // (e.g. for ambiguous symbols like "kr")
+            val currencyManager = com.electricdreams.numo.core.util.CurrencyManager.getInstance(this)
+            val currentCurrencyCode = currencyManager.getCurrentCurrency()
+            val currentCurrency = Amount.Currency.fromCode(currentCurrencyCode)
+            val parsedWithContext = Amount.parse(formattedAmount, currentCurrency)
+            
+            if (parsedWithContext != null) {
+                entryCurrency = parsedWithContext.currency
+                if (entryCurrency != Currency.BTC) {
+                    enteredAmountFiat = parsedWithContext.value
+                }
+            }
         }
 
         // Set default for custom input based on entry currency
@@ -838,8 +852,7 @@ class TipSelectionActivity : AppCompatActivity() {
                 }
                 val totalFiat = (enteredAmountFiat / 100.0) + tipFiat
                 // Format as currency
-                val symbol = entryCurrency.symbol
-                "${symbol}${String.format("%.2f", totalFiat)}"
+                Amount(kotlin.math.round(totalFiat * 100).toLong(), entryCurrency).toString()
             } else {
                 formattedAmount
             }

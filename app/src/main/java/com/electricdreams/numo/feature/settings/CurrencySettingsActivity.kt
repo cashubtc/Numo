@@ -15,6 +15,9 @@ class CurrencySettingsActivity : AppCompatActivity() {
     private lateinit var radioEur: RadioButton
     private lateinit var radioGbp: RadioButton
     private lateinit var radioJpy: RadioButton
+    private lateinit var radioDkk: RadioButton
+    private lateinit var radioSek: RadioButton
+    private lateinit var radioNok: RadioButton
     private lateinit var currencyManager: CurrencyManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,6 +33,9 @@ class CurrencySettingsActivity : AppCompatActivity() {
         radioEur = findViewById(R.id.radio_eur)
         radioGbp = findViewById(R.id.radio_gbp)
         radioJpy = findViewById(R.id.radio_jpy)
+        radioDkk = findViewById(R.id.radio_dkk)
+        radioSek = findViewById(R.id.radio_sek)
+        radioNok = findViewById(R.id.radio_nok)
 
         setSelectedCurrency(currencyManager.getCurrentCurrency())
 
@@ -45,6 +51,9 @@ class CurrencySettingsActivity : AppCompatActivity() {
             CurrencyManager.CURRENCY_GBP -> radioGbp.isChecked = true
             CurrencyManager.CURRENCY_JPY -> radioJpy.isChecked = true
             CurrencyManager.CURRENCY_USD -> radioUsd.isChecked = true
+            CurrencyManager.CURRENCY_DKK -> radioDkk.isChecked = true
+            CurrencyManager.CURRENCY_SEK -> radioSek.isChecked = true
+            CurrencyManager.CURRENCY_NOK -> radioNok.isChecked = true
             else -> radioUsd.isChecked = true
         }
     }
@@ -55,6 +64,9 @@ class CurrencySettingsActivity : AppCompatActivity() {
             R.id.radio_eur -> CurrencyManager.CURRENCY_EUR
             R.id.radio_gbp -> CurrencyManager.CURRENCY_GBP
             R.id.radio_jpy -> CurrencyManager.CURRENCY_JPY
+            R.id.radio_dkk -> CurrencyManager.CURRENCY_DKK
+            R.id.radio_sek -> CurrencyManager.CURRENCY_SEK
+            R.id.radio_nok -> CurrencyManager.CURRENCY_NOK
             else -> CurrencyManager.CURRENCY_USD
         }
     }

@@ -24,6 +24,9 @@ class CurrencyManager private constructor(context: Context) {
         const val CURRENCY_EUR = "EUR"
         const val CURRENCY_GBP = "GBP"
         const val CURRENCY_JPY = "JPY"
+        const val CURRENCY_DKK = "DKK"
+        const val CURRENCY_SEK = "SEK"
+        const val CURRENCY_NOK = "NOK"
 
         // Default currency is USD
         private const val DEFAULT_CURRENCY = CURRENCY_USD
@@ -68,6 +71,9 @@ class CurrencyManager private constructor(context: Context) {
         CURRENCY_GBP -> "£"
         CURRENCY_JPY -> "¥"
         CURRENCY_USD -> "$"
+        CURRENCY_DKK -> "kr."
+        CURRENCY_SEK -> "kr"
+        CURRENCY_NOK -> "kr"
         else -> "$"
     }
 
@@ -93,7 +99,8 @@ class CurrencyManager private constructor(context: Context) {
     /** Check if a currency code is valid and supported. */
     fun isValidCurrency(currencyCode: String?): Boolean {
         return when (currencyCode) {
-            CURRENCY_USD, CURRENCY_EUR, CURRENCY_GBP, CURRENCY_JPY -> true
+            CURRENCY_USD, CURRENCY_EUR, CURRENCY_GBP, CURRENCY_JPY,
+            CURRENCY_DKK, CURRENCY_SEK, CURRENCY_NOK -> true
             else -> false
         }
     }
