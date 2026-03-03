@@ -242,7 +242,26 @@ class TransactionDetailActivity : AppCompatActivity() {
 
         val btcPrice = entry.bitcoinPrice
         if (btcPrice != null && btcPrice > 0) {
-            val formattedPrice = String.format(Locale.US, "$%,.2f", btcPrice)
+            // Determine the correct currency for the Bitcoin price.
+            // 1. If entry unit is a fiat currency, use that.
+            // 2. If available, check the checkout basket currency.
+            // 3. Fallback to USD (default behavior).
+            val currencyCode = if (entry.getEntryUnit() != "sat" && entry.getEntryUnit() != "BTC") {
+                entry.getEntryUnit()
+            } else {
+                val basket = CheckoutBasket.fromJson(checkoutBasketJson)
+                basket?.currency ?: "USD"
+            }
+            
+            val currency = Amount.Currency.fromCode(currencyCode)
+            // If we somehow still resolved to BTC (e.g. basket had "SAT"), force USD for price display
+            val priceCurrency = if (currency == Amount.Currency.BTC) Amount.Currency.USD else currency
+            
+            // Format price using Amount class to respect locale and currency symbol
+            // Amount expects minor units (cents), so multiply by 100
+            val priceMinorUnits = kotlin.math.round(btcPrice * 100).toLong()
+            val formattedPrice = Amount(priceMinorUnits, priceCurrency).toString()
+            
             bitcoinPriceText.text = formattedPrice
             bitcoinPriceRow.visibility = View.VISIBLE
             bitcoinPriceDivider.visibility = View.VISIBLE
