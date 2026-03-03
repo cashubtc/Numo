@@ -284,8 +284,18 @@ class ReceiptPrinter(private val context: Context) {
 
         // Bitcoin price at time of transaction
         data.bitcoinPrice?.let { price ->
-            val formattedPrice = String.format(Locale.US, "$%,.2f", price)
-            sb.appendLine(leftRight("BTC/USD Rate:", formattedPrice))
+            val priceCurrencyCode = data.basket?.currency ?: data.enteredCurrency
+            val priceCurrency = if (priceCurrencyCode.equals("BTC", ignoreCase = true) || priceCurrencyCode.equals("sat", ignoreCase = true)) {
+                Amount.Currency.USD
+            } else {
+                Amount.Currency.fromCode(priceCurrencyCode)
+            }
+            
+            // Format price using Amount class
+            val priceMinorUnits = kotlin.math.round(price * 100).toLong()
+            val formattedPrice = Amount(priceMinorUnits, priceCurrency).toString()
+            
+            sb.appendLine(leftRight("BTC/${priceCurrency.name} Rate:", formattedPrice))
         }
 
         sb.appendLine()
@@ -590,10 +600,22 @@ class ReceiptPrinter(private val context: Context) {
     
     $tipSectionHtml
     
-    ${data.bitcoinPrice?.let { """
+    ${data.bitcoinPrice?.let { price ->
+        val priceCurrencyCode = data.basket?.currency ?: data.enteredCurrency
+        val priceCurrency = if (priceCurrencyCode.equals("BTC", ignoreCase = true) || priceCurrencyCode.equals("sat", ignoreCase = true)) {
+            Amount.Currency.USD
+        } else {
+            Amount.Currency.fromCode(priceCurrencyCode)
+        }
+        
+        // Format price using Amount class
+        val priceMinorUnits = kotlin.math.round(price * 100).toLong()
+        val formattedPrice = Amount(priceMinorUnits, priceCurrency).toString()
+        
+        """
     <div class="row small" style="margin-top: 4px;">
-        <span>BTC/USD Rate:</span>
-        <span>${String.format(Locale.US, "$%,.2f", it)}</span>
+        <span>BTC/${priceCurrency.name} Rate:</span>
+        <span>$formattedPrice</span>
     </div>
     """ } ?: ""}
     
