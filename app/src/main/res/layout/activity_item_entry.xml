@@ -156,7 +156,8 @@
                         android:minHeight="50dp">
 
                         <TextView
-                            android:layout_width="100dp"
+                            android:layout_width="wrap_content"
+                            android:minWidth="100dp"
                             android:layout_height="wrap_content"
                             android:text="@string/item_entry_label_name"
                             android:textAppearance="@style/Text.Body"
@@ -184,7 +185,8 @@
                         android:minHeight="50dp">
 
                         <TextView
-                            android:layout_width="100dp"
+                            android:layout_width="wrap_content"
+                            android:minWidth="100dp"
                             android:layout_height="wrap_content"
                             android:text="@string/item_entry_label_variation"
                             android:textAppearance="@style/Text.Body"
@@ -213,7 +215,8 @@
                         android:minHeight="80dp">
 
                         <TextView
-                            android:layout_width="100dp"
+                            android:layout_width="wrap_content"
+                            android:minWidth="100dp"
                             android:layout_height="wrap_content"
                             android:text="@string/item_entry_label_description"
                             android:textAppearance="@style/Text.Body"
@@ -774,7 +777,8 @@
                         android:minHeight="50dp">
 
                         <TextView
-                            android:layout_width="60dp"
+                            android:layout_width="wrap_content"
+                            android:minWidth="60dp"
                             android:layout_height="wrap_content"
                             android:text="@string/item_entry_label_gtin"
                             android:textAppearance="@style/Text.Body"
@@ -814,7 +818,8 @@
                         android:minHeight="50dp">
 
                         <TextView
-                            android:layout_width="60dp"
+                            android:layout_width="wrap_content"
+                            android:minWidth="60dp"
                             android:layout_height="wrap_content"
                             android:text="@string/item_entry_label_sku"
                             android:textAppearance="@style/Text.Body"
@@ -929,7 +934,8 @@
                             android:minHeight="50dp">
 
                             <TextView
-                                android:layout_width="120dp"
+                                android:layout_width="wrap_content"
+                            android:minWidth="120dp"
                                 android:layout_height="wrap_content"
                                 android:text="@string/item_entry_label_current_stock"
                                 android:textAppearance="@style/Text.Body"
@@ -984,7 +990,8 @@
                             android:visibility="gone">
 
                             <TextView
-                                android:layout_width="120dp"
+                                android:layout_width="wrap_content"
+                            android:minWidth="120dp"
                                 android:layout_height="wrap_content"
                                 android:text="@string/item_entry_label_alert_when_below"
                                 android:textAppearance="@style/Text.Body"

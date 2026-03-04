@@ -227,7 +227,7 @@
                 android:paddingHorizontal="18dp"
                 android:gravity="center"
                 android:text="@string/item_selection_add_variation"
-                android:textColor="@android:color/white"
+                android:textColor="@color/color_bg_white"
                 android:textSize="15sp"
                 android:fontFamily="sans-serif-medium"
                 android:background="@drawable/bg_add_variation_button" />

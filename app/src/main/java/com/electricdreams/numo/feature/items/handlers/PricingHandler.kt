@@ -153,7 +153,7 @@ class PricingHandler(
      * Validates the fiat price format (max 2 decimal places, accepts . or , as separator).
      */
     fun isValidFiatPrice(price: String): Boolean {
-        val pattern = "^\\d+([.,]\\d{0,2})?$".toRegex()
+        val pattern = "^(?:\\d+(?:[.,]\\d{0,2})?|[.,]\\d{1,2})$".toRegex()
         return pattern.matches(price)
     }
 

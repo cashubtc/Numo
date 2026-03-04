@@ -173,7 +173,7 @@
         android:layout_marginHorizontal="20dp"
         android:layout_marginBottom="20dp"
         android:text="@string/common_save"
-        android:textColor="@android:color/white"
+        android:textColor="@color/color_bg_white"
         android:textSize="16sp"
         android:textAllCaps="false"
         android:fontFamily="sans-serif-medium"
