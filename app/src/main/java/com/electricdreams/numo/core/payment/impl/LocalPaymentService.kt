@@ -60,7 +60,7 @@ class LocalPaymentService(
             when (status.status) {
                 QuoteStatus.UNPAID -> PaymentState.PENDING
                 QuoteStatus.PENDING -> PaymentState.PENDING
-                QuoteStatus.PAID -> PaymentState.PAID
+                QuoteStatus.PAID -> PaymentState.PENDING
                 QuoteStatus.ISSUED -> PaymentState.PAID
                 QuoteStatus.EXPIRED -> PaymentState.EXPIRED
                 QuoteStatus.UNKNOWN -> PaymentState.FAILED
