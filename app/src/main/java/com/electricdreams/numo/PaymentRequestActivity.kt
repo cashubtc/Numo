@@ -1084,30 +1084,22 @@ class PaymentRequestActivity : AppCompatActivity() {
                             Log.d(TAG, "NFC token received, cancelled safety timeout")
 
                             try {
-                                // If using BTCPay, we must send the token to the POST endpoint
-                                // specified in the original payment request.
+                                // If using BTCPay, redeem the token via the BTCNutServer API.
                                 if (paymentService is BTCPayPaymentService) {
-                                    val pr = btcPayCashuPR
-                                    if (pr != null) {
-                                        val postUrl = CashuPaymentHelper.getPostUrl(pr)
-                                        val requestId = CashuPaymentHelper.getId(pr)
-
-                                        if (postUrl != null && requestId != null) {
-                                            Log.d(TAG, "Redeeming NFC token via BTCPay NUT-18 POST endpoint")
-                                            val result = (paymentService as BTCPayPaymentService).redeemTokenToPostEndpoint(
-                                                token, requestId, postUrl
-                                            )
-                                            result.onSuccess {
-                                                withContext(Dispatchers.Main) {
-                                                    handleLightningPaymentSuccess()
-                                                }
-                                            }.onFailure { e ->
-                                                throw Exception("BTCPay redemption failed: ${e.message}")
+                                    val invoiceId = btcPayPaymentId
+                                    if (invoiceId != null) {
+                                        Log.d(TAG, "Redeeming NFC token via BTCPay /cashu/pay-invoice")
+                                        val result = paymentService.redeemToken(token, invoiceId)
+                                        result.onSuccess {
+                                            withContext(Dispatchers.Main) {
+                                                handleLightningPaymentSuccess()
                                             }
-                                            return@launch
-                                        } else {
-                                            Log.w(TAG, "BTCPay PR missing postUrl or id, falling back to local flow (likely to fail)")
+                                        }.onFailure { e ->
+                                            throw Exception("BTCPay redemption failed: ${e.message}")
                                         }
+                                        return@launch
+                                    } else {
+                                        Log.w(TAG, "BTCPay invoice ID not available, falling back to local flow (likely to fail)")
                                     }
                                 }
 
