@@ -21,6 +21,8 @@ services:
       BTCPAY_BTCEXPLORERURL: "http://nbxplorer:32838/"
       BTCPAY_BTCLIGHTNING: "type=lnd-rest;server=http://lnd_bitcoin:8080/;allowinsecure=true"
       BTCPAY_ENABLE_REGISTRATION: "true"
+      BTCPAY_DEBUGLOG: "/datadir/debug.log"
+      BTCPAY_DEBUGLOGLEVEL: "Debug"
     ports:
       - "49392:49392"
     volumes:
