@@ -89,6 +89,11 @@ class PaymentTabManager(
         unifiedTabText.visibility = View.GONE
         cashuTabText.visibility = View.GONE
         lightningTabText.visibility = View.GONE
+        
+        unifiedTabIconCashu.visibility = View.VISIBLE
+        unifiedTabIconLightning.visibility = View.VISIBLE
+        cashuTabIcon.visibility = View.VISIBLE
+        lightningTabIcon.visibility = View.VISIBLE
 
         unifiedTabText.setTextColor(secondaryColor)
         cashuTabText.setTextColor(secondaryColor)
@@ -112,8 +117,8 @@ class PaymentTabManager(
                 unifiedTab.setBackgroundResource(primaryBg)
                 unifiedTabText.visibility = View.VISIBLE
                 unifiedTabText.setTextColor(whiteColor)
-                unifiedTabIconCashu.setColorFilter(whiteColor)
-                unifiedTabIconLightning.setColorFilter(whiteColor)
+                unifiedTabIconCashu.visibility = View.GONE
+                unifiedTabIconLightning.visibility = View.GONE
                 
                 unifiedQrContainer.visibility = View.VISIBLE
                 unifiedQrImageView.visibility = View.VISIBLE
@@ -122,7 +127,7 @@ class PaymentTabManager(
                 cashuTab.setBackgroundResource(primaryBg)
                 cashuTabText.visibility = View.VISIBLE
                 cashuTabText.setTextColor(whiteColor)
-                cashuTabIcon.setColorFilter(whiteColor)
+                cashuTabIcon.visibility = View.GONE
                 
                 cashuQrContainer.visibility = View.VISIBLE
                 cashuQrImageView.visibility = View.VISIBLE
@@ -131,7 +136,7 @@ class PaymentTabManager(
                 lightningTab.setBackgroundResource(primaryBg)
                 lightningTabText.visibility = View.VISIBLE
                 lightningTabText.setTextColor(whiteColor)
-                lightningTabIcon.setColorFilter(whiteColor)
+                lightningTabIcon.visibility = View.GONE
                 
                 lightningQrContainer.visibility = View.VISIBLE
                 lightningQrImageView.visibility = View.VISIBLE
