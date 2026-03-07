@@ -290,7 +290,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="Unified"
+                android:text="@string/payment_request_tab_unified"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/color_bg_white" />
