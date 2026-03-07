@@ -37,6 +37,11 @@ object CashuPaymentHelper {
      * Structured result of validating a Cashu token against an expected
      * amount and the merchant's allowed mint list.
      */
+        data class GeneratedPaymentRequest(
+        val original: String,
+        val bech32: String
+    )
+
     sealed class TokenValidationResult {
         /** The provided string was not a valid Cashu token. */
         object InvalidFormat : TokenValidationResult()
@@ -68,7 +73,7 @@ object CashuPaymentHelper {
         amount: Long,
         description: String?,
         allowedMints: List<String>?,
-    ): String? {
+    ): GeneratedPaymentRequest? {
         return try {
             val paymentRequest = PaymentRequest().apply {
                 this.amount = Optional.of(amount)
@@ -95,10 +100,10 @@ object CashuPaymentHelper {
                 val cdkRequest = org.cashudevkit.PaymentRequest.fromString(encoded)
                 val bech32 = cdkRequest.toBech32String()
                 Log.d(TAG, "Converted to bech32: $bech32")
-                bech32
+                GeneratedPaymentRequest(encoded, bech32)
             } catch (e: Throwable) {
                 Log.e(TAG, "Error converting to bech32, returning CREQA format: ${e.message}", e)
-                encoded
+                GeneratedPaymentRequest(encoded, encoded)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error creating payment request: ${e.message}", e)
@@ -107,7 +112,7 @@ object CashuPaymentHelper {
     }
 
     @JvmStatic
-    fun createPaymentRequest(amount: Long, description: String?): String? =
+    fun createPaymentRequest(amount: Long, description: String?): GeneratedPaymentRequest? =
         createPaymentRequest(amount, description, null)
 
     @JvmStatic
@@ -116,7 +121,7 @@ object CashuPaymentHelper {
         description: String?,
         allowedMints: List<String>?,
         nprofile: String,
-    ): String? {
+    ): GeneratedPaymentRequest? {
         return try {
             val paymentRequest = PaymentRequest().apply {
                 this.amount = Optional.of(amount)
@@ -156,10 +161,10 @@ object CashuPaymentHelper {
                 val cdkRequest = org.cashudevkit.PaymentRequest.fromString(encoded)
                 val bech32 = cdkRequest.toBech32String()
                 Log.d(TAG, "Converted Nostr to bech32: $bech32")
-                bech32
+                GeneratedPaymentRequest(encoded, bech32)
             } catch (e: Throwable) {
                 Log.e(TAG, "Error converting to bech32, returning CREQA format: ${e.message}", e)
-                encoded
+                GeneratedPaymentRequest(encoded, encoded)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error creating Nostr payment request: ${e.message}", e)

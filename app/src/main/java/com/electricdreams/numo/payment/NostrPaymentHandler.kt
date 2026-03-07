@@ -51,6 +51,10 @@ class NostrPaymentHandler(
     var paymentRequest: String? = null
         private set
 
+    /** The generated payment request string (bech32) */
+    var paymentRequestBech32: String? = null
+        private set
+
     /**
      * Start a new Nostr payment flow with fresh keys.
      *
@@ -147,9 +151,10 @@ class NostrPaymentHandler(
             return
         }
 
-        paymentRequest = request
-        Log.d(TAG, "Created payment request with Nostr: $request")
-        callback.onPaymentRequestReady(request)
+        paymentRequest = request.original
+        paymentRequestBech32 = request.bech32
+        Log.d(TAG, "Created payment request with Nostr: ${request.original}")
+        callback.onPaymentRequestReady(request.original)
 
         // Stop any existing listener
         listener?.stop()

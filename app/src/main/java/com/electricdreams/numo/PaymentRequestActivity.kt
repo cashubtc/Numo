@@ -94,6 +94,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var paymentAmount: Long = 0
     private var bitcoinPriceWorker: BitcoinPriceWorker? = null
     private var hcePaymentRequest: String? = null
+    private var hcePaymentRequestBech32: String? = null
     private var formattedAmountString: String = ""
     
     // Tip state (received from TipSelectionActivity)
@@ -302,7 +303,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 PaymentTabManager.PaymentTab.LIGHTNING -> lightningHandler?.currentInvoice ?: lightningInvoice
                 PaymentTabManager.PaymentTab.CASHU -> nostrHandler?.paymentRequest
                 PaymentTabManager.PaymentTab.UNIFIED -> {
-                    val creq = nostrHandler?.paymentRequest
+                    val creq = nostrHandler?.paymentRequestBech32
                     val lnbc = lightningHandler?.currentInvoice ?: lightningInvoice
                     if (creq != null && lnbc != null) {
                         "bitcoin:?creq=${creq}&lightning=${lnbc}"
@@ -527,11 +528,13 @@ class PaymentRequestActivity : AppCompatActivity() {
             val mintsForPaymentRequest =
                 if (mintManager.isSwapFromUnknownMintsEnabled()) null else allowedMints
 
-            hcePaymentRequest = CashuPaymentHelper.createPaymentRequest(
+            val generatedHce = CashuPaymentHelper.createPaymentRequest(
                 paymentAmount,
                 "Payment of $paymentAmount sats",
                 mintsForPaymentRequest
             )
+            hcePaymentRequest = generatedHce?.original
+            hcePaymentRequestBech32 = generatedHce?.bech32
 
             if (hcePaymentRequest == null) {
                 Log.e(TAG, "Failed to create payment request for HCE")
@@ -596,7 +599,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun setHceToUnified() {
-        val creq = hcePaymentRequest
+        val creq = hcePaymentRequestBech32
         val lnbc = lightningInvoice
 
         if (creq == null && lnbc == null) {
@@ -623,7 +626,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun updateUnifiedQrCode() {
-        val creq = nostrHandler?.paymentRequest
+        val creq = nostrHandler?.paymentRequestBech32
         val lnbc = lightningInvoice
         
         // If we don't have at least one, we can't show a unified QR
