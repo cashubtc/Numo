@@ -64,8 +64,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var unifiedTabText: TextView
     private lateinit var cashuTabText: TextView
     private lateinit var lightningTabText: TextView
-    private lateinit var unifiedTabIconCashu: ImageView
-    private lateinit var unifiedTabIconLightning: ImageView
+    private lateinit var unifiedTabIcon: TextView
     private lateinit var cashuTabIcon: ImageView
     private lateinit var lightningTabIcon: ImageView
     private lateinit var largeAmountDisplay: TextView
@@ -174,8 +173,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         unifiedTabText = findViewById(R.id.unified_tab_text)
         cashuTabText = findViewById(R.id.cashu_tab_text)
         lightningTabText = findViewById(R.id.lightning_tab_text)
-        unifiedTabIconCashu = findViewById(R.id.unified_tab_icon_cashu)
-        unifiedTabIconLightning = findViewById(R.id.unified_tab_icon_lightning)
+        unifiedTabIcon = findViewById(R.id.unified_tab_icon)
         cashuTabIcon = findViewById(R.id.cashu_tab_icon)
         lightningTabIcon = findViewById(R.id.lightning_tab_icon)
         largeAmountDisplay = findViewById(R.id.large_amount_display)
@@ -207,8 +205,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             unifiedTabText = unifiedTabText,
             cashuTabText = cashuTabText,
             lightningTabText = lightningTabText,
-            unifiedTabIconCashu = unifiedTabIconCashu,
-            unifiedTabIconLightning = unifiedTabIconLightning,
+            unifiedTabIcon = unifiedTabIcon,
             cashuTabIcon = cashuTabIcon,
             lightningTabIcon = lightningTabIcon,
             unifiedQrContainer = unifiedQrContainer,
