@@ -292,27 +292,29 @@
             android:layout_width="wrap_content"
             android:layout_height="42dp"
             android:gravity="center"
-            android:paddingHorizontal="16dp"
+            android:paddingHorizontal="14dp"
             android:orientation="horizontal"
             android:background="@drawable/bg_button_primary_green">
 
             <TextView
                 android:id="@+id/unified_tab_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:text="U"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                android:gravity="center"
                 android:textColor="@color/color_bg_white" />
 
             <TextView
                 android:id="@+id/unified_tab_text"
-                android:layout_width="wrap_content"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="0dp"
                 android:text="@string/payment_request_tab_unified"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                android:gravity="center"
                 android:textColor="@color/color_bg_white" />
         </LinearLayout>
 
@@ -322,7 +324,7 @@
             android:layout_width="wrap_content"
             android:layout_height="42dp"
             android:gravity="center"
-            android:paddingHorizontal="12dp"
+            android:paddingHorizontal="14dp"
             android:orientation="horizontal"
             android:background="@android:color/transparent">
 
@@ -335,12 +337,13 @@
 
             <TextView
                 android:id="@+id/cashu_tab_text"
-                android:layout_width="wrap_content"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="0dp"
                 android:text="Cashu"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                android:gravity="center"
                 android:textColor="@color/color_text_secondary"
                 android:visibility="gone" />
         </LinearLayout>
@@ -351,7 +354,7 @@
             android:layout_width="wrap_content"
             android:layout_height="42dp"
             android:gravity="center"
-            android:paddingHorizontal="12dp"
+            android:paddingHorizontal="14dp"
             android:orientation="horizontal"
             android:background="@android:color/transparent">
 
@@ -364,12 +367,13 @@
 
             <TextView
                 android:id="@+id/lightning_tab_text"
-                android:layout_width="wrap_content"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="0dp"
                 android:text="Lightning"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                android:gravity="center"
                 android:textColor="@color/color_text_secondary"
                 android:visibility="gone" />
         </LinearLayout>
