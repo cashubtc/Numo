@@ -23,8 +23,7 @@ class PaymentTabManager(
     private val cashuTabText: TextView,
     private val lightningTabText: TextView,
 
-    private val unifiedTabIconCashu: ImageView,
-    private val unifiedTabIconLightning: ImageView,
+    private val unifiedTabIcon: TextView,
     private val cashuTabIcon: ImageView,
     private val lightningTabIcon: ImageView,
 
@@ -90,8 +89,7 @@ class PaymentTabManager(
         cashuTabText.visibility = View.GONE
         lightningTabText.visibility = View.GONE
         
-        unifiedTabIconCashu.visibility = View.VISIBLE
-        unifiedTabIconLightning.visibility = View.VISIBLE
+        unifiedTabIcon.visibility = View.VISIBLE
         cashuTabIcon.visibility = View.VISIBLE
         lightningTabIcon.visibility = View.VISIBLE
 
@@ -99,8 +97,7 @@ class PaymentTabManager(
         cashuTabText.setTextColor(secondaryColor)
         lightningTabText.setTextColor(secondaryColor)
 
-        unifiedTabIconCashu.setColorFilter(secondaryColor)
-        unifiedTabIconLightning.setColorFilter(secondaryColor)
+        unifiedTabIcon.setTextColor(secondaryColor)
         cashuTabIcon.setColorFilter(secondaryColor)
         lightningTabIcon.setColorFilter(secondaryColor)
 
@@ -117,8 +114,7 @@ class PaymentTabManager(
                 unifiedTab.setBackgroundResource(primaryBg)
                 unifiedTabText.visibility = View.VISIBLE
                 unifiedTabText.setTextColor(whiteColor)
-                unifiedTabIconCashu.visibility = View.GONE
-                unifiedTabIconLightning.visibility = View.GONE
+                unifiedTabIcon.visibility = View.GONE
                 
                 unifiedQrContainer.visibility = View.VISIBLE
                 unifiedQrImageView.visibility = View.VISIBLE
