@@ -821,4 +821,8 @@
     <string name="developer_error_logs_entry_copy">Copy Entry</string>
     <string name="developer_error_logs_clear_dialog_title">Clear Error Logs</string>
     <string name="developer_error_logs_clear_dialog_message">Clear all stored error logs? This cannot be undone.</string>
+
+    <string name="payment_request_tab_unified">Unified</string>
+    <string name="payment_request_default_description">Payment of %1$d sats</string>
+    <string name="payment_request_lightning_description">Numo POS payment of %1$d sats</string>
 </resources>

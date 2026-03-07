@@ -28,4 +28,5 @@
     <string name="item_selection_redo_button">Rehacer cambio</string>
     <string name="item_selection_undo_button_short">Deshacer</string>
     <string name="item_selection_redo_button_short">Rehacer</string>
+    <string name="pos_charge_button_loading">Iniciando billetera...</string>
 </resources>

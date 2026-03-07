@@ -24,7 +24,7 @@ class PaymentRequestMintBehaviorTest {
             amount = 100L,
             description = "Test",
             allowedMints = null,
-        )
+        )?.original
 
         assertFalse("PaymentRequest should have been encoded", encoded.isNullOrBlank())
 
@@ -47,7 +47,7 @@ class PaymentRequestMintBehaviorTest {
             amount = 42L,
             description = "With mints",
             allowedMints = allowedMints,
-        )
+        )?.original
 
         assertFalse("PaymentRequest should have been encoded", encoded.isNullOrBlank())
 
@@ -68,7 +68,7 @@ class PaymentRequestMintBehaviorTest {
             description = "Nostr no mints",
             allowedMints = null,
             nprofile = nprofile,
-        )
+        )?.original
 
         assertFalse("PaymentRequest should have been encoded", encoded.isNullOrBlank())
 
@@ -93,7 +93,7 @@ class PaymentRequestMintBehaviorTest {
             description = "Nostr with mints",
             allowedMints = allowedMints,
             nprofile = nprofile,
-        )
+        )?.original
 
         assertFalse("PaymentRequest should have been encoded", encoded.isNullOrBlank())
 
