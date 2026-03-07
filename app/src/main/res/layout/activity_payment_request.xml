@@ -201,35 +201,6 @@
                 android:layout_height="match_parent"
                 android:adjustViewBounds="true"
                 android:scaleType="fitCenter" />
-
-            <androidx.cardview.widget.CardView
-                android:layout_width="60dp"
-                android:layout_height="48dp"
-                android:layout_gravity="center"
-                app:cardBackgroundColor="@color/color_bg_white"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="0dp">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:orientation="horizontal"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/cashu" />
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginStart="8dp"
-                        android:src="@drawable/ic_lightning_black"
-                        app:tint="@android:color/black" />
-                </LinearLayout>
-            </androidx.cardview.widget.CardView>
         </FrameLayout>
     </FrameLayout>
 
