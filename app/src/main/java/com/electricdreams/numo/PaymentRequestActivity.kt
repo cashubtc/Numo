@@ -73,6 +73,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var closeButton: View
     private lateinit var shareButton: View
     private lateinit var lightningLoadingSpinner: View
+    private lateinit var unifiedLoadingSpinner: View
+    private lateinit var cashuLoadingSpinner: View
     private lateinit var lightningLogoCard: View
     
     // NFC Animation views
@@ -183,6 +185,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         closeButton = findViewById(R.id.close_button)
         shareButton = findViewById(R.id.share_button)
         lightningLoadingSpinner = findViewById(R.id.lightning_loading_spinner)
+        unifiedLoadingSpinner = findViewById(R.id.unified_loading_spinner)
+        cashuLoadingSpinner = findViewById(R.id.cashu_loading_spinner)
         lightningLogoCard = findViewById(R.id.lightning_logo_card)
         
         // NFC Animation views
@@ -213,6 +217,9 @@ class PaymentRequestActivity : AppCompatActivity() {
             cashuQrContainer = cashuQrContainer,
             lightningQrContainer = lightningQrContainer,
             unifiedQrImageView = unifiedQrImageView,
+            unifiedLoadingSpinner = unifiedLoadingSpinner,
+            lightningLoadingSpinner = lightningLoadingSpinner,
+            cashuLoadingSpinner = cashuLoadingSpinner,
             cashuQrImageView = cashuQrImageView,
             lightningQrImageView = lightningQrImageView,
             resources = resources,
@@ -629,18 +636,40 @@ class PaymentRequestActivity : AppCompatActivity() {
         val creq = nostrHandler?.paymentRequestBech32
         val lnbc = lightningInvoice
         
-        // If we don't have at least one, we can't show a unified QR
-        if (creq == null && lnbc == null) {
+        // We only show the unified QR when BOTH Cashu and Lightning requests are ready
+        // (unless lightning is explicitly disabled or errored out, but for simplicity we assume we need both if Lightning is supported)
+        
+        // Since we attempt to fetch lightning invoice by default if allowed mints are set, 
+        // we'll wait for both unless lnbc fails (which we handle below).
+        // Let's implement the logic: If we have creq, we still want to wait for lnbc if lightning was started.
+        
+        // Actually, if we don't have creq yet, definitely wait.
+        if (creq == null) return
+        
+        // If Lightning is enabled (lightningStarted is true) and we don't have lnbc yet, wait.
+        // If lnbc is null because of an error, it stays null, but we don't want to spin forever. 
+        // Wait, if there's an error, onError hides the lightning spinner. But does it hide the unified spinner? 
+        // We should just hide the unified spinner and show creq if lnbc fails, or we should never show it?
+        // For simplicity: if lightningStarted == true and lightningInvoice == null, we wait. BUT wait, how do we know if it errored? 
+        // Let's just track if lightning is "in progress". For now, we will require both. If one fails, the user is notified.
+        
+        if (lightningStarted && lnbc == null) {
+            // Still waiting for lightning invoice
             return
         }
         
         val unifiedUri = if (creq != null && lnbc != null) {
             "bitcoin:?creq=${creq}&lightning=${lnbc}"
         } else creq ?: lnbc
+        
+        if (unifiedUri == null) return
 
         try {
-            val qrBitmap = QrCodeGenerator.generate(unifiedUri ?: "", 512)
+            val qrBitmap = QrCodeGenerator.generate(unifiedUri, 512)
             unifiedQrImageView.setImageBitmap(qrBitmap)
+            unifiedQrImageView.visibility = View.VISIBLE
+            unifiedLoadingSpinner.visibility = View.GONE
+            
             if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.UNIFIED) {
                 setHceToUnified()
             }
@@ -657,6 +686,8 @@ class PaymentRequestActivity : AppCompatActivity() {
                 try {
                     val qrBitmap = QrCodeGenerator.generate(paymentRequest, 512)
                     cashuQrImageView.setImageBitmap(qrBitmap)
+                    cashuQrImageView.visibility = View.VISIBLE
+                    cashuLoadingSpinner.visibility = View.GONE
                     statusText.text = getString(R.string.payment_request_status_waiting_for_payment)
                     updateUnifiedQrCode()
                 } catch (e: Exception) {
@@ -734,6 +765,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 try {
                     val qrBitmap = QrCodeGenerator.generate(bolt11, 512)
                     lightningQrImageView.setImageBitmap(qrBitmap)
+                    lightningQrImageView.visibility = View.VISIBLE
                     // Hide loading spinner and show the bolt icon
                     lightningLoadingSpinner.visibility = View.GONE
                     lightningLogoCard.visibility = View.VISIBLE
@@ -758,6 +790,8 @@ class PaymentRequestActivity : AppCompatActivity() {
             override fun onError(message: String) {
                 // Hide loading spinner on error
                 lightningLoadingSpinner.visibility = View.GONE
+                lightningStarted = false // Mark as finished/failed so unified QR can proceed with just Cashu
+                updateUnifiedQrCode()
                 
                 // Do not immediately fail the whole payment; NFC or Nostr may still succeed.
                 // Surface a toast to inform the user that the Unified QR will only contain Cashu, 

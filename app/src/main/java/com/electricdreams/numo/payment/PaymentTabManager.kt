@@ -32,6 +32,9 @@ class PaymentTabManager(
     private val lightningQrContainer: View,
     
     private val unifiedQrImageView: View,
+    private val unifiedLoadingSpinner: View,
+    private val lightningLoadingSpinner: View,
+    private val cashuLoadingSpinner: View,
     private val cashuQrImageView: View,
     private val lightningQrImageView: View,
     
@@ -102,11 +105,8 @@ class PaymentTabManager(
         lightningTabIcon.setColorFilter(secondaryColor)
 
         unifiedQrContainer.visibility = View.INVISIBLE
-        unifiedQrImageView.visibility = View.INVISIBLE
         cashuQrContainer.visibility = View.INVISIBLE
-        cashuQrImageView.visibility = View.INVISIBLE
         lightningQrContainer.visibility = View.INVISIBLE
-        lightningQrImageView.visibility = View.INVISIBLE
 
         // Set selected
         when (tab) {
@@ -117,7 +117,6 @@ class PaymentTabManager(
                 unifiedTabIcon.visibility = View.GONE
                 
                 unifiedQrContainer.visibility = View.VISIBLE
-                unifiedQrImageView.visibility = View.VISIBLE
             }
             PaymentTab.CASHU -> {
                 cashuTab.setBackgroundResource(primaryBg)
@@ -126,7 +125,6 @@ class PaymentTabManager(
                 cashuTabIcon.visibility = View.GONE
                 
                 cashuQrContainer.visibility = View.VISIBLE
-                cashuQrImageView.visibility = View.VISIBLE
             }
             PaymentTab.LIGHTNING -> {
                 lightningTab.setBackgroundResource(primaryBg)
@@ -135,7 +133,6 @@ class PaymentTabManager(
                 lightningTabIcon.visibility = View.GONE
                 
                 lightningQrContainer.visibility = View.VISIBLE
-                lightningQrImageView.visibility = View.VISIBLE
             }
         }
 

@@ -169,7 +169,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:adjustViewBounds="true"
-                android:scaleType="fitCenter" />
+                android:scaleType="fitCenter"
+                android:visibility="invisible" />
+                
+            <!-- Loading spinner for Cashu payment request generation -->
+            <ProgressBar
+                android:id="@+id/cashu_loading_spinner"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="visible" />
 
             <!-- Center Logo Overlay for Cashu -->
             <androidx.cardview.widget.CardView
@@ -200,7 +210,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:adjustViewBounds="true"
-                android:scaleType="fitCenter" />
+                android:scaleType="fitCenter"
+                android:visibility="invisible" />
+
+            <!-- Loading spinner for Unified QR generation (waiting for both Cashu and Lightning) -->
+            <ProgressBar
+                android:id="@+id/unified_loading_spinner"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="visible" />
         </FrameLayout>
     </FrameLayout>
 
