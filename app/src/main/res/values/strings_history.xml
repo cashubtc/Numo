@@ -13,6 +13,7 @@
     <string name="history_row_title_withdrawal">Withdrawal</string>
     <string name="history_row_status_tap_to_resume">Tap to resume</string>
     <string name="history_row_status_expired">Expired</string>
+    <string name="history_row_status_failed">Failed</string>
 
     <!-- History: dialogs, toasts, chooser titles -->
     <string name="history_open_with_title">Open payment with...</string>
