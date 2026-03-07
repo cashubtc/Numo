@@ -151,6 +151,24 @@ class BTCPayPaymentService(
         fetchPaymentMethods(invoiceId).first
     }
 
+    /**
+     * Fetch payment data for an existing BTCPay invoice without creating a new one.
+     * Used when resuming a payment that already has a BTCPay invoice.
+     */
+    suspend fun fetchExistingPaymentData(invoiceId: String): WalletResult<PaymentData> =
+        withContext(Dispatchers.IO) {
+            WalletResult.runCatching {
+                val (bolt11, cashuPR) = fetchPaymentMethods(invoiceId)
+                PaymentData(
+                    paymentId = invoiceId,
+                    bolt11 = bolt11,
+                    cashuPR = cashuPR,
+                    mintUrl = null,
+                    expiresAt = null
+                )
+            }
+        }
+
     override fun isReady(): Boolean {
         return config.serverUrl.isNotBlank()
                 && config.apiKey.isNotBlank()

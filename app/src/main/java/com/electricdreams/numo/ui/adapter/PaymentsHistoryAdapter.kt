@@ -160,6 +160,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             val context = itemView.context
             val isPending = entry.isPending()
             val isExpired = entry.isExpired()
+            val isFailed = entry.isFailed()
 
             // Reset translation immediately without animation to prevent recycled views from staying open
             mainContent.translationX = if (position == openItemPosition) -getDeleteWidth(context) else 0f
@@ -211,7 +212,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 satAmount.toString()
             }
 
-            val displayAmount = if (isPending || isExpired) {
+            val displayAmount = if (isPending || isExpired || isFailed) {
                 formattedAmount
             } else if (entry.amount >= 0) {
                 "+$formattedAmount"
@@ -226,7 +227,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             // ── Title: direction-based labels ──
             titleText.text = when {
                 isPending -> context.getString(R.string.history_row_title_pending_payment)
-                isExpired -> context.getString(R.string.history_row_title_pending_payment)
+                isExpired || isFailed -> context.getString(R.string.history_row_title_pending_payment)
                 entry.amount >= 0 -> context.getString(R.string.history_row_title_payment_received)
                 else -> context.getString(R.string.history_row_title_withdrawal)
             }
@@ -245,7 +246,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     statusBadge.setBackgroundResource(R.drawable.bg_status_badge_orange)
                     statusBadgeIcon.setImageResource(R.drawable.ic_clock_small)
                 }
-                isExpired -> {
+                isExpired || isFailed -> {
                     statusBadge.setBackgroundResource(R.drawable.bg_status_badge_red)
                     statusBadgeIcon.setImageResource(R.drawable.ic_clock_small)
                 }
@@ -256,7 +257,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             }
             statusBadge.visibility = View.VISIBLE
 
-            // ── Status text (pending/expired) ──
+            // ── Status text (pending/expired/failed) ──
             when {
                 isPending -> {
                     statusText.visibility = View.VISIBLE
@@ -266,6 +267,11 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 isExpired -> {
                     statusText.visibility = View.VISIBLE
                     statusText.text = context.getString(R.string.history_row_status_expired)
+                    statusText.setTextColor(context.getColor(R.color.color_error))
+                }
+                isFailed -> {
+                    statusText.visibility = View.VISIBLE
+                    statusText.text = context.getString(R.string.history_row_status_failed)
                     statusText.setTextColor(context.getColor(R.color.color_error))
                 }
                 else -> {
