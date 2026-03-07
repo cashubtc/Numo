@@ -335,11 +335,6 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Initialize all payment modes (NDEF, Nostr, Lightning)
         initializePaymentRequest()
-
-        // If resuming and we have Lightning data, auto-switch to Lightning tab
-        if (isResumingPayment && resumeLightningQuoteId != null) {
-            tabManager.selectTab(PaymentTabManager.PaymentTab.LIGHTNING)
-        }
     }
 
     /**
