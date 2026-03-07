@@ -64,9 +64,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var unifiedTabText: TextView
     private lateinit var cashuTabText: TextView
     private lateinit var lightningTabText: TextView
-    private lateinit var unifiedTabIcon: TextView
-    private lateinit var cashuTabIcon: ImageView
-    private lateinit var lightningTabIcon: ImageView
+    private lateinit var tabContainer: android.widget.FrameLayout
+    private lateinit var tabIndicator: View
     private lateinit var largeAmountDisplay: TextView
     private lateinit var convertedAmountDisplay: TextView
     private lateinit var statusText: TextView
@@ -176,9 +175,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         unifiedTabText = findViewById(R.id.unified_tab_text)
         cashuTabText = findViewById(R.id.cashu_tab_text)
         lightningTabText = findViewById(R.id.lightning_tab_text)
-        unifiedTabIcon = findViewById(R.id.unified_tab_icon)
-        cashuTabIcon = findViewById(R.id.cashu_tab_icon)
-        lightningTabIcon = findViewById(R.id.lightning_tab_icon)
+        tabContainer = findViewById(R.id.tab_container)
+        tabIndicator = findViewById(R.id.tab_indicator)
         largeAmountDisplay = findViewById(R.id.large_amount_display)
         convertedAmountDisplay = findViewById(R.id.converted_amount_display)
         statusText = findViewById(R.id.payment_status_text)
@@ -204,15 +202,14 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Initialize tab manager
         tabManager = PaymentTabManager(
+            tabContainer = tabContainer,
+            tabIndicator = tabIndicator,
             unifiedTab = unifiedTab,
             cashuTab = cashuTab,
             lightningTab = lightningTab,
             unifiedTabText = unifiedTabText,
             cashuTabText = cashuTabText,
             lightningTabText = lightningTabText,
-            unifiedTabIcon = unifiedTabIcon,
-            cashuTabIcon = cashuTabIcon,
-            lightningTabIcon = lightningTabIcon,
             unifiedQrContainer = unifiedQrContainer,
             cashuQrContainer = cashuQrContainer,
             lightningQrContainer = lightningQrContainer,

@@ -1,43 +1,44 @@
 package com.electricdreams.numo.payment
 
-import android.animation.LayoutTransition
+import android.animation.ArgbEvaluator
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.content.res.Resources
 import android.view.View
-import android.view.ViewGroup
-import android.widget.ImageView
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import com.electricdreams.numo.R
 
 /**
  * Manages the payment method tab UI (Unified vs Cashu vs Lightning).
  *
- * Handles visual state switching between tabs and visibility of QR containers.
+ * Uses a sliding pill indicator behind text-only tabs.
  */
 class PaymentTabManager(
+    private val tabContainer: FrameLayout,
+    private val tabIndicator: View,
+
     private val unifiedTab: LinearLayout,
     private val cashuTab: LinearLayout,
     private val lightningTab: LinearLayout,
-    
+
     private val unifiedTabText: TextView,
     private val cashuTabText: TextView,
     private val lightningTabText: TextView,
 
-    private val unifiedTabIcon: TextView,
-    private val cashuTabIcon: ImageView,
-    private val lightningTabIcon: ImageView,
-
     private val unifiedQrContainer: View,
     private val cashuQrContainer: View,
     private val lightningQrContainer: View,
-    
+
     private val unifiedQrImageView: View,
     private val unifiedLoadingSpinner: View,
     private val lightningLoadingSpinner: View,
     private val cashuLoadingSpinner: View,
     private val cashuQrImageView: View,
     private val lightningQrImageView: View,
-    
+
     private val resources: Resources,
     private val theme: Resources.Theme
 ) {
@@ -45,99 +46,116 @@ class PaymentTabManager(
         UNIFIED, CASHU, LIGHTNING
     }
 
-    /**
-     * Callback for tab selection events.
-     */
     interface TabSelectionListener {
         fun onTabSelected(tab: PaymentTab)
     }
 
     private var listener: TabSelectionListener? = null
     private var currentTab: PaymentTab? = null
+    private var previousTab: PaymentTab? = null
+    private var isLaidOut = false
 
-    /**
-     * Set up tab click listeners.
-     */
     fun setup(listener: TabSelectionListener) {
         this.listener = listener
-
-        // Enable layout transitions for smooth text appearance/disappearance
-        (unifiedTab.parent as? ViewGroup)?.layoutTransition = LayoutTransition().apply {
-            enableTransitionType(LayoutTransition.CHANGING)
-        }
-        
-        // Default: show Unified
-        selectTab(PaymentTab.UNIFIED)
 
         unifiedTab.setOnClickListener { selectTab(PaymentTab.UNIFIED) }
         cashuTab.setOnClickListener { selectTab(PaymentTab.CASHU) }
         lightningTab.setOnClickListener { selectTab(PaymentTab.LIGHTNING) }
+
+        // Default selection before layout
+        currentTab = PaymentTab.UNIFIED
+
+        tabContainer.post {
+            isLaidOut = true
+            val tabWidth = unifiedTab.width
+            val lp = tabIndicator.layoutParams as FrameLayout.LayoutParams
+            lp.width = tabWidth
+            tabIndicator.layoutParams = lp
+
+            // Apply the current tab state without animation
+            val tab = currentTab ?: PaymentTab.UNIFIED
+            currentTab = null // reset so selectTab doesn't short-circuit
+            selectTab(tab, animate = false)
+        }
     }
 
-    fun selectTab(tab: PaymentTab) {
+    fun selectTab(tab: PaymentTab, animate: Boolean = true) {
         if (currentTab == tab) return
+        previousTab = currentTab
         currentTab = tab
 
-        val primaryBg = R.drawable.bg_button_primary_green
-        val transparentBg = android.R.color.transparent
+        if (!isLaidOut) return
+
         val whiteColor = resources.getColor(R.color.color_bg_white, theme)
         val secondaryColor = resources.getColor(R.color.color_text_secondary, theme)
 
-        // Reset all
-        unifiedTab.setBackgroundResource(transparentBg)
-        cashuTab.setBackgroundResource(transparentBg)
-        lightningTab.setBackgroundResource(transparentBg)
-        
-        unifiedTabText.visibility = View.GONE
-        cashuTabText.visibility = View.GONE
-        lightningTabText.visibility = View.GONE
-        
-        unifiedTabIcon.visibility = View.VISIBLE
-        cashuTabIcon.visibility = View.VISIBLE
-        lightningTabIcon.visibility = View.VISIBLE
+        val targetTab = when (tab) {
+            PaymentTab.UNIFIED -> unifiedTab
+            PaymentTab.CASHU -> cashuTab
+            PaymentTab.LIGHTNING -> lightningTab
+        }
+        val targetX = targetTab.left.toFloat()
 
-        unifiedTabText.setTextColor(secondaryColor)
-        cashuTabText.setTextColor(secondaryColor)
-        lightningTabText.setTextColor(secondaryColor)
+        if (animate) {
+            ObjectAnimator.ofFloat(tabIndicator, "translationX", targetX).apply {
+                duration = 250
+                interpolator = FastOutSlowInInterpolator()
+                start()
+            }
+            animateColors(tab, whiteColor, secondaryColor)
+        } else {
+            tabIndicator.translationX = targetX
+            applyColors(tab, whiteColor, secondaryColor)
+        }
 
-        unifiedTabIcon.setTextColor(secondaryColor)
-        cashuTabIcon.setColorFilter(secondaryColor)
-        lightningTabIcon.setColorFilter(secondaryColor)
-
+        // QR container visibility
         unifiedQrContainer.visibility = View.INVISIBLE
         cashuQrContainer.visibility = View.INVISIBLE
         lightningQrContainer.visibility = View.INVISIBLE
 
-        // Set selected
         when (tab) {
-            PaymentTab.UNIFIED -> {
-                unifiedTab.setBackgroundResource(primaryBg)
-                unifiedTabText.visibility = View.VISIBLE
-                unifiedTabText.setTextColor(whiteColor)
-                unifiedTabIcon.visibility = View.GONE
-                
-                unifiedQrContainer.visibility = View.VISIBLE
-            }
-            PaymentTab.CASHU -> {
-                cashuTab.setBackgroundResource(primaryBg)
-                cashuTabText.visibility = View.VISIBLE
-                cashuTabText.setTextColor(whiteColor)
-                cashuTabIcon.visibility = View.GONE
-                
-                cashuQrContainer.visibility = View.VISIBLE
-            }
-            PaymentTab.LIGHTNING -> {
-                lightningTab.setBackgroundResource(primaryBg)
-                lightningTabText.visibility = View.VISIBLE
-                lightningTabText.setTextColor(whiteColor)
-                lightningTabIcon.visibility = View.GONE
-                
-                lightningQrContainer.visibility = View.VISIBLE
-            }
+            PaymentTab.UNIFIED -> unifiedQrContainer.visibility = View.VISIBLE
+            PaymentTab.CASHU -> cashuQrContainer.visibility = View.VISIBLE
+            PaymentTab.LIGHTNING -> lightningQrContainer.visibility = View.VISIBLE
         }
 
         listener?.onTabSelected(tab)
     }
 
     fun getCurrentTab(): PaymentTab = currentTab ?: PaymentTab.UNIFIED
+
+    private fun applyColors(selectedTab: PaymentTab, whiteColor: Int, secondaryColor: Int) {
+        unifiedTabText.setTextColor(if (selectedTab == PaymentTab.UNIFIED) whiteColor else secondaryColor)
+        cashuTabText.setTextColor(if (selectedTab == PaymentTab.CASHU) whiteColor else secondaryColor)
+        lightningTabText.setTextColor(if (selectedTab == PaymentTab.LIGHTNING) whiteColor else secondaryColor)
+    }
+
+    private fun animateColors(selectedTab: PaymentTab, whiteColor: Int, secondaryColor: Int) {
+        val evaluator = ArgbEvaluator()
+
+        ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 250
+            addUpdateListener { animation ->
+                val fraction = animation.animatedFraction
+                val toWhite = evaluator.evaluate(fraction, secondaryColor, whiteColor) as Int
+                val toGray = evaluator.evaluate(fraction, whiteColor, secondaryColor) as Int
+
+                // Selected tab fades to white
+                when (selectedTab) {
+                    PaymentTab.UNIFIED -> unifiedTabText.setTextColor(toWhite)
+                    PaymentTab.CASHU -> cashuTabText.setTextColor(toWhite)
+                    PaymentTab.LIGHTNING -> lightningTabText.setTextColor(toWhite)
+                }
+
+                // Previously selected tab fades to gray
+                when (previousTab) {
+                    PaymentTab.UNIFIED -> unifiedTabText.setTextColor(toGray)
+                    PaymentTab.CASHU -> cashuTabText.setTextColor(toGray)
+                    PaymentTab.LIGHTNING -> lightningTabText.setTextColor(toGray)
+                    null -> {}
+                }
+            }
+            start()
+        }
+    }
 }
