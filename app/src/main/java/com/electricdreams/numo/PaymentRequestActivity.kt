@@ -52,12 +52,22 @@ import kotlinx.coroutines.withContext
 
 class PaymentRequestActivity : AppCompatActivity() {
 
+    private lateinit var unifiedQrImageView: ImageView
     private lateinit var cashuQrImageView: ImageView
     private lateinit var lightningQrImageView: ImageView
+    private lateinit var unifiedQrContainer: View
     private lateinit var cashuQrContainer: View
     private lateinit var lightningQrContainer: View
-    private lateinit var cashuTab: TextView
-    private lateinit var lightningTab: TextView
+    private lateinit var unifiedTab: android.widget.LinearLayout
+    private lateinit var cashuTab: android.widget.LinearLayout
+    private lateinit var lightningTab: android.widget.LinearLayout
+    private lateinit var unifiedTabText: TextView
+    private lateinit var cashuTabText: TextView
+    private lateinit var lightningTabText: TextView
+    private lateinit var unifiedTabIconCashu: ImageView
+    private lateinit var unifiedTabIconLightning: ImageView
+    private lateinit var cashuTabIcon: ImageView
+    private lateinit var lightningTabIcon: ImageView
     private lateinit var largeAmountDisplay: TextView
     private lateinit var convertedAmountDisplay: TextView
     private lateinit var statusText: TextView
@@ -78,8 +88,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     // Tip-related views
     private lateinit var tipInfoText: TextView
 
-    // HCE mode for deciding which payload to emulate (Cashu vs Lightning)
-    private enum class HceMode { CASHU, LIGHTNING }
+    // HCE mode for deciding which payload to emulate
+    private enum class HceMode { UNIFIED, CASHU, LIGHTNING }
     private enum class OverlayActionMode { SUCCESS, ERROR }
 
     private var paymentAmount: Long = 0
@@ -93,10 +103,10 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var baseAmountSats: Long = 0
     private var baseFormattedAmount: String = ""
 
-    // Current HCE mode (defaults to Cashu)
-    private var currentHceMode: HceMode = HceMode.CASHU
+    // Current HCE mode (defaults to Unified)
+    private var currentHceMode: HceMode = HceMode.UNIFIED
 
-    // Tab manager for Cashu/Lightning tab switching
+    // Tab manager for Unified/Cashu/Lightning tab switching
     private lateinit var tabManager: PaymentTabManager
 
     // Payment handlers
@@ -152,12 +162,22 @@ class PaymentRequestActivity : AppCompatActivity() {
         setContentView(R.layout.activity_payment_request)
 
         // Initialize views
+        unifiedQrImageView = findViewById(R.id.unified_qr)
         cashuQrImageView = findViewById(R.id.payment_request_qr)
         lightningQrImageView = findViewById(R.id.lightning_qr)
+        unifiedQrContainer = findViewById(R.id.unified_qr_container)
         cashuQrContainer = findViewById(R.id.cashu_qr_container)
         lightningQrContainer = findViewById(R.id.lightning_qr_container)
+        unifiedTab = findViewById(R.id.unified_tab)
         cashuTab = findViewById(R.id.cashu_tab)
         lightningTab = findViewById(R.id.lightning_tab)
+        unifiedTabText = findViewById(R.id.unified_tab_text)
+        cashuTabText = findViewById(R.id.cashu_tab_text)
+        lightningTabText = findViewById(R.id.lightning_tab_text)
+        unifiedTabIconCashu = findViewById(R.id.unified_tab_icon_cashu)
+        unifiedTabIconLightning = findViewById(R.id.unified_tab_icon_lightning)
+        cashuTabIcon = findViewById(R.id.cashu_tab_icon)
+        lightningTabIcon = findViewById(R.id.lightning_tab_icon)
         largeAmountDisplay = findViewById(R.id.large_amount_display)
         convertedAmountDisplay = findViewById(R.id.converted_amount_display)
         statusText = findViewById(R.id.payment_status_text)
@@ -181,10 +201,20 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Initialize tab manager
         tabManager = PaymentTabManager(
+            unifiedTab = unifiedTab,
             cashuTab = cashuTab,
             lightningTab = lightningTab,
+            unifiedTabText = unifiedTabText,
+            cashuTabText = cashuTabText,
+            lightningTabText = lightningTabText,
+            unifiedTabIconCashu = unifiedTabIconCashu,
+            unifiedTabIconLightning = unifiedTabIconLightning,
+            cashuTabIcon = cashuTabIcon,
+            lightningTabIcon = lightningTabIcon,
+            unifiedQrContainer = unifiedQrContainer,
             cashuQrContainer = cashuQrContainer,
             lightningQrContainer = lightningQrContainer,
+            unifiedQrImageView = unifiedQrImageView,
             cashuQrImageView = cashuQrImageView,
             lightningQrImageView = lightningQrImageView,
             resources = resources,
@@ -193,24 +223,27 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Set up tabs with listener
         tabManager.setup(object : PaymentTabManager.TabSelectionListener {
-            override fun onLightningTabSelected() {
-                Log.d(TAG, "onLightningTabSelected() called. lightningStarted=$lightningStarted, lightningInvoice=$lightningInvoice")
-
-                // If invoice is delayed (dev setting), start it now if not already started
-                if (!lightningStarted && DeveloperPrefs.isLightningInvoiceDelayed(this@PaymentRequestActivity)) {
-                    startLightningMintFlow()
+            override fun onTabSelected(tab: PaymentTabManager.PaymentTab) {
+                Log.d(TAG, "onTabSelected() called. tab=$tab, lightningStarted=$lightningStarted, lightningInvoice=$lightningInvoice")
+                when (tab) {
+                    PaymentTabManager.PaymentTab.UNIFIED -> {
+                        if (!lightningStarted && DeveloperPrefs.isLightningInvoiceDelayed(this@PaymentRequestActivity)) {
+                            startLightningMintFlow()
+                        }
+                        setHceToUnified()
+                    }
+                    PaymentTabManager.PaymentTab.LIGHTNING -> {
+                        if (!lightningStarted && DeveloperPrefs.isLightningInvoiceDelayed(this@PaymentRequestActivity)) {
+                            startLightningMintFlow()
+                        }
+                        if (lightningInvoice != null) {
+                            setHceToLightning()
+                        }
+                    }
+                    PaymentTabManager.PaymentTab.CASHU -> {
+                        setHceToCashu()
+                    }
                 }
-
-                // If invoice is already known, try to switch HCE now
-                if (lightningInvoice != null) {
-                    setHceToLightning()
-                }
-            }
-
-            override fun onCashuTabSelected() {
-                Log.d(TAG, "onCashuTabSelected() called. currentHceMode=$currentHceMode")
-                // When user returns to Cashu tab, restore Cashu HCE payload
-                setHceToCashu()
             }
         })
 
@@ -267,10 +300,17 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
 
         shareButton.setOnClickListener {
-            val toShare = if (tabManager.isLightningTabSelected()) {
-                lightningHandler?.currentInvoice ?: lightningInvoice
-            } else {
-                nostrHandler?.paymentRequest ?: lightningHandler?.currentInvoice ?: lightningInvoice
+            val currentTab = tabManager.getCurrentTab()
+            val toShare = when (currentTab) {
+                PaymentTabManager.PaymentTab.LIGHTNING -> lightningHandler?.currentInvoice ?: lightningInvoice
+                PaymentTabManager.PaymentTab.CASHU -> nostrHandler?.paymentRequest
+                PaymentTabManager.PaymentTab.UNIFIED -> {
+                    val creq = nostrHandler?.paymentRequest
+                    val lnbc = lightningHandler?.currentInvoice ?: lightningInvoice
+                    if (creq != null && lnbc != null) {
+                        "bitcoin:onchain?creq=${creq}&lightning=${lnbc}"
+                    } else creq ?: lnbc
+                }
             }
             if (toShare != null) {
                 sharePaymentRequest(toShare)
@@ -293,7 +333,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // If resuming and we have Lightning data, auto-switch to Lightning tab
         if (isResumingPayment && resumeLightningQuoteId != null) {
-            tabManager.selectLightningTab()
+            tabManager.selectTab(PaymentTabManager.PaymentTab.LIGHTNING)
         }
     }
 
@@ -558,6 +598,57 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
     }
 
+    private fun setHceToUnified() {
+        val creq = hcePaymentRequest
+        val lnbc = lightningInvoice
+
+        if (creq == null && lnbc == null) {
+            Log.w(TAG, "setHceToUnified() called but both creq and lnbc are null")
+            return
+        }
+
+        val payload = if (creq != null && lnbc != null) {
+            "bitcoin:onchain?creq=${creq}&lightning=${lnbc}"
+        } else creq ?: lnbc
+
+        try {
+            val hceService = NdefHostCardEmulationService.getInstance()
+            if (hceService != null) {
+                Log.d(TAG, "setHceToUnified(): Switching HCE payload to Unified. payload=$payload")
+                hceService.setPaymentRequest(payload ?: "", paymentAmount)
+                currentHceMode = HceMode.UNIFIED
+            } else {
+                Log.w(TAG, "setHceToUnified(): HCE service not available")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "setHceToUnified(): Error while setting HCE Unified payload: ${e.message}", e)
+        }
+    }
+
+    private fun updateUnifiedQrCode() {
+        val creq = nostrHandler?.paymentRequest
+        val lnbc = lightningInvoice
+        
+        // If we don't have at least one, we can't show a unified QR
+        if (creq == null && lnbc == null) {
+            return
+        }
+        
+        val unifiedUri = if (creq != null && lnbc != null) {
+            "bitcoin:onchain?creq=${creq}&lightning=${lnbc}"
+        } else creq ?: lnbc
+
+        try {
+            val qrBitmap = QrCodeGenerator.generate(unifiedUri ?: "", 512)
+            unifiedQrImageView.setImageBitmap(qrBitmap)
+            if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.UNIFIED) {
+                setHceToUnified()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error generating Unified QR bitmap: ${e.message}", e)
+        }
+    }
+
     private fun startNostrPaymentFlow() {
         val handler = nostrHandler ?: return
 
@@ -567,6 +658,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     val qrBitmap = QrCodeGenerator.generate(paymentRequest, 512)
                     cashuQrImageView.setImageBitmap(qrBitmap)
                     statusText.text = getString(R.string.payment_request_status_waiting_for_payment)
+                    updateUnifiedQrCode()
                 } catch (e: Exception) {
                     Log.e(TAG, "Error generating Cashu QR bitmap: ${e.message}", e)
                     statusText.text = getString(R.string.payment_request_status_error_qr)
@@ -645,6 +737,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     // Hide loading spinner and show the bolt icon
                     lightningLoadingSpinner.visibility = View.GONE
                     lightningLogoCard.visibility = View.VISIBLE
+                    updateUnifiedQrCode()
                 } catch (e: Exception) {
                     Log.e(TAG, "Error generating Lightning QR bitmap: ${e.message}", e)
                     // Still hide spinner on error
@@ -652,7 +745,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 }
 
                 // If Lightning tab is currently visible, switch HCE payload to Lightning
-                if (tabManager.isLightningTabSelected()) {
+                if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.LIGHTNING) {
                     Log.d(TAG, "onInvoiceReady(): Lightning tab is selected, calling setHceToLightning()")
                     setHceToLightning()
                 }
@@ -665,7 +758,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             override fun onError(message: String) {
                 // Do not immediately fail the whole payment; NFC or Nostr may still succeed.
                 // Only surface a toast if Lightning tab is currently active.
-                if (tabManager.isLightningTabSelected()) {
+                if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.LIGHTNING) {
                     Toast.makeText(
                         this@PaymentRequestActivity,
                         getString(R.string.payment_request_lightning_error_failed, message),
@@ -686,10 +779,20 @@ class PaymentRequestActivity : AppCompatActivity() {
                 Log.d(TAG, "Setting up NDEF payment with HCE service")
 
                 // Set the payment request to the HCE service based on current tab selection
-                if (tabManager.isLightningTabSelected() && lightningInvoice != null) {
-                    setHceToLightning()
-                } else {
-                    setHceToCashu()
+                when (tabManager.getCurrentTab()) {
+                    PaymentTabManager.PaymentTab.LIGHTNING -> {
+                        if (lightningInvoice != null) {
+                            setHceToLightning()
+                        } else {
+                            setHceToCashu()
+                        }
+                    }
+                    PaymentTabManager.PaymentTab.UNIFIED -> {
+                        setHceToUnified()
+                    }
+                    PaymentTabManager.PaymentTab.CASHU -> {
+                        setHceToCashu()
+                    }
                 }
 
                 // Set up callback for when a token is received or an error occurs
