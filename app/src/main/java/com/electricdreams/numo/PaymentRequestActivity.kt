@@ -305,7 +305,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     val creq = nostrHandler?.paymentRequest
                     val lnbc = lightningHandler?.currentInvoice ?: lightningInvoice
                     if (creq != null && lnbc != null) {
-                        "bitcoin:onchain?creq=${creq}&lightning=${lnbc}"
+                        "bitcoin:?creq=${creq}&lightning=${lnbc}"
                     } else creq ?: lnbc
                 }
             }
@@ -605,7 +605,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
 
         val payload = if (creq != null && lnbc != null) {
-            "bitcoin:onchain?creq=${creq}&lightning=${lnbc}"
+            "bitcoin:?creq=${creq}&lightning=${lnbc}"
         } else creq ?: lnbc
 
         try {
@@ -632,7 +632,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         
         val unifiedUri = if (creq != null && lnbc != null) {
-            "bitcoin:onchain?creq=${creq}&lightning=${lnbc}"
+            "bitcoin:?creq=${creq}&lightning=${lnbc}"
         } else creq ?: lnbc
 
         try {
