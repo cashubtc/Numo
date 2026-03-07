@@ -187,7 +187,52 @@
                     android:src="@drawable/cashu" />
             </androidx.cardview.widget.CardView>
         </FrameLayout>
+        
+        <FrameLayout
+            android:id="@+id/unified_qr_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="24dp"
+            android:visibility="invisible">
+
+            <ImageView
+                android:id="@+id/unified_qr"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter" />
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="60dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                app:cardBackgroundColor="@color/color_bg_white"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/cashu" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginStart="8dp"
+                        android:src="@drawable/ic_lightning_black"
+                        app:tint="@android:color/black" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+        </FrameLayout>
     </FrameLayout>
+
 
     <!-- Icons and Instruction -->
     <LinearLayout
@@ -233,7 +278,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/icons_container" />
 
-    <!-- Lightning / Cashu Switcher (tabs-style) now at the bottom -->
+
+    <!-- Lightning / Cashu / Unified Switcher (tabs-style) now at the bottom -->
     <LinearLayout
         android:id="@+id/lightning_cashu_switch_container"
         android:layout_width="wrap_content"
@@ -248,32 +294,104 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <TextView
+        <!-- Unified Tab -->
+        <LinearLayout
+            android:id="@+id/unified_tab"
+            android:layout_width="wrap_content"
+            android:layout_height="42dp"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:orientation="horizontal"
+            android:background="@drawable/bg_button_primary_green">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <ImageView
+                    android:id="@+id/unified_tab_icon_cashu"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/cashu"
+                    app:tint="@color/color_bg_white" />
+                <ImageView
+                    android:id="@+id/unified_tab_icon_lightning"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_lightning_black"
+                    app:tint="@color/color_bg_white" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/unified_tab_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Unified"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/color_bg_white" />
+        </LinearLayout>
+
+        <!-- Cashu Tab -->
+        <LinearLayout
             android:id="@+id/cashu_tab"
             android:layout_width="wrap_content"
             android:layout_height="42dp"
-            android:minWidth="125dp"
             android:gravity="center"
-            android:paddingHorizontal="21dp"
-            android:text="Cashu"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/color_bg_white"
-            android:background="@drawable/bg_button_primary_green" />
+            android:paddingHorizontal="12dp"
+            android:orientation="horizontal"
+            android:background="@android:color/transparent">
 
-        <TextView
+            <ImageView
+                android:id="@+id/cashu_tab_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/cashu"
+                app:tint="@color/color_text_secondary" />
+
+            <TextView
+                android:id="@+id/cashu_tab_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Cashu"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/color_text_secondary"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Lightning Tab -->
+        <LinearLayout
             android:id="@+id/lightning_tab"
             android:layout_width="wrap_content"
             android:layout_height="42dp"
-            android:minWidth="125dp"
             android:gravity="center"
-            android:paddingHorizontal="21dp"
-            android:text="Lightning"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/color_text_secondary"
-            android:background="@android:color/transparent" />
+            android:paddingHorizontal="12dp"
+            android:orientation="horizontal"
+            android:background="@android:color/transparent">
+
+            <ImageView
+                android:id="@+id/lightning_tab_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_lightning_black"
+                app:tint="@color/color_text_secondary" />
+
+            <TextView
+                android:id="@+id/lightning_tab_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="Lightning"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/color_text_secondary"
+                android:visibility="gone" />
+        </LinearLayout>
     </LinearLayout>
+
 
     <!-- NFC Animation Overlay (Native View) - ONLY for NFC payments -->
     <FrameLayout
