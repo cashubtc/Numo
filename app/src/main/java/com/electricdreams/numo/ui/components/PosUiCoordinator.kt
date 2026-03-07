@@ -10,6 +10,9 @@ import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
+import com.electricdreams.numo.core.cashu.CashuWalletManager
+import kotlinx.coroutines.launch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.electricdreams.numo.R
@@ -59,6 +62,29 @@ class PosUiCoordinator(
         initializeViews()
         initializeManagers()
         setupNavigationButtons()
+        
+        // Disable charge button initially, enable when wallet is ready
+        submitButton.isEnabled = false
+        submitButton.alpha = 0.5f
+        
+        if (true) {
+            activity.lifecycleScope.launch {
+                CashuWalletManager.isWalletReady.collect { isReady ->
+                    // Make sure we only enable it if we don't have a spinner shown
+                    if (submitButtonSpinner.visibility != android.view.View.VISIBLE) {
+                        submitButton.isEnabled = isReady
+                        submitButton.alpha = if (isReady) 1.0f else 0.5f
+                        
+                        // Rely on AmountDisplayManager to set correct text/state based on amount and wallet readiness
+                        amountDisplayManager.updateDisplay(
+                            satoshiInput,
+                            fiatInput,
+                            AmountDisplayManager.AnimationType.NONE
+                        )
+                    }
+                }
+            }
+        }
     }
 
     /** Handle initial payment amount from basket */
@@ -297,6 +323,9 @@ class PosUiCoordinator(
     fun hideChargeButtonSpinner() {
         submitButtonSpinner.visibility = View.GONE
         submitButton.text = activity.getString(R.string.pos_charge_button) // Restore button text
-        submitButton.isEnabled = true
+        // Only re-enable if the wallet is ready
+        val isReady = CashuWalletManager.isWalletReady.value
+        submitButton.isEnabled = isReady
+        submitButton.alpha = if (isReady) 1.0f else 0.5f
     }
 }
