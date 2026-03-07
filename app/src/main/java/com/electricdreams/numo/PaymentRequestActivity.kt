@@ -756,15 +756,14 @@ class PaymentRequestActivity : AppCompatActivity() {
             }
 
             override fun onError(message: String) {
+                // Hide loading spinner on error
+                lightningLoadingSpinner.visibility = View.GONE
+                
                 // Do not immediately fail the whole payment; NFC or Nostr may still succeed.
-                // Only surface a toast if Lightning tab is currently active.
-                if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.LIGHTNING) {
-                    Toast.makeText(
-                        this@PaymentRequestActivity,
-                        getString(R.string.payment_request_lightning_error_failed, message),
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
+                // Surface a toast to inform the user that the Unified QR will only contain Cashu, 
+                // or that the Lightning tab is unavailable.
+                val errorMsg = getString(R.string.payment_request_lightning_error_failed, message)
+                Toast.makeText(this@PaymentRequestActivity, errorMsg, Toast.LENGTH_LONG).show()
             }
         }
     }
