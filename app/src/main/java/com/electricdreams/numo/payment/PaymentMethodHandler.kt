@@ -45,7 +45,7 @@ class PaymentMethodHandler(
         val mintsForPaymentRequest =
             if (mintManager.isSwapFromUnknownMintsEnabled()) null else allowedMints
 
-        val paymentRequest = CashuPaymentHelper.createPaymentRequest(amount, "Payment of $amount sats", mintsForPaymentRequest)
+        val paymentRequest = CashuPaymentHelper.createPaymentRequest(amount, "Payment of $amount sats", mintsForPaymentRequest)?.original
             ?: run {
                 Toast.makeText(activity, R.string.payment_toast_failed_create_request, Toast.LENGTH_SHORT).show()
                 return
