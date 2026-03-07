@@ -92,7 +92,15 @@ object CashuPaymentHelper {
 
             val encoded = paymentRequest.encode()
             Log.d(TAG, "Created payment request: $encoded")
-            encoded
+            try {
+                val cdkRequest = org.cashudevkit.PaymentRequest.fromString(encoded)
+                val bech32 = cdkRequest.toBech32String()
+                Log.d(TAG, "Converted to bech32: $bech32")
+                bech32
+            } catch (e: Throwable) {
+                Log.e(TAG, "Error converting to bech32, returning CREQA format: ${e.message}", e)
+                encoded
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error creating payment request: ${e.message}", e)
             null
@@ -145,7 +153,15 @@ object CashuPaymentHelper {
 
             val encoded = paymentRequest.encode()
             Log.d(TAG, "Created Nostr payment request: $encoded")
-            encoded
+            try {
+                val cdkRequest = org.cashudevkit.PaymentRequest.fromString(encoded)
+                val bech32 = cdkRequest.toBech32String()
+                Log.d(TAG, "Converted Nostr to bech32: $bech32")
+                bech32
+            } catch (e: Throwable) {
+                Log.e(TAG, "Error converting to bech32, returning CREQA format: ${e.message}", e)
+                encoded
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error creating Nostr payment request: ${e.message}", e)
             null
@@ -234,7 +250,7 @@ object CashuPaymentHelper {
 
     @JvmStatic
     fun isCashuPaymentRequest(text: String?): Boolean =
-        text != null && text.startsWith("creqA")
+        text != null && (text.startsWith("creqA") || text.lowercase().startsWith("creqb"))
 
     // === Validation using CDK Token ========================================
 
