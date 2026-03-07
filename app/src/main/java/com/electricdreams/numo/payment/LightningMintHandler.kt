@@ -229,15 +229,13 @@ class LightningMintHandler(
         // Reset the mint-called flag for this resumed payment
         mintCalled.set(false)
 
+        // Pre-notify UI synchronously so it doesn't flicker while the coroutine boots
+        callback.onInvoiceReady(invoice, quoteId, mintUrlStr)
+
         mintJob?.cancel()
         mintJob = uiScope.launch(Dispatchers.IO) {
             try {
                 Log.d(TAG, "Resuming Lightning mint quote monitoring for id=$quoteId")
-
-                // Notify UI that invoice is ready (for display)
-                launch(Dispatchers.Main) {
-                    callback.onInvoiceReady(invoice, quoteId, mintUrlStr)
-                }
 
                 // Start both WebSocket subscription and polling in parallel
                 // Whichever detects payment first will call tryMintOnce (atomic, only one wins)
