@@ -507,7 +507,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Initialize Lightning handler with preferred mint (will be started when tab is selected)
         val preferredLightningMint = mintManager.getPreferredLightningMint()
-        lightningHandler = LightningMintHandler(preferredLightningMint, allowedMints, uiScope)
+        lightningHandler = LightningMintHandler(this, preferredLightningMint, allowedMints, uiScope)
 
         // Unless developer setting to delay it is enabled, start it immediately
         if (!DeveloperPrefs.isLightningInvoiceDelayed(this)) {
@@ -530,7 +530,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
             val generatedHce = CashuPaymentHelper.createPaymentRequest(
                 paymentAmount,
-                "Payment of $paymentAmount sats",
+                getString(R.string.payment_request_default_description, paymentAmount),
                 mintsForPaymentRequest
             )
             hcePaymentRequest = generatedHce?.original

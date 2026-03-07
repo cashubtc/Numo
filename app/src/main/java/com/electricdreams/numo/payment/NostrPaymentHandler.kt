@@ -1,6 +1,7 @@
 package com.electricdreams.numo.payment
 
 import android.content.Context
+import com.electricdreams.numo.R
 import android.util.Log
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.core.util.MintManager
@@ -140,7 +141,7 @@ class NostrPaymentHandler(
         // Create payment request with Nostr transport
         val request = CashuPaymentHelper.createPaymentRequestWithNostr(
             paymentAmount,
-            "Payment of $paymentAmount sats",
+            context.getString(R.string.payment_request_default_description, paymentAmount),
             mintsForPaymentRequest,
             profile
         )
