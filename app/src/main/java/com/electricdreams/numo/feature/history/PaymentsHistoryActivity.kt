@@ -485,6 +485,43 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
         }
 
+        fun markPaymentFailed(context: Context, paymentId: String) {
+            val history = getPaymentHistory(context).toMutableList()
+            val index = history.indexOfFirst { it.id == paymentId && it.isPending() }
+            if (index == -1) return
+
+            val existing = history[index]
+            val updated = PaymentHistoryEntry(
+                id = existing.id,
+                token = existing.token,
+                amount = existing.amount,
+                date = existing.date,
+                rawUnit = existing.getUnit(),
+                rawEntryUnit = existing.getEntryUnit(),
+                enteredAmount = existing.enteredAmount,
+                bitcoinPrice = existing.bitcoinPrice,
+                mintUrl = existing.mintUrl,
+                paymentRequest = existing.paymentRequest,
+                rawStatus = PaymentHistoryEntry.STATUS_FAILED,
+                paymentType = existing.paymentType,
+                lightningInvoice = existing.lightningInvoice,
+                lightningQuoteId = existing.lightningQuoteId,
+                lightningMintUrl = existing.lightningMintUrl,
+                formattedAmount = existing.formattedAmount,
+                nostrNprofile = existing.nostrNprofile,
+                nostrSecretHex = existing.nostrSecretHex,
+                checkoutBasketJson = existing.checkoutBasketJson,
+                basketId = existing.basketId,
+                tipAmountSats = existing.tipAmountSats,
+                tipPercentage = existing.tipPercentage,
+                swapToLightningMintJson = existing.swapToLightningMintJson,
+            )
+            history[index] = updated
+
+            val prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
+        }
+
         /**
          * Cancel a pending payment (mark as cancelled or delete).
          */

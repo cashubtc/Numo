@@ -58,10 +58,11 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<PaymentsHistoryAdapter.ViewH
 
         val isPending = entry.isPending()
         val isExpired = entry.isExpired()
+        val isFailed = entry.isFailed()
 
         // Set amount with appropriate prefix
-        val displayAmount = if (isPending || isExpired) {
-            formattedAmount // No + prefix for pending/expired
+        val displayAmount = if (isPending || isExpired || isFailed) {
+            formattedAmount // No + prefix for pending/expired/failed
         } else if (entry.amount >= 0) {
             "+$formattedAmount"
         } else {
@@ -75,7 +76,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<PaymentsHistoryAdapter.ViewH
         // Set title based on status and payment type
         holder.titleText.text = when {
             isPending -> context.getString(R.string.history_row_title_pending_payment)
-            isExpired -> context.getString(R.string.history_row_title_pending_payment)
+            isExpired || isFailed -> context.getString(R.string.history_row_title_pending_payment)
             entry.isLightning() -> context.getString(R.string.history_row_title_lightning_payment)
             entry.isCashu() -> context.getString(R.string.history_row_title_cashu_payment)
             entry.amount > 0 -> context.getString(R.string.history_row_title_cash_in)
@@ -84,7 +85,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<PaymentsHistoryAdapter.ViewH
 
         // Set icon based on payment type and status
         val iconRes = when {
-            isPending || isExpired -> R.drawable.ic_pending
+            isPending || isExpired || isFailed -> R.drawable.ic_pending
             entry.isLightning() -> R.drawable.ic_lightning_bolt
             else -> R.drawable.ic_bitcoin
         }
@@ -93,12 +94,12 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<PaymentsHistoryAdapter.ViewH
         // Set icon tint based on status
         val iconTint = when {
             isPending -> context.getColor(R.color.color_warning)
-            isExpired -> context.getColor(R.color.color_error)
+            isExpired || isFailed -> context.getColor(R.color.color_error)
             else -> context.getColor(R.color.color_text_primary)
         }
         holder.icon.setColorFilter(iconTint)
 
-        // Show status label for pending/expired payments
+        // Show status label for pending/expired/failed payments
         when {
             isPending -> {
                 holder.statusText.visibility = View.VISIBLE
@@ -110,6 +111,11 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<PaymentsHistoryAdapter.ViewH
                 holder.statusText.text = context.getString(R.string.history_row_status_expired)
                 holder.statusText.setTextColor(context.getColor(R.color.color_error))
             }
+            isFailed -> {
+                holder.statusText.visibility = View.VISIBLE
+                holder.statusText.text = context.getString(R.string.history_row_status_failed)
+                holder.statusText.setTextColor(context.getColor(R.color.color_error))
+            }
             else -> {
                 holder.statusText.visibility = View.GONE
             }
@@ -118,7 +124,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<PaymentsHistoryAdapter.ViewH
         // Hide subtitle (payment type already shown in title)
         holder.subtitleText.visibility = View.GONE
 
-        if (isExpired) {
+        if (isExpired || isFailed) {
             holder.itemView.setOnClickListener(null)
             holder.itemView.isClickable = false
         } else {
