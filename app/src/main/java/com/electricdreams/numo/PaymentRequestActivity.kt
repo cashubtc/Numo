@@ -568,7 +568,12 @@ class PaymentRequestActivity : AppCompatActivity() {
         val isBtcPay = paymentService is BTCPayPaymentService
 
         if (isBtcPay) {
-            initializeBtcPayPaymentRequest()
+            val existingInvoiceId = if (isResumingPayment) resumeLightningQuoteId else null
+            if (existingInvoiceId != null) {
+                resumeBtcPayPaymentRequest(existingInvoiceId)
+            } else {
+                initializeBtcPayPaymentRequest()
+            }
         } else {
             initializeLocalPaymentRequest()
         }
@@ -588,6 +593,14 @@ class PaymentRequestActivity : AppCompatActivity() {
             val result = paymentService.createPayment(paymentAmount, "Payment of $paymentAmount sats")
             result.onSuccess { payment ->
                 btcPayPaymentId = payment.paymentId
+                // Persist invoice ID so resume can reuse it instead of creating a new one
+                pendingPaymentId?.let {
+                    PaymentsHistoryActivity.updatePendingWithLightningInfo(
+                        context = this@PaymentRequestActivity,
+                        paymentId = it,
+                        lightningQuoteId = payment.paymentId,
+                    )
+                }
 
                 val hasCashu = !payment.cashuPR.isNullOrBlank()
                 val hasLightning = !payment.bolt11.isNullOrBlank()
@@ -657,6 +670,68 @@ class PaymentRequestActivity : AppCompatActivity() {
             lightningLoadingSpinner.visibility = View.GONE
         }
         lightningStarted = true
+    }
+
+    /**
+     * Resume a BTCPay payment using an existing invoice ID, avoiding creation of a new invoice.
+     */
+    private fun resumeBtcPayPaymentRequest(invoiceId: String) {
+        cashuQrImageView.visibility = View.INVISIBLE
+        cashuLogoCard.visibility = View.GONE
+        cashuLoadingSpinner.visibility = View.VISIBLE
+
+        val btcPay = paymentService as BTCPayPaymentService
+        uiScope.launch {
+            val result = btcPay.fetchExistingPaymentData(invoiceId)
+            result.onSuccess { payment ->
+                btcPayPaymentId = invoiceId
+
+                val hasCashu = !payment.cashuPR.isNullOrBlank()
+                val hasLightning = !payment.bolt11.isNullOrBlank()
+
+                if (!hasCashu && !hasLightning) {
+                    cashuLoadingSpinner.visibility = View.GONE
+                    handlePaymentError("BTCPay returned no payment methods")
+                    return@onSuccess
+                }
+
+                if (hasCashu) {
+                    btcPayCashuPR = payment.cashuPR
+                    try {
+                        val qrBitmap = QrCodeGenerator.generate(payment.cashuPR!!, 512)
+                        cashuQrImageView.setImageBitmap(qrBitmap)
+                        cashuQrImageView.visibility = View.VISIBLE
+                        cashuLogoCard.visibility = View.VISIBLE
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error generating BTCPay Cashu QR on resume: ${e.message}", e)
+                    }
+                    cashuLoadingSpinner.visibility = View.GONE
+                    hcePaymentRequest = CashuPaymentHelper.stripTransports(payment.cashuPR!!) ?: payment.cashuPR
+                    if (NdefHostCardEmulationService.isHceAvailable(this@PaymentRequestActivity)) {
+                        startService(Intent(this@PaymentRequestActivity, NdefHostCardEmulationService::class.java))
+                        setupNdefPayment()
+                    }
+                } else {
+                    cashuLoadingSpinner.visibility = View.GONE
+                    tabManager.disableTab(PaymentTabManager.Tab.CASHU)
+                }
+
+                if (hasLightning) {
+                    showBtcPayLightningQr(payment.bolt11!!)
+                } else {
+                    fetchBtcPayLightningInBackground(invoiceId)
+                }
+
+                statusText.text = getString(R.string.payment_request_status_waiting_for_payment)
+                startBtcPayPolling(invoiceId)
+            }.onFailure { error ->
+                Log.e(TAG, "BTCPay resume failed: ${error.message}", error)
+                cashuLoadingSpinner.visibility = View.GONE
+                // Invoice may be expired — fall back to creating a new one
+                Log.d(TAG, "Falling back to new BTCPay invoice after resume failure")
+                initializeBtcPayPaymentRequest()
+            }
+        }
     }
 
     private fun fetchBtcPayLightningInBackground(invoiceId: String) {
@@ -763,7 +838,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                         PaymentState.FAILED -> {
                             btcPayPollingActive = false
                             pendingPaymentId?.let {
-                                PaymentsHistoryActivity.markPaymentExpired(this@PaymentRequestActivity, it)
+                                PaymentsHistoryActivity.markPaymentFailed(this@PaymentRequestActivity, it)
                             }
                             handlePaymentError("Invoice invalid")
                         }
@@ -1095,7 +1170,25 @@ class PaymentRequestActivity : AppCompatActivity() {
                                                 handleLightningPaymentSuccess()
                                             }
                                         }.onFailure { e ->
-                                            throw Exception("BTCPay redemption failed: ${e.message}")
+                                            // Redemption failed on our side — check BTCPay invoice
+                                            // status to see if it was settled anyway (e.g. race
+                                            // condition). If still unpaid, reset and allow retry.
+                                            Log.w(TAG, "BTCPay NFC redemption failed: ${e.message} — checking invoice status")
+                                            val statusResult = paymentService.checkPaymentStatus(invoiceId)
+                                            statusResult.onSuccess { state ->
+                                                when (state) {
+                                                    PaymentState.PAID -> withContext(Dispatchers.Main) {
+                                                        handleLightningPaymentSuccess()
+                                                    }
+                                                    PaymentState.PENDING -> withContext(Dispatchers.Main) {
+                                                        // Invoice still open — show error screen with retry option
+                                                        handlePaymentError(e.message ?: "NFC payment failed")
+                                                    }
+                                                    else -> throw Exception("BTCPay redemption failed: ${e.message}")
+                                                }
+                                            }.onFailure {
+                                                throw Exception("BTCPay redemption failed: ${e.message}")
+                                            }
                                         }
                                         return@launch
                                     } else {
