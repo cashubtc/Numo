@@ -270,6 +270,8 @@
     <string name="nfc_payment_error_nfc_comm">Erro de comunicação NFC: %1$s</string>
     <string name="nfc_payment_error_satocash">Erro do cartão Satocash: %1$s (SW: 0x%2$04X)</string>
     <string name="nfc_payment_error_unexpected">Ocorreu um erro inesperado: %1$s</string>
+    <string name="nfc_payment_hint_keep_close">Mantenha o telefone próximo</string>
+    <string name="nfc_payment_hint_processing">Processando pagamento...\nVocê pode levantar o telefone</string>
 
     <!-- Common buttons -->
     <string name="common_ok">OK</string>

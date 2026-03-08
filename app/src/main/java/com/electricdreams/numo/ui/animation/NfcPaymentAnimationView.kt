@@ -31,6 +31,7 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
     private enum class State {
         IDLE,
         READING,
+        PROCESSING,
         RESULT_TRANSITION,
         RESULT,
     }
@@ -42,6 +43,7 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
 
     private val colorIdle = Color.parseColor("#0A0A0A")
     private val colorReading = ContextCompat.getColor(context, R.color.color_bitcoin_orange)
+    private val colorProcessing = ContextCompat.getColor(context, R.color.color_accent_blue)
     private val colorSuccess = Color.parseColor("#34C759")
     private val colorSuccessGradientStart = Color.parseColor("#22C55E")
     private val colorSuccessGradientEnd = Color.parseColor("#4ADE80")
@@ -133,6 +135,21 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         }
 
         invalidate()
+    }
+
+    fun startProcessing() {
+        if (state != State.READING) return
+        
+        state = State.PROCESSING
+        
+        val colorAnimator = ValueAnimator.ofObject(ArgbEvaluator(), currentBackgroundColor, colorProcessing).apply {
+            duration = 360L
+            addUpdateListener { animator ->
+                currentBackgroundColor = animator.animatedValue as Int
+                invalidate()
+            }
+        }
+        colorAnimator.start()
     }
 
     fun showSuccess(_amountText: String) {
@@ -299,7 +316,7 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
             canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), successGradientPaint)
         }
 
-        if (state == State.READING || state == State.RESULT_TRANSITION) {
+        if (state == State.READING || state == State.PROCESSING || state == State.RESULT_TRANSITION) {
             val radius = spinnerRadius * spinnerPulse
             val rect = RectF(
                 centerX - radius,
