@@ -110,6 +110,10 @@ class AddMintInputCard @JvmOverloads constructor(
         this.listener = listener
     }
 
+    fun setHeaderTitle(title: String) {
+        headerTitle.text = title
+    }
+
     fun setMintUrl(url: String) {
         urlInput.setText(url)
         if (!isExpanded) {

@@ -7,6 +7,7 @@ import android.animation.ValueAnimator
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.text.Editable
 import android.text.SpannableString
@@ -26,6 +27,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -40,16 +42,22 @@ import com.electricdreams.numo.ModernPOSActivity
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.prefs.PreferenceStore
+import com.electricdreams.numo.core.util.MintIconCache
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.util.MintProfileService
+import com.electricdreams.numo.feature.scanner.QRScannerActivity
 import com.electricdreams.numo.nostr.NostrMintBackup
+import com.electricdreams.numo.ui.components.AddMintInputCard
 import com.electricdreams.numo.ui.seed.SeedWordEditText
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.imageview.ShapeableImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import org.cashudevkit.generateMnemonic
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -71,6 +79,7 @@ class OnboardingActivity : AppCompatActivity() {
     companion object {
         private const val PREFS_NAME = "OnboardingPrefs"
         private const val KEY_ONBOARDING_COMPLETE = "onboarding_complete"
+        private val ONBOARDING_DEFAULT_MINTS = listOf("https://mint.coinos.io")
 
         fun isOnboardingComplete(context: Context): Boolean {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -101,11 +110,13 @@ class OnboardingActivity : AppCompatActivity() {
     // === Data ===
     private var generatedMnemonic: String? = null
     private var enteredMnemonic: String? = null
-    private val discoveredMints = mutableSetOf<String>()
-    private val selectedMints = mutableSetOf<String>()
+    private val discoveredMints = linkedSetOf<String>()
+    private val selectedMints = linkedSetOf<String>()
+    private val onboardingMintDisplayNames = mutableMapOf<String, String>()
     private var backupFound = false
     private var backupTimestamp: Long? = null
     private val balanceChanges = mutableMapOf<String, Pair<Long, Long>>()
+    private lateinit var mintProfileService: MintProfileService
 
     // === Views ===
     // Step 1: Welcome
@@ -149,6 +160,7 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var mintsListContainer: LinearLayout
     private lateinit var mintsCountText: TextView
     private lateinit var mintsSubtitle: TextView
+    private lateinit var addDifferentMintCard: AddMintInputCard
     private lateinit var mintsContinueButton: MaterialButton
     private lateinit var mintsBackButton: ImageView
 
@@ -169,6 +181,15 @@ class OnboardingActivity : AppCompatActivity() {
     private val seedInputs = mutableListOf<SeedWordEditText>()
     private val mintProgressViews = mutableMapOf<String, View>()
 
+    private val onboardingQrScannerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val qrValue = result.data?.getStringExtra(QRScannerActivity.EXTRA_QR_VALUE)
+            qrValue?.let { addDifferentMintCard.setMintUrl(mintProfileService.normalizeUrl(it)) }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // CRITICAL: Force light mode for onboarding - must be before super.onCreate()
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
@@ -185,6 +206,8 @@ class OnboardingActivity : AppCompatActivity() {
         }
 
         setContentView(R.layout.activity_onboarding)
+        mintProfileService = MintProfileService.getInstance(this)
+        MintIconCache.initialize(this)
 
         setupWindow()
         initViews()
@@ -279,6 +302,8 @@ class OnboardingActivity : AppCompatActivity() {
         mintsListContainer = findViewById(R.id.mints_list_container)
         mintsCountText = findViewById(R.id.mints_count_text)
         mintsSubtitle = findViewById(R.id.mints_subtitle)
+        addDifferentMintCard = findViewById(R.id.add_different_mint_card)
+        addDifferentMintCard.setHeaderTitle(getString(R.string.onboarding_mints_add_different))
         mintsContinueButton = findViewById(R.id.mints_continue_button)
         mintsBackButton = findViewById(R.id.mints_back_button)
 
@@ -469,6 +494,16 @@ class OnboardingActivity : AppCompatActivity() {
             }
         }
 
+        addDifferentMintCard.setOnAddMintListener(object : AddMintInputCard.OnAddMintListener {
+            override fun onAddMint(mintUrl: String) {
+                addDifferentMint(mintUrl)
+            }
+
+            override fun onScanQR() {
+                openOnboardingMintQrScanner()
+            }
+        })
+
         // Success
         enterWalletButton.setOnClickListener {
             completeOnboarding()
@@ -642,23 +677,17 @@ class OnboardingActivity : AppCompatActivity() {
 
                 delay(500)
 
-                // Get default mints from MintManager
-                val mintManager = MintManager.getInstance(this@OnboardingActivity)
-                
-                // Clear and reset to defaults to ensure clean state
-                mintManager.resetToDefaults()
-                
-                val defaultMints = mintManager.getAllowedMints()
-
                 discoveredMints.clear()
                 selectedMints.clear()
-                discoveredMints.addAll(defaultMints)
-                selectedMints.addAll(defaultMints)
+                onboardingMintDisplayNames.clear()
+                discoveredMints.addAll(ONBOARDING_DEFAULT_MINTS)
+                selectedMints.addAll(ONBOARDING_DEFAULT_MINTS)
                 backupFound = false
 
                 withContext(Dispatchers.Main) {
                     showStep(OnboardingStep.REVIEW_MINTS)
                     updateReviewMintsUI()
+                    refreshMintProfilesForReview()
                 }
 
             } catch (e: Exception) {
@@ -684,6 +713,7 @@ class OnboardingActivity : AppCompatActivity() {
 
                 // Initialize CashuWalletManager with the generated mnemonic
                 PreferenceStore.wallet(this@OnboardingActivity).putString("wallet_mnemonic", mnemonic)
+                applySelectedMintsToMintManager()
 
                 withContext(Dispatchers.Main) {
                     generatingStatus.text = getString(R.string.onboarding_status_connecting_mints)
@@ -699,18 +729,8 @@ class OnboardingActivity : AppCompatActivity() {
                 }
 
                 // Fetch mint info for selected mints
-                val mintManager = MintManager.getInstance(this@OnboardingActivity)
                 for (mintUrl in selectedMints) {
-                    try {
-                        val info = CashuWalletManager.fetchMintInfo(mintUrl)
-                        if (info != null) {
-                            val infoJson = CashuWalletManager.mintInfoToJson(info)
-                            mintManager.setMintInfo(mintUrl, infoJson)
-                            mintManager.setMintRefreshTimestamp(mintUrl)
-                        }
-                    } catch (e: Exception) {
-                        // Continue even if mint info fetch fails
-                    }
+                    mintProfileService.fetchAndStoreMintProfile(mintUrl, validateEndpoint = false)
                 }
 
                 delay(300)
@@ -842,36 +862,29 @@ class OnboardingActivity : AppCompatActivity() {
                 fetchMintBackupSuspend(mnemonic)
             }
 
-            // Get default mints
-            val mintManager = MintManager.getInstance(this@OnboardingActivity)
-            
-            // Reset to defaults first
-            mintManager.resetToDefaults()
-            val defaultMints = mintManager.getAllowedMints()
-
             discoveredMints.clear()
             selectedMints.clear()
+            onboardingMintDisplayNames.clear()
 
             if (result.success && result.mints.isNotEmpty()) {
                 backupFound = true
                 backupTimestamp = result.timestamp
-                discoveredMints.addAll(result.mints)
-                selectedMints.addAll(result.mints)
-
-                // Add discovered mints to MintManager
-                for (mintUrl in result.mints) {
-                    mintManager.addMint(mintUrl)
-                }
+                val normalizedBackupMints = result.mints
+                    .map { mintProfileService.normalizeUrl(it) }
+                    .filter { it.isNotBlank() }
+                discoveredMints.addAll(normalizedBackupMints)
+                selectedMints.addAll(normalizedBackupMints)
             } else {
                 backupFound = false
                 backupTimestamp = null
-                discoveredMints.addAll(defaultMints)
-                selectedMints.addAll(defaultMints)
+                discoveredMints.addAll(ONBOARDING_DEFAULT_MINTS)
+                selectedMints.addAll(ONBOARDING_DEFAULT_MINTS)
             }
 
             withContext(Dispatchers.Main) {
                 showStep(OnboardingStep.REVIEW_MINTS)
                 updateReviewMintsUI()
+                refreshMintProfilesForReview()
             }
         }
     }
@@ -894,13 +907,8 @@ class OnboardingActivity : AppCompatActivity() {
         mintProgressContainer.removeAllViews()
         mintProgressViews.clear()
 
-        // Update MintManager with selected mints
-        val mintManager = MintManager.getInstance(this)
-        for (mintUrl in selectedMints) {
-            if (!mintManager.isMintAllowed(mintUrl)) {
-                mintManager.addMint(mintUrl)
-            }
-        }
+        // Persist final onboarding selection before restore.
+        applySelectedMintsToMintManager()
 
         // Create progress views for each mint
         for (mintUrl in selectedMints) {
@@ -975,7 +983,7 @@ class OnboardingActivity : AppCompatActivity() {
         // Update mints list
         mintsListContainer.removeAllViews()
 
-        val sortedMints = discoveredMints.sortedBy { extractMintName(it).lowercase() }
+        val sortedMints = discoveredMints.sortedBy { resolveOnboardingMintDisplayName(it).lowercase() }
         for (mintUrl in sortedMints) {
             val mintView = createMintSelectionView(mintUrl, selectedMints.contains(mintUrl))
             mintsListContainer.addView(mintView)
@@ -985,8 +993,6 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun createMintSelectionView(mintUrl: String, isSelected: Boolean): View {
-        val mintManager = MintManager.getInstance(this)
-
         val container = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = android.view.Gravity.CENTER_VERTICAL
@@ -1000,41 +1006,39 @@ class OnboardingActivity : AppCompatActivity() {
             }
         }
 
-        val checkbox = ImageView(this).apply {
-            layoutParams = LinearLayout.LayoutParams(24.dpToPx(), 24.dpToPx()).apply {
-                marginEnd = 14.dpToPx()
-            }
-            updateCheckboxState(this, isSelected)
+        val mintIcon = ShapeableImageView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(42.dpToPx(), 42.dpToPx())
+            setImageResource(R.drawable.ic_bitcoin)
+            setColorFilter(ContextCompat.getColor(context, R.color.color_primary))
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            setBackgroundColor(ContextCompat.getColor(context, R.color.color_bg_tertiary))
+            shapeAppearanceModel = shapeAppearanceModel.toBuilder()
+                .setAllCornerSizes(21.dpToPx().toFloat())
+                .build()
         }
+        loadMintIcon(mintUrl, mintIcon)
 
-        val infoContainer = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-        }
-
-        val displayName = mintManager.getMintDisplayName(mintUrl)
         val nameText = TextView(this).apply {
-            text = displayName
+            text = resolveOnboardingMintDisplayName(mintUrl)
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+                marginEnd = 14.dpToPx()
+                marginStart = 14.dpToPx()
+            }
             setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
-            textSize = 15f
+            textSize = 16f
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
             maxLines = 1
             ellipsize = android.text.TextUtils.TruncateAt.END
         }
 
-        val urlText = TextView(this).apply {
-            text = mintUrl.removePrefix("https://")
-            setTextColor(ContextCompat.getColor(context, R.color.color_text_tertiary))
-            textSize = 13f
-            maxLines = 1
-            ellipsize = android.text.TextUtils.TruncateAt.END
+        val checkbox = ImageView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(24.dpToPx(), 24.dpToPx())
+            updateCheckboxState(this, isSelected)
         }
 
-        infoContainer.addView(nameText)
-        infoContainer.addView(urlText)
-
+        container.addView(mintIcon)
+        container.addView(nameText)
         container.addView(checkbox)
-        container.addView(infoContainer)
 
         container.setOnClickListener {
             val nowSelected = !selectedMints.contains(mintUrl)
@@ -1048,6 +1052,168 @@ class OnboardingActivity : AppCompatActivity() {
         }
 
         return container
+    }
+
+    private fun loadMintIcon(mintUrl: String, iconView: ShapeableImageView) {
+        val cachedFile = MintIconCache.getCachedIconFile(mintUrl)
+        if (cachedFile != null) {
+            try {
+                val bitmap = BitmapFactory.decodeFile(cachedFile.absolutePath)
+                if (bitmap != null) {
+                    iconView.setImageBitmap(bitmap)
+                    iconView.clearColorFilter()
+                    return
+                }
+            } catch (_: Exception) {
+                // Keep fallback icon below.
+            }
+        }
+
+        iconView.setImageResource(R.drawable.ic_bitcoin)
+        iconView.setColorFilter(ContextCompat.getColor(this, R.color.color_primary))
+    }
+
+    private fun resolveOnboardingMintDisplayName(mintUrl: String): String {
+        val cached = onboardingMintDisplayNames[mintUrl]
+        if (!cached.isNullOrBlank()) {
+            return cached
+        }
+
+        val fromStoredInfo = getStoredMintName(mintUrl)
+        if (!fromStoredInfo.isNullOrBlank()) {
+            onboardingMintDisplayNames[mintUrl] = fromStoredInfo
+            return fromStoredInfo
+        }
+
+        val generic = getString(R.string.onboarding_mint_generic_name)
+        onboardingMintDisplayNames[mintUrl] = generic
+        return generic
+    }
+
+    private fun getStoredMintName(mintUrl: String): String? {
+        val infoJson = MintManager.getInstance(this).getMintInfo(mintUrl) ?: return null
+        return try {
+            val json = JSONObject(infoJson)
+            json.optString("name", "").trim().ifEmpty { null }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun refreshMintProfilesForReview() {
+        lifecycleScope.launch {
+            val sortedMints = discoveredMints.toList().sorted()
+            for (mintUrl in sortedMints) {
+                val result = withContext(Dispatchers.IO) {
+                    mintProfileService.fetchAndStoreMintProfile(mintUrl, validateEndpoint = false)
+                }
+
+                val displayName = result.displayName
+                    ?: getStoredMintName(mintUrl)
+                    ?: getString(R.string.onboarding_mint_generic_name)
+                onboardingMintDisplayNames[mintUrl] = displayName
+
+                if (currentStep == OnboardingStep.REVIEW_MINTS) {
+                    updateReviewMintsUI()
+                }
+            }
+        }
+    }
+
+    private fun openOnboardingMintQrScanner() {
+        val intent = Intent(this, QRScannerActivity::class.java).apply {
+            putExtra(QRScannerActivity.EXTRA_TITLE, getString(R.string.mints_scan_mint_qr))
+            putExtra(QRScannerActivity.EXTRA_INSTRUCTION, getString(R.string.mints_scan_instruction))
+        }
+        onboardingQrScannerLauncher.launch(intent)
+    }
+
+    private fun addDifferentMint(rawUrl: String) {
+        val normalizedInput = mintProfileService.normalizeUrl(rawUrl)
+        if (normalizedInput.isBlank()) {
+            Toast.makeText(this, getString(R.string.mints_invalid_url), Toast.LENGTH_LONG).show()
+            return
+        }
+
+        if (discoveredMints.contains(normalizedInput)) {
+            Toast.makeText(this, getString(R.string.mints_already_exists), Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        addDifferentMintCard.setLoading(true)
+
+        lifecycleScope.launch {
+            val validation = withContext(Dispatchers.IO) {
+                mintProfileService.validateMintUrl(normalizedInput)
+            }
+            if (!validation.isValid || validation.normalizedUrl == null) {
+                addDifferentMintCard.setLoading(false)
+                Toast.makeText(
+                    this@OnboardingActivity,
+                    getString(R.string.mints_invalid_url),
+                    Toast.LENGTH_LONG
+                ).show()
+                return@launch
+            }
+
+            val mintUrl = validation.normalizedUrl
+            if (discoveredMints.contains(mintUrl)) {
+                addDifferentMintCard.setLoading(false)
+                Toast.makeText(
+                    this@OnboardingActivity,
+                    getString(R.string.mints_already_exists),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@launch
+            }
+
+            val profileResult = withContext(Dispatchers.IO) {
+                mintProfileService.fetchAndStoreMintProfile(mintUrl, validateEndpoint = false)
+            }
+
+            val displayName = profileResult.displayName
+                ?: getStoredMintName(mintUrl)
+                ?: getString(R.string.onboarding_mint_generic_name)
+            onboardingMintDisplayNames[mintUrl] = displayName
+
+            discoveredMints.add(mintUrl)
+            selectedMints.add(mintUrl)
+
+            updateReviewMintsUI()
+            addDifferentMintCard.setLoading(false)
+            addDifferentMintCard.clearInput()
+            addDifferentMintCard.collapseIfExpanded()
+            Toast.makeText(
+                this@OnboardingActivity,
+                getString(R.string.mints_added_toast),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    private fun applySelectedMintsToMintManager() {
+        val mintManager = MintManager.getInstance(this)
+        val normalizedSelected = selectedMints
+            .map { mintProfileService.normalizeUrl(it) }
+            .filter { it.isNotBlank() }
+            .toSet()
+
+        val existingMints = mintManager.getAllowedMints()
+        for (mintUrl in existingMints) {
+            if (!normalizedSelected.contains(mintUrl)) {
+                mintManager.removeMint(mintUrl)
+            }
+        }
+
+        for (mintUrl in normalizedSelected) {
+            mintManager.addMint(mintUrl)
+        }
+
+        val preferredMint = discoveredMints.firstOrNull { normalizedSelected.contains(it) }
+            ?: normalizedSelected.sorted().firstOrNull()
+        if (preferredMint != null) {
+            mintManager.setPreferredLightningMint(preferredMint)
+        }
     }
 
     private fun updateCheckboxState(checkbox: ImageView, isSelected: Boolean) {
@@ -1336,15 +1502,6 @@ class OnboardingActivity : AppCompatActivity() {
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
-    }
-
-    private fun extractMintName(mintUrl: String): String {
-        return try {
-            val url = java.net.URL(mintUrl)
-            url.host
-        } catch (e: Exception) {
-            mintUrl.take(30)
-        }
     }
 
     private fun Int.dpToPx(): Int {

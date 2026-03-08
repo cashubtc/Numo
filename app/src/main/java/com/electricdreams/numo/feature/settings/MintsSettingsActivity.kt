@@ -11,7 +11,6 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.google.android.material.imageview.ShapeableImageView
 import android.widget.Toast
 import android.widget.ScrollView
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,6 +25,7 @@ import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintIconCache
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.util.MintProfileService
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
 import com.electricdreams.numo.ui.components.AddMintInputCard
 import com.electricdreams.numo.ui.components.MintListItem
@@ -34,9 +34,6 @@ import androidx.appcompat.widget.SwitchCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import java.util.concurrent.TimeUnit
 
 /**
  * Premium Apple/Google-like mint management screen.
@@ -78,6 +75,7 @@ class MintsSettingsActivity : AppCompatActivity() {
 
     // State
     private lateinit var mintManager: MintManager
+    private lateinit var mintProfileService: MintProfileService
     private var mintBalances = mutableMapOf<String, Long>()
     private var selectedLightningMint: String? = null
     private val mintItems = mutableMapOf<String, MintListItem>()
@@ -95,7 +93,7 @@ class MintsSettingsActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             val qrValue = result.data?.getStringExtra(QRScannerActivity.EXTRA_QR_VALUE)
             qrValue?.let { url ->
-                addMintCard.setMintUrl(normalizeUrl(url))
+                addMintCard.setMintUrl(mintProfileService.normalizeUrl(url))
             }
         }
     }
@@ -125,6 +123,7 @@ class MintsSettingsActivity : AppCompatActivity() {
 
         MintIconCache.initialize(this)
         mintManager = MintManager.getInstance(this)
+        mintProfileService = MintProfileService.getInstance(this)
 
         // Load saved Lightning mint preference from MintManager (single source of truth)
         selectedLightningMint = mintManager.getPreferredLightningMint()
@@ -433,8 +432,8 @@ class MintsSettingsActivity : AppCompatActivity() {
     }
 
     private fun addNewMint(rawUrl: String) {
-        val mintUrl = normalizeUrl(rawUrl)
-        
+        val mintUrl = mintProfileService.normalizeUrl(rawUrl)
+
         if (mintManager.getAllowedMints().contains(mintUrl)) {
             Toast.makeText(this, getString(R.string.mints_already_exists), Toast.LENGTH_SHORT).show()
             return
@@ -443,9 +442,8 @@ class MintsSettingsActivity : AppCompatActivity() {
         addMintCard.setLoading(true)
 
         lifecycleScope.launch {
-            val isValid = validateMintUrl(mintUrl)
-            
-            if (!isValid) {
+            val validation = mintProfileService.validateMintUrl(mintUrl)
+            if (!validation.isValid || validation.normalizedUrl == null) {
                 addMintCard.setLoading(false)
                 Toast.makeText(
                     this@MintsSettingsActivity,
@@ -455,9 +453,20 @@ class MintsSettingsActivity : AppCompatActivity() {
                 return@launch
             }
 
-            val added = mintManager.addMint(mintUrl)
+            val normalizedUrl = validation.normalizedUrl
+            if (mintManager.getAllowedMints().contains(normalizedUrl)) {
+                addMintCard.setLoading(false)
+                Toast.makeText(
+                    this@MintsSettingsActivity,
+                    getString(R.string.mints_already_exists),
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@launch
+            }
+
+            val added = mintManager.addMint(normalizedUrl)
             if (added) {
-                fetchAndStoreMintInfo(mintUrl)
+                mintProfileService.fetchAndStoreMintProfile(normalizedUrl)
                 loadMintsAndBalances()
                 addMintCard.clearInput()
                 addMintCard.collapseIfExpanded()
@@ -476,62 +485,11 @@ class MintsSettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun normalizeUrl(rawUrl: String): String {
-        var url = rawUrl.trim()
-        if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            url = "https://$url"
-        }
-        if (url.endsWith("/")) {
-            url = url.dropLast(1)
-        }
-        return url
-    }
-
-    private suspend fun validateMintUrl(url: String): Boolean = withContext(Dispatchers.IO) {
-        try {
-            val infoUrl = "$url/v1/info"
-            
-            val client = OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(10, TimeUnit.SECONDS)
-                .build()
-            
-            val request = Request.Builder()
-                .url(infoUrl)
-                .get()
-                .build()
-            
-            val response = client.newCall(request).execute()
-            val isValid = response.isSuccessful && response.code == 200
-            response.close()
-            isValid
-        } catch (e: Exception) {
-            false
-        }
-    }
-
-    private suspend fun fetchAndStoreMintInfo(mintUrl: String) {
-        withContext(Dispatchers.IO) {
-            val info = CashuWalletManager.fetchMintInfo(mintUrl)
-            if (info != null) {
-                val json = CashuWalletManager.mintInfoToJson(info)
-                mintManager.setMintInfo(mintUrl, json)
-                mintManager.setMintRefreshTimestamp(mintUrl)
-                
-                info.iconUrl?.let { iconUrl ->
-                    if (iconUrl.isNotEmpty()) {
-                        MintIconCache.downloadAndCacheIcon(mintUrl, iconUrl)
-                    }
-                }
-            }
-        }
-    }
-
     private fun refreshStaleMintInfo() {
         lifecycleScope.launch {
             val mintsToRefresh = mintManager.getMintsNeedingRefresh()
             for (mintUrl in mintsToRefresh) {
-                fetchAndStoreMintInfo(mintUrl)
+                mintProfileService.fetchAndStoreMintProfile(mintUrl)
             }
             if (mintsToRefresh.isNotEmpty()) {
                 updateLightningMintCard()

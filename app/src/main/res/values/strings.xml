@@ -158,6 +158,8 @@
     <string name="onboarding_mints_count">%1$d mint%2$s selected</string>
     <string name="onboarding_mints_continue_restore">Restore Wallet</string>
     <string name="onboarding_mints_continue_new_wallet">Continue</string>
+    <string name="onboarding_mints_add_different">Add a different mint</string>
+    <string name="onboarding_mint_generic_name">Mint</string>
 
     <!-- Onboarding / Restoring -->
     <string name="onboarding_restoring_title">Restoring Wallet</string>

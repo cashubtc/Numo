@@ -19,7 +19,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
@@ -27,12 +26,12 @@ import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintIconCache
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.util.MintProfileService
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.cashudevkit.MintInfo
 
 /**
  * Premium mint details screen inspired by cashu-me MintDetailsPage.
@@ -93,6 +92,7 @@ class MintDetailsActivity : AppCompatActivity() {
 
     // State
     private lateinit var mintManager: MintManager
+    private lateinit var mintProfileService: MintProfileService
     private var mintUrl: String = ""
     private var isLightningMint: Boolean = false
     private var hasFetchError: Boolean = false
@@ -123,6 +123,7 @@ class MintDetailsActivity : AppCompatActivity() {
         isLightningMint = intent.getBooleanExtra(EXTRA_IS_LIGHTNING_MINT, false)
 
         mintManager = MintManager.getInstance(this)
+        mintProfileService = MintProfileService.getInstance(this)
         MintIconCache.initialize(this)
 
         initViews()
@@ -285,6 +286,8 @@ class MintDetailsActivity : AppCompatActivity() {
     }
 
     private fun loadCachedMintInfo() {
+        clearMintInfoSections()
+
         // Try to load from cached JSON
         val cachedJson = mintManager.getMintInfo(mintUrl)
         if (cachedJson != null) {
@@ -297,6 +300,16 @@ class MintDetailsActivity : AppCompatActivity() {
                 Log.w(TAG, "Failed to parse cached mint info: ${'$'}{e.message}")
             }
         }
+    }
+
+    private fun clearMintInfoSections() {
+        descriptionSection.visibility = View.GONE
+        motdSection.visibility = View.GONE
+        softwareRow.visibility = View.GONE
+        softwareDivider.visibility = View.GONE
+        versionRow.visibility = View.GONE
+        contactSection.visibility = View.GONE
+        contactContainer.removeAllViews()
     }
 
     private fun displayCachedMintInfo(info: CashuWalletManager.CachedMintInfo) {
@@ -397,30 +410,14 @@ class MintDetailsActivity : AppCompatActivity() {
     private fun refreshMintInfo() {
         lifecycleScope.launch {
             try {
-                val info = withContext(Dispatchers.IO) {
-                    CashuWalletManager.fetchMintInfo(mintUrl)
+                val result = withContext(Dispatchers.IO) {
+                    mintProfileService.fetchAndStoreMintProfile(mintUrl, validateEndpoint = false)
                 }
-                
-                if (info != null) {
-                    // Cache the fresh info
-                    withContext(Dispatchers.IO) {
-                        val json = CashuWalletManager.mintInfoToJson(info)
-                        mintManager.setMintInfo(mintUrl, json)
-                        mintManager.setMintRefreshTimestamp(mintUrl)
-                        
-                        // Also refresh icon if available
-                        info.iconUrl?.let { iconUrl ->
-                            if (iconUrl.isNotEmpty()) {
-                                MintIconCache.downloadAndCacheIcon(mintUrl, iconUrl)
-                            }
-                        }
-                    }
-                    
-                    // Update UI
-                    displayMintInfo(info)
+
+                if (result.success) {
+                    // Reload from cached data so UI behavior stays consistent with initial load.
+                    loadCachedMintInfo()
                     hideError()
-                    
-                    // Reload icon in case it was refreshed
                     loadMintIcon()
                 } else {
                     showError()
@@ -433,77 +430,6 @@ class MintDetailsActivity : AppCompatActivity() {
     }
 
 
-    private fun displayMintInfo(info: MintInfo) {
-        // Description
-        val descriptionValue = info.descriptionLong ?: info.description
-        if (!descriptionValue.isNullOrBlank()) {
-            if (!descriptionSection.isVisible || descriptionText.text.toString() != descriptionValue) {
-                descriptionSection.visibility = View.VISIBLE
-                descriptionText.text = descriptionValue
-                animateContentChange(descriptionSection)
-            }
-        } else {
-            descriptionSection.visibility = View.GONE
-        }
-
-        // MOTD (Message of the Day)
-        if (!info.motd.isNullOrBlank()) {
-            if (!motdSection.isVisible || motdText.text.toString() != info.motd) {
-                motdSection.visibility = View.VISIBLE
-                motdText.text = info.motd
-                animateContentChange(motdSection, startDelay = 50)
-            }
-        } else {
-            motdSection.visibility = View.GONE
-        }
-        
-        // Version - show as separate rows
-        val versionName = info.version?.name
-        val versionNumberVal = info.version?.version
-        val hasSoftware = !versionName.isNullOrBlank()
-        val hasVersion = !versionNumberVal.isNullOrBlank()
-        
-        if (hasSoftware) {
-            val newSoftwareValue = versionName!!
-            if (!softwareRow.isVisible || softwareValue.text.toString() != newSoftwareValue) {
-                softwareRow.visibility = View.VISIBLE
-                softwareDivider.visibility = View.VISIBLE
-                softwareValue.text = newSoftwareValue
-            }
-        } else {
-            softwareRow.visibility = View.GONE
-            softwareDivider.visibility = View.GONE
-        }
-        
-        if (hasVersion) {
-            val newVersionValue = versionNumberVal!!
-            if (!versionRow.isVisible || versionValue.text.toString() != newVersionValue) {
-                versionRow.visibility = View.VISIBLE
-                versionValue.text = newVersionValue
-            }
-        } else {
-            versionRow.visibility = View.GONE
-        }
-        
-        // Contact info from live MintInfo
-        val contacts = info.contact?.map { 
-            CashuWalletManager.CachedContactInfo(it.method, it.info) 
-        } ?: emptyList()
-        displayContactInfo(contacts)
-    }
-
-
-    private fun animateContentChange(target: View, startDelay: Long = 0, duration: Long = 250) {
-        target.alpha = 0f
-        target.translationY = 10f
-        target.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setStartDelay(startDelay)
-            .setDuration(duration)
-            .setInterpolator(DecelerateInterpolator())
-            .start()
-    }
     private fun showError() {
         hasFetchError = true
         errorBanner.visibility = View.VISIBLE
