@@ -81,6 +81,7 @@
                     android:background="@color/color_divider" />
 
                 <TextView
+                    android:id="@+id/helper_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
@@ -90,6 +91,7 @@
 
                 <!-- Input Row -->
                 <LinearLayout
+                    android:id="@+id/input_row"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
@@ -120,6 +122,61 @@
                         app:tint="@color/color_text_primary"
                         android:contentDescription="@string/mints_scan_qr" />
 
+                </LinearLayout>
+
+                <!-- Onboarding scan row (hidden by default) -->
+                <LinearLayout
+                    android:id="@+id/scan_row_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="8dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:visibility="gone">
+
+                    <FrameLayout
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_button_icon">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_qr_scan"
+                            app:tint="@color/color_text_secondary"
+                            android:contentDescription="@string/onboarding_mints_scan_row_title" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/scan_row_title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/onboarding_mints_scan_row_title"
+                            android:textSize="15sp"
+                            android:textColor="@color/color_text_secondary"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <TextView
+                            android:id="@+id/scan_row_subtitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="1dp"
+                            android:text="@string/onboarding_mints_scan_row_subtitle"
+                            android:textSize="13sp"
+                            android:textColor="@color/color_text_tertiary" />
+                    </LinearLayout>
                 </LinearLayout>
 
                 <!-- Add Button -->

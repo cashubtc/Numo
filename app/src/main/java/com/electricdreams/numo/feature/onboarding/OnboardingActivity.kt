@@ -304,6 +304,7 @@ class OnboardingActivity : AppCompatActivity() {
         mintsSubtitle = findViewById(R.id.mints_subtitle)
         addDifferentMintCard = findViewById(R.id.add_different_mint_card)
         addDifferentMintCard.setHeaderTitle(getString(R.string.onboarding_mints_add_different))
+        addDifferentMintCard.setOnboardingModeEnabled(true)
         mintsContinueButton = findViewById(R.id.mints_continue_button)
         mintsBackButton = findViewById(R.id.mints_back_button)
 

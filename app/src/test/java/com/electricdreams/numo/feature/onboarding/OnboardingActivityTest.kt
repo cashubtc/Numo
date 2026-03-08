@@ -1,7 +1,9 @@
 package com.electricdreams.numo.feature.onboarding
 
 import android.view.View
+import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
@@ -123,6 +125,44 @@ class OnboardingActivityTest {
             scenario.onActivity { activity ->
                 val addCard = activity.findViewById<AddMintInputCard>(R.id.add_different_mint_card)
                 assertNotNull(addCard)
+            }
+        }
+    }
+
+    @Test
+    fun `review subtitle uses updated bitcoin custody copy`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val subtitle = activity.findViewById<TextView>(R.id.mints_subtitle)
+                assertEquals(
+                    "These mints will hold your bitcoin. You can withdraw to your own wallet at any time, or set a payout threshold to do it automatically.",
+                    subtitle.text.toString()
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `onboarding add mint card uses onboarding presentation mode`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val addCard = activity.findViewById<AddMintInputCard>(R.id.add_different_mint_card)
+
+                val helperText = addCard.findViewById<TextView>(R.id.helper_text)
+                val urlInput = addCard.findViewById<EditText>(R.id.url_input)
+                val inlineScan = addCard.findViewById<ImageButton>(R.id.scan_button)
+                val scanRow = addCard.findViewById<View>(R.id.scan_row_container)
+                val scanRowTitle = addCard.findViewById<TextView>(R.id.scan_row_title)
+                val scanRowSubtitle = addCard.findViewById<TextView>(R.id.scan_row_subtitle)
+                val addButton = addCard.findViewById<TextView>(R.id.add_button)
+
+                assertEquals(View.GONE, helperText.visibility)
+                assertEquals("Enter mint address", urlInput.hint.toString())
+                assertEquals(View.GONE, inlineScan.visibility)
+                assertEquals(View.VISIBLE, scanRow.visibility)
+                assertEquals("Scan QR Code", scanRowTitle.text.toString())
+                assertEquals("Tap to scan an address", scanRowSubtitle.text.toString())
+                assertEquals(activity.getColor(R.color.color_text_primary), addButton.currentTextColor)
             }
         }
     }

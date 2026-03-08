@@ -154,11 +154,14 @@
     <string name="onboarding_backup_not_found_subtitle">Using default mints</string>
     <string name="onboarding_mints_title">Select Mints</string>
     <string name="onboarding_mints_subtitle_restore">Select which mints to restore</string>
-    <string name="onboarding_mints_subtitle_description">These mints will store your ecash tokens</string>
+    <string name="onboarding_mints_subtitle_description">These mints will hold your bitcoin. You can withdraw to your own wallet at any time, or set a payout threshold to do it automatically.</string>
     <string name="onboarding_mints_count">%1$d mint%2$s selected</string>
     <string name="onboarding_mints_continue_restore">Restore Wallet</string>
     <string name="onboarding_mints_continue_new_wallet">Continue</string>
     <string name="onboarding_mints_add_different">Add a different mint</string>
+    <string name="onboarding_mints_add_hint">Enter mint address</string>
+    <string name="onboarding_mints_scan_row_title">Scan QR Code</string>
+    <string name="onboarding_mints_scan_row_subtitle">Tap to scan an address</string>
     <string name="onboarding_mint_generic_name">Mint</string>
 
     <!-- Onboarding / Restoring -->

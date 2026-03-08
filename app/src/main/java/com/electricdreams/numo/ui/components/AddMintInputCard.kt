@@ -16,6 +16,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.ScrollView
+import androidx.core.content.ContextCompat
 import com.electricdreams.numo.R
 import com.google.android.material.card.MaterialCardView
 
@@ -40,13 +41,19 @@ class AddMintInputCard @JvmOverloads constructor(
     private val headerIcon: View
     private val headerTitle: TextView
     private val headerChevron: View
+    private val helperText: TextView
     private val urlInput: EditText
     private val scanButton: ImageButton
+    private val scanRowContainer: View
+    private val scanRowTitle: TextView
+    private val scanRowSubtitle: TextView
     private val addButton: TextView
     private val loadingIndicator: ProgressBar
     
     private var listener: OnAddMintListener? = null
     private var isExpanded = false
+    private var onboardingModeEnabled = false
+    private var useSecondaryAddButton = false
 
     init {
         orientation = VERTICAL
@@ -58,14 +65,19 @@ class AddMintInputCard @JvmOverloads constructor(
         headerIcon = findViewById(R.id.header_icon)
         headerTitle = findViewById(R.id.header_title)
         headerChevron = findViewById(R.id.header_chevron)
+        helperText = findViewById(R.id.helper_text)
         urlInput = findViewById(R.id.url_input)
         scanButton = findViewById(R.id.scan_button)
+        scanRowContainer = findViewById(R.id.scan_row_container)
+        scanRowTitle = findViewById(R.id.scan_row_title)
+        scanRowSubtitle = findViewById(R.id.scan_row_subtitle)
         addButton = findViewById(R.id.add_button)
         loadingIndicator = findViewById(R.id.loading_indicator)
         
         // Initial collapsed state
         expandedContainer.visibility = View.GONE
         expandedContainer.alpha = 0f
+        applyPresentationMode()
         
         setupClickListeners()
         setupTextWatcher()
@@ -76,10 +88,8 @@ class AddMintInputCard @JvmOverloads constructor(
             toggleExpanded()
         }
         
-        scanButton.setOnClickListener {
-            animateButtonPress(it)
-            listener?.onScanQR()
-        }
+        scanButton.setOnClickListener { triggerScanAction(it) }
+        scanRowContainer.setOnClickListener { triggerScanAction(it) }
         
         addButton.setOnClickListener {
             val url = urlInput.text.toString().trim()
@@ -114,6 +124,25 @@ class AddMintInputCard @JvmOverloads constructor(
         headerTitle.text = title
     }
 
+    fun setOnboardingModeEnabled(enabled: Boolean) {
+        onboardingModeEnabled = enabled
+        applyPresentationMode()
+    }
+
+    fun setUrlHint(hint: String) {
+        urlInput.hint = hint
+    }
+
+    fun setScanRowText(title: String, subtitle: String) {
+        scanRowTitle.text = title
+        scanRowSubtitle.text = subtitle
+    }
+
+    fun setAddButtonStyleSecondary(enabled: Boolean) {
+        useSecondaryAddButton = enabled
+        applyAddButtonStyle()
+    }
+
     fun setMintUrl(url: String) {
         urlInput.setText(url)
         if (!isExpanded) {
@@ -134,11 +163,59 @@ class AddMintInputCard @JvmOverloads constructor(
             loadingIndicator.visibility = View.VISIBLE
             urlInput.isEnabled = false
             scanButton.isEnabled = false
+            scanRowContainer.isEnabled = false
+            scanRowContainer.alpha = 0.6f
         } else {
             addButton.visibility = View.VISIBLE
             loadingIndicator.visibility = View.GONE
             urlInput.isEnabled = true
             scanButton.isEnabled = true
+            scanRowContainer.isEnabled = true
+            scanRowContainer.alpha = 1f
+        }
+    }
+
+    private fun triggerScanAction(view: View) {
+        animateButtonPress(view)
+        listener?.onScanQR()
+    }
+
+    private fun applyPresentationMode() {
+        if (onboardingModeEnabled) {
+            helperText.visibility = View.GONE
+            scanButton.visibility = View.GONE
+            scanRowContainer.visibility = View.VISIBLE
+            setUrlHint(context.getString(R.string.onboarding_mints_add_hint))
+            setScanRowText(
+                context.getString(R.string.onboarding_mints_scan_row_title),
+                context.getString(R.string.onboarding_mints_scan_row_subtitle),
+            )
+            useSecondaryAddButton = true
+        } else {
+            helperText.visibility = View.VISIBLE
+            scanButton.visibility = View.VISIBLE
+            scanRowContainer.visibility = View.GONE
+            setUrlHint(context.getString(R.string.mints_url_hint))
+            useSecondaryAddButton = false
+        }
+        applyAddButtonStyle()
+    }
+
+    private fun applyAddButtonStyle() {
+        if (useSecondaryAddButton) {
+            addButton.setBackgroundResource(R.drawable.bg_button_secondary_outlined)
+            addButton.setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
+            loadingIndicator.indeterminateTintList = ContextCompat.getColorStateList(
+                context,
+                R.color.color_text_primary
+            )
+        } else {
+            addButton.setBackgroundResource(R.drawable.bg_button_primary_green)
+            addButton.setTextColor(ContextCompat.getColor(context, R.color.color_bg_white))
+            loadingIndicator.indeterminateTintList = ContextCompat.getColorStateList(
+                context,
+                android.R.color.white
+            )
         }
     }
 
