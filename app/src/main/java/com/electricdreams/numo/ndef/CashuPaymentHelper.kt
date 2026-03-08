@@ -13,7 +13,8 @@ import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.payment.SwapToLightningMintManager
 import com.google.gson.*
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.MintUrl
 import org.cashudevkit.ReceiveOptions
@@ -324,7 +325,7 @@ object CashuPaymentHelper {
 
     @JvmStatic
     @Throws(RedemptionException::class)
-    fun redeemToken(tokenString: String?): String {
+    suspend fun redeemToken(tokenString: String?): String = withContext(Dispatchers.IO) {
         if (!isCashuToken(tokenString)) {
             val errorMsg = "Cannot redeem: Invalid token format"
             Log.e(TAG, errorMsg)
@@ -347,10 +348,9 @@ object CashuPaymentHelper {
 
             val mintUrl: MintUrl = cdkToken.mintUrl()
 
-            // Receive into wallet - getWallet is suspend so use runBlocking
-            val mintWallet = runBlocking {
-                wallet.getWallet(mintUrl, CurrencyUnit.Sat)
-            } ?: throw RedemptionException("Failed to get wallet for mint: ${mintUrl.url}")
+            // Receive into wallet - getWallet is suspend
+            val mintWallet = wallet.getWallet(mintUrl, CurrencyUnit.Sat)
+                ?: throw RedemptionException("Failed to get wallet for mint: ${mintUrl.url}")
 
             // Receive into wallet
             val receiveOptions = ReceiveOptions(
@@ -361,13 +361,11 @@ object CashuPaymentHelper {
             )
 
             // Receive into wallet
-            runBlocking {
-                mintWallet.receive(cdkToken, receiveOptions)
-            }
+            mintWallet.receive(cdkToken, receiveOptions)
 
             Log.d(TAG, "Token received via CDK successfully (mintUrl=${mintUrl.url})")
             // Return the original token instead of sending a new one
-            return tokenString ?: error("tokenString is null")
+            tokenString ?: error("tokenString is null")
         } catch (e: RedemptionException) {
             throw e
         } catch (e: Exception) {
