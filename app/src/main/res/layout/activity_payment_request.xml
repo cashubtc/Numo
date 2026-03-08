@@ -270,14 +270,14 @@
         app:layout_constraintTop_toBottomOf="@id/icons_container" />
 
 
-    <!-- Lightning / Cashu / Unified Switcher (tabs-style) now at the bottom -->
-    <LinearLayout
-        android:id="@+id/lightning_cashu_switch_container"
-        android:layout_width="wrap_content"
+    <!-- Payment Method Segmented Control -->
+    <FrameLayout
+        android:id="@+id/tab_container"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="24dp"
-        android:orientation="horizontal"
+        android:layout_marginHorizontal="32dp"
         android:background="@drawable/bg_button_secondary_pill"
         android:padding="5dp"
         app:layout_constraintTop_toBottomOf="@id/payment_status_text"
@@ -285,98 +285,77 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Unified Tab -->
-        <LinearLayout
-            android:id="@+id/unified_tab"
-            android:layout_width="wrap_content"
+        <!-- Sliding pill indicator (behind tabs) -->
+        <View
+            android:id="@+id/tab_indicator"
+            android:layout_width="0dp"
             android:layout_height="42dp"
-            android:gravity="center"
-            android:paddingHorizontal="14dp"
-            android:orientation="horizontal"
-            android:background="@drawable/bg_button_primary_green">
+            android:background="@drawable/bg_tab_indicator_pill" />
 
-            <TextView
-                android:id="@+id/unified_tab_icon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:text="U"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:textColor="@color/color_bg_white" />
-
-            <TextView
-                android:id="@+id/unified_tab_text"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="0dp"
-                android:text="@string/payment_request_tab_unified"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:textColor="@color/color_bg_white" />
-        </LinearLayout>
-
-        <!-- Cashu Tab -->
+        <!-- Tab labels -->
         <LinearLayout
-            android:id="@+id/cashu_tab"
-            android:layout_width="wrap_content"
-            android:layout_height="42dp"
-            android:gravity="center"
-            android:paddingHorizontal="14dp"
-            android:orientation="horizontal"
-            android:background="@android:color/transparent">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
-            <ImageView
-                android:id="@+id/cashu_tab_icon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/cashu"
-                app:tint="@color/color_text_secondary" />
-
-            <TextView
-                android:id="@+id/cashu_tab_text"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="0dp"
-                android:text="Cashu"
-                android:textSize="18sp"
-                android:textStyle="bold"
+            <!-- Unified Tab -->
+            <LinearLayout
+                android:id="@+id/unified_tab"
+                android:layout_width="0dp"
+                android:layout_height="42dp"
+                android:layout_weight="1"
                 android:gravity="center"
-                android:textColor="@color/color_text_secondary"
-                android:visibility="gone" />
-        </LinearLayout>
+                android:background="@android:color/transparent">
 
-        <!-- Lightning Tab -->
-        <LinearLayout
-            android:id="@+id/lightning_tab"
-            android:layout_width="wrap_content"
-            android:layout_height="42dp"
-            android:gravity="center"
-            android:paddingHorizontal="14dp"
-            android:orientation="horizontal"
-            android:background="@android:color/transparent">
+                <TextView
+                    android:id="@+id/unified_tab_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/payment_request_tab_unified"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/color_bg_white" />
+            </LinearLayout>
 
-            <ImageView
-                android:id="@+id/lightning_tab_icon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_lightning_black"
-                app:tint="@color/color_text_secondary" />
-
-            <TextView
-                android:id="@+id/lightning_tab_text"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="0dp"
-                android:text="Lightning"
-                android:textSize="18sp"
-                android:textStyle="bold"
+            <!-- Cashu Tab -->
+            <LinearLayout
+                android:id="@+id/cashu_tab"
+                android:layout_width="0dp"
+                android:layout_height="42dp"
+                android:layout_weight="1"
                 android:gravity="center"
-                android:textColor="@color/color_text_secondary"
-                android:visibility="gone" />
+                android:background="@android:color/transparent">
+
+                <TextView
+                    android:id="@+id/cashu_tab_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cashu"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/color_text_secondary" />
+            </LinearLayout>
+
+            <!-- Lightning Tab -->
+            <LinearLayout
+                android:id="@+id/lightning_tab"
+                android:layout_width="0dp"
+                android:layout_height="42dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:background="@android:color/transparent">
+
+                <TextView
+                    android:id="@+id/lightning_tab_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Lightning"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/color_text_secondary" />
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
+    </FrameLayout>
 
 
     <!-- NFC Animation Overlay (Native View) - ONLY for NFC payments -->
