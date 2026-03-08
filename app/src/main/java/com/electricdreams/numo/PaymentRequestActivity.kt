@@ -1193,8 +1193,10 @@ class PaymentRequestActivity : AppCompatActivity() {
         animationResultLabelText.visibility = View.VISIBLE
         animationResultLabelText.alpha = 0.75f
         animationResultLabelText.translationY = animationLabelBaseTranslationY
-        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
+        animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
         animationResultLabelText.typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+        animationResultLabelText.gravity = android.view.Gravity.CENTER
+        animationResultLabelText.textAlignment = View.TEXT_ALIGNMENT_CENTER
         animationResultLabelText.letterSpacing = 0.03f
         animationResultLabelText.text = getString(R.string.nfc_payment_hint_keep_close)
         
@@ -1226,6 +1228,9 @@ class PaymentRequestActivity : AppCompatActivity() {
         
         fadeOut.addListener(object : android.animation.AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: android.animation.Animator) {
+                animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
+                animationResultLabelText.gravity = android.view.Gravity.CENTER
+                animationResultLabelText.textAlignment = View.TEXT_ALIGNMENT_CENTER
                 animationResultLabelText.text = getString(R.string.nfc_payment_hint_processing)
                 fadeIn.start()
             }
