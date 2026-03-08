@@ -155,6 +155,7 @@ public class NdefHostCardEmulationService extends HostApduService {
             // Log all incoming APDUs at INFO level for visibility
             Log.i(TAG, "=== Received APDU command ===");
             Log.i(TAG, "Hex: " + bytesToHex(commandApdu));
+            boolean isUpdateBinary = false;
             if (commandApdu.length > 0) {
                 String description = "";
                 if (commandApdu.length >= 2) {
@@ -162,7 +163,10 @@ public class NdefHostCardEmulationService extends HostApduService {
                     switch (ins) {
                         case (byte)0xA4: description = "SELECT"; break;
                         case (byte)0xB0: description = "READ BINARY"; break;
-                        case (byte)0xD6: description = "UPDATE BINARY"; break;
+                        case (byte)0xD6: 
+                            description = "UPDATE BINARY"; 
+                            isUpdateBinary = true;
+                            break;
                         default: description = "UNKNOWN";
                     }
                 }
@@ -171,7 +175,8 @@ public class NdefHostCardEmulationService extends HostApduService {
             
             // Start/reset NFC reading indicator when we receive APDU commands
             // Only track reading if we have a payment callback set (meaning we're expecting a payment)
-            if (paymentCallback != null) {
+            // and the command is UPDATE BINARY (so we only show animation when written to, not read)
+            if (paymentCallback != null && isUpdateBinary) {
                 startOrResetNfcReading();
             }
             
