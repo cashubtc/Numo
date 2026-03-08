@@ -38,7 +38,9 @@ data class WithdrawHistoryEntry(
     val errorMessage: String? = null,
     val quoteId: String? = null,
     // True for automatic withdrawals, false for manual withdrawals
-    val automatic: Boolean = true
+    val automatic: Boolean = true,
+    // The generated Cashu token, if this was a manual token withdrawal
+    val token: String? = null
 ) {
     companion object {
         const val STATUS_PENDING = "pending"
@@ -472,7 +474,8 @@ class AutoWithdrawManager private constructor(private val context: Context) {
         destinationType: String,
         status: String,
         quoteId: String? = null,
-        errorMessage: String? = null
+        errorMessage: String? = null,
+        token: String? = null
     ): WithdrawHistoryEntry {
         val entry = WithdrawHistoryEntry(
             mintUrl = mintUrl,
@@ -484,7 +487,8 @@ class AutoWithdrawManager private constructor(private val context: Context) {
             status = status,
             quoteId = quoteId,
             errorMessage = errorMessage,
-            automatic = false
+            automatic = false,
+            token = token
         )
         addToHistory(entry)
         return entry

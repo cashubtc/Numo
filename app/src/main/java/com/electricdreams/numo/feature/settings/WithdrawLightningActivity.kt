@@ -270,6 +270,20 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 
                 val tokenString = token.encode()
 
+                // Save to withdrawal history
+                val autoWithdrawManager = com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager.getInstance(this@WithdrawLightningActivity)
+                autoWithdrawManager.addManualWithdrawalEntry(
+                    mintUrl = mintUrl,
+                    amountSats = amountSats,
+                    feeSats = 0L,
+                    destination = getString(R.string.withdraw_cashu_result_title),
+                    destinationType = "manual_token",
+                    status = com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry.STATUS_COMPLETED,
+                    quoteId = null,
+                    errorMessage = null,
+                    token = tokenString
+                )
+
                 // Resolve theme colors
                 val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
                 val isDarkTheme = currentNightMode == Configuration.UI_MODE_NIGHT_YES

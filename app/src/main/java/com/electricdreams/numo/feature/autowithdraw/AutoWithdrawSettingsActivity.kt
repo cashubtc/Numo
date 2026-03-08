@@ -553,6 +553,42 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
                 }
             }
 
+            if (entry.token != null) {
+                holder.expandIndicator.visibility = View.VISIBLE
+                holder.expandIndicator.setImageResource(R.drawable.ic_share)
+                holder.expandIndicator.rotation = 0f
+                holder.itemView.setOnClickListener {
+                    val context = holder.itemView.context
+                    val cashuUri = "cashu:${entry.token}"
+                    val uriIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(cashuUri)).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, cashuUri)
+                    }
+                    val chooserIntent = Intent.createChooser(uriIntent, context.getString(R.string.token_history_open_with)).apply {
+                        putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(shareIntent))
+                    }
+                    
+                    val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                    val clip = android.content.ClipData.newPlainText("Cashu Token", entry.token)
+                    clipboard.setPrimaryClip(clip)
+                    Toast.makeText(context, R.string.withdraw_cashu_copied, Toast.LENGTH_SHORT).show()
+                    
+                    try {
+                        context.startActivity(chooserIntent)
+                    } catch (e: Exception) {
+                        // ignore if no app can handle it
+                    }
+                }
+            } else if (entry.status != WithdrawHistoryEntry.STATUS_FAILED) {
+                holder.expandIndicator.setImageResource(R.drawable.ic_chevron_down)
+                holder.itemView.setOnClickListener(null)
+            } else {
+                holder.expandIndicator.setImageResource(R.drawable.ic_chevron_down)
+            }
+
             // Animate item appearance
             holder.itemView.alpha = 0f
             holder.itemView.animate()
