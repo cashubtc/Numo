@@ -227,17 +227,17 @@ class TransactionDetailActivity : AppCompatActivity() {
             // Determine the correct currency for the Bitcoin price.
             // 1. If entry unit is a fiat currency, use that.
             // 2. If available, check the checkout basket currency.
-            // 3. Fallback to USD (default behavior).
+            // 3. Fallback to current selected currency.
             val currencyCode = if (entry.getEntryUnit() != "sat" && entry.getEntryUnit() != "BTC") {
                 entry.getEntryUnit()
             } else {
                 val basket = CheckoutBasket.fromJson(checkoutBasketJson)
-                basket?.currency ?: "USD"
+                basket?.currency ?: CurrencyManager.getInstance(this).getCurrentCurrency()
             }
             
             val currency = Amount.Currency.fromCode(currencyCode)
-            // If we somehow still resolved to BTC (e.g. basket had "SAT"), force USD for price display
-            val priceCurrency = if (currency == Amount.Currency.BTC) Amount.Currency.USD else currency
+            // If we somehow still resolved to BTC (e.g. basket had "SAT"), force current currency for price display
+            val priceCurrency = if (currency == Amount.Currency.BTC) Amount.Currency.fromCode(CurrencyManager.getInstance(this).getCurrentCurrency()) else currency
             
             // Format price using Amount class to respect locale and currency symbol
             // Amount expects minor units (cents), so multiply by 100
@@ -384,7 +384,10 @@ class TransactionDetailActivity : AppCompatActivity() {
             putExtra(BasketReceiptActivity.EXTRA_CHECKOUT_BASKET_JSON, basketJsonToUse)
             putExtra(BasketReceiptActivity.EXTRA_PAYMENT_TYPE, paymentType)
             putExtra(BasketReceiptActivity.EXTRA_PAYMENT_DATE, entry.date.time)
-            putExtra(BasketReceiptActivity.EXTRA_TRANSACTION_ID, entry.token.takeIf { it.isNotEmpty() }?.take(32))
+            
+            val txId = entry.token.takeIf { it.isNotEmpty() } ?: lightningInvoice
+            putExtra(BasketReceiptActivity.EXTRA_TRANSACTION_ID, txId)
+            
             putExtra(BasketReceiptActivity.EXTRA_MINT_URL, entry.mintUrl)
             entry.bitcoinPrice?.let { putExtra(BasketReceiptActivity.EXTRA_BITCOIN_PRICE, it) }
             

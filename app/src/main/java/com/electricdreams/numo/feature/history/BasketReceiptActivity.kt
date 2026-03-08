@@ -11,6 +11,7 @@ import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.CheckoutBasket
 import com.electricdreams.numo.core.model.CheckoutBasketItem
+import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.util.ReceiptPrinter
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import java.text.SimpleDateFormat
@@ -61,7 +62,7 @@ class BasketReceiptActivity : AppCompatActivity() {
     // For non-basket transactions
     private var totalSatoshis: Long = 0
     private var enteredAmount: Long = 0
-    private var enteredCurrency: String = "USD"
+    private var enteredCurrency: String = "" // Will be initialized in loadBasketData
     
     // Tip information
     private var tipAmountSats: Long = 0
@@ -129,7 +130,7 @@ class BasketReceiptActivity : AppCompatActivity() {
         // For non-basket transactions
         totalSatoshis = intent.getLongExtra(EXTRA_TOTAL_SATOSHIS, 0)
         enteredAmount = intent.getLongExtra(EXTRA_ENTERED_AMOUNT, 0)
-        enteredCurrency = intent.getStringExtra(EXTRA_ENTERED_CURRENCY) ?: "USD"
+        enteredCurrency = intent.getStringExtra(EXTRA_ENTERED_CURRENCY) ?: CurrencyManager.getInstance(this).getCurrentCurrency()
         
         // Load tip information
         tipAmountSats = intent.getLongExtra(EXTRA_TIP_AMOUNT_SATS, 0)

@@ -10,6 +10,7 @@ import android.webkit.WebViewClient
 import androidx.core.content.FileProvider
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.CheckoutBasket
+import com.electricdreams.numo.core.util.CurrencyManager
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -286,7 +287,7 @@ class ReceiptPrinter(private val context: Context) {
         data.bitcoinPrice?.let { price ->
             val priceCurrencyCode = data.basket?.currency ?: data.enteredCurrency
             val priceCurrency = if (priceCurrencyCode.equals("BTC", ignoreCase = true) || priceCurrencyCode.equals("sat", ignoreCase = true)) {
-                Amount.Currency.USD
+                Amount.Currency.fromCode(CurrencyManager.getInstance(context).getCurrentCurrency())
             } else {
                 Amount.Currency.fromCode(priceCurrencyCode)
             }
@@ -307,8 +308,8 @@ class ReceiptPrinter(private val context: Context) {
         sb.appendLine()
         
         val paymentMethod = when (data.paymentType) {
-            "lightning" -> "⚡ Lightning Network"
-            "cashu" -> "🥜 Cashu (ecash)"
+            "lightning" -> "Lightning Network"
+            "cashu" -> "Cashu (ecash)"
             else -> "Bitcoin"
         }
         sb.appendLine(leftRight("Payment:", paymentMethod))
@@ -319,12 +320,18 @@ class ReceiptPrinter(private val context: Context) {
 
         data.mintUrl?.let { url ->
             sb.appendLine()
-            val shortUrl = if (url.length > w - 6) {
-                url.take(w - 9) + "..."
-            } else {
-                url
+            sb.appendLine("Mint:")
+            // Print URL on its own line(s), wrapping if necessary
+            var remainingUrl = url
+            while (remainingUrl.isNotEmpty()) {
+                if (remainingUrl.length <= w) {
+                    sb.appendLine(remainingUrl)
+                    break
+                } else {
+                    sb.appendLine(remainingUrl.take(w))
+                    remainingUrl = remainingUrl.drop(w)
+                }
             }
-            sb.appendLine(leftRight("Mint:", shortUrl))
         }
 
         sb.appendLine()
@@ -492,10 +499,9 @@ class ReceiptPrinter(private val context: Context) {
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=80mm">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         @page {
-            size: 80mm auto;
             margin: 0;
         }
         * {
@@ -505,10 +511,10 @@ class ReceiptPrinter(private val context: Context) {
         }
         body {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 12px;
+            font-size: 18px;
             line-height: 1.4;
-            width: 80mm;
-            max-width: 80mm;
+            width: 100%;
+            max-width: 100%;
             padding: 8mm 4mm;
             background: white;
             color: black;
@@ -516,10 +522,10 @@ class ReceiptPrinter(private val context: Context) {
         .center { text-align: center; }
         .right { text-align: right; }
         .bold { font-weight: bold; }
-        .large { font-size: 16px; }
-        .small { font-size: 10px; color: #666; }
+        .large { font-size: 22px; }
+        .small { font-size: 14px; color: #666; }
         .header { margin-bottom: 8px; }
-        .merchant-name { font-size: 18px; font-weight: bold; }
+        .merchant-name { font-size: 24px; font-weight: bold; }
         .divider { 
             border-top: 1px dashed #000; 
             margin: 8px 0; 
@@ -538,19 +544,19 @@ class ReceiptPrinter(private val context: Context) {
         .item { margin: 8px 0; }
         .item-name { font-weight: bold; }
         .item-detail { padding-left: 8px; color: #333; }
-        .vat-detail { font-size: 10px; color: #666; padding-left: 8px; }
-        .total-row { font-size: 14px; font-weight: bold; margin: 4px 0; }
-        .secondary-total { font-size: 11px; color: #666; }
+        .vat-detail { font-size: 14px; color: #666; padding-left: 8px; }
+        .total-row { font-size: 20px; font-weight: bold; margin: 4px 0; }
+        .secondary-total { font-size: 16px; color: #666; }
         .paid-badge {
             display: inline-block;
             background: #000;
             color: #fff;
             padding: 2px 8px;
             border-radius: 2px;
-            font-size: 10px;
+            font-size: 14px;
         }
         .footer { margin-top: 16px; }
-        .bitcoin-symbol { font-size: 24px; }
+        .bitcoin-symbol { font-size: 32px; }
     </style>
 </head>
 <body>
@@ -603,7 +609,7 @@ class ReceiptPrinter(private val context: Context) {
     ${data.bitcoinPrice?.let { price ->
         val priceCurrencyCode = data.basket?.currency ?: data.enteredCurrency
         val priceCurrency = if (priceCurrencyCode.equals("BTC", ignoreCase = true) || priceCurrencyCode.equals("sat", ignoreCase = true)) {
-            Amount.Currency.USD
+            Amount.Currency.fromCode(CurrencyManager.getInstance(context).getCurrentCurrency())
         } else {
             Amount.Currency.fromCode(priceCurrencyCode)
         }
@@ -625,8 +631,8 @@ class ReceiptPrinter(private val context: Context) {
     <div class="row">
         <span>Payment:</span>
         <span>${when (data.paymentType) {
-            "lightning" -> "⚡ Lightning"
-            "cashu" -> "🥜 Cashu"
+            "lightning" -> "Lightning"
+            "cashu" -> "Cashu"
             else -> "Bitcoin"
         }}</span>
     </div>
@@ -640,9 +646,9 @@ class ReceiptPrinter(private val context: Context) {
     </div>
     
     ${data.mintUrl?.let { """
-    <div class="row small" style="margin-top: 4px;">
-        <span>Mint:</span>
-        <span style="word-break: break-all; max-width: 50mm;">${if (it.length > 30) it.take(27) + "..." else it}</span>
+    <div class="row small" style="margin-top: 4px; display: block;">
+        <div>Mint:</div>
+        <div style="word-wrap: break-word; text-align: left;">${it}</div>
     </div>
     """ } ?: ""}
     

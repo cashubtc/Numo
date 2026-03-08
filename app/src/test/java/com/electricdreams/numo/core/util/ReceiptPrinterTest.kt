@@ -64,7 +64,7 @@ class ReceiptPrinterTest {
         assertTrue(receipt.contains("Muffin"))
         assertTrue(receipt.contains("TOTAL:"))
         assertTrue(receipt.contains("$9.50"))
-        assertTrue(receipt.contains("⚡ Lightning Network"))
+        assertTrue(receipt.contains("Lightning Network"))
     }
 
     @Test
