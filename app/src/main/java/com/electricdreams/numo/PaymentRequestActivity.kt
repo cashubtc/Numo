@@ -1189,6 +1189,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         pendingNfcSuccessToken = null
         pendingNfcSuccessAmount = 0
 
+        animationResultLabelText.animate().cancel()
+
         // Show "Keep phone close" hint during NFC communication
         animationResultLabelText.visibility = View.VISIBLE
         animationResultLabelText.alpha = 0.75f
@@ -1218,25 +1220,23 @@ class PaymentRequestActivity : AppCompatActivity() {
         } catch (_: Exception) {}
         
         // Show "Processing... You can lift your phone" hint with a gentle crossfade
-        val fadeOut = ObjectAnimator.ofFloat(animationResultLabelText, View.ALPHA, 0.75f, 0f)
-        fadeOut.duration = 150
-        fadeOut.interpolator = android.view.animation.AccelerateInterpolator()
-        
-        val fadeIn = ObjectAnimator.ofFloat(animationResultLabelText, View.ALPHA, 0f, 0.75f)
-        fadeIn.duration = 200
-        fadeIn.interpolator = android.view.animation.DecelerateInterpolator()
-        
-        fadeOut.addListener(object : android.animation.AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: android.animation.Animator) {
+        animationResultLabelText.animate().cancel()
+        animationResultLabelText.animate()
+            .alpha(0f)
+            .setDuration(150)
+            .setInterpolator(android.view.animation.AccelerateInterpolator())
+            .withEndAction {
                 animationResultLabelText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30f)
                 animationResultLabelText.gravity = android.view.Gravity.CENTER
                 animationResultLabelText.textAlignment = View.TEXT_ALIGNMENT_CENTER
                 animationResultLabelText.text = getString(R.string.nfc_payment_hint_processing)
-                fadeIn.start()
+                animationResultLabelText.animate()
+                    .alpha(0.75f)
+                    .setDuration(200)
+                    .setInterpolator(android.view.animation.DecelerateInterpolator())
+                    .start()
             }
-        })
-        
-        fadeOut.start()
+            .start()
         
         nfcAnimationView.startProcessing()
     }
@@ -1262,6 +1262,8 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     private fun showNfcAnimationSuccess(amountText: String) {
         if (nfcAnimationContainer.visibility != View.VISIBLE) return
+
+        animationResultLabelText.animate().cancel()
 
         currentOverlayActionMode = OverlayActionMode.SUCCESS
         animationResultAmountText.setTextSize(TypedValue.COMPLEX_UNIT_SP, 56f)
@@ -1295,6 +1297,8 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     private fun showNfcAnimationError(message: String) {
         if (nfcAnimationContainer.visibility != View.VISIBLE) return
+
+        animationResultLabelText.animate().cancel()
 
         currentOverlayActionMode = OverlayActionMode.ERROR
         
@@ -1422,11 +1426,13 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun resetResultTextViews() {
+        animationResultAmountText.animate().cancel()
         animationResultAmountText.visibility = View.GONE
         animationResultAmountText.alpha = 0f
         animationResultAmountText.translationY = animationAmountBaseTranslationY
         animationResultAmountText.text = ""
 
+        animationResultLabelText.animate().cancel()
         animationResultLabelText.visibility = View.GONE
         animationResultLabelText.alpha = 0f
         animationResultLabelText.translationY = animationLabelBaseTranslationY
@@ -1447,6 +1453,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     private fun resetResultActionButtons() {
         currentOverlayActionMode = OverlayActionMode.SUCCESS
+        animationActionsContainer.animate().cancel()
         animationActionsContainer.visibility = View.GONE
         animationActionsContainer.alpha = 0f
         animationActionsContainer.translationY = 0f
