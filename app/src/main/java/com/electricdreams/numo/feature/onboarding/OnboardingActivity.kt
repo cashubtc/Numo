@@ -52,6 +52,8 @@ import com.electricdreams.numo.ui.seed.SeedWordEditText
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -734,10 +736,12 @@ class OnboardingActivity : AppCompatActivity() {
                     generatingStatus.text = getString(R.string.onboarding_status_fetching_mints)
                 }
 
-                // Fetch mint info for selected mints
-                for (mintUrl in selectedMints) {
-                    mintProfileService.fetchAndStoreMintProfile(mintUrl, validateEndpoint = false)
-                }
+                // Fetch mint info for selected mints concurrently
+                selectedMints.map { mintUrl ->
+                    async {
+                        mintProfileService.fetchAndStoreMintProfile(mintUrl, validateEndpoint = false)
+                    }
+                }.awaitAll()
 
                 delay(300)
 
@@ -1107,12 +1111,10 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun refreshMintProfilesForReview() {
-        lifecycleScope.launch {
-            val sortedMints = discoveredMints.toList().sorted()
-            for (mintUrl in sortedMints) {
-                val result = withContext(Dispatchers.IO) {
-                    mintProfileService.fetchAndStoreMintProfile(mintUrl, validateEndpoint = false)
-                }
+        val sortedMints = discoveredMints.toList().sorted()
+        for (mintUrl in sortedMints) {
+            lifecycleScope.launch {
+                val result = mintProfileService.fetchAndStoreMintProfile(mintUrl, validateEndpoint = false)
 
                 val displayName = result.displayName
                     ?: getStoredMintName(mintUrl)
