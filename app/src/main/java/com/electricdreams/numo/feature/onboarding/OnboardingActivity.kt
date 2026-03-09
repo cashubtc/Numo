@@ -79,7 +79,12 @@ class OnboardingActivity : AppCompatActivity() {
     companion object {
         private const val PREFS_NAME = "OnboardingPrefs"
         private const val KEY_ONBOARDING_COMPLETE = "onboarding_complete"
-        private val ONBOARDING_DEFAULT_MINTS = listOf("https://mint.coinos.io")
+        private val ONBOARDING_DEFAULT_MINTS = listOf(
+            "https://mint.minibits.cash/Bitcoin",
+            "https://mint.chorus.community",
+            "https://mint.cubabitcoin.org",
+            "https://mint.coinos.io"
+        )
 
         fun isOnboardingComplete(context: Context): Boolean {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
