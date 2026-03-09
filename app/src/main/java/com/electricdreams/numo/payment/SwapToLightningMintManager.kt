@@ -16,6 +16,7 @@ import org.cashudevkit.QuoteState
 import java.security.MessageDigest
 import kotlin.math.roundToLong
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
+import org.cashudevkit.MeltConfirmOptions
 
 /**
  * Coordinates swapping a Cashu payment from an unknown mint into the
@@ -294,8 +295,8 @@ object SwapToLightningMintManager {
                     "meltQuoteId=${meltQuote.id}, proofsCount=${proofs.size}, totalMeltRequired=$totalMeltRequired"
             )
             
-            val prepared = tempWallet.prepareMelt(meltQuote.id)
-            prepared.confirm()
+            val prepared = tempWallet.prepareMeltProofs(meltQuote.id, proofs)
+            prepared.confirmWithOptions(MeltConfirmOptions (skipSwap = true))
         } catch (t: Throwable) {
             val msg = "Melt execution failed on unknown mint: ${t.message}"
             Log.e(TAG, msg, t)
