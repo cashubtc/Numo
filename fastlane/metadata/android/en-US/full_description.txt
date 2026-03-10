@@ -1,18 +1,18 @@
-Numo is an Android Point-of-Sale application that enables merchants to receive Cashu ecash payments via tap-to-pay.
+Numo is a free and open-source Android Point-of-Sale application that allows merchants to receive Bitcoin payments through Lightning or Cashu ecash tap-to-pay.
 
-The application acts as a simple point-of-sale terminal for receiving Bitcoin payments. When a customer approaches their phone with a supporting wallet, the app receives the ecash payment over NFC.
+The application acts as a simple point-of-sale terminal for receiving Bitcoin. When a customer approaches their phone with a supporting wallet, the app receives the payment over NFC.
 
 How It Works:
-The merchant enters the desired amount in satoshis using the application's keypad. When they press "Charge", a payment screen appears and a type-4 forum tag is emulated with a Cashu Payment Request string. The payer's Cashu wallet reads the contents via NFC and writes a Cashu token with the requested amount back to the terminal, and Numo will process it. 
+The merchant enters the desired amount using the application's keypad. When they press "Charge", a payment screen appears. For ecash payments, a type-4 forum tag is emulated with a Cashu Payment Request. The payer's wallet reads the contents via NFC and writes a Cashu token back to the terminal, which Numo immediately processes. 
 
-Numo also supports direct Lightning payments. The merchant can switch to the "lightning" tab in the payment screen, generating a fresh BOLT11 invoice displayed as a QR code and transmitted over NFC.
+Numo also supports direct Lightning payments. The merchant can switch to the "Lightning" tab to generate a fresh BOLT11 invoice, which is displayed as a QR code and transmitted over NFC for compatible wallets.
 
 Features:
+- Receive Bitcoin via Lightning BOLT11 invoices
 - Tap-to-pay with Cashu ecash and NDEF protocol
-- Lightning BOLT11 invoices support
 - Merchant item catalogs with pre-selectable items
 - Merchant item baskets that can be persisted
-- Payment history and integration for Cashu wallets
+- Payment history and wallet integration
 - Withdraw to self-custody or Lightning address
 - Automatic withdrawal after threshold is reached
 

@@ -1,1 +1,1 @@
-Cashu ecash Point-of-Sale terminal for merchants to receive tap-to-pay
+Bitcoin's first tap-to-pay solution. Free and open source. Privacy by default
