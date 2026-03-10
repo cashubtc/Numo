@@ -1,0 +1,7 @@
+What's new in v1.2:
+- Added bespoke NFC payment animation with processing state and haptics
+- Added support to record Cashu token withdrawals in history
+- Fixed melting from untrusted mints
+- Fixed receipt print formatting and currency fallbacks
+- Fixed onboarding UI mint selection
+- Various other bug fixes and stability improvements

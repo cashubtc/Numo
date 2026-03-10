@@ -1,0 +1,19 @@
+Numo is an Android Point-of-Sale application that enables merchants to receive Cashu ecash payments via tap-to-pay.
+
+The application acts as a simple point-of-sale terminal for receiving Bitcoin payments. When a customer approaches their phone with a supporting wallet, the app receives the ecash payment over NFC.
+
+How It Works:
+The merchant enters the desired amount in satoshis using the application's keypad. When they press "Charge", a payment screen appears and a type-4 forum tag is emulated with a Cashu Payment Request string. The payer's Cashu wallet reads the contents via NFC and writes a Cashu token with the requested amount back to the terminal, and Numo will process it. 
+
+Numo also supports direct Lightning payments. The merchant can switch to the "lightning" tab in the payment screen, generating a fresh BOLT11 invoice displayed as a QR code and transmitted over NFC.
+
+Features:
+- Tap-to-pay with Cashu ecash and NDEF protocol
+- Lightning BOLT11 invoices support
+- Merchant item catalogs with pre-selectable items
+- Merchant item baskets that can be persisted
+- Payment history and integration for Cashu wallets
+- Withdraw to self-custody or Lightning address
+- Automatic withdrawal after threshold is reached
+
+Important: This application is a Point-of-Sale terminal. It is intended to receive payments and immediately generate redemption tokens.

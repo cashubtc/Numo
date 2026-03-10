@@ -1,0 +1,1 @@
+Cashu ecash Point-of-Sale terminal for merchants to receive tap-to-pay
