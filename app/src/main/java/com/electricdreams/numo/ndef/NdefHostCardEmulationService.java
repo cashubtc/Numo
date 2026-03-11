@@ -77,7 +77,7 @@ public class NdefHostCardEmulationService extends HostApduService {
             @Override
             public void run() {
                 Log.i(TAG, "NFC reading timeout - no APDU received for " + NFC_TIMEOUT_MS + "ms");
-                stopNfcReading();
+                stopNfcReading(false);
             }
         };
         
@@ -92,7 +92,7 @@ public class NdefHostCardEmulationService extends HostApduService {
                         Log.i(TAG, "Message content: " + message);
                         
                         // Stop NFC reading indicator since we received the complete message
-                        stopNfcReading();
+                        stopNfcReading(true);
                         
                         // First try to extract a Cashu token from the message
                         String cashuToken = CashuPaymentHelper.extractCashuToken(message);
@@ -251,7 +251,7 @@ public class NdefHostCardEmulationService extends HostApduService {
         this.expectedAmount = 0;
         
         // Stop NFC reading if active
-        stopNfcReading();
+        stopNfcReading(true); // Don't trigger failure UI on manual clear
         
         if (ndefProcessor != null) {
             ndefProcessor.setMessageToSend("");
@@ -393,16 +393,17 @@ public class NdefHostCardEmulationService extends HostApduService {
      * Stop the NFC reading indicator
      * Called when the NDEF message is received or timeout occurs
      */
-    private void stopNfcReading() {
+    private void stopNfcReading(boolean isSuccess) {
         if (isNfcReading) {
-            Log.i(TAG, "NFC reading stopped. Was writing data: " + isNfcWriting);
+            Log.i(TAG, "NFC reading stopped. Was writing data: " + isNfcWriting + " Success: " + isSuccess);
             isNfcReading = false;
             
             // Cancel any pending timeout
             nfcTimeoutHandler.removeCallbacks(nfcTimeoutRunnable);
             
-            // Notify callback
-            if (paymentCallback != null) {
+            // Notify callback ONLY if it's NOT a success.
+            // If it is a success, the higher-level logic handles the UI transition via onCashuTokenReceived.
+            if (paymentCallback != null && !isSuccess) {
                 paymentCallback.onNfcReadingStopped(isNfcWriting);
             }
             
