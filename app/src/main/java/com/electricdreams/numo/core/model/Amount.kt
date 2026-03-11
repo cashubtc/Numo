@@ -28,7 +28,11 @@ data class Amount(
         JPY("¥"),
         DKK("kr."),
         SEK("kr"),
-        NOK("kr");
+        NOK("kr"),
+        KRW("₩");
+
+        /** Returns true for currencies with no decimal places (e.g. JPY, KRW). */
+        fun isZeroDecimal(): Boolean = this == JPY || this == KRW
 
         /**
          * Get the appropriate locale for formatting this currency.
@@ -43,6 +47,7 @@ data class Amount(
             DKK -> Locale("da", "DK") // Comma decimal: DKK 100,00
             SEK -> Locale("sv", "SE") // Comma decimal: SEK 100,00
             NOK -> Locale("nb", "NO") // Comma decimal: NOK 100,00
+            KRW -> Locale.KOREA       // No decimals: ₩101,816,000
         }
 
         companion object {
@@ -75,8 +80,8 @@ data class Amount(
                 val formatter = NumberFormat.getNumberInstance(currency.getLocale())
                 "${currency.symbol}${formatter.format(value)}"
             }
-            Currency.JPY -> {
-                // JPY has no decimal places (stored as cents internally, divide by 100)
+            Currency.JPY, Currency.KRW -> {
+                // JPY/KRW have no decimal places (stored as cents internally, divide by 100)
                 val major = value / 100.0
                 val formatter = NumberFormat.getIntegerInstance(currency.getLocale())
                 "${currency.symbol}${formatter.format(major.toLong())}"
@@ -101,7 +106,7 @@ data class Amount(
                 val formatter = NumberFormat.getNumberInstance(currency.getLocale())
                 formatter.format(value)
             }
-            Currency.JPY -> {
+            Currency.JPY, Currency.KRW -> {
                 val major = value / 100.0
                 val formatter = NumberFormat.getIntegerInstance(currency.getLocale())
                 formatter.format(major.toLong())
@@ -166,10 +171,10 @@ data class Amount(
                         val sats = numericPart.replace(",", "").toLong()
                         Amount(sats, currency)
                     }
-                    Currency.JPY -> {
-                        // JPY has no decimal places, but stored as cents internally
-                        val yen = numericPart.replace(",", "").toDouble()
-                        Amount((yen * 100).toLong(), currency)
+                    Currency.JPY, Currency.KRW -> {
+                        // JPY/KRW have no decimal places, but stored as cents internally
+                        val amount = numericPart.replace(",", "").toDouble()
+                        Amount((amount * 100).toLong(), currency)
                     }
                     else -> {
                         // For other fiat, convert decimal to minor units (cents)

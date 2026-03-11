@@ -18,6 +18,7 @@ class CurrencySettingsActivity : AppCompatActivity() {
     private lateinit var radioDkk: RadioButton
     private lateinit var radioSek: RadioButton
     private lateinit var radioNok: RadioButton
+    private lateinit var radioKrw: RadioButton
     private lateinit var currencyManager: CurrencyManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +37,7 @@ class CurrencySettingsActivity : AppCompatActivity() {
         radioDkk = findViewById(R.id.radio_dkk)
         radioSek = findViewById(R.id.radio_sek)
         radioNok = findViewById(R.id.radio_nok)
+        radioKrw = findViewById(R.id.radio_krw)
 
         setSelectedCurrency(currencyManager.getCurrentCurrency())
 
@@ -54,6 +56,7 @@ class CurrencySettingsActivity : AppCompatActivity() {
             CurrencyManager.CURRENCY_DKK -> radioDkk.isChecked = true
             CurrencyManager.CURRENCY_SEK -> radioSek.isChecked = true
             CurrencyManager.CURRENCY_NOK -> radioNok.isChecked = true
+            CurrencyManager.CURRENCY_KRW -> radioKrw.isChecked = true
             else -> radioUsd.isChecked = true
         }
     }
@@ -67,6 +70,7 @@ class CurrencySettingsActivity : AppCompatActivity() {
             R.id.radio_dkk -> CurrencyManager.CURRENCY_DKK
             R.id.radio_sek -> CurrencyManager.CURRENCY_SEK
             R.id.radio_nok -> CurrencyManager.CURRENCY_NOK
+            R.id.radio_krw -> CurrencyManager.CURRENCY_KRW
             else -> CurrencyManager.CURRENCY_USD
         }
     }

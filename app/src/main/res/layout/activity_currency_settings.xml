@@ -159,6 +159,19 @@
                     android:paddingHorizontal="24dp"
                     android:text="@string/currency_settings_option_nok"
                     android:textAppearance="@style/Text.BodyBold" />
+
+                <RadioButton
+                    android:id="@+id/radio_krw"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:button="@null"
+                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
+                    android:drawableTint="@color/color_primary_green"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="24dp"
+                    android:text="@string/currency_settings_option_krw"
+                    android:textAppearance="@style/Text.BodyBold" />
             </RadioGroup>
 
         </LinearLayout>

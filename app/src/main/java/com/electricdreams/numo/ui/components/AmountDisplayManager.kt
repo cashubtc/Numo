@@ -61,8 +61,8 @@ class AmountDisplayManager(
                 if (isUsdInputMode) {
                     // Currently in fiat mode, converting to satoshi mode
                     val rawInput = currentInputStr.toLong()
-                    // JPY input is already whole units, others are cents
-                    val fiatAmount = if (currency == Amount.Currency.JPY) {
+                    // JPY/KRW input is already whole units, others are cents
+                    val fiatAmount = if (currency.isZeroDecimal()) {
                         rawInput.toDouble()
                     } else {
                         rawInput / 100.0
@@ -74,8 +74,8 @@ class AmountDisplayManager(
                     // Currently in satoshi mode, converting to fiat mode
                     val satoshis = currentInputStr.toLong()
                     val fiatAmount = bitcoinPriceWorker?.satoshisToFiat(satoshis) ?: 0.0
-                    // JPY stored as whole units, others as cents
-                    val storedValue = if (currency == Amount.Currency.JPY) {
+                    // JPY/KRW stored as whole units, others as cents
+                    val storedValue = if (currency.isZeroDecimal()) {
                         fiatAmount.toLong()
                     } else {
                         (fiatAmount * 100).toLong()
@@ -116,9 +116,9 @@ class AmountDisplayManager(
             
             val rawInput = if (currentInputStr.isEmpty()) 0L else currentInputStr.toLong()
             
-            // For JPY, input is whole units, but Amount expects cents (value * 100)
+            // For JPY/KRW, input is whole units, but Amount expects cents (value * 100)
             // For others, input is cents
-            val fiatCents = if (currency == Amount.Currency.JPY) {
+            val fiatCents = if (currency.isZeroDecimal()) {
                 rawInput * 100
             } else {
                 rawInput

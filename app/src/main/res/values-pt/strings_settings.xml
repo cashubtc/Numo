@@ -24,6 +24,7 @@
     <string name="currency_settings_option_eur">Euro (EUR)</string>
     <string name="currency_settings_option_gbp">Libra esterlina (GBP)</string>
     <string name="currency_settings_option_jpy">Iene japonês (JPY)</string>
+    <string name="currency_settings_option_krw">Won coreano (KRW)</string>
 
     <!-- Settings items: mints -->
     <string name="settings_item_mints_title">Mints</string>

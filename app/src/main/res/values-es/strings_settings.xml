@@ -27,6 +27,7 @@
     <string name="currency_settings_option_dkk">Corona danesa (DKK)</string>
     <string name="currency_settings_option_sek">Corona sueca (SEK)</string>
     <string name="currency_settings_option_nok">Corona noruega (NOK)</string>
+    <string name="currency_settings_option_krw">Won coreano (KRW)</string>
 
     <!-- Settings items: mints -->
     <string name="settings_item_mints_title">Mints</string>

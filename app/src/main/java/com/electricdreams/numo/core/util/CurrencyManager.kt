@@ -27,6 +27,7 @@ class CurrencyManager private constructor(context: Context) {
         const val CURRENCY_DKK = "DKK"
         const val CURRENCY_SEK = "SEK"
         const val CURRENCY_NOK = "NOK"
+        const val CURRENCY_KRW = "KRW"
 
         // Default currency is USD
         private const val DEFAULT_CURRENCY = CURRENCY_USD
@@ -74,6 +75,7 @@ class CurrencyManager private constructor(context: Context) {
         CURRENCY_DKK -> "kr."
         CURRENCY_SEK -> "kr"
         CURRENCY_NOK -> "kr"
+        CURRENCY_KRW -> "₩"
         else -> "$"
     }
 
@@ -100,15 +102,22 @@ class CurrencyManager private constructor(context: Context) {
     fun isValidCurrency(currencyCode: String?): Boolean {
         return when (currencyCode) {
             CURRENCY_USD, CURRENCY_EUR, CURRENCY_GBP, CURRENCY_JPY,
-            CURRENCY_DKK, CURRENCY_SEK, CURRENCY_NOK -> true
+            CURRENCY_DKK, CURRENCY_SEK, CURRENCY_NOK, CURRENCY_KRW -> true
             else -> false
         }
     }
 
-    /** Get the Coinbase API URL for the current currency. */
-    fun getCoinbaseApiUrl(): String {
-        return "https://api.coinbase.com/v2/prices/BTC-$currentCurrency/spot"
+    /** Get the API URL for the current currency. Uses Upbit for KRW, Coinbase for others. */
+    fun getPriceApiUrl(): String {
+        return if (currentCurrency == CURRENCY_KRW) {
+            "https://api.upbit.com/v1/ticker?markets=KRW-BTC"
+        } else {
+            "https://api.coinbase.com/v2/prices/BTC-$currentCurrency/spot"
+        }
     }
+
+    /** Whether the current currency uses the Upbit API. */
+    fun isUpbitCurrency(): Boolean = currentCurrency == CURRENCY_KRW
 
     /**
      * Format a currency amount with the appropriate symbol using Amount class.
