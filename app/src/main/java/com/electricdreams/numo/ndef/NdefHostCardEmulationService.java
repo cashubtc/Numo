@@ -46,7 +46,7 @@ public class NdefHostCardEmulationService extends HostApduService {
     private boolean isNfcWriting = false; // Tracks if payer actually started writing
     private Handler nfcTimeoutHandler;
     private Runnable nfcTimeoutRunnable;
-    private static final long NFC_TIMEOUT_MS = 2000; // 2 seconds
+    private static final long NFC_TIMEOUT_MS = 10000; // 10 seconds
     
     /**
      * Callback interface for Cashu payments
