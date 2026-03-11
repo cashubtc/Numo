@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import com.electricdreams.numo.core.model.Amount
+import org.json.JSONArray
+import org.json.JSONObject
 
 /**
  * Manages currency settings and preferences for the app.
@@ -31,6 +33,22 @@ class CurrencyManager private constructor(context: Context) {
 
         // Default currency is USD
         private const val DEFAULT_CURRENCY = CURRENCY_USD
+
+        private const val COINBASE_BASE_URL = "https://api.coinbase.com/v2/prices/BTC-"
+
+        private val COINBASE_PARSER: (String) -> Double = { response ->
+            JSONObject(response).getJSONObject("data").getDouble("amount")
+        }
+
+        /** Add entries here for currencies not on Coinbase. */
+        private val CUSTOM_APIS = mapOf(
+            CURRENCY_KRW to PriceApiConfig(
+                url = "https://api.upbit.com/v1/ticker?markets=KRW-BTC",
+                parsePrice = { response ->
+                    JSONArray(response).getJSONObject(0).getDouble("trade_price")
+                }
+            ),
+        )
 
         @Volatile
         private var instance: CurrencyManager? = null
@@ -107,17 +125,17 @@ class CurrencyManager private constructor(context: Context) {
         }
     }
 
-    /** Get the API URL for the current currency. Uses Upbit for KRW, Coinbase for others. */
+    /** Get the API URL for the current currency. Falls back to Coinbase. */
     fun getPriceApiUrl(): String {
-        return if (currentCurrency == CURRENCY_KRW) {
-            "https://api.upbit.com/v1/ticker?markets=KRW-BTC"
-        } else {
-            "https://api.coinbase.com/v2/prices/BTC-$currentCurrency/spot"
-        }
+        return CUSTOM_APIS[currentCurrency]?.url
+            ?: "${COINBASE_BASE_URL}$currentCurrency/spot"
     }
 
-    /** Whether the current currency uses the Upbit API. */
-    fun isUpbitCurrency(): Boolean = currentCurrency == CURRENCY_KRW
+    /** Parse a price API response for the current currency. */
+    fun parsePriceResponse(response: String): Double {
+        val parser = CUSTOM_APIS[currentCurrency]?.parsePrice ?: COINBASE_PARSER
+        return parser(response)
+    }
 
     /**
      * Format a currency amount with the appropriate symbol using Amount class.
@@ -129,3 +147,9 @@ class CurrencyManager private constructor(context: Context) {
         return Amount(minorUnits, currency).toString()
     }
 }
+
+/** Configuration for a non-Coinbase price API. */
+data class PriceApiConfig(
+    val url: String,
+    val parsePrice: (String) -> Double,
+)

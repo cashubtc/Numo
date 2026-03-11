@@ -156,11 +156,16 @@ class CurrencyManagerTest {
     }
 
     @Test
-    fun `isUpbitCurrency returns true only for KRW`() {
+    fun `parsePriceResponse parses Upbit response for KRW`() {
         currencyManager.setPreferredCurrency("KRW")
-        assertTrue(currencyManager.isUpbitCurrency())
+        val upbitResponse = """[{"trade_price":136500000.0}]"""
+        assertEquals(136500000.0, currencyManager.parsePriceResponse(upbitResponse), 0.01)
+    }
 
+    @Test
+    fun `parsePriceResponse parses Coinbase response for USD`() {
         currencyManager.setPreferredCurrency("USD")
-        assertFalse(currencyManager.isUpbitCurrency())
+        val coinbaseResponse = """{"data":{"amount":97500.50}}"""
+        assertEquals(97500.50, currencyManager.parsePriceResponse(coinbaseResponse), 0.01)
     }
 }

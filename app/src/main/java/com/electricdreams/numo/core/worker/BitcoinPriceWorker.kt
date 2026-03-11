@@ -7,9 +7,7 @@ import android.os.Looper
 import android.util.Log
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.CurrencyManager
-import org.json.JSONArray
 import org.json.JSONException
-import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -199,7 +197,6 @@ class BitcoinPriceWorker private constructor(context: Context) {
             try {
                 val currency = currencyManager.getCurrentCurrency()
                 val apiUrl = currencyManager.getPriceApiUrl()
-                val isUpbit = currencyManager.isUpbitCurrency()
                 Log.d(TAG, "Fetching Bitcoin price in $currency from: $apiUrl")
 
                 val uri = URI(apiUrl)
@@ -221,14 +218,7 @@ class BitcoinPriceWorker private constructor(context: Context) {
                         }
                     }
 
-                    val price = if (isUpbit) {
-                        val jsonArray = JSONArray(response)
-                        jsonArray.getJSONObject(0).getDouble("trade_price")
-                    } else {
-                        val jsonObject = JSONObject(response)
-                        val data = jsonObject.getJSONObject("data")
-                        data.getDouble("amount")
-                    }
+                    val price = currencyManager.parsePriceResponse(response)
 
                     priceByCurrency[currency] = price
                     cachePrice(currency, price)
