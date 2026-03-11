@@ -385,6 +385,7 @@ public class NdefHostCardEmulationService extends HostApduService {
         }
         
         // Reset the timeout - cancel any pending timeout and schedule a new one
+        Log.d(TAG, "Resetting NFC reading timeout timer (" + NFC_TIMEOUT_MS + "ms)");
         nfcTimeoutHandler.removeCallbacks(nfcTimeoutRunnable);
         nfcTimeoutHandler.postDelayed(nfcTimeoutRunnable, NFC_TIMEOUT_MS);
     }
@@ -399,6 +400,7 @@ public class NdefHostCardEmulationService extends HostApduService {
             isNfcReading = false;
             
             // Cancel any pending timeout
+            Log.d(TAG, "Cancelling NFC reading timeout timer");
             nfcTimeoutHandler.removeCallbacks(nfcTimeoutRunnable);
             
             // Notify callback ONLY if it's NOT a success.

@@ -1403,7 +1403,10 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun cancelNfcSafetyTimeout() {
-        nfcAnimationTimeoutRunnable?.let { nfcTimeoutHandler.removeCallbacks(it) }
+        nfcAnimationTimeoutRunnable?.let {
+            Log.d(TAG, "Cancelling Activity NFC safety timeout")
+            nfcTimeoutHandler.removeCallbacks(it)
+        }
         nfcAnimationTimeoutRunnable = null
     }
 
