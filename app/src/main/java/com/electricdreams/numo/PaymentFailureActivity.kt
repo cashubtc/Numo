@@ -12,6 +12,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
@@ -50,9 +52,13 @@ class PaymentFailureActivity : AppCompatActivity() {
         window.statusBarColor = android.graphics.Color.TRANSPARENT
         window.navigationBarColor = android.graphics.Color.TRANSPARENT
 
+        val backgroundColor = ContextCompat.getColor(this, R.color.color_error)
+        window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(backgroundColor))
+
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
-        windowInsetsController.isAppearanceLightStatusBars = false
-        windowInsetsController.isAppearanceLightNavigationBars = false
+        val useDarkIcons = ColorUtils.calculateLuminance(backgroundColor) > 0.5
+        windowInsetsController.isAppearanceLightStatusBars = useDarkIcons
+        windowInsetsController.isAppearanceLightNavigationBars = useDarkIcons
 
         // Adjust padding for system bars
         findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { v, windowInsets ->
