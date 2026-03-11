@@ -990,8 +990,6 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        nfcAnimationView.reset()
-        
         cancelNfcSafetyTimeout()
         nostrHandler?.stop()
         nostrHandler = null
