@@ -43,6 +43,7 @@ public class NdefHostCardEmulationService extends HostApduService {
     
     // NFC reading state tracking
     private boolean isNfcReading = false;
+    private boolean isNfcWriting = false; // Tracks if payer actually started writing
     private Handler nfcTimeoutHandler;
     private Runnable nfcTimeoutRunnable;
     private static final long NFC_TIMEOUT_MS = 2000; // 2 seconds
@@ -54,7 +55,7 @@ public class NdefHostCardEmulationService extends HostApduService {
         void onCashuTokenReceived(String token);
         void onCashuPaymentError(String errorMessage);
         void onNfcReadingStarted();
-        void onNfcReadingStopped();
+        void onNfcReadingStopped(boolean failedInMiddleOfTransaction);
     }
     
     /**
@@ -169,12 +170,19 @@ public class NdefHostCardEmulationService extends HostApduService {
                 Log.i(TAG, "Command: " + description);
             }
             
-            // Check if this is an UPDATE BINARY command (writing to NDEF)
-            // If so, and we have a callback, trigger the NFC reading UI
-            if (paymentCallback != null && commandApdu != null && commandApdu.length >= 2) {
-                // UPDATE BINARY header is 00 D6
-                if (commandApdu[0] == (byte)0x00 && commandApdu[1] == (byte)0xD6) {
-                    startOrResetNfcReading();
+            // Start or reset NFC reading indicator for any APDU command when a payment is expected
+            if (paymentCallback != null) {
+                startOrResetNfcReading();
+                
+                // Track if the payer started writing data (UPDATE BINARY)
+                if (commandApdu != null && commandApdu.length >= 2) {
+                    // UPDATE BINARY header is 00 D6
+                    if (commandApdu[0] == (byte)0x00 && commandApdu[1] == (byte)0xD6) {
+                        if (!isNfcWriting) {
+                            Log.i(TAG, "Payer started writing data (UPDATE BINARY received)");
+                            isNfcWriting = true;
+                        }
+                    }
                 }
             }
             
@@ -387,7 +395,7 @@ public class NdefHostCardEmulationService extends HostApduService {
      */
     private void stopNfcReading() {
         if (isNfcReading) {
-            Log.i(TAG, "NFC reading stopped");
+            Log.i(TAG, "NFC reading stopped. Was writing data: " + isNfcWriting);
             isNfcReading = false;
             
             // Cancel any pending timeout
@@ -395,8 +403,11 @@ public class NdefHostCardEmulationService extends HostApduService {
             
             // Notify callback
             if (paymentCallback != null) {
-                paymentCallback.onNfcReadingStopped();
+                paymentCallback.onNfcReadingStopped(isNfcWriting);
             }
+            
+            // Reset writing flag for next session
+            isNfcWriting = false;
         }
     }
 

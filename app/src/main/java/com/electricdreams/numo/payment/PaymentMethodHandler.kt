@@ -101,9 +101,9 @@ class PaymentMethodHandler(
                     }
                 }
 
-                override fun onNfcReadingStopped() {
+                override fun onNfcReadingStopped(failedInMiddleOfTransaction: Boolean) {
                     activity.runOnUiThread {
-                        onStatusUpdate("NFC reading stopped")
+                        onStatusUpdate(if (failedInMiddleOfTransaction) "NFC reading interrupted" else "NFC reading stopped")
                     }
                 }
             })

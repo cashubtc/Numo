@@ -915,15 +915,21 @@ class PaymentRequestActivity : AppCompatActivity() {
                         }
                     }
 
-                    override fun onNfcReadingStopped() {
+                    override fun onNfcReadingStopped(failedInMiddleOfTransaction: Boolean) {
                         runOnUiThread {
-                            Log.w(TAG, "NFC reading stopped callback received")
+                            Log.w(TAG, "NFC reading stopped callback received (failedInMiddleOfTransaction: $failedInMiddleOfTransaction)")
                             if (hasTerminalOutcome) {
                                 Log.d(TAG, "NFC reading stopped ignored - terminal outcome already set")
                                 return@runOnUiThread
                             }
 
-                            Log.d(TAG, "NFC reading stopped - keeping animation overlay active")
+                            if (failedInMiddleOfTransaction) {
+                                Log.e(TAG, "NFC connection lost while writing data - failing payment")
+                                handlePaymentError(getString(R.string.payment_failure_button_try_again))
+                            } else {
+                                Log.d(TAG, "NFC connection stopped without writing data. Returning to payment request screen.")
+                                hideNfcAnimationOverlay()
+                            }
                         }
                     }
                 })
@@ -1378,6 +1384,16 @@ class PaymentRequestActivity : AppCompatActivity() {
             .start()
         
         nfcAnimationView.startProcessing()
+    }
+
+    private fun hideNfcAnimationOverlay() {
+        nfcAnimationContainer.visibility = View.GONE
+        nfcAnimationView.reset()
+        resetResultTextViews()
+        resetResultActionButtons()
+        restoreSystemBarsAfterAnimation()
+        cancelNfcSafetyTimeout()
+        isProcessingNfcPayment = false
     }
 
     private fun startNfcSafetyTimeout() {
