@@ -992,11 +992,22 @@ class PaymentRequestActivity : AppCompatActivity() {
     override fun onDestroy() {
         nfcAnimationView.reset()
         
-        // onDestroy can be invoked as part of a normal lifecycle (e.g. when
-        // the system reclaims the Activity). Avoid calling finish() again
-        // from here; simply ensure resources are cleaned up if they haven't
-        // been already.
-        cleanupAndFinish()
+        cancelNfcSafetyTimeout()
+        nostrHandler?.stop()
+        nostrHandler = null
+        lightningHandler?.cancel()
+        lightningHandler = null
+
+        try {
+            val hceService = NdefHostCardEmulationService.getInstance()
+            if (hceService != null) {
+                hceService.clearPaymentRequest()
+                hceService.setPaymentCallback(null)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error cleaning up HCE service in onDestroy: ${e.message}", e)
+        }
+
         super.onDestroy()
     }
 
@@ -1168,7 +1179,6 @@ class PaymentRequestActivity : AppCompatActivity() {
             Log.e(TAG, "Error cleaning up HCE service: ${e.message}", e)
         }
 
-        restoreSystemBarsAfterAnimation()
         finish()
         
         // Fade out the success screen, fade in the home screen
