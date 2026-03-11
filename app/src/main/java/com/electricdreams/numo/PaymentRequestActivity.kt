@@ -1688,7 +1688,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "PaymentRequestActivity"
-        private const val NFC_READ_TIMEOUT_MS = 15_000L
+        private const val NFC_READ_TIMEOUT_MS = 5_000L
 
 
 
