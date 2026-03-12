@@ -12,3 +12,4 @@ local.properties
 .aider*
 .vscode
 release
+btcpay_env.properties
