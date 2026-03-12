@@ -426,7 +426,13 @@ object SwapToLightningMintManager {
 
         try {
             val mintUrl = MintUrl(lightningMintUrl)
-            val quote = wallet.checkMintQuote(mintUrl, lightningQuoteId)
+            val mintWallet = wallet.getWallet(mintUrl, org.cashudevkit.CurrencyUnit.Sat)
+            if (mintWallet == null) {
+                Log.e(TAG, "tryFinalizePendingSwap: Failed to get wallet for mint $mintUrl")
+                return@withContext false
+            }
+
+            val quote = mintWallet.checkMintQuote(lightningQuoteId)
             
             Log.d(TAG, "tryFinalizePendingSwap: Quote state is ${quote.state}")
 
@@ -434,7 +440,7 @@ object SwapToLightningMintManager {
                 org.cashudevkit.QuoteState.PAID -> {
                     Log.d(TAG, "tryFinalizePendingSwap: Quote PAID. Minting tokens...")
                     val proofs = try {
-                        wallet.mint(mintUrl, lightningQuoteId, null)
+                        mintWallet.mint(lightningQuoteId, org.cashudevkit.SplitTarget.None, null)
                     } catch (e: Exception) {
                         Log.e(TAG, "tryFinalizePendingSwap: Minting failed", e)
                         emptyList()
