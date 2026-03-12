@@ -138,7 +138,7 @@ class ItemSelectionActivity : AppCompatActivity() {
     }
 
     private val csvPickerLauncher = registerForActivityResult(
-        ActivityResultContracts.GetContent()
+        ActivityResultContracts.OpenDocument()
     ) { uri ->
         if (uri != null) {
             CsvImportHelper.importItemsFromCsvUri(
@@ -411,7 +411,7 @@ class ItemSelectionActivity : AppCompatActivity() {
 
         importButton?.setOnClickListener {
             // Import from CSV directly into the catalog without leaving this screen
-            csvPickerLauncher.launch("text/csv")
+            csvPickerLauncher.launch(arrayOf("*/*"))
         }
         
         // Home → Items: Show close button (X), hide back arrow

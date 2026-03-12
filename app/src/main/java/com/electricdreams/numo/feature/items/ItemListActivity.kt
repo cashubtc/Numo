@@ -64,8 +64,8 @@ class ItemListActivity : AppCompatActivity() {
             }
         }
 
-    private val csvPickerLauncher: ActivityResultLauncher<String> =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+    private val csvPickerLauncher: ActivityResultLauncher<Array<String>> =
+        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri != null) {
                 CsvImportHelper.importItemsFromCsvUri(
                     context = this,
@@ -141,7 +141,7 @@ class ItemListActivity : AppCompatActivity() {
         }
 
         importCsvButton.setOnClickListener {
-            csvPickerLauncher.launch("text/csv")
+            csvPickerLauncher.launch(arrayOf("*/*"))
         }
 
         exportCsvButton.setOnClickListener {
@@ -181,7 +181,7 @@ class ItemListActivity : AppCompatActivity() {
         }
 
         importButton?.setOnClickListener {
-            csvPickerLauncher.launch("text/csv")
+            csvPickerLauncher.launch(arrayOf("*/*"))
         }
         
         // Settings → Items: Show back arrow, hide close button
