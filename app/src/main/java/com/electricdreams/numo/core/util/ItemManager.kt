@@ -390,6 +390,15 @@ class ItemManager private constructor(context: Context) {
                     }
                 }
 
+                // Parse stock enabled (index 21)
+                var trackInventory = false
+                if (values.size > 21 && values[21].isNotBlank()) {
+                    trackInventory = values[21].equals("Y", ignoreCase = true)
+                } else if (quantity > 0) {
+                    // Fallback for older exports that didn't include Stock Enabled
+                    trackInventory = true
+                }
+
                 // Parse stock alert (index 22-23)
                 var alertEnabled = false
                 var alertThreshold = 0
@@ -406,6 +415,42 @@ class ItemManager private constructor(context: Context) {
                     }
                 }
 
+                // Parse Numo custom fields (index 24-27)
+                var priceType = com.electricdreams.numo.core.model.PriceType.FIAT
+                var priceSats = 0L
+                var vatEnabled = false
+                var vatRate = 0
+                
+                if (values.size > 24 && values[24].isNotBlank()) {
+                    try {
+                        priceType = com.electricdreams.numo.core.model.PriceType.valueOf(values[24])
+                    } catch (e: Exception) {}
+                }
+                
+                if (values.size > 25 && values[25].isNotBlank()) {
+                    try {
+                        priceSats = values[25].toLong()
+                    } catch (e: NumberFormatException) {}
+                } else if (priceType == com.electricdreams.numo.core.model.PriceType.SATS) {
+                    // Fallback if priceSats is missing but priceType is SATS
+                    priceSats = price.toLong()
+                }
+                
+                if (priceType == com.electricdreams.numo.core.model.PriceType.SATS) {
+                    // If it's SATS, zero out the fiat price to match export behaviour
+                    price = 0.0
+                }
+
+                if (values.size > 26) {
+                    vatEnabled = values[26].equals("Y", ignoreCase = true)
+                }
+                
+                if (values.size > 27 && values[27].isNotBlank()) {
+                    try {
+                        vatRate = values[27].toInt()
+                    } catch (e: NumberFormatException) {}
+                }
+
                 // Create new item
                 val item = Item().apply {
                     id = UUID.randomUUID().toString()
@@ -416,7 +461,12 @@ class ItemManager private constructor(context: Context) {
                     this.category = category
                     this.gtin = gtin
                     this.price = price
+                    this.priceSats = priceSats
+                    this.priceType = priceType
+                    this.trackInventory = trackInventory
                     this.quantity = quantity
+                    this.vatEnabled = vatEnabled
+                    this.vatRate = vatRate
                     this.alertEnabled = alertEnabled
                     this.alertThreshold = alertThreshold
                 }
@@ -455,7 +505,7 @@ class ItemManager private constructor(context: Context) {
             val writer = BufferedWriter(OutputStreamWriter(outputStream))
 
             // Write 5 header lines to match the Square template import expectations
-            val header = arrayOfNulls<String>(24)
+            val header = arrayOfNulls<String>(28)
             header[0] = "Token"
             header[1] = "Item Name"
             header[2] = "Variation Name"
@@ -465,18 +515,23 @@ class ItemManager private constructor(context: Context) {
             header[7] = "GTIN"
             header[12] = "Price"
             header[20] = "Current Quantity"
+            header[21] = "Stock Enabled"
             header[22] = "Stock Alert Enabled"
             header[23] = "Stock Alert Threshold"
+            header[24] = "Price Type"
+            header[25] = "Price Sats"
+            header[26] = "VAT Enabled"
+            header[27] = "VAT Rate"
 
             val headerString = header.joinToString(",") { it ?: "" }
             writer.write(headerString + "\n")
-            writer.write(",,,,,,,,,,,,,,,,,,,,,,,\n")
-            writer.write(",,,,,,,,,,,,,,,,,,,,,,,\n")
-            writer.write(",,,,,,,,,,,,,,,,,,,,,,,\n")
-            writer.write(",,,,,,,,,,,,,,,,,,,,,,,\n")
+            writer.write(",,,,,,,,,,,,,,,,,,,,,,,,,,,\n")
+            writer.write(",,,,,,,,,,,,,,,,,,,,,,,,,,,\n")
+            writer.write(",,,,,,,,,,,,,,,,,,,,,,,,,,,\n")
+            writer.write(",,,,,,,,,,,,,,,,,,,,,,,,,,,\n")
 
             for (item in items) {
-                val csvLine = arrayOfNulls<String>(24)
+                val csvLine = arrayOfNulls<String>(28)
                 csvLine[0] = "" // Token
                 csvLine[1] = item.name ?: ""
                 csvLine[2] = item.variationName ?: ""
@@ -488,18 +543,26 @@ class ItemManager private constructor(context: Context) {
                 // Export price
                 if (item.priceType == com.electricdreams.numo.core.model.PriceType.FIAT) {
                     csvLine[12] = item.price.toString()
+                    csvLine[25] = "0"
                 } else {
                     csvLine[12] = item.priceSats.toString()
+                    csvLine[25] = item.priceSats.toString()
                 }
 
                 if (item.trackInventory) {
                     csvLine[20] = item.quantity.toString()
+                    csvLine[21] = "Y"
                 } else {
                     csvLine[20] = ""
+                    csvLine[21] = "N"
                 }
 
                 csvLine[22] = if (item.alertEnabled) "Y" else "N"
                 csvLine[23] = item.alertThreshold.toString()
+                
+                csvLine[24] = item.priceType.name
+                csvLine[26] = if (item.vatEnabled) "Y" else "N"
+                csvLine[27] = item.vatRate.toString()
 
                 val formattedLine = csvLine.joinToString(",") { formatCsvField(it ?: "") }
                 writer.write(formattedLine + "\n")
