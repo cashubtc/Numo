@@ -44,7 +44,7 @@ class PaymentMethodHandler(
         val mintsForPaymentRequest =
             if (mintManager.isSwapFromUnknownMintsEnabled()) null else allowedMints
 
-        val paymentRequest = CashuPaymentHelper.createPaymentRequest(amount, "Payment of $amount sats", mintsForPaymentRequest)
+        val paymentRequest = CashuPaymentHelper.createPaymentRequest(amount, "Payment of $amount sats", mintsForPaymentRequest)?.original
             ?: run {
                 Toast.makeText(activity, "Failed to create payment request", Toast.LENGTH_SHORT).show()
                 return
@@ -100,9 +100,9 @@ class PaymentMethodHandler(
                     }
                 }
 
-                override fun onNfcReadingStopped() {
+                override fun onNfcReadingStopped(failedInMiddleOfTransaction: Boolean) {
                     activity.runOnUiThread {
-                        onStatusUpdate("NFC reading stopped")
+                        onStatusUpdate(if (failedInMiddleOfTransaction) "NFC reading interrupted" else "NFC reading stopped")
                     }
                 }
             })

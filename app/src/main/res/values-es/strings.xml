@@ -817,4 +817,8 @@
     <string name="developer_error_logs_entry_copy">Copiar entrada</string>
     <string name="developer_error_logs_clear_dialog_title">Borrar registros de errores</string>
     <string name="developer_error_logs_clear_dialog_message">¿Borrar todos los registros de errores almacenados? Esta acción no se puede deshacer.</string>
+
+    <string name="payment_request_tab_unified">Unificado</string>
+    <string name="payment_request_default_description">Pago de %1$d sats</string>
+    <string name="payment_request_lightning_description">Pago Numo POS de %1$d sats</string>
 </resources>

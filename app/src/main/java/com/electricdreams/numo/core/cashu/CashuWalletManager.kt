@@ -16,6 +16,9 @@ import org.cashudevkit.WalletDatabaseImpl
 import org.cashudevkit.NoPointer
 import org.cashudevkit.WalletSqliteDatabase
 import org.cashudevkit.WalletRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.cashudevkit.generateMnemonic
 
 /**
@@ -41,6 +44,9 @@ object CashuWalletManager : MintManager.MintChangeListener {
 
     @Volatile
     private var wallet: WalletRepository? = null
+
+    private val _isWalletReady = MutableStateFlow(false)
+    val isWalletReady: StateFlow<Boolean> = _isWalletReady.asStateFlow()
 
     /** Initialize from ModernPOSActivity. Safe to call multiple times. */
     fun init(context: Context) {
@@ -159,6 +165,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
 
         database = db
         wallet = newWallet
+            _isWalletReady.value = true
 
         Log.d(TAG, "Wallet restore complete. Restored ${mints.size} mints.")
         return balanceChanges
@@ -437,10 +444,12 @@ object CashuWalletManager : MintManager.MintChangeListener {
 
             database = db
             wallet = newWallet
+            _isWalletReady.value = true
 
             Log.d(TAG, "Initialized WalletRepository with ${'$'}{mints.size} mints; DB=${'$'}{dbFile.absolutePath}")
         } catch (t: Throwable) {
             Log.e(TAG, "Failed to initialize WalletRepository", t)
+            _isWalletReady.value = false
         }
     }
 
