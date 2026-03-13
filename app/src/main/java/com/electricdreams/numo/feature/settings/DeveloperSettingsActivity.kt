@@ -2,41 +2,40 @@ package com.electricdreams.numo.feature.settings
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.R
+import com.electricdreams.numo.databinding.ActivityDeveloperSettingsBinding
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.feature.onboarding.OnboardingActivity
 
 class DeveloperSettingsActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityDeveloperSettingsBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_developer_settings)
+        binding = ActivityDeveloperSettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        findViewById<View?>(R.id.back_button)?.setOnClickListener { finish() }
+        binding.backButton?.setOnClickListener { finish() }
 
-        findViewById<View>(R.id.restart_onboarding_item).setOnClickListener {
+        binding.restartOnboardingItem.setOnClickListener {
             showRestartOnboardingDialog()
         }
 
-        findViewById<View>(R.id.error_logs_item).setOnClickListener {
+        binding.errorLogsItem.setOnClickListener {
             startActivity(Intent(this, ErrorLogsActivity::class.java))
         }
 
         // Delay Lightning Invoice
-        val delayLightningInvoiceSwitch = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.delay_lightning_invoice_switch)
-        val delayLightningInvoiceItem = findViewById<View>(R.id.delay_lightning_invoice_item)
+        binding.delayLightningInvoiceSwitch.isChecked = DeveloperPrefs.isLightningInvoiceDelayed(this)
 
-        delayLightningInvoiceSwitch.isChecked = DeveloperPrefs.isLightningInvoiceDelayed(this)
-
-        delayLightningInvoiceSwitch.setOnCheckedChangeListener { _, isChecked ->
+        binding.delayLightningInvoiceSwitch.setOnCheckedChangeListener { _, isChecked ->
             DeveloperPrefs.setLightningInvoiceDelayed(this, isChecked)
         }
 
-        delayLightningInvoiceItem.setOnClickListener {
-            delayLightningInvoiceSwitch.toggle()
+        binding.delayLightningInvoiceItem.setOnClickListener {
+            binding.delayLightningInvoiceSwitch.toggle()
         }
     }
 
@@ -52,7 +51,7 @@ class DeveloperSettingsActivity : AppCompatActivity() {
                 onConfirm = {
                     // Clear onboarding completion status
                     OnboardingActivity.setOnboardingComplete(this, false)
-                    
+
                     // Navigate to onboarding
                     val intent = Intent(this, OnboardingActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK

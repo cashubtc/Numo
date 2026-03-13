@@ -7,15 +7,14 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
+import com.electricdreams.numo.databinding.ActivityHistoryBinding
 import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.ui.adapter.PaymentsHistoryAdapter
 import com.google.gson.Gson
@@ -25,32 +24,29 @@ import java.util.Collections
 
 class PaymentsHistoryActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityHistoryBinding
     private lateinit var adapter: PaymentsHistoryAdapter
-    private var emptyView: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_history)
+        binding = ActivityHistoryBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         // Let history content run behind the gesture nav pill for a modern look
         enableEdgeToEdgeWithPill(this, lightNavIcons = true)
 
         // Setup Back Button
-        val backButton: View? = findViewById(R.id.back_button)
-        backButton?.setOnClickListener { finish() }
+        binding.backButton?.setOnClickListener { finish() }
 
         // Setup RecyclerView
-        val recyclerView: RecyclerView = findViewById(R.id.history_recycler_view)
-        emptyView = findViewById(R.id.empty_view)
-
         adapter = PaymentsHistoryAdapter().apply {
             setOnItemClickListener { entry, position ->
                 handleEntryClick(entry, position)
             }
         }
 
-        recyclerView.adapter = adapter
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        binding.historyRecyclerView.adapter = adapter
+        binding.historyRecyclerView.layoutManager = LinearLayoutManager(this)
 
         // Load and display history
         loadHistory()
@@ -147,7 +143,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         adapter.setEntries(history)
 
         val isEmpty = history.isEmpty()
-        emptyView?.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        binding.emptyView.visibility = if (isEmpty) View.VISIBLE else View.GONE
     }
 
     private fun clearAllHistory() {
