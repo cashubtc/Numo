@@ -42,6 +42,12 @@ class CurrencyManager private constructor(context: Context) {
 
         /** Add entries here for currencies not on Coinbase. */
         private val CUSTOM_APIS = mapOf(
+            CURRENCY_JPY to PriceApiConfig(
+                url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=jpy",
+                parsePrice = { response ->
+                    JSONObject(response).getJSONObject("bitcoin").getDouble("jpy")
+                }
+            ),
             CURRENCY_KRW to PriceApiConfig(
                 url = "https://api.upbit.com/v1/ticker?markets=KRW-BTC",
                 parsePrice = { response ->

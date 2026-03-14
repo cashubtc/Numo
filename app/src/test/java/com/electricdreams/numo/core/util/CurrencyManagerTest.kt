@@ -109,6 +109,9 @@ class CurrencyManagerTest {
         currencyManager.setPreferredCurrency("USD")
         assertEquals("https://api.coinbase.com/v2/prices/BTC-USD/spot", currencyManager.getPriceApiUrl())
 
+        currencyManager.setPreferredCurrency("JPY")
+        assertEquals("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=jpy", currencyManager.getPriceApiUrl())
+
         currencyManager.setPreferredCurrency("KRW")
         assertEquals("https://api.upbit.com/v1/ticker?markets=KRW-BTC", currencyManager.getPriceApiUrl())
     }
@@ -167,5 +170,12 @@ class CurrencyManagerTest {
         currencyManager.setPreferredCurrency("USD")
         val coinbaseResponse = """{"data":{"amount":97500.50}}"""
         assertEquals(97500.50, currencyManager.parsePriceResponse(coinbaseResponse), 0.01)
+    }
+
+    @Test
+    fun `parsePriceResponse parses CoinGecko response for JPY`() {
+        currencyManager.setPreferredCurrency("JPY")
+        val coingeckoResponse = """{"bitcoin":{"jpy":11052002.70}}"""
+        assertEquals(11052002.70, currencyManager.parsePriceResponse(coingeckoResponse), 0.01)
     }
 }
