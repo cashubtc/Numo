@@ -170,7 +170,7 @@ data class PaymentHistoryEntry(
     fun getSwapLightningQuoteId(): String? {
         if (swapToLightningMintJson == null) return null
         return try {
-            com.google.gson.Gson().fromJson(swapToLightningMintJson, SwapToLightningMintFrame::class.java).lightningQuoteId
+            com.google.gson.Gson().fromJson(swapToLightningMintJson, PaymentHistoryEntry.Companion.SwapToLightningMintFrame::class.java).lightningQuoteId
         } catch (e: Exception) {
             null
         }
