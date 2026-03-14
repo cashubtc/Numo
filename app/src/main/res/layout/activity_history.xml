@@ -47,12 +47,31 @@
     <TextView
         android:id="@+id/section_header"
         style="@style/Text.SectionHeader"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
+        android:layout_marginStart="24dp"
         android:layout_marginTop="24dp"
         android:text="@string/history_section_payment_history"
-        app:layout_constraintTop_toBottomOf="@+id/top_bar" />
+        app:layout_constraintTop_toBottomOf="@+id/top_bar"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Total Balance (Small & Forgettable) -->
+    <TextView
+        android:id="@+id/total_balance_value"
+        style="@style/Text.Caption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:text=""
+        android:textColor="@color/color_text_tertiary"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
+        android:paddingVertical="4dp"
+        android:paddingHorizontal="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/section_header"
+        app:layout_constraintBottom_toBottomOf="@+id/section_header" />
 
     <!-- List -->
     <androidx.recyclerview.widget.RecyclerView

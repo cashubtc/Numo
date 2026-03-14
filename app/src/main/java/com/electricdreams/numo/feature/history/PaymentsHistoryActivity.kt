@@ -10,15 +10,22 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.R
+import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
+import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.databinding.ActivityHistoryBinding
 import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.ui.adapter.PaymentsHistoryAdapter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.lang.reflect.Type
 import java.util.Collections
 
@@ -26,6 +33,8 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHistoryBinding
     private lateinit var adapter: PaymentsHistoryAdapter
+    private var isBalanceHidden = false
+    private var currentTotalBalanceSats = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +46,11 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
         // Setup Back Button
         binding.backButton?.setOnClickListener { finish() }
+        
+        // Setup Total Balance click listener for privacy toggle
+        binding.totalBalanceValue.setOnClickListener {
+            toggleBalancePrivacy()
+        }
 
         // Setup RecyclerView
         adapter = PaymentsHistoryAdapter().apply {
@@ -48,6 +62,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         binding.historyRecyclerView.adapter = adapter
         binding.historyRecyclerView.layoutManager = LinearLayoutManager(this)
 
+        // Initialize display with zero or hidden state
+        updateBalanceDisplay(0L)
+
         // Load and display history
         loadHistory()
     }
@@ -56,6 +73,65 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         super.onResume()
         // Reload history when returning (e.g., after resuming a pending payment)
         loadHistory()
+        // Fetch fresh balance
+        fetchTotalBalance()
+    }
+
+    private fun toggleBalancePrivacy() {
+        isBalanceHidden = !isBalanceHidden
+        updateBalanceDisplay(currentTotalBalanceSats, animated = true)
+    }
+
+    private fun fetchTotalBalance() {
+        lifecycleScope.launch {
+            val balances = withContext(Dispatchers.IO) {
+                CashuWalletManager.getAllMintBalances()
+            }
+            val totalBalance = balances.values.sum()
+            currentTotalBalanceSats = totalBalance
+            
+            withContext(Dispatchers.Main) {
+                updateBalanceDisplay(totalBalance, animated = true)
+            }
+        }
+    }
+
+    private fun updateBalanceDisplay(totalBalance: Long, animated: Boolean = false) {
+        val totalBalanceValue = binding.totalBalanceValue ?: return
+        
+        if (animated) {
+            totalBalanceValue.animate()
+                .alpha(0f)
+                .setDuration(150)
+                .withEndAction {
+                    setCombinedBalanceText(totalBalance)
+                    totalBalanceValue.animate()
+                        .alpha(1f)
+                        .setDuration(150)
+                        .start()
+                }
+                .start()
+        } else {
+            setCombinedBalanceText(totalBalance)
+        }
+    }
+
+    private fun setCombinedBalanceText(totalBalance: Long) {
+        val textView = binding.totalBalanceValue ?: return
+        
+        if (isBalanceHidden) {
+            textView.text = "••••••"
+        } else {
+            val satsStr = Amount(totalBalance, Amount.Currency.BTC).toString()
+            val priceWorker = BitcoinPriceWorker.getInstance(this)
+            val fiatAmount = priceWorker.satoshisToFiat(totalBalance)
+            
+            if (fiatAmount > 0) {
+                textView.text = "$satsStr (≈ ${priceWorker.formatFiatAmount(fiatAmount)})"
+            } else {
+                textView.text = satsStr
+            }
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
