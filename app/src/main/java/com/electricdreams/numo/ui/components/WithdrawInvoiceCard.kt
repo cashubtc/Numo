@@ -36,7 +36,12 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
         fun onContinue(invoice: String)
     }
 
+    interface OnScanListener {
+        fun onScanClicked()
+    }
+
     private var listener: OnContinueListener? = null
+    private var scanListener: OnScanListener? = null
     
     private val iconContainer: FrameLayout
     private val invoiceIcon: ImageView
@@ -44,6 +49,7 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
     private val subtitleText: TextView
     private val invoiceInput: EditText
     private val continueButton: Button
+    private val scanButton: android.widget.ImageButton
     private val inputContainer: LinearLayout
 
     init {
@@ -61,6 +67,7 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
         subtitleText = findViewById(R.id.subtitle_text)
         invoiceInput = findViewById(R.id.invoice_input)
         continueButton = findViewById(R.id.continue_button)
+        scanButton = findViewById(R.id.scan_button)
         inputContainer = findViewById(R.id.input_container)
         
         setupListeners()
@@ -99,6 +106,11 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
                     .start()
             }
         }
+        
+        // Scan button
+        scanButton.setOnClickListener {
+            scanListener?.onScanClicked()
+        }
     }
     
     private fun updateButtonState(enabled: Boolean) {
@@ -111,6 +123,13 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
      */
     fun setOnContinueListener(listener: OnContinueListener) {
         this.listener = listener
+    }
+
+    /**
+     * Set the listener for scan action
+     */
+    fun setOnScanListener(listener: OnScanListener) {
+        this.scanListener = listener
     }
     
     /**
@@ -138,6 +157,7 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
     fun setCardEnabled(enabled: Boolean) {
         invoiceInput.isEnabled = enabled
         continueButton.isEnabled = enabled && invoiceInput.text.isNotBlank()
+        scanButton.isEnabled = enabled
         alpha = if (enabled) 1f else 0.5f
     }
     

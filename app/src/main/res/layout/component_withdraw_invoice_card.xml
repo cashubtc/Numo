@@ -70,16 +70,35 @@
         android:layout_marginTop="20dp"
         android:orientation="vertical">
 
-        <!-- Invoice Label -->
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Header with Label and Scan Button -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/withdraw_lightning_invoice_hint_label"
-            android:textAppearance="@style/Text.Caption"
-            android:textColor="@color/color_text_secondary"
-            android:textSize="12sp"
-            android:textAllCaps="true"
-            android:letterSpacing="0.05" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- Invoice Label -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/withdraw_lightning_invoice_hint_label"
+                android:textAppearance="@style/Text.Caption"
+                android:textColor="@color/color_text_secondary"
+                android:textSize="12sp"
+                android:textAllCaps="true"
+                android:letterSpacing="0.05" />
+
+            <!-- Scan Button -->
+            <ImageButton
+                android:id="@+id/scan_button"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_qr_scan"
+                android:tint="@color/color_primary"
+                android:contentDescription="@string/withdraw_scan_qr" />
+        </LinearLayout>
 
         <!-- Invoice Input -->
         <EditText

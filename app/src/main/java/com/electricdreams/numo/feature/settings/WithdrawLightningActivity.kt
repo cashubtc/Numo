@@ -21,6 +21,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -30,6 +31,7 @@ import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.LightningAddressManager
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.feature.scanner.QRScannerActivity
 import com.electricdreams.numo.ui.components.WithdrawAddressCard
 import com.electricdreams.numo.ui.components.WithdrawInvoiceCard
 import com.electricdreams.numo.ui.util.QrCodeGenerator
@@ -89,6 +91,21 @@ class WithdrawLightningActivity : AppCompatActivity() {
     private lateinit var tokenQrCode: ImageView
     private lateinit var tokenText: TextView
     private lateinit var copyTokenButton: Button
+
+    // QR Scanner Launcher
+    private val scanLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val qrValue = result.data?.getStringExtra(QRScannerActivity.EXTRA_QR_VALUE)
+            if (!qrValue.isNullOrBlank()) {
+                val cleanedInvoice = if (qrValue.startsWith("lightning:", ignoreCase = true)) {
+                    qrValue.substring(10)
+                } else {
+                    qrValue
+                }
+                invoiceCard.setInvoice(cleanedInvoice)
+            }
+        }
+    }
 
     // Balance refresh receiver
     private val balanceRefreshReceiver: BroadcastReceiver = BalanceRefreshBroadcast.createReceiver { reason ->
@@ -155,6 +172,15 @@ class WithdrawLightningActivity : AppCompatActivity() {
         invoiceCard.setOnContinueListener(object : WithdrawInvoiceCard.OnContinueListener {
             override fun onContinue(invoice: String) {
                 processInvoice(invoice)
+            }
+        })
+        
+        // Invoice card scan listener
+        invoiceCard.setOnScanListener(object : WithdrawInvoiceCard.OnScanListener {
+            override fun onScanClicked() {
+                val intent = Intent(this@WithdrawLightningActivity, QRScannerActivity::class.java)
+                intent.putExtra(QRScannerActivity.EXTRA_TITLE, getString(R.string.withdraw_scan_qr))
+                scanLauncher.launch(intent)
             }
         })
 

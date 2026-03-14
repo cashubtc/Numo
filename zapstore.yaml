@@ -1,0 +1,16 @@
+repository: https://github.com/cashubtc/numo
+description: Numo is an Android Point-of-Sale application that enables merchants toia tap-2-pay
+summary: Bitcoin's first tap to pay solution. Free and open source. No setup. Privacy by default.
+tags:
+    - bitcoin
+    - payments
+    - merchant
+    - pos
+license: MIT
+website: https://numopay.org
+images:
+    - /home/lollerfirst/Pictures/Screenshots/Screenshot_20260206-155253.png
+    - /home/lollerfirst/Pictures/Screenshots/Screenshot_20260206-155313.png
+    - /home/lollerfirst/Pictures/Screenshots/Screenshot_20260206-155412.png
+metadata_sources:
+    - github
