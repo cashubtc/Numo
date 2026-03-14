@@ -1,5 +1,6 @@
 package com.electricdreams.numo.ui.adapter
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,18 +19,43 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<PaymentsHistoryAdapter.ViewH
         fun onItemClick(entry: PaymentHistoryEntry, position: Int)
     }
 
+    fun interface OnItemDeleteListener {
+        fun onItemDelete(entry: PaymentHistoryEntry, position: Int)
+    }
+
     private val entries: MutableList<PaymentHistoryEntry> = mutableListOf()
     private val dateFormat = SimpleDateFormat("MMM d, HH:mm", Locale.getDefault())
+    
     private var onItemClickListener: OnItemClickListener? = null
+    private var onItemDeleteListener: OnItemDeleteListener? = null
+    
+    private var openItemPosition: Int = RecyclerView.NO_POSITION
 
     fun setOnItemClickListener(listener: OnItemClickListener) {
         onItemClickListener = listener
     }
 
+    fun setOnItemDeleteListener(listener: OnItemDeleteListener) {
+        onItemDeleteListener = listener
+    }
+
     fun setEntries(newEntries: List<PaymentHistoryEntry>) {
+        openItemPosition = RecyclerView.NO_POSITION
         entries.clear()
         entries.addAll(newEntries)
         notifyDataSetChanged()
+    }
+
+    fun closeOpenItem() {
+        val previousOpen = openItemPosition
+        if (previousOpen != RecyclerView.NO_POSITION) {
+            openItemPosition = RecyclerView.NO_POSITION
+            notifyItemChanged(previousOpen, "close")
+        }
+    }
+
+    private fun getDeleteWidth(context: Context): Float {
+        return 80f * context.resources.displayMetrics.density
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -38,9 +64,61 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<PaymentsHistoryAdapter.ViewH
         return ViewHolder(view)
     }
 
+    override fun onBindViewHolder(holder: ViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.contains("close")) {
+            holder.mainContent.animate()
+                .translationX(0f)
+                .setDuration(250)
+                .setInterpolator(android.view.animation.DecelerateInterpolator())
+                .start()
+            return
+        }
+        super.onBindViewHolder(holder, position, payloads)
+    }
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val entry = entries[position]
         val context = holder.itemView.context
+
+        // Reset translation immediately without animation to prevent recycled views from staying open
+        holder.mainContent.translationX = if (position == openItemPosition) -getDeleteWidth(context) else 0f
+
+        holder.mainContent.setOnLongClickListener {
+            if (openItemPosition != position) {
+                // Close previously open item if needed
+                val previousOpen = openItemPosition
+                openItemPosition = position
+                if (previousOpen != RecyclerView.NO_POSITION) {
+                    notifyItemChanged(previousOpen, "close")
+                }
+                
+                // Animate this item open
+                holder.mainContent.animate()
+                    .translationX(-getDeleteWidth(context))
+                    .setDuration(250)
+                    .setInterpolator(android.view.animation.OvershootInterpolator(1f))
+                    .start()
+            }
+            true // Consume event
+        }
+
+        holder.mainContent.setOnClickListener {
+            if (openItemPosition == position) {
+                // If it's open, a regular click should just close it
+                closeOpenItem()
+            } else {
+                if (openItemPosition != RecyclerView.NO_POSITION) {
+                    closeOpenItem()
+                } else {
+                    onItemClickListener?.onItemClick(entry, position)
+                }
+            }
+        }
+
+        holder.deleteButtonContainer.setOnClickListener {
+            closeOpenItem()
+            onItemDeleteListener?.onItemDelete(entry, position)
+        }
 
         // Display amount in the unit it was entered
         // Use BASE amount (excluding tip) for proper accounting display
@@ -106,15 +184,13 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<PaymentsHistoryAdapter.ViewH
 
         // Hide subtitle (payment type already shown in title)
         holder.subtitleText.visibility = View.GONE
-
-        holder.itemView.setOnClickListener {
-            onItemClickListener?.onItemClick(entry, position)
-        }
     }
 
     override fun getItemCount(): Int = entries.size
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val mainContent: View = view.findViewById(R.id.main_content)
+        val deleteButtonContainer: View = view.findViewById(R.id.delete_button_container)
         val amountText: TextView = view.findViewById(R.id.amount_text)
         val dateText: TextView = view.findViewById(R.id.date_text)
         val titleText: TextView = view.findViewById(R.id.title_text)

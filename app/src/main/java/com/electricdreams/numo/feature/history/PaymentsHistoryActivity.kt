@@ -57,6 +57,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             setOnItemClickListener { entry, position ->
                 handleEntryClick(entry, position)
             }
+            setOnItemDeleteListener { entry, position ->
+                handleDeleteClick(entry, position)
+            }
         }
 
         binding.historyRecyclerView.adapter = adapter
@@ -193,6 +196,39 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Toast.makeText(this, getString(R.string.history_toast_no_app), Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun handleDeleteClick(entry: PaymentHistoryEntry, position: Int) {
+        if (entry.isPending()) {
+            val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            val hideWarning = prefs.getBoolean("hide_pending_delete_warning", false)
+            if (hideWarning) {
+                deletePaymentFromHistory(position)
+            } else {
+                showPendingDeleteWarning(position)
+            }
+        } else {
+            deletePaymentFromHistory(position)
+        }
+    }
+
+    private fun showPendingDeleteWarning(position: Int) {
+        val view = layoutInflater.inflate(R.layout.dialog_pending_delete_warning, null)
+        val checkbox = view.findViewById<android.widget.CheckBox>(R.id.dont_show_again_checkbox)
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.history_dialog_pending_delete_title)
+            .setMessage(R.string.history_dialog_pending_delete_message)
+            .setView(view)
+            .setPositiveButton(R.string.history_dialog_delete_positive) { _, _ ->
+                if (checkbox.isChecked) {
+                    val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                    prefs.edit().putBoolean("hide_pending_delete_warning", true).apply()
+                }
+                deletePaymentFromHistory(position)
+            }
+            .setNegativeButton(R.string.history_dialog_delete_negative, null)
+            .show()
     }
 
     private fun showDeleteConfirmation(entry: PaymentHistoryEntry, position: Int) {
