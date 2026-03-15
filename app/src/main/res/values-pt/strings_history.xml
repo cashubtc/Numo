@@ -32,8 +32,9 @@
     <string name="transaction_detail_type_cashu_payment">Pagamento Cashu</string>
     <string name="transaction_detail_mint_from_name">De %1$s</string>
     <string name="transaction_detail_mint_unknown">Desconhecido</string>
-    <string name="transaction_detail_payment_type_lightning_value">⚡ Lightning</string>
-    <string name="transaction_detail_payment_type_cashu_value">🥜 Cashu</string>
+    <string name="transaction_detail_payment_type_lightning_value">Lightning</string>
+    <string name="transaction_detail_payment_type_cashu_value">Cashu</string>
+    <string name="transaction_detail_cashu_request_label">Solicitação Cashu</string>
 
     <!-- Transaction detail: tip label -->
     <string name="transaction_detail_tip_added_label">Gorjeta adicionada</string>
@@ -46,6 +47,17 @@
     <string name="history_share_line_amount">Valor: %1$s</string>
     <string name="history_share_line_token">Token: %1$s</string>
     <string name="history_share_line_invoice">Fatura: %1$s</string>
+
+    <!-- Transaction detail: redesigned screen -->
+    <string name="transaction_detail_overflow_menu">Mais opções</string>
+    <string name="transaction_detail_exchange_rate_label">Taxa de câmbio</string>
+    <string name="transaction_detail_invoice_label">Fatura</string>
+    <string name="transaction_detail_transaction_id_label">ID da transação</string>
+    <string name="transaction_detail_print_receipt">Imprimir recibo</string>
+    <string name="transaction_detail_menu_label">Rotular transação</string>
+    <string name="transaction_detail_menu_copy_id">Copiar ID da transação</string>
+    <string name="transaction_detail_menu_delete">Excluir transação</string>
+    <string name="transaction_detail_toast_id_copied">ID da transação copiado para a área de transferência</string>
 
     <!-- Basket receipt -->
     <string name="basket_receipt_title">Recibo</string>
