@@ -66,6 +66,12 @@
     <string name="transaction_detail_menu_delete">Eliminar transacción</string>
     <string name="transaction_detail_toast_id_copied">ID de transacción copiado al portapapeles</string>
 
+    <!-- Transaction detail: label -->
+    <string name="transaction_detail_label_dialog_title">Etiquetar transacción</string>
+    <string name="transaction_detail_label_dialog_hint">Ingresa una etiqueta</string>
+    <string name="transaction_detail_label_dialog_save">Guardar etiqueta</string>
+    <string name="transaction_detail_label_row_title">Etiqueta</string>
+
     <!-- Activity screen -->
     <string name="history_total_balance_label">Saldo total</string>
     <string name="history_menu_export_activity">Exportar actividad</string>

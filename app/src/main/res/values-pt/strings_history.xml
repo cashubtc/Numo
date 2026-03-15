@@ -66,6 +66,12 @@
     <string name="transaction_detail_menu_delete">Excluir transação</string>
     <string name="transaction_detail_toast_id_copied">ID da transação copiado para a área de transferência</string>
 
+    <!-- Transaction detail: label -->
+    <string name="transaction_detail_label_dialog_title">Rotular transação</string>
+    <string name="transaction_detail_label_dialog_hint">Digite um rótulo</string>
+    <string name="transaction_detail_label_dialog_save">Salvar rótulo</string>
+    <string name="transaction_detail_label_row_title">Rótulo</string>
+
     <!-- Activity screen -->
     <string name="history_total_balance_label">Saldo total</string>
     <string name="history_menu_export_activity">Exportar atividade</string>

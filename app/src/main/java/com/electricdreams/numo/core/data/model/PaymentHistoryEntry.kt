@@ -98,6 +98,10 @@ data class PaymentHistoryEntry(
      */
     @SerializedName("swapToLightningMintJson")
     val swapToLightningMintJson: String? = null,
+
+    /** User-assigned label for this transaction */
+    @SerializedName("label")
+    val label: String? = null,
 ) {
 
     /** Check if this payment includes a tip */
