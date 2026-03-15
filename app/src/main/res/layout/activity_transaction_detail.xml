@@ -81,16 +81,16 @@
                 android:textColor="@color/color_text_primary"
                 tools:text="$20.00" />
 
-            <!-- Sat Amount Display -->
+            <!-- Secondary amount (sat equivalent for fiat entries, or fiat equivalent for sat entries) -->
             <TextView
                 android:id="@+id/detail_amount_subtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:gravity="center"
-                android:textSize="16sp"
-                android:fontFamily="sans-serif"
-                android:textColor="@color/color_text_tertiary"
+                android:textSize="17sp"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@color/color_text_secondary"
                 tools:text="₿27,849" />
 
             <!-- Fiat equivalent (shown below sat amount on sat-entry transactions) -->
@@ -100,8 +100,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:gravity="center"
-                android:textSize="15sp"
-                android:fontFamily="sans-serif"
+                android:textSize="17sp"
+                android:fontFamily="sans-serif-medium"
                 android:textColor="@color/color_text_secondary"
                 android:visibility="gone"
                 tools:text="$0.01" />
@@ -112,7 +112,7 @@
                 style="@style/Text.Caption"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="16dp"
                 android:gravity="center"
                 tools:text="March 15, 2026 at 11:31 AM" />
 
