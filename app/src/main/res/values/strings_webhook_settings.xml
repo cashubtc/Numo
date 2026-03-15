@@ -2,6 +2,12 @@
     <string name="webhook_settings_title">Webhooks</string>
     <string name="webhook_settings_description">Send a POST request with payment metadata each time this terminal receives a payment.</string>
     <string name="webhook_settings_section_endpoints">Endpoints</string>
+    <string name="webhook_settings_section_actions">Actions</string>
+    <string name="webhook_settings_sync_all">Sync All Transactions</string>
+    <string name="webhook_settings_sync_all_success">Synced %1$d transactions</string>
+    <string name="webhook_settings_sync_all_empty">No completed transactions to sync</string>
+    <string name="webhook_settings_syncing_progress">Syncing %1$d of %2$d</string>
+    <string name="webhook_settings_sync_cancelled">Sync cancelled</string>
     <string name="webhook_settings_empty">No webhook endpoints configured yet.</string>
     <string name="webhook_settings_add_endpoint">Add Endpoint</string>
     <string name="webhook_settings_dialog_continue">Continue</string>

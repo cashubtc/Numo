@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:background="@drawable/bg_bottom_sheet">
+
+    <TextView
+        android:id="@+id/sync_progress_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/webhook_settings_sync_all"
+        android:textSize="20sp"
+        android:textColor="@color/color_text_primary"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginBottom="16dp" />
+
+    <TextView
+        android:id="@+id/sync_progress_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Syncing..."
+        android:textSize="16sp"
+        android:textColor="@color/color_text_secondary"
+        android:layout_marginBottom="24dp" />
+
+    <ProgressBar
+        android:id="@+id/sync_progress_bar"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        />
+</LinearLayout>
