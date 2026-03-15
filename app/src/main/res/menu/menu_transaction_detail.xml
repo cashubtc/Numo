@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_label_transaction"
+        android:icon="@drawable/ic_edit"
+        android:title="@string/transaction_detail_menu_label" />
+
+    <item
+        android:id="@+id/menu_copy_id"
+        android:icon="@drawable/ic_copy"
+        android:title="@string/transaction_detail_menu_copy_id" />
+
+    <item
+        android:id="@+id/menu_delete_transaction"
+        android:icon="@drawable/ic_trash"
+        android:title="@string/transaction_detail_menu_delete" />
+
+</menu>
