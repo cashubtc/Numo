@@ -423,6 +423,7 @@
     <string name="item_list_empty_title">Sem itens</string>
     <string name="item_list_empty_subtitle">Toque em + para adicionar seu primeiro item</string>
     <string name="item_list_import_from_csv">Importar de CSV</string>
+    <string name="item_list_export_to_csv">Exportar para CSV</string>
     <string name="item_list_clear_all">Excluir todos os itens</string>
 
     <!-- Item entry / edit -->

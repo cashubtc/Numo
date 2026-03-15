@@ -199,6 +199,8 @@
     <string name="restore_mints_title">Select mints to restore</string>
     <string name="restore_mints_count">0 mints selected</string>
     <string name="restore_mints_start_button">Start Restore</string>
+    <string name="restore_confirm_dialog_message">This will restore your wallet from the entered seed phrase.\n\n⚠️ IMPORTANT:\n• Make sure you have backed up your current seed phrase\n• This action cannot be undone\n• Restore will be attempted for %1$d selected mint(s)\n\n%2$s</string>
+    <string name="restore_confirm_current_seed_note">Your current seed phrase starts with: \"%1$s...\"</string>
 
     <string name="restore_progress_title">Restoring Wallet</string>
     <string name="restore_progress_status">Connecting to mints...</string>

@@ -193,6 +193,8 @@
     <string name="restore_mints_title">Selecciona los mints que quieres restaurar</string>
     <string name="restore_mints_count">0 mints seleccionados</string>
     <string name="restore_mints_start_button">Iniciar restauración</string>
+    <string name="restore_confirm_dialog_message">Esto restaurará tu cartera a partir de la frase semilla introducida.\n\n⚠️ IMPORTANTE:\n• Asegúrate de haber hecho una copia de seguridad de tu frase semilla actual\n• Esta acción no se puede deshacer\n• Se intentará restaurar en %1$d mint(s) seleccionado(s)\n\n%2$s</string>
+    <string name="restore_confirm_current_seed_note">Tu frase semilla actual comienza con: \"%1$s...\"</string>
 
     <string name="restore_progress_title">Restaurando cartera</string>
     <string name="restore_progress_status">Conectando con los mints...</string>
@@ -423,6 +425,7 @@
     <string name="item_list_empty_title">Sin artículos</string>
     <string name="item_list_empty_subtitle">Toca + para añadir tu primer artículo</string>
     <string name="item_list_import_from_csv">Importar desde CSV</string>
+    <string name="item_list_export_to_csv">Exportar a CSV</string>
     <string name="item_list_clear_all">Eliminar todos los artículos</string>
 
     <!-- Item entry / edit -->
