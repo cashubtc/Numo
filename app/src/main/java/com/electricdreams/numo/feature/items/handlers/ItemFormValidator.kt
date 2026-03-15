@@ -3,6 +3,7 @@ package com.electricdreams.numo.feature.items.handlers
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.PriceType
 
 /**
@@ -45,14 +46,14 @@ class ItemFormValidator(
 
         // Validate SKU is not duplicate
         if (!skuHandler.isValid()) {
-            Toast.makeText(activity, "Please use a unique SKU", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, R.string.item_list_toast_sku_not_unique, Toast.LENGTH_SHORT).show()
             skuHandler.getSkuInput().requestFocus()
             return ValidationResult(false)
         }
 
         // Validate GTIN is not duplicate
         if (!gtinHandler.isValid()) {
-            Toast.makeText(activity, "Please use a unique GTIN", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, R.string.item_list_toast_gtin_not_unique, Toast.LENGTH_SHORT).show()
             gtinHandler.getGtinInput().requestFocus()
             return ValidationResult(false)
         }

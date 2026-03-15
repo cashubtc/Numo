@@ -145,7 +145,7 @@ class PinEntryActivity : AppCompatActivity() {
             else -> {
                 // Wrong PIN - show error animation and start 3-second cooldown
                 pinDots.showError()
-                showError(result.error ?: "Incorrect PIN")
+                showError(result.error ?: getString(R.string.security_toast_incorrect_pin))
                 enteredPin.clear()
                 handler.postDelayed({
                     pinDots.clear()
@@ -168,7 +168,7 @@ class PinEntryActivity : AppCompatActivity() {
         cooldownTimer = object : CountDownTimer(durationMs, 100) {
             override fun onTick(millisUntilFinished: Long) {
                 val seconds = (millisUntilFinished / 1000.0)
-                showError(String.format("Wait %.1fs", seconds))
+                showError(String.format(getString(R.string.security_toast_wait_seconds), seconds))
             }
 
             override fun onFinish() {
@@ -211,9 +211,9 @@ class PinEntryActivity : AppCompatActivity() {
         val seconds = ((remainingMs % 60000) / 1000).toInt()
 
         lockoutMessage.text = if (minutes > 0) {
-            "Try again in $minutes minute${if (minutes > 1) "s" else ""}"
+            getString(R.string.pin_entry_try_again_minutes, minutes, if (minutes > 1) "s" else "")
         } else {
-            "Try again in $seconds second${if (seconds > 1) "s" else ""}"
+            getString(R.string.pin_entry_try_again_seconds, seconds, if (seconds > 1) "s" else "")
         }
     }
 

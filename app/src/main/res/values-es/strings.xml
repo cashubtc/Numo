@@ -193,6 +193,8 @@
     <string name="restore_mints_title">Selecciona los mints que quieres restaurar</string>
     <string name="restore_mints_count">0 mints seleccionados</string>
     <string name="restore_mints_start_button">Iniciar restauración</string>
+    <string name="restore_confirm_dialog_message">Esto restaurará tu cartera a partir de la frase semilla introducida.\n\n⚠️ IMPORTANTE:\n• Asegúrate de haber hecho una copia de seguridad de tu frase semilla actual\n• Esta acción no se puede deshacer\n• Se intentará restaurar en %1$d mint(s) seleccionado(s)\n\n%2$s</string>
+    <string name="restore_confirm_current_seed_note">Tu frase semilla actual comienza con: \"%1$s...\"</string>
 
     <string name="restore_progress_title">Restaurando cartera</string>
     <string name="restore_progress_status">Conectando con los mints...</string>
@@ -423,6 +425,7 @@
     <string name="item_list_empty_title">Sin artículos</string>
     <string name="item_list_empty_subtitle">Toca + para añadir tu primer artículo</string>
     <string name="item_list_import_from_csv">Importar desde CSV</string>
+    <string name="item_list_export_to_csv">Exportar a CSV</string>
     <string name="item_list_clear_all">Eliminar todos los artículos</string>
 
     <!-- Item entry / edit -->
@@ -817,4 +820,34 @@
     <string name="developer_error_logs_entry_copy">Copiar entrada</string>
     <string name="developer_error_logs_clear_dialog_title">Borrar registros de errores</string>
     <string name="developer_error_logs_clear_dialog_message">¿Borrar todos los registros de errores almacenados? Esta acción no se puede deshacer.</string>
+
+    <!-- PIN Setup Screen -->
+    <string name="pin_setup_create_title">Crear un PIN</string>
+    <string name="pin_setup_new_pin_title">Nuevo PIN</string>
+    <string name="pin_setup_create_subtitle">Elige un PIN de 4 a 16 dígitos para proteger ajustes sensibles</string>
+    <string name="pin_setup_confirm_title">Confirmar PIN</string>
+    <string name="pin_setup_confirm_subtitle">Vuelve a introducir tu PIN para confirmar</string>
+    <string name="pin_setup_digits">%d dígitos</string>
+    <string name="pin_setup_continue">Continuar</string>
+    <string name="pin_setup_back">Atrás</string>
+    <string name="pin_setup_enter_at_least">Introduce al menos %d dígitos</string>
+    <string name="pin_setup_more_needed">%1$d dígito%2$s · Faltan %3$d más</string>
+    <string name="pin_setup_set_pin">Establecer PIN</string>
+
+    <!-- PIN Entry Screen -->
+    <string name="pin_entry_title">Introduce el PIN</string>
+    <string name="pin_entry_subtitle">Introduce tu PIN para continuar</string>
+    <string name="pin_entry_forgot">¿Has olvidado el PIN?</string>
+    <string name="pin_entry_too_many_attempts">Demasiados intentos</string>
+    <string name="pin_entry_try_again_minutes">Inténtalo de nuevo en %1$d minuto%2$s</string>
+    <string name="pin_entry_try_again_seconds">Inténtalo de nuevo en %1$d segundo%2$s</string>
+    <string name="pin_entry_reset_recovery">Restablecer con frase de recuperación</string>
+
+    <!-- PIN Reset Screen -->
+    <string name="pin_reset_title">Restablecer PIN</string>
+    <string name="pin_reset_warning_title">Restablecer tu PIN</string>
+    <string name="pin_reset_warning_message">Introduce tu frase de recuperación de 12 palabras para restablecer tu PIN. Tu PIN actual se eliminará y podrás establecer uno nuevo.</string>
+    <string name="pin_reset_recovery_phrase">Frase de recuperación</string>
+    <string name="pin_reset_paste_clipboard">Pegar del portapapeles</string>
+    <string name="pin_reset_button">Restablecer PIN</string>
 </resources>

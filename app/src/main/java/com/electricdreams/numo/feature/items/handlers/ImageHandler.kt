@@ -18,6 +18,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.exifinterface.media.ExifInterface
+import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.Item
 import com.electricdreams.numo.core.util.ItemManager
 import java.io.File
@@ -121,7 +122,7 @@ class ImageHandler(
         if (granted) {
             takePicture()
         } else {
-            Toast.makeText(activity, "Camera permission is required to take pictures", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, R.string.item_list_toast_camera_permission, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -187,7 +188,7 @@ class ImageHandler(
             )
             takePictureLauncher.launch(selectedImageUri)
         } catch (ex: IOException) {
-            Toast.makeText(activity, "Error creating image file: ${ex.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, activity.getString(R.string.item_list_toast_error_creating_image, ex.message), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -211,7 +212,7 @@ class ImageHandler(
                 imagePlaceholder.visibility = View.GONE
                 updatePhotoButtonText()
             } catch (e: Exception) {
-                Toast.makeText(activity, "Failed to load image", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, R.string.item_list_toast_failed_load_image, Toast.LENGTH_SHORT).show()
             }
         }
     }

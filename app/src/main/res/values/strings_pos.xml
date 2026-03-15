@@ -28,4 +28,9 @@
     <string name="item_selection_redo_button">Redo change</string>
     <string name="item_selection_undo_button_short">Undo</string>
     <string name="item_selection_redo_button_short">Redo</string>
+
+    <!-- POS: toasts -->
+    <string name="pos_toast_basket_empty">Your basket is empty</string>
+    <string name="pos_toast_invalid_amount">Invalid payment amount</string>
+    <string name="pos_toast_no_stock">No more stock available</string>
 </resources>

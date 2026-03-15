@@ -5,6 +5,7 @@ import android.os.Looper
 import android.widget.Toast
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
+import com.electricdreams.numo.R
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
@@ -82,7 +83,7 @@ class PaymentResultHandler(
             onComplete()
 
             // Brief, inline feedback for context
-            Toast.makeText(activity, "Payment error: $message", Toast.LENGTH_LONG).show()
+            Toast.makeText(activity, activity.getString(R.string.payment_toast_error_payment, message), Toast.LENGTH_LONG).show()
 
             // Global failure screen with explicit recovery actions
             val intent = Intent(activity, PaymentFailureActivity::class.java)

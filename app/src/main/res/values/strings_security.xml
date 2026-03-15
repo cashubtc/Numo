@@ -38,4 +38,18 @@
     <string name="security_settings_remove_pin_dialog_title">Remove PIN?</string>
     <string name="security_settings_remove_pin_dialog_message">This will disable PIN protection. Anyone with access to this device will be able to access sensitive features like withdrawing funds and viewing your seed phrase.</string>
     <string name="security_settings_remove_pin_confirm">Remove</string>
+
+    <!-- Security: toast messages -->
+    <string name="security_toast_wallet_not_initialized">Wallet not initialized</string>
+    <string name="security_toast_copied">Copied to clipboard</string>
+    <string name="security_toast_pin_set_success">PIN set successfully</string>
+    <string name="security_toast_pin_must_be_digits">PIN must be 4–16 digits</string>
+    <string name="security_toast_pin_dont_match">PINs don\'t match</string>
+    <string name="security_toast_pin_failed">Failed to set PIN</string>
+    <string name="security_toast_clipboard_empty">Clipboard is empty</string>
+    <string name="security_toast_seed_invalid">Please paste a valid 12-word seed phrase</string>
+    <string name="security_toast_seed_pasted">Seed phrase pasted</string>
+    <string name="security_toast_pin_removed">PIN removed</string>
+    <string name="security_toast_incorrect_pin">Incorrect PIN</string>
+    <string name="security_toast_wait_seconds">Wait %.1fs</string>
 </resources>

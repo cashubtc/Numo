@@ -631,11 +631,11 @@ class ItemSelectionActivity : AppCompatActivity() {
             // Ask to save changes
             AlertDialog.Builder(this)
                 .setTitle(R.string.item_selection_save_basket)
-                .setMessage("Save changes to this basket?")
+                .setMessage(R.string.item_selection_save_basket_message)
                 .setPositiveButton(R.string.common_save) { _, _ ->
                     saveCurrentBasket()
                 }
-                .setNegativeButton("Discard") { _, _ ->
+                .setNegativeButton(R.string.item_selection_discard) { _, _ ->
                     savedBasketManager.clearEditingState()
                     basketManager.clearBasket()
                     basketManager.clearHistory()

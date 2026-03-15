@@ -156,7 +156,7 @@ class PinResetActivity : AppCompatActivity() {
         val clipData = clipboard.primaryClip
 
         if (clipData == null || clipData.itemCount == 0) {
-            Toast.makeText(this, "Clipboard is empty", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.security_toast_clipboard_empty, Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -164,7 +164,7 @@ class PinResetActivity : AppCompatActivity() {
         val words = pastedText.split("\\s+".toRegex()).filter { it.isNotBlank() }
 
         if (words.size != 12) {
-            Toast.makeText(this, "Please paste a valid 12-word seed phrase", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.security_toast_seed_invalid, Toast.LENGTH_LONG).show()
             return
         }
 
@@ -176,7 +176,7 @@ class PinResetActivity : AppCompatActivity() {
         }
 
         validateInputs()
-        Toast.makeText(this, "Seed phrase pasted", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, R.string.security_toast_seed_pasted, Toast.LENGTH_SHORT).show()
     }
 
     private fun validateInputs(): Boolean {
@@ -252,7 +252,7 @@ class PinResetActivity : AppCompatActivity() {
         pinManager.removePin()
         pinManager.resetLockout()
 
-        Toast.makeText(this, "PIN removed", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, R.string.security_toast_pin_removed, Toast.LENGTH_SHORT).show()
 
         // Ask if user wants to set a new PIN
         DialogHelper.showConfirmation(

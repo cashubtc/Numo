@@ -423,6 +423,7 @@
     <string name="item_list_empty_title">Sem itens</string>
     <string name="item_list_empty_subtitle">Toque em + para adicionar seu primeiro item</string>
     <string name="item_list_import_from_csv">Importar de CSV</string>
+    <string name="item_list_export_to_csv">Exportar para CSV</string>
     <string name="item_list_clear_all">Excluir todos os itens</string>
 
     <!-- Item entry / edit -->
@@ -817,4 +818,34 @@
     <string name="developer_error_logs_entry_copy">Copiar entrada</string>
     <string name="developer_error_logs_clear_dialog_title">Limpar registros de erros</string>
     <string name="developer_error_logs_clear_dialog_message">Limpar todos os registros de erros armazenados? Esta ação não pode ser desfeita.</string>
+
+    <!-- PIN Setup Screen -->
+    <string name="pin_setup_create_title">Criar um PIN</string>
+    <string name="pin_setup_new_pin_title">Novo PIN</string>
+    <string name="pin_setup_create_subtitle">Escolha um PIN de 4 a 16 dígitos para proteger configurações sensíveis</string>
+    <string name="pin_setup_confirm_title">Confirmar PIN</string>
+    <string name="pin_setup_confirm_subtitle">Digite novamente seu PIN para confirmar</string>
+    <string name="pin_setup_digits">%d dígitos</string>
+    <string name="pin_setup_continue">Continuar</string>
+    <string name="pin_setup_back">Voltar</string>
+    <string name="pin_setup_enter_at_least">Digite pelo menos %d dígitos</string>
+    <string name="pin_setup_more_needed">%1$d dígito%2$s · Faltam %3$d</string>
+    <string name="pin_setup_set_pin">Definir PIN</string>
+
+    <!-- PIN Entry Screen -->
+    <string name="pin_entry_title">Insira o PIN</string>
+    <string name="pin_entry_subtitle">Digite seu PIN para continuar</string>
+    <string name="pin_entry_forgot">Esqueceu o PIN?</string>
+    <string name="pin_entry_too_many_attempts">Tentativas excessivas</string>
+    <string name="pin_entry_try_again_minutes">Tente novamente em %1$d minuto%2$s</string>
+    <string name="pin_entry_try_again_seconds">Tente novamente em %1$d segundo%2$s</string>
+    <string name="pin_entry_reset_recovery">Redefinir com frase de recuperação</string>
+
+    <!-- PIN Reset Screen -->
+    <string name="pin_reset_title">Redefinir PIN</string>
+    <string name="pin_reset_warning_title">Redefina seu PIN</string>
+    <string name="pin_reset_warning_message">Digite sua frase de recuperação de 12 palavras para redefinir seu PIN. Seu PIN existente será removido e você poderá definir um novo.</string>
+    <string name="pin_reset_recovery_phrase">Frase de recuperação</string>
+    <string name="pin_reset_paste_clipboard">Colar da área de transferência</string>
+    <string name="pin_reset_button">Redefinir PIN</string>
 </resources>

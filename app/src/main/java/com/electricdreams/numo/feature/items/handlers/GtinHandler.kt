@@ -72,10 +72,10 @@ class GtinHandler(
     fun handleBarcodeScanResult(barcodeValue: String?) {
         if (!barcodeValue.isNullOrEmpty()) {
             if (itemManager.isGtinDuplicate(barcodeValue, editItemId)) {
-                Toast.makeText(activity, "This GTIN is already used by another item", Toast.LENGTH_LONG).show()
+                Toast.makeText(activity, R.string.barcode_scanner_toast_gtin_not_unique, Toast.LENGTH_LONG).show()
             } else {
                 gtinInput.setText(barcodeValue)
-                Toast.makeText(activity, "GTIN scanned successfully", Toast.LENGTH_SHORT).show()
+                Toast.makeText(activity, R.string.barcode_scanner_toast_gtin_scanned, Toast.LENGTH_SHORT).show()
             }
         }
     }

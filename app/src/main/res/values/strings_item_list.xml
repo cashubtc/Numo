@@ -11,4 +11,13 @@
     <string name="item_list_toast_imported_items">Imported %1$d items</string>
     <string name="item_list_toast_no_items_imported">No items imported from CSV</string>
     <string name="item_list_toast_error_importing_csv">Error importing CSV file: %1$s</string>
+
+    <!-- Item list: toast messages -->
+    <string name="item_list_toast_camera_permission">Camera permission is required to take pictures</string>
+    <string name="item_list_toast_error_creating_image">Error creating image file: %1$s</string>
+    <string name="item_list_toast_failed_load_image">Failed to load image</string>
+    <string name="item_list_toast_sku_not_unique">Please use a unique SKU</string>
+    <string name="item_list_toast_gtin_not_unique">Please use a unique GTIN</string>
+    <string name="item_list_toast_failed_save_item">Failed to save item</string>
+    <string name="item_list_toast_saved_without_image">Item saved but image could not be saved</string>
 </resources>

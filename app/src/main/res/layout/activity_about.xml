@@ -32,7 +32,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="About"
+            android:text="@string/about_title"
             android:textAppearance="@style/Text.Title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -99,7 +99,7 @@
                 android:paddingHorizontal="24dp"
                 android:paddingTop="8dp"
                 android:paddingBottom="8dp"
-                android:text="Device Information"
+                android:text="@string/about_device_info"
                 android:textSize="13sp"
                 android:textColor="@color/color_text_secondary"
                 android:fontFamily="sans-serif-medium"
@@ -125,7 +125,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="App Version"
+                        android:text="@string/about_app_version"
                         android:textSize="15sp"
                         android:textColor="@color/color_text_secondary" />
 
@@ -150,7 +150,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Build Number"
+                        android:text="@string/about_build_number"
                         android:textSize="15sp"
                         android:textColor="@color/color_text_secondary" />
 
@@ -175,7 +175,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Device"
+                        android:text="@string/about_device"
                         android:textSize="15sp"
                         android:textColor="@color/color_text_secondary" />
 
@@ -200,7 +200,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Android Version"
+                        android:text="@string/about_android_version"
                         android:textSize="15sp"
                         android:textColor="@color/color_text_secondary" />
 
@@ -226,7 +226,7 @@
                 android:paddingHorizontal="24dp"
                 android:paddingTop="24dp"
                 android:paddingBottom="8dp"
-                android:text="About Us"
+                android:text="@string/about_about_us"
                 android:textSize="13sp"
                 android:textColor="@color/color_text_secondary"
                 android:fontFamily="sans-serif-medium"
@@ -256,7 +256,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Terms of Service"
+                    android:text="@string/about_terms_of_service"
                     android:textSize="17sp"
                     android:textColor="@color/color_text_primary" />
 
@@ -290,7 +290,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Privacy Policy"
+                    android:text="@string/about_privacy_policy"
                     android:textSize="17sp"
                     android:textColor="@color/color_text_primary" />
 
@@ -329,7 +329,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Website"
+                        android:text="@string/about_website"
                         android:textSize="17sp"
                         android:textColor="@color/color_text_primary" />
 
@@ -376,7 +376,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Contact Us"
+                        android:text="@string/about_contact_us"
                         android:textSize="17sp"
                         android:textColor="@color/color_text_primary" />
 

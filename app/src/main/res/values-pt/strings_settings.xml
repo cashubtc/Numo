@@ -30,6 +30,10 @@
     <string name="settings_item_mints_title">Mints</string>
     <string name="settings_item_mints_subtitle">Gerencie os mints Cashu e as configurações Lightning</string>
 
+    <!-- Settings items: webhooks -->
+    <string name="settings_item_webhooks_title">Webhooks</string>
+    <string name="settings_item_webhooks_subtitle">Enviar metadados de pagamento para endpoints externos</string>
+
     <!-- Settings items: items catalog -->
     <string name="settings_item_items_title">Itens</string>
     <string name="settings_item_items_subtitle">Crie e gerencie itens do catálogo</string>
@@ -67,4 +71,86 @@
 
     <!-- Settings PIN verification -->
     <string name="settings_verify_pin_subtitle">Verifique para acessar as configurações</string>
+
+    <!-- Settings: About screen toasts & dialogs -->
+    <string name="settings_about_toast_developer_already_enabled">O modo desenvolvedor já está habilitado</string>
+    <string name="settings_about_toast_developer_enabled">Modo desenvolvedor habilitado!</string>
+    <string name="settings_about_toast_developer_taps_remaining">%1$d toques restantes para habilitar o modo desenvolvedor</string>
+    <string name="settings_about_toast_link_error">Não foi possível abrir o link</string>
+    <string name="settings_about_toast_no_email">Nenhum aplicativo de e-mail encontrado</string>
+    <string name="settings_about_dialog_terms_title">Termos de Serviço</string>
+    <string name="settings_about_dialog_privacy_title">Política de Privacidade</string>
+
+    <!-- About Screen -->
+    <string name="about_title">Sobre</string>
+    <string name="about_device_info">Informações do dispositivo</string>
+    <string name="about_app_version">Versão do app</string>
+    <string name="about_build_number">Número da compilação</string>
+    <string name="about_device">Dispositivo</string>
+    <string name="about_android_version">Versão do Android</string>
+    <string name="about_about_us">Sobre nós</string>
+    <string name="about_terms_of_service">Termos de Serviço</string>
+    <string name="about_privacy_policy">Política de Privacidade</string>
+    <string name="about_website">Site</string>
+    <string name="about_contact_us">Contato</string>
+
+    <!-- Termos de Serviço -->
+    <string name="terms_of_service_full">NUMO WALLET - TERMOS DE SERVIÇO
+
+1. ACEITAÇÃO
+Ao usar este aplicativo de carteira, você aceita estes termos.
+
+2. NATUREZA DO SERVIÇO
+Esta é uma carteira de Bitcoin autocustodiada usando tecnologia Cashu ecash. Você é o único responsável pelos seus fundos e frase semente.
+
+3. FRASE SEMENTE
+Sua frase semente de 12 palavras é a ÚNICA forma de recuperar sua carteira. Nunca a compartilhe. Armazene-a com segurança offline. Não podemos recuperar frases semente perdidas.
+
+4. SEM GARANTIA
+Este software é fornecido "como está" sem garantia de qualquer tipo. Use por sua conta e risco.
+
+5. LIMITAÇÃO DE RESPONSABILIDADE
+Não somos responsáveis por qualquer perda de fundos, seja por erros de software, erros do usuário ou falhas de mints de terceiros.
+
+6. MINTS ECASH
+Os tokens ecash são mantidos por mints de terceiros. Esses mints podem falhar ou ficar indisponíveis. Diversifique entre vários mints.
+
+7. PRIVACIDADE
+Esta carteira não coleta dados pessoais. As transações são processadas através de mints ecash que podem ter suas próprias políticas de privacidade.
+
+8. ATUALIZAÇÕES
+Estes termos podem ser atualizados. O uso contínuo constitui aceitação.
+
+Última atualização: Novembro 2024</string>
+
+    <!-- Política de Privacidade -->
+    <string name="privacy_policy_full">NUMO WALLET - POLÍTICA DE PRIVACIDADE
+
+1. COLETA DE DADOS
+Numo não coleta, armazena ou transmite nenhum dado pessoal. O aplicativo é executado inteiramente no seu dispositivo.
+
+2. DADOS DA CARTEIRA
+Sua frase semente e dados da carteira são armazenados localmente no seu dispositivo. Não temos acesso a essas informações.
+
+3. COMUNICAÇÕES DE REDE
+O aplicativo se comunica com:
+• Mints de Cashu (para gerenciar tokens ecash)
+• APIs de preços (para obter taxas de câmbio)
+• Relés de Nostr (para recursos opcionais de backup)
+
+Esses serviços podem ter suas próprias políticas de privacidade.
+
+4. ANALÍTICOS
+Não usamos nenhum serviço de análise ou rastreamento.
+
+5. MINTS DE TERCEIROS
+Ao usar mints ecash, o operador do mint pode ver os valores e horários das transações. Escolha mints confiáveis.
+
+6. BACKUP
+Se você habilitar o backup de Nostr, dados criptografados da carteira são publicados em relés de Nostr. Apenas você pode descriptografar esses dados com sua frase semente.
+
+7. CONTATO
+Para perguntas sobre privacidade: numopay@proton.me
+
+Última atualização: Novembro 2024</string>
 </resources>

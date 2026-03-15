@@ -74,4 +74,87 @@
 
     <!-- Settings PIN verification -->
     <string name="settings_verify_pin_subtitle">Verify to access settings</string>
+
+    <!-- Settings: About screen toasts & dialogs -->
+    <string name="settings_about_toast_developer_already_enabled">Developer mode is already enabled</string>
+    <string name="settings_about_toast_developer_enabled">Developer mode enabled!</string>
+    <string name="settings_about_toast_developer_taps_remaining">%1$d more taps to enable developer mode</string>
+    <string name="settings_about_toast_link_error">Could not open link</string>
+    <string name="settings_about_toast_no_email">No email app found</string>
+    <string name="settings_about_dialog_terms_title">Terms of Service</string>
+    <string name="settings_about_dialog_privacy_title">Privacy Policy</string>
+
+    <!-- About Screen -->
+    <string name="about_title">About</string>
+    <string name="about_device_info">Device Information</string>
+    <string name="about_app_version">App Version</string>
+    <string name="about_build_number">Build Number</string>
+    <string name="about_device">Device</string>
+    <string name="about_android_version">Android Version</string>
+    <string name="about_about_us">About Us</string>
+    <string name="about_terms_of_service">Terms of Service</string>
+    <string name="about_privacy_policy">Privacy Policy</string>
+    <string name="about_website">Website</string>
+    <string name="about_contact_us">Contact Us</string>
+    <string name="about_email_subject">Numo Support</string>
+
+    <!-- Terms of Service Full Text -->
+    <string name="terms_of_service_full">NUMO WALLET - TERMS OF SERVICE
+
+1. ACCEPTANCE
+By using this wallet application, you agree to these terms.
+
+2. NATURE OF SERVICE
+This is a self-custodial Bitcoin wallet using Cashu ecash technology. You are solely responsible for your funds and seed phrase.
+
+3. SEED PHRASE
+Your 12-word seed phrase is the ONLY way to recover your wallet. Never share it. Store it securely offline. We cannot recover lost seed phrases.
+
+4. NO WARRANTY
+This software is provided "as is" without warranty of any kind. Use at your own risk.
+
+5. LIMITATION OF LIABILITY
+We are not liable for any loss of funds, whether through bugs, user error, or third-party mint failures.
+
+6. ECASH MINTS
+Ecash tokens are held by third-party mints. These mints may fail or become unavailable. Diversify across multiple mints.
+
+7. PRIVACY
+This wallet does not collect personal data. Transactions are processed through ecash mints which may have their own privacy policies.
+
+8. UPDATES
+These terms may be updated. Continued use constitutes acceptance.
+
+Last updated: November 2024</string>
+
+    <!-- Privacy Policy Full Text -->
+    <string name="privacy_policy_full">NUMO WALLET - PRIVACY POLICY
+
+1. DATA COLLECTION
+Numo does not collect, store, or transmit any personal data. The app runs entirely on your device.
+
+2. WALLET DATA
+Your seed phrase and wallet data are stored locally on your device. We have no access to this information.
+
+3. NETWORK COMMUNICATIONS
+The app communicates with:
+• Cashu mints (to manage ecash tokens)
+• Price APIs (to fetch exchange rates)
+• Nostr relays (for optional backup features)
+
+These services may have their own privacy policies.
+
+4. ANALYTICS
+We do not use any analytics or tracking services.
+
+5. THIRD-PARTY MINTS
+When using ecash mints, the mint operator may see transaction amounts and timing. Choose trusted mints.
+
+6. BACKUP
+If you enable Nostr backup, encrypted wallet data is published to Nostr relays. Only you can decrypt this data with your seed phrase.
+
+7. CONTACT
+For privacy questions: numopay@proton.me
+
+Last updated: November 2024</string>
 </resources>

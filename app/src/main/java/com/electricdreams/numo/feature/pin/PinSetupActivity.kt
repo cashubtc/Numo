@@ -121,15 +121,15 @@ class PinSetupActivity : AppCompatActivity() {
     private fun updateUIForStep() {
         when (currentStep) {
             Step.ENTER_PIN -> {
-                titleText.text = if (mode == MODE_CHANGE) "New PIN" else "Create a PIN"
-                subtitleText.text = "Choose a 4–16 digit PIN to protect sensitive settings"
+                titleText.text = if (mode == MODE_CHANGE) getString(R.string.pin_setup_new_pin_title) else getString(R.string.pin_setup_create_title)
+                subtitleText.text = getString(R.string.pin_setup_create_subtitle)
                 
                 step1Indicator.background = ContextCompat.getDrawable(this, R.drawable.bg_pin_dot_filled)
                 step2Indicator.background = ContextCompat.getDrawable(this, R.drawable.bg_pin_dot_empty)
             }
             Step.CONFIRM_PIN -> {
-                titleText.text = "Confirm PIN"
-                subtitleText.text = "Re-enter your PIN to confirm"
+                titleText.text = getString(R.string.pin_setup_confirm_title)
+                subtitleText.text = getString(R.string.pin_setup_confirm_subtitle)
                 
                 step1Indicator.background = ContextCompat.getDrawable(this, R.drawable.bg_pin_dot_filled)
                 step2Indicator.background = ContextCompat.getDrawable(this, R.drawable.bg_pin_dot_filled)
@@ -145,17 +145,18 @@ class PinSetupActivity : AppCompatActivity() {
         continueButton.alpha = if (isValid) 1f else 0.4f
         
         continueButton.text = when (currentStep) {
-            Step.ENTER_PIN -> "Continue"
-            Step.CONFIRM_PIN -> "Set PIN"
+            Step.ENTER_PIN -> getString(R.string.pin_setup_continue)
+            Step.CONFIRM_PIN -> getString(R.string.pin_setup_set_pin)
         }
     }
 
     private fun updatePinLengthLabel() {
         val length = enteredPin.length
+        val minLength = PinManager.MIN_PIN_LENGTH
         pinLengthLabel.text = when {
-            length == 0 -> "Enter at least 4 digits"
-            length < PinManager.MIN_PIN_LENGTH -> "$length digit${if (length > 1) "s" else ""} · ${PinManager.MIN_PIN_LENGTH - length} more needed"
-            else -> "$length digit${if (length > 1) "s" else ""}"
+            length == 0 -> getString(R.string.pin_setup_enter_at_least, minLength)
+            length < minLength -> getString(R.string.pin_setup_more_needed, length, if (length > 1) "s" else "", minLength - length)
+            else -> getString(R.string.pin_setup_digits, length)
         }
         
         pinLengthLabel.setTextColor(
@@ -170,7 +171,7 @@ class PinSetupActivity : AppCompatActivity() {
         when (currentStep) {
             Step.ENTER_PIN -> {
                 if (!pinManager.isValidPin(enteredPin.toString())) {
-                    showError("PIN must be 4–16 digits")
+                    showError(getString(R.string.security_toast_pin_must_be_digits))
                     return
                 }
                 
@@ -182,7 +183,7 @@ class PinSetupActivity : AppCompatActivity() {
             }
             Step.CONFIRM_PIN -> {
                 if (enteredPin.toString() != firstPin) {
-                    showError("PINs don't match")
+                    showError(getString(R.string.security_toast_pin_dont_match))
                     pinDots.showError()
                     handler.postDelayed({
                         enteredPin.clear()
@@ -196,13 +197,13 @@ class PinSetupActivity : AppCompatActivity() {
                 // PINs match - save it
                 if (pinManager.setPin(firstPin)) {
                     pinDots.showSuccess()
-                    Toast.makeText(this, "PIN set successfully", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, R.string.security_toast_pin_set_success, Toast.LENGTH_SHORT).show()
                     handler.postDelayed({
                         setResult(Activity.RESULT_OK)
                         finish()
                     }, 400)
                 } else {
-                    showError("Failed to set PIN")
+                    showError(getString(R.string.security_toast_pin_failed))
                 }
             }
         }

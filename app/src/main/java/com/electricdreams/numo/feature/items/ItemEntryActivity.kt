@@ -332,7 +332,7 @@ class ItemEntryActivity : AppCompatActivity() {
 
         val success = if (isEditMode) itemManager.updateItem(item) else itemManager.addItem(item)
         if (!success) {
-            Toast.makeText(this, "Failed to save item", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.item_list_toast_failed_save_item, Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -346,12 +346,12 @@ class ItemEntryActivity : AppCompatActivity() {
         val bitmap = imageHandler.correctedBitmap
         if (bitmap != null) {
             if (!itemManager.saveItemImageBitmap(item, bitmap)) {
-                Toast.makeText(this, "Item saved but image could not be saved", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, R.string.item_list_toast_saved_without_image, Toast.LENGTH_LONG).show()
             }
         } else {
             imageHandler.selectedImageUri?.let { uri ->
                 if (!itemManager.saveItemImage(item, uri)) {
-                    Toast.makeText(this, "Item saved but image could not be saved", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, R.string.item_list_toast_saved_without_image, Toast.LENGTH_LONG).show()
                 }
             }
         }

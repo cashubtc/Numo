@@ -198,6 +198,8 @@
     <string name="restore_mints_title">Select mints to restore</string>
     <string name="restore_mints_count">0 mints selected</string>
     <string name="restore_mints_start_button">Start Restore</string>
+    <string name="restore_confirm_dialog_message">This will restore your wallet from the entered seed phrase.\n\n⚠️ IMPORTANT:\n• Make sure you have backed up your current seed phrase\n• This action cannot be undone\n• Restore will be attempted for %1$d selected mint(s)\n\n%2$s</string>
+    <string name="restore_confirm_current_seed_note">Your current seed phrase starts with: \"%1$s...\"</string>
 
     <string name="restore_progress_title">Restoring Wallet</string>
     <string name="restore_progress_status">Connecting to mints...</string>
@@ -553,7 +555,6 @@
 
     <string name="item_selection_save_button">Save</string>
     <string name="item_selection_saved_baskets_button">Saved</string>
-    <string name="item_selection_save_basket">Save Basket</string>
     <string name="item_selection_save_basket_hint">Enter a name (optional)</string>
 
     <!-- Save Basket Dialog -->
@@ -828,4 +829,34 @@
     <string name="developer_error_logs_entry_copy">Copy Entry</string>
     <string name="developer_error_logs_clear_dialog_title">Clear Error Logs</string>
     <string name="developer_error_logs_clear_dialog_message">Clear all stored error logs? This cannot be undone.</string>
+
+    <!-- PIN Setup Screen -->
+    <string name="pin_setup_create_title">Create a PIN</string>
+    <string name="pin_setup_new_pin_title">New PIN</string>
+    <string name="pin_setup_create_subtitle">Choose a 4–16 digit PIN to protect sensitive settings</string>
+    <string name="pin_setup_confirm_title">Confirm PIN</string>
+    <string name="pin_setup_confirm_subtitle">Re-enter your PIN to confirm</string>
+    <string name="pin_setup_digits">%d digits</string>
+    <string name="pin_setup_continue">Continue</string>
+    <string name="pin_setup_back">Back</string>
+    <string name="pin_setup_enter_at_least">Enter at least %d digits</string>
+    <string name="pin_setup_more_needed">%1$d digit%2$s · %3$d more needed</string>
+    <string name="pin_setup_set_pin">Set PIN</string>
+
+    <!-- PIN Entry Screen -->
+    <string name="pin_entry_title">Enter PIN</string>
+    <string name="pin_entry_subtitle">Enter your PIN to continue</string>
+    <string name="pin_entry_forgot">Forgot PIN?</string>
+    <string name="pin_entry_too_many_attempts">Too Many Attempts</string>
+    <string name="pin_entry_try_again_minutes">Try again in %1$d minute%2$s</string>
+    <string name="pin_entry_try_again_seconds">Try again in %1$d second%2$s</string>
+    <string name="pin_entry_reset_recovery">Reset with Recovery Phrase</string>
+
+    <!-- PIN Reset Screen -->
+    <string name="pin_reset_title">Reset PIN</string>
+    <string name="pin_reset_warning_title">Reset Your PIN</string>
+    <string name="pin_reset_warning_message">Enter your 12-word recovery phrase to reset your PIN. Your existing PIN will be removed and you can set a new one.</string>
+    <string name="pin_reset_recovery_phrase">Recovery Phrase</string>
+    <string name="pin_reset_paste_clipboard">Paste from Clipboard</string>
+    <string name="pin_reset_button">Reset PIN</string>
 </resources>

@@ -3,6 +3,7 @@ package com.electricdreams.numo.feature.items.handlers
 import android.app.Activity
 import android.content.Intent
 import android.widget.Toast
+import com.electricdreams.numo.R
 import com.electricdreams.numo.PaymentRequestActivity
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.CheckoutBasket
@@ -32,7 +33,7 @@ class CheckoutHandler(
      */
     fun proceedToCheckout() {
         if (basketManager.getTotalItemCount() == 0) {
-            Toast.makeText(activity, "Your basket is empty", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, R.string.pos_toast_basket_empty, Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -44,7 +45,7 @@ class CheckoutHandler(
         val totalSatoshis = basketManager.getTotalSatoshis(btcPrice)
 
         if (totalSatoshis <= 0) {
-            Toast.makeText(activity, "Invalid payment amount", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity, R.string.pos_toast_invalid_amount, Toast.LENGTH_SHORT).show()
             return
         }
 

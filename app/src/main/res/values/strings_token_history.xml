@@ -9,4 +9,8 @@
     <string name="token_history_dialog_clear_title">Clear History</string>
     <string name="token_history_dialog_clear_message">Are you sure you want to clear all token history? This action cannot be undone.</string>
     <string name="token_history_dialog_clear_positive">Clear All</string>
+
+    <!-- Token history: toast messages -->
+    <string name="token_history_toast_copied">Token copied to clipboard</string>
+    <string name="token_history_toast_no_app">No apps available to handle this token</string>
 </resources>

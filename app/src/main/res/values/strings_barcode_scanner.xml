@@ -22,4 +22,8 @@
     <string name="barcode_format_qr_code">QR Code</string>
     <string name="barcode_format_data_matrix">Data Matrix</string>
     <string name="barcode_format_unknown">Unknown</string>
+
+    <!-- Barcode scanner: toasts -->
+    <string name="barcode_scanner_toast_gtin_not_unique">This GTIN is already used by another item</string>
+    <string name="barcode_scanner_toast_gtin_scanned">GTIN scanned successfully</string>
 </resources>

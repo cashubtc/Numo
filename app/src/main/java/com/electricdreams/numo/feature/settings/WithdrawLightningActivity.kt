@@ -230,7 +230,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
     private fun createCashuToken(amountSats: Long) {
         if (amountSats > balance) {
-            Toast.makeText(this, "Insufficient balance", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.withdraw_toast_insufficient_balance, Toast.LENGTH_SHORT).show()
             return
         }
 

@@ -3,4 +3,13 @@
     <string name="item_selection_dialog_clear_basket_title">Clear Basket</string>
     <string name="item_selection_dialog_clear_basket_message">Remove all items from basket?</string>
     <string name="item_selection_dialog_clear_basket_positive">Clear</string>
+
+    <!-- Item selection: toasts -->
+    <string name="item_selection_toast_no_stock">No more stock available</string>
+    <string name="item_selection_toast_enter_variation">Enter a variation name</string>
+
+    <!-- Item selection: save basket dialog -->
+    <string name="item_selection_save_basket">Save Basket</string>
+    <string name="item_selection_save_basket_message">Save changes to this basket?</string>
+    <string name="item_selection_discard">Discard</string>
 </resources>

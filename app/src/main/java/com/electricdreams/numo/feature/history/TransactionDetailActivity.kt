@@ -470,7 +470,7 @@ class TransactionDetailActivity : AppCompatActivity() {
         try {
             startActivity(chooserIntent)
         } catch (e: Exception) {
-            Toast.makeText(this, "No apps available to handle this payment", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.history_toast_no_app, Toast.LENGTH_SHORT).show()
         }
     }
 

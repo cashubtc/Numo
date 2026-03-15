@@ -1,0 +1,4 @@
+<resources>
+    <!-- Withdraw: toast messages -->
+    <string name="withdraw_toast_insufficient_balance">Insufficient balance</string>
+</resources>

@@ -38,4 +38,18 @@
     <string name="security_settings_remove_pin_dialog_title">¿Eliminar PIN?</string>
     <string name="security_settings_remove_pin_dialog_message">Esto desactivará la protección con PIN. Cualquiera que tenga acceso a este dispositivo podrá acceder a funciones sensibles como retirar fondos y ver tu frase semilla.</string>
     <string name="security_settings_remove_pin_confirm">Eliminar</string>
+
+    <!-- Security: toast messages -->
+    <string name="security_toast_wallet_not_initialized">Cartera no inicializada</string>
+    <string name="security_toast_copied">Copiado al portapapeles</string>
+    <string name="security_toast_pin_set_success">PIN configurado correctamente</string>
+    <string name="security_toast_pin_must_be_digits">El PIN debe tener entre 4 y 16 dígitos</string>
+    <string name="security_toast_pin_dont_match">Los PINs no coinciden</string>
+    <string name="security_toast_pin_failed">Error al configurar el PIN</string>
+    <string name="security_toast_clipboard_empty">El portapapeles está vacío</string>
+    <string name="security_toast_seed_invalid">Por favor, pega una frase semilla válida de 12 palabras</string>
+    <string name="security_toast_seed_pasted">Frase semilla pegada</string>
+    <string name="security_toast_pin_removed">PIN eliminado</string>
+    <string name="security_toast_incorrect_pin">PIN incorrecto</string>
+    <string name="security_toast_wait_seconds">Espera %.1fs</string>
 </resources>
