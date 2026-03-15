@@ -9,6 +9,8 @@
     <string name="history_row_title_cashu_payment">Pago Cashu</string>
     <string name="history_row_title_cash_in">Entrada de efectivo</string>
     <string name="history_row_title_cash_out">Salida de efectivo</string>
+    <string name="history_row_title_payment_received">Pago recibido</string>
+    <string name="history_row_title_withdrawal">Retiro</string>
     <string name="history_row_status_tap_to_resume">Toca para reanudar</string>
 
     <!-- History: dialogs, toasts, chooser titles -->
@@ -58,6 +60,11 @@
     <string name="transaction_detail_menu_copy_id">Copiar ID de transacción</string>
     <string name="transaction_detail_menu_delete">Eliminar transacción</string>
     <string name="transaction_detail_toast_id_copied">ID de transacción copiado al portapapeles</string>
+
+    <!-- Activity screen -->
+    <string name="history_total_balance_label">Saldo total</string>
+    <string name="history_menu_export_activity">Exportar actividad</string>
+    <string name="history_export_coming_soon">Exportar próximamente</string>
 
     <!-- Basket receipt -->
     <string name="basket_receipt_title">Recibo</string>

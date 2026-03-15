@@ -14,21 +14,25 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.R
+import androidx.appcompat.widget.PopupMenu
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.databinding.ActivityHistoryBinding
+import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
+import com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry
 import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.ui.adapter.PaymentsHistoryAdapter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.reflect.Type
 import java.util.Collections
+import java.util.Date
 
 class PaymentsHistoryActivity : AppCompatActivity() {
 
@@ -53,6 +57,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             toggleBalancePrivacy()
         }
 
+        // Setup overflow menu button
+        binding.overflowButton?.setOnClickListener { showOverflowMenu(it) }
+
         // Setup RecyclerView
         adapter = PaymentsHistoryAdapter().apply {
             setOnItemClickListener { entry, position ->
@@ -71,71 +78,16 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
         // Load and display history
         loadHistory()
+
+        // Load wallet balance
+        loadBalance()
     }
 
     override fun onResume() {
         super.onResume()
         // Reload history when returning (e.g., after resuming a pending payment)
         loadHistory()
-        // Fetch fresh balance
-        fetchTotalBalance()
-    }
-
-    private fun toggleBalancePrivacy() {
-        isBalanceHidden = !isBalanceHidden
-        updateBalanceDisplay(currentTotalBalanceSats, animated = true)
-    }
-
-    private fun fetchTotalBalance() {
-        lifecycleScope.launch {
-            val balances = withContext(Dispatchers.IO) {
-                CashuWalletManager.getAllMintBalances()
-            }
-            val totalBalance = balances.values.sum()
-            currentTotalBalanceSats = totalBalance
-            
-            withContext(Dispatchers.Main) {
-                updateBalanceDisplay(totalBalance, animated = true)
-            }
-        }
-    }
-
-    private fun updateBalanceDisplay(totalBalance: Long, animated: Boolean = false) {
-        val totalBalanceValue = binding.totalBalanceValue ?: return
-        
-        if (animated) {
-            totalBalanceValue.animate()
-                .alpha(0f)
-                .setDuration(150)
-                .withEndAction {
-                    setCombinedBalanceText(totalBalance)
-                    totalBalanceValue.animate()
-                        .alpha(1f)
-                        .setDuration(150)
-                        .start()
-                }
-                .start()
-        } else {
-            setCombinedBalanceText(totalBalance)
-        }
-    }
-
-    private fun setCombinedBalanceText(totalBalance: Long) {
-        val textView = binding.totalBalanceValue ?: return
-        
-        if (isBalanceHidden) {
-            textView.text = "••••••"
-        } else {
-            val satsStr = Amount(totalBalance, Amount.Currency.BTC).toString()
-            val priceWorker = BitcoinPriceWorker.getInstance(this)
-            val fiatAmount = priceWorker.satoshisToFiat(totalBalance)
-            
-            if (fiatAmount > 0) {
-                textView.text = "$satsStr (≈ ${priceWorker.formatFiatAmount(fiatAmount)})"
-            } else {
-                textView.text = satsStr
-            }
-        }
+        loadBalance()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -157,6 +109,42 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         }
     }
 
+    private fun loadBalance() {
+        lifecycleScope.launch {
+            try {
+                val balances = withContext(Dispatchers.IO) {
+                    CashuWalletManager.getAllMintBalances()
+                }
+                val totalSats = balances.values.sum()
+
+                // Display sat balance
+                val satAmount = Amount(totalSats, Amount.Currency.BTC)
+                binding.balanceSats?.text = satAmount.toString()
+
+                // Display fiat balance
+                val currencyCode = CurrencyManager.getInstance(this@PaymentsHistoryActivity)
+                    .getCurrentCurrency()
+                val btcPrice = BitcoinPriceWorker.getInstance(this@PaymentsHistoryActivity)
+                    .getCurrentPrice()
+
+                if (btcPrice > 0) {
+                    val fiatValue = (totalSats.toDouble() / 100_000_000.0) * btcPrice
+                    val fiatCurrency = Amount.Currency.fromCode(currencyCode)
+                    val fiatMinorUnits = kotlin.math.round(fiatValue * 100).toLong()
+                    val fiatAmount = Amount(fiatMinorUnits, fiatCurrency)
+                    binding.balanceFiat?.text = fiatAmount.toString()
+                } else {
+                    // No price available, show sats as primary
+                    binding.balanceFiat?.text = satAmount.toString()
+                    binding.balanceSats?.visibility = View.GONE
+                }
+            } catch (e: Exception) {
+                // Silently handle - balance display is supplementary
+                binding.balanceFiat?.text = ""
+                binding.balanceSats?.text = ""
+            }
+        }
+    }
 
     private fun handleEntryClick(entry: PaymentHistoryEntry, position: Int) {
         if (entry.isPending()) {
@@ -295,12 +283,56 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun loadHistory() {
-        val history = getPaymentHistory().toMutableList()
-        Collections.reverse(history) // Show newest first
-        adapter.setEntries(history)
+    private fun showOverflowMenu(anchor: View) {
+        val popup = PopupMenu(this, anchor, android.view.Gravity.END)
+        popup.menuInflater.inflate(R.menu.menu_activity_history, popup.menu)
+        popup.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.menu_export_activity -> {
+                    Toast.makeText(this, R.string.history_export_coming_soon, Toast.LENGTH_SHORT).show()
+                    true
+                }
+                else -> false
+            }
+        }
+        popup.show()
+    }
 
-        val isEmpty = history.isEmpty()
+    private fun loadHistory() {
+        val paymentHistory = getPaymentHistory()
+
+        // Fetch withdrawal history and convert to PaymentHistoryEntry
+        val withdrawHistory = AutoWithdrawManager.getInstance(this).getHistory()
+        val withdrawAsPayments = withdrawHistory
+            .filter { it.status != WithdrawHistoryEntry.STATUS_FAILED }
+            .map { w ->
+                PaymentHistoryEntry(
+                    id = w.id,
+                    token = w.token ?: "",
+                    amount = -w.amountSats, // Negative = outgoing
+                    date = Date(w.timestamp),
+                    rawUnit = "sat",
+                    rawEntryUnit = "sat",
+                    enteredAmount = w.amountSats,
+                    bitcoinPrice = null,
+                    mintUrl = w.mintUrl,
+                    paymentRequest = null,
+                    rawStatus = when (w.status) {
+                        WithdrawHistoryEntry.STATUS_COMPLETED -> PaymentHistoryEntry.STATUS_COMPLETED
+                        WithdrawHistoryEntry.STATUS_PENDING -> PaymentHistoryEntry.STATUS_PENDING
+                        else -> PaymentHistoryEntry.STATUS_COMPLETED
+                    },
+                    paymentType = PaymentHistoryEntry.TYPE_LIGHTNING,
+                )
+            }
+
+        // Merge and sort by date descending (newest first)
+        val merged = (paymentHistory + withdrawAsPayments)
+            .sortedByDescending { it.date.time }
+
+        adapter.setEntries(merged)
+
+        val isEmpty = merged.isEmpty()
         binding.emptyView.visibility = if (isEmpty) View.VISIBLE else View.GONE
     }
 
@@ -427,7 +459,6 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     basketId = existing.basketId, // Preserve basket ID
                     tipAmountSats = existing.tipAmountSats, // Preserve tip info
                     tipPercentage = existing.tipPercentage, // Preserve tip info
-                    swapToLightningMintJson = existing.swapToLightningMintJson, // Preserve swap metadata
                 )
                 history[index] = updated
 

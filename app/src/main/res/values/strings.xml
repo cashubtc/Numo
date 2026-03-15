@@ -263,6 +263,7 @@ Last updated: November 2024</string>
 
     
     <string name="common_back">Back</string>
+    <string name="common_search">Search</string>
     <string name="developer_settings_title">Developer Settings</string>
     <string name="developer_settings_section_debugging">Debugging</string>
     <string name="developer_settings_restart_onboarding_title">Restart Onboarding</string>
