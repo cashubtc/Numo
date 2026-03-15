@@ -75,7 +75,8 @@
     <!-- Activity screen -->
     <string name="history_total_balance_label">Saldo total</string>
     <string name="history_menu_export_activity">Exportar actividad</string>
-    <string name="history_export_coming_soon">Exportar próximamente</string>
+    <string name="history_export_success">Actividad exportada a CSV</string>
+    <string name="history_export_error">Error al exportar actividad</string>
 
     <!-- Basket receipt -->
     <string name="basket_receipt_title">Recibo</string>

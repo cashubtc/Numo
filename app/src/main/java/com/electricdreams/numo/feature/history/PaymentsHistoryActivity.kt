@@ -8,6 +8,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -31,8 +33,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.reflect.Type
+import java.text.SimpleDateFormat
 import java.util.Collections
 import java.util.Date
+import java.util.Locale
 
 class PaymentsHistoryActivity : AppCompatActivity() {
 
@@ -40,6 +44,16 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     private lateinit var adapter: PaymentsHistoryAdapter
     private var isBalanceHidden = false
     private var currentTotalBalanceSats = 0L
+
+    private val csvExportLauncher: ActivityResultLauncher<String> =
+        registerForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+            if (uri != null) {
+                ActivityCsvExportHelper.exportActivityToCsvUri(
+                    context = this,
+                    uri = uri
+                )
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -289,7 +303,8 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_export_activity -> {
-                    Toast.makeText(this, R.string.history_export_coming_soon, Toast.LENGTH_SHORT).show()
+                    val dateStr = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+                    csvExportLauncher.launch("numo_activity_export_$dateStr.csv")
                     true
                 }
                 else -> false
