@@ -85,6 +85,9 @@ class TransactionDetailActivity : AppCompatActivity() {
         setupViews()
     }
 
+    private val isWithdrawal: Boolean
+        get() = entry.amount < 0
+
     private fun setupViews() {
         // Back button
         findViewById<ImageButton>(R.id.back_button).setOnClickListener { finish() }
@@ -95,8 +98,13 @@ class TransactionDetailActivity : AppCompatActivity() {
         // Display transaction details
         displayTransactionDetails()
 
-        // Print Receipt button
-        findViewById<View>(R.id.btn_print_receipt).setOnClickListener { openBasketReceipt() }
+        // Print Receipt button - only for incoming payments, not withdrawals
+        val printReceiptBtn = findViewById<View>(R.id.btn_print_receipt)
+        if (isWithdrawal) {
+            printReceiptBtn.visibility = View.GONE
+        } else {
+            printReceiptBtn.setOnClickListener { openBasketReceipt() }
+        }
     }
 
     private fun showOverflowMenu(anchor: View) {
@@ -129,8 +137,8 @@ class TransactionDetailActivity : AppCompatActivity() {
         val amountSubtitleText: TextView = findViewById(R.id.detail_amount_subtitle)
         val fiatEquivalentText: TextView = findViewById(R.id.detail_fiat_equivalent)
 
-        // Use BASE amount (excluding tip) for display
-        val baseAmountSats = entry.getBaseAmountSats()
+        // Use BASE amount (excluding tip) for display; use absolute value for withdrawals
+        val baseAmountSats = kotlin.math.abs(entry.getBaseAmountSats())
         val baseSatAmount = Amount(baseAmountSats, Amount.Currency.BTC)
 
         // Determine what to show as primary vs secondary amount
@@ -168,9 +176,10 @@ class TransactionDetailActivity : AppCompatActivity() {
 
         // Payment Type
         val paymentTypeText: TextView = findViewById(R.id.detail_payment_type)
-        paymentTypeText.text = when (paymentType) {
-            PaymentHistoryEntry.TYPE_LIGHTNING -> getString(R.string.transaction_detail_payment_type_lightning_value)
-            PaymentHistoryEntry.TYPE_CASHU -> getString(R.string.transaction_detail_payment_type_cashu_value)
+        paymentTypeText.text = when {
+            isWithdrawal -> getString(R.string.transaction_detail_type_withdrawal)
+            paymentType == PaymentHistoryEntry.TYPE_LIGHTNING -> getString(R.string.transaction_detail_payment_type_lightning_value)
+            paymentType == PaymentHistoryEntry.TYPE_CASHU -> getString(R.string.transaction_detail_payment_type_cashu_value)
             else -> getString(R.string.transaction_detail_type_payment_received)
         }
 
@@ -211,6 +220,20 @@ class TransactionDetailActivity : AppCompatActivity() {
             mintUrlText.text = getMintDisplayName(primaryMintUrl)
         } else {
             mintUrlText.text = getString(R.string.transaction_detail_mint_unknown)
+        }
+
+        // Sent To row (withdrawals only)
+        val sentToRow: View = findViewById(R.id.row_sent_to)
+        val sentToText: TextView = findViewById(R.id.detail_sent_to)
+        val copyDestinationBtn: ImageButton = findViewById(R.id.btn_copy_destination)
+
+        val destination = entry.paymentRequest
+        if (isWithdrawal && !destination.isNullOrEmpty()) {
+            sentToText.text = destination
+            copyDestinationBtn.setOnClickListener { copyDestination(destination) }
+            sentToRow.visibility = View.VISIBLE
+        } else {
+            sentToRow.visibility = View.GONE
         }
 
         // Invoice / Transaction ID row
@@ -331,6 +354,17 @@ class TransactionDetailActivity : AppCompatActivity() {
         Toast.makeText(
             this,
             getString(R.string.history_toast_invoice_copied),
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    private fun copyDestination(destination: String) {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("Destination", destination)
+        clipboard.setPrimaryClip(clip)
+        Toast.makeText(
+            this,
+            getString(R.string.transaction_detail_destination_copied),
             Toast.LENGTH_SHORT
         ).show()
     }

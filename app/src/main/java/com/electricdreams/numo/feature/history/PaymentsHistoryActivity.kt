@@ -316,7 +316,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     enteredAmount = w.amountSats,
                     bitcoinPrice = null,
                     mintUrl = w.mintUrl,
-                    paymentRequest = null,
+                    paymentRequest = w.destination.ifBlank { w.lightningAddress },
                     rawStatus = when (w.status) {
                         WithdrawHistoryEntry.STATUS_COMPLETED -> PaymentHistoryEntry.STATUS_COMPLETED
                         WithdrawHistoryEntry.STATUS_PENDING -> PaymentHistoryEntry.STATUS_PENDING

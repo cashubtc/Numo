@@ -261,6 +261,63 @@
 
             </LinearLayout>
 
+            <!-- Sent To Row (withdrawals only) -->
+            <LinearLayout
+                android:id="@+id/row_sent_to"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_arrow_up_send"
+                    app:tint="@color/color_text_secondary"
+                    android:contentDescription="@null" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+
+                    <TextView
+                        style="@style/Text.BodyBold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/transaction_detail_sent_to_label" />
+
+                    <TextView
+                        android:id="@+id/detail_sent_to"
+                        style="@style/Text.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        tools:text="erik@primal.net" />
+
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/btn_copy_destination"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_copy"
+                    android:padding="4dp"
+                    app:tint="@color/color_text_quaternary"
+                    android:contentDescription="@string/transaction_detail_sent_to_label" />
+
+            </LinearLayout>
+
             <!-- Invoice / Transaction ID Row -->
             <LinearLayout
                 android:id="@+id/row_invoice"
