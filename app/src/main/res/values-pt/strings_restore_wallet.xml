@@ -2,6 +2,8 @@
     <!-- Restore wallet: confirm dialog + summaries -->
     <string name="restore_confirm_dialog_title">Confirmar restauração</string>
     <string name="restore_confirm_dialog_positive">Restaurar</string>
+    <string name="restore_confirm_dialog_message">Isso irá restaurar sua carteira a partir da frase seed inserida.\n\n⚠️ IMPORTANTE:\n• Certifique-se de ter feito backup da sua frase seed atual\n• Esta ação não pode ser desfeita\n• A restauração será tentada em %1$d mint(s) selecionado(s)\n\n%2$s</string>
+    <string name="restore_confirm_current_seed_note">Sua frase seed atual começa com: \"%1$s...\"</string>
 
     <string name="restore_success_recovered_summary">Foram recuperados %1$d sats em %2$d mint(s)</string>
     <string name="restore_success_balance_changed_summary">O saldo mudou em %1$d sats</string>

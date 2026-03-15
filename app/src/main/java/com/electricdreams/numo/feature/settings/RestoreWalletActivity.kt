@@ -607,16 +607,13 @@ class RestoreWalletActivity : AppCompatActivity() {
         val currentMnemonic = CashuWalletManager.getMnemonic()
         val mintCount = selectedMints.size
 
-        val message = buildString {
-            append("This will restore your wallet from the entered seed phrase.\n\n")
-            append("⚠️ IMPORTANT:\n")
-            append("• Make sure you have backed up your current seed phrase\n")
-            append("• This action cannot be undone\n")
-            append("• Restore will be attempted for $mintCount selected mint(s)\n\n")
-            if (currentMnemonic != null) {
-                append("Your current seed phrase starts with: \"${currentMnemonic.split(" ").take(3).joinToString(" ")}...\"")
-            }
+        val currentSeedNote = if (currentMnemonic != null) {
+            getString(R.string.restore_confirm_current_seed_note, currentMnemonic.split(" ").take(3).joinToString(" "))
+        } else {
+            ""
         }
+
+        val message = getString(R.string.restore_confirm_dialog_message, mintCount, currentSeedNote)
 
         AlertDialog.Builder(this)
             .setTitle(R.string.restore_confirm_dialog_title)
