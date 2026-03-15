@@ -25,6 +25,7 @@ import com.electricdreams.numo.ui.util.DialogHelper
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -39,6 +40,7 @@ class WebhookSettingsActivity : AppCompatActivity() {
     private lateinit var qrScannerLauncher: ActivityResultLauncher<Intent>
     private var currentDialog: AlertDialog? = null
     private var isSyncing: Boolean = false
+    private var syncJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -133,7 +135,27 @@ class WebhookSettingsActivity : AppCompatActivity() {
         val syncButton = findViewById<View>(R.id.sync_all_button)
         syncButton.alpha = 0.5f
 
-        lifecycleScope.launch {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_sync_progress, null)
+        val progressBar = dialogView.findViewById<ProgressBar>(R.id.sync_progress_bar)
+        val progressMessage = dialogView.findViewById<TextView>(R.id.sync_progress_message)
+        
+        progressBar.isIndeterminate = true
+        progressMessage.text = getString(R.string.webhook_settings_syncing_progress, 0, 0)
+        
+        val progressDialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .setNegativeButton(R.string.common_cancel) { _, _ ->
+                syncJob?.cancel()
+                isSyncing = false
+                syncButton.alpha = 1.0f
+                Toast.makeText(this, R.string.webhook_settings_sync_cancelled, Toast.LENGTH_SHORT).show()
+            }
+            .create()
+            
+        progressDialog.show()
+
+        syncJob = lifecycleScope.launch {
             try {
                 val history = withContext(Dispatchers.IO) {
                     PaymentsHistoryActivity.getPaymentHistory(this@WebhookSettingsActivity)
@@ -142,6 +164,7 @@ class WebhookSettingsActivity : AppCompatActivity() {
                 val completedTransactions = history.filter { it.isCompleted() }
 
                 if (completedTransactions.isEmpty()) {
+                    progressDialog.dismiss()
                     Toast.makeText(
                         this@WebhookSettingsActivity,
                         R.string.webhook_settings_sync_all_empty,
@@ -149,25 +172,34 @@ class WebhookSettingsActivity : AppCompatActivity() {
                     ).show()
                     return@launch
                 }
+                
+                progressMessage.text = getString(
+                    R.string.webhook_settings_syncing_progress, 
+                    completedTransactions.size, 
+                    completedTransactions.size
+                )
+                progressBar.isIndeterminate = false
+                progressBar.max = completedTransactions.size
+                progressBar.progress = completedTransactions.size
 
                 var successCount = 0
                 val dispatcher = PaymentWebhookDispatcher.getInstance(this@WebhookSettingsActivity)
 
-                completedTransactions.forEach { transaction ->
-                    val result = dispatcher.dispatchPaymentReceivedNow(transaction)
-                    if (result.successCount > 0) {
-                        successCount++
-                    }
-                }
+                val result = dispatcher.dispatchBulkPaymentsNow(completedTransactions)
+                successCount = result.successCount
 
+                progressDialog.dismiss()
                 Toast.makeText(
                     this@WebhookSettingsActivity,
                     getString(R.string.webhook_settings_sync_all_success, successCount),
                     Toast.LENGTH_SHORT
                 ).show()
+            } catch (e: Exception) {
+                progressDialog.dismiss()
             } finally {
                 isSyncing = false
                 syncButton.alpha = 1.0f
+                syncJob = null
             }
         }
     }

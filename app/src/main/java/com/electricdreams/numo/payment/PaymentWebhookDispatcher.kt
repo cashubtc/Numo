@@ -147,6 +147,16 @@ class PaymentWebhookDispatcher(
         val terminal: TerminalMeta,
     )
 
+    data class BulkWebhookPayload(
+        val event: String,
+        val payloadVersion: Int,
+        val eventId: String,
+        val timestampMs: Long,
+        val timestampIso: String,
+        val events: List<PaymentReceivedEvent>,
+        val terminal: TerminalMeta,
+    )
+
     data class TerminalMeta(
         val platform: String,
         val appPackage: String,
@@ -189,6 +199,46 @@ class PaymentWebhookDispatcher(
                 payment = event.payment,
                 transaction = event.transaction,
                 checkout = event.checkout,
+                terminal = TerminalMeta(
+                    platform = "android",
+                    appPackage = appContext.packageName,
+                    appVersionName = BuildConfig.VERSION_NAME,
+                    appVersionCode = BuildConfig.VERSION_CODE,
+                ),
+            )
+
+            val payloadJson = gson.toJson(payload)
+            var successCount = 0
+
+            endpoints.forEach { endpoint ->
+                if (postWithRetry(endpoint, payloadJson, eventId)) {
+                    successCount += 1
+                }
+            }
+
+            DispatchResult(
+                totalEndpoints = endpoints.size,
+                successCount = successCount,
+                failureCount = endpoints.size - successCount,
+            )
+        }
+
+    suspend fun dispatchBulkPaymentsNow(entries: List<PaymentHistoryEntry>): DispatchResult =
+        withContext(ioDispatcher) {
+            val endpoints = endpointProvider.invoke()
+            if (endpoints.isEmpty()) {
+                return@withContext DispatchResult(0, 0, 0)
+            }
+
+            val now = System.currentTimeMillis()
+            val eventId = UUID.randomUUID().toString()
+            val payload = BulkWebhookPayload(
+                event = EVENT_BULK_PAYMENTS_SYNC,
+                payloadVersion = PAYLOAD_VERSION,
+                eventId = eventId,
+                timestampMs = now,
+                timestampIso = formatIsoTimestamp(now),
+                events = entries.map { toPaymentReceivedEvent(it) },
                 terminal = TerminalMeta(
                     platform = "android",
                     appPackage = appContext.packageName,
@@ -401,6 +451,7 @@ class PaymentWebhookDispatcher(
     companion object {
         private const val TAG = "PaymentWebhookDispatch"
         private const val EVENT_PAYMENT_RECEIVED = "payment.received"
+        private const val EVENT_BULK_PAYMENTS_SYNC = "payment.bulk_sync"
         private const val PAYLOAD_VERSION = 2
         private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
 
