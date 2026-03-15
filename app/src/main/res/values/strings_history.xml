@@ -50,6 +50,11 @@
     <string name="history_share_line_token">Token: %1$s</string>
     <string name="history_share_line_invoice">Invoice: %1$s</string>
 
+    <!-- Transaction detail: withdrawal -->
+    <string name="transaction_detail_type_withdrawal">Withdrawal</string>
+    <string name="transaction_detail_sent_to_label">Sent To</string>
+    <string name="transaction_detail_destination_copied">Destination copied to clipboard</string>
+
     <!-- Transaction detail: redesigned screen -->
     <string name="transaction_detail_overflow_menu">More options</string>
     <string name="transaction_detail_exchange_rate_label">Exchange Rate</string>
