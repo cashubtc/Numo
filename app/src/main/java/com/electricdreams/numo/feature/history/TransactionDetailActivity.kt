@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
-import android.widget.PopupMenu
+import androidx.appcompat.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -100,7 +100,7 @@ class TransactionDetailActivity : AppCompatActivity() {
     }
 
     private fun showOverflowMenu(anchor: View) {
-        val popup = PopupMenu(this, anchor)
+        val popup = PopupMenu(this, anchor, android.view.Gravity.END)
         popup.menuInflater.inflate(R.menu.menu_transaction_detail, popup.menu)
 
         popup.setOnMenuItemClickListener { item ->
