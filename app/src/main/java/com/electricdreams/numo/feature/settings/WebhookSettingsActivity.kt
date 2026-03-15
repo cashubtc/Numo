@@ -195,7 +195,13 @@ class WebhookSettingsActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
             } catch (e: Exception) {
+                android.util.Log.e(TAG, "Error during bulk sync: ${e.message}", e)
                 progressDialog.dismiss()
+                Toast.makeText(
+                    this@WebhookSettingsActivity,
+                    "Sync failed: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             } finally {
                 isSyncing = false
                 syncButton.alpha = 1.0f
@@ -451,5 +457,9 @@ class WebhookSettingsActivity : AppCompatActivity() {
                 },
             ),
         )
+    }
+
+    companion object {
+        private const val TAG = "WebhookSettingsActivity"
     }
 }
