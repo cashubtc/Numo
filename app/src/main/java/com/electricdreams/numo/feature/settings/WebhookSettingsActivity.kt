@@ -14,12 +14,18 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.util.WebhookSettingsManager
+import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
+import com.electricdreams.numo.payment.PaymentWebhookDispatcher
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Settings screen for configuring payment-received webhooks.
@@ -31,6 +37,7 @@ class WebhookSettingsActivity : AppCompatActivity() {
     private lateinit var emptyStateText: TextView
     private lateinit var qrScannerLauncher: ActivityResultLauncher<Intent>
     private var currentDialog: AlertDialog? = null
+    private var isSyncing: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,6 +58,7 @@ class WebhookSettingsActivity : AppCompatActivity() {
 
         findViewById<ImageButton>(R.id.back_button).setOnClickListener { finish() }
         findViewById<View>(R.id.add_endpoint_button).setOnClickListener { showAddEndpointDialog() }
+        findViewById<View>(R.id.sync_all_button).setOnClickListener { syncAllTransactions() }
 
         endpointsList = findViewById(R.id.endpoints_list)
         emptyStateText = findViewById(R.id.empty_state_text)
@@ -110,6 +118,57 @@ class WebhookSettingsActivity : AppCompatActivity() {
             setBackgroundColor(resources.getColor(R.color.color_divider, theme))
         }
         container.addView(divider)
+    }
+
+    private fun syncAllTransactions() {
+        if (isSyncing) return
+        
+        if (webhookSettingsManager.getEndpoints().isEmpty()) {
+            Toast.makeText(this, R.string.webhook_settings_empty, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        isSyncing = true
+        val syncButton = findViewById<View>(R.id.sync_all_button)
+        syncButton.alpha = 0.5f
+
+        lifecycleScope.launch {
+            try {
+                val history = withContext(Dispatchers.IO) {
+                    PaymentsHistoryActivity.getPaymentHistory(this@WebhookSettingsActivity)
+                }
+
+                val completedTransactions = history.filter { it.isCompleted() }
+
+                if (completedTransactions.isEmpty()) {
+                    Toast.makeText(
+                        this@WebhookSettingsActivity,
+                        R.string.webhook_settings_sync_all_empty,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    return@launch
+                }
+
+                var successCount = 0
+                val dispatcher = PaymentWebhookDispatcher.getInstance(this@WebhookSettingsActivity)
+
+                completedTransactions.forEach { transaction ->
+                    val result = dispatcher.dispatchPaymentReceivedNow(transaction)
+                    if (result.successCount > 0) {
+                        successCount++
+                    }
+                }
+
+                Toast.makeText(
+                    this@WebhookSettingsActivity,
+                    getString(R.string.webhook_settings_sync_all_success, successCount),
+                    Toast.LENGTH_SHORT
+                ).show()
+            } finally {
+                isSyncing = false
+                syncButton.alpha = 1.0f
+            }
+        }
     }
 
     private fun handleScannedQr(qrValue: String) {
