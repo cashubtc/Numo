@@ -9,6 +9,8 @@
     <string name="history_row_title_cashu_payment">Cashu Payment</string>
     <string name="history_row_title_cash_in">Cash In</string>
     <string name="history_row_title_cash_out">Cash Out</string>
+    <string name="history_row_title_payment_received">Payment Received</string>
+    <string name="history_row_title_withdrawal">Withdrawal</string>
     <string name="history_row_status_tap_to_resume">Tap to resume</string>
 
     <!-- History: dialogs, toasts, chooser titles -->
@@ -58,6 +60,11 @@
     <string name="transaction_detail_menu_copy_id">Copy Transaction ID</string>
     <string name="transaction_detail_menu_delete">Delete Transaction</string>
     <string name="transaction_detail_toast_id_copied">Transaction ID copied to clipboard</string>
+
+    <!-- Activity screen -->
+    <string name="history_total_balance_label">Total Balance</string>
+    <string name="history_menu_export_activity">Export Activity</string>
+    <string name="history_export_coming_soon">Export coming soon</string>
 
     <!-- Basket receipt -->
     <string name="basket_receipt_title">Receipt</string>
