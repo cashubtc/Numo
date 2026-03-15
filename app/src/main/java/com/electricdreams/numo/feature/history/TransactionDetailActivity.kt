@@ -18,7 +18,10 @@ import com.electricdreams.numo.core.model.CheckoutBasket
 import com.electricdreams.numo.core.model.CheckoutBasketItem
 import com.electricdreams.numo.core.model.SavedBasket
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.util.MintProfileService
 import com.electricdreams.numo.core.util.SavedBasketManager
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -212,12 +215,31 @@ class TransactionDetailActivity : AppCompatActivity() {
             exchangeRateRow.visibility = View.GONE
         }
 
-        // Mint display name (falls back to URL if no name stored)
+        // Mint display name (falls back to URL host if no name stored)
         val mintUrlText: TextView = findViewById(R.id.detail_mint_url)
         val primaryMintUrl = entry.mintUrl ?: entry.lightningMintUrl
 
         if (!primaryMintUrl.isNullOrEmpty()) {
-            mintUrlText.text = getMintDisplayName(primaryMintUrl)
+            val displayName = getMintDisplayName(primaryMintUrl)
+            mintUrlText.text = displayName
+
+            // If no cached mint info, try fetching it in the background and update
+            val mintManager = MintManager.getInstance(this)
+            if (mintManager.getMintInfo(primaryMintUrl) == null) {
+                lifecycleScope.launch {
+                    try {
+                        MintProfileService.getInstance(this@TransactionDetailActivity)
+                            .fetchAndStoreMintProfile(primaryMintUrl)
+                        // Re-read display name after fetch
+                        val updatedName = getMintDisplayName(primaryMintUrl)
+                        if (updatedName != displayName) {
+                            mintUrlText.text = updatedName
+                        }
+                    } catch (_: Exception) {
+                        // Keep the URL-based fallback
+                    }
+                }
+            }
         } else {
             mintUrlText.text = getString(R.string.transaction_detail_mint_unknown)
         }

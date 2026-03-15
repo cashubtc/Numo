@@ -359,8 +359,6 @@
                         android:layout_marginTop="2dp"
                         android:maxLines="1"
                         android:ellipsize="middle"
-                        android:fontFamily="monospace"
-                        android:textSize="13sp"
                         tools:text="lnbc1pvjluezpp5qqqsyq..." />
 
                 </LinearLayout>
