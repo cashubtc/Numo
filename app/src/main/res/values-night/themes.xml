@@ -37,6 +37,15 @@
         <item name="colorControlNormal">@color/dark_iconTint</item>
         <!-- Switch colors -->
         <item name="colorControlActivated">#FFFFFF</item>
+        <!-- Popup menu styling -->
+        <item name="popupMenuStyle">@style/Widget.Numo.PopupMenu</item>
+        <item name="android:popupMenuStyle">@style/Widget.Numo.PopupMenu</item>
+    </style>
+
+    <!-- Popup Menu Style -->
+    <style name="Widget.Numo.PopupMenu" parent="Widget.MaterialComponents.PopupMenu">
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+        <item name="android:popupElevation">0dp</item>
     </style>
 
     <style name="Widget.App.Toolbar.Dark" parent="Widget.MaterialComponents.Toolbar.Primary">
