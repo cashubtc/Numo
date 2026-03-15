@@ -18,6 +18,7 @@ import com.electricdreams.numo.core.model.CheckoutBasket
 import com.electricdreams.numo.core.model.CheckoutBasketItem
 import com.electricdreams.numo.core.model.SavedBasket
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.core.util.MintProfileService
 import com.electricdreams.numo.core.util.SavedBasketManager
 import androidx.lifecycle.lifecycleScope
@@ -40,6 +41,8 @@ class TransactionDetailActivity : AppCompatActivity() {
     private var savedBasket: SavedBasket? = null
     private var tipAmountSats: Long = 0
     private var tipPercentage: Int = 0
+    private var paymentId: String? = null
+    private var currentLabel: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,6 +67,8 @@ class TransactionDetailActivity : AppCompatActivity() {
         basketId = intent.getStringExtra(EXTRA_BASKET_ID)
         tipAmountSats = intent.getLongExtra(EXTRA_TRANSACTION_TIP_AMOUNT, 0)
         tipPercentage = intent.getIntExtra(EXTRA_TRANSACTION_TIP_PERCENTAGE, 0)
+        paymentId = intent.getStringExtra(EXTRA_TRANSACTION_ID)
+        currentLabel = intent.getStringExtra(EXTRA_TRANSACTION_LABEL)
 
         // Load saved basket if basketId is available
         basketId?.let { id ->
@@ -117,7 +122,7 @@ class TransactionDetailActivity : AppCompatActivity() {
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.menu_label_transaction -> {
-                    // UI placeholder - functionality not yet implemented
+                    showLabelDialog()
                     true
                 }
                 R.id.menu_copy_id -> {
@@ -287,6 +292,9 @@ class TransactionDetailActivity : AppCompatActivity() {
         } else {
             invoiceRow.visibility = View.GONE
         }
+
+        // Label row
+        updateLabelRow()
     }
 
     /**
@@ -404,6 +412,34 @@ class TransactionDetailActivity : AppCompatActivity() {
         ).show()
     }
 
+    private fun showLabelDialog() {
+        DialogHelper.showInput(this, DialogHelper.InputConfig(
+            title = getString(R.string.transaction_detail_label_dialog_title),
+            hint = getString(R.string.transaction_detail_label_dialog_hint),
+            initialValue = currentLabel ?: "",
+            saveText = getString(R.string.transaction_detail_label_dialog_save),
+            onSave = { label ->
+                currentLabel = label.ifBlank { null }
+                paymentId?.let { id ->
+                    PaymentsHistoryActivity.updateLabel(this, id, currentLabel)
+                }
+                updateLabelRow()
+            }
+        ))
+    }
+
+    private fun updateLabelRow() {
+        val labelRow: View = findViewById(R.id.row_label)
+        val labelValue: TextView = findViewById(R.id.detail_label_value)
+
+        if (!currentLabel.isNullOrBlank()) {
+            labelValue.text = currentLabel
+            labelRow.visibility = View.VISIBLE
+        } else {
+            labelRow.visibility = View.GONE
+        }
+    }
+
     private fun showDeleteConfirmation() {
         AlertDialog.Builder(this)
             .setTitle(R.string.history_dialog_delete_title)
@@ -438,5 +474,7 @@ class TransactionDetailActivity : AppCompatActivity() {
         const val EXTRA_BASKET_ID = "basket_id"
         const val EXTRA_TRANSACTION_TIP_AMOUNT = "transaction_tip_amount"
         const val EXTRA_TRANSACTION_TIP_PERCENTAGE = "transaction_tip_percentage"
+        const val EXTRA_TRANSACTION_ID = "transaction_id"
+        const val EXTRA_TRANSACTION_LABEL = "transaction_label"
     }
 }

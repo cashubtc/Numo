@@ -64,6 +64,8 @@ object PaymentIntentFactory {
             putExtra(TransactionDetailActivity.EXTRA_BASKET_ID, entry.basketId)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_AMOUNT, entry.tipAmountSats)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_PERCENTAGE, entry.tipPercentage)
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ID, entry.id)
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_LABEL, entry.label)
         }
     }
 }

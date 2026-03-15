@@ -176,8 +176,13 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 statusText.visibility = View.GONE
             }
 
-            // ── Subtitle hidden ──
-            subtitleText.visibility = View.GONE
+            // ── Label subtitle ──
+            if (!entry.label.isNullOrBlank()) {
+                subtitleText.text = entry.label
+                subtitleText.visibility = View.VISIBLE
+            } else {
+                subtitleText.visibility = View.GONE
+            }
 
             // ── Click handler ──
             itemView.setOnClickListener {

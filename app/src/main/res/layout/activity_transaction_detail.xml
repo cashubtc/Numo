@@ -375,6 +375,53 @@
 
             </LinearLayout>
 
+            <!-- Label Row (only shown if label exists) -->
+            <LinearLayout
+                android:id="@+id/row_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_label"
+                    app:tint="@color/color_text_secondary"
+                    android:contentDescription="@null" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+
+                    <TextView
+                        style="@style/Text.BodyBold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/transaction_detail_label_row_title" />
+
+                    <TextView
+                        android:id="@+id/detail_label_value"
+                        style="@style/Text.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        tools:text="Coffee order" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
             <!-- Print Receipt Button -->
             <Button
                 android:id="@+id/btn_print_receipt"
