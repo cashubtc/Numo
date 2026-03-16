@@ -268,6 +268,8 @@ class PaymentWebhookDispatcher(
         jsonBody: String,
         eventId: String,
     ): Boolean {
+        Log.d(TAG, "Dispatching webhook to url=${endpoint.url} with payload: $jsonBody")
+        
         retryDelaysMs.forEachIndexed { attemptIndex, delayMs ->
             if (delayMs > 0) {
                 delay(delayMs)
