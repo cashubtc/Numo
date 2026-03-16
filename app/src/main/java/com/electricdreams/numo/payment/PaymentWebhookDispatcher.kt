@@ -147,16 +147,6 @@ class PaymentWebhookDispatcher(
         val terminal: TerminalMeta,
     )
 
-    data class BulkWebhookPayload(
-        val event: String,
-        val payloadVersion: Int,
-        val eventId: String,
-        val timestampMs: Long,
-        val timestampIso: String,
-        val events: List<PaymentReceivedEvent>,
-        val terminal: TerminalMeta,
-    )
-
     data class TerminalMeta(
         val platform: String,
         val appPackage: String,
@@ -231,23 +221,30 @@ class PaymentWebhookDispatcher(
             }
 
             val now = System.currentTimeMillis()
-            val eventId = UUID.randomUUID().toString()
-            val payload = BulkWebhookPayload(
-                event = EVENT_BULK_PAYMENTS_SYNC,
-                payloadVersion = PAYLOAD_VERSION,
-                eventId = eventId,
-                timestampMs = now,
-                timestampIso = formatIsoTimestamp(now),
-                events = entries.map { toPaymentReceivedEvent(it) },
-                terminal = TerminalMeta(
-                    platform = "android",
-                    appPackage = appContext.packageName,
-                    appVersionName = BuildConfig.VERSION_NAME,
-                    appVersionCode = BuildConfig.VERSION_CODE,
-                ),
+            val terminal = TerminalMeta(
+                platform = "android",
+                appPackage = appContext.packageName,
+                appVersionName = BuildConfig.VERSION_NAME,
+                appVersionCode = BuildConfig.VERSION_CODE,
             )
 
-            val payloadJson = gson.toJson(payload)
+            val payloads = entries.map { entry ->
+                val event = toPaymentReceivedEvent(entry)
+                WebhookPayload(
+                    event = EVENT_PAYMENT_RECEIVED,
+                    payloadVersion = PAYLOAD_VERSION,
+                    eventId = UUID.randomUUID().toString(),
+                    timestampMs = now,
+                    timestampIso = formatIsoTimestamp(now),
+                    payment = event.payment,
+                    transaction = event.transaction,
+                    checkout = event.checkout,
+                    terminal = terminal,
+                )
+            }
+
+            val payloadJson = gson.toJson(payloads)
+            val eventId = UUID.randomUUID().toString()
             var successCount = 0
 
             endpoints.forEach { endpoint ->
@@ -453,7 +450,6 @@ class PaymentWebhookDispatcher(
     companion object {
         private const val TAG = "PaymentWebhookDispatch"
         private const val EVENT_PAYMENT_RECEIVED = "payment.received"
-        private const val EVENT_BULK_PAYMENTS_SYNC = "payment.bulk_sync"
         private const val PAYLOAD_VERSION = 2
         private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
 
