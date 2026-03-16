@@ -112,7 +112,11 @@ class WebhookSettingsActivity : AppCompatActivity() {
                         .post("{}".toRequestBody("application/json".toMediaType()))
                         .build()
                     pingClient.newCall(request).execute().use { response ->
-                        isReachable = true
+                        // Consider it reachable if it's a 2xx success code, or a specific 4xx error 
+                        // that indicates the endpoint exists but rejected our empty/unauthenticated payload.
+                        // (e.g. 400 Bad Request, 401 Unauthorized, 403 Forbidden, 405 Method Not Allowed, 415, 422)
+                        val validErrorCodes = setOf(400, 401, 403, 405, 415, 422)
+                        isReachable = response.isSuccessful || response.code in validErrorCodes
                     }
                 } catch (e: Exception) {
                     isReachable = false
