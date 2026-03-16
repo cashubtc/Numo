@@ -28,6 +28,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import android.widget.ImageView
+import java.util.concurrent.TimeUnit
 
 /**
  * Settings screen for configuring payment-received webhooks.
@@ -41,6 +47,12 @@ class WebhookSettingsActivity : AppCompatActivity() {
     private var currentDialog: AlertDialog? = null
     private var isSyncing: Boolean = false
     private var syncJob: Job? = null
+
+    private val pingClient: OkHttpClient by lazy {
+        OkHttpClient.Builder()
+            .callTimeout(5, TimeUnit.SECONDS)
+            .build()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,6 +92,7 @@ class WebhookSettingsActivity : AppCompatActivity() {
             val item = inflater.inflate(R.layout.item_webhook_endpoint, endpointsList, false)
             val endpointText = item.findViewById<TextView>(R.id.endpoint_url_text)
             val authStatusText = item.findViewById<TextView>(R.id.endpoint_auth_status_text)
+            val statusDot = item.findViewById<ImageView>(R.id.endpoint_status_dot)
             val editAuthButton = item.findViewById<ImageButton>(R.id.edit_auth_button)
             val deleteButton = item.findViewById<ImageButton>(R.id.delete_button)
 
@@ -88,6 +101,30 @@ class WebhookSettingsActivity : AppCompatActivity() {
                 getString(R.string.webhook_settings_auth_set)
             } else {
                 getString(R.string.webhook_settings_auth_not_set)
+            }
+
+            statusDot.setImageResource(R.drawable.bg_status_dot_gray)
+            lifecycleScope.launch(Dispatchers.IO) {
+                var isReachable = false
+                try {
+                    val request = Request.Builder()
+                        .url(endpoint.url)
+                        .post("{}".toRequestBody("application/json".toMediaType()))
+                        .build()
+                    pingClient.newCall(request).execute().use { response ->
+                        isReachable = true
+                    }
+                } catch (e: Exception) {
+                    isReachable = false
+                }
+
+                withContext(Dispatchers.Main) {
+                    if (isReachable) {
+                        statusDot.setImageResource(R.drawable.bg_status_dot_green)
+                    } else {
+                        statusDot.setImageResource(R.drawable.bg_status_dot_red)
+                    }
+                }
             }
 
             item.setOnClickListener {
