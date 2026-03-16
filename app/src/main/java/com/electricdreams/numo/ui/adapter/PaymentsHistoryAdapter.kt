@@ -9,7 +9,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
-import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
+import com.electricdreams.numo.core.data.model.HistoryEntry
 import com.electricdreams.numo.core.model.Amount
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -18,7 +18,7 @@ import java.util.Locale
 class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     fun interface OnItemClickListener {
-        fun onItemClick(entry: PaymentHistoryEntry, position: Int)
+        fun onItemClick(entry: HistoryEntry, position: Int)
     }
 
     fun interface OnItemDeleteListener {
@@ -33,7 +33,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     /** Sealed class representing either a month header or a transaction item. */
     sealed class ListItem {
         data class Header(val monthLabel: String) : ListItem()
-        data class Transaction(val entry: PaymentHistoryEntry, val originalPosition: Int) : ListItem()
+        data class Transaction(val entry: HistoryEntry, val originalPosition: Int) : ListItem()
     }
 
     private val items: MutableList<ListItem> = mutableListOf()
@@ -57,7 +57,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     /**
      * Groups entries by month and builds a flat list of headers + items.
      */
-    fun setEntries(newEntries: List<PaymentHistoryEntry>) {
+    fun setEntries(newEntries: List<HistoryEntry>) {
         items.clear()
         openItemPosition = RecyclerView.NO_POSITION
 

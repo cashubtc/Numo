@@ -5,6 +5,7 @@ import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import com.electricdreams.numo.R
+import com.electricdreams.numo.core.data.model.HistoryEntry
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.CurrencyManager
@@ -15,7 +16,6 @@ import java.io.BufferedWriter
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 
 /**
@@ -109,14 +109,18 @@ object ActivityCsvExportHelper {
                 val direction = if (isWithdrawal) "Withdrawal" else "Received"
 
                 // Payment Method
-                val method = when (entry.paymentType) {
-                    PaymentHistoryEntry.TYPE_LIGHTNING -> "Lightning"
-                    PaymentHistoryEntry.TYPE_CASHU -> "Cashu"
+                val method = when (entry) {
+                    is PaymentHistoryEntry -> when (entry.paymentType) {
+                        PaymentHistoryEntry.TYPE_LIGHTNING -> "Lightning"
+                        PaymentHistoryEntry.TYPE_CASHU -> "Cashu"
+                        else -> "Cashu"
+                    }
+                    is WithdrawHistoryEntry -> "Lightning"
                     else -> "Cashu"
                 }
 
                 // Status
-                val status = when (entry.getStatus()) {
+                val status = when (entry.status) {
                     PaymentHistoryEntry.STATUS_COMPLETED -> "Completed"
                     PaymentHistoryEntry.STATUS_PENDING -> "Pending"
                     else -> "Completed"
@@ -140,15 +144,20 @@ object ActivityCsvExportHelper {
                 val amountFiat = computeFiatAmount(entry, fiatCurrency)
 
                 // Exchange Rate
-                val exchangeRate = if (entry.bitcoinPrice != null && entry.bitcoinPrice > 0) {
-                    val priceMinorUnits = kotlin.math.round(entry.bitcoinPrice * 100).toLong()
+                val bitcoinPrice = (entry as? PaymentHistoryEntry)?.bitcoinPrice
+                val exchangeRate = if (bitcoinPrice != null && bitcoinPrice > 0) {
+                    val priceMinorUnits = kotlin.math.round(bitcoinPrice * 100).toLong()
                     Amount(priceMinorUnits, fiatCurrency).toString()
                 } else {
                     ""
                 }
 
                 // Mint
-                val mintUrl = entry.mintUrl ?: entry.lightningMintUrl
+                val mintUrl = when (entry) {
+                    is PaymentHistoryEntry -> entry.mintUrl ?: entry.lightningMintUrl
+                    is WithdrawHistoryEntry -> entry.mintUrl
+                    else -> entry.mintUrl
+                }
                 val mint = if (!mintUrl.isNullOrEmpty()) {
                     mintManager.getMintDisplayName(mintUrl)
                 } else {
@@ -156,12 +165,20 @@ object ActivityCsvExportHelper {
                 }
 
                 // Invoice/Cashu Request (full, non-truncated)
-                val invoiceOrToken = entry.lightningInvoice
-                    ?: entry.token.ifEmpty { null }
-                    ?: ""
+                val invoiceOrToken = when (entry) {
+                    is PaymentHistoryEntry -> entry.lightningInvoice
+                        ?: entry.token.ifEmpty { null }
+                        ?: ""
+                    is WithdrawHistoryEntry -> entry.token ?: ""
+                    else -> ""
+                }
 
                 // Sent To (withdrawals only)
-                val sentTo = if (isWithdrawal) entry.paymentRequest ?: "" else ""
+                val sentTo = when (entry) {
+                    is PaymentHistoryEntry -> if (isWithdrawal) entry.paymentRequest ?: "" else ""
+                    is WithdrawHistoryEntry -> entry.destination.ifBlank { entry.lightningAddress ?: "" }
+                    else -> ""
+                }
 
                 // Label
                 val label = entry.label ?: ""
@@ -199,41 +216,20 @@ object ActivityCsvExportHelper {
      * Load all transactions (payments + withdrawals), merged and sorted by date descending.
      * Same logic as PaymentsHistoryActivity.loadHistory().
      */
-    private fun loadAllTransactions(context: Context): List<PaymentHistoryEntry> {
-        val paymentHistory = PaymentsHistoryActivity.getPaymentHistory(context)
-
-        val withdrawHistory = AutoWithdrawManager.getInstance(context).getHistory()
-        val withdrawAsPayments = withdrawHistory
+    private fun loadAllTransactions(context: Context): List<HistoryEntry> {
+        val paymentHistory: List<HistoryEntry> = PaymentsHistoryActivity.getPaymentHistory(context)
+        val withdrawHistory: List<HistoryEntry> = AutoWithdrawManager.getInstance(context)
+            .getHistory()
             .filter { it.status != WithdrawHistoryEntry.STATUS_FAILED }
-            .map { w ->
-                PaymentHistoryEntry(
-                    id = w.id,
-                    token = w.token ?: "",
-                    amount = -w.amountSats,
-                    date = Date(w.timestamp),
-                    rawUnit = "sat",
-                    rawEntryUnit = "sat",
-                    enteredAmount = w.amountSats,
-                    bitcoinPrice = null,
-                    mintUrl = w.mintUrl,
-                    paymentRequest = w.destination.ifBlank { w.lightningAddress },
-                    rawStatus = when (w.status) {
-                        WithdrawHistoryEntry.STATUS_COMPLETED -> PaymentHistoryEntry.STATUS_COMPLETED
-                        WithdrawHistoryEntry.STATUS_PENDING -> PaymentHistoryEntry.STATUS_PENDING
-                        else -> PaymentHistoryEntry.STATUS_COMPLETED
-                    },
-                    paymentType = PaymentHistoryEntry.TYPE_LIGHTNING,
-                )
-            }
 
-        return (paymentHistory + withdrawAsPayments)
+        return (paymentHistory + withdrawHistory)
             .sortedByDescending { it.date.time }
     }
 
     /**
      * Compute the fiat amount string for a transaction using the stored exchange rate.
      */
-    private fun computeFiatAmount(entry: PaymentHistoryEntry, fiatCurrency: Amount.Currency): String {
+    private fun computeFiatAmount(entry: HistoryEntry, fiatCurrency: Amount.Currency): String {
         // If the entry was made in fiat, use the entered amount directly
         val entryUnit = entry.getEntryUnit()
         if (entryUnit != "sat" && entryUnit != "BTC" && entryUnit != "sats" && entry.enteredAmount > 0) {
@@ -242,7 +238,7 @@ object ActivityCsvExportHelper {
         }
 
         // Otherwise, calculate from sats using stored bitcoin price
-        val btcPrice = entry.bitcoinPrice
+        val btcPrice = (entry as? PaymentHistoryEntry)?.bitcoinPrice
         if (btcPrice != null && btcPrice > 0) {
             val absSats = kotlin.math.abs(entry.amount)
             val fiatValue = (absSats.toDouble() / 100_000_000.0) * btcPrice

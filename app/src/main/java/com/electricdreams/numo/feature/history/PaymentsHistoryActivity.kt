@@ -18,6 +18,7 @@ import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.R
 import androidx.appcompat.widget.PopupMenu
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.data.model.HistoryEntry
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.CurrencyManager
@@ -160,18 +161,22 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleEntryClick(entry: PaymentHistoryEntry, position: Int) {
-        if (entry.isPending()) {
-            // Check if this is a pending swap-to-lightning-mint flow
-            if (entry.getSwapLightningQuoteId() != null) {
-                checkAndFinalizeSwap(entry)
-            } else {
-                // Resume the pending payment normally
-                resumePendingPayment(entry)
+    private fun handleEntryClick(entry: HistoryEntry, position: Int) {
+        when (entry) {
+            is PaymentHistoryEntry -> {
+                if (entry.isPending()) {
+                    // Check if this is a pending swap-to-lightning-mint flow
+                    if (entry.getSwapLightningQuoteId() != null) {
+                        checkAndFinalizeSwap(entry)
+                    } else {
+                        // Resume the pending payment normally
+                        resumePendingPayment(entry)
+                    }
+                } else {
+                    showTransactionDetails(entry, position)
+                }
             }
-        } else {
-            // Show transaction details
-            showTransactionDetails(entry, position)
+            is WithdrawHistoryEntry -> showTransactionDetails(entry, position)
         }
     }
 
@@ -219,7 +224,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         startActivityForResult(intent, REQUEST_RESUME_PAYMENT)
     }
 
-    private fun showTransactionDetails(entry: PaymentHistoryEntry, position: Int) {
+    private fun showTransactionDetails(entry: HistoryEntry, position: Int) {
         val intent = PaymentIntentFactory.createTransactionDetailIntent(this, entry, position)
         startActivityForResult(intent, REQUEST_TRANSACTION_DETAIL)
     }
@@ -314,35 +319,13 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     }
 
     private fun loadHistory() {
-        val paymentHistory = getPaymentHistory()
-
-        // Fetch withdrawal history and convert to PaymentHistoryEntry
-        val withdrawHistory = AutoWithdrawManager.getInstance(this).getHistory()
-        val withdrawAsPayments = withdrawHistory
+        val paymentHistory: List<HistoryEntry> = getPaymentHistory()
+        val withdrawHistory: List<HistoryEntry> = AutoWithdrawManager.getInstance(this)
+            .getHistory()
             .filter { it.status != WithdrawHistoryEntry.STATUS_FAILED }
-            .map { w ->
-                PaymentHistoryEntry(
-                    id = w.id,
-                    token = w.token ?: "",
-                    amount = -w.amountSats, // Negative = outgoing
-                    date = Date(w.timestamp),
-                    rawUnit = "sat",
-                    rawEntryUnit = "sat",
-                    enteredAmount = w.amountSats,
-                    bitcoinPrice = null,
-                    mintUrl = w.mintUrl,
-                    paymentRequest = w.destination.ifBlank { w.lightningAddress },
-                    rawStatus = when (w.status) {
-                        WithdrawHistoryEntry.STATUS_COMPLETED -> PaymentHistoryEntry.STATUS_COMPLETED
-                        WithdrawHistoryEntry.STATUS_PENDING -> PaymentHistoryEntry.STATUS_PENDING
-                        else -> PaymentHistoryEntry.STATUS_COMPLETED
-                    },
-                    paymentType = PaymentHistoryEntry.TYPE_LIGHTNING,
-                )
-            }
 
         // Merge and sort by date descending (newest first)
-        val merged = (paymentHistory + withdrawAsPayments)
+        val merged = (paymentHistory + withdrawHistory)
             .sortedByDescending { it.date.time }
 
         adapter.setEntries(merged)
@@ -511,7 +494,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     bitcoinPrice = existing.bitcoinPrice,
                     mintUrl = existing.mintUrl,
                     paymentRequest = existing.paymentRequest,
-                    rawStatus = existing.getStatus(),
+                    rawStatus = existing.status,
                     paymentType = existing.paymentType,
                     lightningInvoice = lightningInvoice ?: existing.lightningInvoice,
                     lightningQuoteId = lightningQuoteId ?: existing.lightningQuoteId,
@@ -558,7 +541,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     bitcoinPrice = existing.bitcoinPrice,
                     mintUrl = existing.mintUrl,
                     paymentRequest = existing.paymentRequest,
-                    rawStatus = existing.getStatus(),
+                    rawStatus = existing.status,
                     paymentType = existing.paymentType,
                     lightningInvoice = existing.lightningInvoice,
                     lightningQuoteId = existing.lightningQuoteId,
@@ -606,7 +589,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     bitcoinPrice = existing.bitcoinPrice,
                     mintUrl = existing.mintUrl,
                     paymentRequest = existing.paymentRequest,
-                    rawStatus = existing.getStatus(),
+                    rawStatus = existing.status,
                     paymentType = existing.paymentType,
                     lightningInvoice = existing.lightningInvoice,
                     lightningQuoteId = existing.lightningQuoteId,
@@ -660,7 +643,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     bitcoinPrice = existing.bitcoinPrice,
                     mintUrl = existing.mintUrl,
                     paymentRequest = existing.paymentRequest,
-                    rawStatus = existing.getStatus(),
+                    rawStatus = existing.status,
                     paymentType = existing.paymentType,
                     lightningInvoice = existing.lightningInvoice,
                     lightningQuoteId = existing.lightningQuoteId,
