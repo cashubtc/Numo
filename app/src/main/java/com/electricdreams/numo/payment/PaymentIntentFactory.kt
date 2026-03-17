@@ -69,6 +69,7 @@ object PaymentIntentFactory {
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_POSITION, position)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_TYPE, PaymentHistoryEntry.TYPE_LIGHTNING)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ID, entry.id)
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_LABEL, entry.label)
         }
     }
 

@@ -18,6 +18,7 @@ import com.electricdreams.numo.core.model.CheckoutBasket
 import com.electricdreams.numo.core.model.CheckoutBasketItem
 import com.electricdreams.numo.core.model.SavedBasket
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.core.util.MintProfileService
 import com.electricdreams.numo.core.util.SavedBasketManager
@@ -422,6 +423,7 @@ class TransactionDetailActivity : AppCompatActivity() {
                 currentLabel = label.ifBlank { null }
                 paymentId?.let { id ->
                     PaymentsHistoryActivity.updateLabel(this, id, currentLabel)
+                    AutoWithdrawManager.getInstance(this).updateWithdrawalLabel(id, currentLabel)
                 }
                 updateLabelRow()
             }

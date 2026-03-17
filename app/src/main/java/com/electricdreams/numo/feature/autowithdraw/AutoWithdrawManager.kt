@@ -41,14 +41,15 @@ data class WithdrawHistoryEntry(
     // True for automatic withdrawals, false for manual withdrawals
     val automatic: Boolean = true,
     // The generated Cashu token, if this was a manual token withdrawal
-    val token: String? = null
+    val token: String? = null,
+    // User-assigned label for this transaction
+    override val label: String? = null
 ) : HistoryEntry {
 
     // HistoryEntry computed properties — no backing field, so Gson won't serialize them
     override val amount: Long get() = -amountSats
     override val date: Date get() = Date(timestamp)
     override val enteredAmount: Long get() = amountSats
-    override val label: String? get() = null
 
     override fun getEntryUnit(): String = "sat"
     override fun getBaseAmountSats(): Long = -amountSats
@@ -521,6 +522,18 @@ class AutoWithdrawManager private constructor(private val context: Context) {
                 feeSats = feeSats ?: existing.feeSats
             )
             history[index] = updated
+            saveHistory(history)
+        }
+    }
+
+    /**
+     * Update the label on a withdrawal history entry.
+     */
+    fun updateWithdrawalLabel(id: String, label: String?) {
+        val history = getHistory().toMutableList()
+        val index = history.indexOfFirst { it.id == id }
+        if (index >= 0) {
+            history[index] = history[index].copy(label = label?.ifBlank { null })
             saveHistory(history)
         }
     }
