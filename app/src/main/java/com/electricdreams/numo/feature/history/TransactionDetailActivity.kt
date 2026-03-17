@@ -120,6 +120,16 @@ class TransactionDetailActivity : AppCompatActivity() {
         val popup = PopupMenu(this, anchor, android.view.Gravity.END)
         popup.menuInflater.inflate(R.menu.menu_transaction_detail, popup.menu)
 
+        // Style the delete item red to signal destructive action
+        popup.menu.findItem(R.id.menu_delete_transaction)?.let { deleteItem ->
+            val spannable = android.text.SpannableString(deleteItem.title)
+            spannable.setSpan(
+                android.text.style.ForegroundColorSpan(getColor(R.color.color_error)),
+                0, spannable.length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            deleteItem.title = spannable
+        }
+
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.menu_label_transaction -> {
