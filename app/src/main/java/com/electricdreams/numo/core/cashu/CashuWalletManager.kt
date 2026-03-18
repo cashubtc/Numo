@@ -2,6 +2,7 @@ package com.electricdreams.numo.core.cashu
 
 import android.content.Context
 import android.util.Log
+import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import kotlinx.coroutines.CoroutineScope
@@ -161,6 +162,9 @@ object CashuWalletManager : MintManager.MintChangeListener {
         wallet = newWallet
 
         Log.d(TAG, "Wallet restore complete. Restored ${mints.size} mints.")
+        
+        // Notify UI that wallet is ready after restore
+        BalanceRefreshBroadcast.send(appContext, "wallet_restored")
         return balanceChanges
     }
 
@@ -438,7 +442,10 @@ object CashuWalletManager : MintManager.MintChangeListener {
             database = db
             wallet = newWallet
 
-            Log.d(TAG, "Initialized WalletRepository with ${'$'}{mints.size} mints; DB=${'$'}{dbFile.absolutePath}")
+            Log.d(TAG, "Initialized WalletRepository with ${mints.size} mints; DB=${dbFile.absolutePath}")
+            
+            // Notify UI that wallet is ready
+            BalanceRefreshBroadcast.send(appContext, "wallet_initialized")
         } catch (t: Throwable) {
             Log.e(TAG, "Failed to initialize WalletRepository", t)
         }

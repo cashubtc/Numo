@@ -1,6 +1,8 @@
 package com.electricdreams.numo.feature.history
 
 import android.app.Activity
+import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -44,8 +46,8 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHistoryBinding
     private lateinit var adapter: PaymentsHistoryAdapter
-    private var isBalanceHidden = false
-    private var currentTotalBalanceSats = 0L
+    
+    private var balanceReceiver: BroadcastReceiver? = null
 
     private var currentHistoryList = listOf<HistoryEntry>()
 
@@ -95,9 +97,23 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Register for balance updates
+        balanceReceiver = BalanceRefreshBroadcast.createReceiver {
+            loadBalance()
+        }
+        BalanceRefreshBroadcast.register(this, balanceReceiver!!)
+        
         // Reload history when returning (e.g., after resuming a pending payment)
         loadHistory()
         loadBalance()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        balanceReceiver?.let {
+            BalanceRefreshBroadcast.unregister(this, it)
+            balanceReceiver = null
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
