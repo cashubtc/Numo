@@ -60,7 +60,7 @@
     <string name="transaction_detail_exchange_rate_label">Taxa de câmbio</string>
     <string name="transaction_detail_invoice_label">Fatura</string>
     <string name="transaction_detail_transaction_id_label">ID da transação</string>
-    <string name="transaction_detail_print_receipt">Imprimir recibo</string>
+    <string name="transaction_detail_print_receipt">Recibo</string>
     <string name="transaction_detail_menu_label">Rotular transação</string>
     <string name="transaction_detail_menu_copy_id">Copiar ID da transação</string>
     <string name="transaction_detail_menu_delete">Excluir transação</string>

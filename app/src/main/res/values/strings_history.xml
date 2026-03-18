@@ -60,7 +60,7 @@
     <string name="transaction_detail_exchange_rate_label">Exchange Rate</string>
     <string name="transaction_detail_invoice_label">Invoice</string>
     <string name="transaction_detail_transaction_id_label">Transaction ID</string>
-    <string name="transaction_detail_print_receipt">Print Receipt</string>
+    <string name="transaction_detail_print_receipt">Receipt</string>
     <string name="transaction_detail_menu_label">Label Transaction</string>
     <string name="transaction_detail_menu_copy_id">Copy Transaction ID</string>
     <string name="transaction_detail_menu_delete">Delete Transaction</string>
