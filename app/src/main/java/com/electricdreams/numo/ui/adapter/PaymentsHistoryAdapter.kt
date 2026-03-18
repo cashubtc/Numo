@@ -202,10 +202,10 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             // ── Amount display ──
             val formattedAmount = if (entry.getEntryUnit() != "sat") {
                 val entryCurrency = Amount.Currency.fromCode(entry.getEntryUnit())
-                val entryAmount = Amount(entry.enteredAmount, entryCurrency)
+                val entryAmount = Amount(kotlin.math.abs(entry.enteredAmount), entryCurrency)
                 entryAmount.toString()
             } else {
-                val baseAmountSats = entry.getBaseAmountSats()
+                val baseAmountSats = kotlin.math.abs(entry.getBaseAmountSats())
                 val satAmount = Amount(baseAmountSats, Amount.Currency.BTC)
                 satAmount.toString()
             }
