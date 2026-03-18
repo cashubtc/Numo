@@ -43,6 +43,10 @@ object CashuWalletManager : MintManager.MintChangeListener {
     @Volatile
     private var wallet: WalletRepository? = null
 
+    @Volatile
+    var isWalletLoading: Boolean = false
+        private set
+
     /** Initialize from ModernPOSActivity. Safe to call multiple times. */
     fun init(context: Context) {
         if (this::appContext.isInitialized) return
@@ -396,6 +400,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
      * Runs on our IO coroutine scope.
      */
     private suspend fun rebuildWallet(mints: List<String>) {
+        isWalletLoading = true
         try {
             // Close any previous instances
             closeResources()
@@ -448,6 +453,8 @@ object CashuWalletManager : MintManager.MintChangeListener {
             BalanceRefreshBroadcast.send(appContext, "wallet_initialized")
         } catch (t: Throwable) {
             Log.e(TAG, "Failed to initialize WalletRepository", t)
+        } finally {
+            isWalletLoading = false
         }
     }
 

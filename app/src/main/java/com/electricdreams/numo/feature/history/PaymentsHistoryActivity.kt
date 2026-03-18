@@ -136,6 +136,12 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     }
 
     private fun loadBalance() {
+        if (CashuWalletManager.isWalletLoading) {
+            binding.balanceFiat?.text = "..."
+            binding.balanceSats?.visibility = View.GONE
+            return
+        }
+
         lifecycleScope.launch {
             try {
                 val balances = withContext(Dispatchers.IO) {
@@ -146,6 +152,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 // Display sat balance
                 val satAmount = Amount(totalSats, Amount.Currency.BTC)
                 binding.balanceSats?.text = satAmount.toString()
+                binding.balanceSats?.visibility = View.VISIBLE
 
                 // Display fiat balance
                 val currencyCode = CurrencyManager.getInstance(this@PaymentsHistoryActivity)
