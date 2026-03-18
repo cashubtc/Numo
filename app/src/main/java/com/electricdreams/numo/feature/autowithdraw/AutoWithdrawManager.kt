@@ -527,6 +527,18 @@ class AutoWithdrawManager private constructor(private val context: Context) {
     }
 
     /**
+     * Delete a withdrawal history entry.
+     */
+    fun deleteHistoryEntry(id: String) {
+        val history = getHistory().toMutableList()
+        val index = history.indexOfFirst { it.id == id }
+        if (index >= 0) {
+            history.removeAt(index)
+            saveHistory(history)
+        }
+    }
+
+    /**
      * Update the label on a withdrawal history entry.
      */
     fun updateWithdrawalLabel(id: String, label: String?) {

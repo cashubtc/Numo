@@ -30,6 +30,7 @@ import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.ui.adapter.PaymentsHistoryAdapter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -45,6 +46,8 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     private lateinit var adapter: PaymentsHistoryAdapter
     private var isBalanceHidden = false
     private var currentTotalBalanceSats = 0L
+
+    private var currentHistoryList = listOf<HistoryEntry>()
 
     private val csvExportLauncher: ActivityResultLauncher<String> =
         registerForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
@@ -66,11 +69,6 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
         // Setup Back Button
         binding.backButton?.setOnClickListener { finish() }
-        
-        // Setup Total Balance click listener for privacy toggle
-        binding.totalBalanceValue.setOnClickListener {
-            toggleBalancePrivacy()
-        }
 
         // Setup overflow menu button
         binding.overflowButton?.setOnClickListener { showOverflowMenu(it) }
@@ -87,9 +85,6 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
         binding.historyRecyclerView.adapter = adapter
         binding.historyRecyclerView.layoutManager = LinearLayoutManager(this)
-
-        // Initialize display with zero or hidden state
-        updateBalanceDisplay(0L)
 
         // Load and display history
         loadHistory()
@@ -112,8 +107,8 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             REQUEST_TRANSACTION_DETAIL -> {
                 if (resultCode == RESULT_OK && data != null) {
                     val positionToDelete = data.getIntExtra("position_to_delete", -1)
-                    if (positionToDelete >= 0) {
-                        deletePaymentFromHistory(positionToDelete)
+                    if (positionToDelete >= 0 && positionToDelete < currentHistoryList.size) {
+                        deletePaymentFromHistory(currentHistoryList[positionToDelete])
                     }
                 }
             }
@@ -251,21 +246,21 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleDeleteClick(entry: PaymentHistoryEntry, position: Int) {
+    private fun handleDeleteClick(entry: HistoryEntry, position: Int) {
         if (entry.isPending()) {
             val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
             val hideWarning = prefs.getBoolean("hide_pending_delete_warning", false)
             if (hideWarning) {
-                deletePaymentFromHistory(position)
+                deletePaymentFromHistory(entry)
             } else {
-                showPendingDeleteWarning(position)
+                showPendingDeleteWarning(entry)
             }
         } else {
-            deletePaymentFromHistory(position)
+            deletePaymentFromHistory(entry)
         }
     }
 
-    private fun showPendingDeleteWarning(position: Int) {
+    private fun showPendingDeleteWarning(entry: HistoryEntry) {
         val view = layoutInflater.inflate(R.layout.dialog_pending_delete_warning, null)
         val checkbox = view.findViewById<android.widget.CheckBox>(R.id.dont_show_again_checkbox)
 
@@ -278,17 +273,17 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                     prefs.edit().putBoolean("hide_pending_delete_warning", true).apply()
                 }
-                deletePaymentFromHistory(position)
+                deletePaymentFromHistory(entry)
             }
             .setNegativeButton(R.string.history_dialog_delete_negative, null)
             .show()
     }
 
-    private fun showDeleteConfirmation(entry: PaymentHistoryEntry, position: Int) {
+    private fun showDeleteConfirmation(entry: HistoryEntry) {
         AlertDialog.Builder(this)
             .setTitle(R.string.history_dialog_delete_title)
             .setMessage(R.string.history_dialog_delete_message)
-            .setPositiveButton(R.string.history_dialog_delete_positive) { _, _ -> deletePaymentFromHistory(position) }
+            .setPositiveButton(R.string.history_dialog_delete_positive) { _, _ -> deletePaymentFromHistory(entry) }
             .setNegativeButton(R.string.history_dialog_delete_negative, null)
             .show()
     }
@@ -325,12 +320,12 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             .filter { it.status != WithdrawHistoryEntry.STATUS_FAILED }
 
         // Merge and sort by date descending (newest first)
-        val merged = (paymentHistory + withdrawHistory)
+        currentHistoryList = (paymentHistory + withdrawHistory)
             .sortedByDescending { it.date.time }
 
-        adapter.setEntries(merged)
+        adapter.setEntries(currentHistoryList)
 
-        val isEmpty = merged.isEmpty()
+        val isEmpty = currentHistoryList.isEmpty()
         binding.emptyView.visibility = if (isEmpty) View.VISIBLE else View.GONE
     }
 
@@ -340,16 +335,18 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         loadHistory()
     }
 
-    private fun deletePaymentFromHistory(position: Int) {
-        val history = getPaymentHistory().toMutableList()
-        Collections.reverse(history)
-        if (position in 0 until history.size) {
-            history.removeAt(position)
-            Collections.reverse(history)
-
-            val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-            prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
-
+    private fun deletePaymentFromHistory(entry: HistoryEntry) {
+        if (entry is PaymentHistoryEntry) {
+            val history = getPaymentHistory().toMutableList()
+            val index = history.indexOfFirst { it.id == entry.id }
+            if (index >= 0) {
+                history.removeAt(index)
+                val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
+                loadHistory()
+            }
+        } else if (entry is WithdrawHistoryEntry) {
+            AutoWithdrawManager.getInstance(this).deleteHistoryEntry(entry.id)
             loadHistory()
         }
     }

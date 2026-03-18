@@ -22,7 +22,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     fun interface OnItemDeleteListener {
-        fun onItemDelete(entry: PaymentHistoryEntry, position: Int)
+        fun onItemDelete(entry: HistoryEntry, position: Int)
     }
 
     companion object {
