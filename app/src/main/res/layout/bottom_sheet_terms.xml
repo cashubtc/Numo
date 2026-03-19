@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_bottom_sheet"
+        android:paddingBottom="32dp">
+
+        <!-- Drag Handle -->
+        <View
+            android:layout_width="36dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_bottom_sheet_handle" />
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:paddingHorizontal="24dp"
+            android:text="@string/dialog_terms_title"
+            android:textSize="20sp"
+            android:textColor="@color/color_text_primary"
+            android:fontFamily="sans-serif-medium" />
+
+        <!-- Terms Body -->
+        <TextView
+            android:id="@+id/terms_body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:paddingHorizontal="24dp"
+            android:text="@string/dialog_terms_body"
+            android:textSize="14sp"
+            android:textColor="@color/color_text_secondary"
+            android:lineSpacingMultiplier="1.4" />
+
+        <!-- Close Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/terms_close_button"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginHorizontal="24dp"
+            android:text="@string/common_close"
+            android:textSize="16sp"
+            android:textColor="#FFFFFF"
+            android:textAllCaps="false"
+            app:cornerRadius="26dp"
+            app:backgroundTint="#000000" />
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

@@ -164,8 +164,18 @@
     <string name="onboarding_mints_scan_row_title">Scan QR Code</string>
     <string name="onboarding_mints_scan_row_subtitle">Tap to scan an address</string>
     <string name="onboarding_mint_generic_name">Mint</string>
+    <string name="onboarding_mints_default_section_title">Default Mint</string>
+    <string name="onboarding_mints_popular_section_title">Popular Mints</string>
+    <string name="onboarding_mints_popular_section_subtitle">Accept ecash from these mints</string>
+    <string name="onboarding_mints_add_different_button">+ Add a different mint</string>
+    <string name="onboarding_add_mint_sheet_title">Add a Mint</string>
+    <string name="onboarding_add_mint_url_hint">Paste mint URL</string>
+    <string name="onboarding_add_mint_button">Add</string>
+    <string name="onboarding_add_mint_or">or</string>
+    <string name="onboarding_add_mint_scan_qr">Scan QR Code</string>
+    <string name="onboarding_add_mint_loading">Adding mint…</string>
 
-    
+
     <string name="onboarding_restoring_title">Restoring Wallet</string>
     <string name="onboarding_restoring_initializing">Initializing restore...</string>
 

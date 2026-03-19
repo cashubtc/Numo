@@ -97,6 +97,8 @@
                 android:textAllCaps="false"
                 android:alpha="0"
                 android:paddingVertical="4dp"
+                android:stateListAnimator="@null"
+                app:elevation="0dp"
                 app:cornerRadius="32dp"
                 app:backgroundTint="@color/numo_navy" />
 
@@ -580,141 +582,99 @@
 
             </LinearLayout>
 
-            <ScrollView
+            <!-- Backup Status Card -->
+            <LinearLayout
+                android:id="@+id/backup_status_card"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:fillViewport="true">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_success_card"
+                android:padding="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginHorizontal="20dp"
+                android:gravity="center_vertical"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/backup_status_icon"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_cloud_done"
+                    app:tint="@color/color_success_green" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:orientation="vertical"
-                    android:paddingHorizontal="20dp"
-                    android:paddingBottom="24dp">
+                    android:layout_marginStart="14dp">
 
-                    <!-- Backup Status Card -->
-                    <LinearLayout
-                        android:id="@+id/backup_status_card"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:background="@drawable/bg_success_card"
-                        android:padding="16dp"
-                        android:layout_marginTop="8dp"
-                        android:gravity="center_vertical"
-                        android:visibility="gone">
-
-                        <ImageView
-                            android:id="@+id/backup_status_icon"
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
-                            android:src="@drawable/ic_cloud_done"
-                            app:tint="@color/color_success_green" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginStart="14dp">
-
-                            <TextView
-                                android:id="@+id/backup_status_title"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/onboarding_backup_found_title"
-                                android:textSize="15sp"
-                                android:textColor="@color/color_success_green"
-                                android:fontFamily="sans-serif-medium" />
-
-                            <TextView
-                                android:id="@+id/backup_status_subtitle"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="@string/onboarding_backup_found_subtitle"
-                                android:textSize="13sp"
-                                android:textColor="@color/color_text_secondary" />
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                    <!-- Title -->
                     <TextView
-                        android:layout_width="match_parent"
+                        android:id="@+id/backup_status_title"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:text="@string/onboarding_mints_title"
-                        android:textSize="22sp"
-                        android:textColor="@color/color_text_primary"
+                        android:text="@string/onboarding_backup_found_title"
+                        android:textSize="15sp"
+                        android:textColor="@color/color_success_green"
                         android:fontFamily="sans-serif-medium" />
 
                     <TextView
-                        android:id="@+id/mints_subtitle"
-                        android:layout_width="match_parent"
+                        android:id="@+id/backup_status_subtitle"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/onboarding_mints_subtitle_description"
-                        android:textSize="14sp"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/onboarding_backup_found_subtitle"
+                        android:textSize="13sp"
                         android:textColor="@color/color_text_secondary" />
 
-                    <!-- Mints List -->
-                    <LinearLayout
-                        android:id="@+id/mints_list_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginTop="16dp" />
-
-                    <!-- Mints Count -->
-                    <TextView
-                        android:id="@+id/mints_count_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/onboarding_mints_count"
-                        android:textSize="13sp"
-                        android:textColor="@color/color_text_tertiary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp"
-                        android:text="@string/mints_add_section"
-                        android:textSize="12sp"
-                        android:letterSpacing="0.08"
-                        android:fontFamily="sans-serif-medium"
-                        android:textColor="@color/color_text_tertiary" />
-
-                    <com.electricdreams.numo.ui.components.AddMintInputCard
-                        android:id="@+id/add_different_mint_card"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp" />
-
                 </LinearLayout>
-            </ScrollView>
 
-            <!-- Continue Button - Fixed at bottom -->
+            </LinearLayout>
+
+            <!-- Mints RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/mints_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="8dp"
+                android:clipToPadding="false" />
+
+            <!-- Fixed Bottom Buttons -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingHorizontal="20dp"
-                android:paddingTop="16dp"
+                android:paddingTop="12dp"
                 android:paddingBottom="32dp"
                 android:background="@color/color_bg_light">
 
+                <!-- Add a different mint - text button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/add_mint_button"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:text="@string/onboarding_mints_add_different_button"
+                    android:textSize="15sp"
+                    android:textAllCaps="false"
+                    android:textColor="@color/color_text_primary" />
+
+                <!-- Continue - primary button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/mints_continue_button"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
+                    android:layout_marginTop="10dp"
                     android:text="@string/onboarding_mints_continue_new_wallet"
                     android:textSize="17sp"
                     android:textColor="#FFFFFF"
                     android:textAllCaps="false"
+                    android:stateListAnimator="@null"
+                    app:elevation="0dp"
                     app:cornerRadius="28dp"
                     app:backgroundTint="#000000" />
 
