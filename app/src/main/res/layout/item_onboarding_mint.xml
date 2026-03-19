@@ -4,16 +4,16 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingStart="16dp"
+    android:paddingStart="6dp"
     android:paddingEnd="16dp"
     android:paddingTop="14dp"
     android:paddingBottom="14dp">
 
     <ImageView
         android:id="@+id/mint_star"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginEnd="10dp"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:padding="10dp"
         android:src="@drawable/ic_home_outline"
         android:contentDescription="Set as default mint"
         android:background="?attr/selectableItemBackgroundBorderless"
