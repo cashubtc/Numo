@@ -16,6 +16,7 @@ import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.FinalizedMelt
 import org.cashudevkit.MintUrl
 import org.cashudevkit.QuoteState
+import com.electricdreams.numo.core.data.model.HistoryEntry
 import java.util.Date
 import java.util.UUID
 
@@ -23,8 +24,8 @@ import java.util.UUID
  * Data class representing a withdrawal history entry (automatic or manual).
  */
 data class WithdrawHistoryEntry(
-    val id: String = UUID.randomUUID().toString(),
-    val mintUrl: String,
+    override val id: String = UUID.randomUUID().toString(),
+    override val mintUrl: String,
     // For backwards compatibility: original field storing auto-withdraw lightning address
     val lightningAddress: String? = null,
     // Destination label (Lightning address or abbreviated invoice)
@@ -33,15 +34,28 @@ data class WithdrawHistoryEntry(
     val destinationType: String = "",
     val amountSats: Long,
     val feeSats: Long,
-    val status: String, // "pending", "completed", "failed"
+    override val status: String, // "pending", "completed", "failed"
     val timestamp: Long = System.currentTimeMillis(),
     val errorMessage: String? = null,
     val quoteId: String? = null,
     // True for automatic withdrawals, false for manual withdrawals
     val automatic: Boolean = true,
     // The generated Cashu token, if this was a manual token withdrawal
-    val token: String? = null
-) {
+    val token: String? = null,
+    // User-assigned label for this transaction
+    override val label: String? = null
+) : HistoryEntry {
+
+    // HistoryEntry computed properties — no backing field, so Gson won't serialize them
+    override val amount: Long get() = -amountSats
+    override val date: Date get() = Date(timestamp)
+    override val enteredAmount: Long get() = amountSats
+
+    override fun getEntryUnit(): String = "sat"
+    override fun getBaseAmountSats(): Long = -amountSats
+    override fun isPending(): Boolean = status == STATUS_PENDING
+    override fun isCompleted(): Boolean = status == STATUS_COMPLETED
+
     companion object {
         const val STATUS_PENDING = "pending"
         const val STATUS_COMPLETED = "completed"
@@ -508,6 +522,30 @@ class AutoWithdrawManager private constructor(private val context: Context) {
                 feeSats = feeSats ?: existing.feeSats
             )
             history[index] = updated
+            saveHistory(history)
+        }
+    }
+
+    /**
+     * Delete a withdrawal history entry.
+     */
+    fun deleteHistoryEntry(id: String) {
+        val history = getHistory().toMutableList()
+        val index = history.indexOfFirst { it.id == id }
+        if (index >= 0) {
+            history.removeAt(index)
+            saveHistory(history)
+        }
+    }
+
+    /**
+     * Update the label on a withdrawal history entry.
+     */
+    fun updateWithdrawalLabel(id: String, label: String?) {
+        val history = getHistory().toMutableList()
+        val index = history.indexOfFirst { it.id == id }
+        if (index >= 0) {
+            history[index] = history[index].copy(label = label?.ifBlank { null })
             saveHistory(history)
         }
     }

@@ -12,3 +12,5 @@ local.properties
 .aider*
 .vscode
 release
+opencode.json
+.kotlin/

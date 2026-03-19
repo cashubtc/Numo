@@ -9,6 +9,8 @@
     <string name="history_row_title_cashu_payment">Pago Cashu</string>
     <string name="history_row_title_cash_in">Entrada de efectivo</string>
     <string name="history_row_title_cash_out">Salida de efectivo</string>
+    <string name="history_row_title_payment_received">Pago recibido</string>
+    <string name="history_row_title_withdrawal">Retiro</string>
     <string name="history_row_status_tap_to_resume">Toca para reanudar</string>
 
     <!-- History: dialogs, toasts, chooser titles -->
@@ -32,8 +34,9 @@
     <string name="transaction_detail_type_cashu_payment">Pago Cashu</string>
     <string name="transaction_detail_mint_from_name">Desde %1$s</string>
     <string name="transaction_detail_mint_unknown">Desconocido</string>
-    <string name="transaction_detail_payment_type_lightning_value">⚡ Lightning</string>
-    <string name="transaction_detail_payment_type_cashu_value">🥜 Cashu</string>
+    <string name="transaction_detail_payment_type_lightning_value">Lightning</string>
+    <string name="transaction_detail_payment_type_cashu_value">Cashu</string>
+    <string name="transaction_detail_cashu_request_label">Solicitud Cashu</string>
 
     <!-- Transaction detail: tip label -->
     <string name="transaction_detail_tip_added_label">Propina añadida</string>
@@ -46,6 +49,34 @@
     <string name="history_share_line_amount">Importe: %1$s</string>
     <string name="history_share_line_token">Token: %1$s</string>
     <string name="history_share_line_invoice">Factura: %1$s</string>
+
+    <!-- Transaction detail: withdrawal -->
+    <string name="transaction_detail_type_withdrawal">Retiro</string>
+    <string name="transaction_detail_sent_to_label">Enviado a</string>
+    <string name="transaction_detail_destination_copied">Destino copiado al portapapeles</string>
+
+    <!-- Transaction detail: redesigned screen -->
+    <string name="transaction_detail_overflow_menu">Más opciones</string>
+    <string name="transaction_detail_exchange_rate_label">Tipo de cambio</string>
+    <string name="transaction_detail_invoice_label">Factura</string>
+    <string name="transaction_detail_transaction_id_label">ID de transacción</string>
+    <string name="transaction_detail_print_receipt">Recibo</string>
+    <string name="transaction_detail_menu_label">Etiquetar transacción</string>
+    <string name="transaction_detail_menu_copy_id">Copiar ID de transacción</string>
+    <string name="transaction_detail_menu_delete">Eliminar transacción</string>
+    <string name="transaction_detail_toast_id_copied">ID de transacción copiado al portapapeles</string>
+
+    <!-- Transaction detail: label -->
+    <string name="transaction_detail_label_dialog_title">Etiquetar transacción</string>
+    <string name="transaction_detail_label_dialog_hint">Ingresa una etiqueta</string>
+    <string name="transaction_detail_label_dialog_save">Guardar etiqueta</string>
+    <string name="transaction_detail_label_row_title">Etiqueta</string>
+
+    <!-- Activity screen -->
+    <string name="history_total_balance_label">Saldo total</string>
+    <string name="history_menu_export_activity">Exportar actividad</string>
+    <string name="history_export_success">Actividad exportada a CSV</string>
+    <string name="history_export_error">Error al exportar actividad</string>
 
     <!-- Basket receipt -->
     <string name="basket_receipt_title">Recibo</string>

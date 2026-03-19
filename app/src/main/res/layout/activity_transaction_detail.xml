@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout 
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -42,12 +42,13 @@
             app:layout_constraintBottom_toBottomOf="parent" />
 
         <ImageButton
-            android:id="@+id/share_button"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:id="@+id/overflow_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_share"
-            android:contentDescription="@string/transaction_detail_toolbar_share"
+            android:src="@drawable/ic_more_vert"
+            android:contentDescription="@string/transaction_detail_overflow_menu"
+            android:padding="12dp"
             app:tint="@color/color_text_primary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -70,66 +71,40 @@
             android:paddingTop="32dp"
             android:paddingBottom="32dp">
 
-            <!-- Hero Icon -->
-            <FrameLayout
-                android:id="@+id/hero_icon_container"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:layout_gravity="center_horizontal"
-                android:background="@drawable/bg_circle_green">
-
-                <ImageView
-                    android:id="@+id/hero_icon"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_bitcoin"
-                    app:tint="@android:color/white" />
-
-            </FrameLayout>
-
-            <!-- Transaction Type -->
-            <TextView
-                android:id="@+id/transaction_type"
-                style="@style/Text.Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp"
-                android:text="@string/transaction_detail_type_payment_received" />
-
-            <!-- Mint Name (if available) -->
-            <TextView
-                android:id="@+id/mint_name"
-                style="@style/Text.Body"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/color_text_secondary"
-                android:text="@string/transaction_detail_mint_label" />
-
-            <!-- Large Amount Display -->
+            <!-- Large Fiat Amount Display -->
             <TextView
                 android:id="@+id/detail_amount"
                 style="@style/Text.DisplayAmount"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
                 android:gravity="center"
                 android:textColor="@color/color_text_primary"
-                tools:text="₿0" />
+                tools:text="$20.00" />
 
-            <!-- Secondary Amount Display (e.g., sats when fiat is primary) -->
+            <!-- Secondary amount (sat equivalent for fiat entries, or fiat equivalent for sat entries) -->
             <TextView
                 android:id="@+id/detail_amount_subtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:gravity="center"
-                android:textSize="16sp"
-                android:textColor="@color/color_text_tertiary"
-                android:visibility="gone" />
+                android:textSize="17sp"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@color/color_text_secondary"
+                tools:text="₿27,849" />
+
+            <!-- Fiat equivalent (shown below sat amount on sat-entry transactions) -->
+            <TextView
+                android:id="@+id/detail_fiat_equivalent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:textSize="17sp"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@color/color_text_secondary"
+                android:visibility="gone"
+                tools:text="$0.01" />
 
             <!-- Date/Time -->
             <TextView
@@ -137,26 +112,11 @@
                 style="@style/Text.Caption"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="16dp"
                 android:gravity="center"
-                tools:text="Today at 11:01 PM" />
+                tools:text="March 15, 2026 at 11:31 AM" />
 
-            <!-- View Receipt Button (shown only for checkout transactions) -->
-            <Button
-                android:id="@+id/btn_view_basket"
-                style="@style/Widget.Button.Primary"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginTop="24dp"
-                android:text="@string/transaction_detail_view_receipt"
-                android:textAllCaps="false"
-                android:textSize="16sp"
-                android:fontFamily="sans-serif-medium"
-                android:visibility="gone" />
-
-            <!-- Transaction Details Section -->
+            <!-- Transaction Details Section Header -->
             <TextView
                 style="@style/Text.SectionHeader"
                 android:layout_width="match_parent"
@@ -166,30 +126,36 @@
                 android:layout_marginTop="32dp"
                 android:text="@string/transaction_detail_section_transaction_details" />
 
-            <!-- Details Container -->
+            <!-- Transaction Type Row -->
             <LinearLayout
+                android:id="@+id/row_transaction_type"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/bg_rounded_card"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp">
 
-                <!-- Payment Type Row -->
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_card"
+                    app:tint="@color/color_text_secondary"
+                    android:contentDescription="@null" />
+
                 <LinearLayout
-                    android:id="@+id/payment_type_row"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
 
                     <TextView
                         style="@style/Text.BodyBold"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
                         android:text="@string/transaction_detail_payment_type_label" />
 
                     <TextView
@@ -197,447 +163,278 @@
                         style="@style/Text.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/color_text_primary"
-                        android:text="@string/transaction_detail_payment_type_cashu" />
+                        android:layout_marginTop="2dp"
+                        tools:text="Cashu" />
 
                 </LinearLayout>
 
-                <!-- Divider for Payment Type -->
-                <View
-                    android:id="@+id/payment_type_divider"
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="12dp"
-                    android:background="@color/color_divider"
-                    android:visibility="gone" />
+            </LinearLayout>
 
-                <!-- Amount Row -->
+            <!-- Exchange Rate Row -->
+            <LinearLayout
+                android:id="@+id/row_exchange_rate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_switch_currency"
+                    app:tint="@color/color_text_secondary"
+                    android:contentDescription="@null" />
+
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
 
                     <TextView
                         style="@style/Text.BodyBold"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/transaction_detail_amount_label" />
+                        android:text="@string/transaction_detail_exchange_rate_label" />
 
                     <TextView
-                        android:id="@+id/detail_amount_value"
+                        android:id="@+id/detail_exchange_rate"
                         style="@style/Text.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/color_text_primary"
-                        tools:text="₿123" />
+                        android:layout_marginTop="2dp"
+                        tools:text="$71,833.46" />
 
                 </LinearLayout>
 
-                <!-- Divider -->
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="12dp"
-                    android:background="@color/color_divider" />
+            </LinearLayout>
 
-                <!-- Token Unit Row -->
+            <!-- Mint Row -->
+            <LinearLayout
+                android:id="@+id/row_mint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_bank"
+                    app:tint="@color/color_text_secondary"
+                    android:contentDescription="@null" />
+
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
 
                     <TextView
                         style="@style/Text.BodyBold"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/transaction_detail_token_unit_label" />
-
-                    <TextView
-                        android:id="@+id/detail_token_unit"
-                        style="@style/Text.Body"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/color_text_primary"
-                        tools:text="sat" />
-
-                </LinearLayout>
-
-                <!-- Divider -->
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="12dp"
-                    android:background="@color/color_divider" />
-
-                <!-- Entry Unit Row -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        style="@style/Text.BodyBold"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/transaction_detail_entered_as_label" />
-
-                    <TextView
-                        android:id="@+id/detail_entry_unit"
-                        style="@style/Text.Body"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/color_text_primary"
-                        tools:text="USD" />
-
-                </LinearLayout>
-
-                <!-- Divider -->
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="12dp"
-                    android:background="@color/color_divider" />
-
-                <!-- Entered Amount Row -->
-                <LinearLayout
-                    android:id="@+id/entered_amount_row"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        style="@style/Text.BodyBold"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/transaction_detail_entered_amount_label" />
-
-                    <TextView
-                        android:id="@+id/detail_entered_amount"
-                        style="@style/Text.Body"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/color_text_primary"
-                        tools:text="$1.23" />
-
-                </LinearLayout>
-
-                <!-- Divider -->
-                <View
-                    android:id="@+id/entered_amount_divider"
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="12dp"
-                    android:background="@color/color_divider" />
-
-                <!-- Bitcoin Price Row -->
-                <LinearLayout
-                    android:id="@+id/bitcoin_price_row"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        style="@style/Text.BodyBold"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/transaction_detail_bitcoin_price_label" />
-
-                    <TextView
-                        android:id="@+id/detail_bitcoin_price"
-                        style="@style/Text.Body"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/color_text_primary"
-                        tools:text="$27,333.45" />
-
-                </LinearLayout>
-
-                <!-- Divider -->
-                <View
-                    android:id="@+id/bitcoin_price_divider"
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="12dp"
-                    android:background="@color/color_divider" />
-
-                <!-- Tip Row (shown only if tip was added) -->
-                <LinearLayout
-                    android:id="@+id/tip_row"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:id="@+id/tip_label"
-                        style="@style/Text.BodyBold"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/transaction_detail_tip_label"
-                        android:textColor="@color/color_success_green" />
-
-                    <TextView
-                        android:id="@+id/detail_tip_amount"
-                        style="@style/Text.Body"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/color_success_green"
-                        tools:text="₿500" />
-
-                </LinearLayout>
-
-                <!-- Tip Fiat Equivalent Row -->
-                <LinearLayout
-                    android:id="@+id/tip_fiat_row"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="4dp"
-                    android:visibility="gone">
-
-                    <TextView
-                        style="@style/Text.Body"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/transaction_detail_tip_equivalent_label"
-                        android:textColor="@color/color_text_tertiary"
-                        android:textSize="13sp" />
-
-                    <TextView
-                        android:id="@+id/detail_tip_fiat"
-                        style="@style/Text.Body"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/color_text_tertiary"
-                        android:textSize="13sp"
-                        tools:text="≈ $0.50" />
-
-                </LinearLayout>
-
-                <!-- Tip Divider -->
-                <View
-                    android:id="@+id/tip_divider"
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="12dp"
-                    android:background="@color/color_divider"
-                    android:visibility="gone" />
-
-                <!-- Total Paid Row (shown only if tip was added) -->
-                <LinearLayout
-                    android:id="@+id/total_paid_row"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
-
-                    <TextView
-                        style="@style/Text.BodyBold"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/transaction_detail_total_paid_label" />
-
-                    <TextView
-                        android:id="@+id/detail_total_paid"
-                        style="@style/Text.Body"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/color_text_primary"
-                        tools:text="₿11,000" />
-
-                </LinearLayout>
-
-                <!-- Total Paid Divider -->
-                <View
-                    android:id="@+id/total_paid_divider"
-                    android:layout_width="match_parent"
-                    android:layout_height="0.5dp"
-                    android:layout_marginTop="12dp"
-                    android:layout_marginBottom="12dp"
-                    android:background="@color/color_divider"
-                    android:visibility="gone" />
-
-                <!-- Mint URL Row -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        style="@style/Text.BodyBold"
-                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/transaction_detail_mint_label_short" />
 
                     <TextView
                         android:id="@+id/detail_mint_url"
                         style="@style/Text.Body"
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textColor="@color/color_primary_green"
-                        android:autoLink="web"
-                        tools:text="https://mint.example.com" />
+                        android:layout_marginTop="2dp"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        tools:text="https://mint.minibits.cash/Bitcoin" />
 
                 </LinearLayout>
 
             </LinearLayout>
 
-            <!-- Lightning Invoice Section (for Lightning payments) -->
-            <TextView
-                android:id="@+id/lightning_invoice_header"
-                style="@style/Text.SectionHeader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginTop="24dp"
-                android:visibility="gone"
-                android:text="@string/transaction_detail_lightning_invoice_header" />
-
+            <!-- Sent To Row (withdrawals only) -->
             <LinearLayout
-                android:id="@+id/lightning_invoice_container"
+                android:id="@+id/row_sent_to"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/bg_rounded_card"
-                android:orientation="vertical"
-                android:padding="16dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
                 android:visibility="gone">
 
-                <TextView
-                    android:id="@+id/detail_lightning_invoice"
-                    style="@style/Text.Body"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:textSize="12sp"
-                    android:maxLines="3"
-                    android:ellipsize="middle"
-                    android:textColor="@color/color_text_secondary"
-                    android:text="@string/transaction_detail_lightning_invoice_placeholder" />
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_arrow_up_send"
+                    app:tint="@color/color_text_secondary"
+                    android:contentDescription="@null" />
 
-                <TextView
-                    android:id="@+id/copy_invoice_hint"
-                    style="@style/Text.Caption"
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textColor="@color/color_text_tertiary"
-                    android:text="@string/transaction_detail_copy_invoice_hint" />
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+
+                    <TextView
+                        style="@style/Text.BodyBold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/transaction_detail_sent_to_label" />
+
+                    <TextView
+                        android:id="@+id/detail_sent_to"
+                        style="@style/Text.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        tools:text="erik@primal.net" />
+
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/btn_copy_destination"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_copy"
+                    android:padding="4dp"
+                    app:tint="@color/color_text_quaternary"
+                    android:contentDescription="@string/transaction_detail_sent_to_label" />
 
             </LinearLayout>
 
-            <!-- Token Section -->
-            <TextView
-                android:id="@+id/token_header"
-                style="@style/Text.SectionHeader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginTop="24dp"
-                android:text="@string/transaction_detail_token_header" />
-
-            <!-- Token Display -->
-            <TextView
-                android:id="@+id/detail_token"
-                style="@style/Text.Body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/bg_rounded_card"
-                android:padding="16dp"
-                android:fontFamily="monospace"
-                android:textSize="12sp"
-                android:maxLines="4"
-                android:ellipsize="end"
-                android:textColor="@color/color_text_secondary"
-                android:text="@string/transaction_detail_token_placeholder" />
-
-            <!-- Payment Request Section (if available) -->
-            <TextView
-                android:id="@+id/payment_request_header"
-                style="@style/Text.SectionHeader"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginTop="24dp"
-                android:visibility="gone"
-                android:text="@string/transaction_detail_payment_request_header" />
-
-            <TextView
-                android:id="@+id/detail_payment_request"
-                style="@style/Text.Body"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/bg_rounded_card"
-                android:padding="16dp"
-                android:fontFamily="monospace"
-                android:textSize="12sp"
-                android:maxLines="4"
-                android:ellipsize="end"
-                android:textColor="@color/color_text_secondary"
-                android:visibility="gone"
-                android:text="@string/transaction_detail_payment_request_placeholder" />
-
-            <!-- Action Buttons -->
+            <!-- Invoice / Transaction ID Row -->
             <LinearLayout
+                android:id="@+id/row_invoice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_document"
+                    app:tint="@color/color_text_secondary"
+                    android:contentDescription="@null" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+
+                    <TextView
+                        android:id="@+id/detail_invoice_label"
+                        style="@style/Text.BodyBold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/transaction_detail_invoice_label" />
+
+                    <TextView
+                        android:id="@+id/detail_invoice_value"
+                        style="@style/Text.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:maxLines="1"
+                        android:ellipsize="middle"
+                        tools:text="lnbc1pvjluezpp5qqqsyq..." />
+
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/btn_copy_invoice"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_copy"
+                    android:padding="4dp"
+                    app:tint="@color/color_text_quaternary"
+                    android:contentDescription="@string/transaction_detail_copy_invoice_hint" />
+
+            </LinearLayout>
+
+            <!-- Label Row (only shown if label exists) -->
+            <LinearLayout
+                android:id="@+id/row_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_label"
+                    app:tint="@color/color_text_secondary"
+                    android:contentDescription="@null" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+
+                    <TextView
+                        style="@style/Text.BodyBold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/transaction_detail_label_row_title" />
+
+                    <TextView
+                        android:id="@+id/detail_label_value"
+                        style="@style/Text.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        tools:text="Coffee order" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Print Receipt Button -->
+            <Button
+                android:id="@+id/btn_print_receipt"
+                style="@style/Widget.Button.Secondary.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
-                android:layout_marginTop="20dp"
-                android:orientation="vertical">
-
-                <Button
-                    android:id="@+id/btn_copy"
-                    style="@style/Widget.Button.Secondary.Outlined"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/transaction_detail_button_copy_token"
-                    android:layout_marginBottom="12dp"/>
-
-                <Button
-                    android:id="@+id/btn_open_with"
-                    style="@style/Widget.Button.Secondary.Outlined"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/transaction_detail_button_open_with"
-                    android:layout_marginBottom="12dp"/>
-
-                <Button
-                    android:id="@+id/btn_delete"
-                    style="@style/Widget.Button.Secondary.Outlined"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/transaction_detail_button_delete"
-                    android:textColor="@color/color_warning_red"/>
-
-            </LinearLayout>
+                android:layout_marginTop="24dp"
+                android:gravity="center"
+                android:text="@string/transaction_detail_print_receipt"
+                android:textAllCaps="false"
+                app:backgroundTint="@null" />
 
         </LinearLayout>
 

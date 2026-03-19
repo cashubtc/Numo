@@ -12,16 +12,16 @@ import java.util.UUID
 data class PaymentHistoryEntry(
     /** Unique identifier for this entry (for updates) */
     @SerializedName("id")
-    val id: String = UUID.randomUUID().toString(),
+    override val id: String = UUID.randomUUID().toString(),
 
     @SerializedName("token")
     val token: String,
 
     @SerializedName("amount")
-    val amount: Long,
+    override val amount: Long,
 
     @SerializedName("date")
-    val date: Date,
+    override val date: Date,
 
     // Backing fields can be null (for safety with old/Java callers),
     // public getters always normalize to non-null with sensible defaults.
@@ -32,13 +32,13 @@ data class PaymentHistoryEntry(
     private val rawEntryUnit: String? = "sat", // Unit with which it was entered (e.g., "USD", "sat")
 
     @SerializedName("enteredAmount")
-    val enteredAmount: Long, // Amount as it was entered (cents for fiat, sats for BTC)
+    override val enteredAmount: Long, // Amount as it was entered (cents for fiat, sats for BTC)
 
     @SerializedName("bitcoinPrice")
     val bitcoinPrice: Double? = null, // Bitcoin price at time of payment (can be null)
 
     @SerializedName("mintUrl")
-    val mintUrl: String? = null, // Mint from which it was received
+    override val mintUrl: String? = null, // Mint from which it was received
 
     @SerializedName("paymentRequest")
     val paymentRequest: String? = null, // The payment request it was received with (optional)
@@ -98,13 +98,17 @@ data class PaymentHistoryEntry(
      */
     @SerializedName("swapToLightningMintJson")
     val swapToLightningMintJson: String? = null,
-) {
+
+    /** User-assigned label for this transaction */
+    @SerializedName("label")
+    override val label: String? = null,
+) : HistoryEntry {
 
     /** Check if this payment includes a tip */
     fun hasTip(): Boolean = tipAmountSats > 0
 
     /** Get the base amount (excluding tip) in satoshis */
-    fun getBaseAmountSats(): Long = amount - tipAmountSats
+    override fun getBaseAmountSats(): Long = amount - tipAmountSats
 
     /** Get tip formatted for display (e.g., "₿500" or "5%") */
     fun getTipDisplayString(): String {
@@ -137,16 +141,16 @@ data class PaymentHistoryEntry(
     fun getUnit(): String = rawUnit ?: "sat"
 
     /** Public, non-null view of the entry unit. */
-    fun getEntryUnit(): String = rawEntryUnit ?: "sat"
+    override fun getEntryUnit(): String = rawEntryUnit ?: "sat"
 
     /** Public, non-null view of the status. */
-    fun getStatus(): String = rawStatus ?: "completed"
+    override val status: String get() = rawStatus ?: "completed"
 
     /** Check if this payment is pending */
-    fun isPending(): Boolean = getStatus() == STATUS_PENDING
+    override fun isPending(): Boolean = status == STATUS_PENDING
 
     /** Check if this payment is completed */
-    fun isCompleted(): Boolean = getStatus() == STATUS_COMPLETED
+    override fun isCompleted(): Boolean = status == STATUS_COMPLETED
 
     /** Check if this payment was via Lightning */
     fun isLightning(): Boolean = paymentType == TYPE_LIGHTNING

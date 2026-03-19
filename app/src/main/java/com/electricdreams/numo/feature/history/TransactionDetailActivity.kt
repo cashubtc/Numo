@@ -4,10 +4,9 @@ import android.content.*
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.appcompat.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -20,14 +19,18 @@ import com.electricdreams.numo.core.model.CheckoutBasket
 import com.electricdreams.numo.core.model.CheckoutBasketItem
 import com.electricdreams.numo.core.model.SavedBasket
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
+import com.electricdreams.numo.ui.util.DialogHelper
+import com.electricdreams.numo.core.util.MintProfileService
 import com.electricdreams.numo.core.util.SavedBasketManager
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 /**
- * Full-screen activity to display detailed transaction information
- * following Cash App design guidelines.
+ * Full-screen activity to display detailed transaction information.
  */
 class TransactionDetailActivity : AppCompatActivity() {
 
@@ -40,6 +43,8 @@ class TransactionDetailActivity : AppCompatActivity() {
     private var savedBasket: SavedBasket? = null
     private var tipAmountSats: Long = 0
     private var tipPercentage: Int = 0
+    private var paymentId: String? = null
+    private var currentLabel: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,13 +69,15 @@ class TransactionDetailActivity : AppCompatActivity() {
         basketId = intent.getStringExtra(EXTRA_BASKET_ID)
         tipAmountSats = intent.getLongExtra(EXTRA_TRANSACTION_TIP_AMOUNT, 0)
         tipPercentage = intent.getIntExtra(EXTRA_TRANSACTION_TIP_PERCENTAGE, 0)
-        
+        paymentId = intent.getStringExtra(EXTRA_TRANSACTION_ID)
+        currentLabel = intent.getStringExtra(EXTRA_TRANSACTION_LABEL)
+
         // Load saved basket if basketId is available
         basketId?.let { id ->
             savedBasket = SavedBasketManager.getInstance(this).getBasket(id)
         }
 
-        // Create entry object (normalize nullable unit fields via Kotlin defaults)
+        // Create entry object
         entry = PaymentHistoryEntry(
             token = token ?: "",
             amount = amount,
@@ -85,70 +92,101 @@ class TransactionDetailActivity : AppCompatActivity() {
             tipPercentage = tipPercentage,
         )
 
-        // DEBUG: Log received tip info
-        android.util.Log.d("TransactionDetailActivity", "🧾 TRANSACTION DETAIL DEBUG:")
-        android.util.Log.d("TransactionDetailActivity", "   💰 Total amount: $amount sats")
-        android.util.Log.d("TransactionDetailActivity", "   📊 Entered amount: $enteredAmount ${entryUnit ?: "null"}")
-        android.util.Log.d("TransactionDetailActivity", "   💸 Tip from intent: $tipAmountSats sats ($tipPercentage%)")
-        android.util.Log.d("TransactionDetailActivity", "   💸 Tip from entry: ${entry.tipAmountSats} sats (${entry.tipPercentage}%)")
-        android.util.Log.d("TransactionDetailActivity", "   🧮 Calculated base: ${entry.getBaseAmountSats()} sats")
-
         setupViews()
     }
+
+    private val isWithdrawal: Boolean
+        get() = entry.amount < 0
 
     private fun setupViews() {
         // Back button
         findViewById<ImageButton>(R.id.back_button).setOnClickListener { finish() }
 
-        // Share button
-        findViewById<ImageButton>(R.id.share_button).setOnClickListener { shareTransaction() }
+        // Overflow menu button
+        findViewById<ImageButton>(R.id.overflow_button).setOnClickListener { showOverflowMenu(it) }
 
         // Display transaction details
         displayTransactionDetails()
 
-        // Setup action buttons
-        setupActionButtons()
+        // Print Receipt button - only for incoming payments, not withdrawals
+        val printReceiptBtn = findViewById<View>(R.id.btn_print_receipt)
+        if (isWithdrawal) {
+            printReceiptBtn.visibility = View.GONE
+        } else {
+            printReceiptBtn.setOnClickListener { openBasketReceipt() }
+        }
+    }
+
+    private fun showOverflowMenu(anchor: View) {
+        val popup = PopupMenu(this, anchor, android.view.Gravity.END)
+        popup.menuInflater.inflate(R.menu.menu_transaction_detail, popup.menu)
+
+        // Style the delete item red to signal destructive action
+        popup.menu.findItem(R.id.menu_delete_transaction)?.let { deleteItem ->
+            val spannable = android.text.SpannableString(deleteItem.title)
+            spannable.setSpan(
+                android.text.style.ForegroundColorSpan(getColor(R.color.color_error)),
+                0, spannable.length, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            deleteItem.title = spannable
+        }
+
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.menu_label_transaction -> {
+                    showLabelDialog()
+                    true
+                }
+                R.id.menu_copy_id -> {
+                    copyTransactionId()
+                    true
+                }
+                R.id.menu_delete_transaction -> {
+                    showDeleteConfirmation()
+                    true
+                }
+                else -> false
+            }
+        }
+
+        popup.show()
     }
 
     private fun displayTransactionDetails() {
-        // Update hero icon based on payment type
-        val heroIcon = findViewById<ImageView>(R.id.hero_icon)
-        val transactionType = findViewById<TextView>(R.id.transaction_type)
-        
-        val typeTextRes = when (paymentType) {
-            PaymentHistoryEntry.TYPE_LIGHTNING -> R.string.transaction_detail_type_lightning_payment
-            PaymentHistoryEntry.TYPE_CASHU -> R.string.transaction_detail_type_cashu_payment
-            else -> R.string.transaction_detail_type_payment_received
-        }
-
-        when (paymentType) {
-            PaymentHistoryEntry.TYPE_LIGHTNING -> heroIcon.setImageResource(R.drawable.ic_lightning_bolt)
-            else -> heroIcon.setImageResource(R.drawable.ic_bitcoin)
-        }
-
-        transactionType.setText(typeTextRes)
-
-        // Amount display - show BASE amount (excluding tip) for proper accounting
         val amountText: TextView = findViewById(R.id.detail_amount)
         val amountSubtitleText: TextView = findViewById(R.id.detail_amount_subtitle)
-        val amountValueText: TextView = findViewById(R.id.detail_amount_value)
+        val fiatEquivalentText: TextView = findViewById(R.id.detail_fiat_equivalent)
 
-        // Use BASE amount (excluding tip) for display - this is what was sold
-        val baseAmountSats = entry.getBaseAmountSats()
+        // Use BASE amount (excluding tip) for display; use absolute value for withdrawals
+        val baseAmountSats = kotlin.math.abs(entry.getBaseAmountSats())
         val baseSatAmount = Amount(baseAmountSats, Amount.Currency.BTC)
 
-        // Amount is ALWAYS the settlement one in sats (per user request)
-        amountText.text = baseSatAmount.toString()
-        amountValueText.text = baseSatAmount.toString()
-
-        // Secondary: Fiat equivalent (if applicable)
+        // Determine what to show as primary vs secondary amount
         if (entry.enteredAmount > 0 && entry.getEntryUnit() != "sat") {
+            // Fiat entry: show fiat large, sats subtitle, no fiat equivalent (already primary)
             val entryCurrency = Amount.Currency.fromCode(entry.getEntryUnit())
             val fiatAmount = Amount(entry.enteredAmount, entryCurrency)
-            amountSubtitleText.text = "≈ $fiatAmount"
+            amountText.text = fiatAmount.toString()
+            amountSubtitleText.text = baseSatAmount.toString()
             amountSubtitleText.visibility = View.VISIBLE
+            fiatEquivalentText.visibility = View.GONE
         } else {
+            // Sat entry: show sats large, calculate fiat equivalent if exchange rate available
+            amountText.text = baseSatAmount.toString()
             amountSubtitleText.visibility = View.GONE
+
+            val btcPriceForFiat = entry.bitcoinPrice
+            if (btcPriceForFiat != null && btcPriceForFiat > 0) {
+                val fiatValue = (baseAmountSats.toDouble() / 100_000_000.0) * btcPriceForFiat
+                val currencyCode = CurrencyManager.getInstance(this).getCurrentCurrency()
+                val fiatCurrency = Amount.Currency.fromCode(currencyCode)
+                val fiatMinorUnits = kotlin.math.round(fiatValue * 100).toLong()
+                val fiatAmount = Amount(fiatMinorUnits, fiatCurrency)
+                fiatEquivalentText.text = "$fiatAmount"
+                fiatEquivalentText.visibility = View.VISIBLE
+            } else {
+                fiatEquivalentText.visibility = View.GONE
+            }
         }
 
         // Date
@@ -156,220 +194,136 @@ class TransactionDetailActivity : AppCompatActivity() {
         val dateFormat = SimpleDateFormat("MMMM d, yyyy 'at' h:mm a", Locale.getDefault())
         dateText.text = dateFormat.format(entry.date)
 
-        // Mint name/URL
-        val mintNameText: TextView = findViewById(R.id.mint_name)
-        val mintUrlText: TextView = findViewById(R.id.detail_mint_url)
-
-        // Prefer the primary mint URL recorded on the entry; if that is
-        // missing, fall back to the Lightning mint URL (for Lightning or
-        // swap-to-Lightning-mint flows) so we never display a generic
-        // "Unknown" when we actually know which mint was involved.
-        val primaryMintUrl = entry.mintUrl ?: entry.lightningMintUrl
-
-        if (!primaryMintUrl.isNullOrEmpty()) {
-            val mintName = getMintDisplayName(primaryMintUrl)
-            mintNameText.text = getString(R.string.transaction_detail_mint_from_name, mintName)
-            mintUrlText.text = primaryMintUrl
-        } else {
-            mintNameText.visibility = View.GONE
-            mintUrlText.text = getString(R.string.transaction_detail_mint_unknown)
-        }
-
-        // Payment Type Row
-        val paymentTypeRow: View = findViewById(R.id.payment_type_row)
-        val paymentTypeDivider: View = findViewById(R.id.payment_type_divider)
+        // Payment Type
         val paymentTypeText: TextView = findViewById(R.id.detail_payment_type)
-        
-        if (paymentType != null) {
-            paymentTypeRow.visibility = View.VISIBLE
-            paymentTypeDivider.visibility = View.VISIBLE
-            paymentTypeText.text = when (paymentType) {
-                PaymentHistoryEntry.TYPE_LIGHTNING -> getString(R.string.transaction_detail_payment_type_lightning_value)
-                PaymentHistoryEntry.TYPE_CASHU -> getString(R.string.transaction_detail_payment_type_cashu_value)
-                else -> paymentType
-            }
-        } else {
-            paymentTypeRow.visibility = View.GONE
-            paymentTypeDivider.visibility = View.GONE
+        paymentTypeText.text = when {
+            isWithdrawal -> getString(R.string.transaction_detail_type_withdrawal)
+            paymentType == PaymentHistoryEntry.TYPE_LIGHTNING -> getString(R.string.transaction_detail_payment_type_lightning_value)
+            paymentType == PaymentHistoryEntry.TYPE_CASHU -> getString(R.string.transaction_detail_payment_type_cashu_value)
+            else -> getString(R.string.transaction_detail_type_payment_received)
         }
 
-        // Token unit
-        val tokenUnitText: TextView = findViewById(R.id.detail_token_unit)
-        tokenUnitText.text = entry.getUnit()
-
-        // Entry unit
-        val entryUnitText: TextView = findViewById(R.id.detail_entry_unit)
-        entryUnitText.text = entry.getEntryUnit()
-
-        // Entered Amount
-        val enteredAmountText: TextView = findViewById(R.id.detail_entered_amount)
-        val enteredAmountRow: View = findViewById(R.id.entered_amount_row)
-        val enteredAmountDivider: View = findViewById(R.id.entered_amount_divider)
-
-        if (entry.getEntryUnit() != "sat") {
-            val entryCurrency = Amount.Currency.fromCode(entry.getEntryUnit())
-            val enteredAmount = Amount(entry.enteredAmount, entryCurrency)
-            enteredAmountText.text = enteredAmount.toStringWithoutSymbol()
-            enteredAmountRow.visibility = View.VISIBLE
-            enteredAmountDivider.visibility = View.VISIBLE
-        } else {
-            enteredAmountRow.visibility = View.GONE
-            enteredAmountDivider.visibility = View.GONE
-        }
-
-        // Bitcoin Price
-        val bitcoinPriceText: TextView = findViewById(R.id.detail_bitcoin_price)
-        val bitcoinPriceRow: View = findViewById(R.id.bitcoin_price_row)
-        val bitcoinPriceDivider: View = findViewById(R.id.bitcoin_price_divider)
+        // Exchange Rate
+        val exchangeRateRow: View = findViewById(R.id.row_exchange_rate)
+        val exchangeRateText: TextView = findViewById(R.id.detail_exchange_rate)
 
         val btcPrice = entry.bitcoinPrice
         if (btcPrice != null && btcPrice > 0) {
-            // Determine the correct currency for the Bitcoin price.
-            // 1. If entry unit is a fiat currency, use that.
-            // 2. If available, check the checkout basket currency.
-            // 3. Fallback to current selected currency.
             val currencyCode = if (entry.getEntryUnit() != "sat" && entry.getEntryUnit() != "BTC") {
                 entry.getEntryUnit()
             } else {
                 val basket = CheckoutBasket.fromJson(checkoutBasketJson)
                 basket?.currency ?: CurrencyManager.getInstance(this).getCurrentCurrency()
             }
-            
+
             val currency = Amount.Currency.fromCode(currencyCode)
-            // If we somehow still resolved to BTC (e.g. basket had "SAT"), force current currency for price display
-            val priceCurrency = if (currency == Amount.Currency.BTC) Amount.Currency.fromCode(CurrencyManager.getInstance(this).getCurrentCurrency()) else currency
-            
-            // Format price using Amount class to respect locale and currency symbol
-            // Amount expects minor units (cents), so multiply by 100
+            val priceCurrency = if (currency == Amount.Currency.BTC) {
+                Amount.Currency.fromCode(CurrencyManager.getInstance(this).getCurrentCurrency())
+            } else {
+                currency
+            }
+
             val priceMinorUnits = kotlin.math.round(btcPrice * 100).toLong()
             val formattedPrice = Amount(priceMinorUnits, priceCurrency).toString()
-            
-            bitcoinPriceText.text = formattedPrice
-            bitcoinPriceRow.visibility = View.VISIBLE
-            bitcoinPriceDivider.visibility = View.VISIBLE
+
+            exchangeRateText.text = formattedPrice
+            exchangeRateRow.visibility = View.VISIBLE
         } else {
-            bitcoinPriceRow.visibility = View.GONE
-            bitcoinPriceDivider.visibility = View.GONE
+            exchangeRateRow.visibility = View.GONE
         }
 
-        // Tip Row (shown only if tip was added)
-        val tipRow: View = findViewById(R.id.tip_row)
-        val tipLabel: TextView = findViewById(R.id.tip_label)
-        val tipAmountText: TextView = findViewById(R.id.detail_tip_amount)
-        val tipFiatRow: View = findViewById(R.id.tip_fiat_row)
-        val tipFiatText: TextView = findViewById(R.id.detail_tip_fiat)
-        val tipDivider: View = findViewById(R.id.tip_divider)
-        val totalPaidRow: View = findViewById(R.id.total_paid_row)
-        val totalPaidText: TextView = findViewById(R.id.detail_total_paid)
-        val totalPaidDivider: View = findViewById(R.id.total_paid_divider)
+        // Mint display name (falls back to URL host if no name stored)
+        val mintUrlText: TextView = findViewById(R.id.detail_mint_url)
+        val primaryMintUrl = entry.mintUrl ?: entry.lightningMintUrl
 
-        // FIXED: Use entry.tipAmountSats (from stored data) not local tipAmountSats (from intent)
-        if (entry.tipAmountSats > 0) {
-            // Show tip row with label including percentage if applicable
-            tipLabel.text = if (entry.tipPercentage > 0) {
-                getString(R.string.transaction_detail_tip_added_with_percentage, entry.tipPercentage)
-            } else {
-                getString(R.string.transaction_detail_tip_added_label)
+        if (!primaryMintUrl.isNullOrEmpty()) {
+            val displayName = getMintDisplayName(primaryMintUrl)
+            mintUrlText.text = displayName
+
+            // If no cached mint info, try fetching it in the background and update
+            val mintManager = MintManager.getInstance(this)
+            if (mintManager.getMintInfo(primaryMintUrl) == null) {
+                lifecycleScope.launch {
+                    try {
+                        MintProfileService.getInstance(this@TransactionDetailActivity)
+                            .fetchAndStoreMintProfile(primaryMintUrl)
+                        // Re-read display name after fetch
+                        val updatedName = getMintDisplayName(primaryMintUrl)
+                        if (updatedName != displayName) {
+                            mintUrlText.text = updatedName
+                        }
+                    } catch (_: Exception) {
+                        // Keep the URL-based fallback
+                    }
+                }
             }
-            tipAmountText.text = Amount(entry.tipAmountSats, Amount.Currency.BTC).toString()
-            tipRow.visibility = View.VISIBLE
-            tipDivider.visibility = View.VISIBLE
-
-            // Show fiat equivalent if we have bitcoin price
-            if (btcPrice != null && btcPrice > 0) {
-                val tipFiatValue = (entry.tipAmountSats.toDouble() / 100_000_000.0) * btcPrice * 100 // cents
-                val entryCurrency = Amount.Currency.fromCode(entry.getEntryUnit())
-                val tipFiatAmount = Amount(tipFiatValue.toLong(), entryCurrency)
-                tipFiatText.text = "≈ $tipFiatAmount"
-                tipFiatRow.visibility = View.VISIBLE
-            } else {
-                tipFiatRow.visibility = View.GONE
-            }
-
-            // Show total paid (base + tip)
-            val totalAmount = Amount(entry.amount, Amount.Currency.BTC)
-            totalPaidText.text = totalAmount.toString()
-            totalPaidRow.visibility = View.VISIBLE
-            totalPaidDivider.visibility = View.VISIBLE
         } else {
-            tipRow.visibility = View.GONE
-            tipFiatRow.visibility = View.GONE
-            tipDivider.visibility = View.GONE
-            totalPaidRow.visibility = View.GONE
-            totalPaidDivider.visibility = View.GONE
+            mintUrlText.text = getString(R.string.transaction_detail_mint_unknown)
         }
 
-        // Lightning Invoice section
-        val lightningInvoiceHeader: TextView = findViewById(R.id.lightning_invoice_header)
-        val lightningInvoiceContainer: LinearLayout = findViewById(R.id.lightning_invoice_container)
-        val lightningInvoiceText: TextView = findViewById(R.id.detail_lightning_invoice)
-        
+        // Sent To row (withdrawals only)
+        val sentToRow: View = findViewById(R.id.row_sent_to)
+        val sentToText: TextView = findViewById(R.id.detail_sent_to)
+        val copyDestinationBtn: ImageButton = findViewById(R.id.btn_copy_destination)
+
+        val destination = entry.paymentRequest
+        if (isWithdrawal && !destination.isNullOrEmpty()) {
+            sentToText.text = destination
+            copyDestinationBtn.setOnClickListener { copyDestination(destination) }
+            sentToRow.visibility = View.VISIBLE
+        } else {
+            sentToRow.visibility = View.GONE
+        }
+
+        // Invoice / Transaction ID row
+        val invoiceRow: View = findViewById(R.id.row_invoice)
+        val invoiceLabel: TextView = findViewById(R.id.detail_invoice_label)
+        val invoiceValue: TextView = findViewById(R.id.detail_invoice_value)
+        val copyInvoiceBtn: ImageButton = findViewById(R.id.btn_copy_invoice)
+
+        val isCashu = paymentType == PaymentHistoryEntry.TYPE_CASHU
+
         if (!lightningInvoice.isNullOrEmpty()) {
-            lightningInvoiceHeader.visibility = View.VISIBLE
-            lightningInvoiceContainer.visibility = View.VISIBLE
-            lightningInvoiceText.text = lightningInvoice
-            
-            // Make container clickable to copy invoice
-            lightningInvoiceContainer.setOnClickListener {
-                copyLightningInvoice()
+            invoiceLabel.text = if (isCashu) {
+                getString(R.string.transaction_detail_cashu_request_label)
+            } else {
+                getString(R.string.transaction_detail_invoice_label)
             }
+            invoiceValue.text = formatTruncatedId(lightningInvoice!!)
+            copyInvoiceBtn.setOnClickListener { copyLightningInvoice() }
+            invoiceRow.visibility = View.VISIBLE
+        } else if (entry.token.isNotEmpty()) {
+            invoiceLabel.text = if (isCashu) {
+                getString(R.string.transaction_detail_cashu_request_label)
+            } else {
+                getString(R.string.transaction_detail_transaction_id_label)
+            }
+            invoiceValue.text = formatTruncatedId(entry.token)
+            copyInvoiceBtn.setOnClickListener { copyToken() }
+            invoiceRow.visibility = View.VISIBLE
         } else {
-            lightningInvoiceHeader.visibility = View.GONE
-            lightningInvoiceContainer.visibility = View.GONE
+            invoiceRow.visibility = View.GONE
         }
 
-        // Token section - hide for Lightning payments with no token
-        val tokenHeader: TextView = findViewById(R.id.token_header)
-        val tokenText: TextView = findViewById(R.id.detail_token)
-        val copyButton: Button = findViewById(R.id.btn_copy)
-        val openWithButton: Button = findViewById(R.id.btn_open_with)
-        
-        if (entry.token.isEmpty() && paymentType == PaymentHistoryEntry.TYPE_LIGHTNING) {
-            // Lightning payment without token
-            tokenHeader.visibility = View.GONE
-            tokenText.visibility = View.GONE
-            copyButton.visibility = View.GONE
-            openWithButton.visibility = View.GONE
-        } else {
-            tokenHeader.visibility = View.VISIBLE
-            tokenText.visibility = View.VISIBLE
-            tokenText.text = entry.token
-            copyButton.visibility = View.VISIBLE
-            openWithButton.visibility = View.VISIBLE
-        }
+        // Label row
+        updateLabelRow()
+    }
 
-        // Payment request (if available)
-        val paymentRequestHeader: TextView = findViewById(R.id.payment_request_header)
-        val paymentRequestText: TextView = findViewById(R.id.detail_payment_request)
+    /**
+     * Truncates an ID to first 6 + "…" + middle 6 + "…" + last 6 characters.
+     */
+    private fun formatTruncatedId(id: String): String {
+        if (id.length <= 21) return id
 
-        val request = entry.paymentRequest
-        if (!request.isNullOrEmpty()) {
-            paymentRequestHeader.visibility = View.VISIBLE
-            paymentRequestText.visibility = View.VISIBLE
-            paymentRequestText.text = request
-        } else {
-            paymentRequestHeader.visibility = View.GONE
-            paymentRequestText.visibility = View.GONE
-        }
+        val midStart = (id.length / 2) - 3
+        val first = id.take(6)
+        val middle = id.substring(midStart, midStart + 6)
+        val last = id.takeLast(6)
+        return "$first\u2026$middle\u2026$last"
     }
 
     private fun getMintDisplayName(mintUrl: String): String {
         return MintManager.getInstance(this).getMintDisplayName(mintUrl)
-    }
-
-    private fun setupActionButtons() {
-        val copyButton: Button = findViewById(R.id.btn_copy)
-        val openWithButton: Button = findViewById(R.id.btn_open_with)
-        val deleteButton: Button = findViewById(R.id.btn_delete)
-        val viewBasketButton: Button = findViewById(R.id.btn_view_basket)
-
-        copyButton.setOnClickListener { copyToken() }
-        openWithButton.setOnClickListener { openWithApp() }
-        deleteButton.setOnClickListener { showDeleteConfirmation() }
-
-        // Always show View Receipt button - works with or without basket
-        viewBasketButton.visibility = View.VISIBLE
-        viewBasketButton.setOnClickListener { openBasketReceipt() }
     }
 
     private fun openBasketReceipt() {
@@ -379,33 +333,28 @@ class TransactionDetailActivity : AppCompatActivity() {
         } else {
             checkoutBasketJson
         }
-        
+
         val intent = Intent(this, BasketReceiptActivity::class.java).apply {
             putExtra(BasketReceiptActivity.EXTRA_CHECKOUT_BASKET_JSON, basketJsonToUse)
             putExtra(BasketReceiptActivity.EXTRA_PAYMENT_TYPE, paymentType)
             putExtra(BasketReceiptActivity.EXTRA_PAYMENT_DATE, entry.date.time)
-            
+
             val txId = entry.token.takeIf { it.isNotEmpty() } ?: lightningInvoice
             putExtra(BasketReceiptActivity.EXTRA_TRANSACTION_ID, txId)
-            
+
             putExtra(BasketReceiptActivity.EXTRA_MINT_URL, entry.mintUrl)
             entry.bitcoinPrice?.let { putExtra(BasketReceiptActivity.EXTRA_BITCOIN_PRICE, it) }
-            
-            // For non-basket transactions, pass the payment amount info
+
             putExtra(BasketReceiptActivity.EXTRA_TOTAL_SATOSHIS, entry.amount)
             putExtra(BasketReceiptActivity.EXTRA_ENTERED_AMOUNT, entry.enteredAmount)
             putExtra(BasketReceiptActivity.EXTRA_ENTERED_CURRENCY, entry.getEntryUnit())
-            
-            // Pass tip information
+
             putExtra(BasketReceiptActivity.EXTRA_TIP_AMOUNT_SATS, entry.tipAmountSats)
             putExtra(BasketReceiptActivity.EXTRA_TIP_PERCENTAGE, entry.tipPercentage)
         }
         startActivity(intent)
     }
-    
-    /**
-     * Convert a SavedBasket to a CheckoutBasket for receipt display.
-     */
+
     private fun convertSavedBasketToCheckoutBasket(savedBasket: SavedBasket): CheckoutBasket {
         val checkoutItems = savedBasket.items.map { basketItem ->
             CheckoutBasketItem.fromBasketItem(
@@ -413,12 +362,11 @@ class TransactionDetailActivity : AppCompatActivity() {
                 currencyCode = CurrencyManager.getInstance(this).getCurrentCurrency(),
             )
         }
-        
-        // Determine currency for the basket from global fiat settings
+
         val currency = CurrencyManager
             .getInstance(this)
             .getCurrentCurrency()
-        
+
         return CheckoutBasket(
             id = savedBasket.id,
             checkoutTimestamp = savedBasket.paidAt ?: savedBasket.updatedAt,
@@ -474,42 +422,57 @@ class TransactionDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun shareTransaction() {
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
+    private fun copyDestination(destination: String) {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("Destination", destination)
+        clipboard.setPrimaryClip(clip)
+        Toast.makeText(
+            this,
+            getString(R.string.transaction_detail_destination_copied),
+            Toast.LENGTH_SHORT
+        ).show()
+    }
 
-            val currency = Amount.Currency.fromCode(entry.getUnit())
-            val amount = Amount(entry.amount, currency)
+    private fun copyTransactionId() {
+        val id = lightningInvoice ?: entry.token
+        if (id.isEmpty()) return
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("Transaction ID", id)
+        clipboard.setPrimaryClip(clip)
+        Toast.makeText(
+            this,
+            getString(R.string.transaction_detail_toast_id_copied),
+            Toast.LENGTH_SHORT
+        ).show()
+    }
 
-            val typeLabelRes = when (paymentType) {
-                PaymentHistoryEntry.TYPE_LIGHTNING -> R.string.history_share_type_lightning
-                PaymentHistoryEntry.TYPE_CASHU -> R.string.history_share_type_cashu
-                else -> R.string.history_share_type_cashu
-            }
-            val typeLabel = getString(typeLabelRes)
-
-            val shareText = buildString {
-                val firstLineRes = when (paymentType) {
-                    PaymentHistoryEntry.TYPE_LIGHTNING -> R.string.transaction_detail_type_lightning_payment
-                    PaymentHistoryEntry.TYPE_CASHU -> R.string.transaction_detail_type_cashu_payment
-                    else -> R.string.transaction_detail_type_payment_received
+    private fun showLabelDialog() {
+        DialogHelper.showInput(this, DialogHelper.InputConfig(
+            title = getString(R.string.transaction_detail_label_dialog_title),
+            hint = getString(R.string.transaction_detail_label_dialog_hint),
+            initialValue = currentLabel ?: "",
+            saveText = getString(R.string.transaction_detail_label_dialog_save),
+            onSave = { label ->
+                currentLabel = label.ifBlank { null }
+                paymentId?.let { id ->
+                    PaymentsHistoryActivity.updateLabel(this, id, currentLabel)
+                    AutoWithdrawManager.getInstance(this).updateWithdrawalLabel(id, currentLabel)
                 }
-                append(getString(firstLineRes))
-                append("\n")
-                append(getString(R.string.history_share_line_amount, amount.toString()))
-                if (entry.token.isNotEmpty()) {
-                    append("\n")
-                    append(getString(R.string.history_share_line_token, entry.token))
-                } else if (!lightningInvoice.isNullOrEmpty()) {
-                    append("\n")
-                    append(getString(R.string.history_share_line_invoice, lightningInvoice))
-                }
+                updateLabelRow()
             }
+        ))
+    }
 
-            putExtra(Intent.EXTRA_TEXT, shareText)
+    private fun updateLabelRow() {
+        val labelRow: View = findViewById(R.id.row_label)
+        val labelValue: TextView = findViewById(R.id.detail_label_value)
+
+        if (!currentLabel.isNullOrBlank()) {
+            labelValue.text = currentLabel
+            labelRow.visibility = View.VISIBLE
+        } else {
+            labelRow.visibility = View.GONE
         }
-
-        startActivity(Intent.createChooser(shareIntent, getString(R.string.history_share_title)))
     }
 
     private fun showDeleteConfirmation() {
@@ -546,5 +509,7 @@ class TransactionDetailActivity : AppCompatActivity() {
         const val EXTRA_BASKET_ID = "basket_id"
         const val EXTRA_TRANSACTION_TIP_AMOUNT = "transaction_tip_amount"
         const val EXTRA_TRANSACTION_TIP_PERCENTAGE = "transaction_tip_percentage"
+        const val EXTRA_TRANSACTION_ID = "transaction_id"
+        const val EXTRA_TRANSACTION_LABEL = "transaction_label"
     }
 }

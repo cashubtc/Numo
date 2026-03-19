@@ -325,7 +325,7 @@ class PaymentWebhookDispatcher(
                 paymentId = entry.id,
                 amountSats = entry.amount,
                 paymentType = paymentType,
-                status = entry.getStatus(),
+                status = entry.status,
                 mintUrl = mintUrl,
                 tipAmountSats = entry.tipAmountSats,
                 tipPercentage = entry.tipPercentage,
@@ -336,7 +336,7 @@ class PaymentWebhookDispatcher(
             ),
             transaction = TransactionMetadata(
                 paymentId = entry.id,
-                status = entry.getStatus(),
+                status = entry.status,
                 paymentType = paymentType,
                 amountSats = entry.amount,
                 baseAmountSats = entry.getBaseAmountSats(),

@@ -28,6 +28,15 @@
         <item name="colorOnSurface">@color/color_text_primary</item>
         <!-- Icon tint -->
         <item name="colorControlNormal">@color/color_text_secondary</item>
+        <!-- Popup menu styling -->
+        <item name="popupMenuStyle">@style/Widget.Numo.PopupMenu</item>
+        <item name="android:popupMenuStyle">@style/Widget.Numo.PopupMenu</item>
+    </style>
+
+    <!-- Popup Menu Style -->
+    <style name="Widget.Numo.PopupMenu" parent="Widget.MaterialComponents.PopupMenu">
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+        <item name="android:popupElevation">0dp</item>
     </style>
     
     <!-- Splash Screen Theme for Android 12+ -->
