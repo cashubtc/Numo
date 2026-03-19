@@ -69,7 +69,8 @@ class PosUiCoordinator(
         
         if (true) {
             activity.lifecycleScope.launch {
-                CashuWalletManager.isWalletReady.collect { isReady ->
+                CashuWalletManager.walletState.collect { state ->
+                    val isReady = state == com.electricdreams.numo.core.cashu.WalletState.READY
                     // Make sure we only enable it if we don't have a spinner shown
                     if (submitButtonSpinner.visibility != android.view.View.VISIBLE) {
                         submitButton.isEnabled = isReady
@@ -324,7 +325,7 @@ class PosUiCoordinator(
         submitButtonSpinner.visibility = View.GONE
         submitButton.text = activity.getString(R.string.pos_charge_button) // Restore button text
         // Only re-enable if the wallet is ready
-        val isReady = CashuWalletManager.isWalletReady.value
+        val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
         submitButton.isEnabled = isReady
         submitButton.alpha = if (isReady) 1.0f else 0.5f
     }

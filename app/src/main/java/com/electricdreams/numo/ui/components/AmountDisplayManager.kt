@@ -169,7 +169,7 @@ class AmountDisplayManager(
         // Update submit button
         if (satsValue > 0) {
             requestedAmount = satsValue
-            val isReady = CashuWalletManager.isWalletReady.value
+            val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
             if (isReady) {
                 submitButton.text = context.getString(R.string.pos_charge_button)
                 submitButton.isEnabled = true
@@ -179,7 +179,7 @@ class AmountDisplayManager(
             }
         } else {
             requestedAmount = 0
-            val isReady = CashuWalletManager.isWalletReady.value
+            val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
             if (isReady) {
                 submitButton.text = context.getString(R.string.pos_charge_button)
             } else {
