@@ -155,7 +155,7 @@
     <string name="onboarding_backup_not_found_subtitle">Using default mints</string>
     <string name="onboarding_mints_title">Select Mints</string>
     <string name="onboarding_mints_subtitle_restore">Select which mints to restore</string>
-    <string name="onboarding_mints_subtitle_description">These mints will hold your bitcoin. You can withdraw to your own wallet at any time, or set a payout threshold to do it automatically.</string>
+    <string name="onboarding_mints_subtitle_description">This mint will hold your bitcoin. You can withdraw to your own wallet at any time, or set a payout threshold to do it automatically.</string>
     <string name="onboarding_mints_count">%1$d mint%2$s selected</string>
     <string name="onboarding_mints_continue_restore">Restore Wallet</string>
     <string name="onboarding_mints_continue_new_wallet">Continue</string>
@@ -172,7 +172,7 @@
     <string name="onboarding_add_mint_url_hint">Paste mint URL</string>
     <string name="onboarding_add_mint_button">Add</string>
     <string name="onboarding_add_mint_or">or</string>
-    <string name="onboarding_add_mint_scan_qr">Scan QR Code</string>
+    <string name="onboarding_add_mint_scan_qr">Scan</string>
     <string name="onboarding_add_mint_loading">Adding mint…</string>
 
 

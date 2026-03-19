@@ -28,7 +28,6 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
@@ -394,11 +393,7 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun showTermsDialog() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.dialog_terms_title)
-            .setMessage(getString(R.string.dialog_terms_body))
-            .setPositiveButton(R.string.common_close, null)
-            .show()
+        TermsBottomSheet.newInstance().show(supportFragmentManager, "TermsBottomSheet")
     }
 
     private fun setupSeedInputs() {
