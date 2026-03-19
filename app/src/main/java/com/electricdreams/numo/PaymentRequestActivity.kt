@@ -418,6 +418,10 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
+        if (hasTerminalOutcome && currentOverlayActionMode == OverlayActionMode.SUCCESS) {
+            animateSuccessScreenOut()
+            return
+        }
         cancelPayment()
         super.onBackPressed()
     }
@@ -940,6 +944,12 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun cancelPayment() {
+        if (hasTerminalOutcome && currentOverlayActionMode == OverlayActionMode.SUCCESS) {
+            Log.d(TAG, "Payment already successful, not cancelling")
+            animateSuccessScreenOut()
+            return
+        }
+
         Log.d(TAG, "Payment cancelled")
 
         // Note: We don't cancel the pending payment here - user might want to resume it later
