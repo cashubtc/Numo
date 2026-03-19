@@ -80,6 +80,18 @@ class OnboardingMintAdapter(
         notifyDataSetChanged()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    fun addMintAsDefault(url: String) {
+        val oldDefault = mints.firstOrNull()
+        if (oldDefault != null) {
+            accepted.add(oldDefault)
+        }
+        mints.add(0, url)
+        rebuildItems()
+        notifyDataSetChanged()
+        listener.onDefaultMintChanged(url)
+    }
+
     private fun rebuildItems() {
         items.clear()
         items.add(ListItem.Header(

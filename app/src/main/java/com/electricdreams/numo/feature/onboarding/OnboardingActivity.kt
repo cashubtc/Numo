@@ -1162,8 +1162,8 @@ class OnboardingActivity : AppCompatActivity() {
             discoveredMints.add(mintUrl)
             selectedMints.add(mintUrl)
 
-            // Add to adapter directly (avoids full rebuild)
-            mintAdapter.addMint(mintUrl)
+            // Add as default — user manually added this mint, so they likely want it as default
+            mintAdapter.addMintAsDefault(mintUrl)
             updateContinueButtonState()
 
             addMintBottomSheet?.dismiss()
