@@ -707,8 +707,9 @@ class OnboardingActivity : AppCompatActivity() {
                 discoveredMints.clear()
                 selectedMints.clear()
                 onboardingMintDisplayNames.clear()
-                discoveredMints.addAll(ONBOARDING_DEFAULT_MINTS)
-                selectedMints.addAll(ONBOARDING_DEFAULT_MINTS)
+                val shuffledMints = ONBOARDING_DEFAULT_MINTS.shuffled()
+                discoveredMints.addAll(shuffledMints)
+                selectedMints.addAll(shuffledMints)
                 backupFound = false
 
                 withContext(Dispatchers.Main) {
@@ -901,13 +902,15 @@ class OnboardingActivity : AppCompatActivity() {
                 val normalizedBackupMints = result.mints
                     .map { mintProfileService.normalizeUrl(it) }
                     .filter { it.isNotBlank() }
+                    .shuffled()
                 discoveredMints.addAll(normalizedBackupMints)
                 selectedMints.addAll(normalizedBackupMints)
             } else {
                 backupFound = false
                 backupTimestamp = null
-                discoveredMints.addAll(ONBOARDING_DEFAULT_MINTS)
-                selectedMints.addAll(ONBOARDING_DEFAULT_MINTS)
+                val shuffledMints = ONBOARDING_DEFAULT_MINTS.shuffled()
+                discoveredMints.addAll(shuffledMints)
+                selectedMints.addAll(shuffledMints)
             }
 
             withContext(Dispatchers.Main) {
