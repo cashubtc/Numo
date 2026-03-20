@@ -14,8 +14,10 @@ import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
-import android.view.animation.PathInterpolator
+import android.view.animation.LinearInterpolator
+import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
@@ -23,14 +25,17 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.electricdreams.numo.R
 import com.google.android.material.button.MaterialButton
+import kotlin.math.cos
+import kotlin.math.min
+import kotlin.math.sin
 
 /**
- * Cinematic welcome screen animation with 6 sequenced phases:
+ * Cinematic welcome screen animation:
  * 1. Logo reveal (navy on white, centered)
- * 2. Logo translates up + tagline appears (navy text on white)
- * 3. Emoji tiles float from center to lower positions (behind text, gradient fade)
- * 4. Emojis gently fade out
- * 5. Color transition (white bg → navy, navy text → white)
+ * 2. Tagline fades in
+ * 3. Circle expansion (emojis form circle then burst outward)
+ * 4. Color transition (white → navy)
+ * 5. Scrolling emoji rows fade in
  * 6. Get Started button + terms fade in
  */
 class OnboardingWelcomeAnimator(
@@ -45,42 +50,77 @@ class OnboardingWelcomeAnimator(
     private val navyColor = Color.parseColor("#0A2540")
     private val whiteColor = Color.WHITE
 
-    // Smooth Material ease curve
-    private val smoothEase = PathInterpolator(0.4f, 0f, 0.2f, 1f)
+    // === Circle expansion tiles (mixed sizes) ===
 
-    private val tileData = listOf(
-        TileItem("\uD83D\uDC55", R.color.chip_ribbon_cyan, Size.LARGE),
-        TileItem("\uD83E\uDD69", R.color.chip_ribbon_pink, Size.MEDIUM),
-        TileItem("\uD83C\uDF3F", R.color.chip_ribbon_lime, Size.SMALL),
-        TileItem("\uD83E\uDD5C", R.color.chip_ribbon_green, Size.LARGE),
-        TileItem("\uD83D\uDCB5", R.color.chip_ribbon_purple, Size.MEDIUM),
-        TileItem("\uD83D\uDC2E", R.color.chip_ribbon_yellow, Size.SMALL),
-        TileItem("\u2615", R.color.chip_ribbon_orange, Size.MEDIUM),
-        TileItem("\uD83C\uDFB8", R.color.chip_ribbon_cyan, Size.SMALL)
+    private enum class TileSize { SMALL, MEDIUM, LARGE }
+
+    private data class CircleTile(val emoji: String, val colorRes: Int, val size: TileSize)
+
+    private val circleTileData = listOf(
+        CircleTile("\uD83D\uDC55", R.color.chip_ribbon_cyan, TileSize.LARGE),
+        CircleTile("\uD83E\uDD69", R.color.chip_ribbon_pink, TileSize.MEDIUM),
+        CircleTile("\uD83C\uDF3F", R.color.chip_ribbon_lime, TileSize.SMALL),
+        CircleTile("\uD83E\uDD5C", R.color.chip_ribbon_green, TileSize.LARGE),
+        CircleTile("\uD83D\uDCB5", R.color.chip_ribbon_purple, TileSize.MEDIUM),
+        CircleTile("\uD83D\uDC2E", R.color.chip_ribbon_yellow, TileSize.SMALL),
+        CircleTile("\u2615", R.color.chip_ribbon_orange, TileSize.MEDIUM),
+        CircleTile("\uD83C\uDFB8", R.color.chip_ribbon_cyan, TileSize.SMALL)
     )
 
-    // Target positions (x%, y%) — organic spread in the lower portion
-    private val emojiTargetPositions = listOf(
-        Pair(0.10f, 0.46f),
-        Pair(0.80f, 0.43f),
-        Pair(0.33f, 0.55f),
-        Pair(0.64f, 0.52f),
-        Pair(0.18f, 0.65f),
-        Pair(0.76f, 0.62f),
-        Pair(0.44f, 0.72f),
-        Pair(0.56f, 0.80f)
+    // === Scrolling row tiles ===
+
+    private data class RowTile(val emoji: String, val colorRes: Int)
+
+    private val row1Emojis = listOf(
+        RowTile("\uD83D\uDC55", R.color.chip_ribbon_cyan),
+        RowTile("\uD83E\uDD69", R.color.chip_ribbon_pink),
+        RowTile("\uD83C\uDF3F", R.color.chip_ribbon_lime),
+        RowTile("\uD83E\uDD5C", R.color.chip_ribbon_green),
+        RowTile("\u2615", R.color.chip_ribbon_orange),
+        RowTile("\uD83C\uDFB8", R.color.chip_ribbon_cyan),
+        RowTile("\uD83E\uDDE2", R.color.chip_ribbon_purple),
+        RowTile("\uD83D\uDCF1", R.color.chip_ribbon_yellow)
     )
+
+    private val row2Emojis = listOf(
+        RowTile("\uD83C\uDF55", R.color.chip_ribbon_orange),
+        RowTile("\uD83E\uDDC1", R.color.chip_ribbon_pink),
+        RowTile("\uD83D\uDC8E", R.color.chip_ribbon_purple),
+        RowTile("\uD83C\uDFA8", R.color.chip_ribbon_cyan),
+        RowTile("\uD83C\uDF2E", R.color.chip_ribbon_yellow),
+        RowTile("\uD83C\uDF77", R.color.chip_ribbon_pink),
+        RowTile("\uD83E\uDDF5", R.color.chip_ribbon_lime),
+        RowTile("\uD83C\uDFAA", R.color.chip_ribbon_green)
+    )
+
+    private val row3Emojis = listOf(
+        RowTile("\uD83E\uDD56", R.color.chip_ribbon_yellow),
+        RowTile("\uD83E\uDDC0", R.color.chip_ribbon_orange),
+        RowTile("\uD83C\uDF3A", R.color.chip_ribbon_pink),
+        RowTile("\uD83D\uDCE6", R.color.chip_ribbon_green),
+        RowTile("\uD83C\uDF70", R.color.chip_ribbon_purple),
+        RowTile("\uD83C\uDF73", R.color.chip_ribbon_lime),
+        RowTile("\uD83D\uDECD\uFE0F", R.color.chip_ribbon_cyan),
+        RowTile("\uD83C\uDF7A", R.color.chip_ribbon_orange)
+    )
+
+    // === State ===
 
     private val activeAnimators = mutableListOf<Animator>()
-    private val tiles = mutableListOf<View>()
+    private val circleTiles = mutableListOf<View>()
+    private val scrollingTiles = mutableListOf<ScrollingTile>()
+    private var scrollAnimator: ValueAnimator? = null
+    private var scrollTime = 0f
+    private var rowGradientView: View? = null
     private var systemBarsFlipped = false
 
-    private enum class Size { SMALL, MEDIUM, LARGE }
-
-    private data class TileItem(
-        val emoji: String,
-        val colorRes: Int,
-        val size: Size
+    private data class ScrollingTile(
+        val view: View,
+        val initialX: Float,
+        val speedPx: Float,
+        val direction: Float,  // 1.0 for R→L, -1.0 for L→R
+        val wrapWidth: Float,
+        val rowY: Float
     )
 
     fun start() {
@@ -88,20 +128,16 @@ class OnboardingWelcomeAnimator(
         resetAllViews()
 
         container.post {
-            // Position wordmark at vertical center via translationY offset
-            val containerCenterY = container.height / 2f
-            val wordmarkCenterY = wordmark.y + wordmark.height / 2f
-            val offsetToCenter = containerCenterY - wordmarkCenterY
-            wordmark.translationY = offsetToCenter
-
             startPhase1_LogoReveal {
-                startPhase2_LogoMoveAndTagline {
+                startPhase2_Tagline {
                     container.postDelayed({
-                        startPhase3_EmojiFloat {
-                            startPhase4_EmojisFadeOut {
-                                startPhase5_ColorTransition {
-                                    startPhase6_CtaReveal()
-                                }
+                        startPhase3_CircleExpansion {
+                            startPhase4_ColorTransition {
+                                container.postDelayed({
+                                    startPhase5_ScrollingRows {
+                                        startPhase6_CtaReveal()
+                                    }
+                                }, 600)
                             }
                         }
                     }, 200)
@@ -113,7 +149,12 @@ class OnboardingWelcomeAnimator(
     fun stop() {
         activeAnimators.forEach { it.cancel() }
         activeAnimators.clear()
-        tiles.clear()
+        scrollAnimator?.cancel()
+        scrollAnimator = null
+        scrollTime = 0f
+        circleTiles.clear()
+        scrollingTiles.clear()
+        rowGradientView = null
         emojiContainer.removeAllViews()
         systemBarsFlipped = false
     }
@@ -124,7 +165,6 @@ class OnboardingWelcomeAnimator(
 
         wordmark.imageTintList = ColorStateList.valueOf(navyColor)
         wordmark.alpha = 0f
-        wordmark.translationY = 0f
         wordmark.scaleX = 0.95f
         wordmark.scaleY = 0.95f
 
@@ -138,7 +178,11 @@ class OnboardingWelcomeAnimator(
         termsText.translationY = 10f
 
         emojiContainer.removeAllViews()
-        tiles.clear()
+        circleTiles.clear()
+        scrollingTiles.clear()
+        scrollAnimator?.cancel()
+        scrollAnimator = null
+        scrollTime = 0f
 
         updateSystemBars(whiteColor, isLight = true)
         systemBarsFlipped = false
@@ -160,163 +204,116 @@ class OnboardingWelcomeAnimator(
         trackAndStart(animSet)
     }
 
-    // === Phase 2: Logo Move + Tagline (750ms) ===
+    // === Phase 2: Tagline (450ms) ===
 
-    private fun startPhase2_LogoMoveAndTagline(onComplete: () -> Unit) {
-        val currentY = wordmark.translationY
-
-        val logoMove = ObjectAnimator.ofFloat(wordmark, "translationY", currentY, 0f).apply {
-            duration = 700
-            interpolator = DecelerateInterpolator(1.5f)
-        }
-
-        val tagAlpha = ObjectAnimator.ofFloat(tagline, "alpha", 0f, 1f).apply {
-            duration = 450
-            startDelay = 300
-            interpolator = DecelerateInterpolator()
-        }
-        val tagTranslate = ObjectAnimator.ofFloat(tagline, "translationY", 15f, 0f).apply {
-            duration = 450
-            startDelay = 300
-            interpolator = DecelerateInterpolator()
-        }
-
+    private fun startPhase2_Tagline(onComplete: () -> Unit) {
         val animSet = AnimatorSet().apply {
-            playTogether(logoMove, tagAlpha, tagTranslate)
+            playTogether(
+                ObjectAnimator.ofFloat(tagline, "alpha", 0f, 1f),
+                ObjectAnimator.ofFloat(tagline, "translationY", 15f, 0f)
+            )
+            duration = 450
+            interpolator = DecelerateInterpolator()
             addListener(onEnd { onComplete() })
         }
         trackAndStart(animSet)
     }
 
-    // === Phase 3: Emoji Float ===
-    // Tiles materialize near center and drift gently to lower positions
+    // === Phase 3: Circle Expansion (~1500ms) ===
+    // Emojis appear from center, form a circle, hold, then burst outward
 
-    private fun startPhase3_EmojiFloat(onComplete: () -> Unit) {
+    private fun startPhase3_CircleExpansion(onComplete: () -> Unit) {
         val centerX = emojiContainer.width / 2f
         val centerY = emojiContainer.height / 2f
         val density = context.resources.displayMetrics.density
+        val radius = min(emojiContainer.width, emojiContainer.height) * 0.30f
         var completedCount = 0
 
-        tiles.clear()
+        circleTiles.clear()
 
-        tileData.forEachIndexed { index, tile ->
-            val tileView = createTileView(tile, density)
+        circleTileData.forEachIndexed { index, tile ->
+            val tileView = createCircleTileView(tile, density)
             emojiContainer.addView(tileView)
-            tiles.add(tileView)
+            circleTiles.add(tileView)
 
             val tileSize = when (tile.size) {
-                Size.SMALL -> 56 * density
-                Size.MEDIUM -> 72 * density
-                Size.LARGE -> 88 * density
+                TileSize.SMALL -> 56 * density
+                TileSize.MEDIUM -> 72 * density
+                TileSize.LARGE -> 88 * density
             }
 
-            // Slightly staggered start positions to avoid mechanical center burst
-            val offsetX = (-1f + (index % 4) * 0.6f) * 20f * density / 3f
-            val offsetY = (-1f + (index % 3) * 0.8f) * 15f * density / 3f
-            val startX = centerX - tileSize / 2f + offsetX
-            val startY = centerY - tileSize / 2f + offsetY
+            val angle = index * (2.0 * Math.PI / circleTileData.size)
+            val targetX = centerX + (radius * cos(angle)).toFloat() - tileSize / 2f
+            val targetY = centerY + (radius * sin(angle)).toFloat() - tileSize / 2f
+            val startX = centerX - tileSize / 2f
+            val startY = centerY - tileSize / 2f
 
-            val (xFrac, yFrac) = emojiTargetPositions[index]
-            val targetX = emojiContainer.width * xFrac - tileSize / 2f
-            val targetY = emojiContainer.height * yFrac - tileSize / 2f
-
-            // Start partially scaled so they "grow in" rather than pop from nothing
             tileView.translationX = startX
             tileView.translationY = startY
-            tileView.scaleX = 0.4f
-            tileView.scaleY = 0.4f
+            tileView.scaleX = 0f
+            tileView.scaleY = 0f
             tileView.alpha = 0f
 
-            val targetRotation = -5f + (index * 1.8f)
+            val targetRotation = -15f + (index * 4.3f)
 
             val animSet = AnimatorSet().apply {
                 playTogether(
-                    ObjectAnimator.ofFloat(tileView, "alpha", 0f, 0.85f),
-                    ObjectAnimator.ofFloat(tileView, "scaleX", 0.4f, 1f),
-                    ObjectAnimator.ofFloat(tileView, "scaleY", 0.4f, 1f),
+                    ObjectAnimator.ofFloat(tileView, "alpha", 0f, 0.45f),
+                    ObjectAnimator.ofFloat(tileView, "scaleX", 0f, 1f),
+                    ObjectAnimator.ofFloat(tileView, "scaleY", 0f, 1f),
                     ObjectAnimator.ofFloat(tileView, "translationX", startX, targetX),
                     ObjectAnimator.ofFloat(tileView, "translationY", startY, targetY),
                     ObjectAnimator.ofFloat(tileView, "rotation", 0f, targetRotation)
                 )
-                duration = 1000
-                startDelay = index * 100L
-                interpolator = smoothEase
+                duration = 500
+                startDelay = index * 60L
+                interpolator = OvershootInterpolator(0.6f)
             }
 
             animSet.addListener(onEnd {
                 completedCount++
-                if (completedCount == tileData.size) {
-                    container.postDelayed({ onComplete() }, 500)
+                if (completedCount == circleTileData.size) {
+                    // Hold the circle briefly, then burst
+                    container.postDelayed({
+                        startCircleBurst(onComplete)
+                    }, 250)
                 }
             })
             trackAndStart(animSet)
         }
-
-        // Edge gradients on top of tiles for smooth fade at edges
-        addEdgeGradients()
     }
 
-    private fun addEdgeGradients() {
-        // Bottom gradient (stronger — tiles concentrate here)
-        val bottomGradient = View(context).apply {
-            background = GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(Color.TRANSPARENT, whiteColor)
-            )
-            layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                (emojiContainer.height * 0.35f).toInt()
-            ).apply {
-                gravity = Gravity.BOTTOM
-            }
-        }
-        emojiContainer.addView(bottomGradient)
-
-        // Top gradient (subtle — just softens the top edge)
-        val topGradient = View(context).apply {
-            background = GradientDrawable(
-                GradientDrawable.Orientation.BOTTOM_TOP,
-                intArrayOf(Color.TRANSPARENT, whiteColor)
-            )
-            layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                (emojiContainer.height * 0.25f).toInt()
-            ).apply {
-                gravity = Gravity.TOP
-            }
-        }
-        emojiContainer.addView(topGradient)
-    }
-
-    // === Phase 4: Emojis Fade Out (700ms) ===
-
-    private fun startPhase4_EmojisFadeOut(onComplete: () -> Unit) {
-        val childCount = emojiContainer.childCount
-        if (childCount == 0) {
-            onComplete()
-            return
-        }
-
+    private fun startCircleBurst(onComplete: () -> Unit) {
+        val centerX = emojiContainer.width / 2f
+        val centerY = emojiContainer.height / 2f
         var completedCount = 0
 
-        for (i in 0 until childCount) {
-            val child = emojiContainer.getChildAt(i)
+        circleTiles.forEach { tileView ->
+            val currentCenterX = tileView.translationX + tileView.width / 2f
+            val currentCenterY = tileView.translationY + tileView.height / 2f
+
+            val dx = currentCenterX - centerX
+            val dy = currentCenterY - centerY
+            val burstX = tileView.translationX + dx * 4f
+            val burstY = tileView.translationY + dy * 4f
 
             val animSet = AnimatorSet().apply {
                 playTogether(
-                    ObjectAnimator.ofFloat(child, "alpha", child.alpha, 0f),
-                    ObjectAnimator.ofFloat(child, "scaleX", child.scaleX, 0.9f),
-                    ObjectAnimator.ofFloat(child, "scaleY", child.scaleY, 0.9f)
+                    ObjectAnimator.ofFloat(tileView, "translationX", tileView.translationX, burstX),
+                    ObjectAnimator.ofFloat(tileView, "translationY", tileView.translationY, burstY),
+                    ObjectAnimator.ofFloat(tileView, "alpha", 0.45f, 0f),
+                    ObjectAnimator.ofFloat(tileView, "scaleX", 1f, 0.6f),
+                    ObjectAnimator.ofFloat(tileView, "scaleY", 1f, 0.6f)
                 )
-                duration = 700
-                interpolator = smoothEase
+                duration = 550
+                interpolator = AccelerateInterpolator(1.5f)
             }
 
             animSet.addListener(onEnd {
                 completedCount++
-                if (completedCount == childCount) {
+                if (completedCount == circleTiles.size) {
                     emojiContainer.removeAllViews()
-                    tiles.clear()
+                    circleTiles.clear()
                     onComplete()
                 }
             })
@@ -324,10 +321,9 @@ class OnboardingWelcomeAnimator(
         }
     }
 
-    // === Phase 5: Color Transition (1200ms) ===
-    // Smooth cross-fade from white to navy
+    // === Phase 4: Color Transition (1200ms) ===
 
-    private fun startPhase5_ColorTransition(onComplete: () -> Unit) {
+    private fun startPhase4_ColorTransition(onComplete: () -> Unit) {
         val bgView = container.findViewById<View>(R.id.welcome_background_overlay)
         val argbEvaluator = ArgbEvaluator()
         systemBarsFlipped = false
@@ -351,7 +347,6 @@ class OnboardingWelcomeAnimator(
                     activity.window.navigationBarColor = bgColor
                 }
 
-                // Flip icon appearance at the midpoint
                 if (fraction > 0.5f && !systemBarsFlipped) {
                     systemBarsFlipped = true
                     (context as? Activity)?.let { activity ->
@@ -370,7 +365,121 @@ class OnboardingWelcomeAnimator(
         trackAndStart(colorAnim)
     }
 
-    // === Phase 6: CTA Reveal (600ms) ===
+    // === Phase 5: Scrolling Rows Fade In (800ms) ===
+
+    private fun startPhase5_ScrollingRows(onComplete: () -> Unit) {
+        createScrollingRows()
+        startScrollAnimation()
+
+        val fadeAnim = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 800
+            interpolator = DecelerateInterpolator()
+
+            addUpdateListener {
+                val fraction = it.animatedFraction
+                scrollingTiles.forEach { tile -> tile.view.alpha = 0.3f * fraction }
+                rowGradientView?.alpha = fraction
+            }
+
+            addListener(onEnd { onComplete() })
+        }
+        trackAndStart(fadeAnim)
+    }
+
+    private fun createScrollingRows() {
+        val density = context.resources.displayMetrics.density
+        val tileSizePx = (72 * density).toInt()
+        val spacingPx = (12 * density).toInt()
+        val stepPx = tileSizePx + spacingPx
+
+        data class RowConfig(
+            val emojis: List<RowTile>,
+            val direction: Float,  // 1.0 = R→L, -1.0 = L→R
+            val speedDp: Float,
+            val rowIndex: Int
+        )
+
+        val rows = listOf(
+            RowConfig(row1Emojis, 1f, 35f, 0),
+            RowConfig(row2Emojis, -1f, 22f, 1),
+            RowConfig(row3Emojis, 1f, 14f, 2)
+        )
+
+        scrollingTiles.clear()
+
+        rows.forEach { config ->
+            val wrapWidth = (config.emojis.size * stepPx).toFloat()
+            val speedPx = config.speedDp * density
+            val rowY = (config.rowIndex * stepPx).toFloat()
+
+            config.emojis.forEachIndexed { i, item ->
+                val tileView = createRowTileView(item, density, tileSizePx)
+                tileView.translationY = rowY
+                tileView.alpha = 0f
+                emojiContainer.addView(tileView)
+
+                scrollingTiles.add(ScrollingTile(
+                    view = tileView,
+                    initialX = (i * stepPx).toFloat(),
+                    speedPx = speedPx,
+                    direction = config.direction,
+                    wrapWidth = wrapWidth,
+                    rowY = rowY
+                ))
+            }
+        }
+
+        // Gradient overlay — gentle fade across the bottom half of rows
+        val totalRowsHeight = 3 * tileSizePx + 2 * spacingPx
+        val gradientHeight = (totalRowsHeight * 0.6f).toInt()
+        rowGradientView = View(context).apply {
+            background = GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(Color.TRANSPARENT, Color.argb(180, 10, 37, 64), navyColor)
+            )
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                gradientHeight
+            ).apply {
+                gravity = Gravity.TOP
+                topMargin = totalRowsHeight - gradientHeight
+            }
+            alpha = 0f
+        }
+        emojiContainer.addView(rowGradientView)
+    }
+
+    private fun startScrollAnimation() {
+        scrollTime = 0f
+        scrollAnimator?.cancel()
+
+        scrollAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 16L  // ~60fps tick
+            repeatCount = ValueAnimator.INFINITE
+            interpolator = LinearInterpolator()
+            addUpdateListener {
+                scrollTime += 0.016f
+                updateRowPositions()
+            }
+        }
+        scrollAnimator?.start()
+    }
+
+    private fun updateRowPositions() {
+        val containerWidth = emojiContainer.width.toFloat()
+
+        scrollingTiles.forEach { tile ->
+            val totalScroll = scrollTime * tile.speedPx
+            // Modulo wrap: tile scrolls continuously and wraps around
+            var x = tile.initialX - totalScroll * tile.direction
+            x = ((x % tile.wrapWidth) + tile.wrapWidth) % tile.wrapWidth
+            // Shift so tiles cover the visible area (centered around 0..containerWidth)
+            if (x > containerWidth) x -= tile.wrapWidth
+            tile.view.translationX = x
+        }
+    }
+
+    // === Phase 6: CTA Reveal (500ms) ===
 
     private fun startPhase6_CtaReveal() {
         val btnAlpha = ObjectAnimator.ofFloat(acceptButton, "alpha", 0f, 1f).apply {
@@ -401,23 +510,21 @@ class OnboardingWelcomeAnimator(
 
     // === Tile Creation ===
 
-    private fun createTileView(tile: TileItem, density: Float): View {
+    private fun createCircleTileView(tile: CircleTile, density: Float): View {
         val sizePx = when (tile.size) {
-            Size.SMALL -> (56 * density).toInt()
-            Size.MEDIUM -> (72 * density).toInt()
-            Size.LARGE -> (88 * density).toInt()
+            TileSize.SMALL -> (56 * density).toInt()
+            TileSize.MEDIUM -> (72 * density).toInt()
+            TileSize.LARGE -> (88 * density).toInt()
         }
-
         val radiusPx = when (tile.size) {
-            Size.SMALL -> 12 * density
-            Size.MEDIUM -> 16 * density
-            Size.LARGE -> 20 * density
+            TileSize.SMALL -> 12 * density
+            TileSize.MEDIUM -> 16 * density
+            TileSize.LARGE -> 20 * density
         }
-
         val emojiSize = when (tile.size) {
-            Size.SMALL -> 24f
-            Size.MEDIUM -> 32f
-            Size.LARGE -> 40f
+            TileSize.SMALL -> 24f
+            TileSize.MEDIUM -> 32f
+            TileSize.LARGE -> 40f
         }
 
         val baseColor = ContextCompat.getColor(context, tile.colorRes)
@@ -427,18 +534,33 @@ class OnboardingWelcomeAnimator(
             text = tile.emoji
             textSize = emojiSize
             gravity = Gravity.CENTER
-
-            // Subtle diagonal gradient fill for depth
             val bgDrawable = GradientDrawable(
                 GradientDrawable.Orientation.TL_BR,
                 intArrayOf(lighterColor, baseColor)
             )
             bgDrawable.cornerRadius = radiusPx
             background = bgDrawable
-
             layoutParams = FrameLayout.LayoutParams(sizePx, sizePx)
-
             elevation = 6 * density
+        }
+    }
+
+    private fun createRowTileView(tile: RowTile, density: Float, sizePx: Int): View {
+        val radiusPx = 16 * density
+        val baseColor = ContextCompat.getColor(context, tile.colorRes)
+        val lighterColor = lightenColor(baseColor, 0.35f)
+
+        return TextView(context).apply {
+            text = tile.emoji
+            textSize = 32f
+            gravity = Gravity.CENTER
+            val bgDrawable = GradientDrawable(
+                GradientDrawable.Orientation.TL_BR,
+                intArrayOf(lighterColor, baseColor)
+            )
+            bgDrawable.cornerRadius = radiusPx
+            background = bgDrawable
+            layoutParams = FrameLayout.LayoutParams(sizePx, sizePx)
         }
     }
 

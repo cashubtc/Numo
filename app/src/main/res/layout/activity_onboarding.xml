@@ -52,7 +52,7 @@
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.22" />
+                android:layout_weight="1" />
 
             <!-- Numo Wordmark (white vector, tinted navy by animator initially) -->
             <ImageView
@@ -81,7 +81,7 @@
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.58" />
+                android:layout_weight="1" />
 
             <!-- Get Started button (white bg, navy text — visible after color transition) -->
             <com.google.android.material.button.MaterialButton
