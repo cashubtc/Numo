@@ -136,7 +136,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     }
 
     private fun loadBalance() {
-        if (CashuWalletManager.isWalletLoading) {
+        if (CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.LOADING) {
             binding.balanceFiat?.text = "..."
             binding.balanceSats?.visibility = View.GONE
             return

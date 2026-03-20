@@ -33,4 +33,5 @@
     <string name="pos_toast_basket_empty">Your basket is empty</string>
     <string name="pos_toast_invalid_amount">Invalid payment amount</string>
     <string name="pos_toast_no_stock">No more stock available</string>
+    <string name="pos_charge_button_loading">Starting wallet...</string>
 </resources>

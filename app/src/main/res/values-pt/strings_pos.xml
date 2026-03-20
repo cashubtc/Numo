@@ -28,4 +28,5 @@
     <string name="item_selection_redo_button">Refazer alteração</string>
     <string name="item_selection_undo_button_short">Desfazer</string>
     <string name="item_selection_redo_button_short">Refazer</string>
+    <string name="pos_charge_button_loading">Iniciando carteira...</string>
 </resources>
