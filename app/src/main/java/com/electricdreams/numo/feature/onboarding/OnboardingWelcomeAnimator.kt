@@ -120,7 +120,8 @@ class OnboardingWelcomeAnimator(
         val speedPx: Float,
         val direction: Float,  // 1.0 for R→L, -1.0 for L→R
         val wrapWidth: Float,
-        val rowY: Float
+        val rowY: Float,
+        val targetAlpha: Float // per-row opacity
     )
 
     fun start() {
@@ -377,7 +378,7 @@ class OnboardingWelcomeAnimator(
 
             addUpdateListener {
                 val fraction = it.animatedFraction
-                scrollingTiles.forEach { tile -> tile.view.alpha = 0.3f * fraction }
+                scrollingTiles.forEach { tile -> tile.view.alpha = tile.targetAlpha * fraction }
                 rowGradientView?.alpha = fraction
             }
 
@@ -396,13 +397,14 @@ class OnboardingWelcomeAnimator(
             val emojis: List<RowTile>,
             val direction: Float,  // 1.0 = R→L, -1.0 = L→R
             val speedDp: Float,
-            val rowIndex: Int
+            val rowIndex: Int,
+            val alpha: Float       // target opacity for this row
         )
 
         val rows = listOf(
-            RowConfig(row1Emojis, 1f, 35f, 0),
-            RowConfig(row2Emojis, -1f, 22f, 1),
-            RowConfig(row3Emojis, 1f, 14f, 2)
+            RowConfig(row1Emojis, 1f, 35f, 0, 0.30f),
+            RowConfig(row2Emojis, -1f, 22f, 1, 0.18f),
+            RowConfig(row3Emojis, 1f, 14f, 2, 0.10f)
         )
 
         scrollingTiles.clear()
@@ -424,7 +426,8 @@ class OnboardingWelcomeAnimator(
                     speedPx = speedPx,
                     direction = config.direction,
                     wrapWidth = wrapWidth,
-                    rowY = rowY
+                    rowY = rowY,
+                    targetAlpha = config.alpha
                 ))
             }
         }
