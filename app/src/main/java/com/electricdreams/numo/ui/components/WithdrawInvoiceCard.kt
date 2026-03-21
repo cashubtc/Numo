@@ -43,8 +43,6 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
     private var listener: OnContinueListener? = null
     private var scanListener: OnScanListener? = null
     
-    private val iconContainer: FrameLayout
-    private val invoiceIcon: ImageView
     private val titleText: TextView
     private val subtitleText: TextView
     private val invoiceInput: EditText
@@ -58,11 +56,9 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
         // Setup card styling
         radius = resources.getDimension(R.dimen.card_corner_radius)
         cardElevation = 0f
-        setCardBackgroundColor(context.getColor(R.color.color_bg_card))
+        setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
         
         // Find views
-        iconContainer = findViewById(R.id.icon_container)
-        invoiceIcon = findViewById(R.id.invoice_icon)
         titleText = findViewById(R.id.title_text)
         subtitleText = findViewById(R.id.subtitle_text)
         invoiceInput = findViewById(R.id.invoice_input)
@@ -172,17 +168,6 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
             .setStartDelay(delay)
             .setDuration(350)
             .setInterpolator(AccelerateDecelerateInterpolator())
-            .start()
-        
-        // Icon bounce
-        iconContainer.scaleX = 0f
-        iconContainer.scaleY = 0f
-        iconContainer.animate()
-            .scaleX(1f)
-            .scaleY(1f)
-            .setStartDelay(delay + 150)
-            .setDuration(400)
-            .setInterpolator(OvershootInterpolator(2f))
             .start()
     }
 }

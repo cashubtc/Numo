@@ -70,7 +70,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginTop="20dp"
-                app:cardBackgroundColor="@color/color_bg_card"
+                app:cardBackgroundColor="@android:color/transparent"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
@@ -78,6 +78,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/bg_hero_gradient"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:padding="24dp">
@@ -166,17 +167,13 @@
 
                 <!-- Section Header -->
                 <TextView
+                    style="@style/Text.SectionHeader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
                     android:layout_marginTop="28dp"
                     android:layout_marginBottom="12dp"
-                    android:text="@string/withdraw_section_send_to"
-                    android:fontFamily="sans-serif"
-                    android:textSize="13sp"
-                    android:textColor="@color/color_text_secondary"
-                    android:textAllCaps="true"
-                    android:letterSpacing="0.03" />
+                    android:text="@string/withdraw_section_send_to" />
 
                 <!-- Invoice Card -->
                 <com.electricdreams.numo.ui.components.WithdrawInvoiceCard
@@ -238,17 +235,13 @@
 
                 <!-- Section Header -->
                 <TextView
+                    style="@style/Text.SectionHeader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
                     android:layout_marginTop="28dp"
                     android:layout_marginBottom="12dp"
-                    android:text="@string/withdraw_tab_cashu"
-                    android:fontFamily="sans-serif"
-                    android:textSize="13sp"
-                    android:textColor="@color/color_text_secondary"
-                    android:textAllCaps="true"
-                    android:letterSpacing="0.03" />
+                    android:text="@string/withdraw_tab_cashu" />
 
                 <!-- Amount Input Card -->
                 <com.google.android.material.card.MaterialCardView
@@ -257,7 +250,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="20dp"
                     android:layout_marginTop="20dp"
-                    app:cardBackgroundColor="@color/color_bg_card"
+                    app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="0dp">
@@ -269,50 +262,22 @@
                         android:padding="20dp">
 
                         <!-- Header -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
+                            android:text="@string/withdraw_cashu_amount_card_title"
+                            android:textColor="@color/color_text_primary"
+                            android:fontFamily="sans-serif-medium"
+                            android:textSize="17sp" />
 
-                            <FrameLayout
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
-                                android:background="@drawable/bg_circle_accent_light">
-
-                                <ImageView
-                                    android:layout_width="24dp"
-                                    android:layout_height="24dp"
-                                    android:layout_gravity="center"
-                                    android:src="@drawable/ic_qr_scan"
-                                    app:tint="@color/color_primary" />
-                            </FrameLayout>
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:layout_marginStart="16dp"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/withdraw_cashu_amount_card_title"
-                                    android:textColor="@color/color_text_primary"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:textSize="17sp" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
-                                    android:text="@string/withdraw_cashu_amount_card_subtitle"
-                                    android:textAppearance="@style/Text.Caption"
-                                    android:textColor="@color/color_text_secondary"
-                                    android:textSize="13sp" />
-                            </LinearLayout>
-                        </LinearLayout>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/withdraw_cashu_amount_card_subtitle"
+                            android:textAppearance="@style/Text.Caption"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="13sp" />
 
                         <!-- Amount Input -->
                         <TextView
@@ -364,7 +329,7 @@
                     android:layout_marginHorizontal="20dp"
                     android:layout_marginTop="20dp"
                     android:layout_marginBottom="24dp"
-                    app:cardBackgroundColor="@color/color_bg_card"
+                    app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="0dp"

@@ -10,34 +10,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <!-- Icon Container -->
-        <FrameLayout
-            android:id="@+id/icon_container"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/bg_circle_accent_light">
-
-            <ImageView
-                android:id="@+id/invoice_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_lightning_bolt"
-                android:tint="@color/color_primary"
-                android:contentDescription="@string/withdraw_invoice_card_title" />
-
-        </FrameLayout>
-
-        <!-- Title and Subtitle -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="16dp"
-            android:orientation="vertical">
+        android:orientation="vertical">
 
             <TextView
                 android:id="@+id/title_text"
@@ -57,8 +30,6 @@
                 android:textAppearance="@style/Text.Caption"
                 android:textColor="@color/color_text_secondary"
                 android:textSize="13sp" />
-
-        </LinearLayout>
 
     </LinearLayout>
 
