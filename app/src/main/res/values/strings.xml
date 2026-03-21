@@ -330,7 +330,7 @@ Last updated: November 2024</string>
     <string name="withdraw_lightning_option_address">📧 Lightning Address</string>
     <string name="withdraw_lightning_address_hint_label">Enter a Lightning address</string>
     <string name="withdraw_lightning_address_hint_value">user@domain.com</string>
-    <string name="withdraw_lightning_amount_label">Amount (sats)</string>
+    <string name="withdraw_lightning_amount_label">Amount</string>
     <string name="withdraw_lightning_amount_hint">1000</string>
     <string name="withdraw_lightning_button_continue">Continue</string>
 

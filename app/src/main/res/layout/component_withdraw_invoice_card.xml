@@ -62,6 +62,10 @@
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_marginTop="12dp"
+        app:icon="@drawable/ic_qr_scan"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"
+        app:iconTint="@color/color_text_primary"
         android:text="@string/withdraw_scan_invoice_button"
         android:textAllCaps="false"
         android:textSize="17sp" />

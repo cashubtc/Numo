@@ -254,7 +254,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="20dp"
-                    android:layout_marginTop="20dp"
                     app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp"
@@ -266,35 +265,15 @@
                         android:orientation="vertical"
                         android:padding="20dp">
 
-                        <!-- Header -->
+                        <!-- Amount Label -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/withdraw_cashu_amount_card_title"
-                            android:textColor="@color/color_text_primary"
+                            android:layout_marginBottom="12dp"
                             android:fontFamily="sans-serif-medium"
-                            android:textSize="17sp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="@string/withdraw_cashu_amount_card_subtitle"
-                            android:textAppearance="@style/Text.Caption"
-                            android:textColor="@color/color_text_secondary"
-                            android:textSize="13sp" />
-
-                        <!-- Amount Input -->
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="20dp"
                             android:text="@string/withdraw_lightning_amount_label"
-                            android:textAppearance="@style/Text.Caption"
-                            android:textColor="@color/color_text_secondary"
-                            android:textSize="12sp"
-                            android:textAllCaps="true"
-                            android:letterSpacing="0.05" />
+                            android:textColor="@color/color_text_primary"
+                            android:textSize="15sp" />
 
                         <EditText
                             android:id="@+id/cashu_amount_input"

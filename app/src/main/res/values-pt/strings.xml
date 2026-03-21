@@ -289,7 +289,7 @@
     <string name="withdraw_lightning_option_address">📧 Endereço Lightning</string>
     <string name="withdraw_lightning_address_hint_label">Insira um endereço Lightning</string>
     <string name="withdraw_lightning_address_hint_value">usuario@dominio.com</string>
-    <string name="withdraw_lightning_amount_label">Valor (sats)</string>
+    <string name="withdraw_lightning_amount_label">Valor</string>
     <string name="withdraw_lightning_amount_hint">1000</string>
     <string name="withdraw_lightning_button_continue">Continuar</string>
 
