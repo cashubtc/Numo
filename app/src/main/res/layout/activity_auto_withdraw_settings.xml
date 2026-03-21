@@ -75,24 +75,40 @@
                     app:cardCornerRadius="24dp"
                     app:cardElevation="0dp">
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_hero_gradient"
-                        android:padding="24dp">
+                        android:clipChildren="false">
 
-                        <!-- Decorative background lightning bolt -->
-                        <ImageView
-                            android:layout_width="120dp"
-                            android:layout_height="120dp"
-                            android:layout_marginEnd="-20dp"
-                            android:layout_marginBottom="-20dp"
-                            android:alpha="0.06"
-                            android:importantForAccessibility="no"
-                            android:src="@drawable/ic_lightning_bolt"
-                            app:tint="@color/color_bitcoin_orange"
-                            app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintEnd_toEndOf="parent" />
+                        <!-- Decorative background lightning bolt with fade -->
+                        <FrameLayout
+                            android:layout_width="140dp"
+                            android:layout_height="140dp"
+                            android:layout_gravity="bottom|end"
+                            android:layout_marginEnd="-30dp"
+                            android:layout_marginBottom="-30dp">
+
+                            <ImageView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:alpha="0.12"
+                                android:rotation="-15"
+                                android:importantForAccessibility="no"
+                                android:src="@drawable/ic_lightning_bolt"
+                                app:tint="@color/color_bitcoin_orange" />
+
+                            <View
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:background="@drawable/bg_hero_bolt_fade" />
+
+                        </FrameLayout>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="24dp">
 
                         <!-- Title -->
                         <TextView
@@ -158,6 +174,7 @@
                         </LinearLayout>
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
+                    </FrameLayout>
                 </androidx.cardview.widget.CardView>
 
             </LinearLayout>
