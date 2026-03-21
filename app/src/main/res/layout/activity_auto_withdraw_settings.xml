@@ -81,40 +81,31 @@
                         android:background="@drawable/bg_hero_gradient"
                         android:padding="24dp">
 
-                        <!-- Animated Icon Container -->
-                        <FrameLayout
-                            android:id="@+id/icon_container"
-                            android:layout_width="80dp"
-                            android:layout_height="80dp"
-                            android:background="@drawable/bg_circle"
-                            android:backgroundTint="#2A2A4A"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent">
-
-                            <ImageView
-                                android:id="@+id/hero_icon"
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_lightning_bolt"
-                                app:tint="#FFFFFF" />
-
-                        </FrameLayout>
+                        <!-- Decorative background lightning bolt -->
+                        <ImageView
+                            android:layout_width="120dp"
+                            android:layout_height="120dp"
+                            android:layout_marginEnd="-20dp"
+                            android:layout_marginBottom="-20dp"
+                            android:alpha="0.06"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_lightning_bolt"
+                            app:tint="@color/color_bitcoin_orange"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent" />
 
                         <!-- Title -->
                         <TextView
                             android:id="@+id/hero_title"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="20dp"
                             android:fontFamily="sans-serif-medium"
                             android:text="@string/auto_withdraw_hero_title"
-                            android:textColor="#FFFFFF"
+                            android:textColor="@color/color_text_primary"
                             android:textSize="22sp"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/icon_container" />
+                            app:layout_constraintTop_toTopOf="parent" />
 
                         <!-- Subtitle -->
                         <TextView
@@ -122,12 +113,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:alpha="0.7"
                             android:fontFamily="sans-serif"
                             android:gravity="center"
                             android:paddingHorizontal="16dp"
                             android:text="@string/auto_withdraw_hero_subtitle"
-                            android:textColor="#FFFFFF"
+                            android:textColor="@color/color_text_secondary"
                             android:textSize="15sp"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
