@@ -267,17 +267,13 @@
                 <!-- DESTINATION SECTION -->
                 <!-- ==================== -->
                 <TextView
+                    style="@style/Text.SectionHeader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
                     android:layout_marginTop="28dp"
                     android:layout_marginBottom="12dp"
-                    android:fontFamily="sans-serif"
-                    android:text="@string/auto_withdraw_section_destination"
-                    android:textAllCaps="true"
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="13sp"
-                    android:letterSpacing="0.03" />
+                    android:text="@string/auto_withdraw_section_destination" />
 
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
@@ -337,17 +333,13 @@
                 <!-- TRIGGER SETTINGS -->
                 <!-- ==================== -->
                 <TextView
+                    style="@style/Text.SectionHeader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
                     android:layout_marginTop="28dp"
                     android:layout_marginBottom="12dp"
-                    android:fontFamily="sans-serif"
-                    android:text="@string/auto_withdraw_section_trigger"
-                    android:textAllCaps="true"
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="13sp"
-                    android:letterSpacing="0.03" />
+                    android:text="@string/auto_withdraw_section_trigger" />
 
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
@@ -526,17 +518,13 @@
                 <!-- MANUAL WITHDRAW SECTION -->
                 <!-- ==================== -->
                 <TextView
+                    style="@style/Text.SectionHeader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
                     android:layout_marginTop="28dp"
                     android:layout_marginBottom="12dp"
-                    android:fontFamily="sans-serif"
-                    android:text="@string/manual_withdraw_section_title"
-                    android:textAllCaps="true"
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="13sp"
-                    android:letterSpacing="0.03" />
+                    android:text="@string/manual_withdraw_section_title" />
 
                 <androidx.cardview.widget.CardView
                     android:id="@+id/manual_withdraw_card"
@@ -621,16 +609,12 @@
                     android:orientation="horizontal">
 
                     <TextView
+                        style="@style/Text.SectionHeader"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:layout_weight="1"
-                        android:fontFamily="sans-serif"
-                        android:text="@string/auto_withdraw_section_history"
-                        android:textAllCaps="true"
-                        android:textColor="@color/color_text_secondary"
-                        android:textSize="13sp"
-                        android:letterSpacing="0.03" />
+                        android:text="@string/auto_withdraw_section_history" />
 
                     <TextView
                         android:id="@+id/see_all_button"
