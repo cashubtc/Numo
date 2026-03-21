@@ -214,7 +214,7 @@
                                 android:layout_width="22dp"
                                 android:layout_height="22dp"
                                 android:layout_gravity="center"
-                                android:src="@drawable/ic_lightning_bolt"
+                                android:src="@drawable/ic_autoplay"
                                 app:tint="@color/color_success_green" />
                         </FrameLayout>
 
@@ -557,7 +557,7 @@
                                 android:layout_width="22dp"
                                 android:layout_height="22dp"
                                 android:layout_gravity="center"
-                                android:src="@drawable/ic_lightning_bolt"
+                                android:src="@drawable/ic_arrow_down_receive"
                                 app:tint="@color/color_bitcoin_orange" />
                         </FrameLayout>
 
