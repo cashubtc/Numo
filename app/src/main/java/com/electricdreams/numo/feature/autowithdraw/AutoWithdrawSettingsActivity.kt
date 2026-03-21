@@ -450,6 +450,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val iconContainer: FrameLayout = view.findViewById(R.id.icon_container)
             val statusIcon: ImageView = view.findViewById(R.id.status_icon)
+            val statusBadgeIcon: FrameLayout = view.findViewById(R.id.status_badge_icon_container)
             val amountText: TextView = view.findViewById(R.id.amount_text)
             val addressText: TextView = view.findViewById(R.id.address_text)
             val mintText: TextView = view.findViewById(R.id.mint_text)
@@ -493,19 +494,18 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             // Status styling
             when (entry.status) {
                 WithdrawHistoryEntry.STATUS_COMPLETED -> {
-                    holder.statusIcon.setImageResource(R.drawable.ic_check)
-                    holder.statusIcon.setColorFilter(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_success_green))
-                    holder.iconContainer.backgroundTintList = ContextCompat.getColorStateList(this@AutoWithdrawSettingsActivity, R.color.color_bg_secondary)
-                    holder.statusBadge.text = getString(R.string.auto_withdraw_status_completed)
-                    holder.statusBadge.setTextColor(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_success_green))
-                    holder.statusBadge.background = ContextCompat.getDrawable(this@AutoWithdrawSettingsActivity, R.drawable.bg_status_pill_success)
+                    holder.statusIcon.setImageResource(R.drawable.ic_arrow_up_send)
+                    holder.statusIcon.setColorFilter(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_text_primary))
+                    holder.statusBadgeIcon.visibility = View.VISIBLE
+                    holder.statusBadge.visibility = View.GONE
                     holder.expandIndicator.visibility = View.GONE
                     holder.errorContainer.visibility = View.GONE
                 }
                 WithdrawHistoryEntry.STATUS_PENDING -> {
                     holder.statusIcon.setImageResource(R.drawable.ic_pending)
                     holder.statusIcon.setColorFilter(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_warning))
-                    holder.iconContainer.backgroundTintList = ContextCompat.getColorStateList(this@AutoWithdrawSettingsActivity, R.color.color_bg_secondary)
+                    holder.statusBadgeIcon.visibility = View.GONE
+                    holder.statusBadge.visibility = View.VISIBLE
                     holder.statusBadge.text = getString(R.string.auto_withdraw_status_pending)
                     holder.statusBadge.setTextColor(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_warning))
                     holder.statusBadge.background = ContextCompat.getDrawable(this@AutoWithdrawSettingsActivity, R.drawable.bg_status_pill_pending)
@@ -515,7 +515,8 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
                 WithdrawHistoryEntry.STATUS_FAILED -> {
                     holder.statusIcon.setImageResource(R.drawable.ic_close)
                     holder.statusIcon.setColorFilter(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_error))
-                    holder.iconContainer.backgroundTintList = ContextCompat.getColorStateList(this@AutoWithdrawSettingsActivity, R.color.color_bg_secondary)
+                    holder.statusBadgeIcon.visibility = View.GONE
+                    holder.statusBadge.visibility = View.VISIBLE
                     holder.statusBadge.text = getString(R.string.auto_withdraw_status_failed)
                     holder.statusBadge.setTextColor(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_error))
                     holder.statusBadge.background = ContextCompat.getDrawable(this@AutoWithdrawSettingsActivity, R.drawable.bg_status_pill_error)
