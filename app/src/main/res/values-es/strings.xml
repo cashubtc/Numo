@@ -710,6 +710,9 @@
     <string name="withdraw_amount_placeholder">Introduce la cantidad en sats</string>
     <string name="withdraw_continue_button">Continuar</string>
     <string name="withdraw_scan_qr">Escanear QR</string>
+    <string name="withdraw_scan_invoice_button">Escanear factura</string>
+    <string name="withdraw_invoice_helper">Ingrese una factura Lightning BOLT11</string>
+    <string name="withdraw_address_helper">Enviar a una dirección tipo email Lightning</string>
     <string name="withdraw_section_send_to">Enviar a</string>
     <string name="withdraw_balance_available">Disponible: %1$s</string>
 

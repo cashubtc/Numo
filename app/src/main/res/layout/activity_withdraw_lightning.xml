@@ -105,6 +105,14 @@
                         android:textStyle="bold" />
 
                     <TextView
+                        android:id="@+id/fiat_balance_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/color_text_secondary"
+                        android:textSize="16sp" />
+
+                    <TextView
                         android:id="@+id/mint_name_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -112,10 +120,7 @@
                         android:text="@string/withdraw_lightning_mint_name_label"
                         android:textAppearance="@style/Text.Caption"
                         android:textColor="@color/color_text_tertiary"
-                        android:textSize="13sp"
-                        android:drawableStart="@drawable/ic_lightning_bolt"
-                        android:drawablePadding="6dp"
-                        android:drawableTint="@color/color_text_tertiary" />
+                        android:textSize="13sp" />
 
                 </LinearLayout>
 
@@ -173,7 +178,7 @@
                     android:layout_marginStart="24dp"
                     android:layout_marginTop="28dp"
                     android:layout_marginBottom="12dp"
-                    android:text="@string/withdraw_section_send_to" />
+                    android:text="@string/auto_withdraw_section_destination" />
 
                 <!-- Invoice Card -->
                 <com.electricdreams.numo.ui.components.WithdrawInvoiceCard

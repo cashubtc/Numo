@@ -28,6 +28,7 @@ import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.LightningAddressManager
 import com.electricdreams.numo.core.util.MintManager
@@ -73,6 +74,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
     private lateinit var balanceCard: MaterialCardView
     private lateinit var mintNameText: TextView
     private lateinit var balanceText: TextView
+    private lateinit var fiatBalanceText: TextView
     private lateinit var invoiceCard: WithdrawInvoiceCard
     private lateinit var addressCard: WithdrawAddressCard
     private lateinit var loadingOverlay: FrameLayout
@@ -144,6 +146,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
         balanceCard = findViewById(R.id.balance_card)
         mintNameText = findViewById(R.id.mint_name_text)
         balanceText = findViewById(R.id.balance_text)
+        fiatBalanceText = findViewById(R.id.fiat_balance_text)
         invoiceCard = findViewById(R.id.invoice_card)
         addressCard = findViewById(R.id.address_card)
         loadingOverlay = findViewById(R.id.loading_overlay)
@@ -364,6 +367,18 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
         val balanceAmount = Amount(balance, Amount.Currency.BTC)
         balanceText.text = balanceAmount.toString()
+        updateFiatDisplay(balance)
+    }
+
+    private fun updateFiatDisplay(sats: Long) {
+        val priceWorker = BitcoinPriceWorker.getInstance(this)
+        val fiatAmount = priceWorker.satoshisToFiat(sats)
+        if (fiatAmount > 0) {
+            fiatBalanceText.text = priceWorker.formatFiatAmount(fiatAmount)
+            fiatBalanceText.visibility = android.view.View.VISIBLE
+        } else {
+            fiatBalanceText.visibility = android.view.View.GONE
+        }
     }
 
     private fun prefillFields() {
@@ -620,7 +635,8 @@ class WithdrawLightningActivity : AppCompatActivity() {
                         balance = newBalance
                         val balanceAmount = Amount(balance, Amount.Currency.BTC)
                         balanceText.text = balanceAmount.toString()
-                        
+                        updateFiatDisplay(balance)
+
                         // Update suggested amount in address card
                         val suggestedAmount = (balance * (1 - FEE_BUFFER_PERCENT)).toLong()
                         if (suggestedAmount > 0) {

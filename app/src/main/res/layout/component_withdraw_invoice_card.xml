@@ -6,101 +6,64 @@
     android:orientation="vertical"
     android:padding="20dp">
 
-    <!-- Header Row -->
-    <LinearLayout
+    <!-- Lightning Invoice Label -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="@string/withdraw_invoice_card_title"
+        android:textColor="@color/color_text_primary"
+        android:textSize="15sp" />
+
+    <!-- Input Field -->
+    <EditText
+        android:id="@+id/invoice_input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:background="@drawable/bg_input_pill"
+        android:fontFamily="sans-serif"
+        android:hint="@string/withdraw_invoice_placeholder"
+        android:inputType="textMultiLine"
+        android:maxLines="4"
+        android:minHeight="80dp"
+        android:padding="14dp"
+        android:gravity="top"
+        android:textColor="@color/color_text_primary"
+        android:textColorHint="@color/color_text_tertiary"
+        android:textSize="14sp" />
 
-            <TextView
-                android:id="@+id/title_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/withdraw_invoice_card_title"
-                android:textColor="@color/color_text_primary"
-                android:textSize="17sp"
-                android:fontFamily="sans-serif-medium" />
-
-            <TextView
-                android:id="@+id/subtitle_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="@string/withdraw_invoice_card_subtitle"
-                android:textAppearance="@style/Text.Caption"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="13sp" />
-
-    </LinearLayout>
-
-    <!-- Input Container -->
-    <LinearLayout
-        android:id="@+id/input_container"
-        android:layout_width="match_parent"
+    <!-- Helper Text -->
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:orientation="vertical">
+        android:layout_marginTop="8dp"
+        android:alpha="0.7"
+        android:text="@string/withdraw_invoice_helper"
+        android:textColor="@color/color_text_secondary"
+        android:textSize="13sp" />
 
-        <!-- Header with Label and Scan Button -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+    <!-- Continue Button -->
+    <Button
+        android:id="@+id/continue_button"
+        style="@style/Widget.Button.Primary.Green"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="16dp"
+        android:enabled="false"
+        android:text="@string/withdraw_continue_button"
+        android:textAllCaps="false"
+        android:textSize="17sp" />
 
-            <!-- Invoice Label -->
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/withdraw_lightning_invoice_hint_label"
-                android:textAppearance="@style/Text.Caption"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="12sp"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
-
-            <!-- Scan Button -->
-            <ImageButton
-                android:id="@+id/scan_button"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_qr_scan"
-                android:tint="@color/color_primary"
-                android:contentDescription="@string/withdraw_scan_qr" />
-        </LinearLayout>
-
-        <!-- Invoice Input -->
-        <EditText
-            android:id="@+id/invoice_input"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/bg_input_pill"
-            android:hint="@string/withdraw_invoice_placeholder"
-            android:inputType="textMultiLine"
-            android:maxLines="4"
-            android:minHeight="80dp"
-            android:padding="14dp"
-            android:textAppearance="@style/Text.Body"
-            android:textColor="@color/color_text_primary"
-            android:textColorHint="@color/color_text_tertiary"
-            android:textSize="14sp"
-            android:gravity="top" />
-
-        <!-- Continue Button -->
-        <Button
-            android:id="@+id/continue_button"
-            style="@style/Widget.Button.Primary.Green"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="16dp"
-            android:enabled="false"
-            android:text="@string/withdraw_continue_button"
-            android:textAllCaps="false"
-            android:textSize="17sp" />
-
-    </LinearLayout>
+    <!-- Scan Invoice Button -->
+    <Button
+        android:id="@+id/scan_button"
+        style="@style/Widget.Button.Secondary.Outlined"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_marginTop="12dp"
+        android:text="@string/withdraw_scan_invoice_button"
+        android:textAllCaps="false"
+        android:textSize="17sp" />
 
 </LinearLayout>

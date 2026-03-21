@@ -6,12 +6,9 @@ import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.OvershootInterpolator
 import android.widget.Button
 import android.widget.EditText
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
+
 import android.widget.TextView
 import com.electricdreams.numo.R
 import com.google.android.material.card.MaterialCardView
@@ -39,12 +36,9 @@ class WithdrawAddressCard @JvmOverloads constructor(
 
     private var listener: OnContinueListener? = null
     
-    private val titleText: TextView
-    private val subtitleText: TextView
     private val addressInput: EditText
     private val amountInput: EditText
     private val continueButton: Button
-    private val inputContainer: LinearLayout
 
     init {
         LayoutInflater.from(context).inflate(R.layout.component_withdraw_address_card, this, true)
@@ -55,12 +49,9 @@ class WithdrawAddressCard @JvmOverloads constructor(
         setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
         
         // Find views
-        titleText = findViewById(R.id.title_text)
-        subtitleText = findViewById(R.id.subtitle_text)
         addressInput = findViewById(R.id.address_input)
         amountInput = findViewById(R.id.amount_input)
         continueButton = findViewById(R.id.continue_button)
-        inputContainer = findViewById(R.id.input_container)
         
         setupListeners()
     }
