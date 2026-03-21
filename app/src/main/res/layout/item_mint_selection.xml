@@ -12,31 +12,12 @@
     android:clickable="true"
     android:focusable="true">
 
-    <!-- Mint Icon Container -->
-    <FrameLayout
-        android:id="@+id/icon_container"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="@drawable/bg_circle_accent_light">
-
-        <ImageView
-            android:id="@+id/mint_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_lightning_bolt"
-            android:tint="@color/color_primary"
-            android:contentDescription="@string/mint_selection_icon_description" />
-
-    </FrameLayout>
-
     <!-- Text Content -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:layout_marginStart="16dp"
         android:layout_marginEnd="12dp">
 
         <TextView
