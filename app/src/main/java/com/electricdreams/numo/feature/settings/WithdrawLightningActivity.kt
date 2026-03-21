@@ -236,21 +236,21 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
     private fun switchTab(isLightning: Boolean) {
         if (isLightning) {
-            tabLightning.setBackgroundResource(R.drawable.bg_segment_tab_selected)
-            tabLightning.setTextColor(getColor(R.color.color_text_primary))
-            
-            tabCashu.background = null
-            tabCashu.setTextColor(getColor(R.color.color_text_tertiary))
-            
+            tabLightning.setBackgroundResource(R.drawable.bg_button_primary_green)
+            tabLightning.setTextColor(getColor(R.color.color_bg_white))
+
+            tabCashu.setBackgroundResource(android.R.color.transparent)
+            tabCashu.setTextColor(getColor(R.color.color_text_secondary))
+
             lightningOptionsContainer.visibility = View.VISIBLE
             cashuTokenOptionsContainer.visibility = View.GONE
         } else {
-            tabCashu.setBackgroundResource(R.drawable.bg_segment_tab_selected)
-            tabCashu.setTextColor(getColor(R.color.color_text_primary))
-            
-            tabLightning.background = null
-            tabLightning.setTextColor(getColor(R.color.color_text_tertiary))
-            
+            tabCashu.setBackgroundResource(R.drawable.bg_button_primary_green)
+            tabCashu.setTextColor(getColor(R.color.color_bg_white))
+
+            tabLightning.setBackgroundResource(android.R.color.transparent)
+            tabLightning.setTextColor(getColor(R.color.color_text_secondary))
+
             lightningOptionsContainer.visibility = View.GONE
             cashuTokenOptionsContainer.visibility = View.VISIBLE
         }
