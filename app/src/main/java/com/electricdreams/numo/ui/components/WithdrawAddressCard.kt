@@ -117,10 +117,8 @@ class WithdrawAddressCard @JvmOverloads constructor(
     private fun updateButtonState() {
         val hasAddress = !addressInput.text.isNullOrBlank()
         val hasValidAmount = amountInput.text.toString().toLongOrNull()?.let { it > 0 } ?: false
-        val enabled = hasAddress && hasValidAmount
-        
-        continueButton.isEnabled = enabled
-        continueButton.alpha = if (enabled) 1f else 0.5f
+
+        continueButton.isEnabled = hasAddress && hasValidAmount
     }
 
     /**

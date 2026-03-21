@@ -217,7 +217,6 @@ class WithdrawLightningActivity : AppCompatActivity() {
             override fun afterTextChanged(s: android.text.Editable?) {
                 val amount = s?.toString()?.toLongOrNull() ?: 0L
                 createTokenButton.isEnabled = amount > 0
-                createTokenButton.alpha = if (amount > 0) 1f else 0.5f
             }
         })
 

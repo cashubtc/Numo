@@ -352,9 +352,7 @@
                             android:text="@string/withdraw_cashu_create_button"
                             android:textAllCaps="false"
                             android:textSize="17sp"
-                            android:textStyle="bold"
-                            android:enabled="false"
-                            android:alpha="0.5"/>
+                            android:enabled="false" />
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
