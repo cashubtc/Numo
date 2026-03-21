@@ -634,7 +634,7 @@
 
     <!-- Auto-Withdraw Settings -->
     <string name="auto_withdraw_title">Saques</string>
-    <string name="auto_withdraw_hero_title">Saque</string>
+    <string name="auto_withdraw_hero_title">Saque automático</string>
     <string name="auto_withdraw_hero_subtitle">Envie fundos automaticamente para sua carteira Lightning quando o saldo ultrapassar um limite</string>
     <string name="auto_withdraw_status_active">Ativo</string>
     <string name="auto_withdraw_status_inactive">Inativo</string>

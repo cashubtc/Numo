@@ -2,7 +2,6 @@ package com.electricdreams.numo.feature.autowithdraw
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -33,6 +32,7 @@ import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.feature.settings.WithdrawLightningActivity
+import com.electricdreams.numo.ui.components.LightningStrikeView
 import com.electricdreams.numo.ui.components.MintSelectionBottomSheet
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.google.android.material.slider.Slider
@@ -56,8 +56,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     private lateinit var autoWithdrawManager: AutoWithdrawManager
 
     // Hero section
-    private lateinit var heroIcon: ImageView
-    private lateinit var heroIconContainer: FrameLayout
     private lateinit var statusContainer: LinearLayout
     private lateinit var statusDot: View
     private lateinit var statusText: TextView
@@ -86,7 +84,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     private lateinit var mintManager: MintManager
 
     private var isUpdatingUI = false
-    private var iconAnimator: ObjectAnimator? = null
     
     // Current threshold value (in sats)
     private var currentThreshold: Long = AutoWithdrawSettingsManager.DEFAULT_THRESHOLD_SATS
@@ -118,8 +115,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         }
 
         // Hero section
-        heroIcon = findViewById(R.id.hero_icon)
-        heroIconContainer = findViewById(R.id.icon_container)
         statusContainer = findViewById(R.id.status_container)
         statusDot = findViewById(R.id.status_dot)
         statusText = findViewById(R.id.status_text)
@@ -162,6 +157,9 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
                 updateStatusIndicator(isChecked)
                 animateConfigContainer(isChecked)
                 animateStatusChange(isChecked)
+                if (isChecked) {
+                    playLightningStrike()
+                }
             }
         }
 
@@ -318,6 +316,16 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         }
     }
 
+    private fun playLightningStrike() {
+        val root = findViewById<ViewGroup>(R.id.root_layout)
+        val strike = LightningStrikeView(this)
+        root.addView(strike, ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        ))
+        strike.strike()
+    }
+
     private fun animateStatusChange(enabled: Boolean) {
         // Pulse animation on status container
         val scaleX = ObjectAnimator.ofFloat(statusContainer, "scaleX", 1f, 1.1f, 1f)
@@ -330,28 +338,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             start()
         }
 
-        // Icon pulse
-        if (enabled) {
-            startIconPulseAnimation()
-        } else {
-            stopIconPulseAnimation()
-        }
-    }
-
-    private fun startIconPulseAnimation() {
-        iconAnimator?.cancel()
-        
-        iconAnimator = ObjectAnimator.ofFloat(heroIconContainer, "alpha", 1f, 0.6f, 1f).apply {
-            duration = 1500
-            repeatCount = ValueAnimator.INFINITE
-            interpolator = AccelerateDecelerateInterpolator()
-            start()
-        }
-    }
-
-    private fun stopIconPulseAnimation() {
-        iconAnimator?.cancel()
-        heroIconContainer.alpha = 1f
     }
 
     private fun animateConfigContainer(show: Boolean) {
@@ -408,17 +394,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             .setInterpolator(AccelerateDecelerateInterpolator())
             .start()
 
-        // Icon bounce
-        heroIconContainer.scaleX = 0f
-        heroIconContainer.scaleY = 0f
-        heroIconContainer.animate()
-            .scaleX(1f)
-            .scaleY(1f)
-            .setStartDelay(200)
-            .setDuration(500)
-            .setInterpolator(OvershootInterpolator(2f))
-            .start()
-
         // Status pill fade
         statusContainer.alpha = 0f
         statusContainer.animate()
@@ -438,11 +413,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
 
         val manualWithdrawCard: CardView = findViewById(R.id.manual_withdraw_card)
         animateCardEntrance(manualWithdrawCard, 200)
-
-        // If auto-withdraw is enabled, start icon animation
-        if (settingsManager.isGloballyEnabled()) {
-            heroIconContainer.postDelayed({ startIconPulseAnimation() }, 800)
-        }
     }
 
     private fun animateCardEntrance(card: View, delay: Long) {
@@ -465,7 +435,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        iconAnimator?.cancel()
     }
 
     /**
