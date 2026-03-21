@@ -76,6 +76,9 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     private lateinit var historyRecyclerView: RecyclerView
     private lateinit var seeAllButton: TextView
 
+    // Auto-withdraw config container (Destination + Trigger Settings)
+    private lateinit var configContainer: LinearLayout
+
     // Manual withdraw
     private lateinit var manualWithdrawRow: LinearLayout
     
@@ -137,6 +140,9 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         historyRecyclerView = findViewById(R.id.history_recycler_view)
         seeAllButton = findViewById(R.id.see_all_button)
         
+        // Config container (Destination + Trigger Settings)
+        configContainer = findViewById(R.id.auto_withdraw_config_container)
+
         // Manual withdraw
         manualWithdrawRow = findViewById(R.id.manual_withdraw_row)
 
@@ -154,7 +160,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             if (!isUpdatingUI) {
                 settingsManager.setGloballyEnabled(isChecked)
                 updateStatusIndicator(isChecked)
-                updateConfigFieldsEnabled(isChecked)
+                animateConfigContainer(isChecked)
                 animateStatusChange(isChecked)
             }
         }
@@ -284,7 +290,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         val enabled = settingsManager.isGloballyEnabled()
         enableSwitch.isChecked = enabled
         updateStatusIndicator(enabled)
-        updateConfigFieldsEnabled(enabled)
+        configContainer.visibility = if (enabled) View.VISIBLE else View.GONE
 
         lightningAddressInput.setText(settingsManager.getDefaultLightningAddress())
         
@@ -348,19 +354,28 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         heroIconContainer.alpha = 1f
     }
 
-    private fun updateConfigFieldsEnabled(enabled: Boolean) {
-        val alpha = if (enabled) 1f else 0.5f
-        
-        // Animate alpha change
-        lightningAddressInput.animate().alpha(alpha).setDuration(200).start()
-        thresholdDisplay.animate().alpha(alpha).setDuration(200).start()
-        percentageSlider.animate().alpha(alpha).setDuration(200).start()
-        percentageBadge.animate().alpha(alpha).setDuration(200).start()
-        
-        lightningAddressInput.isEnabled = enabled
-        thresholdDisplay.isEnabled = enabled
-        thresholdDisplay.isClickable = enabled
-        percentageSlider.isEnabled = enabled
+    private fun animateConfigContainer(show: Boolean) {
+        if (show) {
+            configContainer.visibility = View.VISIBLE
+            configContainer.alpha = 0f
+            configContainer.translationY = -20f
+            configContainer.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setDuration(250)
+                .setInterpolator(AccelerateDecelerateInterpolator())
+                .start()
+        } else {
+            configContainer.animate()
+                .alpha(0f)
+                .translationY(-20f)
+                .setDuration(200)
+                .setInterpolator(AccelerateDecelerateInterpolator())
+                .withEndAction {
+                    configContainer.visibility = View.GONE
+                }
+                .start()
+        }
     }
 
     private fun loadHistory() {
@@ -415,10 +430,15 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         // Cards stagger in
         val toggleCard: CardView = findViewById(R.id.toggle_card)
         animateCardEntrance(toggleCard, 100)
-        
+
+        // Animate config container entrance only if enabled
+        if (settingsManager.isGloballyEnabled()) {
+            animateCardEntrance(configContainer, 150)
+        }
+
         val manualWithdrawCard: CardView = findViewById(R.id.manual_withdraw_card)
         animateCardEntrance(manualWithdrawCard, 200)
-        
+
         // If auto-withdraw is enabled, start icon animation
         if (settingsManager.isGloballyEnabled()) {
             heroIconContainer.postDelayed({ startIconPulseAnimation() }, 800)

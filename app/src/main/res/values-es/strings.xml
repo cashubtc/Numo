@@ -636,7 +636,7 @@
 
     <!-- Auto-Withdraw Settings -->
     <string name="auto_withdraw_title">Retiros</string>
-    <string name="auto_withdraw_hero_title">Retiro automático</string>
+    <string name="auto_withdraw_hero_title">Retiro</string>
     <string name="auto_withdraw_hero_subtitle">Envía fondos automáticamente a tu cartera Lightning cuando el saldo supere un umbral</string>
     <string name="auto_withdraw_status_active">Activo</string>
     <string name="auto_withdraw_status_inactive">Inactivo</string>
@@ -678,7 +678,7 @@
     <string name="auto_withdraw_progress_completed">Enviado correctamente</string>
     <string name="auto_withdraw_progress_failed">El retiro ha fallado</string>
 
-    <string name="auto_withdraw_settings_title">Retiro automático</string>
+    <string name="auto_withdraw_settings_title">Retiro</string>
     <string name="auto_withdraw_error_title">Detalles del error</string>
 
     <!-- Settings - Withdrawals menu item -->

@@ -255,6 +255,16 @@
                 </androidx.cardview.widget.CardView>
 
                 <!-- ==================== -->
+                <!-- AUTO-WITHDRAW CONFIG (hidden when toggle off) -->
+                <!-- ==================== -->
+                <LinearLayout
+                    android:id="@+id/auto_withdraw_config_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                <!-- ==================== -->
                 <!-- DESTINATION SECTION -->
                 <!-- ==================== -->
                 <TextView
@@ -510,6 +520,8 @@
                     </LinearLayout>
 
                 </androidx.cardview.widget.CardView>
+
+                </LinearLayout>
 
                 <!-- ==================== -->
                 <!-- MANUAL WITHDRAW SECTION -->

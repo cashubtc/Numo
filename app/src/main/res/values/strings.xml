@@ -679,7 +679,7 @@ Last updated: November 2024</string>
 
     
     <string name="auto_withdraw_title">Withdrawals</string>
-    <string name="auto_withdraw_hero_title">Auto-Withdraw</string>
+    <string name="auto_withdraw_hero_title">Withdraw</string>
     <string name="auto_withdraw_hero_subtitle">Automatically send funds to your Lightning wallet when balance exceeds a threshold</string>
     <string name="auto_withdraw_status_active">Active</string>
     <string name="auto_withdraw_status_inactive">Inactive</string>
@@ -721,7 +721,7 @@ Last updated: November 2024</string>
     <string name="auto_withdraw_progress_completed">Sent successfully!</string>
     <string name="auto_withdraw_progress_failed">Withdrawal failed</string>
     
-    <string name="auto_withdraw_settings_title">Auto-Withdraw</string>
+    <string name="auto_withdraw_settings_title">Withdraw</string>
     <string name="auto_withdraw_error_title">Error Details</string>
 
     
