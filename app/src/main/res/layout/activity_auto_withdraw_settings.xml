@@ -195,7 +195,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    app:cardBackgroundColor="@color/color_bg_card"
+                    app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp">
 
@@ -535,7 +535,7 @@
                     android:id="@+id/manual_withdraw_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardBackgroundColor="@color/color_bg_card"
+                    app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp">
 
@@ -642,7 +642,7 @@
                     android:id="@+id/history_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardBackgroundColor="@color/color_bg_card"
+                    app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp">
 
@@ -655,13 +655,6 @@
                         android:orientation="vertical"
                         android:paddingVertical="48dp"
                         android:visibility="visible">
-
-                        <ImageView
-                            android:layout_width="56dp"
-                            android:layout_height="56dp"
-                            android:alpha="0.3"
-                            android:src="@drawable/ic_history"
-                            app:tint="@color/color_text_secondary" />
 
                         <TextView
                             android:layout_width="wrap_content"
