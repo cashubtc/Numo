@@ -413,6 +413,11 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
 
         val manualWithdrawCard: CardView = findViewById(R.id.manual_withdraw_card)
         animateCardEntrance(manualWithdrawCard, 200)
+
+        // History section
+        val historySectionHeader: View = findViewById(R.id.history_section_header)
+        animateCardEntrance(historySectionHeader, 250)
+        animateCardEntrance(historyCard, 300)
     }
 
     private fun animateCardEntrance(card: View, delay: Long) {

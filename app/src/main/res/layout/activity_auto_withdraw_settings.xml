@@ -603,6 +603,7 @@
                 <!-- HISTORY SECTION -->
                 <!-- ==================== -->
                 <LinearLayout
+                    android:id="@+id/history_section_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="28dp"
