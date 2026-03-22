@@ -74,6 +74,7 @@
                     app:cardElevation="0dp">
 
                     <FrameLayout
+                        android:id="@+id/hero_bg"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_hero_gradient"
@@ -88,6 +89,7 @@
                             android:layout_marginBottom="-30dp">
 
                             <ImageView
+                                android:id="@+id/hero_bolt"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:alpha="0.12"
@@ -97,6 +99,7 @@
                                 app:tint="@color/color_bitcoin_orange" />
 
                             <View
+                                android:id="@+id/hero_bolt_fade"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
                                 android:background="@drawable/bg_hero_bolt_fade" />
@@ -476,12 +479,12 @@
                                 android:stepSize="1"
                                 android:valueFrom="50"
                                 android:valueTo="98"
-                                app:haloColor="@color/color_accent_blue"
+                                app:haloColor="@color/color_bitcoin_orange"
                                 app:haloRadius="24dp"
-                                app:thumbColor="@color/color_accent_blue"
+                                app:thumbColor="@color/color_bitcoin_orange"
                                 app:thumbRadius="12dp"
                                 app:tickVisible="false"
-                                app:trackColorActive="@color/color_accent_blue"
+                                app:trackColorActive="@color/color_bitcoin_orange"
                                 app:trackColorInactive="@color/color_bg_tertiary"
                                 app:trackHeight="6dp" />
 
@@ -630,7 +633,7 @@
                         android:paddingHorizontal="8dp"
                         android:paddingVertical="4dp"
                         android:text="@string/auto_withdraw_see_all"
-                        android:textColor="@color/color_accent_blue"
+                        android:textColor="@color/color_bitcoin_orange"
                         android:textSize="14sp"
                         android:visibility="gone" />
 

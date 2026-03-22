@@ -56,6 +56,9 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     private lateinit var autoWithdrawManager: AutoWithdrawManager
 
     // Hero section
+    private lateinit var heroBg: FrameLayout
+    private lateinit var heroBolt: ImageView
+    private lateinit var heroBoltFade: View
     private lateinit var statusContainer: LinearLayout
     private lateinit var statusDot: View
     private lateinit var statusText: TextView
@@ -115,6 +118,9 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         }
 
         // Hero section
+        heroBg = findViewById(R.id.hero_bg)
+        heroBolt = findViewById(R.id.hero_bolt)
+        heroBoltFade = findViewById(R.id.hero_bolt_fade)
         statusContainer = findViewById(R.id.status_container)
         statusDot = findViewById(R.id.status_dot)
         statusText = findViewById(R.id.status_text)
@@ -155,6 +161,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             if (!isUpdatingUI) {
                 settingsManager.setGloballyEnabled(isChecked)
                 updateStatusIndicator(isChecked)
+                updateHeroGradient(isChecked, animate = true)
                 animateConfigContainer(isChecked)
                 animateStatusChange(isChecked)
                 if (isChecked) {
@@ -288,6 +295,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         val enabled = settingsManager.isGloballyEnabled()
         enableSwitch.isChecked = enabled
         updateStatusIndicator(enabled)
+        updateHeroGradient(enabled, animate = false)
         configContainer.visibility = if (enabled) View.VISIBLE else View.GONE
 
         lightningAddressInput.setText(settingsManager.getDefaultLightningAddress())
@@ -314,6 +322,16 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             statusText.setTextColor(ContextCompat.getColor(this, R.color.color_text_tertiary))
             statusContainer.background = ContextCompat.getDrawable(this, R.drawable.bg_input_pill)
         }
+    }
+
+    private fun updateHeroGradient(enabled: Boolean, animate: Boolean) {
+        val gradientRes = if (enabled) R.drawable.bg_hero_gradient_active else R.drawable.bg_hero_gradient
+        val fadeRes = if (enabled) R.drawable.bg_hero_bolt_fade_active else R.drawable.bg_hero_bolt_fade
+        val boltColor = if (enabled) R.color.color_success_green else R.color.color_bitcoin_orange
+
+        heroBg.setBackgroundResource(gradientRes)
+        heroBolt.setColorFilter(ContextCompat.getColor(this, boltColor))
+        heroBoltFade.setBackgroundResource(fadeRes)
     }
 
     private fun playLightningStrike() {
