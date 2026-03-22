@@ -63,6 +63,10 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     private lateinit var statusDot: View
     private lateinit var statusText: TextView
 
+    // Toggle icon
+    private lateinit var toggleIconContainer: FrameLayout
+    private lateinit var toggleIcon: ImageView
+
     // Settings controls
     private lateinit var enableSwitch: SwitchCompat
     private lateinit var enableToggleRow: LinearLayout
@@ -124,6 +128,10 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         statusContainer = findViewById(R.id.status_container)
         statusDot = findViewById(R.id.status_dot)
         statusText = findViewById(R.id.status_text)
+
+        // Toggle icon
+        toggleIconContainer = findViewById(R.id.toggle_icon_container)
+        toggleIcon = findViewById(R.id.toggle_icon)
 
         // Main toggle
         enableSwitch = findViewById(R.id.enable_switch)
@@ -332,6 +340,15 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         heroBg.setBackgroundResource(gradientRes)
         heroBolt.setColorFilter(ContextCompat.getColor(this, boltColor))
         heroBoltFade.setBackgroundResource(fadeRes)
+
+        // Toggle row icon
+        if (enabled) {
+            toggleIconContainer.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#E8F5E9"))
+            toggleIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_success_green))
+        } else {
+            toggleIconContainer.backgroundTintList = ContextCompat.getColorStateList(this, R.color.color_bg_light)
+            toggleIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_text_primary))
+        }
     }
 
     private fun playLightningStrike() {
