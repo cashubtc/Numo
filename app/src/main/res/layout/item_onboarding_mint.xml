@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="6dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="14dp"
+    android:paddingBottom="14dp">
+
+    <ImageView
+        android:id="@+id/mint_star"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:padding="10dp"
+        android:src="@drawable/ic_home_outline"
+        android:contentDescription="Set as default mint"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:importantForAccessibility="yes" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/mint_icon"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:scaleType="centerCrop" />
+
+    <TextView
+        android:id="@+id/mint_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="10dp"
+        android:textSize="16sp"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="@color/color_text_primary"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <ImageView
+        android:id="@+id/mint_checkbox"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:visibility="gone"
+        android:importantForAccessibility="no" />
+
+</LinearLayout>

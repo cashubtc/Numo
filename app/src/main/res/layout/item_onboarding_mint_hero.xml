@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    app:cardBackgroundColor="@android:color/transparent"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="0dp">
+
+    <FrameLayout
+        android:id="@+id/hero_bg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_hero_gradient_active"
+        android:clipChildren="false">
+
+        <!-- Decorative background lightning bolt with fade -->
+        <FrameLayout
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="-30dp"
+            android:layout_marginBottom="-30dp">
+
+            <ImageView
+                android:id="@+id/hero_bolt"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0.12"
+                android:importantForAccessibility="no"
+                android:rotation="-15"
+                android:src="@drawable/ic_lightning_bolt"
+                app:tint="@color/color_bitcoin_orange" />
+
+            <View
+                android:id="@+id/hero_bolt_fade"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_hero_bolt_fade_active" />
+
+        </FrameLayout>
+
+        <!-- Content -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="24dp">
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/hero_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@color/color_text_primary"
+                android:textSize="22sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- Subtitle / Description -->
+            <TextView
+                android:id="@+id/hero_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="sans-serif"
+                android:gravity="start"
+                android:textColor="@color/color_text_secondary"
+                android:textSize="15sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/hero_title" />
+
+            <!-- Mint Identity Row -->
+            <LinearLayout
+                android:id="@+id/hero_mint_row"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/hero_subtitle">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/hero_mint_icon"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:scaleType="centerCrop" />
+
+                <TextView
+                    android:id="@+id/hero_mint_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:ellipsize="end"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:textColor="@color/color_text_primary"
+                    android:textSize="15sp" />
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </FrameLayout>
+
+</androidx.cardview.widget.CardView>

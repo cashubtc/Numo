@@ -22,6 +22,7 @@ import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -38,6 +39,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.gridlayout.widget.GridLayout
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.ModernPOSActivity
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
@@ -47,7 +50,6 @@ import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.util.MintProfileService
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
 import com.electricdreams.numo.nostr.NostrMintBackup
-import com.electricdreams.numo.ui.components.AddMintInputCard
 import com.electricdreams.numo.ui.seed.SeedWordEditText
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
@@ -164,11 +166,10 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var backupStatusIcon: ImageView
     private lateinit var backupStatusTitle: TextView
     private lateinit var backupStatusSubtitle: TextView
-    private lateinit var mintsListContainer: LinearLayout
-    private lateinit var mintsCountText: TextView
-    private lateinit var mintsSubtitle: TextView
-    private lateinit var addDifferentMintCard: AddMintInputCard
-    private lateinit var mintsContinueButton: MaterialButton
+    private lateinit var mintsRecyclerView: RecyclerView
+    private lateinit var mintAdapter: OnboardingMintAdapter
+    private lateinit var addMintButton: Button
+    private lateinit var mintsContinueButton: Button
     private lateinit var mintsBackButton: ImageView
 
     // Step 6: Restoring (Restore flow)
@@ -188,12 +189,19 @@ class OnboardingActivity : AppCompatActivity() {
     private val seedInputs = mutableListOf<SeedWordEditText>()
     private val mintProgressViews = mutableMapOf<String, View>()
 
+    private var addMintBottomSheet: AddMintBottomSheet? = null
+
     private val onboardingQrScannerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
             val qrValue = result.data?.getStringExtra(QRScannerActivity.EXTRA_QR_VALUE)
-            qrValue?.let { addDifferentMintCard.setMintUrl(mintProfileService.normalizeUrl(it)) }
+            qrValue?.let { scannedUrl ->
+                // Dismiss the bottom sheet if open and add the scanned mint
+                addMintBottomSheet?.dismiss()
+                addMintBottomSheet = null
+                addDifferentMint(mintProfileService.normalizeUrl(scannedUrl))
+            }
         }
     }
 
@@ -306,14 +314,34 @@ class OnboardingActivity : AppCompatActivity() {
         backupStatusIcon = findViewById(R.id.backup_status_icon)
         backupStatusTitle = findViewById(R.id.backup_status_title)
         backupStatusSubtitle = findViewById(R.id.backup_status_subtitle)
-        mintsListContainer = findViewById(R.id.mints_list_container)
-        mintsCountText = findViewById(R.id.mints_count_text)
-        mintsSubtitle = findViewById(R.id.mints_subtitle)
-        addDifferentMintCard = findViewById(R.id.add_different_mint_card)
-        addDifferentMintCard.setHeaderTitle(getString(R.string.onboarding_mints_add_different))
-        addDifferentMintCard.setOnboardingModeEnabled(true)
+        mintsRecyclerView = findViewById(R.id.mints_recycler_view)
+        addMintButton = findViewById(R.id.add_mint_button)
         mintsContinueButton = findViewById(R.id.mints_continue_button)
         mintsBackButton = findViewById(R.id.mints_back_button)
+
+        // Setup RecyclerView + Adapter
+        mintAdapter = OnboardingMintAdapter(object : OnboardingMintAdapter.Listener {
+            override fun onLoadMintIcon(mintUrl: String, iconView: ShapeableImageView) {
+                loadMintIcon(mintUrl, iconView)
+            }
+            override fun onResolveMintName(mintUrl: String): String {
+                return resolveOnboardingMintDisplayName(mintUrl)
+            }
+            override fun onMintAcceptedChanged() {
+                updateContinueButtonState()
+            }
+            override fun onDefaultMintChanged(newDefaultUrl: String) {
+                updateContinueButtonState()
+            }
+        })
+        mintAdapter.setHeaderStrings(
+            defTitle = getString(R.string.onboarding_mints_default_section_title),
+            defSubtitle = getString(R.string.onboarding_mints_subtitle_description),
+            popTitle = getString(R.string.onboarding_mints_popular_section_title),
+            popSubtitle = getString(R.string.onboarding_mints_popular_section_subtitle)
+        )
+        mintsRecyclerView.layoutManager = LinearLayoutManager(this)
+        mintsRecyclerView.adapter = mintAdapter
 
         // Restoring
         restoringContainer = findViewById(R.id.restoring_container)
@@ -502,15 +530,9 @@ class OnboardingActivity : AppCompatActivity() {
             }
         }
 
-        addDifferentMintCard.setOnAddMintListener(object : AddMintInputCard.OnAddMintListener {
-            override fun onAddMint(mintUrl: String) {
-                addDifferentMint(mintUrl)
-            }
-
-            override fun onScanQR() {
-                openOnboardingMintQrScanner()
-            }
-        })
+        addMintButton.setOnClickListener {
+            showAddMintBottomSheet()
+        }
 
         // Success
         enterWalletButton.setOnClickListener {
@@ -688,8 +710,9 @@ class OnboardingActivity : AppCompatActivity() {
                 discoveredMints.clear()
                 selectedMints.clear()
                 onboardingMintDisplayNames.clear()
-                discoveredMints.addAll(ONBOARDING_DEFAULT_MINTS)
-                selectedMints.addAll(ONBOARDING_DEFAULT_MINTS)
+                val shuffledMints = ONBOARDING_DEFAULT_MINTS.shuffled()
+                discoveredMints.addAll(shuffledMints)
+                selectedMints.addAll(shuffledMints)
                 backupFound = false
 
                 withContext(Dispatchers.Main) {
@@ -882,13 +905,15 @@ class OnboardingActivity : AppCompatActivity() {
                 val normalizedBackupMints = result.mints
                     .map { mintProfileService.normalizeUrl(it) }
                     .filter { it.isNotBlank() }
+                    .shuffled()
                 discoveredMints.addAll(normalizedBackupMints)
                 selectedMints.addAll(normalizedBackupMints)
             } else {
                 backupFound = false
                 backupTimestamp = null
-                discoveredMints.addAll(ONBOARDING_DEFAULT_MINTS)
-                selectedMints.addAll(ONBOARDING_DEFAULT_MINTS)
+                val shuffledMints = ONBOARDING_DEFAULT_MINTS.shuffled()
+                discoveredMints.addAll(shuffledMints)
+                selectedMints.addAll(shuffledMints)
             }
 
             withContext(Dispatchers.Main) {
@@ -982,86 +1007,40 @@ class OnboardingActivity : AppCompatActivity() {
                 backupStatusTitle.setTextColor(ContextCompat.getColor(this, R.color.color_text_primary))
                 backupStatusSubtitle.text = getString(R.string.onboarding_backup_not_found_subtitle)
             }
-            mintsSubtitle.text = getString(R.string.onboarding_mints_subtitle_restore)
             mintsContinueButton.text = getString(R.string.onboarding_mints_continue_restore)
         } else {
             backupStatusCard.visibility = View.GONE
-            mintsSubtitle.text = getString(R.string.onboarding_mints_subtitle_description)
             mintsContinueButton.text = getString(R.string.onboarding_mints_continue_new_wallet)
         }
 
-        // Update mints list
-        mintsListContainer.removeAllViews()
+        // Populate the RecyclerView adapter
+        // First mint is the default, rest are popular
+        val mintList = discoveredMints.toList()
+        val defaultMint = mintList.firstOrNull() ?: return
+        val popularMints = mintList.drop(1)
+        // All popular mints start as accepted
+        val acceptedMints = selectedMints.filter { it != defaultMint }.toSet()
 
-        val sortedMints = discoveredMints.sortedBy { resolveOnboardingMintDisplayName(it).lowercase() }
-        for (mintUrl in sortedMints) {
-            val mintView = createMintSelectionView(mintUrl, selectedMints.contains(mintUrl))
-            mintsListContainer.addView(mintView)
-        }
-
-        updateMintsCount()
+        mintAdapter.setMints(defaultMint, popularMints, acceptedMints)
+        updateContinueButtonState()
     }
 
-    private fun createMintSelectionView(mintUrl: String, isSelected: Boolean): View {
-        val container = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = android.view.Gravity.CENTER_VERTICAL
-            setPadding(16.dpToPx(), 14.dpToPx(), 16.dpToPx(), 14.dpToPx())
-            background = ContextCompat.getDrawable(context, R.drawable.bg_mint_item)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                bottomMargin = 8.dpToPx()
+    private fun showAddMintBottomSheet() {
+        val sheet = AddMintBottomSheet.newInstance(object : AddMintBottomSheet.Listener {
+            override fun onAddMintUrl(url: String) {
+                addDifferentMint(url)
             }
-        }
-
-        val mintIcon = ShapeableImageView(this).apply {
-            layoutParams = LinearLayout.LayoutParams(42.dpToPx(), 42.dpToPx())
-            setImageResource(R.drawable.ic_bitcoin)
-            setColorFilter(ContextCompat.getColor(context, R.color.color_primary))
-            scaleType = ImageView.ScaleType.CENTER_CROP
-            setBackgroundColor(ContextCompat.getColor(context, R.color.color_bg_tertiary))
-            shapeAppearanceModel = shapeAppearanceModel.toBuilder()
-                .setAllCornerSizes(21.dpToPx().toFloat())
-                .build()
-        }
-        loadMintIcon(mintUrl, mintIcon)
-
-        val nameText = TextView(this).apply {
-            text = resolveOnboardingMintDisplayName(mintUrl)
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                marginEnd = 14.dpToPx()
-                marginStart = 14.dpToPx()
+            override fun onScanQrCode() {
+                openOnboardingMintQrScanner()
             }
-            setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
-            textSize = 16f
-            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
-            maxLines = 1
-            ellipsize = android.text.TextUtils.TruncateAt.END
-        }
+        })
+        addMintBottomSheet = sheet
+        sheet.show(supportFragmentManager, "AddMintBottomSheet")
+    }
 
-        val checkbox = ImageView(this).apply {
-            layoutParams = LinearLayout.LayoutParams(24.dpToPx(), 24.dpToPx())
-            updateCheckboxState(this, isSelected)
-        }
-
-        container.addView(mintIcon)
-        container.addView(nameText)
-        container.addView(checkbox)
-
-        container.setOnClickListener {
-            val nowSelected = !selectedMints.contains(mintUrl)
-            if (nowSelected) {
-                selectedMints.add(mintUrl)
-            } else {
-                selectedMints.remove(mintUrl)
-            }
-            updateCheckboxState(checkbox, nowSelected)
-            updateMintsCount()
-        }
-
-        return container
+    private fun updateContinueButtonState() {
+        val totalSelected = mintAdapter.getAllSelectedMints().size
+        mintsContinueButton.isEnabled = totalSelected > 0
     }
 
     private fun loadMintIcon(mintUrl: String, iconView: ShapeableImageView) {
@@ -1111,8 +1090,8 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun refreshMintProfilesForReview() {
-        val sortedMints = discoveredMints.toList().sorted()
-        for (mintUrl in sortedMints) {
+        val mintsList = discoveredMints.toList()
+        for (mintUrl in mintsList) {
             lifecycleScope.launch {
                 val result = mintProfileService.fetchAndStoreMintProfile(mintUrl, validateEndpoint = false)
 
@@ -1122,7 +1101,8 @@ class OnboardingActivity : AppCompatActivity() {
                 onboardingMintDisplayNames[mintUrl] = displayName
 
                 if (currentStep == OnboardingStep.REVIEW_MINTS) {
-                    updateReviewMintsUI()
+                    // Notify adapter to refresh name display for this mint
+                    mintAdapter.notifyDataSetChanged()
                 }
             }
         }
@@ -1148,14 +1128,14 @@ class OnboardingActivity : AppCompatActivity() {
             return
         }
 
-        addDifferentMintCard.setLoading(true)
+        addMintBottomSheet?.setLoading(true)
 
         lifecycleScope.launch {
             val validation = withContext(Dispatchers.IO) {
                 mintProfileService.validateMintUrl(normalizedInput)
             }
             if (!validation.isValid || validation.normalizedUrl == null) {
-                addDifferentMintCard.setLoading(false)
+                addMintBottomSheet?.setLoading(false)
                 Toast.makeText(
                     this@OnboardingActivity,
                     getString(R.string.mints_invalid_url),
@@ -1166,7 +1146,7 @@ class OnboardingActivity : AppCompatActivity() {
 
             val mintUrl = validation.normalizedUrl
             if (discoveredMints.contains(mintUrl)) {
-                addDifferentMintCard.setLoading(false)
+                addMintBottomSheet?.setLoading(false)
                 Toast.makeText(
                     this@OnboardingActivity,
                     getString(R.string.mints_already_exists),
@@ -1187,10 +1167,12 @@ class OnboardingActivity : AppCompatActivity() {
             discoveredMints.add(mintUrl)
             selectedMints.add(mintUrl)
 
-            updateReviewMintsUI()
-            addDifferentMintCard.setLoading(false)
-            addDifferentMintCard.clearInput()
-            addDifferentMintCard.collapseIfExpanded()
+            // Add as default — user manually added this mint, so they likely want it as default
+            mintAdapter.addMintAsDefault(mintUrl)
+            updateContinueButtonState()
+
+            addMintBottomSheet?.dismiss()
+            addMintBottomSheet = null
             Toast.makeText(
                 this@OnboardingActivity,
                 getString(R.string.mints_added_toast),
@@ -1201,7 +1183,10 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun applySelectedMintsToMintManager() {
         val mintManager = MintManager.getInstance(this)
-        val normalizedSelected = selectedMints
+
+        // Get selected mints from the adapter (default + accepted popular)
+        val allSelected = mintAdapter.getAllSelectedMints()
+        val normalizedSelected = allSelected
             .map { mintProfileService.normalizeUrl(it) }
             .filter { it.isNotBlank() }
             .toSet()
@@ -1217,30 +1202,11 @@ class OnboardingActivity : AppCompatActivity() {
             mintManager.addMint(mintUrl)
         }
 
-        val preferredMint = discoveredMints.firstOrNull { normalizedSelected.contains(it) }
-            ?: normalizedSelected.sorted().firstOrNull()
-        if (preferredMint != null) {
+        // The default mint (index 0 in adapter) becomes the preferred Lightning mint
+        val preferredMint = mintAdapter.getDefaultMintUrl().let { mintProfileService.normalizeUrl(it) }
+        if (preferredMint.isNotBlank()) {
             mintManager.setPreferredLightningMint(preferredMint)
         }
-    }
-
-    private fun updateCheckboxState(checkbox: ImageView, isSelected: Boolean) {
-        if (isSelected) {
-            checkbox.setImageResource(R.drawable.ic_checkbox_checked)
-            checkbox.setColorFilter(ContextCompat.getColor(this, R.color.color_success_green))
-        } else {
-            checkbox.setImageResource(R.drawable.ic_checkbox_unchecked)
-            checkbox.setColorFilter(ContextCompat.getColor(this, R.color.color_text_tertiary))
-        }
-    }
-
-    private fun updateMintsCount() {
-        val count = selectedMints.size
-        val pluralSuffix = if (count != 1) "s" else ""
-        mintsCountText.text = getString(R.string.onboarding_mints_count, count, pluralSuffix)
-
-        mintsContinueButton.isEnabled = count > 0
-        mintsContinueButton.alpha = if (count > 0) 1f else 0.5f
     }
 
     // === Restore Progress ===

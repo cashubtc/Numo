@@ -155,7 +155,7 @@
     <string name="onboarding_backup_not_found_subtitle">Using default mints</string>
     <string name="onboarding_mints_title">Select Mints</string>
     <string name="onboarding_mints_subtitle_restore">Select which mints to restore</string>
-    <string name="onboarding_mints_subtitle_description">These mints will hold your bitcoin. You can withdraw to your own wallet at any time, or set a payout threshold to do it automatically.</string>
+    <string name="onboarding_mints_subtitle_description">This mint will hold your bitcoin. You can withdraw to your own wallet at any time, or set a payout threshold to do it automatically.</string>
     <string name="onboarding_mints_count">%1$d mint%2$s selected</string>
     <string name="onboarding_mints_continue_restore">Restore Wallet</string>
     <string name="onboarding_mints_continue_new_wallet">Continue</string>
@@ -164,8 +164,18 @@
     <string name="onboarding_mints_scan_row_title">Scan QR Code</string>
     <string name="onboarding_mints_scan_row_subtitle">Tap to scan an address</string>
     <string name="onboarding_mint_generic_name">Mint</string>
+    <string name="onboarding_mints_default_section_title">Default Mint</string>
+    <string name="onboarding_mints_popular_section_title">Popular Mints</string>
+    <string name="onboarding_mints_popular_section_subtitle">Accept ecash from these mints</string>
+    <string name="onboarding_mints_add_different_button">+ New Mint</string>
+    <string name="onboarding_add_mint_sheet_title">Add a Mint</string>
+    <string name="onboarding_add_mint_url_hint">Enter mint URL</string>
+    <string name="onboarding_add_mint_button">Add</string>
+    <string name="onboarding_add_mint_or">or</string>
+    <string name="onboarding_add_mint_scan_qr">Scan</string>
+    <string name="onboarding_add_mint_loading">Adding mint…</string>
 
-    
+
     <string name="onboarding_restoring_title">Restoring Wallet</string>
     <string name="onboarding_restoring_initializing">Initializing restore...</string>
 
