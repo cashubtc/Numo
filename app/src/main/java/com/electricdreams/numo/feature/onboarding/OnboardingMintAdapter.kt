@@ -32,12 +32,14 @@ class OnboardingMintAdapter(
             val titleSizeSp: Float,
             val subtitleSizeSp: Float
         ) : ListItem()
-        data class Mint(val url: String, val isDefault: Boolean) : ListItem()
+        data class DefaultHero(val url: String, val title: String, val subtitle: String) : ListItem()
+        data class Mint(val url: String) : ListItem()
     }
 
     companion object {
         private const val VIEW_TYPE_HEADER = 0
         private const val VIEW_TYPE_MINT = 1
+        private const val VIEW_TYPE_DEFAULT_HERO = 2
     }
 
     private val items = mutableListOf<ListItem>()
@@ -94,19 +96,15 @@ class OnboardingMintAdapter(
 
     private fun rebuildItems() {
         items.clear()
-        items.add(ListItem.Header(
-            defaultSectionTitle, defaultSectionSubtitle,
-            topMarginDp = 0, titleSizeSp = 22f, subtitleSizeSp = 14f
-        ))
         if (mints.isNotEmpty()) {
-            items.add(ListItem.Mint(mints[0], isDefault = true))
+            items.add(ListItem.DefaultHero(mints[0], defaultSectionTitle, defaultSectionSubtitle))
         }
         items.add(ListItem.Header(
             popularSectionTitle, popularSectionSubtitle,
-            topMarginDp = 24, titleSizeSp = 22f, subtitleSizeSp = 14f
+            topMarginDp = 16, titleSizeSp = 22f, subtitleSizeSp = 14f
         ))
         for (i in 1 until mints.size) {
-            items.add(ListItem.Mint(mints[i], isDefault = false))
+            items.add(ListItem.Mint(mints[i]))
         }
     }
 
@@ -131,7 +129,7 @@ class OnboardingMintAdapter(
 
     /**
      * Swaps a popular mint with the current default mint.
-     * Uses notifyItemMoved + notifyItemChanged for smooth RecyclerView animation.
+     * Updates the hero card and the swapped popular mint row.
      */
     private fun swapToDefault(tappedMintIndex: Int) {
         if (tappedMintIndex < 1 || tappedMintIndex >= mints.size) return
@@ -148,22 +146,15 @@ class OnboardingMintAdapter(
         mints[0] = newDefault
         mints[tappedMintIndex] = oldDefault
 
-        // Calculate adapter positions (accounting for headers):
-        // [0] = Header "Default Mint"
-        // [1] = default mint
-        // [2] = Header "Popular Mints"
-        // [3..] = popular mints
-        val defaultAdapterPos = 1
-        val tappedAdapterPos = tappedMintIndex + 2 // +2 for two headers
+        // Adapter positions:
+        // [0] = DefaultHero
+        // [1] = Header "Popular Mints"
+        // [2..] = popular mints (mints[i] is at adapter position i + 1)
+        val tappedAdapterPos = tappedMintIndex + 1
 
-        // Move tapped item up to default position, old default down to tapped position
-        notifyItemMoved(tappedAdapterPos, defaultAdapterPos)
-        notifyItemMoved(defaultAdapterPos + 1, tappedAdapterPos)
-
-        // Rebuild items with updated isDefault flags and notify changes
         rebuildItems()
-        notifyItemChanged(defaultAdapterPos)
-        notifyItemChanged(tappedAdapterPos)
+        notifyItemChanged(0)               // Hero card shows new default
+        notifyItemChanged(tappedAdapterPos) // Swapped popular mint row
 
         listener.onDefaultMintChanged(newDefault)
     }
@@ -172,6 +163,7 @@ class OnboardingMintAdapter(
 
     override fun getItemViewType(position: Int): Int = when (items[position]) {
         is ListItem.Header -> VIEW_TYPE_HEADER
+        is ListItem.DefaultHero -> VIEW_TYPE_DEFAULT_HERO
         is ListItem.Mint -> VIEW_TYPE_MINT
     }
 
@@ -181,6 +173,10 @@ class OnboardingMintAdapter(
             VIEW_TYPE_HEADER -> {
                 val view = inflater.inflate(R.layout.item_onboarding_mint_header, parent, false)
                 HeaderViewHolder(view)
+            }
+            VIEW_TYPE_DEFAULT_HERO -> {
+                val view = inflater.inflate(R.layout.item_onboarding_mint_hero, parent, false)
+                DefaultHeroViewHolder(view)
             }
             else -> {
                 val view = inflater.inflate(R.layout.item_onboarding_mint, parent, false)
@@ -199,25 +195,37 @@ class OnboardingMintAdapter(
                 h.title.text = item.title
                 h.subtitle.text = item.subtitle
 
-                // Apply dynamic text sizes and style
                 h.title.setTextSize(TypedValue.COMPLEX_UNIT_SP, item.titleSizeSp)
                 h.subtitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, item.subtitleSizeSp)
 
                 if (item.titleSizeSp > 16f) {
-                    // Large header style (Default Mint section)
                     h.title.letterSpacing = 0f
                     h.title.isAllCaps = false
                     h.title.setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
                 } else {
-                    // Small label style (Popular Mints section)
                     h.title.letterSpacing = 0.08f
-                    h.title.isAllCaps = false // already uppercase in string resource
+                    h.title.isAllCaps = false
                     h.title.setTextColor(ContextCompat.getColor(context, R.color.color_text_secondary))
                 }
 
                 val lp = h.itemView.layoutParams as RecyclerView.LayoutParams
                 lp.topMargin = (item.topMarginDp * density).toInt()
                 h.itemView.layoutParams = lp
+            }
+            is ListItem.DefaultHero -> {
+                val h = holder as DefaultHeroViewHolder
+                h.title.text = item.title
+                h.subtitle.text = item.subtitle
+                h.mintName.text = listener.onResolveMintName(item.url)
+
+                // Mint icon with rounded corners
+                h.mintIcon.setImageResource(R.drawable.ic_bitcoin)
+                h.mintIcon.setColorFilter(ContextCompat.getColor(context, R.color.color_primary))
+                h.mintIcon.setBackgroundColor(ContextCompat.getColor(context, R.color.color_bg_tertiary))
+                h.mintIcon.shapeAppearanceModel = h.mintIcon.shapeAppearanceModel.toBuilder()
+                    .setAllCornerSizes(18f * density)
+                    .build()
+                listener.onLoadMintIcon(item.url, h.mintIcon)
             }
             is ListItem.Mint -> {
                 val h = holder as MintViewHolder
@@ -234,47 +242,32 @@ class OnboardingMintAdapter(
                 listener.onLoadMintIcon(item.url, h.icon)
 
                 val lp = h.itemView.layoutParams as RecyclerView.LayoutParams
+                h.itemView.background =
+                    ContextCompat.getDrawable(context, R.drawable.bg_mint_item)
+                lp.bottomMargin = (8 * density).toInt()
 
-                if (item.isDefault) {
-                    h.itemView.background =
-                        ContextCompat.getDrawable(context, R.drawable.bg_default_mint_item)
-                    lp.bottomMargin = 0
+                h.checkbox.visibility = View.VISIBLE
+                updateCheckboxState(context, h.checkbox, accepted.contains(item.url))
 
-                    h.checkbox.visibility = View.GONE
-
-                    // Filled home icon for default
-                    h.star.setImageResource(R.drawable.ic_home_filled)
-                    h.star.setOnClickListener(null)
-                    h.star.isClickable = false
-
-                    h.itemView.setOnClickListener(null)
-                } else {
-                    h.itemView.background =
-                        ContextCompat.getDrawable(context, R.drawable.bg_mint_item)
-                    lp.bottomMargin = (8 * density).toInt()
-
-                    h.checkbox.visibility = View.VISIBLE
-                    updateCheckboxState(context, h.checkbox, accepted.contains(item.url))
-
-                    // Outline home icon for popular — tap to promote to default
-                    h.star.setImageResource(R.drawable.ic_home_outline)
-                    h.star.isClickable = true
-                    h.star.setOnClickListener { view ->
-                        view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                        val mintIndex = mints.indexOf(item.url)
-                        if (mintIndex > 0) {
-                            swapToDefault(mintIndex)
-                        }
-                    }
-
-                    // Checkbox toggle on row tap
-                    h.itemView.setOnClickListener {
-                        val nowAccepted = !accepted.contains(item.url)
-                        if (nowAccepted) accepted.add(item.url) else accepted.remove(item.url)
-                        updateCheckboxState(context, h.checkbox, nowAccepted)
-                        listener.onMintAcceptedChanged()
+                // Outline home icon for popular — tap to promote to default
+                h.star.setImageResource(R.drawable.ic_home_outline)
+                h.star.isClickable = true
+                h.star.setOnClickListener { view ->
+                    view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                    val mintIndex = mints.indexOf(item.url)
+                    if (mintIndex > 0) {
+                        swapToDefault(mintIndex)
                     }
                 }
+
+                // Checkbox toggle on row tap
+                h.itemView.setOnClickListener {
+                    val nowAccepted = !accepted.contains(item.url)
+                    if (nowAccepted) accepted.add(item.url) else accepted.remove(item.url)
+                    updateCheckboxState(context, h.checkbox, nowAccepted)
+                    listener.onMintAcceptedChanged()
+                }
+
                 h.itemView.layoutParams = lp
             }
         }
@@ -297,6 +290,13 @@ class OnboardingMintAdapter(
     class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.header_title)
         val subtitle: TextView = view.findViewById(R.id.header_subtitle)
+    }
+
+    class DefaultHeroViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val title: TextView = view.findViewById(R.id.hero_title)
+        val subtitle: TextView = view.findViewById(R.id.hero_subtitle)
+        val mintIcon: ShapeableImageView = view.findViewById(R.id.hero_mint_icon)
+        val mintName: TextView = view.findViewById(R.id.hero_mint_name)
     }
 
     class MintViewHolder(view: View) : RecyclerView.ViewHolder(view) {

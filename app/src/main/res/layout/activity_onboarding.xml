@@ -200,12 +200,6 @@
 
                     </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="@color/color_text_tertiary" />
-
                 </LinearLayout>
 
             </LinearLayout>
@@ -262,12 +256,6 @@
                             android:textColor="@color/color_text_secondary" />
 
                     </LinearLayout>
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="@color/color_text_tertiary" />
 
                 </LinearLayout>
 
