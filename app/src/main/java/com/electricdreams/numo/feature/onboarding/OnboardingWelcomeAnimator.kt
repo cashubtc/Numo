@@ -573,23 +573,10 @@ class OnboardingWelcomeAnimator(
     }
 
     private fun createRowTileView(tile: RowTile, density: Float, sizePx: Int): View {
-        val radiusPx = 12 * density
-        val baseColor = ContextCompat.getColor(context, tile.colorRes)
-        val lighterColor = lightenColor(baseColor, 0.35f)
-        // Ghost tile: semi-transparent backgrounds so tiles feel like faint texture
-        val ghostBase = Color.argb(40, Color.red(baseColor), Color.green(baseColor), Color.blue(baseColor))
-        val ghostLighter = Color.argb(40, Color.red(lighterColor), Color.green(lighterColor), Color.blue(lighterColor))
-
         return TextView(context).apply {
             text = tile.emoji
             textSize = 22f
             gravity = Gravity.CENTER
-            val bgDrawable = GradientDrawable(
-                GradientDrawable.Orientation.TL_BR,
-                intArrayOf(ghostLighter, ghostBase)
-            )
-            bgDrawable.cornerRadius = radiusPx
-            background = bgDrawable
             layoutParams = FrameLayout.LayoutParams(sizePx, sizePx)
         }
     }
