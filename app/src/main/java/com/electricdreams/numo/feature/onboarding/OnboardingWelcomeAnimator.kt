@@ -104,6 +104,28 @@ class OnboardingWelcomeAnimator(
         RowTile("\uD83C\uDF7A", R.color.chip_ribbon_orange)
     )
 
+    private val row4Emojis = listOf(
+        RowTile("\uD83E\uDDF4", R.color.chip_ribbon_cyan),
+        RowTile("\uD83C\uDF4B", R.color.chip_ribbon_yellow),
+        RowTile("\uD83C\uDFA7", R.color.chip_ribbon_purple),
+        RowTile("\uD83E\uDDCA", R.color.chip_ribbon_lime),
+        RowTile("\uD83C\uDF6B", R.color.chip_ribbon_orange),
+        RowTile("\uD83C\uDFB2", R.color.chip_ribbon_green),
+        RowTile("\uD83E\uDDF8", R.color.chip_ribbon_pink),
+        RowTile("\uD83D\uDD11", R.color.chip_ribbon_cyan)
+    )
+
+    private val row5Emojis = listOf(
+        RowTile("\uD83C\uDF81", R.color.chip_ribbon_pink),
+        RowTile("\uD83E\uDD64", R.color.chip_ribbon_orange),
+        RowTile("\uD83E\uDDF2", R.color.chip_ribbon_purple),
+        RowTile("\uD83C\uDF7F", R.color.chip_ribbon_yellow),
+        RowTile("\uD83E\uDDF3", R.color.chip_ribbon_green),
+        RowTile("\uD83C\uDFAF", R.color.chip_ribbon_cyan),
+        RowTile("\uD83C\uDF69", R.color.chip_ribbon_lime),
+        RowTile("\uD83D\uDD2E", R.color.chip_ribbon_purple)
+    )
+
     // === State ===
 
     private val activeAnimators = mutableListOf<Animator>()
@@ -389,8 +411,8 @@ class OnboardingWelcomeAnimator(
 
     private fun createScrollingRows() {
         val density = context.resources.displayMetrics.density
-        val tileSizePx = (72 * density).toInt()
-        val spacingPx = (12 * density).toInt()
+        val tileSizePx = (48 * density).toInt()
+        val spacingPx = (8 * density).toInt()
         val stepPx = tileSizePx + spacingPx
 
         data class RowConfig(
@@ -402,9 +424,11 @@ class OnboardingWelcomeAnimator(
         )
 
         val rows = listOf(
-            RowConfig(row1Emojis, 1f, 35f, 0, 0.30f),
-            RowConfig(row2Emojis, -1f, 22f, 1, 0.18f),
-            RowConfig(row3Emojis, 1f, 14f, 2, 0.10f)
+            RowConfig(row1Emojis,  1f, 12f, 0, 0.22f),
+            RowConfig(row2Emojis, -1f,  9f, 1, 0.16f),
+            RowConfig(row3Emojis,  1f, 15f, 2, 0.11f),
+            RowConfig(row4Emojis, -1f,  7f, 3, 0.06f),
+            RowConfig(row5Emojis,  1f, 11f, 4, 0.03f)
         )
 
         scrollingTiles.clear()
@@ -432,13 +456,13 @@ class OnboardingWelcomeAnimator(
             }
         }
 
-        // Gradient overlay — gentle fade across the bottom half of rows
-        val totalRowsHeight = 3 * tileSizePx + 2 * spacingPx
-        val gradientHeight = (totalRowsHeight * 0.6f).toInt()
+        // Gradient overlay — aggressive fade so bottom rows dissolve into background
+        val totalRowsHeight = 5 * tileSizePx + 4 * spacingPx
+        val gradientHeight = (totalRowsHeight * 0.8f).toInt()
         rowGradientView = View(context).apply {
             background = GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(Color.TRANSPARENT, Color.argb(180, 10, 37, 64), navyColor)
+                intArrayOf(Color.TRANSPARENT, Color.argb(220, 10, 37, 64), navyColor)
             )
             layoutParams = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
@@ -549,17 +573,20 @@ class OnboardingWelcomeAnimator(
     }
 
     private fun createRowTileView(tile: RowTile, density: Float, sizePx: Int): View {
-        val radiusPx = 16 * density
+        val radiusPx = 12 * density
         val baseColor = ContextCompat.getColor(context, tile.colorRes)
         val lighterColor = lightenColor(baseColor, 0.35f)
+        // Ghost tile: semi-transparent backgrounds so tiles feel like faint texture
+        val ghostBase = Color.argb(40, Color.red(baseColor), Color.green(baseColor), Color.blue(baseColor))
+        val ghostLighter = Color.argb(40, Color.red(lighterColor), Color.green(lighterColor), Color.blue(lighterColor))
 
         return TextView(context).apply {
             text = tile.emoji
-            textSize = 32f
+            textSize = 22f
             gravity = Gravity.CENTER
             val bgDrawable = GradientDrawable(
                 GradientDrawable.Orientation.TL_BR,
-                intArrayOf(lighterColor, baseColor)
+                intArrayOf(ghostLighter, ghostBase)
             )
             bgDrawable.cornerRadius = radiusPx
             background = bgDrawable
