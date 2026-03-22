@@ -28,6 +28,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
@@ -377,11 +378,8 @@ class OnboardingActivity : AppCompatActivity() {
 
                 override fun updateDrawState(ds: TextPaint) {
                     super.updateDrawState(ds)
-                    ds.color = ds.linkColor.let {
-                        ContextCompat.getColor(this@OnboardingActivity, R.color.numo_navy)
-                    }
-                    ds.isUnderlineText = false
-                    ds.isFakeBoldText = true
+                    ds.color = ContextCompat.getColor(this@OnboardingActivity, R.color.color_accent_blue)
+                    ds.isUnderlineText = true
                 }
             }
 
@@ -393,7 +391,11 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun showTermsDialog() {
-        TermsBottomSheet.newInstance().show(supportFragmentManager, "TermsBottomSheet")
+        AlertDialog.Builder(this)
+            .setTitle(R.string.dialog_terms_title)
+            .setMessage(getString(R.string.dialog_terms_body))
+            .setPositiveButton(R.string.common_close, null)
+            .show()
     }
 
     private fun setupSeedInputs() {
