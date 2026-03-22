@@ -15,7 +15,6 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:paddingHorizontal="8dp"
-        android:elevation="1dp"
         android:background="@color/color_bg_white"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -33,9 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/auto_withdraw_settings_title"
-            android:textSize="20sp"
-            android:textColor="@color/color_text_primary"
-            android:fontFamily="sans-serif-medium"
+            android:textAppearance="@style/Text.Title"
             android:textAlignment="center" />
 
         <!-- Spacer to balance layout -->

@@ -25,10 +25,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Mint Name"
-            android:textAppearance="@style/Text.Body"
+            android:fontFamily="sans-serif-medium"
             android:textColor="@color/color_text_primary"
-            android:textSize="16sp"
-            android:textStyle="bold"
+            android:textSize="17sp"
             android:maxLines="1"
             android:ellipsize="end" />
 
@@ -36,11 +35,10 @@
             android:id="@+id/mint_url"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="4dp"
             android:text="mint.example.com"
-            android:textAppearance="@style/Text.Caption"
-            android:textColor="@color/color_text_tertiary"
-            android:textSize="12sp"
+            android:textColor="@color/color_text_secondary"
+            android:textSize="14sp"
             android:maxLines="1"
             android:ellipsize="end" />
 
@@ -52,10 +50,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="₿1,234"
-        android:textAppearance="@style/Text.Body"
+        android:fontFamily="sans-serif-medium"
         android:textColor="@color/color_success_green"
         android:textSize="15sp"
-        android:textStyle="bold"
         android:layout_marginEnd="8dp" />
 
     <!-- Chevron -->
