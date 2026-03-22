@@ -280,7 +280,7 @@ class OnboardingMintAdapter(
     ) {
         if (isSelected) {
             checkbox.setImageResource(R.drawable.ic_checkbox_checked)
-            checkbox.setColorFilter(ContextCompat.getColor(context, R.color.color_success_green))
+            checkbox.setColorFilter(ContextCompat.getColor(context, R.color.color_primary_green))
         } else {
             checkbox.setImageResource(R.drawable.ic_checkbox_unchecked)
             checkbox.setColorFilter(ContextCompat.getColor(context, R.color.color_text_tertiary))
