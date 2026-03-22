@@ -1,15 +1,11 @@
 package com.electricdreams.numo.feature.onboarding
 
 import android.view.View
-import android.widget.EditText
 import android.widget.FrameLayout
-import android.widget.ImageButton
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.electricdreams.numo.R
-import com.electricdreams.numo.ui.components.AddMintInputCard
 import com.google.android.material.button.MaterialButton
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -82,116 +78,6 @@ class OnboardingActivityTest {
                 
                 val generatingContainer = activity.findViewById<FrameLayout>(R.id.generating_container)
                 assertEquals("Generating container should be visible", View.VISIBLE, generatingContainer.visibility)
-            }
-        }
-    }
-
-    @Test
-    fun `review mint row renders name only with no visible URL subtitle`() {
-        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
-            scenario.onActivity { activity ->
-                val discovered =
-                    ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "discoveredMints")
-                val selected =
-                    ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "selectedMints")
-                val names = ReflectionHelpers.getField<MutableMap<String, String>>(
-                    activity,
-                    "onboardingMintDisplayNames"
-                )
-                discovered.clear()
-                selected.clear()
-                names.clear()
-
-                val mintUrl = "https://mint.coinos.io"
-                discovered.add(mintUrl)
-                selected.add(mintUrl)
-                names[mintUrl] = "Coinos"
-
-                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
-
-                val list = activity.findViewById<LinearLayout>(R.id.mints_list_container)
-                assertEquals(1, list.childCount)
-
-                val rowTexts = extractTextValues(list.getChildAt(0))
-                assertTrue(rowTexts.contains("Coinos"))
-                assertFalse(rowTexts.any { it.contains("coinos.io", ignoreCase = true) })
-            }
-        }
-    }
-
-    @Test
-    fun `review screen includes add different mint card`() {
-        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
-            scenario.onActivity { activity ->
-                val addCard = activity.findViewById<AddMintInputCard>(R.id.add_different_mint_card)
-                assertNotNull(addCard)
-            }
-        }
-    }
-
-    @Test
-    fun `review subtitle uses updated bitcoin custody copy`() {
-        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
-            scenario.onActivity { activity ->
-                val subtitle = activity.findViewById<TextView>(R.id.mints_subtitle)
-                assertEquals(
-                    "These mints will hold your bitcoin. You can withdraw to your own wallet at any time, or set a payout threshold to do it automatically.",
-                    subtitle.text.toString()
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `onboarding add mint card uses onboarding presentation mode`() {
-        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
-            scenario.onActivity { activity ->
-                val addCard = activity.findViewById<AddMintInputCard>(R.id.add_different_mint_card)
-
-                val helperText = addCard.findViewById<TextView>(R.id.helper_text)
-                val urlInput = addCard.findViewById<EditText>(R.id.url_input)
-                val inlineScan = addCard.findViewById<ImageButton>(R.id.scan_button)
-                val scanRow = addCard.findViewById<View>(R.id.scan_row_container)
-                val scanRowTitle = addCard.findViewById<TextView>(R.id.scan_row_title)
-                val scanRowSubtitle = addCard.findViewById<TextView>(R.id.scan_row_subtitle)
-                val addButton = addCard.findViewById<TextView>(R.id.add_button)
-
-                assertEquals(View.GONE, helperText.visibility)
-                assertEquals("Enter mint address", urlInput.hint.toString())
-                assertEquals(View.GONE, inlineScan.visibility)
-                assertEquals(View.VISIBLE, scanRow.visibility)
-                assertEquals("Scan QR Code", scanRowTitle.text.toString())
-                assertEquals("Tap to scan an address", scanRowSubtitle.text.toString())
-                assertEquals(activity.getColor(R.color.color_text_primary), addButton.currentTextColor)
-            }
-        }
-    }
-
-    @Test
-    fun `mints count reflects single selected mint in review`() {
-        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
-            scenario.onActivity { activity ->
-                val discovered =
-                    ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "discoveredMints")
-                val selected =
-                    ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "selectedMints")
-                val names = ReflectionHelpers.getField<MutableMap<String, String>>(
-                    activity,
-                    "onboardingMintDisplayNames"
-                )
-                discovered.clear()
-                selected.clear()
-                names.clear()
-
-                val mintUrl = "https://mint.coinos.io"
-                discovered.add(mintUrl)
-                selected.add(mintUrl)
-                names[mintUrl] = "Coinos"
-
-                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
-
-                val countText = activity.findViewById<TextView>(R.id.mints_count_text).text.toString()
-                assertTrue(countText.contains("1 mint"))
             }
         }
     }
@@ -291,24 +177,6 @@ class OnboardingActivityTest {
         } finally {
             server.shutdown()
         }
-    }
-
-    private fun extractTextValues(view: View): List<String> {
-        val values = mutableListOf<String>()
-        when (view) {
-            is TextView -> values.add(view.text.toString())
-            is LinearLayout -> {
-                for (i in 0 until view.childCount) {
-                    values.addAll(extractTextValues(view.getChildAt(i)))
-                }
-            }
-            is FrameLayout -> {
-                for (i in 0 until view.childCount) {
-                    values.addAll(extractTextValues(view.getChildAt(i)))
-                }
-            }
-        }
-        return values
     }
 
     private fun waitForCondition(

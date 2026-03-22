@@ -103,6 +103,7 @@
     
     <!-- Apple-style Bottom Sheet Fragment Theme -->
     <style name="Theme.Numo.BottomSheet" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+        <item name="colorPrimary">@color/color_primary_green_light</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:backgroundDimAmount">0.4</item>
