@@ -291,7 +291,7 @@
     <string name="withdraw_lightning_option_address">📧 Dirección Lightning</string>
     <string name="withdraw_lightning_address_hint_label">Introduce una dirección Lightning</string>
     <string name="withdraw_lightning_address_hint_value">usuario@dominio.com</string>
-    <string name="withdraw_lightning_amount_label">Cantidad (sats)</string>
+    <string name="withdraw_lightning_amount_label">Cantidad</string>
     <string name="withdraw_lightning_amount_hint">1000</string>
     <string name="withdraw_lightning_button_continue">Continuar</string>
 
@@ -313,7 +313,7 @@
     <string name="withdraw_melt_amount_label">Cantidad</string>
     <string name="withdraw_melt_fee_label">Reserva de comisión</string>
     <string name="withdraw_melt_total_label">Total</string>
-    <string name="withdraw_melt_fee_note">La reserva de comisión se devolverá si la comisión real de Lightning es menor.</string>
+    <string name="withdraw_melt_fee_note">La reserva de comisión se devolverá si la comisión de Lightning es menor.</string>
     <string name="withdraw_melt_loading">Procesando retiro...</string>
 
     <!-- Withdraw - melt errors and states -->
@@ -678,7 +678,7 @@
     <string name="auto_withdraw_progress_completed">Enviado correctamente</string>
     <string name="auto_withdraw_progress_failed">El retiro ha fallado</string>
 
-    <string name="auto_withdraw_settings_title">Retiro automático</string>
+    <string name="auto_withdraw_settings_title">Retiro</string>
     <string name="auto_withdraw_error_title">Detalles del error</string>
 
     <!-- Settings - Withdrawals menu item -->
@@ -710,6 +710,9 @@
     <string name="withdraw_amount_placeholder">Introduce la cantidad en sats</string>
     <string name="withdraw_continue_button">Continuar</string>
     <string name="withdraw_scan_qr">Escanear QR</string>
+    <string name="withdraw_scan_invoice_button">Escanear factura</string>
+    <string name="withdraw_invoice_helper">Ingrese una factura Lightning BOLT11</string>
+    <string name="withdraw_address_helper">Enviar a una dirección tipo email Lightning</string>
     <string name="withdraw_section_send_to">Enviar a</string>
     <string name="withdraw_balance_available">Disponible: %1$s</string>
 

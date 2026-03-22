@@ -289,7 +289,7 @@
     <string name="withdraw_lightning_option_address">📧 Endereço Lightning</string>
     <string name="withdraw_lightning_address_hint_label">Insira um endereço Lightning</string>
     <string name="withdraw_lightning_address_hint_value">usuario@dominio.com</string>
-    <string name="withdraw_lightning_amount_label">Valor (sats)</string>
+    <string name="withdraw_lightning_amount_label">Valor</string>
     <string name="withdraw_lightning_amount_hint">1000</string>
     <string name="withdraw_lightning_button_continue">Continuar</string>
 
@@ -311,7 +311,7 @@
     <string name="withdraw_melt_amount_label">Valor</string>
     <string name="withdraw_melt_fee_label">Reserva de taxa</string>
     <string name="withdraw_melt_total_label">Total</string>
-    <string name="withdraw_melt_fee_note">A reserva de taxa será devolvida se a taxa real do Lightning for menor.</string>
+    <string name="withdraw_melt_fee_note">A reserva de taxa será devolvida se a taxa do Lightning for menor.</string>
     <string name="withdraw_melt_loading">Processando saque...</string>
 
     <!-- Withdraw - melt errors and states -->
@@ -676,7 +676,7 @@
     <string name="auto_withdraw_progress_completed">Enviado com sucesso!</string>
     <string name="auto_withdraw_progress_failed">O saque falhou</string>
 
-    <string name="auto_withdraw_settings_title">Saque automático</string>
+    <string name="auto_withdraw_settings_title">Saque</string>
     <string name="auto_withdraw_error_title">Detalhes do erro</string>
 
     <!-- Settings - Withdrawals menu item -->
@@ -708,6 +708,9 @@
     <string name="withdraw_amount_placeholder">Insira o valor em sats</string>
     <string name="withdraw_continue_button">Continuar</string>
     <string name="withdraw_scan_qr">Escanear QR</string>
+    <string name="withdraw_scan_invoice_button">Escanear fatura</string>
+    <string name="withdraw_invoice_helper">Insira uma fatura Lightning BOLT11</string>
+    <string name="withdraw_address_helper">Enviar para um endereço Lightning tipo email</string>
     <string name="withdraw_section_send_to">Enviar para</string>
     <string name="withdraw_balance_available">Disponível: %1$s</string>
 

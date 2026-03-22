@@ -330,7 +330,7 @@ Last updated: November 2024</string>
     <string name="withdraw_lightning_option_address">📧 Lightning Address</string>
     <string name="withdraw_lightning_address_hint_label">Enter a Lightning address</string>
     <string name="withdraw_lightning_address_hint_value">user@domain.com</string>
-    <string name="withdraw_lightning_amount_label">Amount (sats)</string>
+    <string name="withdraw_lightning_amount_label">Amount</string>
     <string name="withdraw_lightning_amount_hint">1000</string>
     <string name="withdraw_lightning_button_continue">Continue</string>
 
@@ -352,7 +352,7 @@ Last updated: November 2024</string>
     <string name="withdraw_melt_amount_label">Amount</string>
     <string name="withdraw_melt_fee_label">Fee Reserve</string>
     <string name="withdraw_melt_total_label">Total</string>
-    <string name="withdraw_melt_fee_note">The fee reserve will be returned if the actual Lightning fee is lower.</string>
+    <string name="withdraw_melt_fee_note">The fee reserve will be returned if the Lightning fee is lower.</string>
     <string name="withdraw_melt_loading">Processing withdrawal...</string>
 
     
@@ -721,7 +721,7 @@ Last updated: November 2024</string>
     <string name="auto_withdraw_progress_completed">Sent successfully!</string>
     <string name="auto_withdraw_progress_failed">Withdrawal failed</string>
     
-    <string name="auto_withdraw_settings_title">Auto-Withdraw</string>
+    <string name="auto_withdraw_settings_title">Withdraw</string>
     <string name="auto_withdraw_error_title">Error Details</string>
 
     
@@ -753,6 +753,9 @@ Last updated: November 2024</string>
     <string name="withdraw_amount_placeholder">Enter amount in sats</string>
     <string name="withdraw_continue_button">Continue</string>
     <string name="withdraw_scan_qr">Scan QR</string>
+    <string name="withdraw_scan_invoice_button">Scan Invoice</string>
+    <string name="withdraw_invoice_helper">Enter a BOLT11 lightning invoice</string>
+    <string name="withdraw_address_helper">Send to an email-like lightning address</string>
     <string name="withdraw_section_send_to">Send To</string>
     <string name="withdraw_balance_available">Available: %1$s</string>
 

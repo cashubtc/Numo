@@ -88,7 +88,7 @@
     <!-- Component Styles -->
     <style name="Widget.Button.Primary.Green">
         <item name="android:background">@drawable/bg_button_primary_green</item>
-        <item name="android:textColor">@color/color_bg_white</item>
+        <item name="android:textColor">@color/color_button_primary_green_text</item>
         <item name="android:textAllCaps">false</item>
         <item name="android:textSize">17sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
