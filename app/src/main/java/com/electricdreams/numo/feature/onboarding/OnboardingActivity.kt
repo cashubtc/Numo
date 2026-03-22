@@ -22,6 +22,7 @@ import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -167,8 +168,8 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var backupStatusSubtitle: TextView
     private lateinit var mintsRecyclerView: RecyclerView
     private lateinit var mintAdapter: OnboardingMintAdapter
-    private lateinit var addMintButton: MaterialButton
-    private lateinit var mintsContinueButton: MaterialButton
+    private lateinit var addMintButton: Button
+    private lateinit var mintsContinueButton: Button
     private lateinit var mintsBackButton: ImageView
 
     // Step 6: Restoring (Restore flow)
@@ -1040,7 +1041,6 @@ class OnboardingActivity : AppCompatActivity() {
     private fun updateContinueButtonState() {
         val totalSelected = mintAdapter.getAllSelectedMints().size
         mintsContinueButton.isEnabled = totalSelected > 0
-        mintsContinueButton.alpha = if (totalSelected > 0) 1f else 0.5f
     }
 
     private fun loadMintIcon(mintUrl: String, iconView: ShapeableImageView) {

@@ -169,7 +169,7 @@
     <string name="onboarding_mints_popular_section_subtitle">Accept ecash from these mints</string>
     <string name="onboarding_mints_add_different_button">+ New Mint</string>
     <string name="onboarding_add_mint_sheet_title">Add a Mint</string>
-    <string name="onboarding_add_mint_url_hint">Paste mint URL</string>
+    <string name="onboarding_add_mint_url_hint">Enter mint URL</string>
     <string name="onboarding_add_mint_button">Add</string>
     <string name="onboarding_add_mint_or">or</string>
     <string name="onboarding_add_mint_scan_qr">Scan</string>

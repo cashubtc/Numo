@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.EditText
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
@@ -16,7 +17,6 @@ import com.electricdreams.numo.R
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.button.MaterialButton
 
 class AddMintBottomSheet : BottomSheetDialogFragment() {
 
@@ -57,8 +57,8 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val urlInput = view.findViewById<EditText>(R.id.mint_url_input)
-        val addButton = view.findViewById<MaterialButton>(R.id.add_mint_button)
-        val scanRow = view.findViewById<View>(R.id.scan_qr_row)
+        val addButton = view.findViewById<Button>(R.id.add_mint_button)
+        val scanRow = view.findViewById<View>(R.id.scan_qr_button)
 
         urlInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -66,7 +66,6 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
             override fun afterTextChanged(s: Editable?) {
                 val hasText = s?.toString()?.trim()?.isNotEmpty() == true
                 addButton.isEnabled = hasText
-                addButton.alpha = if (hasText) 1f else 0.5f
             }
         })
 
@@ -86,7 +85,7 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
 
     fun setLoading(loading: Boolean) {
         val view = view ?: return
-        val addButton = view.findViewById<MaterialButton>(R.id.add_mint_button)
+        val addButton = view.findViewById<Button>(R.id.add_mint_button)
         val loadingContainer = view.findViewById<LinearLayout>(R.id.add_mint_loading)
         val urlInput = view.findViewById<EditText>(R.id.mint_url_input)
 
