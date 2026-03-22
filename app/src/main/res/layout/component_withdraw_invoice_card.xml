@@ -56,18 +56,26 @@
         android:textSize="17sp" />
 
     <!-- Scan Invoice Button -->
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/scan_button"
-        style="@style/Widget.Button.Secondary.Outlined"
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:layout_marginTop="12dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:text="@string/withdraw_scan_invoice_button"
+        android:textAllCaps="false"
+        android:textSize="17sp"
+        android:textColor="@color/color_text_primary"
+        android:fontFamily="sans-serif-medium"
+        app:backgroundTint="@color/color_bg_white"
+        app:strokeColor="@color/color_chip_border"
+        app:strokeWidth="1dp"
+        app:cornerRadius="26dp"
         app:icon="@drawable/ic_qr_scan"
         app:iconGravity="textStart"
         app:iconPadding="8dp"
         app:iconTint="@color/color_text_primary"
-        android:text="@string/withdraw_scan_invoice_button"
-        android:textAllCaps="false"
-        android:textSize="17sp" />
+        app:rippleColor="@color/color_ripple" />
 
 </LinearLayout>
