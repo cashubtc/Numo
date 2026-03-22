@@ -313,7 +313,7 @@
     <string name="withdraw_melt_amount_label">Cantidad</string>
     <string name="withdraw_melt_fee_label">Reserva de comisión</string>
     <string name="withdraw_melt_total_label">Total</string>
-    <string name="withdraw_melt_fee_note">La reserva de comisión se devolverá si la comisión real de Lightning es menor.</string>
+    <string name="withdraw_melt_fee_note">La reserva de comisión se devolverá si la comisión de Lightning es menor.</string>
     <string name="withdraw_melt_loading">Procesando retiro...</string>
 
     <!-- Withdraw - melt errors and states -->

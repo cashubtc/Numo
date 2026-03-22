@@ -311,7 +311,7 @@
     <string name="withdraw_melt_amount_label">Valor</string>
     <string name="withdraw_melt_fee_label">Reserva de taxa</string>
     <string name="withdraw_melt_total_label">Total</string>
-    <string name="withdraw_melt_fee_note">A reserva de taxa será devolvida se a taxa real do Lightning for menor.</string>
+    <string name="withdraw_melt_fee_note">A reserva de taxa será devolvida se a taxa do Lightning for menor.</string>
     <string name="withdraw_melt_loading">Processando saque...</string>
 
     <!-- Withdraw - melt errors and states -->

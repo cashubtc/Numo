@@ -352,7 +352,7 @@ Last updated: November 2024</string>
     <string name="withdraw_melt_amount_label">Amount</string>
     <string name="withdraw_melt_fee_label">Fee Reserve</string>
     <string name="withdraw_melt_total_label">Total</string>
-    <string name="withdraw_melt_fee_note">The fee reserve will be returned if the actual Lightning fee is lower.</string>
+    <string name="withdraw_melt_fee_note">The fee reserve will be returned if the Lightning fee is lower.</string>
     <string name="withdraw_melt_loading">Processing withdrawal...</string>
 
     
