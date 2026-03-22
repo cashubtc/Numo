@@ -638,21 +638,12 @@
                 android:paddingBottom="32dp"
                 android:background="@color/color_bg_light">
 
-                <!-- Add a different mint - secondary outlined button -->
-                <Button
-                    android:id="@+id/add_mint_button"
-                    style="@style/Widget.Button.Secondary.Outlined"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:text="@string/onboarding_mints_add_different_button" />
-
                 <!-- Continue - primary button -->
                 <Button
                     android:id="@+id/mints_continue_button"
                     style="@style/Widget.Button.Primary.Green"
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
-                    android:layout_marginTop="10dp"
                     android:text="@string/onboarding_mints_continue_new_wallet" />
 
             </LinearLayout>

@@ -168,7 +168,6 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var backupStatusSubtitle: TextView
     private lateinit var mintsRecyclerView: RecyclerView
     private lateinit var mintAdapter: OnboardingMintAdapter
-    private lateinit var addMintButton: Button
     private lateinit var mintsContinueButton: Button
     private lateinit var mintsBackButton: ImageView
 
@@ -315,7 +314,6 @@ class OnboardingActivity : AppCompatActivity() {
         backupStatusTitle = findViewById(R.id.backup_status_title)
         backupStatusSubtitle = findViewById(R.id.backup_status_subtitle)
         mintsRecyclerView = findViewById(R.id.mints_recycler_view)
-        addMintButton = findViewById(R.id.add_mint_button)
         mintsContinueButton = findViewById(R.id.mints_continue_button)
         mintsBackButton = findViewById(R.id.mints_back_button)
 
@@ -333,12 +331,15 @@ class OnboardingActivity : AppCompatActivity() {
             override fun onDefaultMintChanged(newDefaultUrl: String) {
                 updateContinueButtonState()
             }
+            override fun onAddMintClicked() {
+                showAddMintBottomSheet()
+            }
+            override fun onRequestSetDefault(mintUrl: String, mintName: String) {
+                showSetDefaultConfirmationDialog(mintUrl, mintName)
+            }
         })
         mintAdapter.setHeaderStrings(
-            defTitle = getString(R.string.onboarding_mints_default_section_title),
-            defSubtitle = getString(R.string.onboarding_mints_subtitle_description),
-            popTitle = getString(R.string.onboarding_mints_popular_section_title),
-            popSubtitle = getString(R.string.onboarding_mints_popular_section_subtitle)
+            acceptFromTitle = getString(R.string.onboarding_mints_accept_from_header)
         )
         mintsRecyclerView.layoutManager = LinearLayoutManager(this)
         mintsRecyclerView.adapter = mintAdapter
@@ -528,10 +529,6 @@ class OnboardingActivity : AppCompatActivity() {
             } else {
                 completeNewWalletSetup()
             }
-        }
-
-        addMintButton.setOnClickListener {
-            showAddMintBottomSheet()
         }
 
         // Success
@@ -1036,6 +1033,18 @@ class OnboardingActivity : AppCompatActivity() {
         })
         addMintBottomSheet = sheet
         sheet.show(supportFragmentManager, "AddMintBottomSheet")
+    }
+
+    private fun showSetDefaultConfirmationDialog(mintUrl: String, mintName: String) {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.onboarding_mints_set_default_title))
+            .setMessage(getString(R.string.onboarding_mints_set_default_message, mintName))
+            .setPositiveButton(getString(R.string.onboarding_mints_set_default_confirm)) { _, _ ->
+                mintAdapter.confirmSetDefault(mintUrl)
+                updateContinueButtonState()
+            }
+            .setNegativeButton(getString(R.string.onboarding_mints_set_default_cancel), null)
+            .show()
     }
 
     private fun updateContinueButtonState() {
