@@ -1,11 +1,11 @@
 package com.electricdreams.numo.feature.onboarding
 
 import android.annotation.SuppressLint
-import android.util.TypedValue
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -22,45 +22,35 @@ class OnboardingMintAdapter(
         fun onResolveMintName(mintUrl: String): String
         fun onMintAcceptedChanged()
         fun onDefaultMintChanged(newDefaultUrl: String)
+        fun onAddMintClicked()
+        fun onRequestSetDefault(mintUrl: String, mintName: String)
     }
 
     sealed class ListItem {
-        data class Header(
-            val title: String,
-            val subtitle: String,
-            val topMarginDp: Int,
-            val titleSizeSp: Float,
-            val subtitleSizeSp: Float
-        ) : ListItem()
-        data class DefaultHero(val url: String, val title: String, val subtitle: String) : ListItem()
+        data class Header(val title: String, val acceptedCount: Int) : ListItem()
+        data class DefaultHero(val url: String) : ListItem()
         data class Mint(val url: String) : ListItem()
+        object Hint : ListItem()
+        object AddMint : ListItem()
     }
 
     companion object {
         private const val VIEW_TYPE_HEADER = 0
         private const val VIEW_TYPE_MINT = 1
         private const val VIEW_TYPE_DEFAULT_HERO = 2
+        private const val VIEW_TYPE_HINT = 3
+        private const val VIEW_TYPE_ADD_MINT = 4
     }
 
     private val items = mutableListOf<ListItem>()
     private val mints = mutableListOf<String>()
     val accepted = mutableSetOf<String>()
 
-    private var defaultSectionTitle = ""
-    private var defaultSectionSubtitle = ""
-    private var popularSectionTitle = ""
-    private var popularSectionSubtitle = ""
+    private var acceptFromTitle = ""
+    private var lastAnimatedPosition = -1
 
-    fun setHeaderStrings(
-        defTitle: String,
-        defSubtitle: String,
-        popTitle: String,
-        popSubtitle: String
-    ) {
-        defaultSectionTitle = defTitle
-        defaultSectionSubtitle = defSubtitle
-        popularSectionTitle = popTitle
-        popularSectionSubtitle = popSubtitle
+    fun setHeaderStrings(acceptFromTitle: String) {
+        this.acceptFromTitle = acceptFromTitle
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -70,6 +60,7 @@ class OnboardingMintAdapter(
         mints.addAll(popularUrls)
         accepted.clear()
         accepted.addAll(acceptedUrls)
+        lastAnimatedPosition = -1
         rebuildItems()
         notifyDataSetChanged()
     }
@@ -89,6 +80,7 @@ class OnboardingMintAdapter(
             accepted.add(oldDefault)
         }
         mints.add(0, url)
+        lastAnimatedPosition = -1
         rebuildItems()
         notifyDataSetChanged()
         listener.onDefaultMintChanged(url)
@@ -97,15 +89,14 @@ class OnboardingMintAdapter(
     private fun rebuildItems() {
         items.clear()
         if (mints.isNotEmpty()) {
-            items.add(ListItem.DefaultHero(mints[0], defaultSectionTitle, defaultSectionSubtitle))
+            items.add(ListItem.DefaultHero(mints[0]))
         }
-        items.add(ListItem.Header(
-            popularSectionTitle, popularSectionSubtitle,
-            topMarginDp = 16, titleSizeSp = 22f, subtitleSizeSp = 14f
-        ))
+        items.add(ListItem.Header(acceptFromTitle, accepted.size))
         for (i in 1 until mints.size) {
             items.add(ListItem.Mint(mints[i]))
         }
+        items.add(ListItem.Hint)
+        items.add(ListItem.AddMint)
     }
 
     fun getDefaultMintUrl(): String {
@@ -125,6 +116,16 @@ class OnboardingMintAdapter(
         // Plus all accepted popular mints
         result.addAll(accepted)
         return result
+    }
+
+    /**
+     * Called by the Activity after the user confirms via the set-default dialog.
+     */
+    fun confirmSetDefault(mintUrl: String) {
+        val mintIndex = mints.indexOf(mintUrl)
+        if (mintIndex > 0) {
+            swapToDefault(mintIndex)
+        }
     }
 
     /**
@@ -148,12 +149,13 @@ class OnboardingMintAdapter(
 
         // Adapter positions:
         // [0] = DefaultHero
-        // [1] = Header "Popular Mints"
+        // [1] = Header "ACCEPT FROM"
         // [2..] = popular mints (mints[i] is at adapter position i + 1)
         val tappedAdapterPos = tappedMintIndex + 1
 
         rebuildItems()
         notifyItemChanged(0)               // Hero card shows new default
+        notifyItemChanged(1)               // Header count may change
         notifyItemChanged(tappedAdapterPos) // Swapped popular mint row
 
         listener.onDefaultMintChanged(newDefault)
@@ -165,6 +167,8 @@ class OnboardingMintAdapter(
         is ListItem.Header -> VIEW_TYPE_HEADER
         is ListItem.DefaultHero -> VIEW_TYPE_DEFAULT_HERO
         is ListItem.Mint -> VIEW_TYPE_MINT
+        is ListItem.Hint -> VIEW_TYPE_HINT
+        is ListItem.AddMint -> VIEW_TYPE_ADD_MINT
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -177,6 +181,14 @@ class OnboardingMintAdapter(
             VIEW_TYPE_DEFAULT_HERO -> {
                 val view = inflater.inflate(R.layout.item_onboarding_mint_hero, parent, false)
                 DefaultHeroViewHolder(view)
+            }
+            VIEW_TYPE_HINT -> {
+                val view = inflater.inflate(R.layout.item_onboarding_mint_hint, parent, false)
+                HintViewHolder(view)
+            }
+            VIEW_TYPE_ADD_MINT -> {
+                val view = inflater.inflate(R.layout.item_onboarding_mint_add, parent, false)
+                AddMintViewHolder(view)
             }
             else -> {
                 val view = inflater.inflate(R.layout.item_onboarding_mint, parent, false)
@@ -193,29 +205,19 @@ class OnboardingMintAdapter(
             is ListItem.Header -> {
                 val h = holder as HeaderViewHolder
                 h.title.text = item.title
-                h.subtitle.text = item.subtitle
 
-                h.title.setTextSize(TypedValue.COMPLEX_UNIT_SP, item.titleSizeSp)
-                h.subtitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, item.subtitleSizeSp)
-
-                if (item.titleSizeSp > 16f) {
-                    h.title.letterSpacing = 0f
-                    h.title.isAllCaps = false
-                    h.title.setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
+                h.count.text = if (item.acceptedCount == 1) {
+                    context.getString(R.string.onboarding_mints_count_label_singular, item.acceptedCount)
                 } else {
-                    h.title.letterSpacing = 0.08f
-                    h.title.isAllCaps = false
-                    h.title.setTextColor(ContextCompat.getColor(context, R.color.color_text_secondary))
+                    context.getString(R.string.onboarding_mints_count_label, item.acceptedCount)
                 }
 
                 val lp = h.itemView.layoutParams as RecyclerView.LayoutParams
-                lp.topMargin = (item.topMarginDp * density).toInt()
+                lp.topMargin = (20 * density).toInt()
                 h.itemView.layoutParams = lp
             }
             is ListItem.DefaultHero -> {
                 val h = holder as DefaultHeroViewHolder
-                h.title.text = item.title
-                h.subtitle.text = item.subtitle
                 h.mintName.text = listener.onResolveMintName(item.url)
 
                 // Mint icon with rounded corners
@@ -223,7 +225,7 @@ class OnboardingMintAdapter(
                 h.mintIcon.setColorFilter(ContextCompat.getColor(context, R.color.color_primary))
                 h.mintIcon.setBackgroundColor(ContextCompat.getColor(context, R.color.color_bg_tertiary))
                 h.mintIcon.shapeAppearanceModel = h.mintIcon.shapeAppearanceModel.toBuilder()
-                    .setAllCornerSizes(18f * density)
+                    .setAllCornerSizes(22f * density)
                     .build()
                 listener.onLoadMintIcon(item.url, h.mintIcon)
             }
@@ -237,7 +239,7 @@ class OnboardingMintAdapter(
                 h.icon.setColorFilter(ContextCompat.getColor(context, R.color.color_primary))
                 h.icon.setBackgroundColor(ContextCompat.getColor(context, R.color.color_bg_tertiary))
                 h.icon.shapeAppearanceModel = h.icon.shapeAppearanceModel.toBuilder()
-                    .setAllCornerSizes(21f * density)
+                    .setAllCornerSizes(20f * density)
                     .build()
                 listener.onLoadMintIcon(item.url, h.icon)
 
@@ -246,55 +248,81 @@ class OnboardingMintAdapter(
                     ContextCompat.getDrawable(context, R.drawable.bg_mint_item)
                 lp.bottomMargin = (8 * density).toInt()
 
-                h.checkbox.visibility = View.VISIBLE
-                updateCheckboxState(context, h.checkbox, accepted.contains(item.url))
-
-                // Outline home icon for popular — tap to promote to default
-                h.star.setImageResource(R.drawable.ic_home_outline)
-                h.star.isClickable = true
-                h.star.setOnClickListener { view ->
-                    view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                    val mintIndex = mints.indexOf(item.url)
-                    if (mintIndex > 0) {
-                        swapToDefault(mintIndex)
-                    }
-                }
+                // Status text and checkbox
+                val isAccepted = accepted.contains(item.url)
+                updateMintRowState(context, h, isAccepted)
 
                 // Checkbox toggle on row tap
                 h.itemView.setOnClickListener {
                     val nowAccepted = !accepted.contains(item.url)
                     if (nowAccepted) accepted.add(item.url) else accepted.remove(item.url)
-                    updateCheckboxState(context, h.checkbox, nowAccepted)
+                    updateMintRowState(context, h, nowAccepted)
+                    // Update the header count
+                    rebuildItems()
+                    notifyItemChanged(1)
                     listener.onMintAcceptedChanged()
+                }
+
+                // Long-press to set as default
+                h.itemView.setOnLongClickListener { view ->
+                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                    val mintName = listener.onResolveMintName(item.url)
+                    listener.onRequestSetDefault(item.url, mintName)
+                    true
                 }
 
                 h.itemView.layoutParams = lp
             }
+            is ListItem.Hint -> {
+                // Static text — no binding needed
+            }
+            is ListItem.AddMint -> {
+                val h = holder as AddMintViewHolder
+                h.addText.setOnClickListener {
+                    listener.onAddMintClicked()
+                }
+            }
+        }
+
+        // Staggered entrance animation
+        if (position > lastAnimatedPosition) {
+            holder.itemView.alpha = 0f
+            holder.itemView.translationY = 16f * density
+            holder.itemView.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setStartDelay((position * 50).toLong())
+                .setDuration(400)
+                .setInterpolator(DecelerateInterpolator())
+                .start()
+            lastAnimatedPosition = position
         }
     }
 
-    private fun updateCheckboxState(
+    private fun updateMintRowState(
         context: android.content.Context,
-        checkbox: ImageView,
-        isSelected: Boolean
+        holder: MintViewHolder,
+        isAccepted: Boolean
     ) {
-        if (isSelected) {
-            checkbox.setImageResource(R.drawable.ic_checkbox_checked)
-            checkbox.setColorFilter(ContextCompat.getColor(context, R.color.color_primary_green))
+        if (isAccepted) {
+            holder.checkbox.setImageResource(R.drawable.ic_checkbox_checked)
+            holder.checkbox.setColorFilter(ContextCompat.getColor(context, R.color.color_primary_green))
+            holder.status.text = context.getString(R.string.onboarding_mints_status_accepting)
+            holder.status.setTextColor(ContextCompat.getColor(context, R.color.color_text_secondary))
         } else {
-            checkbox.setImageResource(R.drawable.ic_checkbox_unchecked)
-            checkbox.setColorFilter(ContextCompat.getColor(context, R.color.color_text_tertiary))
+            holder.checkbox.setImageResource(R.drawable.ic_checkbox_unchecked)
+            holder.checkbox.setColorFilter(ContextCompat.getColor(context, R.color.color_text_tertiary))
+            holder.status.text = context.getString(R.string.onboarding_mints_status_not_accepting)
+            holder.status.setTextColor(ContextCompat.getColor(context, R.color.color_text_tertiary))
         }
     }
 
     class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.header_title)
-        val subtitle: TextView = view.findViewById(R.id.header_subtitle)
+        val count: TextView = view.findViewById(R.id.header_count)
     }
 
     class DefaultHeroViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val title: TextView = view.findViewById(R.id.hero_title)
-        val subtitle: TextView = view.findViewById(R.id.hero_subtitle)
         val mintIcon: ShapeableImageView = view.findViewById(R.id.hero_mint_icon)
         val mintName: TextView = view.findViewById(R.id.hero_mint_name)
     }
@@ -302,7 +330,13 @@ class OnboardingMintAdapter(
     class MintViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val icon: ShapeableImageView = view.findViewById(R.id.mint_icon)
         val name: TextView = view.findViewById(R.id.mint_name)
+        val status: TextView = view.findViewById(R.id.mint_status)
         val checkbox: ImageView = view.findViewById(R.id.mint_checkbox)
-        val star: ImageView = view.findViewById(R.id.mint_star)
+    }
+
+    class HintViewHolder(view: View) : RecyclerView.ViewHolder(view)
+
+    class AddMintViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val addText: TextView = view.findViewById(R.id.add_mint_text)
     }
 }
