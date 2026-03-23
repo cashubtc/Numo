@@ -337,7 +337,8 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         val fadeRes = if (enabled) R.drawable.bg_hero_bolt_fade_active else R.drawable.bg_hero_bolt_fade_green
 
         heroBg.setBackgroundResource(gradientRes)
-        heroBolt.setColorFilter(ContextCompat.getColor(this, R.color.color_success_green))
+        val boltColor = if (enabled) R.color.color_bitcoin_orange else R.color.color_success_green
+        heroBolt.setColorFilter(ContextCompat.getColor(this, boltColor))
         heroBoltFade.setBackgroundResource(fadeRes)
 
         // Toggle row icon
