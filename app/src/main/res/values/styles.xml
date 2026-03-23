@@ -28,14 +28,46 @@
         <item name="android:lineHeight">22sp</item>
         <item name="android:textColor">@color/color_text_primary</item>
         <item name="android:gravity">center</item>
+        <item name="android:letterSpacing">-0.012</item>
     </style>
 
     <style name="Text.SectionHeader">
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">13sp</item>
-        <item name="android:textColor">@color/color_text_tertiary</item>
-        <item name="android:letterSpacing">0.05</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
+        <item name="android:letterSpacing">0.06</item>
         <item name="android:textAllCaps">true</item>
+    </style>
+
+    <style name="Text.RowTitle">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+        <item name="android:letterSpacing">-0.007</item>
+    </style>
+
+    <style name="Text.RowSubtitle">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
+    </style>
+
+    <style name="Text.Helper">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/color_text_tertiary</item>
+    </style>
+
+    <style name="Text.SecondaryButton">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
+    </style>
+
+    <style name="Text.Badge">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:letterSpacing">0.03</item>
     </style>
 
     <style name="Text.Body">
@@ -61,8 +93,8 @@
 
     <style name="Text.Button">
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textSize">17sp</item>
-        <item name="android:letterSpacing">0.01</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:letterSpacing">-0.012</item>
         <item name="android:gravity">center</item>
     </style>
 
@@ -90,8 +122,9 @@
         <item name="android:background">@drawable/bg_button_primary_green</item>
         <item name="android:textColor">@color/color_button_primary_green_text</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:textSize">17sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">-0.012</item>
         <item name="android:minHeight">52dp</item>
         <item name="android:paddingStart">24dp</item>
         <item name="android:paddingEnd">24dp</item>
@@ -102,11 +135,11 @@
 
     <style name="Widget.Button.Secondary.Outlined">
         <item name="android:background">@drawable/bg_button_secondary_outlined</item>
-        <item name="android:textColor">@color/color_text_primary</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:textSize">17sp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:minHeight">52dp</item>
+        <item name="android:minHeight">48dp</item>
         <item name="android:paddingStart">24dp</item>
         <item name="android:paddingEnd">24dp</item>
         <item name="android:stateListAnimator">@null</item>

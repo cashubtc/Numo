@@ -333,12 +333,11 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     }
 
     private fun updateHeroGradient(enabled: Boolean, animate: Boolean) {
-        val gradientRes = if (enabled) R.drawable.bg_hero_gradient_active else R.drawable.bg_hero_gradient
-        val fadeRes = if (enabled) R.drawable.bg_hero_bolt_fade_active else R.drawable.bg_hero_bolt_fade
-        val boltColor = if (enabled) R.color.color_success_green else R.color.color_bitcoin_orange
+        val gradientRes = if (enabled) R.drawable.bg_hero_gradient_active else R.drawable.bg_hero_gradient_green
+        val fadeRes = if (enabled) R.drawable.bg_hero_bolt_fade_active else R.drawable.bg_hero_bolt_fade_green
 
         heroBg.setBackgroundResource(gradientRes)
-        heroBolt.setColorFilter(ContextCompat.getColor(this, boltColor))
+        heroBolt.setColorFilter(ContextCompat.getColor(this, R.color.color_success_green))
         heroBoltFade.setBackgroundResource(fadeRes)
 
         // Toggle row icon

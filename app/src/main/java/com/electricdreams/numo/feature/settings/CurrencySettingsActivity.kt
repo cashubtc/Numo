@@ -2,11 +2,13 @@ package com.electricdreams.numo.feature.settings
 
 import android.os.Bundle
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.util.CurrencyManager
+import com.electricdreams.numo.ui.util.EntranceAnimator
 
 class CurrencySettingsActivity : AppCompatActivity() {
 
@@ -45,6 +47,16 @@ class CurrencySettingsActivity : AppCompatActivity() {
             val selectedCurrency = getSelectedCurrency()
             currencyManager.setPreferredCurrency(selectedCurrency)
         }
+
+        playEntranceAnimation()
+    }
+
+    private fun playEntranceAnimation() {
+        val content = findViewById<LinearLayout>(R.id.currency_content)
+        val views = (0 until content.childCount)
+            .map { content.getChildAt(it) }
+            .filter { it.visibility != View.GONE }
+        EntranceAnimator.animateEntrance(views)
     }
 
     private fun setSelectedCurrency(currencyCode: String) {

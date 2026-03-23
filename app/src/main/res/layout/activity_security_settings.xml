@@ -16,12 +16,10 @@
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="9dp"
+            android:background="@drawable/bg_nav_back_button"
             android:contentDescription="@string/common_back"
             android:src="@drawable/ic_chevron_back"
             android:tint="@color/color_text_primary"
@@ -49,6 +47,7 @@
         app:layout_constraintTop_toBottomOf="@id/top_bar">
 
         <LinearLayout
+            android:id="@+id/security_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -61,22 +60,18 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
+                android:paddingHorizontal="20dp"
                 android:paddingTop="16dp"
-                android:paddingBottom="8dp"
+                android:paddingBottom="14dp"
                 android:text="Wallet Backup"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_secondary"
-                android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Security Info Card -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginHorizontal="24dp"
+                android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="8dp"
                 android:padding="20dp"
                 android:background="@drawable/bg_warning_card">
@@ -118,20 +113,28 @@
             <LinearLayout
                 android:id="@+id/backup_mnemonic_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_key"
-                    app:tint="@color/color_icon_secondary" />
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="14dp"
+                    android:background="@drawable/bg_circle_light">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_key"
+                        app:tint="@color/color_icon_secondary" />
+                </FrameLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -143,58 +146,59 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/security_settings_backup_mnemonic_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.RowTitle" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/security_settings_backup_mnemonic_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
+                        android:textAppearance="@style/Text.RowSubtitle"
                         android:layout_marginTop="2dp" />
                 </LinearLayout>
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
+                    app:tint="@color/color_text_tertiary" />
             </LinearLayout>
 
             <!-- Wallet Recovery Section -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="24dp"
-                android:paddingBottom="8dp"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="14dp"
                 android:text="@string/security_settings_section_recovery"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_secondary"
-                android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Restore Wallet Item -->
             <LinearLayout
                 android:id="@+id/restore_wallet_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_restore"
-                    app:tint="@color/color_icon_secondary" />
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="14dp"
+                    android:background="@drawable/bg_circle_light">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_restore"
+                        app:tint="@color/color_icon_secondary" />
+                </FrameLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -206,24 +210,21 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/security_settings_restore_wallet_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.RowTitle" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/security_settings_restore_wallet_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
+                        android:textAppearance="@style/Text.RowSubtitle"
                         android:layout_marginTop="2dp" />
                 </LinearLayout>
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
+                    app:tint="@color/color_text_tertiary" />
             </LinearLayout>
 
             <!-- ===================== -->
@@ -233,22 +234,18 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="32dp"
-                android:paddingBottom="8dp"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="14dp"
                 android:text="@string/security_settings_section_pin_protection"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_secondary"
-                android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- PIN Info Card -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginHorizontal="24dp"
+                android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="8dp"
                 android:padding="16dp"
                 android:background="@drawable/bg_pin_info_card">
@@ -290,20 +287,28 @@
             <LinearLayout
                 android:id="@+id/setup_pin_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_lock"
-                    app:tint="@color/color_icon_secondary" />
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="14dp"
+                    android:background="@drawable/bg_circle_light">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_lock"
+                        app:tint="@color/color_icon_secondary" />
+                </FrameLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -316,46 +321,51 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/security_settings_setup_pin_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.RowTitle" />
 
                     <TextView
                         android:id="@+id/pin_subtitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/security_settings_setup_pin_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
+                        android:textAppearance="@style/Text.RowSubtitle"
                         android:layout_marginTop="2dp" />
                 </LinearLayout>
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
+                    app:tint="@color/color_text_tertiary" />
             </LinearLayout>
 
             <!-- Change PIN Item (shown when PIN is set) -->
             <LinearLayout
                 android:id="@+id/change_pin_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp"
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp"
                 android:visibility="gone">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_edit"
-                    app:tint="@color/color_icon_secondary" />
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="14dp"
+                    android:background="@drawable/bg_circle_light">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_edit"
+                        app:tint="@color/color_icon_secondary" />
+                </FrameLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -367,45 +377,50 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/security_settings_change_pin_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.RowTitle" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/security_settings_change_pin_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
+                        android:textAppearance="@style/Text.RowSubtitle"
                         android:layout_marginTop="2dp" />
                 </LinearLayout>
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
+                    app:tint="@color/color_text_tertiary" />
             </LinearLayout>
 
             <!-- Remove PIN Item (shown when PIN is set) -->
             <LinearLayout
                 android:id="@+id/remove_pin_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp"
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp"
                 android:visibility="gone">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_close"
-                    app:tint="@color/color_warning_red" />
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="14dp"
+                    android:background="@drawable/bg_circle_light">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_close"
+                        app:tint="@color/color_warning_red" />
+                </FrameLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -417,24 +432,22 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/security_settings_remove_pin_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_warning_red"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.RowTitle"
+                        android:textColor="@color/color_warning_red" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/security_settings_remove_pin_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
+                        android:textAppearance="@style/Text.RowSubtitle"
                         android:layout_marginTop="2dp" />
                 </LinearLayout>
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
+                    app:tint="@color/color_text_tertiary" />
             </LinearLayout>
 
         </LinearLayout>

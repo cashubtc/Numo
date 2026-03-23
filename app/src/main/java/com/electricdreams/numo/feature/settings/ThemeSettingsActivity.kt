@@ -2,6 +2,7 @@ package com.electricdreams.numo.feature.settings
 
 import android.os.Bundle
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatActivity
@@ -9,6 +10,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SwitchCompat
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.prefs.PreferenceStore
+import com.electricdreams.numo.ui.util.EntranceAnimator
 
 class ThemeSettingsActivity : AppCompatActivity() {
 
@@ -60,6 +62,16 @@ class ThemeSettingsActivity : AppCompatActivity() {
             val selectedTheme = getSelectedTheme()
             saveTheme(selectedTheme)
         }
+
+        playEntranceAnimation()
+    }
+
+    private fun playEntranceAnimation() {
+        val content = findViewById<LinearLayout>(R.id.theme_content)
+        val views = (0 until content.childCount)
+            .map { content.getChildAt(it) }
+            .filter { it.visibility != View.GONE }
+        EntranceAnimator.animateEntrance(views)
     }
 
     private fun getCurrentTheme(): String {
@@ -91,4 +103,3 @@ class ThemeSettingsActivity : AppCompatActivity() {
         PreferenceStore.app(this).putString(PREF_THEME, theme)
     }
 }
-

@@ -20,9 +20,10 @@
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="9dp"
+            android:background="@drawable/bg_nav_back_button"
             android:src="@drawable/ic_chevron_back"
             android:contentDescription="@string/common_back"
             app:tint="@color/color_text_primary" />
@@ -70,14 +71,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="24dp"
+                    app:cardCornerRadius="16dp"
                     app:cardElevation="0dp">
 
                     <FrameLayout
                         android:id="@+id/hero_bg"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_hero_gradient"
+                        android:background="@drawable/bg_hero_gradient_green"
                         android:clipChildren="false">
 
                         <!-- Decorative background lightning bolt with fade -->
@@ -92,89 +93,146 @@
                                 android:id="@+id/hero_bolt"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:alpha="0.12"
+                                android:alpha="0.06"
                                 android:rotation="-15"
                                 android:importantForAccessibility="no"
                                 android:src="@drawable/ic_lightning_bolt"
-                                app:tint="@color/color_bitcoin_orange" />
+                                app:tint="@color/color_success_green" />
 
                             <View
                                 android:id="@+id/hero_bolt_fade"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:background="@drawable/bg_hero_bolt_fade" />
+                                android:background="@drawable/bg_hero_bolt_fade_green" />
 
                         </FrameLayout>
 
-                    <androidx.constraintlayout.widget.ConstraintLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:padding="24dp">
-
-                        <!-- Title -->
-                        <TextView
-                            android:id="@+id/hero_title"
-                            android:layout_width="wrap_content"
+                        <!-- Content -->
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:fontFamily="sans-serif-medium"
-                            android:text="@string/auto_withdraw_hero_title"
-                            android:textColor="@color/color_text_primary"
-                            android:textSize="22sp"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="parent" />
+                            android:padding="24dp">
 
-                        <!-- Subtitle -->
-                        <TextView
-                            android:id="@+id/hero_subtitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:fontFamily="sans-serif"
-                            android:gravity="center"
-                            android:paddingHorizontal="16dp"
-                            android:text="@string/auto_withdraw_hero_subtitle"
-                            android:textColor="@color/color_text_secondary"
-                            android:textSize="15sp"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/hero_title" />
-
-                        <!-- Status Indicator -->
-                        <LinearLayout
-                            android:id="@+id/status_container"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="20dp"
-                            android:background="@drawable/bg_status_pill_success"
-                            android:gravity="center"
-                            android:orientation="horizontal"
-                            android:paddingHorizontal="16dp"
-                            android:paddingVertical="8dp"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toBottomOf="@id/hero_subtitle">
-
-                            <View
-                                android:id="@+id/status_dot"
-                                android:layout_width="8dp"
-                                android:layout_height="8dp"
-                                android:layout_marginEnd="8dp"
-                                android:background="@drawable/bg_notification_dot"
-                                android:backgroundTint="@color/color_success_green" />
-
+                            <!-- "AUTO-WITHDRAW" label -->
                             <TextView
-                                android:id="@+id/status_text"
+                                android:id="@+id/hero_label"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="sans-serif-medium"
-                                android:text="@string/auto_withdraw_status_inactive"
+                                android:letterSpacing="0.1"
+                                android:text="@string/auto_withdraw_hero_label"
                                 android:textColor="@color/color_success_green"
-                                android:textSize="13sp" />
+                                android:textSize="11sp"
+                                android:textAllCaps="true"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
 
-                        </LinearLayout>
+                            <!-- Icon + Title + Status Row -->
+                            <LinearLayout
+                                android:id="@+id/hero_content_row"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="16dp"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@id/hero_label">
 
-                    </androidx.constraintlayout.widget.ConstraintLayout>
+                                <!-- 44dp icon circle with autorenew icon -->
+                                <FrameLayout
+                                    android:layout_width="44dp"
+                                    android:layout_height="44dp"
+                                    android:layout_marginEnd="14dp"
+                                    android:background="@drawable/bg_circle_light">
+                                    <ImageView
+                                        android:layout_width="24dp"
+                                        android:layout_height="24dp"
+                                        android:layout_gravity="center"
+                                        android:src="@drawable/ic_autorenew"
+                                        app:tint="@color/color_icon_secondary" />
+                                </FrameLayout>
+
+                                <LinearLayout
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical">
+                                    <TextView
+                                        android:id="@+id/hero_title"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:fontFamily="sans-serif-medium"
+                                        android:text="@string/auto_withdraw_hero_title"
+                                        android:textColor="@color/color_text_primary"
+                                        android:textSize="17sp"
+                                        android:letterSpacing="-0.012" />
+                                    <TextView
+                                        android:id="@+id/hero_subtitle"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="2dp"
+                                        android:fontFamily="sans-serif"
+                                        android:text="@string/auto_withdraw_hero_subtitle"
+                                        android:textColor="@color/color_text_secondary"
+                                        android:textSize="13sp" />
+                                </LinearLayout>
+
+                                <!-- Status badge -->
+                                <LinearLayout
+                                    android:id="@+id/status_container"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/bg_status_pill_success"
+                                    android:gravity="center"
+                                    android:orientation="horizontal"
+                                    android:paddingHorizontal="10dp"
+                                    android:paddingVertical="4dp">
+                                    <View
+                                        android:id="@+id/status_dot"
+                                        android:layout_width="8dp"
+                                        android:layout_height="8dp"
+                                        android:layout_marginEnd="6dp"
+                                        android:background="@drawable/bg_notification_dot"
+                                        android:backgroundTint="@color/color_success_green" />
+                                    <TextView
+                                        android:id="@+id/status_text"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:fontFamily="sans-serif-medium"
+                                        android:text="@string/auto_withdraw_status_inactive"
+                                        android:textColor="@color/color_success_green"
+                                        android:textSize="11sp" />
+                                </LinearLayout>
+                            </LinearLayout>
+
+                            <!-- Divider -->
+                            <View
+                                android:id="@+id/hero_divider"
+                                android:layout_width="0dp"
+                                android:layout_height="1dp"
+                                android:layout_marginTop="16dp"
+                                android:background="@color/color_divider"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@id/hero_content_row" />
+
+                            <!-- Helper text -->
+                            <TextView
+                                android:id="@+id/hero_helper"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="12dp"
+                                android:fontFamily="sans-serif"
+                                android:lineSpacingMultiplier="1.5"
+                                android:text="@string/auto_withdraw_hero_helper"
+                                android:textColor="@color/color_text_tertiary"
+                                android:textSize="13sp"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@id/hero_divider" />
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
                     </FrameLayout>
                 </androidx.cardview.widget.CardView>
 

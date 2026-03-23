@@ -16,12 +16,10 @@
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="9dp"
+            android:background="@drawable/bg_nav_back_button"
             android:contentDescription="@string/common_back"
             android:src="@drawable/ic_chevron_back"
             android:tint="@color/color_text_primary"
@@ -48,6 +46,7 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
+            android:id="@+id/language_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -57,15 +56,11 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="24dp"
-                android:paddingBottom="8dp"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="14dp"
                 android:text="@string/language_settings_section_app_language"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_secondary"
-                android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Language Radio Group -->
             <RadioGroup
@@ -79,12 +74,11 @@
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_checkbox_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:text="@string/language_settings_option_english"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_spanish"
@@ -92,12 +86,11 @@
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_checkbox_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:text="@string/language_settings_option_spanish"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_portuguese"
@@ -105,12 +98,11 @@
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_checkbox_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:text="@string/language_settings_option_portuguese"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
             </RadioGroup>
 
@@ -119,7 +111,7 @@
                 android:id="@+id/current_language_summary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
+                android:paddingHorizontal="20dp"
                 android:paddingTop="16dp"
                 android:textSize="14sp"
                 android:textColor="@color/color_text_secondary" />

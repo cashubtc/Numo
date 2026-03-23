@@ -16,12 +16,10 @@
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="9dp"
+            android:background="@drawable/bg_nav_back_button"
             android:contentDescription="@string/common_back"
             android:src="@drawable/ic_chevron_back"
             android:tint="@color/color_text_primary"
@@ -48,6 +46,7 @@
         app:layout_constraintTop_toBottomOf="@id/top_bar">
 
         <LinearLayout
+            android:id="@+id/currency_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -57,9 +56,9 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="4dp"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="14dp"
                 android:text="@string/currency_settings_section_preferred_currency"
                 android:textAppearance="@style/Text.SectionHeader" />
 
@@ -75,12 +74,11 @@
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_checkbox_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:text="@string/currency_settings_option_usd"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_eur"
@@ -88,12 +86,11 @@
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_checkbox_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:text="@string/currency_settings_option_eur"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_gbp"
@@ -101,12 +98,11 @@
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_checkbox_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:text="@string/currency_settings_option_gbp"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_jpy"
@@ -114,12 +110,11 @@
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_checkbox_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:text="@string/currency_settings_option_jpy"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_dkk"
@@ -127,12 +122,11 @@
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_checkbox_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:text="@string/currency_settings_option_dkk"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_sek"
@@ -140,12 +134,11 @@
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_checkbox_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:text="@string/currency_settings_option_sek"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_nok"
@@ -153,12 +146,11 @@
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_checkbox_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:text="@string/currency_settings_option_nok"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_krw"
@@ -166,12 +158,11 @@
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_checkbox_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:text="@string/currency_settings_option_krw"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
             </RadioGroup>
 
         </LinearLayout>
