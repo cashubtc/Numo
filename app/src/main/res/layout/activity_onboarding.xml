@@ -821,16 +821,12 @@
                 android:layout_weight="0.3" />
 
             <!-- Enter Wallet Button -->
-            <com.google.android.material.button.MaterialButton
+            <Button
                 android:id="@+id/enter_wallet_button"
+                style="@style/Widget.Button.Primary.Green"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:text="@string/onboarding_enter_wallet_button"
-                android:textSize="17sp"
-                android:textColor="#FFFFFF"
-                android:textAllCaps="false"
-                app:cornerRadius="28dp"
-                app:backgroundTint="#000000" />
+                android:layout_height="wrap_content"
+                android:text="@string/onboarding_enter_wallet_button" />
 
             <Space
                 android:layout_width="match_parent"

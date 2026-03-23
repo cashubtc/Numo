@@ -28,6 +28,8 @@
         <item name="colorOnSurface">@color/color_text_primary</item>
         <!-- Icon tint -->
         <item name="colorControlNormal">@color/color_text_secondary</item>
+        <!-- Switch/toggle active color -->
+        <item name="colorControlActivated">@color/color_success_green</item>
         <!-- Popup menu styling -->
         <item name="popupMenuStyle">@style/Widget.Numo.PopupMenu</item>
         <item name="android:popupMenuStyle">@style/Widget.Numo.PopupMenu</item>

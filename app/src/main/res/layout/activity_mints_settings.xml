@@ -59,7 +59,6 @@
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:fillViewport="true"
-        android:background="@color/color_bg_surface"
         app:layout_constraintTop_toBottomOf="@id/top_bar"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -121,6 +120,7 @@
                                 android:layout_marginBottom="-30dp">
 
                                 <ImageView
+                                    android:id="@+id/hero_bolt"
                                     android:layout_width="match_parent"
                                     android:layout_height="match_parent"
                                     android:alpha="0.08"
@@ -142,17 +142,6 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical"
                                 android:padding="24dp">
-
-                                <!-- "LIGHTNING MINT" label -->
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:letterSpacing="0.1"
-                                    android:text="@string/mints_lightning_mint"
-                                    android:textAllCaps="true"
-                                    android:textColor="@color/color_success_green"
-                                    android:textSize="11sp" />
 
                                 <!-- Top Row: Icon + Name/URL -->
                                 <LinearLayout
@@ -214,14 +203,6 @@
                                             android:ellipsize="end" />
 
                                     </LinearLayout>
-
-                                    <!-- Lightning Badge -->
-                                    <ImageView
-                                        android:layout_width="28dp"
-                                        android:layout_height="28dp"
-                                        android:src="@drawable/ic_lightning_bolt"
-                                        app:tint="@color/color_bitcoin_orange"
-                                        android:contentDescription="@null" />
 
                                 </LinearLayout>
 
@@ -451,12 +432,14 @@
                 android:text="@string/mints_add_section"
                 android:textAppearance="@style/Text.SectionHeader" />
 
-            <com.electricdreams.numo.ui.components.AddMintInputCard
-                android:id="@+id/add_mint_card"
+            <Button
+                android:id="@+id/add_mint_button"
+                style="@style/Widget.Button.Secondary.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="16dp" />
+                android:text="+ Add New Mint"
+                android:gravity="center" />
 
         </LinearLayout>
     </ScrollView>
