@@ -247,16 +247,12 @@
         <!-- Confirm Button - hidden initially, appears with animation -->
         <Button
             android:id="@+id/custom_confirm_button"
+            style="@style/Widget.Button.Primary.Green"
             android:layout_width="0dp"
             android:layout_height="52dp"
             android:layout_weight="0"
             android:layout_marginStart="0dp"
             android:text="@string/tip_selection_main_confirm"
-            android:textAllCaps="false"
-            android:textColor="@color/color_bg_white"
-            android:textSize="17sp"
-            android:textStyle="bold"
-            android:background="@drawable/bg_button_primary_green"
             android:visibility="gone" />
 
     </LinearLayout>
@@ -264,18 +260,13 @@
     <!-- Main Confirm Button (bottom, for preset selections) -->
     <Button
         android:id="@+id/confirm_button"
+        style="@style/Widget.Button.Primary.Green"
         android:layout_width="match_parent"
         android:layout_height="52dp"
-        android:layout_marginHorizontal="24dp"
+        android:layout_marginHorizontal="20dp"
         android:layout_marginBottom="24dp"
         android:text="@string/tip_selection_main_confirm"
-        android:textAllCaps="false"
-        android:textColor="@color/color_bg_white"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:background="@drawable/bg_button_primary_green"
         android:enabled="false"
-        android:alpha="0.4"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -55,7 +55,7 @@ class MintsSettingsActivity : AppCompatActivity() {
     private lateinit var backButton: ImageButton
     private lateinit var resetButton: ImageButton
     private lateinit var lightningMintSection: View
-    private lateinit var lightningMintCard: CardView
+    private lateinit var lightningMintCard: View
     private lateinit var lightningIconContainer: FrameLayout
     private lateinit var lightningMintIcon: ImageView
     private lateinit var lightningMintName: TextView

@@ -306,7 +306,7 @@ class OnboardingMintAdapter(
     ) {
         if (isAccepted) {
             holder.checkbox.setImageResource(R.drawable.ic_checkbox_checked)
-            holder.checkbox.setColorFilter(ContextCompat.getColor(context, R.color.color_primary_green))
+            holder.checkbox.setColorFilter(ContextCompat.getColor(context, R.color.color_text_primary))
             holder.status.text = context.getString(R.string.onboarding_mints_status_accepting)
             holder.status.setTextColor(ContextCompat.getColor(context, R.color.color_text_secondary))
         } else {

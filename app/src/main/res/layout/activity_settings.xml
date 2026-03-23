@@ -78,20 +78,12 @@
                 android:paddingVertical="14dp"
                 android:paddingHorizontal="20dp">
 
-                <FrameLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:layout_marginEnd="14dp"
-                    android:background="@drawable/bg_circle_light">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_catalog"
-                        app:tint="@color/color_icon_secondary" />
-
-                </FrameLayout>
+                    android:src="@drawable/ic_catalog"
+                    app:tint="@color/color_icon_secondary" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -135,20 +127,12 @@
                 android:paddingVertical="14dp"
                 android:paddingHorizontal="20dp">
 
-                <FrameLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:layout_marginEnd="14dp"
-                    android:background="@drawable/bg_circle_light">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_tip"
-                        app:tint="@color/color_icon_secondary" />
-
-                </FrameLayout>
+                    android:src="@drawable/ic_tip"
+                    app:tint="@color/color_icon_secondary" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -192,20 +176,12 @@
                 android:paddingVertical="14dp"
                 android:paddingHorizontal="20dp">
 
-                <FrameLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:layout_marginEnd="14dp"
-                    android:background="@drawable/bg_circle_light">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_shopping_bag"
-                        app:tint="@color/color_icon_secondary" />
-
-                </FrameLayout>
+                    android:src="@drawable/ic_shopping_bag"
+                    app:tint="@color/color_icon_secondary" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -262,20 +238,12 @@
                 android:paddingVertical="14dp"
                 android:paddingHorizontal="20dp">
 
-                <FrameLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:layout_marginEnd="14dp"
-                    android:background="@drawable/bg_circle_light">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_switch_currency"
-                        app:tint="@color/color_icon_secondary" />
-
-                </FrameLayout>
+                    android:src="@drawable/ic_switch_currency"
+                    app:tint="@color/color_icon_secondary" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -319,20 +287,12 @@
                 android:paddingVertical="14dp"
                 android:paddingHorizontal="20dp">
 
-                <FrameLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:layout_marginEnd="14dp"
-                    android:background="@drawable/bg_circle_light">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_bank"
-                        app:tint="@color/color_icon_secondary" />
-
-                </FrameLayout>
+                    android:src="@drawable/ic_bank"
+                    app:tint="@color/color_icon_secondary" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -376,20 +336,12 @@
                 android:paddingVertical="14dp"
                 android:paddingHorizontal="20dp">
 
-                <FrameLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:layout_marginEnd="14dp"
-                    android:background="@drawable/bg_circle_light">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_link"
-                        app:tint="@color/color_icon_secondary" />
-
-                </FrameLayout>
+                    android:src="@drawable/ic_link"
+                    app:tint="@color/color_icon_secondary" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -433,20 +385,12 @@
                 android:paddingVertical="14dp"
                 android:paddingHorizontal="20dp">
 
-                <FrameLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:layout_marginEnd="14dp"
-                    android:background="@drawable/bg_circle_light">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_lightning_bolt"
-                        app:tint="@color/color_icon_secondary" />
-
-                </FrameLayout>
+                    android:src="@drawable/ic_lightning_bolt"
+                    app:tint="@color/color_icon_secondary" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -503,20 +447,12 @@
                 android:paddingVertical="14dp"
                 android:paddingHorizontal="20dp">
 
-                <FrameLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:layout_marginEnd="14dp"
-                    android:background="@drawable/bg_circle_light">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_shield"
-                        app:tint="@color/color_icon_secondary" />
-
-                </FrameLayout>
+                    android:src="@drawable/ic_shield"
+                    app:tint="@color/color_icon_secondary" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -573,20 +509,12 @@
                 android:paddingVertical="14dp"
                 android:paddingHorizontal="20dp">
 
-                <FrameLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:layout_marginEnd="14dp"
-                    android:background="@drawable/bg_circle_light">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_language"
-                        app:tint="@color/color_icon_secondary" />
-
-                </FrameLayout>
+                    android:src="@drawable/ic_language"
+                    app:tint="@color/color_icon_secondary" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -630,20 +558,12 @@
                 android:paddingVertical="14dp"
                 android:paddingHorizontal="20dp">
 
-                <FrameLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:layout_marginEnd="14dp"
-                    android:background="@drawable/bg_circle_light">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_dark_mode"
-                        app:tint="@color/color_icon_secondary" />
-
-                </FrameLayout>
+                    android:src="@drawable/ic_dark_mode"
+                    app:tint="@color/color_icon_secondary" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -687,20 +607,12 @@
                 android:paddingVertical="14dp"
                 android:paddingHorizontal="20dp">
 
-                <FrameLayout
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:layout_marginEnd="14dp"
-                    android:background="@drawable/bg_circle_light">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_info"
-                        app:tint="@color/color_icon_secondary" />
-
-                </FrameLayout>
+                    android:src="@drawable/ic_info"
+                    app:tint="@color/color_icon_secondary" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -763,20 +675,12 @@
                     android:paddingVertical="14dp"
                     android:paddingHorizontal="20dp">
 
-                    <FrameLayout
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:layout_marginEnd="14dp"
-                        android:background="@drawable/bg_circle_light">
-
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="center"
-                            android:src="@drawable/ic_settings"
-                            app:tint="@color/color_icon_secondary" />
-
-                    </FrameLayout>
+                        android:src="@drawable/ic_settings"
+                        app:tint="@color/color_icon_secondary" />
 
                     <LinearLayout
                         android:layout_width="0dp"
