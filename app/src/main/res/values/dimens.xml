@@ -47,7 +47,7 @@
     <dimen name="text_section_header">13sp</dimen>
 
     <!-- Margins -->
-    <dimen name="margin_screen_horizontal">24dp</dimen>
+    <dimen name="margin_screen_horizontal">20dp</dimen>
     <dimen name="margin_screen_vertical">16dp</dimen>
     <dimen name="margin_content_horizontal">16dp</dimen>
 
@@ -68,10 +68,18 @@
     <dimen name="bottom_sheet_handle_width">36dp</dimen>
     <dimen name="bottom_sheet_handle_height">4dp</dimen>
 
-    <!-- Settings -->
+    <!-- Settings / Row Layout -->
     <dimen name="settings_item_height">56dp</dimen>
     <dimen name="settings_horizontal_padding">24dp</dimen>
     <dimen name="icon_button_size">44dp</dimen>
+    <dimen name="row_padding_vertical">14dp</dimen>
+    <dimen name="row_padding_horizontal">16dp</dimen>
+    <dimen name="row_icon_size">40dp</dimen>
+    <dimen name="row_icon_gap">14dp</dimen>
+    <dimen name="section_header_margin_bottom">14dp</dimen>
+    <dimen name="section_gap">28dp</dimen>
+    <dimen name="nav_back_size">36dp</dimen>
+    <dimen name="radius_button_pill">100dp</dimen>
 
     <!-- QR Scanner -->
     <dimen name="qr_viewfinder_size">280dp</dimen>

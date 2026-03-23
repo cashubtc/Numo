@@ -45,7 +45,6 @@ class ItemListActivity : AppCompatActivity() {
     private lateinit var bottomActions: LinearLayout
     private lateinit var fabAddItem: ImageButton
     private lateinit var doneReorderButton: ImageButton
-    private lateinit var headerDivider: View
     private lateinit var topBar: View
     private lateinit var adapter: ItemAdapter
     private lateinit var itemTouchHelper: ItemTouchHelper
@@ -111,7 +110,6 @@ class ItemListActivity : AppCompatActivity() {
         bottomActions = findViewById(R.id.bottom_actions)
         fabAddItem = findViewById(R.id.fab_add_item)
         doneReorderButton = findViewById(R.id.done_reorder_button)
-        headerDivider = findViewById(R.id.header_divider)
         topBar = findViewById(R.id.top_bar)
         val importCsvButton: Button = findViewById(R.id.import_csv_button)
         val exportCsvButton: Button = findViewById(R.id.export_csv_button)
@@ -209,7 +207,6 @@ class ItemListActivity : AppCompatActivity() {
             emptyView.visibility = View.GONE
             itemsContent.visibility = View.VISIBLE
             fabAddItem.visibility = View.VISIBLE
-            headerDivider.visibility = View.VISIBLE
             topBar.visibility = View.VISIBLE
             topBar.setBackgroundResource(R.color.color_bg_white)
             
@@ -223,7 +220,6 @@ class ItemListActivity : AppCompatActivity() {
             emptyView.visibility = View.VISIBLE
             itemsContent.visibility = View.GONE
             fabAddItem.visibility = View.GONE
-            headerDivider.visibility = View.GONE
             topBar.visibility = View.GONE
             
             // Set navigation bar to match empty state background

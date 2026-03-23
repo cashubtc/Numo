@@ -60,6 +60,7 @@ class ThemeSettingsActivity : AppCompatActivity() {
             val selectedTheme = getSelectedTheme()
             saveTheme(selectedTheme)
         }
+
     }
 
     private fun getCurrentTheme(): String {
@@ -91,4 +92,3 @@ class ThemeSettingsActivity : AppCompatActivity() {
         PreferenceStore.app(this).putString(PREF_THEME, theme)
     }
 }
-

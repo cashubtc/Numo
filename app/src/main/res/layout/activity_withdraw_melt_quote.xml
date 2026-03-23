@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_bg_surface">
+    android:background="@color/color_bg_white">
 
     <!-- Top App Bar -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -11,18 +11,15 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="@color/color_bg_white"
-        android:elevation="1dp"
-        android:paddingHorizontal="8dp"
+        android:paddingHorizontal="16dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="9dp"
+            android:background="@drawable/bg_nav_back_button"
             android:contentDescription="@string/withdraw_melt_toolbar_back"
             android:src="@drawable/ic_chevron_back"
             android:tint="@color/color_text_primary"
@@ -34,10 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/withdraw_melt_title"
-            android:textSize="20sp"
-            android:fontFamily="sans-serif-medium"
-            android:textColor="@color/color_text_primary"
-            android:textAlignment="center"
+            android:textAppearance="@style/Text.Title"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -49,7 +43,6 @@
         android:id="@+id/confirmation_scroll"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@color/color_bg_surface"
         app:layout_constraintBottom_toTopOf="@id/confirm_button"
         app:layout_constraintTop_toBottomOf="@id/top_bar">
 
@@ -78,7 +71,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginTop="24dp"
-                app:cardBackgroundColor="@color/color_bg_card"
+                app:cardBackgroundColor="@android:color/transparent"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
@@ -90,14 +83,10 @@
                     android:padding="20dp">
 
                         <TextView
+                            style="@style/Text.SectionHeader"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/withdraw_melt_destination_label"
-                            android:fontFamily="sans-serif"
-                            android:textSize="13sp"
-                            android:textColor="@color/color_text_secondary"
-                            android:textAllCaps="true"
-                            android:letterSpacing="0.03" />
+                            android:text="@string/withdraw_melt_destination_label" />
 
                         <TextView
                             android:id="@+id/destination_text"
@@ -119,7 +108,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginTop="16dp"
-                app:cardBackgroundColor="@color/color_bg_card"
+                app:cardBackgroundColor="@android:color/transparent"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
@@ -242,7 +231,7 @@
         style="@style/Widget.Button.Primary.Green"
         android:layout_width="match_parent"
         android:layout_height="52dp"
-        android:layout_marginHorizontal="20dp"
+        android:layout_marginHorizontal="40dp"
         android:layout_marginBottom="24dp"
         android:text="@string/withdraw_melt_title"
         android:textAllCaps="false"
@@ -387,7 +376,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:layout_marginTop="16dp"
-                app:cardBackgroundColor="@color/color_bg_card"
+                app:cardBackgroundColor="@android:color/transparent"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">

@@ -16,12 +16,10 @@
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="9dp"
+            android:background="@drawable/bg_nav_back_button"
             android:contentDescription="@string/common_back"
             android:src="@drawable/ic_chevron_back"
             android:tint="@color/color_text_primary"
@@ -48,6 +46,7 @@
         app:layout_constraintTop_toBottomOf="@id/top_bar">
 
         <LinearLayout
+            android:id="@+id/theme_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -56,44 +55,47 @@
             <!-- Mode Section Header -->
             <TextView
                 android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="4dp"
-            android:text="@string/theme_settings_section_mode"
-            android:textAppearance="@style/Text.SectionHeader" />
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="14dp"
+                android:text="@string/theme_settings_section_mode"
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Dark Mode Toggle -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp"
-                android:layout_marginBottom="16dp">
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp"
+                android:background="@drawable/bg_row_ripple">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/theme_settings_dark_mode_label"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/dark_mode_switch"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    app:thumbTint="@color/selector_switch_thumb"
+                    app:trackTint="@color/selector_switch_track" />
             </LinearLayout>
 
             <!-- App Theme Section Header -->
             <TextView
                 android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="4dp"
-            android:text="@string/theme_settings_section_app_theme"
-            android:textAppearance="@style/Text.SectionHeader" />
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="14dp"
+                android:text="@string/theme_settings_section_app_theme"
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Theme Radio Group -->
             <RadioGroup
@@ -107,12 +109,11 @@
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_radio_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:text="@string/theme_settings_option_obsidian"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_bitcoin_orange"
@@ -120,12 +121,11 @@
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_radio_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:text="@string/theme_settings_option_bitcoin_orange"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_green"
@@ -133,12 +133,11 @@
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_radio_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:text="@string/theme_settings_option_green"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_white"
@@ -146,16 +145,14 @@
                     android:layout_height="56dp"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_radio_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="20dp"
                     android:text="@string/theme_settings_option_white"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
             </RadioGroup>
 
         </LinearLayout>
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

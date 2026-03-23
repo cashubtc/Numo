@@ -6,12 +6,9 @@ import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.OvershootInterpolator
 import android.widget.Button
 import android.widget.EditText
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
+
 import android.widget.TextView
 import com.electricdreams.numo.R
 import com.google.android.material.card.MaterialCardView
@@ -43,14 +40,9 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
     private var listener: OnContinueListener? = null
     private var scanListener: OnScanListener? = null
     
-    private val iconContainer: FrameLayout
-    private val invoiceIcon: ImageView
-    private val titleText: TextView
-    private val subtitleText: TextView
     private val invoiceInput: EditText
     private val continueButton: Button
-    private val scanButton: android.widget.ImageButton
-    private val inputContainer: LinearLayout
+    private val scanButton: Button
 
     init {
         LayoutInflater.from(context).inflate(R.layout.component_withdraw_invoice_card, this, true)
@@ -58,17 +50,12 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
         // Setup card styling
         radius = resources.getDimension(R.dimen.card_corner_radius)
         cardElevation = 0f
-        setCardBackgroundColor(context.getColor(R.color.color_bg_card))
+        setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
         
         // Find views
-        iconContainer = findViewById(R.id.icon_container)
-        invoiceIcon = findViewById(R.id.invoice_icon)
-        titleText = findViewById(R.id.title_text)
-        subtitleText = findViewById(R.id.subtitle_text)
         invoiceInput = findViewById(R.id.invoice_input)
         continueButton = findViewById(R.id.continue_button)
         scanButton = findViewById(R.id.scan_button)
-        inputContainer = findViewById(R.id.input_container)
         
         setupListeners()
     }
@@ -115,7 +102,6 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
     
     private fun updateButtonState(enabled: Boolean) {
         continueButton.isEnabled = enabled
-        continueButton.alpha = if (enabled) 1f else 0.5f
     }
 
     /**
@@ -173,17 +159,6 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
             .setStartDelay(delay)
             .setDuration(350)
             .setInterpolator(AccelerateDecelerateInterpolator())
-            .start()
-        
-        // Icon bounce
-        iconContainer.scaleX = 0f
-        iconContainer.scaleY = 0f
-        iconContainer.animate()
-            .scaleX(1f)
-            .scaleY(1f)
-            .setStartDelay(delay + 150)
-            .setDuration(400)
-            .setInterpolator(OvershootInterpolator(2f))
             .start()
     }
 }

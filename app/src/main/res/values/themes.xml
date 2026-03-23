@@ -28,6 +28,8 @@
         <item name="colorOnSurface">@color/color_text_primary</item>
         <!-- Icon tint -->
         <item name="colorControlNormal">@color/color_text_secondary</item>
+        <!-- Switch/toggle active color -->
+        <item name="colorControlActivated">@color/color_success_green</item>
         <!-- Popup menu styling -->
         <item name="popupMenuStyle">@style/Widget.Numo.PopupMenu</item>
         <item name="android:popupMenuStyle">@style/Widget.Numo.PopupMenu</item>
@@ -103,6 +105,7 @@
     
     <!-- Apple-style Bottom Sheet Fragment Theme -->
     <style name="Theme.Numo.BottomSheet" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+        <item name="colorPrimary">@color/color_primary_green_light</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:backgroundDimAmount">0.4</item>

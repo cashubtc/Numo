@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    app:cardBackgroundColor="@android:color/transparent"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="0dp">
+
+    <FrameLayout
+        android:id="@+id/hero_bg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_hero_gradient_green"
+        android:clipChildren="false">
+
+        <!-- Decorative background lightning bolt with fade -->
+        <FrameLayout
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="-30dp"
+            android:layout_marginBottom="-30dp">
+
+            <ImageView
+                android:id="@+id/hero_bolt"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0.08"
+                android:importantForAccessibility="no"
+                android:rotation="-15"
+                android:src="@drawable/ic_lightning_bolt"
+                app:tint="@color/color_success_green" />
+
+            <View
+                android:id="@+id/hero_bolt_fade"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_hero_bolt_fade_green" />
+
+        </FrameLayout>
+
+        <!-- Content -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp">
+
+            <!-- "DEFAULT MINT" label -->
+            <TextView
+                android:id="@+id/hero_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05"
+                android:text="@string/onboarding_mints_hero_label"
+                android:textColor="@color/color_success_green"
+                android:textSize="13sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- Mint Identity Row -->
+            <LinearLayout
+                android:id="@+id/hero_mint_row"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/hero_label">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/hero_mint_icon"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:scaleType="centerCrop" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/hero_mint_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:fontFamily="sans-serif-medium"
+                        android:maxLines="1"
+                        android:textColor="@color/color_text_primary"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:id="@+id/hero_mint_subtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:fontFamily="sans-serif"
+                        android:text="@string/onboarding_mints_hero_subtitle"
+                        android:textColor="@color/color_text_secondary"
+                        android:textSize="13sp" />
+
+                </LinearLayout>
+
+                <!-- Default badge pill -->
+                <TextView
+                    android:id="@+id/hero_default_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_default_pill"
+                    android:fontFamily="sans-serif-medium"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:text="@string/onboarding_mints_hero_default_badge"
+                    android:textColor="@color/color_success_green"
+                    android:textSize="11sp" />
+
+            </LinearLayout>
+
+            <!-- Divider -->
+            <View
+                android:id="@+id/hero_divider"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="@color/color_divider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/hero_mint_row" />
+
+            <!-- Helper text -->
+            <TextView
+                android:id="@+id/hero_helper"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:fontFamily="sans-serif"
+                android:lineSpacingMultiplier="1.4"
+                android:text="@string/onboarding_mints_hero_helper"
+                android:textColor="@color/color_text_secondary"
+                android:textSize="13sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/hero_divider" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </FrameLayout>
+
+</androidx.cardview.widget.CardView>

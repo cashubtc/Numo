@@ -158,6 +158,21 @@
     <string name="onboarding_mints_count">%1$d mint%2$s selecionado(s)</string>
     <string name="onboarding_mints_continue_restore">Restaurar carteira</string>
     <string name="onboarding_mints_continue_new_wallet">Continuar</string>
+    <string name="onboarding_mints_hero_label">MINT PADRÃO</string>
+    <string name="onboarding_mints_hero_subtitle">Guarda seu bitcoin</string>
+    <string name="onboarding_mints_hero_default_badge">Padrão</string>
+    <string name="onboarding_mints_hero_helper">Retire para sua própria carteira a qualquer momento, ou defina um limite de pagamento para fazê-lo automaticamente.</string>
+    <string name="onboarding_mints_accept_from_header">ACEITAR DE</string>
+    <string name="onboarding_mints_count_label">%1$d mints</string>
+    <string name="onboarding_mints_count_label_singular">%1$d mint</string>
+    <string name="onboarding_mints_status_accepting">Aceitando pagamentos</string>
+    <string name="onboarding_mints_status_not_accepting">Não aceitando</string>
+    <string name="onboarding_mints_long_press_hint">Mantenha pressionado um mint para definir como padrão</string>
+    <string name="onboarding_mints_add_new_button">+ Adicionar Novo Mint</string>
+    <string name="onboarding_mints_set_default_title">Definir como padrão?</string>
+    <string name="onboarding_mints_set_default_message">Tornar \"%1$s\" seu mint padrão?</string>
+    <string name="onboarding_mints_set_default_confirm">Definir como padrão</string>
+    <string name="onboarding_mints_set_default_cancel">Cancelar</string>
 
     <!-- Onboarding / Restoring -->
     <string name="onboarding_restoring_title">Restaurando carteira</string>
@@ -289,7 +304,7 @@
     <string name="withdraw_lightning_option_address">📧 Endereço Lightning</string>
     <string name="withdraw_lightning_address_hint_label">Insira um endereço Lightning</string>
     <string name="withdraw_lightning_address_hint_value">usuario@dominio.com</string>
-    <string name="withdraw_lightning_amount_label">Valor (sats)</string>
+    <string name="withdraw_lightning_amount_label">Valor</string>
     <string name="withdraw_lightning_amount_hint">1000</string>
     <string name="withdraw_lightning_button_continue">Continuar</string>
 
@@ -311,7 +326,7 @@
     <string name="withdraw_melt_amount_label">Valor</string>
     <string name="withdraw_melt_fee_label">Reserva de taxa</string>
     <string name="withdraw_melt_total_label">Total</string>
-    <string name="withdraw_melt_fee_note">A reserva de taxa será devolvida se a taxa real do Lightning for menor.</string>
+    <string name="withdraw_melt_fee_note">A reserva de taxa será devolvida se a taxa do Lightning for menor.</string>
     <string name="withdraw_melt_loading">Processando saque...</string>
 
     <!-- Withdraw - melt errors and states -->
@@ -634,8 +649,10 @@
 
     <!-- Auto-Withdraw Settings -->
     <string name="auto_withdraw_title">Saques</string>
+    <string name="auto_withdraw_hero_label">SAQUE AUTOMÁTICO</string>
     <string name="auto_withdraw_hero_title">Saque automático</string>
     <string name="auto_withdraw_hero_subtitle">Envie fundos automaticamente para sua carteira Lightning quando o saldo ultrapassar um limite</string>
+    <string name="auto_withdraw_hero_helper">Defina um limite de pagamento e um endereço Lightning para sacar automaticamente quando seu saldo atingir o limite.</string>
     <string name="auto_withdraw_status_active">Ativo</string>
     <string name="auto_withdraw_status_inactive">Inativo</string>
 
@@ -676,7 +693,7 @@
     <string name="auto_withdraw_progress_completed">Enviado com sucesso!</string>
     <string name="auto_withdraw_progress_failed">O saque falhou</string>
 
-    <string name="auto_withdraw_settings_title">Saque automático</string>
+    <string name="auto_withdraw_settings_title">Saque</string>
     <string name="auto_withdraw_error_title">Detalhes do erro</string>
 
     <!-- Settings - Withdrawals menu item -->
@@ -708,6 +725,9 @@
     <string name="withdraw_amount_placeholder">Insira o valor em sats</string>
     <string name="withdraw_continue_button">Continuar</string>
     <string name="withdraw_scan_qr">Escanear QR</string>
+    <string name="withdraw_scan_invoice_button">Escanear fatura</string>
+    <string name="withdraw_invoice_helper">Insira uma fatura Lightning BOLT11</string>
+    <string name="withdraw_address_helper">Enviar para um endereço Lightning tipo email</string>
     <string name="withdraw_section_send_to">Enviar para</string>
     <string name="withdraw_balance_available">Disponível: %1$s</string>
 

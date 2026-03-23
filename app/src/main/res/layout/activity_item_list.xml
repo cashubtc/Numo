@@ -18,10 +18,10 @@
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="9dp"
+            android:background="@drawable/bg_nav_back_button"
             android:contentDescription="@string/item_list_toolbar_back"
             android:src="@drawable/ic_chevron_back"
             app:tint="@color/color_text_primary"
@@ -73,12 +73,13 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Divider under header -->
+    <!-- Divider under header (hidden for UI refresh) -->
     <View
         android:id="@+id/header_divider"
         android:layout_width="match_parent"
         android:layout_height="0.5dp"
         android:background="@color/color_divider"
+        android:visibility="gone"
         app:layout_anchor="@id/top_bar"
         app:layout_anchorGravity="bottom" />
 
@@ -113,12 +114,13 @@
             android:paddingBottom="24dp"
             android:background="@color/color_bg_white">
 
-            <!-- Top divider -->
+            <!-- Top divider (hidden for UI refresh) -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="0.5dp"
                 android:layout_marginBottom="16dp"
-                android:background="@color/color_divider" />
+                android:background="@color/color_divider"
+                android:visibility="gone" />
 
             <!-- Import from CSV Button -->
             <Button

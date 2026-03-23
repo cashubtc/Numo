@@ -96,6 +96,7 @@ class SecuritySettingsActivity : AppCompatActivity() {
                 openRestoreWallet()
             }
         }
+
     }
 
     private fun updatePinUI() {

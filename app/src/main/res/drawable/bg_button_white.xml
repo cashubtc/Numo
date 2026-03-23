@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Disabled state - black with 20% opacity -->
+    <!-- Disabled state -->
     <item android:state_enabled="false">
         <shape android:shape="rectangle">
             <corners android:radius="26dp" />
-            <solid android:color="#33000000" />
+            <solid android:color="@color/color_button_primary_disabled" />
         </shape>
     </item>
     <!-- Pressed state - 75% opacity white -->
