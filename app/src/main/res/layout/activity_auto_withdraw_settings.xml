@@ -184,78 +184,60 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="20dp">
+                android:orientation="vertical">
 
                 <!-- ==================== -->
-                <!-- MAIN TOGGLE CARD -->
+                <!-- MAIN TOGGLE ROW -->
                 <!-- ==================== -->
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/toggle_card"
+                <LinearLayout
+                    android:id="@+id/enable_toggle_row"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp">
+                    android:background="@drawable/bg_row_ripple"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingVertical="14dp"
+                    android:paddingHorizontal="20dp">
+
+                    <ImageView
+                        android:id="@+id/toggle_icon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="14dp"
+                        android:src="@drawable/ic_autoplay"
+                        app:tint="@color/color_icon_secondary" />
 
                     <LinearLayout
-                        android:id="@+id/enable_toggle_row"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_row_ripple"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingVertical="14dp"
-                        android:paddingHorizontal="20dp">
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                        <!-- Icon -->
-                        <ImageView
-                            android:id="@+id/toggle_icon"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginEnd="14dp"
-                            android:src="@drawable/ic_autoplay"
-                            app:tint="@color/color_icon_secondary" />
-
-                        <!-- Text -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:fontFamily="sans-serif-medium"
-                                android:text="@string/auto_withdraw_enable_title"
-                                android:textColor="@color/color_text_primary"
-                                android:textSize="17sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:text="@string/auto_withdraw_enable_subtitle"
-                                android:textColor="@color/color_text_secondary"
-                                android:textSize="14sp" />
-
-                        </LinearLayout>
-
-                        <!-- iOS-style Toggle -->
-                        <androidx.appcompat.widget.SwitchCompat
-                            android:id="@+id/enable_switch"
+                        <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            app:thumbTint="@color/selector_switch_thumb"
-                            app:trackTint="@color/selector_switch_track" />
+                            android:text="@string/auto_withdraw_enable_title"
+                            android:textAppearance="@style/Text.RowTitle" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/auto_withdraw_enable_subtitle"
+                            android:textAppearance="@style/Text.RowSubtitle" />
 
                     </LinearLayout>
 
-                </androidx.cardview.widget.CardView>
+                    <androidx.appcompat.widget.SwitchCompat
+                        android:id="@+id/enable_switch"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:thumbTint="@color/selector_switch_thumb"
+                        app:trackTint="@color/selector_switch_track" />
+
+                </LinearLayout>
 
                 <!-- ==================== -->
                 <!-- AUTO-WITHDRAW CONFIG (hidden when toggle off) -->
@@ -274,6 +256,7 @@
                     style="@style/Text.SectionHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:paddingHorizontal="20dp"
                     android:paddingTop="28dp"
                     android:paddingBottom="14dp"
                     android:text="@string/auto_withdraw_section_destination" />
@@ -281,6 +264,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="20dp"
                     app:cardBackgroundColor="@color/color_bg_white"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp">
@@ -336,6 +320,7 @@
                     style="@style/Text.SectionHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:paddingHorizontal="20dp"
                     android:paddingTop="28dp"
                     android:paddingBottom="14dp"
                     android:text="@string/auto_withdraw_section_trigger" />
@@ -343,6 +328,7 @@
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="20dp"
                     app:cardBackgroundColor="@color/color_bg_white"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp">
@@ -520,73 +506,58 @@
                     style="@style/Text.SectionHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:paddingHorizontal="20dp"
                     android:paddingTop="28dp"
                     android:paddingBottom="14dp"
                     android:text="@string/manual_withdraw_section_title" />
 
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/manual_withdraw_card"
+                <LinearLayout
+                    android:id="@+id/manual_withdraw_row"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp">
+                    android:background="@drawable/bg_row_ripple"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingVertical="14dp"
+                    android:paddingHorizontal="20dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="14dp"
+                        android:src="@drawable/ic_arrow_down_receive"
+                        app:tint="@color/color_icon_secondary" />
 
                     <LinearLayout
-                        android:id="@+id/manual_withdraw_row"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_row_ripple"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingVertical="14dp"
-                        android:paddingHorizontal="20dp">
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                        <!-- Icon -->
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginEnd="14dp"
-                            android:src="@drawable/ic_arrow_down_receive"
-                            app:tint="@color/color_icon_secondary" />
-
-                        <!-- Text -->
-                        <LinearLayout
-                            android:layout_width="0dp"
+                        <TextView
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
+                            android:text="@string/manual_withdraw_title"
+                            android:textAppearance="@style/Text.RowTitle" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:fontFamily="sans-serif-medium"
-                                android:text="@string/manual_withdraw_title"
-                                android:textColor="@color/color_text_primary"
-                                android:textSize="17sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
-                                android:text="@string/manual_withdraw_subtitle"
-                                android:textColor="@color/color_text_secondary"
-                                android:textSize="14sp" />
-
-                        </LinearLayout>
-
-                        <!-- Chevron -->
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/ic_chevron_right"
-                            app:tint="@color/color_text_tertiary" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/manual_withdraw_subtitle"
+                            android:textAppearance="@style/Text.RowSubtitle" />
 
                     </LinearLayout>
 
-                </androidx.cardview.widget.CardView>
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_forward"
+                        app:tint="@color/color_text_tertiary" />
+
+                </LinearLayout>
 
                 <!-- ==================== -->
                 <!-- HISTORY SECTION -->
@@ -595,6 +566,7 @@
                     android:id="@+id/history_section_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:paddingHorizontal="20dp"
                     android:paddingTop="28dp"
                     android:paddingBottom="14dp"
                     android:gravity="center_vertical"
@@ -628,6 +600,7 @@
                     android:id="@+id/history_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="20dp"
                     app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="16dp"
                     app:cardElevation="0dp">
