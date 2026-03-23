@@ -113,29 +113,9 @@
                 </LinearLayout>
 
                 <!-- Empty State -->
-                <LinearLayout
+                <include
                     android:id="@+id/empty_state"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="24dp"
-                    tools:visibility="gone">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/basket_names_settings_empty_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/basket_names_settings_empty_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle" />
-
-                </LinearLayout>
+                    layout="@layout/component_empty_state" />
 
             </LinearLayout>
 

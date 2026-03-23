@@ -80,14 +80,9 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical" />
 
-                <TextView
+                <include
                     android:id="@+id/empty_state_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="24dp"
-                    android:text="@string/webhook_settings_empty"
-                    android:textAppearance="@style/Text.RowSubtitle" />
+                    layout="@layout/component_empty_state" />
             </LinearLayout>
 
             <Button

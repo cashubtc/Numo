@@ -26,6 +26,7 @@ import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.databinding.ActivityHistoryBinding
+import com.electricdreams.numo.ui.components.EmptyStateHelper
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry
 import com.electricdreams.numo.payment.PaymentIntentFactory
@@ -349,7 +350,15 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         adapter.setEntries(currentHistoryList)
 
         val isEmpty = currentHistoryList.isEmpty()
-        binding.emptyView.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        binding.emptyView.root.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        if (isEmpty) {
+            EmptyStateHelper.bind(
+                binding.emptyView.root,
+                R.drawable.ic_receipt,
+                "No Payments Yet",
+                "Payment history will appear here once you start accepting payments"
+            )
+        }
     }
 
     private fun clearAllHistory() {

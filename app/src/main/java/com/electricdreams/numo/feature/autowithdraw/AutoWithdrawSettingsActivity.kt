@@ -32,6 +32,7 @@ import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.feature.settings.WithdrawLightningActivity
+import com.electricdreams.numo.ui.components.EmptyStateHelper
 import com.electricdreams.numo.ui.components.LightningStrikeView
 import com.electricdreams.numo.ui.components.MintSelectionBottomSheet
 import com.electricdreams.numo.ui.util.DialogHelper
@@ -76,7 +77,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
 
     // History section
     private lateinit var historyCard: CardView
-    private lateinit var historyEmptyContainer: LinearLayout
+    private lateinit var historyEmptyContainer: View
     private lateinit var historyRecyclerView: RecyclerView
     private lateinit var seeAllButton: TextView
 
@@ -393,6 +394,12 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
 
         if (history.isEmpty()) {
             historyEmptyContainer.visibility = View.VISIBLE
+            EmptyStateHelper.bind(
+                historyEmptyContainer,
+                R.drawable.ic_history,
+                getString(R.string.auto_withdraw_history_empty_title),
+                getString(R.string.auto_withdraw_history_empty_subtitle)
+            )
             historyRecyclerView.visibility = View.GONE
             seeAllButton.visibility = View.GONE
         } else {

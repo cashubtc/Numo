@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.R
+import com.electricdreams.numo.ui.components.EmptyStateHelper
 import com.electricdreams.numo.core.data.model.TokenHistoryEntry
 import com.electricdreams.numo.databinding.ActivityHistoryBinding
 import com.electricdreams.numo.ui.adapter.TokenHistoryAdapter
@@ -59,7 +60,15 @@ class TokenHistoryActivity : AppCompatActivity() {
         adapter.setEntries(history)
 
         val isEmpty = history.isEmpty()
-        binding.emptyView.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        binding.emptyView.root.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        if (isEmpty) {
+            EmptyStateHelper.bind(
+                binding.emptyView.root,
+                R.drawable.ic_receipt,
+                "No Tokens Yet",
+                "Cashu token history will appear here"
+            )
+        }
     }
 
     private fun showClearHistoryConfirmation() {

@@ -17,6 +17,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.R
+import com.electricdreams.numo.ui.components.EmptyStateHelper
 import com.electricdreams.numo.core.util.WebhookSettingsManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
@@ -42,7 +43,7 @@ class WebhookSettingsActivity : AppCompatActivity() {
 
     private lateinit var webhookSettingsManager: WebhookSettingsManager
     private lateinit var endpointsList: LinearLayout
-    private lateinit var emptyStateText: TextView
+    private lateinit var emptyStateText: View
     private lateinit var qrScannerLauncher: ActivityResultLauncher<Intent>
     private var currentDialog: AlertDialog? = null
     private var isSyncing: Boolean = false
@@ -85,7 +86,18 @@ class WebhookSettingsActivity : AppCompatActivity() {
         endpointsList.removeAllViews()
 
         val endpoints = webhookSettingsManager.getEndpoints()
-        emptyStateText.visibility = if (endpoints.isEmpty()) View.VISIBLE else View.GONE
+        val isEmpty = endpoints.isEmpty()
+        emptyStateText.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        findViewById<View>(R.id.add_endpoint_button).visibility = if (isEmpty) View.GONE else View.VISIBLE
+        if (isEmpty) {
+            EmptyStateHelper.bind(
+                emptyStateText,
+                R.drawable.ic_link,
+                "No Endpoints",
+                "Add a webhook endpoint to feed sales data to external dashboards",
+                "+ Add Endpoint"
+            ) { showAddEndpointDialog() }
+        }
 
         val inflater = LayoutInflater.from(this)
         endpoints.forEachIndexed { index, endpoint ->

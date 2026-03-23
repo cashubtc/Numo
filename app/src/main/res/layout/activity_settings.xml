@@ -85,26 +85,12 @@
                     android:src="@drawable/ic_catalog"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_items_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_items_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-
-                </LinearLayout>
+                    android:text="@string/settings_item_items_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
                     android:layout_width="20dp"
@@ -134,26 +120,12 @@
                     android:src="@drawable/ic_tip"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_tips_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_tips_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-
-                </LinearLayout>
+                    android:text="@string/settings_item_tips_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
                     android:layout_width="20dp"
@@ -183,26 +155,12 @@
                     android:src="@drawable/ic_shopping_bag"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_basket_names_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_basket_names_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-
-                </LinearLayout>
+                    android:text="@string/settings_item_basket_names_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
                     android:layout_width="20dp"
@@ -245,26 +203,12 @@
                     android:src="@drawable/ic_switch_currency"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_currency_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_currency_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-
-                </LinearLayout>
+                    android:text="@string/settings_item_currency_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
                     android:layout_width="20dp"
@@ -294,26 +238,12 @@
                     android:src="@drawable/ic_bank"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_mints_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_mints_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-
-                </LinearLayout>
+                    android:text="@string/settings_item_mints_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
                     android:layout_width="20dp"
@@ -343,26 +273,12 @@
                     android:src="@drawable/ic_link"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_webhooks_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_webhooks_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-
-                </LinearLayout>
+                    android:text="@string/settings_item_webhooks_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
                     android:layout_width="20dp"
@@ -392,26 +308,12 @@
                     android:src="@drawable/ic_lightning_bolt"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_withdrawals_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_withdrawals_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-
-                </LinearLayout>
+                    android:text="@string/settings_item_withdrawals_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
                     android:layout_width="20dp"
@@ -454,26 +356,12 @@
                     android:src="@drawable/ic_shield"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_security_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_security_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-
-                </LinearLayout>
+                    android:text="@string/settings_item_security_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
                     android:layout_width="20dp"
@@ -516,26 +404,12 @@
                     android:src="@drawable/ic_language"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_language_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_language_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-
-                </LinearLayout>
+                    android:text="@string/settings_item_language_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
                     android:layout_width="20dp"
@@ -565,26 +439,12 @@
                     android:src="@drawable/ic_dark_mode"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_theme_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_theme_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-
-                </LinearLayout>
+                    android:text="@string/settings_item_theme_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
                     android:layout_width="20dp"
@@ -614,26 +474,12 @@
                     android:src="@drawable/ic_info"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_about_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_about_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-
-                </LinearLayout>
+                    android:text="@string/settings_item_about_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
                     android:layout_width="20dp"
@@ -682,26 +528,12 @@
                         android:src="@drawable/ic_settings"
                         app:tint="@color/color_icon_secondary" />
 
-                    <LinearLayout
+                    <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/settings_item_developer_title"
-                            android:textAppearance="@style/Text.RowTitle" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/settings_item_developer_subtitle"
-                            android:textAppearance="@style/Text.RowSubtitle"
-                            android:layout_marginTop="2dp" />
-
-                    </LinearLayout>
+                        android:text="@string/settings_item_developer_title"
+                        android:textAppearance="@style/Text.RowTitle" />
 
                     <ImageView
                         android:layout_width="20dp"

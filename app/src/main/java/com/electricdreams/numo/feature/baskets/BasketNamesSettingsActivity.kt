@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.R
+import com.electricdreams.numo.ui.components.EmptyStateHelper
 
 /**
  * Settings activity for configuring preset basket names.
@@ -30,7 +31,7 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
     private lateinit var namesHeader: TextView
     private lateinit var namesCard: LinearLayout
     private lateinit var namesList: LinearLayout
-    private lateinit var emptyState: LinearLayout
+    private lateinit var emptyState: View
     private lateinit var addNameButton: View
     private lateinit var clearAllButton: View
     
@@ -74,7 +75,15 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
             namesHeader.visibility = View.GONE
             namesCard.visibility = View.GONE
             emptyState.visibility = View.VISIBLE
+            EmptyStateHelper.bind(
+                emptyState,
+                R.drawable.ic_label,
+                getString(R.string.basket_names_settings_empty_title),
+                getString(R.string.basket_names_settings_empty_subtitle),
+                "+ Add Name"
+            ) { showAddNameDialog() }
             clearAllButton.visibility = View.GONE
+            addNameButton.visibility = View.GONE
         } else {
             // Show names list
             namesHeader.visibility = View.VISIBLE
@@ -94,10 +103,10 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
                     addDivider()
                 }
             }
+
+            // Show add button only when items exist and can add more
+            addNameButton.visibility = if (basketNamesManager.canAddMore()) View.VISIBLE else View.GONE
         }
-        
-        // Update add button visibility
-        addNameButton.visibility = if (basketNamesManager.canAddMore()) View.VISIBLE else View.GONE
     }
     
     private fun bindNameItem(view: View, index: Int, name: String, totalCount: Int) {
