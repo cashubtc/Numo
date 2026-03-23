@@ -129,7 +129,6 @@ class MintDetailsActivity : AppCompatActivity() {
         initViews()
         setupListeners()
         loadMintDetails()
-        startEntranceAnimations()
     }
     
     override fun onStart() {

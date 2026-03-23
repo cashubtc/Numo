@@ -11,8 +11,6 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.OvershootInterpolator
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
@@ -138,7 +136,6 @@ class WithdrawLightningActivity : AppCompatActivity() {
         setupListeners()
         displayMintInfo()
         prefillFields()
-        startEntranceAnimations()
     }
 
     private fun initViews() {
@@ -394,33 +391,6 @@ class WithdrawLightningActivity : AppCompatActivity() {
         if (suggestedAmount > 0) {
             addressCard.setSuggestedAmount(suggestedAmount)
         }
-    }
-
-    private fun startEntranceAnimations() {
-        // Balance card slide in from top
-        balanceCard.alpha = 0f
-        balanceCard.translationY = -40f
-        balanceCard.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setDuration(400)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .start()
-
-        // Balance text scale
-        balanceText.scaleX = 0.8f
-        balanceText.scaleY = 0.8f
-        balanceText.animate()
-            .scaleX(1f)
-            .scaleY(1f)
-            .setStartDelay(200)
-            .setDuration(350)
-            .setInterpolator(OvershootInterpolator(2f))
-            .start()
-
-        // Cards stagger entrance
-        invoiceCard.animateEntrance(300)
-        addressCard.animateEntrance(450)
     }
 
     private fun processInvoice(invoice: String) {

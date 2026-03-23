@@ -278,11 +278,10 @@
                 <!-- ==================== -->
                 <TextView
                     style="@style/Text.SectionHeader"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginTop="28dp"
-                    android:layout_marginBottom="12dp"
+                    android:paddingTop="28dp"
+                    android:paddingBottom="14dp"
                     android:text="@string/auto_withdraw_section_destination" />
 
                 <androidx.cardview.widget.CardView
@@ -341,11 +340,10 @@
                 <!-- ==================== -->
                 <TextView
                     style="@style/Text.SectionHeader"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginTop="28dp"
-                    android:layout_marginBottom="12dp"
+                    android:paddingTop="28dp"
+                    android:paddingBottom="14dp"
                     android:text="@string/auto_withdraw_section_trigger" />
 
                 <androidx.cardview.widget.CardView
@@ -526,11 +524,10 @@
                 <!-- ==================== -->
                 <TextView
                     style="@style/Text.SectionHeader"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginTop="28dp"
-                    android:layout_marginBottom="12dp"
+                    android:paddingTop="28dp"
+                    android:paddingBottom="14dp"
                     android:text="@string/manual_withdraw_section_title" />
 
                 <androidx.cardview.widget.CardView
@@ -611,8 +608,8 @@
                     android:id="@+id/history_section_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="28dp"
-                    android:layout_marginBottom="12dp"
+                    android:paddingTop="28dp"
+                    android:paddingBottom="14dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -620,7 +617,6 @@
                         style="@style/Text.SectionHeader"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
                         android:layout_weight="1"
                         android:text="@string/auto_withdraw_section_history" />
 

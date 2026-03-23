@@ -296,7 +296,7 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:padding="12dp"
-                    android:src="@drawable/ic_arrow_back"
+                    android:src="@drawable/ic_chevron_back"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     app:tint="@color/color_text_primary"
                     android:contentDescription="@string/onboarding_seed_toolbar_back" />
@@ -547,7 +547,7 @@
                     android:layout_width="48dp"
                     android:layout_height="48dp"
                     android:padding="12dp"
-                    android:src="@drawable/ic_arrow_back"
+                    android:src="@drawable/ic_chevron_back"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     app:tint="@color/color_text_primary"
                     android:contentDescription="@string/onboarding_mints_toolbar_back" />

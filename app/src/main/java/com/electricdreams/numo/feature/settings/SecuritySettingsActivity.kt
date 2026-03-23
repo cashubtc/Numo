@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.R
@@ -12,7 +11,6 @@ import com.electricdreams.numo.feature.pin.PinEntryActivity
 import com.electricdreams.numo.feature.pin.PinManager
 import com.electricdreams.numo.feature.pin.PinSetupActivity
 import com.electricdreams.numo.ui.util.DialogHelper
-import com.electricdreams.numo.ui.util.EntranceAnimator
 
 class SecuritySettingsActivity : AppCompatActivity() {
 
@@ -99,15 +97,6 @@ class SecuritySettingsActivity : AppCompatActivity() {
             }
         }
 
-        playEntranceAnimation()
-    }
-
-    private fun playEntranceAnimation() {
-        val content = findViewById<LinearLayout>(R.id.security_content) ?: return
-        val views = (0 until content.childCount)
-            .map { content.getChildAt(it) }
-            .filter { it.visibility != View.GONE }
-        EntranceAnimator.animateEntrance(views)
     }
 
     private fun updatePinUI() {

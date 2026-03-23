@@ -139,7 +139,6 @@ class MintsSettingsActivity : AppCompatActivity() {
 
         setupListeners()
         loadMintsAndBalances()
-        startEntranceAnimations()
     }
 
     override fun onStart() {
@@ -317,9 +316,6 @@ class MintsSettingsActivity : AppCompatActivity() {
 
             mintsContainer.addView(item)
             mintItems[mintUrl] = item
-
-            // Staggered entrance animation
-            item.animateEntrance(index * 50L)
         }
     }
 
@@ -549,15 +545,4 @@ class MintsSettingsActivity : AppCompatActivity() {
         allMintsHeader.visibility = View.VISIBLE
     }
 
-    private fun startEntranceAnimations() {
-        // Lightning mint section slide in
-        lightningMintSection.alpha = 0f
-        lightningMintSection.translationY = -30f
-        lightningMintSection.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setDuration(350)
-            .setInterpolator(DecelerateInterpolator())
-            .start()
-    }
 }

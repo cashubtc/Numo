@@ -10,8 +10,6 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
-import android.view.animation.LayoutAnimationController
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -122,11 +120,6 @@ class ItemListActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = ItemAdapter(itemManager.getAllItems())
         recyclerView.adapter = adapter
-
-        // Entrance animation for list items
-        val animation = AnimationUtils.loadAnimation(this, R.anim.entrance_fade_up)
-        val controller = LayoutAnimationController(animation, 0.05f)
-        recyclerView.layoutAnimation = controller
 
         // Set up drag-and-drop reordering
         setupDragAndDrop()

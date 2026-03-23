@@ -14,8 +14,6 @@ import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.feature.tips.TipsSettingsActivity
 import com.electricdreams.numo.feature.baskets.BasketNamesSettingsActivity
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawSettingsActivity
-import android.widget.LinearLayout
-import com.electricdreams.numo.ui.util.EntranceAnimator
 
 /**
  * Main Settings screen.
@@ -44,7 +42,6 @@ class SettingsActivity : AppCompatActivity() {
 
         setupViews()
         setupListeners()
-        playEntranceAnimation()
     }
 
     override fun onResume() {
@@ -55,14 +52,6 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun setupViews() {
         updateDeveloperSectionVisibility()
-    }
-
-    private fun playEntranceAnimation() {
-        val content = findViewById<LinearLayout>(R.id.settings_content) ?: return
-        val views = (0 until content.childCount)
-            .map { content.getChildAt(it) }
-            .filter { it.visibility != View.GONE }
-        EntranceAnimator.animateEntrance(views)
     }
 
     private fun updateDeveloperSectionVisibility() {

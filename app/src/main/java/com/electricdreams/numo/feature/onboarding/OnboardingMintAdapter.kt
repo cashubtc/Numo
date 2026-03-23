@@ -5,7 +5,6 @@ import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -47,7 +46,6 @@ class OnboardingMintAdapter(
     val accepted = mutableSetOf<String>()
 
     private var acceptFromTitle = ""
-    private var lastAnimatedPosition = -1
 
     fun setHeaderStrings(acceptFromTitle: String) {
         this.acceptFromTitle = acceptFromTitle
@@ -60,7 +58,6 @@ class OnboardingMintAdapter(
         mints.addAll(popularUrls)
         accepted.clear()
         accepted.addAll(acceptedUrls)
-        lastAnimatedPosition = -1
         rebuildItems()
         notifyDataSetChanged()
     }
@@ -80,7 +77,6 @@ class OnboardingMintAdapter(
             accepted.add(oldDefault)
         }
         mints.add(0, url)
-        lastAnimatedPosition = -1
         rebuildItems()
         notifyDataSetChanged()
         listener.onDefaultMintChanged(url)
@@ -284,19 +280,6 @@ class OnboardingMintAdapter(
             }
         }
 
-        // Staggered entrance animation
-        if (position > lastAnimatedPosition) {
-            holder.itemView.alpha = 0f
-            holder.itemView.translationY = 16f * density
-            holder.itemView.animate()
-                .alpha(1f)
-                .translationY(0f)
-                .setStartDelay((position * 50).toLong())
-                .setDuration(400)
-                .setInterpolator(DecelerateInterpolator())
-                .start()
-            lastAnimatedPosition = position
-        }
     }
 
     private fun updateMintRowState(
