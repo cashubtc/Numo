@@ -156,63 +156,6 @@
                     app:tint="@color/color_text_tertiary" />
             </LinearLayout>
 
-            <!-- Wallet Recovery Section -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="28dp"
-                android:paddingBottom="14dp"
-                android:text="@string/security_settings_section_recovery"
-                android:textAppearance="@style/Text.SectionHeader" />
-
-            <!-- Restore Wallet Item -->
-            <LinearLayout
-                android:id="@+id/restore_wallet_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="14dp"
-                android:paddingHorizontal="20dp">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="14dp"
-                    android:src="@drawable/ic_restore"
-                    app:tint="@color/color_icon_secondary" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_restore_wallet_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_restore_wallet_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
-            </LinearLayout>
-
             <!-- ===================== -->
             <!-- PIN PROTECTION SECTION -->
             <!-- ===================== -->
@@ -404,6 +347,67 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/security_settings_remove_pin_subtitle"
+                        android:textAppearance="@style/Text.RowSubtitle"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_chevron_forward"
+                    app:tint="@color/color_text_tertiary" />
+            </LinearLayout>
+
+            <!-- ======================== -->
+            <!-- WALLET RECOVERY SECTION -->
+            <!-- ======================== -->
+
+            <!-- Wallet Recovery Section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="14dp"
+                android:text="@string/security_settings_section_recovery"
+                android:textAppearance="@style/Text.SectionHeader" />
+
+            <!-- Restore Wallet Item -->
+            <LinearLayout
+                android:id="@+id/restore_wallet_item"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="14dp"
+                    android:src="@drawable/ic_restore"
+                    app:tint="@color/color_icon_secondary" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/security_settings_restore_wallet_title"
+                        android:textAppearance="@style/Text.RowTitle" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/security_settings_restore_wallet_subtitle"
                         android:textAppearance="@style/Text.RowSubtitle"
                         android:layout_marginTop="2dp" />
                 </LinearLayout>

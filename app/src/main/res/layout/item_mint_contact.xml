@@ -5,7 +5,8 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:padding="16dp">
+    android:paddingVertical="14dp"
+    android:paddingHorizontal="20dp">
 
     <!-- Method (label on left, takes space to push value right) -->
     <TextView

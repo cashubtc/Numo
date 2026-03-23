@@ -98,108 +98,122 @@
             android:paddingBottom="32dp">
 
             <!-- ==================== -->
-            <!-- HEADER SECTION -->
+            <!-- HEADER SECTION (Hero Card) -->
             <!-- ==================== -->
-            <LinearLayout
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center_horizontal"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="24dp"
-                android:paddingBottom="24dp">
+                android:layout_marginHorizontal="20dp"
+                app:cardCornerRadius="16dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardElevation="0dp">
 
-                <!-- Icon -->
                 <FrameLayout
-                    android:id="@+id/icon_container"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:background="@drawable/bg_circle"
-                    android:backgroundTint="@color/color_bg_tertiary">
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_hero_gradient_green">
 
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/mint_icon"
-                        android:layout_width="78dp"
-                        android:layout_height="78dp"
-                        android:layout_gravity="center"
-                        android:scaleType="centerCrop"
-                        app:shapeAppearanceOverlay="@style/ShapeAppearance.Circle"
-                        app:strokeColor="@color/color_bg_white"
-                        app:strokeWidth="2dp"
-                        android:src="@drawable/ic_bitcoin"
-                        android:contentDescription="@string/cd_mint_icon" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal"
+                        android:padding="24dp">
+
+                        <!-- Icon -->
+                        <FrameLayout
+                            android:id="@+id/icon_container"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:background="@drawable/bg_circle"
+                            android:backgroundTint="@color/color_bg_tertiary">
+
+                            <com.google.android.material.imageview.ShapeableImageView
+                                android:id="@+id/mint_icon"
+                                android:layout_width="78dp"
+                                android:layout_height="78dp"
+                                android:layout_gravity="center"
+                                android:scaleType="centerCrop"
+                                app:shapeAppearanceOverlay="@style/ShapeAppearance.Circle"
+                                app:strokeColor="@color/color_bg_white"
+                                app:strokeWidth="2dp"
+                                android:src="@drawable/ic_bitcoin"
+                                android:contentDescription="@string/cd_mint_icon" />
+
+                        </FrameLayout>
+
+                        <!-- Name -->
+                        <TextView
+                            android:id="@+id/mint_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:text="Mint Name"
+                            android:textSize="24sp"
+                            android:textColor="@color/color_text_primary"
+                            android:fontFamily="sans-serif-medium"
+                            android:textAlignment="center" />
+
+                        <!-- URL -->
+                        <TextView
+                            android:id="@+id/mint_url"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="mint.example.com"
+                            android:textSize="13sp"
+                            android:textColor="@color/color_text_tertiary"
+                            android:textAlignment="center" />
+
+                        <!-- Balance Badge -->
+                        <TextView
+                            android:id="@+id/balance_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:paddingHorizontal="20dp"
+                            android:paddingVertical="10dp"
+                            android:background="@drawable/bg_input_pill"
+                            android:text="₿0"
+                            android:textSize="18sp"
+                            android:textColor="@color/color_text_primary"
+                            android:fontFamily="sans-serif-medium" />
+
+                        <!-- Lightning Badge (shown if this is the lightning mint) -->
+                        <LinearLayout
+                            android:id="@+id/lightning_badge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:paddingHorizontal="14dp"
+                            android:paddingVertical="6dp"
+                            android:background="@drawable/bg_badge_lightning"
+                            android:visibility="gone">
+
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:layout_marginEnd="6dp"
+                                android:src="@drawable/ic_lightning_bolt"
+                                app:tint="@color/color_bitcoin_orange" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/mints_lightning_mint"
+                                android:textSize="13sp"
+                                android:textColor="@color/color_bitcoin_orange"
+                                android:fontFamily="sans-serif-medium" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                 </FrameLayout>
 
-                <!-- Name -->
-                <TextView
-                    android:id="@+id/mint_name"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="Mint Name"
-                    android:textSize="24sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium"
-                    android:textAlignment="center" />
-
-                <!-- URL -->
-                <TextView
-                    android:id="@+id/mint_url"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="mint.example.com"
-                    android:textSize="13sp"
-                    android:textColor="@color/color_text_tertiary"
-                    android:textAlignment="center" />
-
-                <!-- Balance Badge -->
-                <TextView
-                    android:id="@+id/balance_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="10dp"
-                    android:background="@drawable/bg_input_pill"
-                    android:text="₿0"
-                    android:textSize="18sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium" />
-
-                <!-- Lightning Badge (shown if this is the lightning mint) -->
-                <LinearLayout
-                    android:id="@+id/lightning_badge"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="6dp"
-                    android:background="@drawable/bg_badge_lightning"
-                    android:visibility="gone">
-
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:layout_marginEnd="6dp"
-                        android:src="@drawable/ic_lightning_bolt"
-                        app:tint="@color/color_bitcoin_orange" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/mints_lightning_mint"
-                        android:textSize="13sp"
-                        android:textColor="@color/color_bitcoin_orange"
-                        android:fontFamily="sans-serif-medium" />
-
-                </LinearLayout>
-
-
-            </LinearLayout>
+            </androidx.cardview.widget.CardView>
 
             <!-- ==================== -->
             <!-- DESCRIPTION SECTION -->
@@ -474,11 +488,11 @@
                     android:focusable="true">
 
                     <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:layout_marginEnd="16dp"
                         android:src="@drawable/ic_lightning_bolt"
-                        app:tint="@color/color_bitcoin_orange" />
+                        app:tint="@color/color_icon_secondary" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -510,11 +524,11 @@
                     android:focusable="true">
 
                     <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:layout_marginEnd="16dp"
                         android:src="@drawable/ic_copy"
-                        app:tint="@color/color_text_primary" />
+                        app:tint="@color/color_icon_secondary" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -545,8 +559,8 @@
                     android:focusable="true">
 
                     <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:layout_marginEnd="16dp"
                         android:src="@drawable/ic_trash"
                         app:tint="@color/color_error" />

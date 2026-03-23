@@ -64,7 +64,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     private lateinit var statusText: TextView
 
     // Toggle icon
-    private lateinit var toggleIconContainer: FrameLayout
     private lateinit var toggleIcon: ImageView
 
     // Settings controls
@@ -110,9 +109,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         setupListeners()
         loadSettings()
         loadHistory()
-        
-        // Start entrance animations
-        startEntranceAnimations()
     }
 
     private fun initViews() {
@@ -130,7 +126,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         statusText = findViewById(R.id.status_text)
 
         // Toggle icon
-        toggleIconContainer = findViewById(R.id.toggle_icon_container)
         toggleIcon = findViewById(R.id.toggle_icon)
 
         // Main toggle
@@ -342,13 +337,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         heroBoltFade.setBackgroundResource(fadeRes)
 
         // Toggle row icon
-        if (enabled) {
-            toggleIconContainer.backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#E8F5E9"))
-            toggleIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_success_green))
-        } else {
-            toggleIconContainer.backgroundTintList = ContextCompat.getColorStateList(this, R.color.color_bg_light)
-            toggleIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_text_primary))
-        }
+        toggleIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_icon_secondary))
     }
 
     private fun playLightningStrike() {
@@ -415,56 +404,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             val displayHistory = history.take(5)
             historyRecyclerView.adapter = AutoWithdrawHistoryAdapter(displayHistory)
         }
-    }
-
-    private fun startEntranceAnimations() {
-        // Hero card slide in
-        val heroCard: CardView = findViewById(R.id.hero_card)
-        heroCard.alpha = 0f
-        heroCard.translationY = -50f
-        heroCard.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setDuration(400)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .start()
-
-        // Status pill fade
-        statusContainer.alpha = 0f
-        statusContainer.animate()
-            .alpha(1f)
-            .setStartDelay(400)
-            .setDuration(300)
-            .start()
-
-        // Cards stagger in
-        val toggleCard: CardView = findViewById(R.id.toggle_card)
-        animateCardEntrance(toggleCard, 100)
-
-        // Animate config container entrance only if enabled
-        if (settingsManager.isGloballyEnabled()) {
-            animateCardEntrance(configContainer, 150)
-        }
-
-        val manualWithdrawCard: CardView = findViewById(R.id.manual_withdraw_card)
-        animateCardEntrance(manualWithdrawCard, 200)
-
-        // History section
-        val historySectionHeader: View = findViewById(R.id.history_section_header)
-        animateCardEntrance(historySectionHeader, 250)
-        animateCardEntrance(historyCard, 300)
-    }
-
-    private fun animateCardEntrance(card: View, delay: Long) {
-        card.alpha = 0f
-        card.translationY = 30f
-        card.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setStartDelay(delay)
-            .setDuration(350)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .start()
     }
 
     override fun onResume() {
@@ -619,13 +558,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
                 holder.expandIndicator.setImageResource(R.drawable.ic_chevron_down)
             }
 
-            // Animate item appearance
-            holder.itemView.alpha = 0f
-            holder.itemView.animate()
-                .alpha(1f)
-                .setStartDelay((position * 50).toLong())
-                .setDuration(200)
-                .start()
         }
         
         private fun toggleExpand(entryId: String, holder: ViewHolder) {

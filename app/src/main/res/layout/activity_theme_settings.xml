@@ -82,7 +82,9 @@
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/dark_mode_switch"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    app:thumbTint="@color/selector_switch_thumb"
+                    app:trackTint="@color/selector_switch_track" />
             </LinearLayout>
 
             <!-- App Theme Section Header -->

@@ -203,30 +203,22 @@
                         android:id="@+id/enable_toggle_row"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackground"
+                        android:background="@drawable/bg_row_ripple"
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:padding="20dp">
+                        android:paddingVertical="14dp"
+                        android:paddingHorizontal="20dp">
 
                         <!-- Icon -->
-                        <FrameLayout
-                            android:id="@+id/toggle_icon_container"
-                            android:layout_width="44dp"
-                            android:layout_height="44dp"
-                            android:layout_marginEnd="16dp"
-                            android:background="@drawable/bg_circle"
-                            android:backgroundTint="@color/color_bg_light">
-
-                            <ImageView
-                                android:id="@+id/toggle_icon"
-                                android:layout_width="22dp"
-                                android:layout_height="22dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_autoplay"
-                                app:tint="@color/color_text_primary" />
-                        </FrameLayout>
+                        <ImageView
+                            android:id="@+id/toggle_icon"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginEnd="14dp"
+                            android:src="@drawable/ic_autoplay"
+                            app:tint="@color/color_icon_secondary" />
 
                         <!-- Text -->
                         <LinearLayout
@@ -257,7 +249,9 @@
                         <androidx.appcompat.widget.SwitchCompat
                             android:id="@+id/enable_switch"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
+                            android:layout_height="wrap_content"
+                            app:thumbTint="@color/selector_switch_thumb"
+                            app:trackTint="@color/selector_switch_track" />
 
                     </LinearLayout>
 
@@ -542,28 +536,21 @@
                         android:id="@+id/manual_withdraw_row"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackground"
+                        android:background="@drawable/bg_row_ripple"
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:padding="20dp">
+                        android:paddingVertical="14dp"
+                        android:paddingHorizontal="20dp">
 
                         <!-- Icon -->
-                        <FrameLayout
-                            android:layout_width="44dp"
-                            android:layout_height="44dp"
-                            android:layout_marginEnd="16dp"
-                            android:background="@drawable/bg_circle"
-                            android:backgroundTint="@color/color_bg_light">
-
-                            <ImageView
-                                android:layout_width="22dp"
-                                android:layout_height="22dp"
-                                android:layout_gravity="center"
-                                android:src="@drawable/ic_arrow_down_receive"
-                                app:tint="@color/color_text_primary" />
-                        </FrameLayout>
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginEnd="14dp"
+                            android:src="@drawable/ic_arrow_down_receive"
+                            app:tint="@color/color_icon_secondary" />
 
                         <!-- Text -->
                         <LinearLayout
