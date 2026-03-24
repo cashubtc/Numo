@@ -589,7 +589,7 @@ class OnboardingActivity : AppCompatActivity() {
     private fun animateWelcomeScreen() {
         welcomeAnimator?.stop()
         welcomeAnimator = OnboardingWelcomeAnimator(
-            context = this,
+            activity = this,
             container = welcomeContainer,
             wordmark = welcomeWordmark,
             tagline = welcomeTagline,
@@ -597,7 +597,17 @@ class OnboardingActivity : AppCompatActivity() {
             termsText = termsText,
             emojiContainer = emojiBurstContainer
         )
-        welcomeAnimator?.start()
+        welcomeAnimator?.start(lifecycleScope)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        welcomeAnimator?.pause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        welcomeAnimator?.resume()
     }
 
     // === New Wallet Flow ===

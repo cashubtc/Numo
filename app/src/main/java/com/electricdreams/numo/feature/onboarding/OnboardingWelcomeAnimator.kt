@@ -7,7 +7,6 @@ import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Activity
-import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
@@ -25,6 +24,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.electricdreams.numo.R
 import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 import kotlin.math.cos
 import kotlin.math.min
 import kotlin.math.sin
@@ -39,7 +43,7 @@ import kotlin.math.sin
  * 6. Get Started button + terms fade in
  */
 class OnboardingWelcomeAnimator(
-    private val context: Context,
+    private val activity: Activity,
     private val container: FrameLayout,
     private val wordmark: ImageView,
     private val tagline: TextView,
@@ -47,8 +51,8 @@ class OnboardingWelcomeAnimator(
     private val termsText: TextView,
     private val emojiContainer: FrameLayout
 ) {
-    private val navyColor = Color.parseColor("#0A2540")
-    private val whiteColor = Color.WHITE
+    private val navyColor = ContextCompat.getColor(activity, R.color.numo_navy)
+    private val whiteColor = ContextCompat.getColor(activity, android.R.color.white)
 
     // === Circle expansion tiles (mixed sizes) ===
 
@@ -146,25 +150,20 @@ class OnboardingWelcomeAnimator(
         val targetAlpha: Float // per-row opacity
     )
 
-    fun start() {
+    fun start(scope: CoroutineScope) {
         stop()
         resetAllViews()
 
         container.post {
-            startPhase1_LogoReveal {
-                startPhase2_Tagline {
-                    container.postDelayed({
-                        startPhase3_CircleExpansion {
-                            startPhase4_ColorTransition {
-                                container.postDelayed({
-                                    startPhase5_ScrollingRows {
-                                        startPhase6_CtaReveal()
-                                    }
-                                }, 600)
-                            }
-                        }
-                    }, 200)
-                }
+            scope.launch {
+                startPhase1_LogoReveal()
+                startPhase2_Tagline()
+                delay(200)
+                startPhase3_CircleExpansion()
+                startPhase4_ColorTransition()
+                delay(600)
+                startPhase5_ScrollingRows()
+                startPhase6_CtaReveal()
             }
         }
     }
@@ -180,6 +179,16 @@ class OnboardingWelcomeAnimator(
         rowGradientView = null
         emojiContainer.removeAllViews()
         systemBarsFlipped = false
+    }
+
+    fun pause() {
+        scrollAnimator?.pause()
+        activeAnimators.forEach { it.pause() }
+    }
+
+    fun resume() {
+        scrollAnimator?.resume()
+        activeAnimators.forEach { it.resume() }
     }
 
     private fun resetAllViews() {
@@ -213,7 +222,7 @@ class OnboardingWelcomeAnimator(
 
     // === Phase 1: Logo Reveal (600ms) ===
 
-    private fun startPhase1_LogoReveal(onComplete: () -> Unit) {
+    private suspend fun startPhase1_LogoReveal() = suspendCancellableCoroutine<Unit> { cont ->
         val animSet = AnimatorSet().apply {
             playTogether(
                 ObjectAnimator.ofFloat(wordmark, "alpha", 0f, 1f),
@@ -222,14 +231,15 @@ class OnboardingWelcomeAnimator(
             )
             duration = 600
             interpolator = DecelerateInterpolator()
-            addListener(onEnd { onComplete() })
+            addListener(onEnd { if (cont.isActive) cont.resume(Unit) })
         }
+        cont.invokeOnCancellation { animSet.cancel() }
         trackAndStart(animSet)
     }
 
     // === Phase 2: Tagline (450ms) ===
 
-    private fun startPhase2_Tagline(onComplete: () -> Unit) {
+    private suspend fun startPhase2_Tagline() = suspendCancellableCoroutine<Unit> { cont ->
         val animSet = AnimatorSet().apply {
             playTogether(
                 ObjectAnimator.ofFloat(tagline, "alpha", 0f, 1f),
@@ -237,76 +247,81 @@ class OnboardingWelcomeAnimator(
             )
             duration = 450
             interpolator = DecelerateInterpolator()
-            addListener(onEnd { onComplete() })
+            addListener(onEnd { if (cont.isActive) cont.resume(Unit) })
         }
+        cont.invokeOnCancellation { animSet.cancel() }
         trackAndStart(animSet)
     }
 
     // === Phase 3: Circle Expansion (~1500ms) ===
     // Emojis appear from center, form a circle, hold, then burst outward
 
-    private fun startPhase3_CircleExpansion(onComplete: () -> Unit) {
+    private suspend fun startPhase3_CircleExpansion() {
         val centerX = emojiContainer.width / 2f
         val centerY = emojiContainer.height / 2f
-        val density = context.resources.displayMetrics.density
+        val density = activity.resources.displayMetrics.density
         val radius = min(emojiContainer.width, emojiContainer.height) * 0.30f
-        var completedCount = 0
 
         circleTiles.clear()
 
-        circleTileData.forEachIndexed { index, tile ->
-            val tileView = createCircleTileView(tile, density)
-            emojiContainer.addView(tileView)
-            circleTiles.add(tileView)
+        suspendCancellableCoroutine<Unit> { cont ->
+            var completedCount = 0
+            circleTileData.forEachIndexed { index, tile ->
+                val tileView = createCircleTileView(tile, density)
+                emojiContainer.addView(tileView)
+                circleTiles.add(tileView)
 
-            val tileSize = when (tile.size) {
-                TileSize.SMALL -> 56 * density
-                TileSize.MEDIUM -> 72 * density
-                TileSize.LARGE -> 88 * density
-            }
-
-            val angle = index * (2.0 * Math.PI / circleTileData.size)
-            val targetX = centerX + (radius * cos(angle)).toFloat() - tileSize / 2f
-            val targetY = centerY + (radius * sin(angle)).toFloat() - tileSize / 2f
-            val startX = centerX - tileSize / 2f
-            val startY = centerY - tileSize / 2f
-
-            tileView.translationX = startX
-            tileView.translationY = startY
-            tileView.scaleX = 0f
-            tileView.scaleY = 0f
-            tileView.alpha = 0f
-
-            val targetRotation = -15f + (index * 4.3f)
-
-            val animSet = AnimatorSet().apply {
-                playTogether(
-                    ObjectAnimator.ofFloat(tileView, "alpha", 0f, 0.45f),
-                    ObjectAnimator.ofFloat(tileView, "scaleX", 0f, 1f),
-                    ObjectAnimator.ofFloat(tileView, "scaleY", 0f, 1f),
-                    ObjectAnimator.ofFloat(tileView, "translationX", startX, targetX),
-                    ObjectAnimator.ofFloat(tileView, "translationY", startY, targetY),
-                    ObjectAnimator.ofFloat(tileView, "rotation", 0f, targetRotation)
-                )
-                duration = 500
-                startDelay = index * 60L
-                interpolator = OvershootInterpolator(0.6f)
-            }
-
-            animSet.addListener(onEnd {
-                completedCount++
-                if (completedCount == circleTileData.size) {
-                    // Hold the circle briefly, then burst
-                    container.postDelayed({
-                        startCircleBurst(onComplete)
-                    }, 250)
+                val tileSize = when (tile.size) {
+                    TileSize.SMALL -> 56 * density
+                    TileSize.MEDIUM -> 72 * density
+                    TileSize.LARGE -> 88 * density
                 }
-            })
-            trackAndStart(animSet)
+
+                val angle = index * (2.0 * Math.PI / circleTileData.size)
+                val targetX = centerX + (radius * cos(angle)).toFloat() - tileSize / 2f
+                val targetY = centerY + (radius * sin(angle)).toFloat() - tileSize / 2f
+                val startX = centerX - tileSize / 2f
+                val startY = centerY - tileSize / 2f
+
+                tileView.translationX = startX
+                tileView.translationY = startY
+                tileView.scaleX = 0f
+                tileView.scaleY = 0f
+                tileView.alpha = 0f
+
+                val targetRotation = -15f + (index * 4.3f)
+
+                val animSet = AnimatorSet().apply {
+                    playTogether(
+                        ObjectAnimator.ofFloat(tileView, "alpha", 0f, 0.45f),
+                        ObjectAnimator.ofFloat(tileView, "scaleX", 0f, 1f),
+                        ObjectAnimator.ofFloat(tileView, "scaleY", 0f, 1f),
+                        ObjectAnimator.ofFloat(tileView, "translationX", startX, targetX),
+                        ObjectAnimator.ofFloat(tileView, "translationY", startY, targetY),
+                        ObjectAnimator.ofFloat(tileView, "rotation", 0f, targetRotation)
+                    )
+                    duration = 500
+                    startDelay = index * 60L
+                    interpolator = OvershootInterpolator(0.6f)
+                }
+
+                animSet.addListener(onEnd {
+                    completedCount++
+                    if (completedCount == circleTileData.size) {
+                        if (cont.isActive) cont.resume(Unit)
+                    }
+                })
+                cont.invokeOnCancellation { animSet.cancel() }
+                trackAndStart(animSet)
+            }
         }
+
+        delay(250) // Hold the circle briefly
+
+        startCircleBurst()
     }
 
-    private fun startCircleBurst(onComplete: () -> Unit) {
+    private suspend fun startCircleBurst() = suspendCancellableCoroutine<Unit> { cont ->
         val centerX = emojiContainer.width / 2f
         val centerY = emojiContainer.height / 2f
         var completedCount = 0
@@ -337,16 +352,17 @@ class OnboardingWelcomeAnimator(
                 if (completedCount == circleTiles.size) {
                     emojiContainer.removeAllViews()
                     circleTiles.clear()
-                    onComplete()
+                    if (cont.isActive) cont.resume(Unit)
                 }
             })
+            cont.invokeOnCancellation { animSet.cancel() }
             trackAndStart(animSet)
         }
     }
 
     // === Phase 4: Color Transition (1200ms) ===
 
-    private fun startPhase4_ColorTransition(onComplete: () -> Unit) {
+    private suspend fun startPhase4_ColorTransition() = suspendCancellableCoroutine<Unit> { cont ->
         val bgView = container.findViewById<View>(R.id.welcome_background_overlay)
         val argbEvaluator = ArgbEvaluator()
         systemBarsFlipped = false
@@ -365,52 +381,52 @@ class OnboardingWelcomeAnimator(
                 wordmark.imageTintList = ColorStateList.valueOf(textColor)
                 tagline.setTextColor(textColor)
 
-                (context as? Activity)?.let { activity ->
-                    activity.window.statusBarColor = bgColor
-                    activity.window.navigationBarColor = bgColor
-                }
+                activity.window.statusBarColor = bgColor
+                activity.window.navigationBarColor = bgColor
 
                 if (fraction > 0.5f && !systemBarsFlipped) {
                     systemBarsFlipped = true
-                    (context as? Activity)?.let { activity ->
-                        val controller = WindowInsetsControllerCompat(activity.window, activity.window.decorView)
-                        controller.isAppearanceLightStatusBars = false
-                        controller.isAppearanceLightNavigationBars = false
-                    }
+                    val controller = WindowInsetsControllerCompat(activity.window, activity.window.decorView)
+                    controller.isAppearanceLightStatusBars = false
+                    controller.isAppearanceLightNavigationBars = false
                 }
             }
 
             addListener(onEnd {
                 updateSystemBars(navyColor, isLight = false)
-                onComplete()
+                if (cont.isActive) cont.resume(Unit)
             })
         }
+        cont.invokeOnCancellation { colorAnim.cancel() }
         trackAndStart(colorAnim)
     }
 
     // === Phase 5: Scrolling Rows Fade In (800ms) ===
 
-    private fun startPhase5_ScrollingRows(onComplete: () -> Unit) {
+    private suspend fun startPhase5_ScrollingRows() {
         createScrollingRows()
         startScrollAnimation()
 
-        val fadeAnim = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 800
-            interpolator = DecelerateInterpolator()
+        suspendCancellableCoroutine<Unit> { cont ->
+            val fadeAnim = ValueAnimator.ofFloat(0f, 1f).apply {
+                duration = 800
+                interpolator = DecelerateInterpolator()
 
-            addUpdateListener {
-                val fraction = it.animatedFraction
-                scrollingTiles.forEach { tile -> tile.view.alpha = tile.targetAlpha * fraction }
-                rowGradientView?.alpha = fraction
+                addUpdateListener {
+                    val fraction = it.animatedFraction
+                    scrollingTiles.forEach { tile -> tile.view.alpha = tile.targetAlpha * fraction }
+                    rowGradientView?.alpha = fraction
+                }
+
+                addListener(onEnd { if (cont.isActive) cont.resume(Unit) })
             }
-
-            addListener(onEnd { onComplete() })
+            cont.invokeOnCancellation { fadeAnim.cancel() }
+            trackAndStart(fadeAnim)
         }
-        trackAndStart(fadeAnim)
     }
 
     private fun createScrollingRows() {
-        val density = context.resources.displayMetrics.density
+        val density = activity.resources.displayMetrics.density
         val tileSizePx = (48 * density).toInt()
         val spacingPx = (8 * density).toInt()
         val stepPx = tileSizePx + spacingPx
@@ -459,7 +475,7 @@ class OnboardingWelcomeAnimator(
         // Gradient overlay — aggressive fade so bottom rows dissolve into background
         val totalRowsHeight = 5 * tileSizePx + 4 * spacingPx
         val gradientHeight = (totalRowsHeight * 0.8f).toInt()
-        rowGradientView = View(context).apply {
+        rowGradientView = View(activity).apply {
             background = GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 intArrayOf(Color.TRANSPARENT, Color.argb(220, 10, 37, 64), navyColor)
@@ -508,7 +524,7 @@ class OnboardingWelcomeAnimator(
 
     // === Phase 6: CTA Reveal (500ms) ===
 
-    private fun startPhase6_CtaReveal() {
+    private suspend fun startPhase6_CtaReveal() = suspendCancellableCoroutine<Unit> { cont ->
         val btnAlpha = ObjectAnimator.ofFloat(acceptButton, "alpha", 0f, 1f).apply {
             duration = 400
             interpolator = DecelerateInterpolator()
@@ -531,7 +547,9 @@ class OnboardingWelcomeAnimator(
 
         val animSet = AnimatorSet().apply {
             playTogether(btnAlpha, btnTranslate, termsAlpha, termsTranslate)
+            addListener(onEnd { if (cont.isActive) cont.resume(Unit) })
         }
+        cont.invokeOnCancellation { animSet.cancel() }
         trackAndStart(animSet)
     }
 
@@ -554,10 +572,10 @@ class OnboardingWelcomeAnimator(
             TileSize.LARGE -> 40f
         }
 
-        val baseColor = ContextCompat.getColor(context, tile.colorRes)
+        val baseColor = ContextCompat.getColor(activity, tile.colorRes)
         val lighterColor = lightenColor(baseColor, 0.35f)
 
-        return TextView(context).apply {
+        return TextView(activity).apply {
             text = tile.emoji
             textSize = emojiSize
             gravity = Gravity.CENTER
@@ -573,7 +591,7 @@ class OnboardingWelcomeAnimator(
     }
 
     private fun createRowTileView(tile: RowTile, density: Float, sizePx: Int): View {
-        return TextView(context).apply {
+        return TextView(activity).apply {
             text = tile.emoji
             textSize = 22f
             gravity = Gravity.CENTER
@@ -596,13 +614,11 @@ class OnboardingWelcomeAnimator(
     }
 
     private fun updateSystemBars(bgColor: Int, isLight: Boolean) {
-        (context as? Activity)?.let { activity ->
-            activity.window.statusBarColor = bgColor
-            activity.window.navigationBarColor = bgColor
-            val controller = WindowInsetsControllerCompat(activity.window, activity.window.decorView)
-            controller.isAppearanceLightStatusBars = isLight
-            controller.isAppearanceLightNavigationBars = isLight
-        }
+        activity.window.statusBarColor = bgColor
+        activity.window.navigationBarColor = bgColor
+        val controller = WindowInsetsControllerCompat(activity.window, activity.window.decorView)
+        controller.isAppearanceLightStatusBars = isLight
+        controller.isAppearanceLightNavigationBars = isLight
     }
 
     private fun onEnd(action: () -> Unit): AnimatorListenerAdapter {
