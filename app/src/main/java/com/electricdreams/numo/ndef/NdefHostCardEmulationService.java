@@ -43,9 +43,10 @@ public class NdefHostCardEmulationService extends HostApduService {
     
     // NFC reading state tracking
     private boolean isNfcReading = false;
+    private boolean isNfcWriting = false; // Tracks if payer actually started writing
     private Handler nfcTimeoutHandler;
     private Runnable nfcTimeoutRunnable;
-    private static final long NFC_TIMEOUT_MS = 2000; // 2 seconds
+    private static final long NFC_TIMEOUT_MS = 3500; // 3.5 seconds
     
     /**
      * Callback interface for Cashu payments
@@ -54,7 +55,7 @@ public class NdefHostCardEmulationService extends HostApduService {
         void onCashuTokenReceived(String token);
         void onCashuPaymentError(String errorMessage);
         void onNfcReadingStarted();
-        void onNfcReadingStopped();
+        void onNfcReadingStopped(boolean failedInMiddleOfTransaction);
     }
     
     /**
@@ -76,7 +77,7 @@ public class NdefHostCardEmulationService extends HostApduService {
             @Override
             public void run() {
                 Log.i(TAG, "NFC reading timeout - no APDU received for " + NFC_TIMEOUT_MS + "ms");
-                stopNfcReading();
+                stopNfcReading(false);
             }
         };
         
@@ -91,7 +92,7 @@ public class NdefHostCardEmulationService extends HostApduService {
                         Log.i(TAG, "Message content: " + message);
                         
                         // Stop NFC reading indicator since we received the complete message
-                        stopNfcReading();
+                        stopNfcReading(true);
                         
                         // First try to extract a Cashu token from the message
                         String cashuToken = CashuPaymentHelper.extractCashuToken(message);
@@ -169,10 +170,20 @@ public class NdefHostCardEmulationService extends HostApduService {
                 Log.i(TAG, "Command: " + description);
             }
             
-            // Start/reset NFC reading indicator when we receive APDU commands
-            // Only track reading if we have a payment callback set (meaning we're expecting a payment)
+            // Start or reset NFC reading indicator for any APDU command when a payment is expected
             if (paymentCallback != null) {
                 startOrResetNfcReading();
+                
+                // Track if the payer started writing data (UPDATE BINARY)
+                if (commandApdu != null && commandApdu.length >= 2) {
+                    // UPDATE BINARY header is 00 D6
+                    if (commandApdu[0] == (byte)0x00 && commandApdu[1] == (byte)0xD6) {
+                        if (!isNfcWriting) {
+                            Log.i(TAG, "Payer started writing data (UPDATE BINARY received)");
+                            isNfcWriting = true;
+                        }
+                    }
+                }
             }
             
             // Try to process with the NDEF processor
@@ -240,7 +251,7 @@ public class NdefHostCardEmulationService extends HostApduService {
         this.expectedAmount = 0;
         
         // Stop NFC reading if active
-        stopNfcReading();
+        stopNfcReading(true); // Don't trigger failure UI on manual clear
         
         if (ndefProcessor != null) {
             ndefProcessor.setMessageToSend("");
@@ -374,6 +385,7 @@ public class NdefHostCardEmulationService extends HostApduService {
         }
         
         // Reset the timeout - cancel any pending timeout and schedule a new one
+        Log.d(TAG, "Resetting NFC reading timeout timer (" + NFC_TIMEOUT_MS + "ms)");
         nfcTimeoutHandler.removeCallbacks(nfcTimeoutRunnable);
         nfcTimeoutHandler.postDelayed(nfcTimeoutRunnable, NFC_TIMEOUT_MS);
     }
@@ -382,18 +394,23 @@ public class NdefHostCardEmulationService extends HostApduService {
      * Stop the NFC reading indicator
      * Called when the NDEF message is received or timeout occurs
      */
-    private void stopNfcReading() {
+    private void stopNfcReading(boolean isSuccess) {
         if (isNfcReading) {
-            Log.i(TAG, "NFC reading stopped");
+            Log.i(TAG, "NFC reading stopped. Was writing data: " + isNfcWriting + " Success: " + isSuccess);
             isNfcReading = false;
             
             // Cancel any pending timeout
+            Log.d(TAG, "Cancelling NFC reading timeout timer");
             nfcTimeoutHandler.removeCallbacks(nfcTimeoutRunnable);
             
-            // Notify callback
-            if (paymentCallback != null) {
-                paymentCallback.onNfcReadingStopped();
+            // Notify callback ONLY if it's NOT a success.
+            // If it is a success, the higher-level logic handles the UI transition via onCashuTokenReceived.
+            if (paymentCallback != null && !isSuccess) {
+                paymentCallback.onNfcReadingStopped(isNfcWriting);
             }
+            
+            // Reset writing flag for next session
+            isNfcWriting = false;
         }
     }
 

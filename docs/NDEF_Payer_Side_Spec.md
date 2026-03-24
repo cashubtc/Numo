@@ -6,7 +6,7 @@ This document formalizes the **actual NFC/NDEF protocol implemented in this repo
 It describes exactly what a **payer device** (NFC reader/writer) must do on the wire
 (APDUs, payloads, chunking) to:
 
-1. Read a **Cashu payment request** from a PoS terminal that emulates a **Type 4 NDEF tag**.
+1. Read a **payment payload** (BIP21 URI, Cashu request, or Lightning invoice) from a PoS terminal that emulates a **Type 4 NDEF tag**.
 2. Write a **Cashu token** (or equivalent result) back to the PoS.
 
 There are **no recommendations** here – this is a description of the behavior
@@ -36,7 +36,7 @@ All statements below are derived from that code.
     - NDEF Tag Application AID: `D2 76 00 00 85 01 01`.
     - A **Capability Container (CC) file** (`E1 03`).
     - A **single NDEF file** (`E1 04`).
-  - When a payment is active, the NDEF file contains a **Cashu payment request** as a
+  - When a payment is active, the NDEF file contains a **payment payload** (a BIP21 URI, a Cashu payment request, or a Lightning invoice) as a
     single NDEF **Text** record.
   - After the payer writes back an NDEF message, the PoS extracts a **Cashu token** from
     the text/URI content and processes the payment.
@@ -54,8 +54,8 @@ All statements below are derived from that code.
 2. Payer **selects the NDEF Tag Application** via ISO 7816 AID SELECT.
 3. Payer may **select and read the CC file** to learn file IDs and (advertised) limits.
 4. Payer **selects the NDEF file** and **reads** the NDEF message containing the
-   Cashu payment request.
-5. Payer processes the Cashu payment request off‑tag.
+   payment payload.
+5. Payer processes the payload off‑tag (extracting the Cashu request or Lightning invoice as needed).
 6. Payer **writes a new NDEF message** (Text or URI record) containing a Cashu token
    (or URL with token) via one or more UPDATE BINARY APDUs.
 7. PoS parses the written NDEF and, if a valid token is present, validates and redeems it.
@@ -327,9 +327,14 @@ Later, when the payer sends `SELECT FILE E1 04`, the tag builds an NDEF message 
 
 ### 4.2 Semantic Content of `messageToSend`
 
-`messageToSend` is the **encoded Cashu payment request string** produced by
-`CashuPaymentHelper.createPaymentRequest(...)` or related helpers. It typically
-starts with `creqA` and is opaque to NFC; it is simply treated as UTF‑8 text.
+`messageToSend` is the payload string. Its format depends on the active tab/mode on the PoS device. It is always encoded as UTF-8 text inside an NDEF Text record. It will be one of the following three formats:
+
+1. **Unified (Default):** A BIP21 URI containing both a Bech32-encoded Cashu request and a Lightning invoice.  
+   Format: `bitcoin:?creq={cashu_bech32}&lightning={lnbc_invoice}` (Note: The Cashu request is usually Bech32-encoded, starting with `creq1...`, though a fallback to `creqA...` is possible).
+2. **Cashu:** A raw Nostr Cashu payment request.  
+   Format: `creqA...`
+3. **Lightning:** A standard Bolt11 Lightning invoice.  
+   Format: `lnbc...`
 
 From the payer’s point of view, the **payment request NDEF** is:
 
@@ -337,8 +342,7 @@ From the payer’s point of view, the **payment request NDEF** is:
   - `NLEN` (2 bytes), followed by
   - A single **Text record** with:
     - language code `"en"`.
-    - payload text equal to the ASCII/UTF‑8 encoded Cashu payment request
-      (e.g. `"creqA..."`).
+    - payload text equal to the ASCII/UTF‑8 encoded string of one of the above formats.
 
 ---
 
@@ -380,7 +384,7 @@ any of the following conditions are met (all derived from
 
 ### 4.3 Mint List Semantics in Payment Requests
 
-The Cashu payment request string (`creqA…`) MAY contain a list of allowed mints
+The encoded Cashu payment request string (whether represented as raw `creqA...` or Bech32 `creq1...` within the URI) MAY contain a list of allowed mints
 as part of its encoded payload. How this field is populated depends on the
 merchant’s settings in the Numo app:
 
@@ -587,7 +591,7 @@ processed.
 This section consolidates the behavior above into the exact sequences a **payer**
 should send to interact with this implementation.
 
-### 6.1 Reading the Cashu Payment Request
+### 6.1 Reading the Payment Payload
 
 Assume the PoS has already called `setPaymentRequest(paymentRequest, amount)` and
 thus prepared an outgoing NDEF message.
@@ -656,8 +660,8 @@ thus prepared an outgoing NDEF message.
 The payer then parses the NDEF message:
 
 - NDEF file framing: Type 4 header (already known from NLEN).
-- Single Text record with language `"en"` and text = Cashu payment request string
-  (`"creqA..."`).
+- Single Text record with language `"en"` and text = the payment payload string 
+  (e.g., `"bitcoin:?creq=...&lightning=..."` or `"creqA..."` or `"lnbc..."`).
 
 ### 6.2 Writing a Cashu Token Back to the PoS
 
@@ -785,8 +789,9 @@ this implementation is:
 2. Optionally **read the CC file** at file ID `E1 03` to discover that the NDEF
    file ID is `E1 04` and the advertised size and MLe/MLc.
 3. **Select the NDEF file** (`00 A4 00 0C 02 E1 04`) and **READ BINARY** to obtain
-   the payment request NDEF (Text record with `"en"` + Cashu `creqA...` string).
-4. Complete the Cashu payment off‑tag.
+   the payment request NDEF (Text record with `"en"` + the payment payload string 
+   like `"bitcoin:?..."`, `"creqA..."`, or `"lnbc..."`).
+4. Parse the payload off-tag to identify whether it is a Unified BIP21 URI, a Cashu payment request, or a Lightning invoice, and complete the payment.
 5. **Select the NDEF file again (if needed)** and **UPDATE BINARY** to write a
    complete Type 4 NDEF file containing a single Text or URI record from which a
    Cashu token can be extracted, using either:

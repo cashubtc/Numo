@@ -17,6 +17,9 @@ import org.cashudevkit.WalletDatabaseImpl
 import org.cashudevkit.NoPointer
 import org.cashudevkit.WalletSqliteDatabase
 import org.cashudevkit.WalletRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import org.cashudevkit.generateMnemonic
 
 /**
@@ -28,6 +31,10 @@ import org.cashudevkit.generateMnemonic
  * The wallet's mnemonic (seed phrase) and SQLite database are both
  * persisted so that balances survive app restarts.
  */
+enum class WalletState {
+    UNINITIALIZED, LOADING, READY, ERROR
+}
+
 object CashuWalletManager : MintManager.MintChangeListener {
 
     private const val TAG = "CashuWalletManager"
@@ -43,9 +50,8 @@ object CashuWalletManager : MintManager.MintChangeListener {
     @Volatile
     private var wallet: WalletRepository? = null
 
-    @Volatile
-    var isWalletLoading: Boolean = false
-        private set
+    private val _walletState = MutableStateFlow(WalletState.UNINITIALIZED)
+    val walletState: StateFlow<WalletState> = _walletState.asStateFlow()
 
     /** Initialize from ModernPOSActivity. Safe to call multiple times. */
     fun init(context: Context) {
@@ -164,6 +170,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
 
         database = db
         wallet = newWallet
+            _walletState.value = WalletState.READY
 
         Log.d(TAG, "Wallet restore complete. Restored ${mints.size} mints.")
         
@@ -400,7 +407,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
      * Runs on our IO coroutine scope.
      */
     private suspend fun rebuildWallet(mints: List<String>) {
-        isWalletLoading = true
+        _walletState.value = WalletState.LOADING
         try {
             // Close any previous instances
             closeResources()
@@ -446,6 +453,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
 
             database = db
             wallet = newWallet
+            _walletState.value = WalletState.READY
 
             Log.d(TAG, "Initialized WalletRepository with ${mints.size} mints; DB=${dbFile.absolutePath}")
             
@@ -453,8 +461,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
             BalanceRefreshBroadcast.send(appContext, "wallet_initialized")
         } catch (t: Throwable) {
             Log.e(TAG, "Failed to initialize WalletRepository", t)
-        } finally {
-            isWalletLoading = false
+            _walletState.value = WalletState.ERROR
         }
     }
 
