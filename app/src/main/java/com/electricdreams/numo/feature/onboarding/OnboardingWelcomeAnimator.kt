@@ -169,8 +169,9 @@ class OnboardingWelcomeAnimator(
     }
 
     fun stop() {
-        activeAnimators.forEach { it.cancel() }
+        val animators = activeAnimators.toList()
         activeAnimators.clear()
+        animators.forEach { it.cancel() }
         scrollAnimator?.cancel()
         scrollAnimator = null
         scrollTime = 0f
@@ -183,12 +184,12 @@ class OnboardingWelcomeAnimator(
 
     fun pause() {
         scrollAnimator?.pause()
-        activeAnimators.forEach { it.pause() }
+        activeAnimators.toList().forEach { it.pause() }
     }
 
     fun resume() {
         scrollAnimator?.resume()
-        activeAnimators.forEach { it.resume() }
+        activeAnimators.toList().forEach { it.resume() }
     }
 
     private fun resetAllViews() {
@@ -266,6 +267,7 @@ class OnboardingWelcomeAnimator(
 
         suspendCancellableCoroutine<Unit> { cont ->
             var completedCount = 0
+            val phaseAnimators = mutableListOf<Animator>()
             circleTileData.forEachIndexed { index, tile ->
                 val tileView = createCircleTileView(tile, density)
                 emojiContainer.addView(tileView)
@@ -311,9 +313,10 @@ class OnboardingWelcomeAnimator(
                         if (cont.isActive) cont.resume(Unit)
                     }
                 })
-                cont.invokeOnCancellation { animSet.cancel() }
+                phaseAnimators.add(animSet)
                 trackAndStart(animSet)
             }
+            cont.invokeOnCancellation { phaseAnimators.forEach { it.cancel() } }
         }
 
         delay(250) // Hold the circle briefly
@@ -325,6 +328,7 @@ class OnboardingWelcomeAnimator(
         val centerX = emojiContainer.width / 2f
         val centerY = emojiContainer.height / 2f
         var completedCount = 0
+        val phaseAnimators = mutableListOf<Animator>()
 
         circleTiles.forEach { tileView ->
             val currentCenterX = tileView.translationX + tileView.width / 2f
@@ -355,9 +359,10 @@ class OnboardingWelcomeAnimator(
                     if (cont.isActive) cont.resume(Unit)
                 }
             })
-            cont.invokeOnCancellation { animSet.cancel() }
+            phaseAnimators.add(animSet)
             trackAndStart(animSet)
         }
+        cont.invokeOnCancellation { phaseAnimators.forEach { it.cancel() } }
     }
 
     // === Phase 4: Color Transition (1200ms) ===
