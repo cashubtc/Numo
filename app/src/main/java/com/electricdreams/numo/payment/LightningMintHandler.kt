@@ -153,7 +153,17 @@ class LightningMintHandler(
 
                 Log.d(TAG, "Requesting Lightning mint quote from ${mintUrl.url} for $paymentAmount sats")
                 val mintWallet = wallet.getWallet(mintUrl, CurrencyUnit.Sat)
-                val quote = mintWallet?.mintQuote(org.cashudevkit.PaymentMethod.Bolt11, quoteAmount, context.getString(R.string.payment_request_lightning_description, paymentAmount), null)
+
+                val nut04 = mintWallet.loadMintInfo().nuts.nut04
+                val supportsDescription = nut04?.methods?.any {
+                    it.method == org.cashudevkit.PaymentMethod.Bolt11 && it.description == true
+                } == true
+                val description = if (supportsDescription) {
+                    context.getString(R.string.payment_request_lightning_description, paymentAmount)
+                } else {
+                    null
+                }
+                val quote = mintWallet?.mintQuote(org.cashudevkit.PaymentMethod.Bolt11, quoteAmount, description, null)
                     ?: throw Exception("Failed to get wallet for mint: ${mintUrl.url}")
                 mintQuote = quote
 
