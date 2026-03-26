@@ -53,3 +53,11 @@ jobs:
       with:
         name: coverage-report
         path: app/build/reports/jacoco/jacocoTestReport/html/
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        override_commit: ${{ github.event.workflow_run.head_sha }}
+        override_branch: ${{ github.event.workflow_run.head_branch }}
+        override_pr: ${{ github.event.workflow_run.pull_requests[0].number }}
