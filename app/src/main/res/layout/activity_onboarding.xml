@@ -325,24 +325,13 @@
 
                 </LinearLayout>
 
-                <FrameLayout
+                <ImageView
+                    android:id="@+id/teaser_illustration"
                     android:layout_width="match_parent"
-                    android:layout_height="180dp"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginBottom="16dp"
-                    android:background="@drawable/bg_placeholder_image">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="@string/explainer_image_placeholder"
-                        android:textSize="11sp"
-                        android:textColor="#335EFFC2"
-                        android:textAllCaps="true"
-                        android:letterSpacing="0.04" />
-
-                </FrameLayout>
+                    android:layout_height="220dp"
+                    android:scaleType="fitCenter"
+                    android:clipToPadding="false"
+                    android:contentDescription="@string/explainer_image_placeholder" />
 
             </LinearLayout>
 

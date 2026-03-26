@@ -324,6 +324,8 @@ class OnboardingActivity : AppCompatActivity() {
         chevronHint3 = findViewById(R.id.chevron_hint_3)
         chevronHintContainer = findViewById(R.id.chevron_hint_container)
 
+        findViewById<ImageView>(R.id.teaser_illustration).setImageDrawable(TapToPayIllustration())
+
         setupExplainerViewPager()
 
         // Enter Seed
