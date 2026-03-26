@@ -124,7 +124,7 @@
     <string name="explainer_slide1_body">Ingresa un monto, toca cobrar y tu cliente acerca su telfono al tuyo. El pago llega al instante por NFC.</string>
     <string name="explainer_slide2_title">Auto-custodia\nautomtica</string>
     <string name="explainer_slide2_body">Configura el retiro automtico para mover los pagos entrantes directamente a tu billetera Lightning. Numo es auto-custodia por defecto.</string>
-    <string name="explainer_slide3_title">Cero\ncomisiones</string>
+    <string name="explainer_slide3_title">Cero comisiones</string>
     <string name="explainer_slide3_body">Numo es completamente de cdigo abierto y no cobra comisiones. Sin suscripciones, sin recortes, sin costos ocultos. Cada sat que recibes es tuyo.</string>
     <string name="explainer_image_placeholder">Imagen de ejemplo</string>
 

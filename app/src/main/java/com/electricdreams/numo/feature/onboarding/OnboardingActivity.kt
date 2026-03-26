@@ -157,6 +157,7 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var chevronHint1: ImageView
     private lateinit var chevronHint2: ImageView
     private lateinit var chevronHint3: ImageView
+    private lateinit var chevronHintContainer: View
     private var explainerOpen = false
     private var chevronAnimatorSet: AnimatorSet? = null
 
@@ -279,13 +280,17 @@ class OnboardingActivity : AppCompatActivity() {
             // Dark icons on white background
             windowInsetsController.isAppearanceLightStatusBars = true
             windowInsetsController.isAppearanceLightNavigationBars = true
+        } else if (step == OnboardingStep.CHOOSE_PATH) {
+            // Navy bars for setup screen — nav bar matches dark teaser area
+            window.statusBarColor = android.graphics.Color.parseColor("#0E3050")
+            window.navigationBarColor = android.graphics.Color.parseColor("#0A2540")
+            windowInsetsController.isAppearanceLightStatusBars = false
+            windowInsetsController.isAppearanceLightNavigationBars = false
         } else {
             // White bars for all other screens
             val bgColor = android.graphics.Color.WHITE
             window.statusBarColor = bgColor
             window.navigationBarColor = bgColor
-            
-            // Dark icons on light background
             windowInsetsController.isAppearanceLightStatusBars = true
             windowInsetsController.isAppearanceLightNavigationBars = true
         }
@@ -317,6 +322,7 @@ class OnboardingActivity : AppCompatActivity() {
         chevronHint1 = findViewById(R.id.chevron_hint_1)
         chevronHint2 = findViewById(R.id.chevron_hint_2)
         chevronHint3 = findViewById(R.id.chevron_hint_3)
+        chevronHintContainer = findViewById(R.id.chevron_hint_container)
 
         setupExplainerViewPager()
 
@@ -534,7 +540,6 @@ class OnboardingActivity : AppCompatActivity() {
         // Teaser + Explainer
         setupTeaserTouchListener()
         explainerCloseBtn.setOnClickListener { closeExplainer() }
-        explainerBackdrop.setOnClickListener { closeExplainer() }
 
         // Enter Seed
         seedBackButton.setOnClickListener {
@@ -649,6 +654,14 @@ class OnboardingActivity : AppCompatActivity() {
     private fun setupExplainerViewPager() {
         explainerViewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
         explainerViewPager.adapter = ExplainerSlideAdapter()
+        explainerViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                chevronHintContainer.animate()
+                    .alpha(if (position == 0) 1f else 0f)
+                    .setDuration(200)
+                    .start()
+            }
+        })
     }
 
     @android.annotation.SuppressLint("ClickableViewAccessibility")
@@ -699,21 +712,16 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun setExplainerWindowBars(open: Boolean) {
-        val navyColor = android.graphics.Color.parseColor("#0A2540")
-        val lightColor = android.graphics.Color.WHITE
         val controller = WindowInsetsControllerCompat(window, window.decorView)
-
+        val darkNavy = android.graphics.Color.parseColor("#0A2540")
         if (open) {
-            window.statusBarColor = navyColor
-            window.navigationBarColor = navyColor
-            controller.isAppearanceLightStatusBars = false
-            controller.isAppearanceLightNavigationBars = false
+            window.statusBarColor = darkNavy
         } else {
-            window.statusBarColor = lightColor
-            window.navigationBarColor = lightColor
-            controller.isAppearanceLightStatusBars = true
-            controller.isAppearanceLightNavigationBars = true
+            window.statusBarColor = android.graphics.Color.parseColor("#0E3050")
         }
+        window.navigationBarColor = darkNavy // always dark navy at bottom
+        controller.isAppearanceLightStatusBars = false
+        controller.isAppearanceLightNavigationBars = false
     }
 
     private fun openExplainer() {

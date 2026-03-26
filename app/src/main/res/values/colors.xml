@@ -3,6 +3,7 @@
     <!-- Numo Brand Colors -->
     <color name="numo_fluorescent_green">#5EFFC2</color>
     <color name="numo_navy">#0A2540</color>
+    <color name="numo_navy_light">#0E3050</color>
     
     <!-- Cash App Brand Colors -->
     <color name="color_primary_green">#0B1215</color>

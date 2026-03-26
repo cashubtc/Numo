@@ -125,7 +125,7 @@
         android:id="@+id/choose_path_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/color_bg_white"
+        android:background="@color/numo_navy_light"
         android:visibility="gone">
 
         <!-- Setup content -->
@@ -142,7 +142,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/onboarding_setup_title"
                 android:textSize="28sp"
-                android:textColor="@color/color_text_primary"
+                android:textColor="#FFFFFF"
                 android:fontFamily="sans-serif-medium"
                 android:gravity="center" />
 
@@ -152,7 +152,7 @@
                 android:layout_marginTop="10dp"
                 android:text="@string/onboarding_setup_subtitle"
                 android:textSize="16sp"
-                android:textColor="@color/color_text_secondary"
+                android:textColor="#99FFFFFF"
                 android:gravity="center" />
 
             <Space
@@ -195,7 +195,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/onboarding_create_wallet_title"
                             android:textSize="16sp"
-                            android:textColor="@color/color_text_primary"
+                            android:textColor="#FFFFFF"
                             android:fontFamily="sans-serif-medium" />
 
                         <TextView
@@ -204,7 +204,7 @@
                             android:layout_marginTop="1dp"
                             android:text="@string/onboarding_create_wallet_subtitle"
                             android:textSize="14sp"
-                            android:textColor="@color/color_text_tertiary" />
+                            android:textColor="#73FFFFFF" />
 
                     </LinearLayout>
 
@@ -212,7 +212,7 @@
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:src="@drawable/ic_chevron_right"
-                        app:tint="@color/color_icon_tertiary"
+                        app:tint="#4DFFFFFF"
                         android:contentDescription="@null" />
 
                 </LinearLayout>
@@ -251,7 +251,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/onboarding_restore_wallet_title"
                             android:textSize="16sp"
-                            android:textColor="@color/color_text_primary"
+                            android:textColor="#FFFFFF"
                             android:fontFamily="sans-serif-medium" />
 
                         <TextView
@@ -260,7 +260,7 @@
                             android:layout_marginTop="1dp"
                             android:text="@string/onboarding_restore_wallet_subtitle"
                             android:textSize="14sp"
-                            android:textColor="@color/color_text_tertiary" />
+                            android:textColor="#73FFFFFF" />
 
                     </LinearLayout>
 
@@ -268,7 +268,7 @@
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:src="@drawable/ic_chevron_right"
-                        app:tint="@color/color_icon_tertiary"
+                        app:tint="#4DFFFFFF"
                         android:contentDescription="@null" />
 
                 </LinearLayout>
@@ -276,6 +276,14 @@
             </LinearLayout>
 
         </LinearLayout>
+
+        <!-- Gradient fade into teaser — covers bottom half of screen -->
+        <View
+            android:id="@+id/teaser_gradient"
+            android:layout_width="match_parent"
+            android:layout_height="420dp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/bg_teaser_gradient" />
 
         <!-- Teaser card -->
         <FrameLayout
@@ -401,6 +409,7 @@
 
                 <!-- Swipe hint chevrons -->
                 <LinearLayout
+                    android:id="@+id/chevron_hint_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"

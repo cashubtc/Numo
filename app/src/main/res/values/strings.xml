@@ -125,7 +125,7 @@
     <string name="explainer_slide1_body">Enter an amount, tap charge, and your customer holds their phone to yours. Payment lands instantly over NFC.</string>
     <string name="explainer_slide2_title">Automatic\nself-custody</string>
     <string name="explainer_slide2_body">Set up auto-withdraw to move incoming payments straight to your own Lightning wallet. Numo stays self-custodial by default.</string>
-    <string name="explainer_slide3_title">Zero\nfees</string>
+    <string name="explainer_slide3_title">Zero fees</string>
     <string name="explainer_slide3_body">Numo is fully open-source and charges no fees. No subscriptions, no cuts, no hidden costs. Every sat you receive is yours.</string>
     <string name="explainer_image_placeholder">Image placeholder</string>
 
