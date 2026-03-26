@@ -102,8 +102,19 @@ class LightningMintHandlerTest {
             cashuWalletManagerMock.`when`<WalletRepository> { CashuWalletManager.getWallet() }.thenReturn(mockWalletRepository)
         
         // Mock WalletRepository.getWallet() to return our mock Wallet (it's a suspend function)
+        // Mock loadMintInfo() chain: MintInfo -> nuts -> nut04 -> methods (empty = no description support)
+        val mockNut04 = mock(org.cashudevkit.Nut04Settings::class.java)
+        `when`(mockNut04.methods).thenReturn(emptyList())
+
+        val mockNuts = mock(org.cashudevkit.Nuts::class.java)
+        `when`(mockNuts.nut04).thenReturn(mockNut04)
+
+        val mockMintInfo = mock(org.cashudevkit.MintInfo::class.java)
+        `when`(mockMintInfo.nuts).thenReturn(mockNuts)
+
         runBlocking {
             `when`(mockWalletRepository.getWallet(org.mockito.kotlin.any(), org.mockito.kotlin.any())).thenReturn(mockWallet)
+            `when`(mockWallet.loadMintInfo()).thenReturn(mockMintInfo)
         }
         
         // Setup handler with dynamic server url and injected dispatcher
