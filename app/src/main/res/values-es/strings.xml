@@ -118,6 +118,16 @@
     <string name="onboarding_restore_wallet_title">Restaurar desde copia de seguridad</string>
     <string name="onboarding_restore_wallet_subtitle">Usa tu frase semilla existente</string>
 
+    <!-- Explainer -->
+    <string name="explainer_teaser_title">Cmo funciona\nNumo?</string>
+    <string name="explainer_slide1_title">Toca para\ncobrar</string>
+    <string name="explainer_slide1_body">Ingresa un monto, toca cobrar y tu cliente acerca su telfono al tuyo. El pago llega al instante por NFC.</string>
+    <string name="explainer_slide2_title">Auto-custodia\nautomtica</string>
+    <string name="explainer_slide2_body">Configura el retiro automtico para mover los pagos entrantes directamente a tu billetera Lightning. Numo es auto-custodia por defecto.</string>
+    <string name="explainer_slide3_title">Cero\ncomisiones</string>
+    <string name="explainer_slide3_body">Numo es completamente de cdigo abierto y no cobra comisiones. Sin suscripciones, sin recortes, sin costos ocultos. Cada sat que recibes es tuyo.</string>
+    <string name="explainer_image_placeholder">Imagen de ejemplo</string>
+
     <!-- Onboarding / Restore Seed Entry -->
     <string name="onboarding_seed_toolbar_back">Atrás</string>
     <string name="onboarding_seed_toolbar_title">Restaurar cartera</string>

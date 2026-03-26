@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="22dp"
+    android:height="22dp"
+    android:viewportWidth="22"
+    android:viewportHeight="22">
+    <!-- Circular arrow (partial circle with arrow) -->
+    <path
+        android:pathData="M4,11a7,7 0,1 1,1.4 4.2"
+        android:strokeWidth="1.8"
+        android:strokeColor="#9B9B9F"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <!-- Arrow head -->
+    <path
+        android:pathData="M3.2,8L4,11L7,11"
+        android:strokeWidth="1.8"
+        android:strokeColor="#9B9B9F"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <!-- Clock hands -->
+    <path
+        android:pathData="M11,7L11,11L13.5,12.5"
+        android:strokeWidth="1.8"
+        android:strokeColor="#9B9B9F"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

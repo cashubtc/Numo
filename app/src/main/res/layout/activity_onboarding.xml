@@ -125,18 +125,16 @@
         android:id="@+id/choose_path_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/color_bg_white"
         android:visibility="gone">
 
+        <!-- Setup content -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="24dp">
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.15" />
+            android:paddingHorizontal="24dp"
+            android:paddingTop="48dp">
 
             <!-- Title -->
             <TextView
@@ -151,7 +149,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:text="@string/onboarding_setup_subtitle"
                 android:textSize="16sp"
                 android:textColor="@color/color_text_secondary"
@@ -159,125 +157,289 @@
 
             <Space
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.15" />
+                android:layout_height="48dp" />
 
-            <!-- Create New Wallet Card -->
+            <!-- Option rows -->
             <LinearLayout
-                android:id="@+id/create_wallet_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_onboarding_option_card"
-                android:padding="24dp"
-                android:clickable="true"
-                android:focusable="true">
+                android:orientation="vertical">
 
+                <!-- Create New Wallet -->
                 <LinearLayout
+                    android:id="@+id/create_wallet_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:gravity="center_vertical"
+                    android:paddingVertical="14dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground">
 
                     <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_add_circle"
-                        android:contentDescription="@string/onboarding_create_wallet_title"
-                        app:tint="@color/color_success_green" />
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_plus_stroke"
+                        android:contentDescription="@string/onboarding_create_wallet_title" />
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:layout_marginStart="16dp">
+                        android:layout_marginStart="14dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/onboarding_create_wallet_title"
-                            android:textSize="17sp"
+                            android:textSize="16sp"
                             android:textColor="@color/color_text_primary"
                             android:fontFamily="sans-serif-medium" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="1dp"
                             android:text="@string/onboarding_create_wallet_subtitle"
                             android:textSize="14sp"
-                            android:textColor="@color/color_text_secondary" />
+                            android:textColor="@color/color_text_tertiary" />
 
                     </LinearLayout>
 
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/color_icon_tertiary"
+                        android:contentDescription="@null" />
+
                 </LinearLayout>
 
-            </LinearLayout>
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="8dp" />
 
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="16dp" />
-
-            <!-- Restore Wallet Card -->
-            <LinearLayout
-                android:id="@+id/restore_wallet_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_onboarding_option_card"
-                android:padding="24dp"
-                android:clickable="true"
-                android:focusable="true">
-
+                <!-- Restore from Backup -->
                 <LinearLayout
+                    android:id="@+id/restore_wallet_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:gravity="center_vertical"
+                    android:paddingVertical="14dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground">
 
                     <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_restore"
-                        android:contentDescription="@string/onboarding_restore_wallet_title"
-                        app:tint="@color/color_accent_blue" />
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_clock_stroke"
+                        android:contentDescription="@string/onboarding_restore_wallet_title" />
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:layout_marginStart="16dp">
+                        android:layout_marginStart="14dp">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/onboarding_restore_wallet_title"
-                            android:textSize="17sp"
+                            android:textSize="16sp"
                             android:textColor="@color/color_text_primary"
                             android:fontFamily="sans-serif-medium" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="1dp"
                             android:text="@string/onboarding_restore_wallet_subtitle"
                             android:textSize="14sp"
-                            android:textColor="@color/color_text_secondary" />
+                            android:textColor="@color/color_text_tertiary" />
 
                     </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_chevron_right"
+                        app:tint="@color/color_icon_tertiary"
+                        android:contentDescription="@null" />
 
                 </LinearLayout>
 
             </LinearLayout>
 
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.7" />
-
         </LinearLayout>
+
+        <!-- Teaser card -->
+        <FrameLayout
+            android:id="@+id/teaser_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="34dp"
+            android:clickable="true"
+            android:focusable="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_teaser_card"
+                android:clipChildren="true"
+                android:clipToPadding="false">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="26dp"
+                    android:paddingHorizontal="24dp"
+                    android:paddingBottom="20dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/explainer_teaser_title"
+                        android:textSize="32sp"
+                        android:fontFamily="sans-serif-black"
+                        android:textColor="@color/numo_fluorescent_green"
+                        android:textAllCaps="true"
+                        android:letterSpacing="-0.03"
+                        android:lineSpacingMultiplier="1.05" />
+
+                </LinearLayout>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="180dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/bg_placeholder_image">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="@string/explainer_image_placeholder"
+                        android:textSize="11sp"
+                        android:textColor="#335EFFC2"
+                        android:textAllCaps="true"
+                        android:letterSpacing="0.04" />
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+        </FrameLayout>
+
+        <!-- Explainer overlay -->
+        <FrameLayout
+            android:id="@+id/explainer_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <!-- Backdrop -->
+            <View
+                android:id="@+id/explainer_backdrop"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#80000000"
+                android:alpha="0" />
+
+            <!-- Sheet -->
+            <LinearLayout
+                android:id="@+id/explainer_sheet"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:background="@color/numo_navy"
+                android:translationY="2000dp">
+
+                <!-- Close button -->
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="20dp"
+                    android:paddingTop="16dp">
+
+                    <FrameLayout
+                        android:id="@+id/explainer_close_btn"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_explainer_close_btn"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_close"
+                            android:alpha="0.6"
+                            android:contentDescription="@string/navigation_drawer_close" />
+
+                    </FrameLayout>
+
+                </FrameLayout>
+
+                <!-- Slides ViewPager -->
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/explainer_view_pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical" />
+
+                <!-- Swipe hint chevrons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="54dp">
+
+                    <ImageView
+                        android:id="@+id/chevron_hint_1"
+                        android:layout_width="24dp"
+                        android:layout_height="14dp"
+                        android:src="@drawable/ic_chevron_down_hint"
+                        android:alpha="0.12"
+                        android:contentDescription="@null" />
+
+                    <ImageView
+                        android:id="@+id/chevron_hint_2"
+                        android:layout_width="24dp"
+                        android:layout_height="14dp"
+                        android:layout_marginTop="-6dp"
+                        android:src="@drawable/ic_chevron_down_hint"
+                        android:alpha="0.12"
+                        android:contentDescription="@null" />
+
+                    <ImageView
+                        android:id="@+id/chevron_hint_3"
+                        android:layout_width="24dp"
+                        android:layout_height="14dp"
+                        android:layout_marginTop="-6dp"
+                        android:src="@drawable/ic_chevron_down_hint"
+                        android:alpha="0.12"
+                        android:contentDescription="@null" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </FrameLayout>
+
     </FrameLayout>
 
     <!-- ======================== -->

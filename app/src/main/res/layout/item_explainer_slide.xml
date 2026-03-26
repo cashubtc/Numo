@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingHorizontal="32dp">
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="32dp" />
+
+    <TextView
+        android:id="@+id/slide_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="42sp"
+        android:fontFamily="sans-serif-black"
+        android:textColor="@color/numo_fluorescent_green"
+        android:textAllCaps="true"
+        android:letterSpacing="-0.035"
+        android:lineSpacingMultiplier="1.0" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="16dp" />
+
+    <TextView
+        android:id="@+id/slide_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxWidth="300dp"
+        android:textSize="16sp"
+        android:textColor="#8CFFFFFF"
+        android:lineSpacingMultiplier="1.5" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center">
+
+        <FrameLayout
+            android:layout_width="280dp"
+            android:layout_height="240dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_placeholder_image_large">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/explainer_image_placeholder"
+                android:textSize="11sp"
+                android:textColor="#335EFFC2"
+                android:textAllCaps="true"
+                android:letterSpacing="0.04" />
+
+        </FrameLayout>
+
+    </FrameLayout>
+
+</LinearLayout>

@@ -16,9 +16,12 @@ import android.text.TextPaint
 import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
+import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
+import androidx.viewpager2.widget.ViewPager2
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.FrameLayout
@@ -144,6 +147,19 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var createWalletButton: View
     private lateinit var restoreWalletButton: View
 
+    // Teaser + Explainer
+    private lateinit var teaserCard: View
+    private lateinit var explainerOverlay: View
+    private lateinit var explainerSheet: View
+    private lateinit var explainerBackdrop: View
+    private lateinit var explainerViewPager: ViewPager2
+    private lateinit var explainerCloseBtn: View
+    private lateinit var chevronHint1: ImageView
+    private lateinit var chevronHint2: ImageView
+    private lateinit var chevronHint3: ImageView
+    private var explainerOpen = false
+    private var chevronAnimatorSet: AnimatorSet? = null
+
     // Step 3: Enter Seed (Restore)
     private lateinit var enterSeedContainer: FrameLayout
     private lateinit var seedInputGrid: GridLayout
@@ -264,8 +280,8 @@ class OnboardingActivity : AppCompatActivity() {
             windowInsetsController.isAppearanceLightStatusBars = true
             windowInsetsController.isAppearanceLightNavigationBars = true
         } else {
-            // White/light bars for all other screens
-            val bgColor = android.graphics.Color.parseColor("#F6F7F8")
+            // White bars for all other screens
+            val bgColor = android.graphics.Color.WHITE
             window.statusBarColor = bgColor
             window.navigationBarColor = bgColor
             
@@ -290,6 +306,19 @@ class OnboardingActivity : AppCompatActivity() {
         choosePathContainer = findViewById(R.id.choose_path_container)
         createWalletButton = findViewById(R.id.create_wallet_button)
         restoreWalletButton = findViewById(R.id.restore_wallet_button)
+
+        // Teaser + Explainer
+        teaserCard = findViewById(R.id.teaser_card)
+        explainerOverlay = findViewById(R.id.explainer_overlay)
+        explainerSheet = findViewById(R.id.explainer_sheet)
+        explainerBackdrop = findViewById(R.id.explainer_backdrop)
+        explainerViewPager = findViewById(R.id.explainer_view_pager)
+        explainerCloseBtn = findViewById(R.id.explainer_close_btn)
+        chevronHint1 = findViewById(R.id.chevron_hint_1)
+        chevronHint2 = findViewById(R.id.chevron_hint_2)
+        chevronHint3 = findViewById(R.id.chevron_hint_3)
+
+        setupExplainerViewPager()
 
         // Enter Seed
         enterSeedContainer = findViewById(R.id.enter_seed_container)
@@ -502,6 +531,11 @@ class OnboardingActivity : AppCompatActivity() {
             showStep(OnboardingStep.ENTER_SEED)
         }
 
+        // Teaser + Explainer
+        setupTeaserTouchListener()
+        explainerCloseBtn.setOnClickListener { closeExplainer() }
+        explainerBackdrop.setOnClickListener { closeExplainer() }
+
         // Enter Seed
         seedBackButton.setOnClickListener {
             showStep(OnboardingStep.CHOOSE_PATH)
@@ -545,6 +579,12 @@ class OnboardingActivity : AppCompatActivity() {
             welcomeAnimator = null
         }
 
+        // Close explainer and stop chevron animation if leaving CHOOSE_PATH
+        if (currentStep == OnboardingStep.CHOOSE_PATH && step != OnboardingStep.CHOOSE_PATH) {
+            resetExplainer()
+            stopChevronPulseAnimation()
+        }
+
         currentStep = step
 
         // Update window bars based on the step (green only for welcome screen)
@@ -578,7 +618,12 @@ class OnboardingActivity : AppCompatActivity() {
         if (step == OnboardingStep.WELCOME) {
             animateWelcomeScreen()
         } else {
-        animateContainerIn(containerToShow)
+            animateContainerIn(containerToShow)
+        }
+
+        // Start chevron animation when showing CHOOSE_PATH
+        if (step == OnboardingStep.CHOOSE_PATH) {
+            startChevronPulseAnimation()
         }
     }
 
@@ -595,6 +640,201 @@ class OnboardingActivity : AppCompatActivity() {
             duration = 300
             interpolator = DecelerateInterpolator()
         }.start()
+    }
+
+    // ══════════════════════════════════════════
+    // Explainer overlay
+    // ══════════════════════════════════════════
+
+    private fun setupExplainerViewPager() {
+        explainerViewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
+        explainerViewPager.adapter = ExplainerSlideAdapter()
+    }
+
+    @android.annotation.SuppressLint("ClickableViewAccessibility")
+    private fun setupTeaserTouchListener() {
+        var startY = 0f
+        var isDragging = false
+
+        teaserCard.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    startY = event.rawY
+                    isDragging = false
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val diff = startY - event.rawY
+                    if (diff > 10) {
+                        isDragging = true
+                        // Show the overlay and track finger
+                        explainerOverlay.visibility = View.VISIBLE
+                        val screenHeight = explainerOverlay.height.toFloat()
+                        val progress = (diff / screenHeight).coerceIn(0f, 1f)
+                        explainerSheet.translationY = screenHeight * (1f - progress)
+                        explainerBackdrop.alpha = progress
+                        // Fade out teaser proportionally
+                        teaserCard.alpha = 1f - progress
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    val diff = startY - event.rawY
+                    if (isDragging) {
+                        val threshold = 80 * resources.displayMetrics.density
+                        if (diff > threshold) {
+                            openExplainer()
+                        } else {
+                            snapExplainerClosed()
+                        }
+                    } else if (diff < 10 * resources.displayMetrics.density) {
+                        // Tap — open
+                        openExplainer()
+                    }
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun setExplainerWindowBars(open: Boolean) {
+        val navyColor = android.graphics.Color.parseColor("#0A2540")
+        val lightColor = android.graphics.Color.WHITE
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+
+        if (open) {
+            window.statusBarColor = navyColor
+            window.navigationBarColor = navyColor
+            controller.isAppearanceLightStatusBars = false
+            controller.isAppearanceLightNavigationBars = false
+        } else {
+            window.statusBarColor = lightColor
+            window.navigationBarColor = lightColor
+            controller.isAppearanceLightStatusBars = true
+            controller.isAppearanceLightNavigationBars = true
+        }
+    }
+
+    private fun openExplainer() {
+        explainerOpen = true
+        explainerOverlay.visibility = View.VISIBLE
+        setExplainerWindowBars(true)
+        val screenHeight = explainerOverlay.height.toFloat()
+
+        // Animate sheet up
+        ObjectAnimator.ofFloat(explainerSheet, "translationY", explainerSheet.translationY, 0f).apply {
+            duration = 450
+            interpolator = android.view.animation.PathInterpolator(0.32f, 0.72f, 0f, 1f)
+        }.start()
+
+        // Fade in backdrop
+        ObjectAnimator.ofFloat(explainerBackdrop, "alpha", explainerBackdrop.alpha, 1f).apply {
+            duration = 350
+        }.start()
+
+        // Slide teaser down and fade out
+        ObjectAnimator.ofFloat(teaserCard, "translationY", 0f, screenHeight * 0.3f).apply {
+            duration = 350
+        }.start()
+        ObjectAnimator.ofFloat(teaserCard, "alpha", 1f, 0f).apply {
+            duration = 200
+        }.start()
+    }
+
+    private fun closeExplainer() {
+        explainerOpen = false
+        setExplainerWindowBars(false)
+        val screenHeight = explainerOverlay.height.toFloat()
+
+        // Animate sheet down
+        ObjectAnimator.ofFloat(explainerSheet, "translationY", 0f, screenHeight).apply {
+            duration = 450
+            interpolator = android.view.animation.PathInterpolator(0.32f, 0.72f, 0f, 1f)
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    explainerOverlay.visibility = View.GONE
+                    explainerViewPager.setCurrentItem(0, false)
+                }
+            })
+        }.start()
+
+        // Fade backdrop out
+        ObjectAnimator.ofFloat(explainerBackdrop, "alpha", 1f, 0f).apply {
+            duration = 350
+        }.start()
+
+        // Bounce teaser back in after a short delay
+        teaserCard.postDelayed({
+            teaserCard.translationY = 200f
+            ObjectAnimator.ofFloat(teaserCard, "translationY", 200f, 0f).apply {
+                duration = 500
+                interpolator = OvershootInterpolator(1.2f)
+            }.start()
+            ObjectAnimator.ofFloat(teaserCard, "alpha", 0f, 1f).apply {
+                duration = 300
+            }.start()
+        }, 300)
+    }
+
+    private fun snapExplainerClosed() {
+        setExplainerWindowBars(false)
+        val screenHeight = explainerOverlay.height.toFloat()
+
+        ObjectAnimator.ofFloat(explainerSheet, "translationY", explainerSheet.translationY, screenHeight).apply {
+            duration = 350
+            interpolator = DecelerateInterpolator()
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    explainerOverlay.visibility = View.GONE
+                }
+            })
+        }.start()
+
+        ObjectAnimator.ofFloat(explainerBackdrop, "alpha", explainerBackdrop.alpha, 0f).apply {
+            duration = 300
+        }.start()
+
+        // Restore teaser
+        ObjectAnimator.ofFloat(teaserCard, "alpha", teaserCard.alpha, 1f).apply {
+            duration = 200
+        }.start()
+    }
+
+    private fun resetExplainer() {
+        if (explainerOpen) {
+            explainerOpen = false
+            explainerOverlay.visibility = View.GONE
+            explainerSheet.translationY = 2000f
+            explainerBackdrop.alpha = 0f
+            teaserCard.translationY = 0f
+            teaserCard.alpha = 1f
+            explainerViewPager.setCurrentItem(0, false)
+        }
+    }
+
+    private fun startChevronPulseAnimation() {
+        stopChevronPulseAnimation()
+
+        val chevrons = listOf(chevronHint1, chevronHint2, chevronHint3)
+        val animators = chevrons.mapIndexed { index, chevron ->
+            ObjectAnimator.ofFloat(chevron, "alpha", 0.12f, 0.7f, 0.12f).apply {
+                duration = 1800
+                repeatCount = ValueAnimator.INFINITE
+                interpolator = AccelerateDecelerateInterpolator()
+                startDelay = (index * 200).toLong()
+            }
+        }
+
+        chevronAnimatorSet = AnimatorSet().apply {
+            playTogether(animators.map { it as android.animation.Animator })
+            start()
+        }
+    }
+
+    private fun stopChevronPulseAnimation() {
+        chevronAnimatorSet?.cancel()
+        chevronAnimatorSet = null
     }
 
     /**
