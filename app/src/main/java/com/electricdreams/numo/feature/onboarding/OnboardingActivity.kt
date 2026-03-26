@@ -901,9 +901,9 @@ class OnboardingActivity : AppCompatActivity() {
                 discoveredMints.clear()
                 selectedMints.clear()
                 onboardingMintDisplayNames.clear()
-                val shuffledMints = ONBOARDING_DEFAULT_MINTS.shuffled()
-                discoveredMints.addAll(shuffledMints)
-                selectedMints.addAll(shuffledMints)
+                val healthyMints = filterHealthyMints(ONBOARDING_DEFAULT_MINTS.shuffled())
+                discoveredMints.addAll(healthyMints)
+                selectedMints.addAll(healthyMints)
                 backupFound = false
 
                 withContext(Dispatchers.Main) {
@@ -1102,9 +1102,9 @@ class OnboardingActivity : AppCompatActivity() {
             } else {
                 backupFound = false
                 backupTimestamp = null
-                val shuffledMints = ONBOARDING_DEFAULT_MINTS.shuffled()
-                discoveredMints.addAll(shuffledMints)
-                selectedMints.addAll(shuffledMints)
+                val healthyMints = filterHealthyMints(ONBOARDING_DEFAULT_MINTS.shuffled())
+                discoveredMints.addAll(healthyMints)
+                selectedMints.addAll(healthyMints)
             }
 
             withContext(Dispatchers.Main) {
@@ -1291,6 +1291,19 @@ class OnboardingActivity : AppCompatActivity() {
             null
         }
     }
+
+    /**
+     * Pings each mint in parallel and returns only the ones that respond successfully.
+     * Falls back to the full list if all mints are unreachable.
+     */
+    private suspend fun filterHealthyMints(mints: List<String>): List<String> =
+        withContext(Dispatchers.IO) {
+            val results = mints.map { url ->
+                async { url to mintProfileService.validateMintUrl(url).isValid }
+            }.awaitAll()
+            val healthy = results.filter { it.second }.map { it.first }
+            healthy.ifEmpty { mints } // fall back to full list if none reachable
+        }
 
     private fun refreshMintProfilesForReview() {
         val mintsList = discoveredMints.toList()
