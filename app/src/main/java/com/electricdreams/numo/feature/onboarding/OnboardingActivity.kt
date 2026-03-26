@@ -115,6 +115,7 @@ class OnboardingActivity : AppCompatActivity() {
 
     private var currentStep = OnboardingStep.WELCOME
     private var isRestoreFlow = false
+    private var welcomeAnimator: OnboardingWelcomeAnimator? = null
 
     // === Data ===
     private var generatedMnemonic: String? = null
@@ -136,6 +137,7 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var welcomeTagline: TextView
     private lateinit var termsText: TextView
     private lateinit var acceptButton: MaterialButton
+    private lateinit var emojiBurstContainer: FrameLayout
 
     // Step 2: Choose Path
     private lateinit var choosePathContainer: FrameLayout
@@ -253,15 +255,14 @@ class OnboardingActivity : AppCompatActivity() {
         val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
         
         if (step == OnboardingStep.WELCOME) {
-            // Navy status bar (matches curved navy section at top)
-            val navyColor = android.graphics.Color.parseColor("#0A2540")
-            val greenColor = android.graphics.Color.parseColor("#5EFFC2")
-            window.statusBarColor = navyColor
-            window.navigationBarColor = greenColor
-            
-            // Light icons on navy status bar, dark icons on green nav bar
-            windowInsetsController.isAppearanceLightStatusBars = false
-            windowInsetsController.isAppearanceLightNavigationBars = false
+            // Start with white bars (animator will transition to navy)
+            val whiteColor = android.graphics.Color.WHITE
+            window.statusBarColor = whiteColor
+            window.navigationBarColor = whiteColor
+
+            // Dark icons on white background
+            windowInsetsController.isAppearanceLightStatusBars = true
+            windowInsetsController.isAppearanceLightNavigationBars = true
         } else {
             // White/light bars for all other screens
             val bgColor = android.graphics.Color.parseColor("#F6F7F8")
@@ -283,6 +284,7 @@ class OnboardingActivity : AppCompatActivity() {
         welcomeTagline = findViewById(R.id.welcome_tagline)
         termsText = findViewById(R.id.terms_text)
         acceptButton = findViewById(R.id.accept_button)
+        emojiBurstContainer = findViewById(R.id.emoji_burst_container)
 
         // Choose Path
         choosePathContainer = findViewById(R.id.choose_path_container)
@@ -379,9 +381,8 @@ class OnboardingActivity : AppCompatActivity() {
                 }
 
                 override fun updateDrawState(ds: TextPaint) {
-                    super.updateDrawState(ds)
-                    ds.color = ContextCompat.getColor(this@OnboardingActivity, R.color.color_accent_blue)
-                    ds.isUnderlineText = true
+                    // No super — avoids default blue color and underline
+                    ds.isFakeBoldText = true
                 }
             }
 
@@ -538,6 +539,12 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun showStep(step: OnboardingStep) {
+        // Stop welcome animation if leaving welcome screen
+        if (currentStep == OnboardingStep.WELCOME && step != OnboardingStep.WELCOME) {
+            welcomeAnimator?.stop()
+            welcomeAnimator = null
+        }
+
         currentStep = step
 
         // Update window bars based on the step (green only for welcome screen)
@@ -591,88 +598,35 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     /**
-     * Elegant Apple-like animation for the welcome screen.
-     * Two-tone design: Navy curved section at top, fluorescent green at bottom.
-     * 1. Navy curve slides/fades in from top
-     * 2. Wordmark fades in with scale animation
-     * 3. Tagline fades in with slide up
-     * 4. Button fades in
+     * Cinematic welcome screen animation with 5 phases:
+     * 1. Logo splash with shimmer
+     * 2. Logo translates from center to top
+     * 3. Tagline fades in
+     * 4. Emoji tiles form circle then burst outward
+     * 5. Get Started button and terms fade in
      */
     private fun animateWelcomeScreen() {
-        // Reset all views to initial state
-        welcomeNavyCurve.alpha = 0f
-        welcomeNavyCurve.translationY = -50f
-        welcomeWordmark.alpha = 0f
-        welcomeWordmark.scaleX = 0.95f
-        welcomeWordmark.scaleY = 0.95f
-        welcomeTagline.alpha = 0f
-        welcomeTagline.translationY = 15f
-        acceptButton.alpha = 0f
-        acceptButton.translationY = 20f
+        welcomeAnimator?.stop()
+        welcomeAnimator = OnboardingWelcomeAnimator(
+            activity = this,
+            container = welcomeContainer,
+            wordmark = welcomeWordmark,
+            tagline = welcomeTagline,
+            acceptButton = acceptButton,
+            termsText = termsText,
+            emojiContainer = emojiBurstContainer
+        )
+        welcomeAnimator?.start(lifecycleScope)
+    }
 
-        // 1. Animate navy curve sliding down and fading in
-        val navyCurveAlpha = ObjectAnimator.ofFloat(welcomeNavyCurve, "alpha", 0f, 1f).apply {
-            duration = 700
-            startDelay = 150
-            interpolator = DecelerateInterpolator()
-        }
-        val navyCurveTranslate = ObjectAnimator.ofFloat(welcomeNavyCurve, "translationY", -50f, 0f).apply {
-            duration = 700
-            startDelay = 150
-            interpolator = DecelerateInterpolator()
-        }
+    override fun onPause() {
+        super.onPause()
+        welcomeAnimator?.pause()
+    }
 
-        // 2. Animate wordmark fade in with subtle scale - appears immediately (no delay)
-        val wordmarkAlpha = ObjectAnimator.ofFloat(welcomeWordmark, "alpha", 0f, 1f).apply {
-            duration = 400
-            startDelay = 0
-            interpolator = DecelerateInterpolator()
-        }
-        val wordmarkScaleX = ObjectAnimator.ofFloat(welcomeWordmark, "scaleX", 0.95f, 1f).apply {
-            duration = 400
-            startDelay = 0
-            interpolator = DecelerateInterpolator()
-        }
-        val wordmarkScaleY = ObjectAnimator.ofFloat(welcomeWordmark, "scaleY", 0.95f, 1f).apply {
-            duration = 400
-            startDelay = 0
-            interpolator = DecelerateInterpolator()
-        }
-
-        // 3. Animate tagline fade in with slide up
-        val taglineAlpha = ObjectAnimator.ofFloat(welcomeTagline, "alpha", 0f, 1f).apply {
-            duration = 450
-            startDelay = 850
-            interpolator = DecelerateInterpolator()
-        }
-        val taglineTranslate = ObjectAnimator.ofFloat(welcomeTagline, "translationY", 15f, 0f).apply {
-            duration = 450
-            startDelay = 850
-            interpolator = DecelerateInterpolator()
-        }
-
-        // 4. Animate button fade in
-        val buttonAlpha = ObjectAnimator.ofFloat(acceptButton, "alpha", 0f, 1f).apply {
-            duration = 400
-            startDelay = 1150
-            interpolator = DecelerateInterpolator()
-        }
-        val buttonTranslate = ObjectAnimator.ofFloat(acceptButton, "translationY", 20f, 0f).apply {
-            duration = 400
-            startDelay = 1150
-            interpolator = DecelerateInterpolator()
-        }
-
-        // Play all animations
-        AnimatorSet().apply {
-            playTogether(
-                navyCurveAlpha, navyCurveTranslate,
-                wordmarkAlpha, wordmarkScaleX, wordmarkScaleY,
-                taglineAlpha, taglineTranslate,
-                buttonAlpha, buttonTranslate
-            )
-            start()
-        }
+    override fun onResume() {
+        super.onResume()
+        welcomeAnimator?.resume()
     }
 
     // === New Wallet Flow ===
@@ -1489,6 +1443,12 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun Int.dpToPx(): Int {
         return (this * resources.displayMetrics.density).toInt()
+    }
+
+    override fun onDestroy() {
+        welcomeAnimator?.stop()
+        welcomeAnimator = null
+        super.onDestroy()
     }
 
     @Deprecated("Deprecated in Java")

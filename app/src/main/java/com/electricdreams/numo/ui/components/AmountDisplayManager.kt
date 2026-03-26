@@ -5,6 +5,7 @@ import android.view.View
 import com.electricdreams.numo.R
 import android.widget.Button
 import android.widget.TextView
+import com.electricdreams.numo.core.cashu.CashuWalletManager
 import android.widget.Toast
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.prefs.PreferenceStore
@@ -167,14 +168,24 @@ class AmountDisplayManager(
 
         // Update submit button
         if (satsValue > 0) {
-            // Always show a simple, localized "Charge" label without the amount
-            submitButton.text = context.getString(R.string.pos_charge_button)
-            submitButton.isEnabled = true
             requestedAmount = satsValue
+            val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
+            if (isReady) {
+                submitButton.text = context.getString(R.string.pos_charge_button)
+                submitButton.isEnabled = true
+            } else {
+                submitButton.text = context.getString(R.string.pos_charge_button_loading)
+                submitButton.isEnabled = false
+            }
         } else {
-            submitButton.text = context.getString(R.string.pos_charge_button)
-            submitButton.isEnabled = false
             requestedAmount = 0
+            val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
+            if (isReady) {
+                submitButton.text = context.getString(R.string.pos_charge_button)
+            } else {
+                submitButton.text = context.getString(R.string.pos_charge_button_loading)
+            }
+            submitButton.isEnabled = false
         }
     }
 

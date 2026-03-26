@@ -1,6 +1,8 @@
 package com.electricdreams.numo.payment
 
+import android.content.Context
 import android.util.Log
+import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.google.gson.Gson
 import com.google.gson.JsonObject
@@ -43,6 +45,7 @@ import kotlin.coroutines.resumeWithException
  * @param uiScope Coroutine scope for UI callbacks
  */
 class LightningMintHandler(
+    private val context: Context,
     private val preferredMint: String?,
     private val allowedMints: List<String>,
     private val uiScope: CoroutineScope,
@@ -51,10 +54,11 @@ class LightningMintHandler(
 ) {
     // Secondary constructor to maintain compatibility
     constructor(
+        context: Context,
         preferredMint: String?,
         allowedMints: List<String>,
         uiScope: CoroutineScope
-    ) : this(preferredMint, allowedMints, uiScope, Dispatchers.IO)
+    ) : this(context, preferredMint, allowedMints, uiScope, Dispatchers.IO)
     /**
      * Callback interface for Lightning mint events.
      */
@@ -149,7 +153,17 @@ class LightningMintHandler(
 
                 Log.d(TAG, "Requesting Lightning mint quote from ${mintUrl.url} for $paymentAmount sats")
                 val mintWallet = wallet.getWallet(mintUrl, CurrencyUnit.Sat)
-                val quote = mintWallet?.mintQuote(org.cashudevkit.PaymentMethod.Bolt11, quoteAmount, "Numo POS payment of $paymentAmount sats", null)
+
+                val nut04 = mintWallet.loadMintInfo().nuts.nut04
+                val supportsDescription = nut04?.methods?.any {
+                    it.method == org.cashudevkit.PaymentMethod.Bolt11 && it.description == true
+                } == true
+                val description = if (supportsDescription) {
+                    context.getString(R.string.payment_request_lightning_description, paymentAmount)
+                } else {
+                    null
+                }
+                val quote = mintWallet?.mintQuote(org.cashudevkit.PaymentMethod.Bolt11, quoteAmount, description, null)
                     ?: throw Exception("Failed to get wallet for mint: ${mintUrl.url}")
                 mintQuote = quote
 

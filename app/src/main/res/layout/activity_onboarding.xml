@@ -13,25 +13,35 @@
         android:id="@+id/welcome_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clipChildren="false"
         android:visibility="gone">
 
-        <!-- Layer 1: Fluorescent green background (bottom portion) -->
+        <!-- Background (starts white, transitions to navy via animator) -->
         <View
             android:id="@+id/welcome_background_overlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/numo_fluorescent_green" />
+            android:background="@android:color/white" />
 
-        <!-- Layer 2: Navy curved overlay (top portion with curved bottom edge) -->
+        <!-- Navy curve - hidden in new design, kept for ID compatibility -->
         <ImageView
             android:id="@+id/welcome_navy_curve"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:src="@drawable/bg_welcome_curve"
             android:scaleType="fitXY"
+            android:visibility="gone"
             android:alpha="0" />
 
-        <!-- Content Layer -->
+        <!-- Emoji container (BEFORE content so emojis render behind text) -->
+        <FrameLayout
+            android:id="@+id/emoji_burst_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipChildren="false"
+            android:clipToPadding="false" />
+
+        <!-- Content Layer (on top of emojis) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -42,9 +52,9 @@
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.22" />
+                android:layout_weight="1" />
 
-            <!-- Numo Wordmark - White (positioned in navy section) -->
+            <!-- Numo Wordmark (white vector, tinted navy by animator initially) -->
             <ImageView
                 android:id="@+id/welcome_wordmark"
                 android:layout_width="200dp"
@@ -53,7 +63,7 @@
                 android:contentDescription="@string/app_name"
                 android:alpha="0" />
 
-            <!-- Tagline - White text (in navy section) -->
+            <!-- Tagline (color set by animator: starts navy, transitions to white) -->
             <TextView
                 android:id="@+id/welcome_tagline"
                 android:layout_width="wrap_content"
@@ -71,40 +81,41 @@
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.58" />
+                android:layout_weight="1" />
 
-            <!-- Terms Text (in green section) -->
-            <TextView
-                android:id="@+id/terms_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/onboarding_terms_text"
-                android:textSize="13sp"
-                android:textColor="@color/numo_navy"
-                android:alpha="0.7"
-                android:gravity="center"
-                android:paddingHorizontal="16dp" />
-
-            <!-- Accept Button - Navy background (in green section) -->
+            <!-- Get Started button (white bg, navy text — visible after color transition) -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/accept_button"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
-                android:layout_marginTop="16dp"
                 android:text="@string/onboarding_get_started"
                 android:textSize="18sp"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/numo_navy"
                 android:textAllCaps="false"
                 android:alpha="0"
                 android:paddingVertical="4dp"
                 app:cornerRadius="32dp"
-                app:backgroundTint="@color/numo_navy" />
+                app:backgroundTint="#FFFFFF" />
+
+            <!-- Terms Text (below button) -->
+            <TextView
+                android:id="@+id/terms_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="@string/onboarding_terms_text"
+                android:textSize="13sp"
+                android:textColor="#FFFFFF"
+                android:alpha="0"
+                android:gravity="center"
+                android:paddingHorizontal="16dp" />
 
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="32dp" />
 
         </LinearLayout>
+
     </FrameLayout>
 
     <!-- ======================== -->

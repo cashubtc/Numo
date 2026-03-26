@@ -21,6 +21,9 @@ import okhttp3.WebSocketListener
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.mockito.kotlin.anyOrNull
+import android.content.Context
+import com.electricdreams.numo.R
+import org.mockito.kotlin.whenever
 import org.cashudevkit.Amount
 import org.cashudevkit.MintQuote
 import org.cashudevkit.MintUrl
@@ -62,6 +65,8 @@ class LightningMintHandlerTest {
     private lateinit var mockCallback: LightningMintHandler.Callback
     @Mock
     private lateinit var mockMintQuote: MintQuote
+    @Mock
+    private lateinit var mockContext: Context
     
     private lateinit var mockWebServer: MockWebServer
     private lateinit var testScope: TestScope
@@ -80,6 +85,7 @@ class LightningMintHandlerTest {
     @Before
     fun setup() {
         MockitoAnnotations.openMocks(this)
+        whenever(mockContext.getString(org.mockito.kotlin.any(), org.mockito.kotlin.any())).thenReturn("Numo POS payment of 100 sats")
         
         // Setup coroutines
         Dispatchers.setMain(UnconfinedTestDispatcher())
@@ -96,12 +102,23 @@ class LightningMintHandlerTest {
             cashuWalletManagerMock.`when`<WalletRepository> { CashuWalletManager.getWallet() }.thenReturn(mockWalletRepository)
         
         // Mock WalletRepository.getWallet() to return our mock Wallet (it's a suspend function)
+        // Mock loadMintInfo() chain: MintInfo -> nuts -> nut04 -> methods (empty = no description support)
+        val mockNut04 = mock(org.cashudevkit.Nut04Settings::class.java)
+        `when`(mockNut04.methods).thenReturn(emptyList())
+
+        val mockNuts = mock(org.cashudevkit.Nuts::class.java)
+        `when`(mockNuts.nut04).thenReturn(mockNut04)
+
+        val mockMintInfo = mock(org.cashudevkit.MintInfo::class.java)
+        `when`(mockMintInfo.nuts).thenReturn(mockNuts)
+
         runBlocking {
             `when`(mockWalletRepository.getWallet(org.mockito.kotlin.any(), org.mockito.kotlin.any())).thenReturn(mockWallet)
+            `when`(mockWallet.loadMintInfo()).thenReturn(mockMintInfo)
         }
         
         // Setup handler with dynamic server url and injected dispatcher
-        handler = LightningMintHandler(useUrl, listOf(useUrl), testScope, UnconfinedTestDispatcher())
+        handler = LightningMintHandler(mockContext, useUrl, listOf(useUrl), testScope, UnconfinedTestDispatcher())
         
         // Setup default mock behaviors
         `when`(mockMintQuote.request).thenReturn(bolt11)
@@ -141,7 +158,7 @@ class LightningMintHandlerTest {
     fun startFailsWhenNoMintsConfigured() {
         runBlocking {
             // Given
-            val emptyHandler = LightningMintHandler(null, emptyList(), testScope)
+            val emptyHandler = LightningMintHandler(mockContext, null, emptyList(), testScope)
             
             // When
             emptyHandler.start(paymentAmount, mockCallback)
@@ -162,7 +179,7 @@ class LightningMintHandlerTest {
             `when`(mockWallet.mintQuote(any(), any(), any(), any())).thenThrow(RuntimeException("Wallet rejected URL"))
 
             // Given invalid mint URL
-            val invalidHandler = LightningMintHandler("http://exa mple.com", listOf("http://exa mple.com"), testScope, UnconfinedTestDispatcher())
+            val invalidHandler = LightningMintHandler(mockContext, "http://exa mple.com", listOf("http://exa mple.com"), testScope, UnconfinedTestDispatcher())
             
             // When
             invalidHandler.start(paymentAmount, mockCallback)
@@ -182,7 +199,7 @@ class LightningMintHandlerTest {
             val testScope = TestScope(testDispatcher)
             
             // Use StandardTestDispatcher for the IO dispatcher too so we can control time
-            val handler = LightningMintHandler(mintUrlStr, listOf(mintUrlStr), testScope, testDispatcher)
+            val handler = LightningMintHandler(mockContext, mintUrlStr, listOf(mintUrlStr), testScope, testDispatcher)
 
             // We stub mintQuote to return successfully
             doReturn(mockMintQuote).`when`(mockWallet).mintQuote(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
