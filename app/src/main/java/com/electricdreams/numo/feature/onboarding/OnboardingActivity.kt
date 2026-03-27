@@ -155,6 +155,7 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var explainerBackdrop: View
     private lateinit var explainerViewPager: ViewPager2
     private lateinit var explainerCloseBtn: View
+    private lateinit var explainerCloseContainer: View
     private lateinit var chevronHint1: ImageView
     private lateinit var chevronHint2: ImageView
     private lateinit var chevronHint3: ImageView
@@ -320,6 +321,7 @@ class OnboardingActivity : AppCompatActivity() {
         explainerBackdrop = findViewById(R.id.explainer_backdrop)
         explainerViewPager = findViewById(R.id.explainer_view_pager)
         explainerCloseBtn = findViewById(R.id.explainer_close_btn)
+        explainerCloseContainer = findViewById(R.id.explainer_close_container)
         chevronHint1 = findViewById(R.id.chevron_hint_1)
         chevronHint2 = findViewById(R.id.chevron_hint_2)
         chevronHint3 = findViewById(R.id.chevron_hint_3)
@@ -679,6 +681,22 @@ class OnboardingActivity : AppCompatActivity() {
             if (next < (explainerViewPager.adapter?.itemCount ?: 0)) {
                 explainerViewPager.setCurrentItem(next, true)
             }
+        }
+
+        // Make explainer overlay extend behind system bars
+        val dp16 = (16 * resources.displayMetrics.density).toInt()
+        ViewCompat.setOnApplyWindowInsetsListener(explainerOverlay) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            (v.layoutParams as FrameLayout.LayoutParams).apply {
+                topMargin = -insets.top
+                bottomMargin = -insets.bottom
+            }
+            v.layoutParams = v.layoutParams
+            explainerCloseContainer.setPadding(
+                explainerCloseContainer.paddingStart, insets.top + dp16, 0, 0
+            )
+            chevronHintContainer.setPadding(0, dp16, 0, insets.bottom + dp16)
+            windowInsets
         }
     }
 

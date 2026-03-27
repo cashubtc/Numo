@@ -338,10 +338,10 @@
 
                 <!-- Close button -->
                 <FrameLayout
+                    android:id="@+id/explainer_close_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingStart="20dp"
-                    android:paddingTop="16dp">
+                    android:paddingStart="20dp">
 
                     <FrameLayout
                         android:id="@+id/explainer_close_btn"
@@ -378,8 +378,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:gravity="center_horizontal"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="54dp">
+                    android:paddingTop="16dp">
 
                     <ImageView
                         android:id="@+id/chevron_hint_1"

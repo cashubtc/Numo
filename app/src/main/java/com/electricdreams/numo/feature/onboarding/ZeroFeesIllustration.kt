@@ -158,6 +158,13 @@ class ZeroFeesIllustration @JvmOverloads constructor(
         startRunnable?.let { removeCallbacks(it) }
         startRunnable = null
         animatorSet?.cancel()
+        animatorSet = null
+        // Reset so animation replays fresh on re-attach
+        animStarted = false
+        animScheduled = false
+        zeroAlpha = 0f
+        zeroScale = 0.5f
+        fees.forEach { it.alpha = 0f; it.slashProgress = 0f; it.destroyed = 0f }
     }
 
     private fun scheduleAnimation() {
