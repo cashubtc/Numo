@@ -99,6 +99,10 @@ data class PaymentHistoryEntry(
     @SerializedName("swapToLightningMintJson")
     val swapToLightningMintJson: String? = null,
 
+    /** BTCPay Server invoice ID - for resuming BTCPay pending payments */
+    @SerializedName("btcPayInvoiceId")
+    val btcPayInvoiceId: String? = null,
+
     /** User-assigned label for this transaction */
     @SerializedName("label")
     override val label: String? = null,

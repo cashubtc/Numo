@@ -351,6 +351,12 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Initialize all payment modes (NDEF, Nostr, Lightning)
         initializePaymentRequest()
+
+        // If resuming a local Lightning payment, auto-switch to Lightning tab.
+        // BTCPay resume uses resumeLightningQuoteId for the invoice ID — don't switch tab for it.
+        if (isResumingPayment && resumeLightningQuoteId != null && paymentService !is BTCPayPaymentService) {
+            tabManager.selectLightningTab()
+        }
     }
 
     /**
@@ -1115,7 +1121,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                                         val result = paymentService.redeemToken(token, invoiceId)
                                         result.onSuccess {
                                             withContext(Dispatchers.Main) {
-                                                handleLightningPaymentSuccess()
+                                                handleLightningPaymentSuccess(PaymentHistoryEntry.TYPE_CASHU)
                                             }
                                         }.onFailure { e ->
                                             // Redemption failed on our side — check BTCPay invoice
@@ -1126,7 +1132,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                                             statusResult.onSuccess { state ->
                                                 when (state) {
                                                     PaymentState.PAID -> withContext(Dispatchers.Main) {
-                                                        handleLightningPaymentSuccess()
+                                                        handleLightningPaymentSuccess(PaymentHistoryEntry.TYPE_CASHU)
                                                     }
                                                     PaymentState.PENDING -> withContext(Dispatchers.Main) {
                                                         // Invoice still open — show error screen with retry option
@@ -1279,7 +1285,9 @@ class PaymentRequestActivity : AppCompatActivity() {
      * history can record the payment (amount, date, etc.) but leave the
      * token field effectively blank.
      */
-    private fun handleLightningPaymentSuccess() {
+    private fun handleLightningPaymentSuccess(
+        paymentType: String = PaymentHistoryEntry.TYPE_LIGHTNING
+    ) {
         // Guard against late callbacks so we don't surface a failure screen
         // after a successful Lightning payment has already been processed.
         if (!beginTerminalOutcome("lightning_success")) return
@@ -1296,7 +1304,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 context = this,
                 paymentId = paymentId,
                 token = "",
-                paymentType = PaymentHistoryEntry.TYPE_LIGHTNING,
+                paymentType = paymentType,
                 mintUrl = lightningMintUrl,
                 lightningInvoice = lightningInvoice,
                 lightningQuoteId = lightningQuoteId,
