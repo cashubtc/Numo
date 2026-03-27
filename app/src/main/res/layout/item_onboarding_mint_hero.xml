@@ -33,12 +33,6 @@
                 android:src="@drawable/ic_lightning_bolt"
                 app:tint="@color/numo_fluorescent_green" />
 
-            <View
-                android:id="@+id/hero_bolt_fade"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/bg_hero_bolt_fade_green" />
-
         </FrameLayout>
 
         <!-- Content -->

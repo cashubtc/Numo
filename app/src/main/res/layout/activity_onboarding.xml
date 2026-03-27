@@ -191,14 +191,6 @@
                             android:textColor="#FFFFFF"
                             android:fontFamily="sans-serif-medium" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="1dp"
-                            android:text="@string/onboarding_create_wallet_subtitle"
-                            android:textSize="14sp"
-                            android:textColor="#73FFFFFF" />
-
                     </LinearLayout>
 
                 </LinearLayout>
@@ -239,14 +231,6 @@
                             android:textSize="16sp"
                             android:textColor="#FFFFFF"
                             android:fontFamily="sans-serif-medium" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="1dp"
-                            android:text="@string/onboarding_restore_wallet_subtitle"
-                            android:textSize="14sp"
-                            android:textColor="#73FFFFFF" />
 
                     </LinearLayout>
 
