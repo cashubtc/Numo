@@ -6,27 +6,21 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
-import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 
 /**
  * Animated stacked notification banners for "Automatic self-custody" slide.
  *
- * Intro: Front banner slides in → back cards appear behind.
- * Cycle: Front banner slides UP and fades out (dismissed), back cards
- *        slide forward to fill the gap, a new card appears at the back.
+ * Intro: Front banner slides in, back cards fade in behind.
+ * Cycle: Front banner slides up and fades out, stack shifts forward,
+ *        new card appears at back. Repeats every ~2.5s.
+ *
+ * All positions are derived from two progress floats — no mutable banner list.
  */
 class AutoCustodyAnimatedView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : View(context, attrs) {
-
-    private data class BannerState(
-        val subtitle: String,
-        var y: Float,        // Y offset from center (in dp-like units)
-        var scale: Float,
-        var alpha: Float
-    )
 
     private val allSubtitles = listOf(
         "\$100.00 sent to alice@getalby.com",
@@ -41,13 +35,17 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
     private val settledScale = floatArrayOf(1f,  0.95f, 0.90f)
     private val settledAlpha = floatArrayOf(1f,  0.45f, 0.18f)
 
-    private var banners = mutableListOf<BannerState>()
-    private var nextSubtitleIndex = 3 // next one to pull from allSubtitles
+    // Animation state — these floats drive ALL rendering
+    private var introProgress = 0f
+    private var backIntroProgress = 0f
+    private var cycleProgress = 0f
+    private var currentIndex = 0
+    private var animStarted = false
+    private var introComplete = false
 
     private var introAnimator: AnimatorSet? = null
-    private var cycleAnimator: AnimatorSet? = null
+    private var cycleAnimator: ValueAnimator? = null
     private var cycleRunnable: Runnable? = null
-    private var introComplete = false
 
     // Paints
     private val cardPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -84,18 +82,52 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
         val bannerR = 14f * s
         val centerY = h * 0.4f
 
-        // Draw back to front
-        for (i in (banners.size - 1) downTo 0) {
-            val b = banners[i]
-            if (b.alpha < 0.01f) continue
-            drawBanner(canvas, cx, centerY + b.y * s, bannerW, bannerH, bannerR, s, b.subtitle, b.alpha, b.scale)
+        if (!introComplete) {
+            // Intro: back cards first, then front on top
+            val bp = backIntroProgress
+            if (bp > 0.01f) {
+                drawBanner(canvas, cx, centerY + settledY[2] * s, bannerW, bannerH, bannerR, s,
+                    subtitle(2), settledAlpha[2] * bp, settledScale[2])
+                drawBanner(canvas, cx, centerY + settledY[1] * s, bannerW, bannerH, bannerR, s,
+                    subtitle(1), settledAlpha[1] * bp, settledScale[1])
+            }
+            val p = introProgress
+            drawBanner(canvas, cx, centerY + (settledY[0] + 50f * (1f - p)) * s,
+                bannerW, bannerH, bannerR, s, subtitle(0), p, 0.95f + 0.05f * p)
+
+        } else if (cycleProgress > 0f) {
+            // Cycle transition: 4 cards derived from cycleProgress, back to front
+            val p = cycleProgress
+            drawBanner(canvas, cx, centerY + lerp(28f, settledY[2], p) * s,
+                bannerW, bannerH, bannerR, s, subtitle(3),
+                lerp(0f, settledAlpha[2], p), lerp(0.85f, settledScale[2], p))
+            drawBanner(canvas, cx, centerY + lerp(settledY[2], settledY[1], p) * s,
+                bannerW, bannerH, bannerR, s, subtitle(2),
+                lerp(settledAlpha[2], settledAlpha[1], p), lerp(settledScale[2], settledScale[1], p))
+            drawBanner(canvas, cx, centerY + lerp(settledY[1], settledY[0], p) * s,
+                bannerW, bannerH, bannerR, s, subtitle(1),
+                lerp(settledAlpha[1], settledAlpha[0], p), lerp(settledScale[1], settledScale[0], p))
+            drawBanner(canvas, cx, centerY + lerp(settledY[0], -40f, p) * s,
+                bannerW, bannerH, bannerR, s, subtitle(0),
+                lerp(settledAlpha[0], 0f, p), lerp(settledScale[0], 0.95f, p))
+
+        } else {
+            // Settled: 3 banners at rest, back to front
+            for (i in 2 downTo 0) {
+                drawBanner(canvas, cx, centerY + settledY[i] * s, bannerW, bannerH, bannerR, s,
+                    subtitle(i), settledAlpha[i], settledScale[i])
+            }
         }
     }
+
+    private fun subtitle(offset: Int): String =
+        allSubtitles[(currentIndex + offset) % allSubtitles.size]
 
     private fun drawBanner(
         canvas: Canvas, cx: Float, drawY: Float, w: Float, h: Float,
         r: Float, s: Float, subtitle: String, alpha: Float, scale: Float
     ) {
+        if (alpha < 0.01f) return
         canvas.save()
         canvas.translate(cx, drawY + h / 2f)
         canvas.scale(scale, scale)
@@ -149,7 +181,7 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        if (w > 0 && h > 0 && !introComplete) {
+        if (w > 0 && h > 0 && !animStarted) {
             startIntro()
         }
     }
@@ -160,43 +192,39 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
     }
 
     private fun stopAll() {
-        introAnimator?.cancel(); introAnimator = null
-        cycleAnimator?.cancel(); cycleAnimator = null
-        cycleRunnable?.let { removeCallbacks(it) }; cycleRunnable = null
+        // Remove listeners BEFORE cancel to prevent onAnimationEnd cascades
+        introAnimator?.removeAllListeners()
+        introAnimator?.cancel()
+        introAnimator = null
+
+        cycleAnimator?.removeAllListeners()
+        cycleAnimator?.cancel()
+        cycleAnimator = null
+
+        cycleRunnable?.let { removeCallbacks(it) }
+        cycleRunnable = null
     }
 
     private fun startIntro() {
-        stopAll()
-        introComplete = false
-        nextSubtitleIndex = 3
+        if (animStarted) return
+        animStarted = true
 
-        // Create initial 3 banners
-        banners.clear()
-        banners.add(BannerState(allSubtitles[0], settledY[0], settledScale[0], 0f)) // front
-        banners.add(BannerState(allSubtitles[1], settledY[1], settledScale[1], 0f)) // middle
-        banners.add(BannerState(allSubtitles[2], settledY[2], settledScale[2], 0f)) // back
-
-        // Phase 1: Front banner slides in
         val frontIn = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 600; startDelay = 300
+            duration = 600
+            startDelay = 300
             interpolator = OvershootInterpolator(0.8f)
             addUpdateListener {
-                val p = it.animatedValue as Float
-                banners[0].alpha = p
-                banners[0].y = settledY[0] + 50f * (1f - p)
-                banners[0].scale = 0.95f + 0.05f * p
+                introProgress = it.animatedValue as Float
                 invalidate()
             }
         }
 
-        // Phase 2: Back cards fade in
         val backIn = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 500; startDelay = 1000
+            duration = 500
+            startDelay = 1000
             interpolator = DecelerateInterpolator(1.5f)
             addUpdateListener {
-                val p = it.animatedValue as Float
-                banners[1].alpha = settledAlpha[1] * p
-                banners[2].alpha = settledAlpha[2] * p
+                backIntroProgress = it.animatedValue as Float
                 invalidate()
             }
         }
@@ -206,6 +234,7 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
             addListener(object : android.animation.AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: android.animation.Animator) {
                     introComplete = true
+                    invalidate()
                     scheduleCycle()
                 }
             })
@@ -214,72 +243,33 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
     }
 
     private fun scheduleCycle() {
+        if (!isAttachedToWindow) return
         cycleRunnable = Runnable { doCycle() }
         postDelayed(cycleRunnable!!, 2500)
     }
 
     private fun doCycle() {
-        if (banners.size < 3) return
+        if (!isAttachedToWindow) return
 
-        // Snapshot the front banner's current values for animation
-        val front = banners[0]
-        val mid = banners[1]
-        val back = banners[2]
-
-        val frontStartY = front.y
-        val frontStartAlpha = front.alpha
-        val midStartY = mid.y
-        val midStartScale = mid.scale
-        val midStartAlpha = mid.alpha
-        val backStartY = back.y
-        val backStartScale = back.scale
-        val backStartAlpha = back.alpha
-
-        // Prepare the new back card (starts invisible)
-        val newSubtitle = allSubtitles[nextSubtitleIndex % allSubtitles.size]
-        nextSubtitleIndex++
-        val newCard = BannerState(newSubtitle, settledY[2] + 10f, settledScale[2], 0f)
-        banners.add(newCard)
-
-        val anim = ValueAnimator.ofFloat(0f, 1f).apply {
+        cycleAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 500
             interpolator = DecelerateInterpolator(1.8f)
             addUpdateListener {
-                val p = it.animatedValue as Float
-
-                // Front: slides up and fades out
-                front.y = frontStartY - 40f * p
-                front.alpha = frontStartAlpha * (1f - p)
-                front.scale = 1f - 0.05f * p
-
-                // Middle → front position
-                mid.y = lerp(midStartY, settledY[0], p)
-                mid.scale = lerp(midStartScale, settledScale[0], p)
-                mid.alpha = lerp(midStartAlpha, settledAlpha[0], p)
-
-                // Back → middle position
-                back.y = lerp(backStartY, settledY[1], p)
-                back.scale = lerp(backStartScale, settledScale[1], p)
-                back.alpha = lerp(backStartAlpha, settledAlpha[1], p)
-
-                // New card → back position
-                newCard.y = lerp(settledY[2] + 10f, settledY[2], p)
-                newCard.alpha = settledAlpha[2] * p
-                newCard.scale = settledScale[2]
-
+                cycleProgress = it.animatedValue as Float
                 invalidate()
             }
             addListener(object : android.animation.AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: android.animation.Animator) {
-                    // Remove the dismissed front card
-                    banners.remove(front)
-                    invalidate()
-                    scheduleCycle()
+                    if (isAttachedToWindow) {
+                        currentIndex = (currentIndex + 1) % allSubtitles.size
+                        cycleProgress = 0f
+                        invalidate()
+                        scheduleCycle()
+                    }
                 }
             })
             start()
         }
-        cycleAnimator = AnimatorSet().apply { play(anim); start() }
     }
 
     private fun lerp(a: Float, b: Float, t: Float) = a + (b - a) * t
