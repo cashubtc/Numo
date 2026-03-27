@@ -89,7 +89,11 @@ class BTCPayPaymentService(
                 val url = "${baseUrl()}/api/v1/stores/${config.storeId}/invoices/$paymentId"
                 val request = authorizedGet(url)
                 val body = executeForBody(request)
-                val json = JsonParser.parseString(body).asJsonObject
+                val json = try {
+                    JsonParser.parseString(body).asJsonObject
+                } catch (e: Exception) {
+                    throw WalletError.NetworkError("BTCPay returned unexpected response format: ${body.take(100)}")
+                }
                 val status = json.get("status")?.takeIf { !it.isJsonNull }?.asString ?: "Invalid"
                 Log.d(TAG, "Invoice $paymentId status: $status")
                 mapInvoiceStatus(status)
@@ -212,7 +216,11 @@ class BTCPayPaymentService(
             .build()
 
         val body = executeForBody(request)
-        val json = JsonParser.parseString(body).asJsonObject
+        val json = try {
+            JsonParser.parseString(body).asJsonObject
+        } catch (e: Exception) {
+            throw WalletError.NetworkError("BTCPay returned unexpected response format: ${body.take(100)}")
+        }
         return json.get("id")?.asString
             ?: throw WalletError.Unknown("BTCPay invoice response missing 'id'")
     }
@@ -226,7 +234,11 @@ class BTCPayPaymentService(
         val request = authorizedGet(url)
         val body = executeForBody(request)
         Log.d(TAG, "Payment methods response: $body")
-        val array = JsonParser.parseString(body).asJsonArray
+        val array = try {
+            JsonParser.parseString(body).asJsonArray
+        } catch (e: Exception) {
+            throw WalletError.NetworkError("BTCPay returned unexpected response format: ${body.take(100)}")
+        }
 
         var bolt11: String? = null
         var cashuPR: String? = null
