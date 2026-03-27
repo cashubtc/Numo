@@ -116,7 +116,7 @@
     <string name="onboarding_setup_subtitle">Choose how you\'d like to get started</string>
     <string name="onboarding_create_wallet_title">Create New Wallet</string>
     <string name="onboarding_create_wallet_subtitle">Start fresh with a new seed phrase</string>
-    <string name="onboarding_restore_wallet_title">Restore from Backup</string>
+    <string name="onboarding_restore_wallet_title">Restore From Backup</string>
     <string name="onboarding_restore_wallet_subtitle">Use your existing seed phrase</string>
 
     <!-- Explainer -->

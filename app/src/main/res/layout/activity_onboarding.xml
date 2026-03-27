@@ -165,17 +165,9 @@
                         android:focusable="true"
                         android:background="@drawable/bg_button_white">
 
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@drawable/ic_plus_stroke"
-                            app:tint="#0A2540"
-                            android:contentDescription="@string/onboarding_create_wallet_title" />
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
                             android:text="@string/onboarding_create_wallet_title"
                             android:textSize="16sp"
                             android:textColor="#0A2540"
@@ -199,17 +191,9 @@
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground">
 
-                        <ImageView
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
-                            android:src="@drawable/ic_clock_stroke"
-                            android:alpha="0.5"
-                            android:contentDescription="@string/onboarding_restore_wallet_title" />
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
                             android:text="@string/onboarding_restore_wallet_title"
                             android:textSize="14sp"
                             android:textColor="#80FFFFFF"
