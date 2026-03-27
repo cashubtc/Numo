@@ -219,7 +219,7 @@ class OnboardingMintAdapter(
                 // Mint icon with rounded corners
                 h.mintIcon.setImageResource(R.drawable.ic_bitcoin)
                 h.mintIcon.setColorFilter(ContextCompat.getColor(context, R.color.color_primary))
-                h.mintIcon.setBackgroundColor(ContextCompat.getColor(context, R.color.color_bg_tertiary))
+                h.mintIcon.setBackgroundColor(android.graphics.Color.parseColor("#1AFFFFFF"))
                 h.mintIcon.shapeAppearanceModel = h.mintIcon.shapeAppearanceModel.toBuilder()
                     .setAllCornerSizes(22f * density)
                     .build()
@@ -233,7 +233,7 @@ class OnboardingMintAdapter(
                 // Icon
                 h.icon.setImageResource(R.drawable.ic_bitcoin)
                 h.icon.setColorFilter(ContextCompat.getColor(context, R.color.color_primary))
-                h.icon.setBackgroundColor(ContextCompat.getColor(context, R.color.color_bg_tertiary))
+                h.icon.setBackgroundColor(android.graphics.Color.parseColor("#1AFFFFFF"))
                 h.icon.shapeAppearanceModel = h.icon.shapeAppearanceModel.toBuilder()
                     .setAllCornerSizes(20f * density)
                     .build()
@@ -289,14 +289,14 @@ class OnboardingMintAdapter(
     ) {
         if (isAccepted) {
             holder.checkbox.setImageResource(R.drawable.ic_checkbox_checked)
-            holder.checkbox.setColorFilter(ContextCompat.getColor(context, R.color.color_text_primary))
+            holder.checkbox.setColorFilter(android.graphics.Color.WHITE)
             holder.status.text = context.getString(R.string.onboarding_mints_status_accepting)
-            holder.status.setTextColor(ContextCompat.getColor(context, R.color.color_text_secondary))
+            holder.status.setTextColor(android.graphics.Color.parseColor("#99FFFFFF"))
         } else {
             holder.checkbox.setImageResource(R.drawable.ic_checkbox_unchecked)
-            holder.checkbox.setColorFilter(ContextCompat.getColor(context, R.color.color_text_tertiary))
+            holder.checkbox.setColorFilter(android.graphics.Color.parseColor("#4DFFFFFF"))
             holder.status.text = context.getString(R.string.onboarding_mints_status_not_accepting)
-            holder.status.setTextColor(ContextCompat.getColor(context, R.color.color_text_tertiary))
+            holder.status.setTextColor(android.graphics.Color.parseColor("#73FFFFFF"))
         }
     }
 

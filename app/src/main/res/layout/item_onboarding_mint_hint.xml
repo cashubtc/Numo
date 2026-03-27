@@ -8,5 +8,5 @@
     android:paddingBottom="12dp"
     android:text="@string/onboarding_mints_long_press_hint"
     android:textSize="12sp"
-    android:textColor="@color/color_text_tertiary"
+    android:textColor="#73FFFFFF"
     android:fontFamily="sans-serif" />

@@ -187,7 +187,7 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var backupStatusSubtitle: TextView
     private lateinit var mintsRecyclerView: RecyclerView
     private lateinit var mintAdapter: OnboardingMintAdapter
-    private lateinit var mintsContinueButton: Button
+    private lateinit var mintsContinueButton: MaterialButton
     private lateinit var mintsBackButton: ImageView
 
     // Step 6: Restoring (Restore flow)
@@ -281,18 +281,18 @@ class OnboardingActivity : AppCompatActivity() {
             windowInsetsController.isAppearanceLightStatusBars = true
             windowInsetsController.isAppearanceLightNavigationBars = true
         } else if (step == OnboardingStep.CHOOSE_PATH) {
-            // Navy bars for setup screen — nav bar matches dark teaser area
+            // Navy bars — nav bar matches dark teaser area at bottom
             window.statusBarColor = android.graphics.Color.parseColor("#0E3050")
             window.navigationBarColor = android.graphics.Color.parseColor("#0A2540")
             windowInsetsController.isAppearanceLightStatusBars = false
             windowInsetsController.isAppearanceLightNavigationBars = false
         } else {
-            // White bars for all other screens
-            val bgColor = android.graphics.Color.WHITE
-            window.statusBarColor = bgColor
-            window.navigationBarColor = bgColor
-            windowInsetsController.isAppearanceLightStatusBars = true
-            windowInsetsController.isAppearanceLightNavigationBars = true
+            // Navy bars for all other onboarding screens
+            val navyLight = android.graphics.Color.parseColor("#0E3050")
+            window.statusBarColor = navyLight
+            window.navigationBarColor = navyLight
+            windowInsetsController.isAppearanceLightStatusBars = false
+            windowInsetsController.isAppearanceLightNavigationBars = false
         }
     }
 
@@ -462,13 +462,13 @@ class OnboardingActivity : AppCompatActivity() {
         val container = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = android.view.Gravity.CENTER_VERTICAL
-            background = ContextCompat.getDrawable(context, R.drawable.bg_seed_input)
+            background = ContextCompat.getDrawable(context, R.drawable.bg_seed_input_dark)
             setPadding(12.dpToPx(), 10.dpToPx(), 12.dpToPx(), 10.dpToPx())
         }
 
         val indexText = TextView(this).apply {
             text = "$index"
-            setTextColor(ContextCompat.getColor(context, R.color.color_text_tertiary))
+            setTextColor(android.graphics.Color.parseColor("#73FFFFFF"))
             textSize = 13f
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
             layoutParams = LinearLayout.LayoutParams(24.dpToPx(), LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -477,8 +477,8 @@ class OnboardingActivity : AppCompatActivity() {
 
         val input = SeedWordEditText(this).apply {
             hint = ""
-            setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
-            setHintTextColor(ContextCompat.getColor(context, R.color.color_text_tertiary))
+            setTextColor(android.graphics.Color.WHITE)
+            setHintTextColor(android.graphics.Color.parseColor("#4DFFFFFF"))
             textSize = 15f
             typeface = android.graphics.Typeface.MONOSPACE
             background = null
@@ -502,7 +502,7 @@ class OnboardingActivity : AppCompatActivity() {
             setOnFocusChangeListener { _, hasFocus ->
                 container.background = ContextCompat.getDrawable(
                     context,
-                    if (hasFocus) R.drawable.bg_seed_input_focused else R.drawable.bg_seed_input
+                    if (hasFocus) R.drawable.bg_seed_input_dark_focused else R.drawable.bg_seed_input_dark
                 )
             }
 
@@ -1015,9 +1015,9 @@ class OnboardingActivity : AppCompatActivity() {
             else -> {
                 seedValidationStatus.visibility = View.VISIBLE
                 seedValidationIcon.setImageResource(R.drawable.ic_check)
-                seedValidationIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_success_green))
+                seedValidationIcon.setColorFilter(ContextCompat.getColor(this, R.color.numo_fluorescent_green))
                 seedValidationText.text = getString(R.string.onboarding_seed_validation_ready)
-                seedValidationText.setTextColor(ContextCompat.getColor(this, R.color.color_success_green))
+                seedValidationText.setTextColor(ContextCompat.getColor(this, R.color.numo_fluorescent_green))
             }
         }
 
@@ -1192,20 +1192,20 @@ class OnboardingActivity : AppCompatActivity() {
             if (backupFound) {
                 backupStatusCard.background = ContextCompat.getDrawable(this, R.drawable.bg_success_card)
                 backupStatusIcon.setImageResource(R.drawable.ic_cloud_done)
-                backupStatusIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_success_green))
+                backupStatusIcon.setColorFilter(ContextCompat.getColor(this, R.color.numo_fluorescent_green))
                 backupStatusTitle.text = getString(R.string.onboarding_backup_found_title)
-                backupStatusTitle.setTextColor(ContextCompat.getColor(this, R.color.color_success_green))
+                backupStatusTitle.setTextColor(ContextCompat.getColor(this, R.color.numo_fluorescent_green))
 
                 val dateStr = backupTimestamp?.let {
                     SimpleDateFormat("MMM d, yyyy 'at' h:mm a", Locale.getDefault()).format(Date(it * 1000))
                 } ?: getString(R.string.restore_backup_unknown_date)
                 backupStatusSubtitle.text = getString(R.string.onboarding_backup_found_subtitle, dateStr)
             } else {
-                backupStatusCard.background = ContextCompat.getDrawable(this, R.drawable.bg_info_card)
+                backupStatusCard.setBackgroundColor(ContextCompat.getColor(this, R.color.numo_navy))
                 backupStatusIcon.setImageResource(R.drawable.ic_cloud_off)
-                backupStatusIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_text_tertiary))
+                backupStatusIcon.setColorFilter(android.graphics.Color.parseColor("#73FFFFFF"))
                 backupStatusTitle.text = getString(R.string.onboarding_backup_not_found_title)
-                backupStatusTitle.setTextColor(ContextCompat.getColor(this, R.color.color_text_primary))
+                backupStatusTitle.setTextColor(android.graphics.Color.WHITE)
                 backupStatusSubtitle.text = getString(R.string.onboarding_backup_not_found_subtitle)
             }
             mintsContinueButton.text = getString(R.string.onboarding_mints_continue_restore)
@@ -1254,6 +1254,7 @@ class OnboardingActivity : AppCompatActivity() {
     private fun updateContinueButtonState() {
         val totalSelected = mintAdapter.getAllSelectedMints().size
         mintsContinueButton.isEnabled = totalSelected > 0
+        mintsContinueButton.alpha = if (totalSelected > 0) 1f else 0.35f
     }
 
     private fun loadMintIcon(mintUrl: String, iconView: ShapeableImageView) {
@@ -1466,7 +1467,7 @@ class OnboardingActivity : AppCompatActivity() {
                 FrameLayout.LayoutParams.MATCH_PARENT
             )
             isIndeterminate = true
-            indeterminateTintList = ContextCompat.getColorStateList(context, R.color.color_text_tertiary)
+            indeterminateTintList = ContextCompat.getColorStateList(context, R.color.numo_fluorescent_green)
         }
 
         val statusIcon = ImageView(this).apply {
@@ -1488,7 +1489,7 @@ class OnboardingActivity : AppCompatActivity() {
 
         val nameText = TextView(this).apply {
             text = mintManager.getMintDisplayName(mintUrl)
-            setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
+            setTextColor(android.graphics.Color.WHITE)
             textSize = 15f
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
             tag = "name"
@@ -1496,7 +1497,7 @@ class OnboardingActivity : AppCompatActivity() {
 
         val statusText = TextView(this).apply {
             text = getString(R.string.restore_progress_status_waiting)
-            setTextColor(ContextCompat.getColor(context, R.color.color_text_tertiary))
+            setTextColor(android.graphics.Color.parseColor("#73FFFFFF"))
             textSize = 13f
             tag = "status"
         }
@@ -1543,7 +1544,7 @@ class OnboardingActivity : AppCompatActivity() {
                 spinner?.visibility = View.GONE
                 statusIcon?.visibility = View.VISIBLE
                 statusIcon?.setImageResource(R.drawable.ic_check)
-                statusIcon?.setColorFilter(ContextCompat.getColor(this, R.color.color_success_green))
+                statusIcon?.setColorFilter(ContextCompat.getColor(this, R.color.numo_fluorescent_green))
 
                 val diff = after - before
                 if (diff != 0L) {
@@ -1554,7 +1555,7 @@ class OnboardingActivity : AppCompatActivity() {
                     balanceText?.setTextColor(
                         ContextCompat.getColor(
                             this,
-                            if (diff >= 0) R.color.color_success_green else R.color.color_warning_red
+                            if (diff >= 0) R.color.numo_fluorescent_green else R.color.color_warning_red
                         )
                     )
                 }
@@ -1637,14 +1638,14 @@ class OnboardingActivity : AppCompatActivity() {
 
         val nameText = TextView(this).apply {
             text = mintManager.getMintDisplayName(mintUrl)
-            setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
+            setTextColor(android.graphics.Color.WHITE)
             textSize = 15f
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
         }
 
         val detailText = TextView(this).apply {
             text = getString(R.string.restore_success_balance_line, after)
-            setTextColor(ContextCompat.getColor(context, R.color.color_text_secondary))
+            setTextColor(android.graphics.Color.parseColor("#99FFFFFF"))
             textSize = 13f
         }
 
@@ -1657,9 +1658,9 @@ class OnboardingActivity : AppCompatActivity() {
                 ContextCompat.getColor(
                     context,
                     when {
-                        diff > 0 -> R.color.color_success_green
+                        diff > 0 -> R.color.numo_fluorescent_green
                         diff < 0 -> R.color.color_warning_red
-                        else -> R.color.color_text_secondary
+                        else -> R.color.numo_fluorescent_green
                     }
                 )
             )

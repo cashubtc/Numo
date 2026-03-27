@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_bg_light">
+    android:background="@color/numo_navy_light">
 
     <!-- ======================== -->
     <!-- STEP 1: WELCOME SCREEN   -->
@@ -141,23 +141,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/onboarding_setup_title"
-                android:textSize="28sp"
-                android:textColor="#FFFFFF"
-                android:fontFamily="sans-serif-medium"
-                android:gravity="center" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="@string/onboarding_setup_subtitle"
-                android:textSize="16sp"
-                android:textColor="#99FFFFFF"
-                android:gravity="center" />
+                android:textSize="32sp"
+                android:textColor="@color/numo_fluorescent_green"
+                android:fontFamily="sans-serif-black"
+                android:textAllCaps="true"
+                android:letterSpacing="-0.03"
+                android:lineSpacingMultiplier="1.05" />
 
             <Space
                 android:layout_width="match_parent"
-                android:layout_height="48dp" />
+                android:layout_height="40dp" />
 
             <!-- Option rows -->
             <LinearLayout
@@ -208,13 +201,6 @@
 
                     </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="#4DFFFFFF"
-                        android:contentDescription="@null" />
-
                 </LinearLayout>
 
                 <Space
@@ -264,13 +250,6 @@
 
                     </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="#4DFFFFFF"
-                        android:contentDescription="@null" />
-
                 </LinearLayout>
 
             </LinearLayout>
@@ -318,7 +297,7 @@
                         android:text="@string/explainer_teaser_title"
                         android:textSize="32sp"
                         android:fontFamily="sans-serif-black"
-                        android:textColor="@color/numo_fluorescent_green"
+                        android:textColor="#FFFFFF"
                         android:textAllCaps="true"
                         android:letterSpacing="-0.03"
                         android:lineSpacingMultiplier="1.05" />
@@ -454,39 +433,32 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <!-- Top Bar -->
-            <LinearLayout
+            <!-- Back button -->
+            <ImageView
+                android:id="@+id/seed_back_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:padding="12dp"
+                android:src="@drawable/ic_chevron_back"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="#99FFFFFF"
+                android:contentDescription="@string/onboarding_seed_toolbar_back" />
+
+            <!-- Title -->
+            <TextView
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="8dp">
-
-                <ImageView
-                    android:id="@+id/seed_back_button"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:padding="12dp"
-                    android:src="@drawable/ic_chevron_back"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    app:tint="@color/color_text_primary"
-                    android:contentDescription="@string/onboarding_seed_toolbar_back" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/onboarding_seed_toolbar_title"
-                    android:textSize="17sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium"
-                    android:gravity="center" />
-
-                <Space
-                    android:layout_width="48dp"
-                    android:layout_height="48dp" />
-
-            </LinearLayout>
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="8dp"
+                android:text="@string/onboarding_seed_toolbar_title"
+                android:textSize="32sp"
+                android:textColor="@color/numo_fluorescent_green"
+                android:fontFamily="sans-serif-black"
+                android:textAllCaps="true"
+                android:letterSpacing="-0.03"
+                android:lineSpacingMultiplier="1.05" />
 
             <ScrollView
                 android:layout_width="match_parent"
@@ -508,7 +480,7 @@
                         android:layout_marginTop="16dp"
                         android:text="@string/onboarding_seed_instruction_title"
                         android:textSize="24sp"
-                        android:textColor="@color/color_text_primary"
+                        android:textColor="#FFFFFF"
                         android:fontFamily="sans-serif-medium" />
 
                     <TextView
@@ -517,7 +489,7 @@
                         android:layout_marginTop="8dp"
                         android:text="@string/onboarding_seed_instruction_body"
                         android:textSize="15sp"
-                        android:textColor="@color/color_text_secondary"
+                        android:textColor="#99FFFFFF"
                         android:lineHeight="20sp" />
 
                     <!-- Seed Input Grid -->
@@ -532,17 +504,22 @@
                     <!-- Paste Button -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/paste_button"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="wrap_content"
                         android:layout_height="44dp"
                         android:layout_gravity="center_horizontal"
                         android:layout_marginTop="16dp"
                         android:text="@string/onboarding_seed_paste_button"
                         android:textSize="14sp"
+                        android:textColor="#FFFFFF"
                         android:textAllCaps="false"
-                        app:strokeColor="@color/color_divider"
-                        app:strokeWidth="1dp"
-                        app:cornerRadius="22dp" />
+                        android:background="@drawable/bg_button_outlined_dark"
+                        app:backgroundTint="@null"
+                        app:cornerRadius="22dp"
+                        app:icon="@drawable/ic_copy"
+                        app:iconSize="18dp"
+                        app:iconTint="#FFFFFF"
+                        app:iconGravity="textStart"
+                        app:iconPadding="6dp" />
 
                     <!-- Validation Status -->
                     <LinearLayout
@@ -560,7 +537,7 @@
                             android:layout_width="18dp"
                             android:layout_height="18dp"
                             android:src="@drawable/ic_check"
-                            app:tint="@color/color_success_green" />
+                            app:tint="@color/numo_fluorescent_green" />
 
                         <TextView
                             android:id="@+id/seed_validation_text"
@@ -569,7 +546,7 @@
                             android:layout_marginStart="8dp"
                             android:text="@string/onboarding_seed_validation_ready"
                             android:textSize="14sp"
-                            android:textColor="@color/color_success_green" />
+                            android:textColor="@color/numo_fluorescent_green" />
 
                     </LinearLayout>
 
@@ -584,7 +561,7 @@
                 android:paddingHorizontal="20dp"
                 android:paddingTop="16dp"
                 android:paddingBottom="32dp"
-                android:background="@color/color_bg_light">
+                android:background="@color/numo_navy_light">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/seed_continue_button"
@@ -592,12 +569,15 @@
                     android:layout_height="56dp"
                     android:text="@string/onboarding_seed_continue"
                     android:textSize="17sp"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/button_text_onboarding"
                     android:textAllCaps="false"
                     android:enabled="false"
                     android:alpha="0.5"
+                    android:background="@drawable/bg_button_white"
+                    android:stateListAnimator="@null"
+                    app:backgroundTint="@null"
                     app:cornerRadius="28dp"
-                    app:backgroundTint="#000000" />
+                    app:elevation="0dp" />
 
             </LinearLayout>
         </LinearLayout>
@@ -623,7 +603,7 @@
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:indeterminate="true"
-                android:indeterminateTint="@color/color_text_primary" />
+                android:indeterminateTint="@color/numo_fluorescent_green" />
 
             <TextView
                 android:id="@+id/generating_status"
@@ -632,7 +612,7 @@
                 android:layout_marginTop="24dp"
                 android:text="@string/onboarding_status_creating_wallet"
                 android:textSize="17sp"
-                android:textColor="@color/color_text_primary"
+                android:textColor="#FFFFFF"
                 android:gravity="center" />
 
             <TextView
@@ -641,7 +621,7 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/onboarding_generating_hint"
                 android:textSize="14sp"
-                android:textColor="@color/color_text_secondary"
+                android:textColor="#99FFFFFF"
                 android:gravity="center" />
 
         </LinearLayout>
@@ -667,7 +647,7 @@
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:indeterminate="true"
-                android:indeterminateTint="@color/color_text_primary" />
+                android:indeterminateTint="@color/numo_fluorescent_green" />
 
             <TextView
                 android:id="@+id/fetching_status"
@@ -676,7 +656,7 @@
                 android:layout_marginTop="24dp"
                 android:text="@string/onboarding_fetching_searching_backup"
                 android:textSize="17sp"
-                android:textColor="@color/color_text_primary"
+                android:textColor="#FFFFFF"
                 android:gravity="center" />
 
             <TextView
@@ -685,7 +665,7 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/onboarding_fetching_checking_relays"
                 android:textSize="14sp"
-                android:textColor="@color/color_text_secondary"
+                android:textColor="#99FFFFFF"
                 android:gravity="center" />
 
         </LinearLayout>
@@ -705,39 +685,32 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <!-- Top Bar -->
-            <LinearLayout
+            <!-- Back button -->
+            <ImageView
+                android:id="@+id/mints_back_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:padding="12dp"
+                android:src="@drawable/ic_chevron_back"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="#99FFFFFF"
+                android:contentDescription="@string/onboarding_mints_toolbar_back" />
+
+            <!-- Title -->
+            <TextView
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="8dp">
-
-                <ImageView
-                    android:id="@+id/mints_back_button"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:padding="12dp"
-                    android:src="@drawable/ic_chevron_back"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    app:tint="@color/color_text_primary"
-                    android:contentDescription="@string/onboarding_mints_toolbar_back" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/onboarding_mints_toolbar_title"
-                    android:textSize="17sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium"
-                    android:gravity="center" />
-
-                <Space
-                    android:layout_width="48dp"
-                    android:layout_height="48dp" />
-
-            </LinearLayout>
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="8dp"
+                android:text="@string/onboarding_mints_toolbar_title"
+                android:textSize="32sp"
+                android:textColor="@color/numo_fluorescent_green"
+                android:fontFamily="sans-serif-black"
+                android:textAllCaps="true"
+                android:letterSpacing="-0.03"
+                android:lineSpacingMultiplier="1.05" />
 
             <!-- Backup Status Card -->
             <LinearLayout
@@ -745,7 +718,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:background="@drawable/bg_success_card"
+                android:background="@color/numo_navy"
                 android:padding="16dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginHorizontal="20dp"
@@ -757,7 +730,7 @@
                     android:layout_width="28dp"
                     android:layout_height="28dp"
                     android:src="@drawable/ic_cloud_done"
-                    app:tint="@color/color_success_green" />
+                    app:tint="@color/numo_fluorescent_green" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -772,7 +745,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/onboarding_backup_found_title"
                         android:textSize="15sp"
-                        android:textColor="@color/color_success_green"
+                        android:textColor="@color/numo_fluorescent_green"
                         android:fontFamily="sans-serif-medium" />
 
                     <TextView
@@ -782,7 +755,7 @@
                         android:layout_marginTop="2dp"
                         android:text="@string/onboarding_backup_found_subtitle"
                         android:textSize="13sp"
-                        android:textColor="@color/color_text_secondary" />
+                        android:textColor="#99FFFFFF" />
 
                 </LinearLayout>
 
@@ -807,15 +780,22 @@
                 android:paddingHorizontal="20dp"
                 android:paddingTop="12dp"
                 android:paddingBottom="32dp"
-                android:background="@color/color_bg_light">
+                android:background="@color/numo_navy_light">
 
-                <!-- Continue - primary button -->
-                <Button
+                <!-- Continue - primary button (matches seed_continue_button style) -->
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/mints_continue_button"
-                    style="@style/Widget.Button.Primary.Green"
                     android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:text="@string/onboarding_mints_continue_new_wallet" />
+                    android:layout_height="56dp"
+                    android:text="@string/onboarding_mints_continue_new_wallet"
+                    android:textSize="17sp"
+                    android:textColor="@color/button_text_onboarding"
+                    android:textAllCaps="false"
+                    android:background="@drawable/bg_button_white"
+                    android:stateListAnimator="@null"
+                    app:backgroundTint="@null"
+                    app:cornerRadius="28dp"
+                    app:elevation="0dp" />
 
             </LinearLayout>
         </LinearLayout>
@@ -848,7 +828,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/onboarding_restoring_title"
                     android:textSize="17sp"
-                    android:textColor="@color/color_text_primary"
+                    android:textColor="#FFFFFF"
                     android:fontFamily="sans-serif-medium"
                     android:gravity="center" />
 
@@ -873,7 +853,7 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:indeterminate="true"
-                        android:indeterminateTint="@color/color_text_primary" />
+                        android:indeterminateTint="@color/numo_fluorescent_green" />
 
                     <TextView
                         android:id="@+id/restoring_status"
@@ -882,7 +862,7 @@
                         android:layout_marginTop="16dp"
                         android:text="@string/onboarding_restoring_initializing"
                         android:textSize="15sp"
-                        android:textColor="@color/color_text_secondary"
+                        android:textColor="#99FFFFFF"
                         android:gravity="center" />
 
                     <!-- Mint Progress Items -->
@@ -942,7 +922,7 @@
                 android:layout_marginTop="32dp"
                 android:text="@string/onboarding_success_created_title"
                 android:textSize="28sp"
-                android:textColor="@color/color_text_primary"
+                android:textColor="#FFFFFF"
                 android:fontFamily="sans-serif-medium"
                 android:gravity="center" />
 
@@ -953,7 +933,7 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/onboarding_success_created_subtitle"
                 android:textSize="16sp"
-                android:textColor="@color/color_text_secondary"
+                android:textColor="#99FFFFFF"
                 android:gravity="center" />
 
             <Space
@@ -974,7 +954,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/onboarding_success_balance_by_mint"
                     android:textSize="12sp"
-                    android:textColor="@color/color_text_tertiary"
+                    android:textColor="#73FFFFFF"
                     android:letterSpacing="0.1"
                     android:layout_marginBottom="12dp" />
 
@@ -992,12 +972,19 @@
                 android:layout_weight="0.3" />
 
             <!-- Enter Wallet Button -->
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/enter_wallet_button"
-                style="@style/Widget.Button.Primary.Green"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/onboarding_enter_wallet_button" />
+                android:layout_height="56dp"
+                android:text="@string/onboarding_enter_wallet_button"
+                android:textSize="17sp"
+                android:textColor="@color/button_text_onboarding"
+                android:textAllCaps="false"
+                android:background="@drawable/bg_button_white"
+                android:stateListAnimator="@null"
+                app:backgroundTint="@null"
+                app:cornerRadius="28dp"
+                app:elevation="0dp" />
 
             <Space
                 android:layout_width="match_parent"

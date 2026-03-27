@@ -14,7 +14,7 @@
         android:fontFamily="sans-serif-medium"
         android:letterSpacing="0.05"
         android:textAllCaps="true"
-        android:textColor="@color/color_text_secondary"
+        android:textColor="#FFFFFF"
         android:textSize="13sp" />
 
     <TextView
@@ -22,7 +22,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif"
-        android:textColor="@color/color_text_tertiary"
+        android:textColor="#73FFFFFF"
         android:textSize="12sp" />
 
 </LinearLayout>

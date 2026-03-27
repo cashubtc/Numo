@@ -120,10 +120,10 @@
     <string name="onboarding_restore_wallet_subtitle">Use your existing seed phrase</string>
 
     <!-- Explainer -->
-    <string name="explainer_teaser_title">How does\nNumo work?</string>
-    <string name="explainer_slide1_title">Tap to\nget paid</string>
+    <string name="explainer_teaser_title">How does Numo work?</string>
+    <string name="explainer_slide1_title">Tap to get paid</string>
     <string name="explainer_slide1_body">Enter an amount, tap charge, and your customer holds their phone to yours. Payment lands instantly over NFC.</string>
-    <string name="explainer_slide2_title">Automatic\nself-custody</string>
+    <string name="explainer_slide2_title">Automatic self-custody</string>
     <string name="explainer_slide2_body">Set up auto-withdraw to move incoming payments straight to your own Lightning wallet. Numo stays self-custodial by default.</string>
     <string name="explainer_slide3_title">Zero fees</string>
     <string name="explainer_slide3_body">Numo is fully open-source and charges no fees. No subscriptions, no cuts, no hidden costs. Every sat you receive is yours.</string>
@@ -132,9 +132,9 @@
     
     <string name="onboarding_seed_toolbar_back">Back</string>
     <string name="onboarding_seed_toolbar_title">Restore Wallet</string>
-    <string name="onboarding_seed_instruction_title">Enter your 12-word seed phrase</string>
+    <string name="onboarding_seed_instruction_title">Enter your 12 word seed phrase</string>
     <string name="onboarding_seed_instruction_body">Enter the words in the correct order to restore your wallet.</string>
-    <string name="onboarding_seed_paste_button">Paste from Clipboard</string>
+    <string name="onboarding_seed_paste_button">Paste</string>
     <string name="onboarding_seed_validation_ready">Ready to continue</string>
     <string name="onboarding_seed_invalid_characters">Invalid characters detected</string>
     <string name="onboarding_seed_words_entered_count">%1$d of 12 words entered</string>

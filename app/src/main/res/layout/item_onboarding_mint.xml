@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:textSize="15sp"
             android:fontFamily="sans-serif-medium"
-            android:textColor="@color/color_text_primary"
+            android:textColor="#FFFFFF"
             android:maxLines="1"
             android:ellipsize="end" />
 
@@ -40,7 +40,7 @@
             android:layout_marginTop="2dp"
             android:textSize="12sp"
             android:fontFamily="sans-serif"
-            android:textColor="@color/color_text_secondary" />
+            android:textColor="#99FFFFFF" />
 
     </LinearLayout>
 
