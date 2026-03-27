@@ -120,7 +120,8 @@
     <string name="onboarding_restore_wallet_subtitle">Use your existing seed phrase</string>
 
     <!-- Explainer -->
-    <string name="explainer_teaser_title">How does Numo work?</string>
+    <string name="explainer_teaser_title">Tap. Pay. Done.</string>
+    <string name="explainer_teaser_subtitle">How does Numo work?</string>
     <string name="explainer_slide1_title">Tap to get paid</string>
     <string name="explainer_slide1_body">Enter an amount, tap charge, and your customer holds their phone to yours. Payment lands instantly over NFC.</string>
     <string name="explainer_slide2_title">Automatic self-custody</string>

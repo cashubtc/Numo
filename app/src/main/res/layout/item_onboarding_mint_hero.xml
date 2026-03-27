@@ -101,20 +101,6 @@
 
                 </LinearLayout>
 
-                <!-- Default badge pill -->
-                <TextView
-                    android:id="@+id/hero_default_badge"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:background="@drawable/bg_default_pill"
-                    android:fontFamily="sans-serif-medium"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="4dp"
-                    android:text="@string/onboarding_mints_hero_default_badge"
-                    android:textColor="@color/numo_fluorescent_green"
-                    android:textSize="11sp" />
-
             </LinearLayout>
 
             <!-- Divider -->

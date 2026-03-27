@@ -128,64 +128,64 @@
         android:background="@color/numo_navy"
         android:visibility="gone">
 
-        <!-- Setup content -->
-        <LinearLayout
+        <!-- Scrollable content + teaser -->
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="24dp"
-            android:paddingTop="48dp">
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            android:scrollbars="none">
 
-            <!-- Title -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/onboarding_setup_title"
-                android:textSize="32sp"
-                android:textColor="@color/numo_fluorescent_green"
-                android:fontFamily="sans-serif-black"
-                android:textAllCaps="true"
-                android:letterSpacing="-0.03"
-                android:lineSpacingMultiplier="1.05" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="40dp" />
-
-            <!-- Option rows -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Create New Wallet -->
+                <!-- Setup content -->
                 <LinearLayout
-                    android:id="@+id/create_wallet_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingVertical="14dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:background="?attr/selectableItemBackground">
+                    android:orientation="vertical"
+                    android:paddingHorizontal="24dp"
+                    android:paddingTop="48dp">
 
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:src="@drawable/ic_plus_stroke"
-                        android:contentDescription="@string/onboarding_create_wallet_title" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <!-- Title -->
+                    <TextView
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="14dp">
+                        android:text="@string/onboarding_setup_title"
+                        android:textSize="32sp"
+                        android:textColor="@color/numo_fluorescent_green"
+                        android:fontFamily="sans-serif-black"
+                        android:textAllCaps="true"
+                        android:letterSpacing="-0.03"
+                        android:lineSpacingMultiplier="1.05" />
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp" />
+
+                    <!-- Create New Wallet -->
+                    <LinearLayout
+                        android:id="@+id/create_wallet_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingVertical="14dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_plus_stroke"
+                            android:contentDescription="@string/onboarding_create_wallet_title" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
                             android:text="@string/onboarding_create_wallet_title"
                             android:textSize="16sp"
                             android:textColor="#FFFFFF"
@@ -193,40 +193,32 @@
 
                     </LinearLayout>
 
-                </LinearLayout>
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="8dp" />
 
-                <Space
-                    android:layout_width="match_parent"
-                    android:layout_height="8dp" />
-
-                <!-- Restore from Backup -->
-                <LinearLayout
-                    android:id="@+id/restore_wallet_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingVertical="14dp"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:background="?attr/selectableItemBackground">
-
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:src="@drawable/ic_clock_stroke"
-                        android:contentDescription="@string/onboarding_restore_wallet_title" />
-
+                    <!-- Restore from Backup -->
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:id="@+id/restore_wallet_button"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="14dp">
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingVertical="14dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_clock_stroke"
+                            android:contentDescription="@string/onboarding_restore_wallet_title" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="14dp"
                             android:text="@string/onboarding_restore_wallet_title"
                             android:textSize="16sp"
                             android:textColor="#FFFFFF"
@@ -236,61 +228,89 @@
 
                 </LinearLayout>
 
-            </LinearLayout>
+                <!-- Flexible spacer pushes teaser to bottom on large screens -->
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
 
-        </LinearLayout>
-
-        <!-- Teaser card -->
-        <FrameLayout
-            android:id="@+id/teaser_card"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:paddingHorizontal="16dp"
-            android:paddingBottom="34dp"
-            android:clickable="true"
-            android:focusable="true">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_teaser_card"
-                android:clipChildren="true"
-                android:clipToPadding="false">
-
-                <LinearLayout
+                <!-- "How does Numo work?" title above the card -->
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingTop="26dp"
                     android:paddingHorizontal="24dp"
-                    android:paddingBottom="20dp">
+                    android:paddingTop="24dp"
+                    android:paddingBottom="16dp"
+                    android:text="@string/explainer_teaser_subtitle"
+                    android:textSize="32sp"
+                    android:fontFamily="sans-serif-black"
+                    android:textColor="#FFFFFF"
+                    android:textAllCaps="true"
+                    android:letterSpacing="-0.03"
+                    android:lineSpacingMultiplier="1.05" />
 
-                    <TextView
+                <!-- Teaser card -->
+                <FrameLayout
+                    android:id="@+id/teaser_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:paddingBottom="34dp"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <com.google.android.material.card.MaterialCardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/explainer_teaser_title"
-                        android:textSize="32sp"
-                        android:fontFamily="sans-serif-black"
-                        android:textColor="@color/numo_navy"
-                        android:textAllCaps="true"
-                        android:letterSpacing="-0.03"
-                        android:lineSpacingMultiplier="1.05" />
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/numo_fluorescent_green">
 
-                </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
 
-                <ImageView
-                    android:id="@+id/teaser_illustration"
-                    android:layout_width="match_parent"
-                    android:layout_height="220dp"
-                    android:scaleType="fitCenter"
-                    android:clipToPadding="false"
-                    android:contentDescription="@string/explainer_image_placeholder" />
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:paddingTop="26dp"
+                                android:paddingHorizontal="24dp"
+                                android:paddingBottom="20dp">
+
+                                <!-- "Tap. Pay. Done." tagline -->
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/explainer_teaser_title"
+                                    android:textSize="32sp"
+                                    android:fontFamily="sans-serif-black"
+                                    android:textColor="@color/numo_navy"
+                                    android:textAllCaps="true"
+                                    android:letterSpacing="-0.03"
+                                    android:lineSpacingMultiplier="1.05" />
+
+                            </LinearLayout>
+
+                            <ImageView
+                                android:id="@+id/teaser_illustration"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:adjustViewBounds="true"
+                                android:src="@drawable/img_tap_to_pay"
+                                android:scaleType="fitCenter"
+                                android:contentDescription="@string/explainer_image_placeholder" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                </FrameLayout>
 
             </LinearLayout>
 
-        </FrameLayout>
+        </ScrollView>
 
         <!-- Explainer overlay -->
         <FrameLayout
@@ -458,15 +478,6 @@
                         android:textSize="24sp"
                         android:textColor="#FFFFFF"
                         android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/onboarding_seed_instruction_body"
-                        android:textSize="15sp"
-                        android:textColor="#99FFFFFF"
-                        android:lineHeight="20sp" />
 
                     <!-- Seed Input Grid -->
                     <androidx.gridlayout.widget.GridLayout
