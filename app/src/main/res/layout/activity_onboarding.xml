@@ -256,14 +256,6 @@
 
         </LinearLayout>
 
-        <!-- Gradient fade into teaser — covers bottom half of screen -->
-        <View
-            android:id="@+id/teaser_gradient"
-            android:layout_width="match_parent"
-            android:layout_height="420dp"
-            android:layout_gravity="bottom"
-            android:background="@drawable/bg_teaser_gradient" />
-
         <!-- Teaser card -->
         <FrameLayout
             android:id="@+id/teaser_card"
@@ -297,7 +289,7 @@
                         android:text="@string/explainer_teaser_title"
                         android:textSize="32sp"
                         android:fontFamily="sans-serif-black"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/numo_navy"
                         android:textAllCaps="true"
                         android:letterSpacing="-0.03"
                         android:lineSpacingMultiplier="1.05" />

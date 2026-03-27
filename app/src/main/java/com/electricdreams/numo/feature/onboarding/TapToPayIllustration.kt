@@ -78,8 +78,8 @@ class TapToPayIllustration : Drawable() {
         val phoneH = 280f * scale
         val phoneR = 22f * scale
 
-        // Position phones so tops are visible but bottoms clip
-        val phoneCenterY = top + h * 0.55f
+        // Position phones — tops fully visible, bottoms clip at card edge
+        val phoneCenterY = top + h * 0.52f
 
         // ── Left phone (merchant) — tilted clockwise ──
         canvas.save()
@@ -89,7 +89,7 @@ class TapToPayIllustration : Drawable() {
         canvas.restore()
 
         // ── NFC waves between phones ──
-        drawNfcWaves(canvas, cx + 8f * scale, top + h * 0.32f, scale)
+        drawNfcWaves(canvas, cx + 8f * scale, top + h * 0.26f, scale)
 
         // ── Right phone (customer) — tilted counter-clockwise ──
         canvas.save()
