@@ -48,6 +48,7 @@ import com.electricdreams.numo.core.payment.PaymentService
 import com.electricdreams.numo.core.payment.PaymentServiceFactory
 import com.electricdreams.numo.core.payment.PaymentState
 import com.electricdreams.numo.core.payment.impl.BTCPayPaymentService
+import com.electricdreams.numo.core.wallet.WalletError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -129,6 +130,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var btcPayPaymentId: String? = null
     private var btcPayCashuPR: String? = null
     private var btcPayPollingJob: Job? = null
+    private var btcPayInvoiceCreatedAt: Long = 0L
 
     // Lightning quote info for history
     private var lightningInvoice: String? = null
@@ -558,6 +560,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             val result = paymentService.createPayment(paymentAmount, "Payment of $paymentAmount sats")
             result.onSuccess { payment ->
                 btcPayPaymentId = payment.paymentId
+                btcPayInvoiceCreatedAt = System.currentTimeMillis()
                 // Persist invoice ID so resume can reuse it instead of creating a new one
                 pendingPaymentId?.let {
                     PaymentsHistoryActivity.updatePendingWithLightningInfo(
@@ -655,6 +658,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             val result = btcPay.fetchExistingPaymentData(invoiceId)
             result.onSuccess { payment ->
                 btcPayPaymentId = invoiceId
+                btcPayInvoiceCreatedAt = System.currentTimeMillis()
 
                 val hasCashu = !payment.cashuPR.isNullOrBlank()
                 val hasLightning = !payment.bolt11.isNullOrBlank()
@@ -697,9 +701,16 @@ class PaymentRequestActivity : AppCompatActivity() {
             }.onFailure { error ->
                 Log.e(TAG, "BTCPay resume failed: ${error.message}", error)
                 cashuLoadingSpinner.visibility = View.GONE
-                // Invoice may be expired — fall back to creating a new one
-                Log.d(TAG, "Falling back to new BTCPay invoice after resume failure")
-                initializeBtcPayPaymentRequest()
+                // Only create a new invoice if the original is definitively gone (404/expired).
+                // For network errors, show the error rather than risk duplicate invoices.
+                val isInvoiceGone = error is WalletError.NetworkError &&
+                    (error.message?.contains("404") == true || error.message?.contains("expired", ignoreCase = true) == true)
+                if (isInvoiceGone) {
+                    Log.d(TAG, "Invoice gone, creating new BTCPay invoice")
+                    initializeBtcPayPaymentRequest()
+                } else {
+                    handlePaymentError(error.message ?: "Failed to load payment")
+                }
             }
         }
     }
@@ -789,12 +800,27 @@ class PaymentRequestActivity : AppCompatActivity() {
      */
     private fun startBtcPayPolling(paymentId: String) {
         btcPayPollingJob = uiScope.launch {
+            var consecutiveErrors = 0
+            var pollInterval = 2000L
+
             while (!hasTerminalOutcome) {
-                delay(2000)
+                // Fix 7: local expiry guard (15 min) in case server never returns EXPIRED
+                if (btcPayInvoiceCreatedAt > 0 &&
+                    System.currentTimeMillis() - btcPayInvoiceCreatedAt > BTCPAY_INVOICE_TIMEOUT_MS) {
+                    Log.w(TAG, "BTCPay invoice timed out locally after ${BTCPAY_INVOICE_TIMEOUT_MS / 60000} min")
+                    btcPayPollingJob?.cancel()
+                    pendingPaymentId?.let { PaymentsHistoryActivity.markPaymentExpired(this@PaymentRequestActivity, it) }
+                    handlePaymentError("Invoice expired")
+                    return@launch
+                }
+
+                delay(pollInterval)
                 if (hasTerminalOutcome) break
 
                 val statusResult = paymentService.checkPaymentStatus(paymentId)
                 statusResult.onSuccess { state ->
+                    consecutiveErrors = 0
+                    pollInterval = 2000L
                     when (state) {
                         PaymentState.PAID -> {
                             btcPayPollingJob?.cancel()
@@ -806,25 +832,26 @@ class PaymentRequestActivity : AppCompatActivity() {
                         }
                         PaymentState.EXPIRED -> {
                             btcPayPollingJob?.cancel()
-                            pendingPaymentId?.let {
-                                PaymentsHistoryActivity.markPaymentExpired(this@PaymentRequestActivity, it)
-                            }
+                            pendingPaymentId?.let { PaymentsHistoryActivity.markPaymentExpired(this@PaymentRequestActivity, it) }
                             handlePaymentError("Invoice expired")
                         }
                         PaymentState.FAILED -> {
                             btcPayPollingJob?.cancel()
-                            pendingPaymentId?.let {
-                                PaymentsHistoryActivity.markPaymentFailed(this@PaymentRequestActivity, it)
-                            }
+                            pendingPaymentId?.let { PaymentsHistoryActivity.markPaymentFailed(this@PaymentRequestActivity, it) }
                             handlePaymentError("Invoice invalid")
                         }
-                        PaymentState.PENDING -> {
-                            // Continue polling
-                        }
+                        PaymentState.PENDING -> { /* continue */ }
                     }
                 }.onFailure { error ->
-                    Log.w(TAG, "BTCPay poll error: ${error.message}")
-                    // Continue polling on transient errors
+                    // Fix 6: exponential backoff, stop after too many consecutive errors
+                    consecutiveErrors++
+                    pollInterval = minOf(pollInterval * 2, 30_000L)
+                    Log.w(TAG, "BTCPay poll error ($consecutiveErrors): ${error.message}")
+                    if (consecutiveErrors >= BTCPAY_MAX_POLL_ERRORS) {
+                        Log.e(TAG, "BTCPay polling stopped after $consecutiveErrors consecutive errors")
+                        btcPayPollingJob?.cancel()
+                        handlePaymentError("Server unreachable")
+                    }
                 }
             }
         }
@@ -2040,6 +2067,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "PaymentRequestActivity"
         private const val NFC_READ_TIMEOUT_MS = 5_000L
+        private const val BTCPAY_INVOICE_TIMEOUT_MS = 15 * 60 * 1000L // 15 min
+        private const val BTCPAY_MAX_POLL_ERRORS = 5
 
 
 
