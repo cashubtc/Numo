@@ -162,67 +162,68 @@
 
                     <Space
                         android:layout_width="match_parent"
-                        android:layout_height="40dp" />
+                        android:layout_height="48dp" />
 
-                    <!-- Create New Wallet -->
+                    <!-- Create New Wallet (primary CTA) -->
                     <LinearLayout
                         android:id="@+id/create_wallet_button"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="56dp"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingVertical="14dp"
+                        android:gravity="center"
                         android:clickable="true"
                         android:focusable="true"
-                        android:background="?attr/selectableItemBackground">
+                        android:background="@drawable/bg_button_white">
 
                         <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
                             android:src="@drawable/ic_plus_stroke"
+                            android:tint="#0A2540"
                             android:contentDescription="@string/onboarding_create_wallet_title" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
+                            android:layout_marginStart="10dp"
                             android:text="@string/onboarding_create_wallet_title"
                             android:textSize="16sp"
-                            android:textColor="#FFFFFF"
+                            android:textColor="#0A2540"
                             android:fontFamily="sans-serif-medium" />
 
                     </LinearLayout>
 
                     <Space
                         android:layout_width="match_parent"
-                        android:layout_height="8dp" />
+                        android:layout_height="24dp" />
 
-                    <!-- Restore from Backup -->
+                    <!-- Restore from Backup (secondary action) -->
                     <LinearLayout
                         android:id="@+id/restore_wallet_button"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingVertical="14dp"
+                        android:gravity="center"
+                        android:paddingVertical="12dp"
                         android:clickable="true"
                         android:focusable="true"
                         android:background="?attr/selectableItemBackground">
 
                         <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
                             android:src="@drawable/ic_clock_stroke"
+                            android:alpha="0.5"
                             android:contentDescription="@string/onboarding_restore_wallet_title" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="14dp"
+                            android:layout_marginStart="8dp"
                             android:text="@string/onboarding_restore_wallet_title"
-                            android:textSize="16sp"
-                            android:textColor="#FFFFFF"
-                            android:fontFamily="sans-serif-medium" />
+                            android:textSize="14sp"
+                            android:textColor="#80FFFFFF"
+                            android:fontFamily="sans-serif" />
 
                     </LinearLayout>
 
