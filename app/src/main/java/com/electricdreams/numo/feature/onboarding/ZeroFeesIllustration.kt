@@ -157,6 +157,7 @@ class ZeroFeesIllustration @JvmOverloads constructor(
         super.onDetachedFromWindow()
         startRunnable?.let { removeCallbacks(it) }
         startRunnable = null
+        animatorSet?.removeAllListeners()
         animatorSet?.cancel()
         animatorSet = null
         // Reset so animation replays fresh on re-attach

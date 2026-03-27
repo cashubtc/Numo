@@ -23,16 +23,6 @@
             android:layout_height="match_parent"
             android:background="@android:color/white" />
 
-        <!-- Navy curve - hidden in new design, kept for ID compatibility -->
-        <ImageView
-            android:id="@+id/welcome_navy_curve"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@drawable/bg_welcome_curve"
-            android:scaleType="fitXY"
-            android:visibility="gone"
-            android:alpha="0" />
-
         <!-- Emoji container (BEFORE content so emojis render behind text) -->
         <FrameLayout
             android:id="@+id/emoji_burst_container"
@@ -179,7 +169,7 @@
                             android:layout_width="20dp"
                             android:layout_height="20dp"
                             android:src="@drawable/ic_plus_stroke"
-                            android:tint="#0A2540"
+                            app:tint="#0A2540"
                             android:contentDescription="@string/onboarding_create_wallet_title" />
 
                         <TextView
@@ -349,7 +339,7 @@
                         android:layout_height="44dp"
                         android:padding="10dp"
                         android:src="@drawable/ic_close"
-                        android:tint="#FFFFFF"
+                        app:tint="#FFFFFF"
                         android:alpha="0.7"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:clickable="true"

@@ -136,7 +136,6 @@ class OnboardingActivity : AppCompatActivity() {
     // Step 1: Welcome
     private lateinit var welcomeContainer: FrameLayout
     private lateinit var welcomeBackgroundOverlay: View
-    private lateinit var welcomeNavyCurve: ImageView
     private lateinit var welcomeWordmark: ImageView
     private lateinit var welcomeTagline: TextView
     private lateinit var termsText: TextView
@@ -302,7 +301,6 @@ class OnboardingActivity : AppCompatActivity() {
         // Welcome
         welcomeContainer = findViewById(R.id.welcome_container)
         welcomeBackgroundOverlay = findViewById(R.id.welcome_background_overlay)
-        welcomeNavyCurve = findViewById(R.id.welcome_navy_curve)
         welcomeWordmark = findViewById(R.id.welcome_wordmark)
         welcomeTagline = findViewById(R.id.welcome_tagline)
         termsText = findViewById(R.id.terms_text)
