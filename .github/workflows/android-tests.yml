@@ -12,6 +12,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
@@ -36,5 +38,35 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Run unit tests
-        run: ./gradlew testDebugUnitTest --no-daemon --console=plain
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Run unit tests with coverage
+        run: ./gradlew jacocoTestReport --no-daemon --console=plain
+
+      - name: Generate JaCoCo Badge
+        uses: cicirello/jacoco-badge-generator@v2
+        with:
+          jacoco-csv-file: app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.csv
+          badges-directory: badges
+          generate-branches-badge: true
+          generate-summary: true
+
+      - name: Push Badge to Branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: badges
+          folder: badges
+          clean: false
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: app/build/reports/jacoco/jacocoTestReport/html/
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
