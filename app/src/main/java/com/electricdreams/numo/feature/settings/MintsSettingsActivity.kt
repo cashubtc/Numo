@@ -545,4 +545,4 @@ class MintsSettingsActivity : AppCompatActivity() {
         allMintsHeader.visibility = View.VISIBLE
     }
 
-}
+}   qq
