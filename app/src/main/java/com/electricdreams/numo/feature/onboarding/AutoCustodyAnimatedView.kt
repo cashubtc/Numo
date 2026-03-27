@@ -179,6 +179,13 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
         canvas.restore()
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        if (width > 0 && height > 0 && !animStarted) {
+            startIntro()
+        }
+    }
+
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         if (w > 0 && h > 0 && !animStarted) {
@@ -203,6 +210,14 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
 
         cycleRunnable?.let { removeCallbacks(it) }
         cycleRunnable = null
+
+        // Reset so animation replays fresh on re-attach
+        animStarted = false
+        introComplete = false
+        introProgress = 0f
+        backIntroProgress = 0f
+        cycleProgress = 0f
+        currentIndex = 0
     }
 
     private fun startIntro() {
