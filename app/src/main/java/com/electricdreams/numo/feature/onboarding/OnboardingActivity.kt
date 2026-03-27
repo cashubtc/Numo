@@ -897,6 +897,7 @@ class OnboardingActivity : AppCompatActivity() {
             activity = this,
             container = welcomeContainer,
             wordmark = welcomeWordmark,
+            wordmarkGreen = findViewById(R.id.welcome_wordmark_green),
             tagline = welcomeTagline,
             acceptButton = acceptButton,
             termsText = termsText,

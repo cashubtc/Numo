@@ -44,14 +44,29 @@
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
-            <!-- Numo Wordmark (white vector, tinted navy by animator initially) -->
-            <ImageView
-                android:id="@+id/welcome_wordmark"
+            <!-- Numo Wordmark (white + green overlay for color fill animation) -->
+            <FrameLayout
                 android:layout_width="200dp"
-                android:layout_height="88dp"
-                android:src="@drawable/ic_numo_wordmark_white"
-                android:contentDescription="@string/app_name"
-                android:alpha="0" />
+                android:layout_height="88dp">
+
+                <ImageView
+                    android:id="@+id/welcome_wordmark"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_numo_wordmark_white"
+                    android:contentDescription="@string/app_name"
+                    android:alpha="0" />
+
+                <ImageView
+                    android:id="@+id/welcome_wordmark_green"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_numo_wordmark_white"
+                    app:tint="@color/numo_fluorescent_green"
+                    android:contentDescription="@null"
+                    android:alpha="0" />
+
+            </FrameLayout>
 
             <!-- Tagline (color set by animator: starts navy, transitions to white) -->
             <TextView

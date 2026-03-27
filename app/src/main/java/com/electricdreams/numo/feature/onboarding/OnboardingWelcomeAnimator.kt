@@ -9,6 +9,7 @@ import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.Rect
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
@@ -46,6 +47,7 @@ class OnboardingWelcomeAnimator(
     private val activity: Activity,
     private val container: FrameLayout,
     private val wordmark: ImageView,
+    private val wordmarkGreen: ImageView,
     private val tagline: TextView,
     private val acceptButton: MaterialButton,
     private val termsText: TextView,
@@ -163,6 +165,8 @@ class OnboardingWelcomeAnimator(
                 startPhase4_ColorTransition()
                 delay(400)
                 startPhase6_CtaReveal()
+                delay(800)
+                startPhase4b_GreenFill()
             }
         }
     }
@@ -199,6 +203,9 @@ class OnboardingWelcomeAnimator(
         wordmark.alpha = 0f
         wordmark.scaleX = 0.95f
         wordmark.scaleY = 0.95f
+
+        wordmarkGreen.alpha = 0f
+        wordmarkGreen.clipBounds = null
 
         tagline.setTextColor(navyColor)
         tagline.alpha = 0f
@@ -413,6 +420,28 @@ class OnboardingWelcomeAnimator(
         }
         cont.invokeOnCancellation { colorAnim.cancel() }
         trackAndStart(colorAnim)
+    }
+
+    // === Phase 4b: Green Color Fill (800ms) ===
+
+    private suspend fun startPhase4b_GreenFill() = suspendCancellableCoroutine<Unit> { cont ->
+        val w = wordmarkGreen.width
+        val h = wordmarkGreen.height
+        if (w == 0 || h == 0) { if (cont.isActive) cont.resume(Unit); return@suspendCancellableCoroutine }
+
+        wordmarkGreen.alpha = 1f
+        wordmarkGreen.clipBounds = Rect(0, 0, 0, h)
+
+        val fillAnim = ValueAnimator.ofInt(0, w).apply {
+            duration = 3000
+            interpolator = AccelerateDecelerateInterpolator()
+            addUpdateListener {
+                wordmarkGreen.clipBounds = Rect(0, 0, it.animatedValue as Int, h)
+            }
+            addListener(onEnd { if (cont.isActive) cont.resume(Unit) })
+        }
+        cont.invokeOnCancellation { fillAnim.cancel() }
+        trackAndStart(fillAnim)
     }
 
     // === Phase 5: Scrolling Rows Fade In (800ms) ===
