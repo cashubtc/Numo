@@ -4,13 +4,13 @@ import android.graphics.*
 import android.graphics.drawable.Drawable
 
 /**
- * Premium illustration of two phones doing NFC tap-to-pay.
- * Phones are large, overlapping, and intentionally extend beyond the bottom
- * of the drawable bounds so the parent container clips them for a dynamic feel.
+ * Illustration for the "Tap to get paid" explainer slide.
+ * Two phones in landscape-ish arrangement entering from left and right sides,
+ * meeting in the center with NFC waves between them.
+ * Uses the same phone rendering style as [TapToPayIllustration].
  */
-class TapToPayIllustration : Drawable() {
+class TapToGetPaidIllustration : Drawable() {
 
-    // Phone body — very dark navy with subtle edge highlight
     private val phonePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#06131F")
         style = Paint.Style.FILL
@@ -19,19 +19,15 @@ class TapToPayIllustration : Drawable() {
     private val phoneEdgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#1C3550")
         style = Paint.Style.STROKE
-        strokeWidth = 1.5f
     }
 
-    // Screen — slightly lighter than body
     private val screenPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#0B2038")
         style = Paint.Style.FILL
     }
 
-    // Screen inner glow (subtle gradient overlay)
     private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    // Text paints
     private val amountPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
         textAlign = Paint.Align.CENTER
@@ -49,14 +45,12 @@ class TapToPayIllustration : Drawable() {
         typeface = Typeface.create("sans-serif", Typeface.NORMAL)
     }
 
-    // NFC arcs
     private val nfcPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#5EFFC2")
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
     }
 
-    // Checkmark
     private val checkPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#5EFFC2")
         style = Paint.Style.STROKE
@@ -69,32 +63,28 @@ class TapToPayIllustration : Drawable() {
         val w = b.width().toFloat()
         val h = b.height().toFloat()
         val cx = b.left + w / 2f
-        val top = b.top.toFloat()
+        val cy = b.top + h / 2f
 
-        val scale = w / 380f // normalize to a 380-wide design
+        val scale = w / 380f
 
-        // Phones are tall — they intentionally extend past the bottom
-        val phoneW = 140f * scale
-        val phoneH = 280f * scale
-        val phoneR = 22f * scale
+        val phoneW = 120f * scale
+        val phoneH = 240f * scale
+        val phoneR = 20f * scale
 
-        // Position phones so tops are visible but bottoms clip
-        val phoneCenterY = top + h * 0.55f
-
-        // ── Left phone (merchant) — tilted clockwise ──
+        // ── Left phone (merchant) — nearly horizontal, top facing right ──
         canvas.save()
-        canvas.translate(cx - 48f * scale, phoneCenterY)
-        canvas.rotate(10f)
+        canvas.translate(cx - 70f * scale, cy + 15f * scale)
+        canvas.rotate(75f)
         drawPhone(canvas, phoneW, phoneH, phoneR, scale, isMerchant = true)
         canvas.restore()
 
-        // ── NFC waves between phones ──
-        drawNfcWaves(canvas, cx + 8f * scale, top + h * 0.32f, scale)
+        // ── NFC waves centered between phone tops ──
+        drawNfcWaves(canvas, cx, cy - 20f * scale, scale)
 
-        // ── Right phone (customer) — tilted counter-clockwise ──
+        // ── Right phone (customer) — nearly horizontal, top facing left ──
         canvas.save()
-        canvas.translate(cx + 48f * scale, phoneCenterY - 20f * scale)
-        canvas.rotate(-10f)
+        canvas.translate(cx + 70f * scale, cy - 15f * scale)
+        canvas.rotate(-75f)
         drawPhone(canvas, phoneW, phoneH, phoneR, scale, isMerchant = false)
         canvas.restore()
     }
@@ -164,12 +154,12 @@ class TapToPayIllustration : Drawable() {
         val screenCy = sy + sh * 0.38f
 
         if (isMerchant) {
-            drawMerchantScreen(canvas, screenCx, screenCy, sw, scale)
+            drawMerchantScreen(canvas, screenCx, screenCy, scale)
         } else {
-            drawCustomerScreen(canvas, screenCx, screenCy, sw, scale)
+            drawCustomerScreen(canvas, screenCx, screenCy, scale)
         }
 
-        // Home indicator at bottom
+        // Home indicator
         val homePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor("#30FFFFFF")
         }
@@ -183,16 +173,10 @@ class TapToPayIllustration : Drawable() {
         )
     }
 
-    private fun drawMerchantScreen(
-        canvas: Canvas, cx: Float, cy: Float, screenW: Float, scale: Float
-    ) {
-        // Amount
-        amountPaint.textSize = 36f * scale
-        canvas.drawText("\$20", cx, cy, amountPaint)
-
-        // Checkmark circle
-        val checkCy = cy + 36f * scale
-        val circleR = 16f * scale
+    private fun drawMerchantScreen(canvas: Canvas, cx: Float, cy: Float, scale: Float) {
+        // Checkmark circle — centered on screen
+        val checkCy = cy + 2f * scale
+        val circleR = 18f * scale
         val circlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor("#1A5EFFC2")
         }
@@ -207,18 +191,16 @@ class TapToPayIllustration : Drawable() {
         }
         canvas.drawPath(checkPath, checkPaint)
 
-        // "Payment received" label
+        // Label
         sublabelPaint.textSize = 9f * scale
         sublabelPaint.color = Color.parseColor("#60FFFFFF")
-        canvas.drawText("Payment received", cx, checkCy + 32f * scale, sublabelPaint)
+        canvas.drawText("Payment received", cx, checkCy + 34f * scale, sublabelPaint)
     }
 
-    private fun drawCustomerScreen(
-        canvas: Canvas, cx: Float, cy: Float, screenW: Float, scale: Float
-    ) {
-        // Contactless icon at top — centered above the "$20"
+    private fun drawCustomerScreen(canvas: Canvas, cx: Float, cy: Float, scale: Float) {
+        // Contactless icon
         nfcPaint.strokeWidth = 1.8f * scale
-        val iconCy = cy - 44f * scale
+        val iconCy = cy - 30f * scale
         for (i in 0..2) {
             val arcR = (7f + i * 6f) * scale
             nfcPaint.alpha = 200 - i * 55
@@ -228,24 +210,24 @@ class TapToPayIllustration : Drawable() {
         nfcPaint.alpha = 255
 
         // Amount
-        amountPaint.textSize = 36f * scale
-        canvas.drawText("\$20", cx, cy + 4f * scale, amountPaint)
+        amountPaint.textSize = 22f * scale
+        canvas.drawText("\$5.50", cx, cy + 6f * scale, amountPaint)
 
-        // "Tap to pay" label
-        labelPaint.textSize = 11f * scale
-        canvas.drawText("Tap to pay", cx, cy + 28f * scale, labelPaint)
+        // Label
+        labelPaint.textSize = 10f * scale
+        canvas.drawText("Tap to pay", cx, cy + 24f * scale, labelPaint)
 
-        // Subtle merchant name
+        // Merchant name
         sublabelPaint.textSize = 8f * scale
         sublabelPaint.color = Color.parseColor("#40FFFFFF")
-        canvas.drawText("Coffee Shop", cx, cy + 46f * scale, sublabelPaint)
+        canvas.drawText("Bakery", cx, cy + 44f * scale, sublabelPaint)
     }
 
     private fun drawNfcWaves(canvas: Canvas, cx: Float, cy: Float, scale: Float) {
         nfcPaint.strokeWidth = 2.2f * scale
         val alphas = intArrayOf(140, 90, 45)
         for (i in 0..2) {
-            val r = (20f + i * 14f) * scale
+            val r = (18f + i * 13f) * scale
             nfcPaint.alpha = alphas[i]
             val arcRect = RectF(cx - r, cy - r, cx + r, cy + r)
             canvas.drawArc(arcRect, -40f, 80f, false, nfcPaint)

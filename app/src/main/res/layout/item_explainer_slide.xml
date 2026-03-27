@@ -37,25 +37,16 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:gravity="center">
+        android:clipChildren="false"
+        android:clipToPadding="false">
 
-        <FrameLayout
-            android:layout_width="280dp"
-            android:layout_height="240dp"
+        <ImageView
+            android:id="@+id/slide_illustration"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:background="@drawable/bg_placeholder_image_large">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="@string/explainer_image_placeholder"
-                android:textSize="11sp"
-                android:textColor="#335EFFC2"
-                android:textAllCaps="true"
-                android:letterSpacing="0.04" />
-
-        </FrameLayout>
+            android:scaleType="fitCenter"
+            android:contentDescription="@null" />
 
     </FrameLayout>
 
