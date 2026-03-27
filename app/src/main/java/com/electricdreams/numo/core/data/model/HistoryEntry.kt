@@ -20,4 +20,6 @@ interface HistoryEntry {
     fun getBaseAmountSats(): Long
     fun isPending(): Boolean
     fun isCompleted(): Boolean
+    fun isExpired(): Boolean = false
+    fun isFailed(): Boolean = false
 }
