@@ -161,8 +161,7 @@ class OnboardingWelcomeAnimator(
                 delay(200)
                 startPhase3_CircleExpansion()
                 startPhase4_ColorTransition()
-                delay(600)
-                startPhase5_ScrollingRows()
+                delay(400)
                 startPhase6_CtaReveal()
             }
         }
@@ -259,7 +258,12 @@ class OnboardingWelcomeAnimator(
 
     private suspend fun startPhase3_CircleExpansion() {
         val centerX = emojiContainer.width / 2f
-        val centerY = emojiContainer.height / 2f
+        // Center on the wordmark, not the screen center
+        val wordmarkLocation = IntArray(2)
+        wordmark.getLocationInWindow(wordmarkLocation)
+        val containerLocation = IntArray(2)
+        emojiContainer.getLocationInWindow(containerLocation)
+        val centerY = (wordmarkLocation[1] - containerLocation[1]).toFloat() + wordmark.height / 2f
         val density = activity.resources.displayMetrics.density
         val radius = min(emojiContainer.width, emojiContainer.height) * 0.30f
 
@@ -326,7 +330,12 @@ class OnboardingWelcomeAnimator(
 
     private suspend fun startCircleBurst() = suspendCancellableCoroutine<Unit> { cont ->
         val centerX = emojiContainer.width / 2f
-        val centerY = emojiContainer.height / 2f
+        // Match the circle center used in phase 3
+        val wordmarkLocation = IntArray(2)
+        wordmark.getLocationInWindow(wordmarkLocation)
+        val containerLocation = IntArray(2)
+        emojiContainer.getLocationInWindow(containerLocation)
+        val centerY = (wordmarkLocation[1] - containerLocation[1]).toFloat() + wordmark.height / 2f
         var completedCount = 0
         val phaseAnimators = mutableListOf<Animator>()
 

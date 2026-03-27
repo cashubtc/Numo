@@ -23,6 +23,7 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import androidx.viewpager2.widget.ViewPager2
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.Button
@@ -282,13 +283,13 @@ class OnboardingActivity : AppCompatActivity() {
             windowInsetsController.isAppearanceLightNavigationBars = true
         } else if (step == OnboardingStep.CHOOSE_PATH) {
             // Navy bars — nav bar matches dark teaser area at bottom
-            window.statusBarColor = android.graphics.Color.parseColor("#0E3050")
+            window.statusBarColor = android.graphics.Color.parseColor("#0A2540")
             window.navigationBarColor = android.graphics.Color.parseColor("#0A2540")
             windowInsetsController.isAppearanceLightStatusBars = false
             windowInsetsController.isAppearanceLightNavigationBars = false
         } else {
             // Navy bars for all other onboarding screens
-            val navyLight = android.graphics.Color.parseColor("#0E3050")
+            val navyLight = android.graphics.Color.parseColor("#0A2540")
             window.statusBarColor = navyLight
             window.navigationBarColor = navyLight
             windowInsetsController.isAppearanceLightStatusBars = false
@@ -579,7 +580,15 @@ class OnboardingActivity : AppCompatActivity() {
         }
     }
 
+    private fun hideKeyboard() {
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        currentFocus?.let { imm.hideSoftInputFromWindow(it.windowToken, 0) }
+    }
+
     private fun showStep(step: OnboardingStep) {
+        // Always dismiss keyboard when changing steps
+        hideKeyboard()
+
         // Stop welcome animation if leaving welcome screen
         if (currentStep == OnboardingStep.WELCOME && step != OnboardingStep.WELCOME) {
             welcomeAnimator?.stop()
@@ -719,7 +728,7 @@ class OnboardingActivity : AppCompatActivity() {
         if (open) {
             window.statusBarColor = darkNavy
         } else {
-            window.statusBarColor = android.graphics.Color.parseColor("#0E3050")
+            window.statusBarColor = android.graphics.Color.parseColor("#0A2540")
         }
         window.navigationBarColor = darkNavy // always dark navy at bottom
         controller.isAppearanceLightStatusBars = false
@@ -1702,6 +1711,8 @@ class OnboardingActivity : AppCompatActivity() {
         val intent = Intent(this, ModernPOSActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
+        @Suppress("DEPRECATION")
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         finish()
     }
 

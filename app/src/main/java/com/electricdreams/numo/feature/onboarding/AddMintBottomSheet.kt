@@ -42,7 +42,7 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
         dialog.window?.setSoftInputMode(
             WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
         )
-        dialog.window?.navigationBarColor = android.graphics.Color.parseColor("#0E3050")
+        dialog.window?.navigationBarColor = android.graphics.Color.parseColor("#0A2540")
         return dialog
     }
 
@@ -109,7 +109,7 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
             )
             bottomSheet?.let { sheet ->
                 sheet.setBackgroundColor(
-                    android.graphics.Color.parseColor("#0E3050")
+                    android.graphics.Color.parseColor("#0A2540")
                 )
                 val behavior = BottomSheetBehavior.from(sheet)
                 behavior.state = BottomSheetBehavior.STATE_EXPANDED

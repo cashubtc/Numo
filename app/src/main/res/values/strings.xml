@@ -211,7 +211,7 @@
     <string name="onboarding_success_created_title">Wallet Created</string>
     <string name="onboarding_success_created_subtitle">Your wallet is ready to use</string>
     <string name="onboarding_success_balance_by_mint">BALANCE BY MINT</string>
-    <string name="onboarding_enter_wallet_button">Enter Wallet</string>
+    <string name="onboarding_enter_wallet_button">Continue</string>
 
     
     <string name="onboarding_error_creating_wallet">Error creating wallet: %1$s</string>

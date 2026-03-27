@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/numo_navy_light">
+    android:background="@color/numo_navy">
 
     <!-- ======================== -->
     <!-- STEP 1: WELCOME SCREEN   -->
@@ -125,7 +125,7 @@
         android:id="@+id/choose_path_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/numo_navy_light"
+        android:background="@color/numo_navy"
         android:visibility="gone">
 
         <!-- Setup content -->
@@ -561,7 +561,7 @@
                 android:paddingHorizontal="20dp"
                 android:paddingTop="16dp"
                 android:paddingBottom="32dp"
-                android:background="@color/numo_navy_light">
+                android:background="@color/numo_navy">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/seed_continue_button"
@@ -780,7 +780,7 @@
                 android:paddingHorizontal="20dp"
                 android:paddingTop="12dp"
                 android:paddingBottom="32dp"
-                android:background="@color/numo_navy_light">
+                android:background="@color/numo_navy">
 
                 <!-- Continue - primary button (matches seed_continue_button style) -->
                 <com.google.android.material.button.MaterialButton
