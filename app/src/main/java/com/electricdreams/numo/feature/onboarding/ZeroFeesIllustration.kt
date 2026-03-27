@@ -191,7 +191,7 @@ class ZeroFeesIllustration @JvmOverloads constructor(
 
         // Phase 2: Each fee gets slashed individually (staggered)
         fees.forEachIndexed { i, fee ->
-            val baseDelay = 900L + i * 200L
+            val baseDelay = 1600L + i * 200L
 
             // Slash line draws
             val slash = ValueAnimator.ofFloat(0f, 1f).apply {
@@ -219,10 +219,10 @@ class ZeroFeesIllustration @JvmOverloads constructor(
         }
 
         // Phase 3: "0%" bounces in after all fees are destroyed
-        val lastFeeEnd = 900L + fees.size * 200L + 350L
+        val lastFeeEnd = 1600L + (fees.size - 1) * 200L + 150L + 350L
         val zeroIn = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 600
-            startDelay = lastFeeEnd + 100L
+            startDelay = lastFeeEnd + 300L
             interpolator = OvershootInterpolator(1.5f)
             addUpdateListener {
                 val p = it.animatedValue as Float
