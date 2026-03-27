@@ -313,7 +313,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     val creq = nostrHandler?.paymentRequestBech32
                     val lnbc = lightningHandler?.currentInvoice ?: lightningInvoice
                     if (creq != null && lnbc != null) {
-                        "bitcoin:?creq=${creq}&lightning=${lnbc}"
+                        org.cashudevkit.createBip321Uri(creq, lnbc, null)
                     } else creq ?: lnbc
                 }
             }
@@ -614,7 +614,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
 
         val payload = if (creq != null && lnbc != null) {
-            "bitcoin:?creq=${creq}&lightning=${lnbc}"
+            org.cashudevkit.createBip321Uri(creq, lnbc, null)
         } else creq ?: lnbc
 
         try {
@@ -658,7 +658,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         
         val unifiedUri = if (creq != null && lnbc != null) {
-            "bitcoin:?creq=${creq}&lightning=${lnbc}"
+            org.cashudevkit.createBip321Uri(creq, lnbc, null)
         } else creq ?: lnbc
         
         if (unifiedUri == null) return
