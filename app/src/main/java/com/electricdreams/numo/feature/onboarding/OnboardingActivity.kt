@@ -746,6 +746,10 @@ class OnboardingActivity : AppCompatActivity() {
         explainerOpen = true
         explainerOverlay.visibility = View.VISIBLE
         setExplainerWindowBars(true)
+
+        // Reset adapter so animations replay fresh
+        explainerViewPager.adapter = ExplainerSlideAdapter()
+        explainerViewPager.setCurrentItem(0, false)
         val screenHeight = explainerOverlay.height.toFloat()
 
         // Animate sheet up
