@@ -43,7 +43,9 @@ class ZeroFeesIllustration @JvmOverloads constructor(
     private var zeroScale = 0.5f
 
     private var animStarted = false
+    private var animScheduled = false
     private var animatorSet: AnimatorSet? = null
+    private var startRunnable: Runnable? = null
 
     private val feePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
@@ -141,16 +143,29 @@ class ZeroFeesIllustration @JvmOverloads constructor(
         }
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        scheduleAnimation()
+    }
+
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        if (w > 0 && h > 0 && !animStarted) {
-            postDelayed({ startAnimation() }, 500)
-        }
+        if (w > 0 && h > 0) scheduleAnimation()
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
+        startRunnable?.let { removeCallbacks(it) }
+        startRunnable = null
         animatorSet?.cancel()
+    }
+
+    private fun scheduleAnimation() {
+        if (animScheduled || animStarted) return
+        if (width == 0 || height == 0) return
+        animScheduled = true
+        startRunnable = Runnable { startAnimation() }
+        postDelayed(startRunnable!!, 500)
     }
 
     private fun startAnimation() {
