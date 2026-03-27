@@ -157,8 +157,8 @@ data class PaymentHistoryEntry(
     override fun isCompleted(): Boolean = status == STATUS_COMPLETED
 
     /** Check if this payment expired (BTCPay invoice expired before payment) */
-    fun isExpired(): Boolean = getStatus() == STATUS_EXPIRED
-    fun isFailed(): Boolean = getStatus() == STATUS_FAILED
+    override fun isExpired(): Boolean = status == STATUS_EXPIRED
+    override fun isFailed(): Boolean = status == STATUS_FAILED
 
     /** Check if this payment was via Lightning */
     fun isLightning(): Boolean = paymentType == TYPE_LIGHTNING

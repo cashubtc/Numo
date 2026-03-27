@@ -84,7 +84,6 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var unifiedLoadingSpinner: View
     private lateinit var cashuLoadingSpinner: View
     private lateinit var lightningLogoCard: View
-    private lateinit var cashuLoadingSpinner: View
     private lateinit var cashuLogoCard: View
     
     // NFC Animation views
@@ -240,7 +239,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         unifiedLoadingSpinner = findViewById(R.id.unified_loading_spinner)
         cashuLoadingSpinner = findViewById(R.id.cashu_loading_spinner)
         lightningLogoCard = findViewById(R.id.lightning_logo_card)
-        cashuLoadingSpinner = findViewById(R.id.cashu_loading_spinner)
         cashuLogoCard = findViewById(R.id.cashu_logo_card)
 
         // NFC Animation views
@@ -393,7 +391,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         // If resuming a local Lightning payment, auto-switch to Lightning tab.
         // BTCPay resume uses resumeLightningQuoteId for the invoice ID — don't switch tab for it.
         if (isResumingPayment && resumeLightningQuoteId != null && paymentService !is BTCPayPaymentService) {
-            tabManager.selectLightningTab()
+            tabManager.selectTab(PaymentTabManager.PaymentTab.LIGHTNING)
         }
     }
 
@@ -669,6 +667,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         try {
             val qrBitmap = QrCodeGenerator.generate(bolt11, 512)
             lightningQrImageView.setImageBitmap(qrBitmap)
+            lightningQrImageView.visibility = View.VISIBLE
             lightningLoadingSpinner.visibility = View.GONE
             lightningLogoCard.visibility = View.VISIBLE
         } catch (e: Exception) {
@@ -676,6 +675,10 @@ class PaymentRequestActivity : AppCompatActivity() {
             lightningLoadingSpinner.visibility = View.GONE
         }
         lightningStarted = true
+        updateUnifiedQrCode()
+        if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.LIGHTNING) {
+            setHceToLightning()
+        }
     }
 
     /**
@@ -750,10 +753,13 @@ class PaymentRequestActivity : AppCompatActivity() {
                 if (bolt11 != null) {
                     Log.d(TAG, "Got bolt11 in background after $attempt attempt(s)")
                     showBtcPayLightningQr(bolt11)
-                    break
+                    return@launch
                 }
                 Log.d(TAG, "Background bolt11 fetch attempt $attempt — not ready yet")
             }
+            // All attempts exhausted — hide spinner
+            Log.w(TAG, "Lightning invoice not available after all attempts")
+            lightningLoadingSpinner.visibility = View.GONE
         }
     }
 
@@ -832,7 +838,11 @@ class PaymentRequestActivity : AppCompatActivity() {
                     when (state) {
                         PaymentState.PAID -> {
                             btcPayPollingActive = false
-                            handleLightningPaymentSuccess()
+                            val type = when (currentHceMode) {
+                                HceMode.CASHU, HceMode.UNIFIED -> PaymentHistoryEntry.TYPE_CASHU
+                                HceMode.LIGHTNING -> PaymentHistoryEntry.TYPE_LIGHTNING
+                            }
+                            handleLightningPaymentSuccess(type)
                         }
                         PaymentState.EXPIRED -> {
                             btcPayPollingActive = false
@@ -903,7 +913,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun setHceToUnified() {
-        val creq = hcePaymentRequestBech32
+        // In BTCPay mode hcePaymentRequestBech32 is not set; fall back to stripped cashuPR
+        val creq = hcePaymentRequestBech32 ?: hcePaymentRequest
         val lnbc = lightningInvoice
 
         if (creq == null && lnbc == null) {
@@ -938,7 +949,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun updateUnifiedQrCode() {
-        val creq = nostrHandler?.paymentRequestBech32
+        val creq = nostrHandler?.paymentRequestBech32 ?: hcePaymentRequestBech32 ?: btcPayCashuPR ?: hcePaymentRequest
         val lnbc = lightningInvoice
         
         // We only show the unified QR when BOTH Cashu and Lightning requests are ready
