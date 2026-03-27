@@ -1,14 +1,11 @@
 package com.electricdreams.numo.feature.onboarding
 
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 
@@ -20,11 +17,7 @@ class ExplainerSlideAdapter : RecyclerView.Adapter<ExplainerSlideAdapter.SlideVi
         const val SLIDE_ZERO_FEES = 2
     }
 
-    private data class Slide(
-        val titleRes: Int,
-        val bodyRes: Int,
-        val type: Int
-    )
+    private data class Slide(val titleRes: Int, val bodyRes: Int, val type: Int)
 
     private val slides = listOf(
         Slide(R.string.explainer_slide1_title, R.string.explainer_slide1_body, SLIDE_PHONES),
@@ -43,14 +36,24 @@ class ExplainerSlideAdapter : RecyclerView.Adapter<ExplainerSlideAdapter.SlideVi
         holder.title.setText(slide.titleRes)
         holder.body.setText(slide.bodyRes)
 
-        // Reset all views
+        val container = holder.illustrationContainer
+
+        // Reset: hide all static views, remove any custom views
         holder.illustration.visibility = View.GONE
         holder.phoneLeft.visibility = View.GONE
         holder.phoneRight.visibility = View.GONE
+        // Remove any previously added custom views
+        val toRemove = mutableListOf<View>()
+        for (i in 0 until container.childCount) {
+            val child = container.getChildAt(i)
+            if (child is AutoCustodyAnimatedView || child is ZeroFeesIllustration) {
+                toRemove.add(child)
+            }
+        }
+        toRemove.forEach { container.removeView(it) }
 
         when (slide.type) {
             SLIDE_PHONES -> {
-                // Two real phone images entering from edges
                 holder.phoneLeft.visibility = View.VISIBLE
                 holder.phoneRight.visibility = View.VISIBLE
                 holder.phoneLeft.setImageResource(R.drawable.img_minibits_nfc)
@@ -58,12 +61,6 @@ class ExplainerSlideAdapter : RecyclerView.Adapter<ExplainerSlideAdapter.SlideVi
             }
 
             SLIDE_CUSTODY -> {
-                // Animated notification banners
-                val container = holder.illustrationContainer
-                for (i in container.childCount - 1 downTo 0) {
-                    val child = container.getChildAt(i)
-                    if (child is AutoCustodyAnimatedView) container.removeViewAt(i)
-                }
                 val custodyView = AutoCustodyAnimatedView(holder.itemView.context)
                 custodyView.layoutParams = FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT,
@@ -73,20 +70,14 @@ class ExplainerSlideAdapter : RecyclerView.Adapter<ExplainerSlideAdapter.SlideVi
             }
 
             SLIDE_ZERO_FEES -> {
-                // Replace illustration container contents with animated view
-                val container = holder.illustrationContainer
-                // Remove any previously added ZeroFees views (keep the 3 ImageViews)
-                for (i in container.childCount - 1 downTo 0) {
-                    val child = container.getChildAt(i)
-                    if (child is ZeroFeesIllustration) container.removeViewAt(i)
-                }
+                val dp32 = (32 * holder.itemView.resources.displayMetrics.density).toInt()
                 val zeroFees = ZeroFeesIllustration(holder.itemView.context)
                 zeroFees.layoutParams = FrameLayout.LayoutParams(
                     FrameLayout.LayoutParams.MATCH_PARENT,
                     FrameLayout.LayoutParams.MATCH_PARENT
                 ).apply {
-                    marginStart = (32 * holder.itemView.resources.displayMetrics.density).toInt()
-                    marginEnd = (32 * holder.itemView.resources.displayMetrics.density).toInt()
+                    marginStart = dp32
+                    marginEnd = dp32
                 }
                 container.addView(zeroFees)
             }

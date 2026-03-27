@@ -12,9 +12,10 @@ import android.view.animation.OvershootInterpolator
 
 /**
  * Animated "Zero Fees" illustration.
- * Phase 1: Various fee percentages float around gently.
- * Phase 2: A slash cuts through them, they split and fade away.
- * Phase 3: A large "0%" appears with a bounce.
+ * Phase 1: Fee percentages fade in scattered around the screen.
+ * Phase 2: Each fee gets individually slashed — a line cuts through it,
+ *          then it splits apart and fades away, one after another.
+ * Phase 3: Large "0%" bounces in.
  */
 class ZeroFeesIllustration @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
@@ -22,24 +23,22 @@ class ZeroFeesIllustration @JvmOverloads constructor(
 
     private data class FeeLabel(
         val text: String,
-        val baseX: Float,   // 0..1 relative position
+        val baseX: Float,   // 0..1 relative
         val baseY: Float,
-        val size: Float,    // relative text size multiplier
+        val size: Float,    // text size multiplier
         var alpha: Float = 0f,
-        var splitOffset: Float = 0f  // drift apart when slashed
+        var slashProgress: Float = 0f,  // 0..1 line draw
+        var destroyed: Float = 0f       // 0..1 split + fade
     )
 
     private val fees = listOf(
-        FeeLabel("3%",   0.20f, 0.30f, 1.1f),
-        FeeLabel("2.5%", 0.72f, 0.25f, 0.85f),
-        FeeLabel("1.5%", 0.15f, 0.60f, 0.9f),
-        FeeLabel("2%",   0.65f, 0.55f, 1.0f),
-        FeeLabel("2.9%", 0.45f, 0.40f, 0.75f),
+        FeeLabel("3%",   0.22f, 0.28f, 1.1f),
+        FeeLabel("2.5%", 0.70f, 0.24f, 0.85f),
+        FeeLabel("1.5%", 0.18f, 0.58f, 0.9f),
+        FeeLabel("2%",   0.68f, 0.54f, 1.0f),
+        FeeLabel("2.9%", 0.45f, 0.40f, 0.8f),
     )
 
-    private var feesAlpha = 0f       // overall fee labels opacity
-    private var slashProgress = 0f   // 0..1
-    private var feeSplitDrift = 0f   // how far fee halves drift apart
     private var zeroAlpha = 0f
     private var zeroScale = 0.5f
 
@@ -53,7 +52,7 @@ class ZeroFeesIllustration @JvmOverloads constructor(
     }
 
     private val slashPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#99FFFFFF")
+        color = Color.parseColor("#BBFFFFFF")
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
     }
@@ -68,59 +67,64 @@ class ZeroFeesIllustration @JvmOverloads constructor(
         super.onDraw(canvas)
         val w = width.toFloat()
         val h = height.toFloat()
+        if (w == 0f || h == 0f) return
         val cx = w / 2f
         val cy = h * 0.45f
         val s = w / 380f
 
-        // Draw floating fee labels
-        if (feesAlpha > 0.01f) {
-            for (fee in fees) {
-                val textSize = 32f * fee.size * s
-                feePaint.textSize = textSize
-                val x = fee.baseX * w
-                val y = fee.baseY * h
+        for (fee in fees) {
+            if (fee.alpha < 0.01f) continue
 
-                val a = (feesAlpha * fee.alpha * 180).toInt().coerceIn(0, 255)
+            val textSize = 34f * fee.size * s
+            feePaint.textSize = textSize
+            slashPaint.strokeWidth = 2.5f * s
 
-                if (feeSplitDrift > 0) {
-                    // Split: top half drifts up-left, bottom half drifts down-right
-                    val drift = feeSplitDrift * 25f * s
+            val x = fee.baseX * w
+            val y = fee.baseY * h
 
-                    // Top half
-                    canvas.save()
-                    canvas.clipRect(0f, 0f, w, y)
-                    feePaint.alpha = a
-                    canvas.translate(-drift * 0.5f, -drift)
-                    canvas.drawText(fee.text, x, y, feePaint)
-                    canvas.restore()
+            // Measure text width for the slash line
+            val textW = feePaint.measureText(fee.text)
+            val fadeAlpha = fee.alpha * (1f - fee.destroyed)
 
-                    // Bottom half
-                    canvas.save()
-                    canvas.clipRect(0f, y, w, h)
-                    feePaint.alpha = a
-                    canvas.translate(drift * 0.5f, drift)
-                    canvas.drawText(fee.text, x, y, feePaint)
-                    canvas.restore()
-                } else {
-                    feePaint.alpha = a
-                    canvas.drawText(fee.text, x, y, feePaint)
-                }
+            if (fee.destroyed > 0.01f) {
+                // Split apart: top half up-left, bottom half down-right
+                val drift = fee.destroyed * 20f * s
+                val a = (fadeAlpha * 180).toInt().coerceIn(0, 255)
+
+                // Top half
+                canvas.save()
+                canvas.clipRect(x - textW, y - textSize * 1.2f, x + textW, y - textSize * 0.1f)
+                feePaint.alpha = a
+                canvas.translate(-drift * 0.4f, -drift)
+                canvas.drawText(fee.text, x, y, feePaint)
+                canvas.restore()
+
+                // Bottom half
+                canvas.save()
+                canvas.clipRect(x - textW, y - textSize * 0.1f, x + textW, y + textSize * 0.5f)
+                feePaint.alpha = a
+                canvas.translate(drift * 0.4f, drift)
+                canvas.drawText(fee.text, x, y, feePaint)
+                canvas.restore()
+            } else {
+                // Normal draw
+                feePaint.alpha = (fee.alpha * 180).toInt().coerceIn(0, 255)
+                canvas.drawText(fee.text, x, y, feePaint)
             }
 
-            // Diagonal slash line across the center
-            if (slashProgress > 0f) {
-                slashPaint.strokeWidth = 3f * s
-                slashPaint.alpha = ((1f - feeSplitDrift.coerceAtMost(1f)) * 200).toInt()
-                val slashW = w * 0.7f
-                val x1 = cx - slashW / 2f
-                val y1 = cy + 30f * s
-                val x2 = cx + slashW / 2f
-                val y2 = cy - 30f * s
+            // Individual slash line across this fee
+            if (fee.slashProgress > 0f && fee.destroyed < 0.99f) {
+                val slashAlpha = ((1f - fee.destroyed) * 220).toInt()
+                slashPaint.alpha = slashAlpha
+                val sx = x - textW * 0.6f
+                val sy = y + 4f * s
+                val ex = x + textW * 0.6f
+                val ey = y - textSize * 0.7f
 
                 canvas.drawLine(
-                    x1, y1,
-                    x1 + (x2 - x1) * slashProgress,
-                    y1 + (y2 - y1) * slashProgress,
+                    sx, sy,
+                    sx + (ex - sx) * fee.slashProgress,
+                    sy + (ey - sy) * fee.slashProgress,
                     slashPaint
                 )
             }
@@ -137,9 +141,9 @@ class ZeroFeesIllustration @JvmOverloads constructor(
         }
     }
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        if (!animStarted) {
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (w > 0 && h > 0 && !animStarted) {
             postDelayed({ startAnimation() }, 500)
         }
     }
@@ -153,49 +157,57 @@ class ZeroFeesIllustration @JvmOverloads constructor(
         if (animStarted) return
         animStarted = true
 
-        // Phase 1: Fee labels fade in (staggered)
+        val animators = mutableListOf<android.animation.Animator>()
+
+        // Phase 1: All fees fade in (staggered)
         val fadeIn = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 800
+            duration = 600
             interpolator = DecelerateInterpolator()
             addUpdateListener {
                 val p = it.animatedValue as Float
-                feesAlpha = p
                 fees.forEachIndexed { i, fee ->
-                    val stagger = (i * 0.15f).coerceAtMost(0.6f)
+                    val stagger = i * 0.12f
                     fee.alpha = ((p - stagger) / (1f - stagger)).coerceIn(0f, 1f)
                 }
                 invalidate()
             }
         }
+        animators.add(fadeIn)
 
-        // Phase 2: Slash draws across
-        val slash = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 350
-            startDelay = 1000
-            interpolator = AccelerateInterpolator(1.2f)
-            addUpdateListener {
-                slashProgress = it.animatedValue as Float
-                invalidate()
+        // Phase 2: Each fee gets slashed individually (staggered)
+        fees.forEachIndexed { i, fee ->
+            val baseDelay = 900L + i * 200L
+
+            // Slash line draws
+            val slash = ValueAnimator.ofFloat(0f, 1f).apply {
+                duration = 200
+                startDelay = baseDelay
+                interpolator = AccelerateInterpolator()
+                addUpdateListener {
+                    fee.slashProgress = it.animatedValue as Float
+                    invalidate()
+                }
             }
+            animators.add(slash)
+
+            // Split + fade
+            val destroy = ValueAnimator.ofFloat(0f, 1f).apply {
+                duration = 350
+                startDelay = baseDelay + 150L
+                interpolator = AccelerateInterpolator(1.5f)
+                addUpdateListener {
+                    fee.destroyed = it.animatedValue as Float
+                    invalidate()
+                }
+            }
+            animators.add(destroy)
         }
 
-        // Phase 3: Fees split apart and fade out
-        val splitFade = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 500
-            startDelay = 1400
-            interpolator = AccelerateInterpolator()
-            addUpdateListener {
-                val p = it.animatedValue as Float
-                feeSplitDrift = p
-                feesAlpha = 1f - p
-                invalidate()
-            }
-        }
-
-        // Phase 4: "0%" bounces in
+        // Phase 3: "0%" bounces in after all fees are destroyed
+        val lastFeeEnd = 900L + fees.size * 200L + 350L
         val zeroIn = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 600
-            startDelay = 1800
+            startDelay = lastFeeEnd + 100L
             interpolator = OvershootInterpolator(1.5f)
             addUpdateListener {
                 val p = it.animatedValue as Float
@@ -204,9 +216,10 @@ class ZeroFeesIllustration @JvmOverloads constructor(
                 invalidate()
             }
         }
+        animators.add(zeroIn)
 
         animatorSet = AnimatorSet().apply {
-            playTogether(fadeIn, slash, splitFade, zeroIn)
+            playTogether(animators)
             start()
         }
     }

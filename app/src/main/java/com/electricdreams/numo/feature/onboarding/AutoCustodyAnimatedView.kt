@@ -1,37 +1,53 @@
 package com.electricdreams.numo.feature.onboarding
 
+import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
+import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
 
 /**
- * Stacked notification banners for "Automatic self-custody" slide.
- * The stack is static (front card + 2 decorative cards behind).
- * The front card's content crossfades between different withdrawal entries,
- * with a subtle slide-up on each transition — clean and jank-free.
+ * Animated stacked notification banners for "Automatic self-custody" slide.
+ *
+ * Intro: Front banner slides in → back cards appear behind.
+ * Cycle: Front banner slides UP and fades out (dismissed), back cards
+ *        slide forward to fill the gap, a new card appears at the back.
  */
 class AutoCustodyAnimatedView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : View(context, attrs) {
 
-    private val subtitles = listOf(
-        "\$100.00 sent to alice@getalby.com",
-        "\$50.00 sent to satoshi@wallet.com",
-        "\$25.00 sent to bob@strike.me"
+    private data class BannerState(
+        val subtitle: String,
+        var y: Float,        // Y offset from center (in dp-like units)
+        var scale: Float,
+        var alpha: Float
     )
 
-    private var currentIndex = 0
-    private var transitionProgress = 0f  // 0 = showing current, 0→1 = crossfading to next
-    private var cycleAnimator: ValueAnimator? = null
-    private var cycleRunnable: Runnable? = null
+    private val allSubtitles = listOf(
+        "\$100.00 sent to alice@getalby.com",
+        "\$50.00 sent to satoshi@wallet.com",
+        "\$25.00 sent to bob@strike.me",
+        "\$75.00 sent to carol@coinos.io",
+        "\$30.00 sent to dave@phoenix.acinq.co"
+    )
 
-    // Stack visual config
-    private val stackScales = floatArrayOf(1.00f, 0.95f, 0.90f)
-    private val stackOffsets = floatArrayOf(0f, 10f, 18f)
-    private val stackAlphas = floatArrayOf(1.00f, 0.45f, 0.18f)
+    // Settled positions for 3-card stack
+    private val settledY     = floatArrayOf(0f,  10f,  18f)
+    private val settledScale = floatArrayOf(1f,  0.95f, 0.90f)
+    private val settledAlpha = floatArrayOf(1f,  0.45f, 0.18f)
+
+    private var banners = mutableListOf<BannerState>()
+    private var nextSubtitleIndex = 3 // next one to pull from allSubtitles
+
+    private var introAnimator: AnimatorSet? = null
+    private var cycleAnimator: AnimatorSet? = null
+    private var cycleRunnable: Runnable? = null
+    private var introComplete = false
 
     // Paints
     private val cardPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -60,6 +76,7 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
         super.onDraw(canvas)
         val w = width.toFloat()
         val h = height.toFloat()
+        if (w == 0f || h == 0f) return
         val cx = w / 2f
         val s = w / 380f
         val bannerW = 340f * s
@@ -67,57 +84,45 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
         val bannerR = 14f * s
         val centerY = h * 0.4f
 
-        // Draw back decorative cards (static, no content)
-        for (i in 2 downTo 1) {
-            val drawY = centerY + stackOffsets[i] * s
-            val alpha = stackAlphas[i]
-            val scale = stackScales[i]
-
-            canvas.save()
-            canvas.translate(cx, drawY + bannerH / 2f)
-            canvas.scale(scale, scale)
-            canvas.translate(-cx, -(drawY + bannerH / 2f))
-
-            val rect = RectF(cx - bannerW / 2, drawY, cx + bannerW / 2, drawY + bannerH)
-
-            shadowPaint.alpha = (alpha * 50).toInt()
-            canvas.drawRoundRect(
-                RectF(rect.left + 2 * s, rect.top + 5 * s, rect.right + 2 * s, rect.bottom + 5 * s),
-                bannerR, bannerR, shadowPaint
-            )
-            cardPaint.alpha = (alpha * 255).toInt()
-            canvas.drawRoundRect(rect, bannerR, bannerR, cardPaint)
-
-            canvas.restore()
+        // Draw back to front
+        for (i in (banners.size - 1) downTo 0) {
+            val b = banners[i]
+            if (b.alpha < 0.01f) continue
+            drawBanner(canvas, cx, centerY + b.y * s, bannerW, bannerH, bannerR, s, b.subtitle, b.alpha, b.scale)
         }
+    }
 
-        // Draw front card with crossfading content
-        val drawY = centerY + stackOffsets[0] * s
-        val rect = RectF(cx - bannerW / 2, drawY, cx + bannerW / 2, drawY + bannerH)
+    private fun drawBanner(
+        canvas: Canvas, cx: Float, drawY: Float, w: Float, h: Float,
+        r: Float, s: Float, subtitle: String, alpha: Float, scale: Float
+    ) {
+        canvas.save()
+        canvas.translate(cx, drawY + h / 2f)
+        canvas.scale(scale, scale)
+        canvas.translate(-cx, -(drawY + h / 2f))
 
-        // Shadow
-        shadowPaint.alpha = 50
+        val rect = RectF(cx - w / 2, drawY, cx + w / 2, drawY + h)
+
+        shadowPaint.alpha = (alpha * 50).toInt()
         canvas.drawRoundRect(
             RectF(rect.left + 2 * s, rect.top + 5 * s, rect.right + 2 * s, rect.bottom + 5 * s),
-            bannerR, bannerR, shadowPaint
+            r, r, shadowPaint
         )
-        // Card
-        cardPaint.alpha = 255
-        canvas.drawRoundRect(rect, bannerR, bannerR, cardPaint)
+        cardPaint.alpha = (alpha * 255).toInt()
+        canvas.drawRoundRect(rect, r, r, cardPaint)
 
-        // Lightning icon (always visible)
         val iconSize = 46f * s
         val iconR = 12f * s
         val iconX = rect.left + 16f * s
-        val iconCy = drawY + bannerH / 2f
+        val iconCy = drawY + h / 2f
         val iconY = iconCy - iconSize / 2f
 
-        orangeBgPaint.alpha = 255
+        orangeBgPaint.alpha = (alpha * 255).toInt()
         canvas.drawRoundRect(
             RectF(iconX, iconY, iconX + iconSize, iconY + iconSize),
             iconR, iconR, orangeBgPaint
         )
-        lightningPaint.alpha = 255
+        lightningPaint.alpha = (alpha * 255).toInt()
         val bCx = iconX + iconSize / 2f
         val bolt = Path().apply {
             moveTo(bCx + 1.5f * s, iconCy - 11f * s)
@@ -130,59 +135,82 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
         }
         canvas.drawPath(bolt, lightningPaint)
 
-        // Title (always visible, doesn't change)
         val textX = iconX + iconSize + 14f * s
         titlePaint.textSize = 15f * s
-        titlePaint.alpha = 255
+        titlePaint.alpha = (alpha * 255).toInt()
         canvas.drawText("Threshold Reached", textX, iconCy - 4f * s, titlePaint)
 
-        // Subtitle — crossfade between current and next
         subtitlePaint.textSize = 12f * s
-        val p = transitionProgress
-        val nextIndex = (currentIndex + 1) % subtitles.size
+        subtitlePaint.alpha = (alpha * 200).toInt()
+        canvas.drawText(subtitle, textX, iconCy + 16f * s, subtitlePaint)
 
-        if (p < 0.01f) {
-            // Static — show current
-            subtitlePaint.alpha = 200
-            canvas.drawText(subtitles[currentIndex], textX, iconCy + 16f * s, subtitlePaint)
-        } else {
-            // Outgoing: fade out + slide up slightly
-            val outAlpha = ((1f - p) * 200).toInt()
-            val outSlide = p * -8f * s
-            subtitlePaint.alpha = outAlpha
-            canvas.drawText(subtitles[currentIndex], textX, iconCy + 16f * s + outSlide, subtitlePaint)
-
-            // Incoming: fade in + slide up from below
-            val inAlpha = (p * 200).toInt()
-            val inSlide = (1f - p) * 8f * s
-            subtitlePaint.alpha = inAlpha
-            canvas.drawText(subtitles[nextIndex], textX, iconCy + 16f * s + inSlide, subtitlePaint)
-        }
+        canvas.restore()
     }
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        startCycling()
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        if (w > 0 && h > 0 && !introComplete) {
+            startIntro()
+        }
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        stopCycling()
+        stopAll()
     }
 
-    private fun startCycling() {
-        stopCycling()
-        currentIndex = 0
-        transitionProgress = 0f
-        invalidate()
-        scheduleCycle()
+    private fun stopAll() {
+        introAnimator?.cancel(); introAnimator = null
+        cycleAnimator?.cancel(); cycleAnimator = null
+        cycleRunnable?.let { removeCallbacks(it) }; cycleRunnable = null
     }
 
-    private fun stopCycling() {
-        cycleAnimator?.cancel()
-        cycleAnimator = null
-        cycleRunnable?.let { removeCallbacks(it) }
-        cycleRunnable = null
+    private fun startIntro() {
+        stopAll()
+        introComplete = false
+        nextSubtitleIndex = 3
+
+        // Create initial 3 banners
+        banners.clear()
+        banners.add(BannerState(allSubtitles[0], settledY[0], settledScale[0], 0f)) // front
+        banners.add(BannerState(allSubtitles[1], settledY[1], settledScale[1], 0f)) // middle
+        banners.add(BannerState(allSubtitles[2], settledY[2], settledScale[2], 0f)) // back
+
+        // Phase 1: Front banner slides in
+        val frontIn = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 600; startDelay = 300
+            interpolator = OvershootInterpolator(0.8f)
+            addUpdateListener {
+                val p = it.animatedValue as Float
+                banners[0].alpha = p
+                banners[0].y = settledY[0] + 50f * (1f - p)
+                banners[0].scale = 0.95f + 0.05f * p
+                invalidate()
+            }
+        }
+
+        // Phase 2: Back cards fade in
+        val backIn = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 500; startDelay = 1000
+            interpolator = DecelerateInterpolator(1.5f)
+            addUpdateListener {
+                val p = it.animatedValue as Float
+                banners[1].alpha = settledAlpha[1] * p
+                banners[2].alpha = settledAlpha[2] * p
+                invalidate()
+            }
+        }
+
+        introAnimator = AnimatorSet().apply {
+            playTogether(frontIn, backIn)
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    introComplete = true
+                    scheduleCycle()
+                }
+            })
+            start()
+        }
     }
 
     private fun scheduleCycle() {
@@ -191,22 +219,68 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
     }
 
     private fun doCycle() {
-        cycleAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 400
-            interpolator = DecelerateInterpolator(1.5f)
+        if (banners.size < 3) return
+
+        // Snapshot the front banner's current values for animation
+        val front = banners[0]
+        val mid = banners[1]
+        val back = banners[2]
+
+        val frontStartY = front.y
+        val frontStartAlpha = front.alpha
+        val midStartY = mid.y
+        val midStartScale = mid.scale
+        val midStartAlpha = mid.alpha
+        val backStartY = back.y
+        val backStartScale = back.scale
+        val backStartAlpha = back.alpha
+
+        // Prepare the new back card (starts invisible)
+        val newSubtitle = allSubtitles[nextSubtitleIndex % allSubtitles.size]
+        nextSubtitleIndex++
+        val newCard = BannerState(newSubtitle, settledY[2] + 10f, settledScale[2], 0f)
+        banners.add(newCard)
+
+        val anim = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 500
+            interpolator = DecelerateInterpolator(1.8f)
             addUpdateListener {
-                transitionProgress = it.animatedValue as Float
+                val p = it.animatedValue as Float
+
+                // Front: slides up and fades out
+                front.y = frontStartY - 40f * p
+                front.alpha = frontStartAlpha * (1f - p)
+                front.scale = 1f - 0.05f * p
+
+                // Middle → front position
+                mid.y = lerp(midStartY, settledY[0], p)
+                mid.scale = lerp(midStartScale, settledScale[0], p)
+                mid.alpha = lerp(midStartAlpha, settledAlpha[0], p)
+
+                // Back → middle position
+                back.y = lerp(backStartY, settledY[1], p)
+                back.scale = lerp(backStartScale, settledScale[1], p)
+                back.alpha = lerp(backStartAlpha, settledAlpha[1], p)
+
+                // New card → back position
+                newCard.y = lerp(settledY[2] + 10f, settledY[2], p)
+                newCard.alpha = settledAlpha[2] * p
+                newCard.scale = settledScale[2]
+
                 invalidate()
             }
             addListener(object : android.animation.AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: android.animation.Animator) {
-                    currentIndex = (currentIndex + 1) % subtitles.size
-                    transitionProgress = 0f
+                    // Remove the dismissed front card
+                    banners.remove(front)
                     invalidate()
                     scheduleCycle()
                 }
             })
             start()
         }
+        cycleAnimator = AnimatorSet().apply { play(anim); start() }
     }
+
+    private fun lerp(a: Float, b: Float, t: Float) = a + (b - a) * t
 }
