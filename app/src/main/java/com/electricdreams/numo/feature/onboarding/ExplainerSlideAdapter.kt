@@ -8,31 +8,28 @@ import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 
 class ExplainerSlideAdapter : RecyclerView.Adapter<ExplainerSlideAdapter.SlideViewHolder>() {
 
     private companion object {
-        const val TYPE_DRAWABLE = 0
-        const val TYPE_ZERO_FEES = 1
+        const val SLIDE_PHONES = 0
+        const val SLIDE_CUSTODY = 1
+        const val SLIDE_ZERO_FEES = 2
     }
 
     private data class Slide(
         val titleRes: Int,
         val bodyRes: Int,
-        val illustration: (() -> Drawable)? = null,
-        val animateIn: Boolean = false,
-        val customViewType: Int = TYPE_DRAWABLE
+        val type: Int
     )
 
     private val slides = listOf(
-        Slide(R.string.explainer_slide1_title, R.string.explainer_slide1_body,
-            illustration = { TapToGetPaidIllustration() }),
-        Slide(R.string.explainer_slide2_title, R.string.explainer_slide2_body,
-            illustration = { AutoCustodyIllustration() }, animateIn = true),
-        Slide(R.string.explainer_slide3_title, R.string.explainer_slide3_body,
-            customViewType = TYPE_ZERO_FEES)
+        Slide(R.string.explainer_slide1_title, R.string.explainer_slide1_body, SLIDE_PHONES),
+        Slide(R.string.explainer_slide2_title, R.string.explainer_slide2_body, SLIDE_CUSTODY),
+        Slide(R.string.explainer_slide3_title, R.string.explainer_slide3_body, SLIDE_ZERO_FEES)
     )
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SlideViewHolder {
@@ -46,38 +43,52 @@ class ExplainerSlideAdapter : RecyclerView.Adapter<ExplainerSlideAdapter.SlideVi
         holder.title.setText(slide.titleRes)
         holder.body.setText(slide.bodyRes)
 
-        if (slide.customViewType == TYPE_ZERO_FEES) {
-            // Add the animated ZeroFeesIllustration view
-            holder.illustration.visibility = View.GONE
-            holder.illustrationContainer.removeAllViews()
-            val zeroFees = ZeroFeesIllustration(holder.itemView.context)
-            zeroFees.layoutParams = FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT,
-                FrameLayout.LayoutParams.MATCH_PARENT
-            )
-            holder.illustrationContainer.addView(zeroFees)
-        } else {
-            holder.illustration.visibility = View.VISIBLE
-            holder.illustrationContainer.removeAllViews()
-            holder.illustrationContainer.addView(holder.illustration)
+        // Reset all views
+        holder.illustration.visibility = View.GONE
+        holder.phoneLeft.visibility = View.GONE
+        holder.phoneRight.visibility = View.GONE
 
-            slide.illustration?.let {
-                holder.illustration.setImageDrawable(it())
+        when (slide.type) {
+            SLIDE_PHONES -> {
+                // Two real phone images entering from edges
+                holder.phoneLeft.visibility = View.VISIBLE
+                holder.phoneRight.visibility = View.VISIBLE
+                holder.phoneLeft.setImageResource(R.drawable.img_minibits_nfc)
+                holder.phoneRight.setImageResource(R.drawable.img_numo_invoice)
+            }
 
-                if (slide.animateIn) {
-                    holder.illustration.alpha = 0f
-                    holder.illustration.translationY = 60f
-                    holder.illustration.animate()
-                        .alpha(1f)
-                        .translationY(0f)
-                        .setDuration(700)
-                        .setStartDelay(300)
-                        .setInterpolator(DecelerateInterpolator(2f))
-                        .start()
-                } else {
-                    holder.illustration.alpha = 1f
-                    holder.illustration.translationY = 0f
+            SLIDE_CUSTODY -> {
+                holder.illustration.visibility = View.VISIBLE
+                holder.illustration.setImageDrawable(AutoCustodyIllustration())
+                // Animate in
+                holder.illustration.alpha = 0f
+                holder.illustration.translationY = 60f
+                holder.illustration.animate()
+                    .alpha(1f)
+                    .translationY(0f)
+                    .setDuration(700)
+                    .setStartDelay(300)
+                    .setInterpolator(DecelerateInterpolator(2f))
+                    .start()
+            }
+
+            SLIDE_ZERO_FEES -> {
+                // Replace illustration container contents with animated view
+                val container = holder.illustrationContainer
+                // Remove any previously added ZeroFees views (keep the 3 ImageViews)
+                for (i in container.childCount - 1 downTo 0) {
+                    val child = container.getChildAt(i)
+                    if (child is ZeroFeesIllustration) container.removeViewAt(i)
                 }
+                val zeroFees = ZeroFeesIllustration(holder.itemView.context)
+                zeroFees.layoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                ).apply {
+                    marginStart = (32 * holder.itemView.resources.displayMetrics.density).toInt()
+                    marginEnd = (32 * holder.itemView.resources.displayMetrics.density).toInt()
+                }
+                container.addView(zeroFees)
             }
         }
     }
@@ -89,5 +100,7 @@ class ExplainerSlideAdapter : RecyclerView.Adapter<ExplainerSlideAdapter.SlideVi
         val body: TextView = view.findViewById(R.id.slide_body)
         val illustrationContainer: FrameLayout = view.findViewById(R.id.slide_illustration_container)
         val illustration: ImageView = view.findViewById(R.id.slide_illustration)
+        val phoneLeft: ImageView = view.findViewById(R.id.slide_phone_left)
+        val phoneRight: ImageView = view.findViewById(R.id.slide_phone_right)
     }
 }
