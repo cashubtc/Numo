@@ -383,7 +383,15 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
     private fun expireStaleBtcPayEntries() {
         val history = getPaymentHistory(this).toMutableList()
-        val stale = history.filter { it.isPending() && it.lightningQuoteId == null && it.nostrNprofile == null }
+        val cutoff = System.currentTimeMillis() - STALE_PENDING_THRESHOLD_MS
+        val stale = history.filter { entry ->
+            entry.isPending() && (
+                // No resume data at all — always orphaned
+                (entry.lightningQuoteId == null && entry.nostrNprofile == null) ||
+                // Has resume data but payment is too old to still be valid
+                entry.date.time < cutoff
+            )
+        }
         stale.forEach { markPaymentExpired(this, it.id) }
     }
 
@@ -394,6 +402,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         private const val KEY_HISTORY = "history"
         private const val REQUEST_TRANSACTION_DETAIL = 1001
         private const val REQUEST_RESUME_PAYMENT = 1002
+        // Pending payments older than this are considered stale regardless of resume data.
+        // BTCPay invoices default to 15min; local Lightning quotes also expire. 2h is generous.
+        private const val STALE_PENDING_THRESHOLD_MS = 2 * 60 * 60 * 1000L
 
         @JvmStatic
         fun getPaymentHistory(context: Context): List<PaymentHistoryEntry> {
