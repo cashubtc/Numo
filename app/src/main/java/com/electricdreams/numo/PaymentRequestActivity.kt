@@ -50,6 +50,7 @@ import com.electricdreams.numo.core.payment.PaymentState
 import com.electricdreams.numo.core.payment.impl.BTCPayPaymentService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -127,7 +128,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     // BTCPay payment tracking
     private var btcPayPaymentId: String? = null
     private var btcPayCashuPR: String? = null
-    private var btcPayPollingActive = false
+    private var btcPayPollingJob: Job? = null
 
     // Lightning quote info for history
     private var lightningInvoice: String? = null
@@ -787,32 +788,31 @@ class PaymentRequestActivity : AppCompatActivity() {
      * Poll BTCPay invoice status every 2 seconds until terminal state.
      */
     private fun startBtcPayPolling(paymentId: String) {
-        btcPayPollingActive = true
-        uiScope.launch {
-            while (btcPayPollingActive && !hasTerminalOutcome) {
+        btcPayPollingJob = uiScope.launch {
+            while (!hasTerminalOutcome) {
                 delay(2000)
-                if (!btcPayPollingActive || hasTerminalOutcome) break
+                if (hasTerminalOutcome) break
 
                 val statusResult = paymentService.checkPaymentStatus(paymentId)
                 statusResult.onSuccess { state ->
                     when (state) {
                         PaymentState.PAID -> {
-                            btcPayPollingActive = false
+                            btcPayPollingJob?.cancel()
                             val type = when (currentHceMode) {
                                 HceMode.CASHU, HceMode.UNIFIED -> PaymentHistoryEntry.TYPE_CASHU
                                 HceMode.LIGHTNING -> PaymentHistoryEntry.TYPE_LIGHTNING
                             }
-                            handleLightningPaymentSuccess(type)
+                            handleLightningPaymentSuccess(type, btcPayInvoiceId = btcPayPaymentId)
                         }
                         PaymentState.EXPIRED -> {
-                            btcPayPollingActive = false
+                            btcPayPollingJob?.cancel()
                             pendingPaymentId?.let {
                                 PaymentsHistoryActivity.markPaymentExpired(this@PaymentRequestActivity, it)
                             }
                             handlePaymentError("Invoice expired")
                         }
                         PaymentState.FAILED -> {
-                            btcPayPollingActive = false
+                            btcPayPollingJob?.cancel()
                             pendingPaymentId?.let {
                                 PaymentsHistoryActivity.markPaymentFailed(this@PaymentRequestActivity, it)
                             }
@@ -1297,7 +1297,8 @@ class PaymentRequestActivity : AppCompatActivity() {
      * token field effectively blank.
      */
     private fun handleLightningPaymentSuccess(
-        paymentType: String = PaymentHistoryEntry.TYPE_LIGHTNING
+        paymentType: String = PaymentHistoryEntry.TYPE_LIGHTNING,
+        btcPayInvoiceId: String? = null,
     ) {
         // Guard against late callbacks so we don't surface a failure screen
         // after a successful Lightning payment has already been processed.
@@ -1320,6 +1321,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 lightningInvoice = lightningInvoice,
                 lightningQuoteId = lightningQuoteId,
                 lightningMintUrl = lightningMintUrl,
+                btcPayInvoiceId = btcPayInvoiceId,
             )
         }
 
@@ -1416,7 +1418,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         cancelNfcSafetyTimeout()
 
         // Stop BTCPay polling
-        btcPayPollingActive = false
+        btcPayPollingJob?.cancel()
+        btcPayPollingJob = null
 
         // Stop Nostr handler
         nostrHandler?.stop()
@@ -1449,6 +1452,8 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         cancelNfcSafetyTimeout()
+        btcPayPollingJob?.cancel()
+        btcPayPollingJob = null
         nostrHandler?.stop()
         nostrHandler = null
         lightningHandler?.cancel()

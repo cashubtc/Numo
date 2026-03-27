@@ -470,6 +470,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             lightningInvoice: String? = null,
             lightningQuoteId: String? = null,
             lightningMintUrl: String? = null,
+            btcPayInvoiceId: String? = null,
         ) {
             val history = getPaymentHistory(context).toMutableList()
             // Only complete entries that are still pending — never overwrite expired/cancelled status
@@ -496,11 +497,12 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     formattedAmount = existing.formattedAmount,
                     nostrNprofile = existing.nostrNprofile,
                     nostrSecretHex = existing.nostrSecretHex,
-                    checkoutBasketJson = existing.checkoutBasketJson, // Preserve basket data
-                    basketId = existing.basketId, // Preserve basket ID
-                    tipAmountSats = existing.tipAmountSats, // Preserve tip info
-                    tipPercentage = existing.tipPercentage, // Preserve tip info
-                    label = existing.label, // Preserve label
+                    checkoutBasketJson = existing.checkoutBasketJson,
+                    basketId = existing.basketId,
+                    tipAmountSats = existing.tipAmountSats,
+                    tipPercentage = existing.tipPercentage,
+                    label = existing.label,
+                    btcPayInvoiceId = btcPayInvoiceId ?: existing.btcPayInvoiceId,
                 )
                 history[index] = updated
 
