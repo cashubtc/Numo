@@ -58,18 +58,18 @@ class ExplainerSlideAdapter : RecyclerView.Adapter<ExplainerSlideAdapter.SlideVi
             }
 
             SLIDE_CUSTODY -> {
-                holder.illustration.visibility = View.VISIBLE
-                holder.illustration.setImageDrawable(AutoCustodyIllustration())
-                // Animate in
-                holder.illustration.alpha = 0f
-                holder.illustration.translationY = 60f
-                holder.illustration.animate()
-                    .alpha(1f)
-                    .translationY(0f)
-                    .setDuration(700)
-                    .setStartDelay(300)
-                    .setInterpolator(DecelerateInterpolator(2f))
-                    .start()
+                // Animated notification banners
+                val container = holder.illustrationContainer
+                for (i in container.childCount - 1 downTo 0) {
+                    val child = container.getChildAt(i)
+                    if (child is AutoCustodyAnimatedView) container.removeViewAt(i)
+                }
+                val custodyView = AutoCustodyAnimatedView(holder.itemView.context)
+                custodyView.layoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                )
+                container.addView(custodyView)
             }
 
             SLIDE_ZERO_FEES -> {

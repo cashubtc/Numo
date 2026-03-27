@@ -665,12 +665,21 @@ class OnboardingActivity : AppCompatActivity() {
         explainerViewPager.adapter = ExplainerSlideAdapter()
         explainerViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
+                // Show chevrons on slides 0 and 1, hide on last slide
                 chevronHintContainer.animate()
-                    .alpha(if (position == 0) 1f else 0f)
+                    .alpha(if (position <= 1) 1f else 0f)
                     .setDuration(200)
                     .start()
             }
         })
+
+        // Tap chevrons to advance to next slide
+        chevronHintContainer.setOnClickListener {
+            val next = explainerViewPager.currentItem + 1
+            if (next < (explainerViewPager.adapter?.itemCount ?: 0)) {
+                explainerViewPager.setCurrentItem(next, true)
+            }
+        }
     }
 
     @android.annotation.SuppressLint("ClickableViewAccessibility")
