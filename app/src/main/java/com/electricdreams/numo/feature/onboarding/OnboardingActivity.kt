@@ -144,7 +144,7 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var welcomeTagline: TextView
     private lateinit var termsText: TextView
     private lateinit var acceptButton: MaterialButton
-    private lateinit var emojiBurstContainer: FrameLayout
+    private lateinit var circularRevealView: View
 
     // Step 2: Choose Path
     private lateinit var choosePathContainer: FrameLayout
@@ -313,7 +313,7 @@ class OnboardingActivity : AppCompatActivity() {
         welcomeTagline = findViewById(R.id.welcome_tagline)
         termsText = findViewById(R.id.terms_text)
         acceptButton = findViewById(R.id.accept_button)
-        emojiBurstContainer = findViewById(R.id.emoji_burst_container)
+        circularRevealView = findViewById(R.id.welcome_circular_reveal)
 
         // Choose Path
         choosePathContainer = findViewById(R.id.choose_path_container)
@@ -893,11 +893,10 @@ class OnboardingActivity : AppCompatActivity() {
 
     /**
      * Cinematic welcome screen animation with 5 phases:
-     * 1. Logo splash with shimmer
-     * 2. Logo translates from center to top
+     * 1. Circular reveal (blank white → navy)
+     * 2. Staggered per-letter NUMO reveal (white on navy)
      * 3. Tagline fades in
-     * 4. Emoji tiles form circle then burst outward
-     * 5. Get Started button and terms fade in
+     * 4. Get Started button and terms fade in
      */
     private fun animateWelcomeScreen() {
         welcomeAnimator?.stop()
@@ -909,7 +908,7 @@ class OnboardingActivity : AppCompatActivity() {
             tagline = welcomeTagline,
             acceptButton = acceptButton,
             termsText = termsText,
-            emojiContainer = emojiBurstContainer
+            revealView = circularRevealView
         )
         welcomeAnimator?.start(lifecycleScope)
     }

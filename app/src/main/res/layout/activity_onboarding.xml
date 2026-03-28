@@ -23,13 +23,13 @@
             android:layout_height="match_parent"
             android:background="@android:color/white" />
 
-        <!-- Emoji container (BEFORE content so emojis render behind text) -->
-        <FrameLayout
-            android:id="@+id/emoji_burst_container"
+        <!-- Navy overlay for circular reveal transition -->
+        <View
+            android:id="@+id/welcome_circular_reveal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipChildren="false"
-            android:clipToPadding="false" />
+            android:background="@color/numo_navy"
+            android:visibility="invisible" />
 
         <!-- Content Layer (on top of emojis) -->
         <LinearLayout
