@@ -9,7 +9,7 @@ import com.electricdreams.numo.core.wallet.WalletResult
  * - [com.electricdreams.numo.core.payment.impl.LocalPaymentService] – wraps existing CDK flow
  * - [com.electricdreams.numo.core.payment.impl.BTCPayPaymentService] – BTCPay Greenfield API + BTCNutServer
  */
-interface PaymentService {
+interface IPaymentService {
 
     /**
      * Create a new payment (invoice / mint quote).
