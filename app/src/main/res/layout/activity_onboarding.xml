@@ -481,7 +481,7 @@
                 android:paddingTop="8dp"
                 android:text="@string/onboarding_seed_toolbar_title"
                 android:textSize="32sp"
-                android:textColor="@color/numo_fluorescent_green"
+                android:textColor="#FFFFFF"
                 android:fontFamily="sans-serif-black"
                 android:textAllCaps="true"
                 android:letterSpacing="-0.03"
@@ -916,21 +916,13 @@
                 android:layout_height="0dp"
                 android:layout_weight="0.2" />
 
-            <!-- Success Checkmark -->
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center">
-
-                <ImageView
-                    android:id="@+id/success_checkmark"
-                    android:layout_width="88dp"
-                    android:layout_height="88dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_success_checkmark"
-                    android:contentDescription="@string/payment_received_success_icon_description" />
-
-            </FrameLayout>
+            <!-- Success Checkmark (animated, matches payment success style) -->
+            <com.electricdreams.numo.ui.animation.CheckmarkAnimationView
+                android:id="@+id/success_checkmark"
+                android:layout_width="88dp"
+                android:layout_height="88dp"
+                android:layout_gravity="center_horizontal"
+                android:contentDescription="@string/payment_received_success_icon_description" />
 
             <!-- Success Text -->
             <TextView

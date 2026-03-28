@@ -12,22 +12,19 @@ import android.view.animation.OvershootInterpolator
 /**
  * Animated stacked notification banners for "Automatic self-custody" slide.
  *
- * Intro: Front banner slides in, back cards fade in behind.
- * Cycle: Front banner slides up and fades out, stack shifts forward,
- *        new card appears at back. Repeats every ~2.5s.
- *
- * All positions are derived from two progress floats — no mutable banner list.
+ * Each card cycles through: processing (spinner + "Processing payment")
+ * → success (checkmark + amount sent) → exit. Back cards show completed state.
  */
 class AutoCustodyAnimatedView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : View(context, attrs) {
 
     private val allSubtitles = listOf(
-        "\$100.00 sent to alice@getalby.com",
+        "21,000 sats sent to alice@getalby.com",
         "\$50.00 sent to satoshi@wallet.com",
-        "\$25.00 sent to bob@strike.me",
+        "100,000 sats sent to bob@strike.me",
         "\$75.00 sent to carol@coinos.io",
-        "\$30.00 sent to dave@phoenix.acinq.co"
+        "50,000 sats sent to dave@phoenix.acinq.co"
     )
 
     // Settled positions for 3-card stack
@@ -35,7 +32,7 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
     private val settledScale = floatArrayOf(1f,  0.95f, 0.90f)
     private val settledAlpha = floatArrayOf(1f,  0.45f, 0.18f)
 
-    // Animation state — these floats drive ALL rendering
+    // Core animation state
     private var introProgress = 0f
     private var backIntroProgress = 0f
     private var cycleProgress = 0f
@@ -43,23 +40,36 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
     private var animStarted = false
     private var introComplete = false
 
+    // Processing → Success
+    private var successProgress = 0f  // 0 = processing (spinner), 1 = success (checkmark)
+
     private var introAnimator: AnimatorSet? = null
     private var cycleAnimator: ValueAnimator? = null
+    private var successAnimator: ValueAnimator? = null
     private var cycleRunnable: Runnable? = null
+    private var exitRunnable: Runnable? = null
 
     // Paints
     private val cardPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE; style = Paint.Style.FILL
+        style = Paint.Style.FILL
     }
     private val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#20000000")
         maskFilter = BlurMaskFilter(14f, BlurMaskFilter.Blur.NORMAL)
     }
-    private val orangeBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#FFF0DB"); style = Paint.Style.FILL
+    private val iconBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
     }
-    private val lightningPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#F7931A"); style = Paint.Style.FILL
+    private val spinnerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#F7931A")
+        style = Paint.Style.STROKE
+        strokeCap = Paint.Cap.ROUND
+    }
+    private val checkPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#00C244")
+        style = Paint.Style.STROKE
+        strokeCap = Paint.Cap.ROUND
+        strokeJoin = Paint.Join.ROUND
     }
     private val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#0A2540")
@@ -69,6 +79,10 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
         color = Color.parseColor("#6F6F73")
         typeface = Typeface.create("sans-serif", Typeface.NORMAL)
     }
+
+    // Colors
+    private val orangeBg = Color.parseColor("#FFF0DB")
+    private val greenBg = Color.parseColor("#D4FFED")
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
@@ -83,7 +97,7 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
         val centerY = h * 0.4f
 
         if (!introComplete) {
-            // Intro: back cards first, then front on top
+            // Intro: back cards (success state), front card enters in processing state
             val bp = backIntroProgress
             if (bp > 0.01f) {
                 drawBanner(canvas, cx, centerY + settledY[2] * s, bannerW, bannerH, bannerR, s,
@@ -93,10 +107,11 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
             }
             val p = introProgress
             drawBanner(canvas, cx, centerY + (settledY[0] + 50f * (1f - p)) * s,
-                bannerW, bannerH, bannerR, s, subtitle(0), p, 0.95f + 0.05f * p)
+                bannerW, bannerH, bannerR, s, subtitle(0), p, 0.95f + 0.05f * p,
+                success = 0f, subtitleClip = p)
 
         } else if (cycleProgress > 0f) {
-            // Cycle transition: 4 cards derived from cycleProgress, back to front
+            // Cycle transition: all cards in success state
             val p = cycleProgress
             drawBanner(canvas, cx, centerY + lerp(28f, settledY[2], p) * s,
                 bannerW, bannerH, bannerR, s, subtitle(3),
@@ -104,19 +119,29 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
             drawBanner(canvas, cx, centerY + lerp(settledY[2], settledY[1], p) * s,
                 bannerW, bannerH, bannerR, s, subtitle(2),
                 lerp(settledAlpha[2], settledAlpha[1], p), lerp(settledScale[2], settledScale[1], p))
+            // Card moving to front — already in processing state
             drawBanner(canvas, cx, centerY + lerp(settledY[1], settledY[0], p) * s,
                 bannerW, bannerH, bannerR, s, subtitle(1),
-                lerp(settledAlpha[1], settledAlpha[0], p), lerp(settledScale[1], settledScale[0], p))
+                lerp(settledAlpha[1], settledAlpha[0], p), lerp(settledScale[1], settledScale[0], p),
+                success = 0f)
+            // Front card exits in success state
             drawBanner(canvas, cx, centerY + lerp(settledY[0], -40f, p) * s,
                 bannerW, bannerH, bannerR, s, subtitle(0),
                 lerp(settledAlpha[0], 0f, p), lerp(settledScale[0], 0.95f, p))
 
         } else {
-            // Settled: 3 banners at rest, back to front
+            // Settled: back cards success, front card uses successProgress
             for (i in 2 downTo 0) {
+                val success = if (i == 0) successProgress else 1f
                 drawBanner(canvas, cx, centerY + settledY[i] * s, bannerW, bannerH, bannerR, s,
-                    subtitle(i), settledAlpha[i], settledScale[i])
+                    subtitle(i), settledAlpha[i], settledScale[i],
+                    success = success)
             }
+        }
+
+        // Keep redrawing while spinner is visible
+        if (animStarted && (!introComplete || (cycleProgress == 0f && successProgress < 1f))) {
+            postInvalidateOnAnimation()
         }
     }
 
@@ -125,7 +150,8 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
 
     private fun drawBanner(
         canvas: Canvas, cx: Float, drawY: Float, w: Float, h: Float,
-        r: Float, s: Float, subtitle: String, alpha: Float, scale: Float
+        r: Float, s: Float, subtitle: String, alpha: Float, scale: Float,
+        success: Float = 1f, subtitleClip: Float = 1f
     ) {
         if (alpha < 0.01f) return
         canvas.save()
@@ -135,46 +161,84 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
 
         val rect = RectF(cx - w / 2, drawY, cx + w / 2, drawY + h)
 
+        // Shadow
         shadowPaint.alpha = (alpha * 50).toInt()
         canvas.drawRoundRect(
             RectF(rect.left + 2 * s, rect.top + 5 * s, rect.right + 2 * s, rect.bottom + 5 * s),
             r, r, shadowPaint
         )
+
+        // Card background — back cards slightly darker for depth
+        val gray = (240 + 15 * alpha).toInt().coerceIn(240, 255)
+        cardPaint.color = Color.rgb(gray, gray, gray)
         cardPaint.alpha = (alpha * 255).toInt()
         canvas.drawRoundRect(rect, r, r, cardPaint)
 
+        // Icon area
         val iconSize = 46f * s
         val iconR = 12f * s
         val iconX = rect.left + 16f * s
         val iconCy = drawY + h / 2f
         val iconY = iconCy - iconSize / 2f
+        val bCx = iconX + iconSize / 2f
 
-        orangeBgPaint.alpha = (alpha * 255).toInt()
+        // Icon background: orange (processing) → green (success)
+        iconBgPaint.color = lerpColor(orangeBg, greenBg, success)
+        iconBgPaint.alpha = (alpha * 255).toInt()
         canvas.drawRoundRect(
             RectF(iconX, iconY, iconX + iconSize, iconY + iconSize),
-            iconR, iconR, orangeBgPaint
+            iconR, iconR, iconBgPaint
         )
-        lightningPaint.alpha = (alpha * 255).toInt()
-        val bCx = iconX + iconSize / 2f
-        val bolt = Path().apply {
-            moveTo(bCx + 1.5f * s, iconCy - 11f * s)
-            lineTo(bCx - 6f * s, iconCy + 1f * s)
-            lineTo(bCx - 0.5f * s, iconCy + 1f * s)
-            lineTo(bCx - 1.5f * s, iconCy + 11f * s)
-            lineTo(bCx + 6f * s, iconCy - 1f * s)
-            lineTo(bCx + 0.5f * s, iconCy - 1f * s)
-            close()
-        }
-        canvas.drawPath(bolt, lightningPaint)
 
+        // Spinner (fades out as success increases)
+        if (success < 1f) {
+            spinnerPaint.alpha = ((1f - success) * alpha * 255).toInt()
+            spinnerPaint.strokeWidth = 2.5f * s
+            val spinR = 10f * s
+            val spinRect = RectF(bCx - spinR, iconCy - spinR, bCx + spinR, iconCy + spinR)
+            val angle = ((System.nanoTime() / 5_000_000L) % 360).toFloat()
+            canvas.drawArc(spinRect, angle, 270f, false, spinnerPaint)
+        }
+
+        // Checkmark (fades in as success increases)
+        if (success > 0f) {
+            checkPaint.alpha = (success * alpha * 255).toInt()
+            checkPaint.strokeWidth = 2.5f * s
+            val check = Path().apply {
+                moveTo(bCx - 7f * s, iconCy)
+                lineTo(bCx - 1.5f * s, iconCy + 6f * s)
+                lineTo(bCx + 8f * s, iconCy - 6f * s)
+            }
+            canvas.drawPath(check, checkPaint)
+        }
+
+        // Title
         val textX = iconX + iconSize + 14f * s
         titlePaint.textSize = 15f * s
         titlePaint.alpha = (alpha * 255).toInt()
         canvas.drawText("Threshold Reached", textX, iconCy - 4f * s, titlePaint)
 
+        // Subtitle: cross-fade "Processing payment" ↔ amount
         subtitlePaint.textSize = 12f * s
-        subtitlePaint.alpha = (alpha * 200).toInt()
-        canvas.drawText(subtitle, textX, iconCy + 16f * s, subtitlePaint)
+        val subY = iconCy + 16f * s
+
+        if (success < 1f) {
+            subtitlePaint.alpha = ((1f - success) * alpha * 200).toInt()
+            val processingText = "Processing payment"
+            if (subtitleClip < 0.99f) {
+                val subW = subtitlePaint.measureText(processingText)
+                canvas.save()
+                canvas.clipRect(textX, drawY, textX + subW * subtitleClip, drawY + h)
+                canvas.drawText(processingText, textX, subY, subtitlePaint)
+                canvas.restore()
+            } else {
+                canvas.drawText(processingText, textX, subY, subtitlePaint)
+            }
+        }
+        if (success > 0f) {
+            subtitlePaint.alpha = (success * alpha * 200).toInt()
+            canvas.drawText(subtitle, textX, subY, subtitlePaint)
+        }
 
         canvas.restore()
     }
@@ -199,7 +263,6 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
     }
 
     private fun stopAll() {
-        // Remove listeners BEFORE cancel to prevent onAnimationEnd cascades
         introAnimator?.removeAllListeners()
         introAnimator?.cancel()
         introAnimator = null
@@ -208,15 +271,21 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
         cycleAnimator?.cancel()
         cycleAnimator = null
 
+        successAnimator?.removeAllListeners()
+        successAnimator?.cancel()
+        successAnimator = null
+
         cycleRunnable?.let { removeCallbacks(it) }
         cycleRunnable = null
+        exitRunnable?.let { removeCallbacks(it) }
+        exitRunnable = null
 
-        // Reset so animation replays fresh on re-attach
         animStarted = false
         introComplete = false
         introProgress = 0f
         backIntroProgress = 0f
         cycleProgress = 0f
+        successProgress = 0f
         currentIndex = 0
     }
 
@@ -259,8 +328,29 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
 
     private fun scheduleCycle() {
         if (!isAttachedToWindow) return
-        cycleRunnable = Runnable { doCycle() }
-        postDelayed(cycleRunnable!!, 2500)
+        cycleRunnable = Runnable { doSuccess() }
+        postDelayed(cycleRunnable!!, 1500)
+    }
+
+    private fun doSuccess() {
+        if (!isAttachedToWindow) return
+        successAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 400
+            interpolator = DecelerateInterpolator()
+            addUpdateListener {
+                successProgress = it.animatedValue as Float
+                invalidate()
+            }
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    if (isAttachedToWindow) {
+                        exitRunnable = Runnable { doCycle() }
+                        postDelayed(exitRunnable!!, 1000)
+                    }
+                }
+            })
+            start()
+        }
     }
 
     private fun doCycle() {
@@ -278,6 +368,7 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
                     if (isAttachedToWindow) {
                         currentIndex = (currentIndex + 1) % allSubtitles.size
                         cycleProgress = 0f
+                        successProgress = 0f
                         invalidate()
                         scheduleCycle()
                     }
@@ -288,4 +379,11 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
     }
 
     private fun lerp(a: Float, b: Float, t: Float) = a + (b - a) * t
+
+    private fun lerpColor(from: Int, to: Int, t: Float): Int {
+        val r = (Color.red(from) * (1 - t) + Color.red(to) * t).toInt()
+        val g = (Color.green(from) * (1 - t) + Color.green(to) * t).toInt()
+        val b = (Color.blue(from) * (1 - t) + Color.blue(to) * t).toInt()
+        return Color.rgb(r, g, b)
+    }
 }

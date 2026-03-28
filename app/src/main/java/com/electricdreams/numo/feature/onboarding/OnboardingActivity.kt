@@ -1656,8 +1656,8 @@ class OnboardingActivity : AppCompatActivity() {
         }
 
         // Animate checkmark
-        val checkmark = successContainer.findViewById<ImageView>(R.id.success_checkmark)
-        checkmark?.let { animateCheckmark(it) }
+        val checkmark = successContainer.findViewById<com.electricdreams.numo.ui.animation.CheckmarkAnimationView>(R.id.success_checkmark)
+        checkmark?.play()
     }
 
     private fun createBalanceChangeItem(mintUrl: String, before: Long, after: Long, diff: Long): View {
@@ -1717,24 +1717,6 @@ class OnboardingActivity : AppCompatActivity() {
         container.addView(diffText)
 
         return container
-    }
-
-    private fun animateCheckmark(checkmark: View) {
-        checkmark.scaleX = 0f
-        checkmark.scaleY = 0f
-        checkmark.alpha = 0f
-
-        val scaleX = ObjectAnimator.ofFloat(checkmark, "scaleX", 0f, 1.2f, 1f)
-        val scaleY = ObjectAnimator.ofFloat(checkmark, "scaleY", 0f, 1.2f, 1f)
-        val alpha = ObjectAnimator.ofFloat(checkmark, "alpha", 0f, 1f)
-
-        AnimatorSet().apply {
-            playTogether(scaleX, scaleY, alpha)
-            duration = 500
-            interpolator = AccelerateDecelerateInterpolator()
-            startDelay = 200
-            start()
-        }
     }
 
     private fun completeOnboarding() {
