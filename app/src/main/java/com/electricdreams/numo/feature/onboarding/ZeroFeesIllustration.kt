@@ -44,11 +44,11 @@ class ZeroFeesIllustration @JvmOverloads constructor(
     )
 
     private val fees = listOf(
-        FeeLabel("3%",   0.22f, 0.28f, 1.1f),
-        FeeLabel("2.5%", 0.70f, 0.24f, 0.85f),
-        FeeLabel("1.5%", 0.18f, 0.58f, 0.9f),
-        FeeLabel("2%",   0.68f, 0.54f, 1.0f),
-        FeeLabel("2.9%", 0.45f, 0.40f, 0.8f),
+        FeeLabel("3%",   0.25f, 0.28f, 1.1f),
+        FeeLabel("2.5%", 0.50f, 0.25f, 0.85f),
+        FeeLabel("1.5%", 0.75f, 0.28f, 0.9f),
+        FeeLabel("2%",   0.35f, 0.52f, 1.0f),
+        FeeLabel("2.9%", 0.65f, 0.52f, 0.8f),
     )
 
     private val feeParticles = HashMap<Int, List<Particle>>()
@@ -79,8 +79,6 @@ class ZeroFeesIllustration @JvmOverloads constructor(
         textAlign = Paint.Align.CENTER
         typeface = Typeface.create("sans-serif-black", Typeface.BOLD)
     }
-
-    private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     private val particlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
@@ -166,23 +164,6 @@ class ZeroFeesIllustration @JvmOverloads constructor(
                     }
                 }
             }
-        }
-
-        // Radial glow behind 0%
-        if (zeroAlpha > 0.01f) {
-            val glowR = 120f * s * zeroScale
-            val gCy = cy + 10f * s
-            glowPaint.shader = RadialGradient(
-                cx, gCy, glowR,
-                intArrayOf(
-                    Color.argb((zeroAlpha * 40).toInt(), 94, 255, 194),
-                    Color.argb((zeroAlpha * 15).toInt(), 94, 255, 194),
-                    Color.TRANSPARENT
-                ),
-                floatArrayOf(0f, 0.5f, 1f),
-                Shader.TileMode.CLAMP
-            )
-            canvas.drawCircle(cx, gCy, glowR, glowPaint)
         }
 
         // Draw "0%"
