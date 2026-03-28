@@ -9,7 +9,6 @@ import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.Rect
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
@@ -46,8 +45,8 @@ import kotlin.math.sin
 class OnboardingWelcomeAnimator(
     private val activity: Activity,
     private val container: FrameLayout,
-    private val wordmark: ImageView,
-    private val wordmarkGreen: ImageView,
+    private val letterViews: List<ImageView>,
+    private val letterContainer: android.widget.LinearLayout,
     private val tagline: TextView,
     private val acceptButton: MaterialButton,
     private val termsText: TextView,
@@ -165,8 +164,6 @@ class OnboardingWelcomeAnimator(
                 startPhase4_ColorTransition()
                 delay(400)
                 startPhase6_CtaReveal()
-                delay(800)
-                startPhase4b_GreenFill()
             }
         }
     }
@@ -199,13 +196,14 @@ class OnboardingWelcomeAnimator(
         container.findViewById<View>(R.id.welcome_background_overlay)
             ?.setBackgroundColor(whiteColor)
 
-        wordmark.imageTintList = ColorStateList.valueOf(navyColor)
-        wordmark.alpha = 0f
-        wordmark.scaleX = 0.95f
-        wordmark.scaleY = 0.95f
-
-        wordmarkGreen.alpha = 0f
-        wordmarkGreen.clipBounds = null
+        val density = activity.resources.displayMetrics.density
+        letterViews.forEach { letter ->
+            letter.imageTintList = ColorStateList.valueOf(navyColor)
+            letter.alpha = 0f
+            letter.translationY = 24f * density
+            letter.scaleX = 0.9f
+            letter.scaleY = 0.9f
+        }
 
         tagline.setTextColor(navyColor)
         tagline.alpha = 0f
@@ -227,21 +225,40 @@ class OnboardingWelcomeAnimator(
         systemBarsFlipped = false
     }
 
-    // === Phase 1: Logo Reveal (600ms) ===
+    // === Phase 1: Staggered Per-Letter Reveal (~720ms) ===
+
+    private val appleSpring = android.view.animation.PathInterpolator(0.175f, 0.885f, 0.32f, 1.1f)
 
     private suspend fun startPhase1_LogoReveal() = suspendCancellableCoroutine<Unit> { cont ->
-        val animSet = AnimatorSet().apply {
-            playTogether(
-                ObjectAnimator.ofFloat(wordmark, "alpha", 0f, 1f),
-                ObjectAnimator.ofFloat(wordmark, "scaleX", 0.95f, 1f),
-                ObjectAnimator.ofFloat(wordmark, "scaleY", 0.95f, 1f)
-            )
-            duration = 600
-            interpolator = DecelerateInterpolator()
-            addListener(onEnd { if (cont.isActive) cont.resume(Unit) })
+        val density = activity.resources.displayMetrics.density
+        val staggerDelay = 90L
+        val letterDuration = 450L
+        var completedCount = 0
+        val phaseAnimators = mutableListOf<Animator>()
+
+        letterViews.forEachIndexed { index, letter ->
+            val animSet = AnimatorSet().apply {
+                playTogether(
+                    ObjectAnimator.ofFloat(letter, "alpha", 0f, 1f),
+                    ObjectAnimator.ofFloat(letter, "translationY", 24f * density, 0f),
+                    ObjectAnimator.ofFloat(letter, "scaleX", 0.9f, 1f),
+                    ObjectAnimator.ofFloat(letter, "scaleY", 0.9f, 1f)
+                )
+                duration = letterDuration
+                startDelay = index * staggerDelay
+                interpolator = appleSpring
+            }
+
+            animSet.addListener(onEnd {
+                completedCount++
+                if (completedCount == letterViews.size && cont.isActive) {
+                    cont.resume(Unit)
+                }
+            })
+            phaseAnimators.add(animSet)
+            trackAndStart(animSet)
         }
-        cont.invokeOnCancellation { animSet.cancel() }
-        trackAndStart(animSet)
+        cont.invokeOnCancellation { phaseAnimators.forEach { it.cancel() } }
     }
 
     // === Phase 2: Tagline (450ms) ===
@@ -267,10 +284,10 @@ class OnboardingWelcomeAnimator(
         val centerX = emojiContainer.width / 2f
         // Center on the wordmark, not the screen center
         val wordmarkLocation = IntArray(2)
-        wordmark.getLocationInWindow(wordmarkLocation)
+        letterContainer.getLocationInWindow(wordmarkLocation)
         val containerLocation = IntArray(2)
         emojiContainer.getLocationInWindow(containerLocation)
-        val centerY = (wordmarkLocation[1] - containerLocation[1]).toFloat() + wordmark.height / 2f
+        val centerY = (wordmarkLocation[1] - containerLocation[1]).toFloat() + letterContainer.height / 2f
         val density = activity.resources.displayMetrics.density
         val radius = min(emojiContainer.width, emojiContainer.height) * 0.30f
 
@@ -339,10 +356,10 @@ class OnboardingWelcomeAnimator(
         val centerX = emojiContainer.width / 2f
         // Match the circle center used in phase 3
         val wordmarkLocation = IntArray(2)
-        wordmark.getLocationInWindow(wordmarkLocation)
+        letterContainer.getLocationInWindow(wordmarkLocation)
         val containerLocation = IntArray(2)
         emojiContainer.getLocationInWindow(containerLocation)
-        val centerY = (wordmarkLocation[1] - containerLocation[1]).toFloat() + wordmark.height / 2f
+        val centerY = (wordmarkLocation[1] - containerLocation[1]).toFloat() + letterContainer.height / 2f
         var completedCount = 0
         val phaseAnimators = mutableListOf<Animator>()
 
@@ -399,7 +416,8 @@ class OnboardingWelcomeAnimator(
                 bgView?.setBackgroundColor(bgColor)
 
                 val textColor = argbEvaluator.evaluate(fraction, navyColor, whiteColor) as Int
-                wordmark.imageTintList = ColorStateList.valueOf(textColor)
+                val tint = ColorStateList.valueOf(textColor)
+                letterViews.forEach { it.imageTintList = tint }
                 tagline.setTextColor(textColor)
 
                 activity.window.statusBarColor = bgColor
@@ -420,28 +438,6 @@ class OnboardingWelcomeAnimator(
         }
         cont.invokeOnCancellation { colorAnim.cancel() }
         trackAndStart(colorAnim)
-    }
-
-    // === Phase 4b: Green Color Fill (800ms) ===
-
-    private suspend fun startPhase4b_GreenFill() = suspendCancellableCoroutine<Unit> { cont ->
-        val w = wordmarkGreen.width
-        val h = wordmarkGreen.height
-        if (w == 0 || h == 0) { if (cont.isActive) cont.resume(Unit); return@suspendCancellableCoroutine }
-
-        wordmarkGreen.alpha = 1f
-        wordmarkGreen.clipBounds = Rect(0, 0, 0, h)
-
-        val fillAnim = ValueAnimator.ofInt(0, w).apply {
-            duration = 3000
-            interpolator = AccelerateDecelerateInterpolator()
-            addUpdateListener {
-                wordmarkGreen.clipBounds = Rect(0, 0, it.animatedValue as Int, h)
-            }
-            addListener(onEnd { if (cont.isActive) cont.resume(Unit) })
-        }
-        cont.invokeOnCancellation { fillAnim.cancel() }
-        trackAndStart(fillAnim)
     }
 
     // === Phase 5: Scrolling Rows Fade In (800ms) ===

@@ -44,27 +44,75 @@
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
-            <!-- Numo Wordmark (white + green overlay for color fill animation) -->
+            <!-- Numo Wordmark (per-letter white + green overlay for color fill animation) -->
             <FrameLayout
                 android:layout_width="200dp"
-                android:layout_height="88dp">
+                android:layout_height="88dp"
+                android:clipChildren="false"
+                android:clipToPadding="false">
 
-                <ImageView
-                    android:id="@+id/welcome_wordmark"
+                <!-- Per-letter wordmark views (stagger-animated individually) -->
+                <LinearLayout
+                    android:id="@+id/welcome_wordmark_letters"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:src="@drawable/ic_numo_wordmark_white"
-                    android:contentDescription="@string/app_name"
-                    android:alpha="0" />
+                    android:orientation="horizontal"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
 
-                <ImageView
-                    android:id="@+id/welcome_wordmark_green"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:src="@drawable/ic_numo_wordmark_white"
-                    app:tint="@color/numo_fluorescent_green"
-                    android:contentDescription="@null"
-                    android:alpha="0" />
+                    <ImageView
+                        android:id="@+id/welcome_letter_n"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="41.4"
+                        android:src="@drawable/ic_numo_letter_n"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="@string/app_name"
+                        android:alpha="0" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="6.93" />
+
+                    <ImageView
+                        android:id="@+id/welcome_letter_u"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="39.36"
+                        android:src="@drawable/ic_numo_letter_u"
+                        android:scaleType="fitCenter"
+                        android:alpha="0" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="7.0" />
+
+                    <ImageView
+                        android:id="@+id/welcome_letter_m"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="54.72"
+                        android:src="@drawable/ic_numo_letter_m"
+                        android:scaleType="fitCenter"
+                        android:alpha="0" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="6.49" />
+
+                    <ImageView
+                        android:id="@+id/welcome_letter_o"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="40.08"
+                        android:src="@drawable/ic_numo_letter_o"
+                        android:scaleType="fitCenter"
+                        android:alpha="0" />
+
+                </LinearLayout>
 
             </FrameLayout>
 

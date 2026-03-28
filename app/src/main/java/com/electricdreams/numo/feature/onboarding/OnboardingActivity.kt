@@ -136,7 +136,11 @@ class OnboardingActivity : AppCompatActivity() {
     // Step 1: Welcome
     private lateinit var welcomeContainer: FrameLayout
     private lateinit var welcomeBackgroundOverlay: View
-    private lateinit var welcomeWordmark: ImageView
+    private lateinit var welcomeLetterN: ImageView
+    private lateinit var welcomeLetterU: ImageView
+    private lateinit var welcomeLetterM: ImageView
+    private lateinit var welcomeLetterO: ImageView
+    private lateinit var welcomeLetterContainer: android.widget.LinearLayout
     private lateinit var welcomeTagline: TextView
     private lateinit var termsText: TextView
     private lateinit var acceptButton: MaterialButton
@@ -301,7 +305,11 @@ class OnboardingActivity : AppCompatActivity() {
         // Welcome
         welcomeContainer = findViewById(R.id.welcome_container)
         welcomeBackgroundOverlay = findViewById(R.id.welcome_background_overlay)
-        welcomeWordmark = findViewById(R.id.welcome_wordmark)
+        welcomeLetterN = findViewById(R.id.welcome_letter_n)
+        welcomeLetterU = findViewById(R.id.welcome_letter_u)
+        welcomeLetterM = findViewById(R.id.welcome_letter_m)
+        welcomeLetterO = findViewById(R.id.welcome_letter_o)
+        welcomeLetterContainer = findViewById(R.id.welcome_wordmark_letters)
         welcomeTagline = findViewById(R.id.welcome_tagline)
         termsText = findViewById(R.id.terms_text)
         acceptButton = findViewById(R.id.accept_button)
@@ -896,8 +904,8 @@ class OnboardingActivity : AppCompatActivity() {
         welcomeAnimator = OnboardingWelcomeAnimator(
             activity = this,
             container = welcomeContainer,
-            wordmark = welcomeWordmark,
-            wordmarkGreen = findViewById(R.id.welcome_wordmark_green),
+            letterViews = listOf(welcomeLetterN, welcomeLetterU, welcomeLetterM, welcomeLetterO),
+            letterContainer = welcomeLetterContainer,
             tagline = welcomeTagline,
             acceptButton = acceptButton,
             termsText = termsText,
