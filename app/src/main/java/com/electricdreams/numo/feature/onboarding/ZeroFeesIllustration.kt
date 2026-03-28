@@ -9,6 +9,7 @@ import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
+import com.electricdreams.numo.ui.util.isAnimationEnabled
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -240,7 +241,7 @@ class ZeroFeesIllustration @JvmOverloads constructor(
                 startY = y,
                 angle = angle,
                 speed = (30f + ((seed + i * 37) % 30)) * s,
-                size = 1.5f + ((seed + i * 53) % 20) / 10f
+                size = 1.5f + ((seed + i * 53) % 30) / 10f
             )
         }
         feeParticles[feeIndex] = parts
@@ -249,6 +250,14 @@ class ZeroFeesIllustration @JvmOverloads constructor(
     private fun startAnimation() {
         if (animStarted) return
         animStarted = true
+
+        if (!context.isAnimationEnabled()) {
+            // Skip to final state: show "0%" at full scale
+            zeroScale = 1f; zeroAlpha = 1f
+            fees.forEach { it.alpha = 0f }
+            invalidate()
+            return
+        }
 
         val w = width.toFloat()
         val h = height.toFloat()
@@ -309,7 +318,7 @@ class ZeroFeesIllustration @JvmOverloads constructor(
         val zeroIn = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 600
             startDelay = lastFeeEnd + 300L
-            interpolator = OvershootInterpolator(1.5f)
+            interpolator = OvershootInterpolator(1.0f)
             addUpdateListener {
                 val p = it.animatedValue as Float
                 zeroAlpha = p

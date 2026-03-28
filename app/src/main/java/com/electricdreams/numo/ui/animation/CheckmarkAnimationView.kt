@@ -13,6 +13,7 @@ import android.view.View
 import android.view.animation.DecelerateInterpolator
 import androidx.core.content.ContextCompat
 import com.electricdreams.numo.R
+import com.electricdreams.numo.ui.util.isAnimationEnabled
 import kotlin.math.min
 
 /**
@@ -84,12 +85,21 @@ class CheckmarkAnimationView @JvmOverloads constructor(
 
     fun play() {
         animator?.cancel()
+        visibility = VISIBLE
+
+        if (!context.isAnimationEnabled()) {
+            circleScale = 1f
+            checkProgress = 1f
+            invalidate()
+            return
+        }
+
         circleScale = 0f
         checkProgress = 0f
-        visibility = VISIBLE
 
         val circleAnim = ValueAnimator.ofFloat(0.82f, 1f).apply {
             duration = 320L
+            interpolator = android.view.animation.PathInterpolator(0.175f, 0.885f, 0.32f, 1.1f)
             addUpdateListener {
                 circleScale = it.animatedValue as Float
                 invalidate()
@@ -110,6 +120,24 @@ class CheckmarkAnimationView @JvmOverloads constructor(
             playTogether(circleAnim, checkAnim)
             start()
         }
+    }
+
+    /**
+     * Fade out and scale down (subtler than entrance per Jakub's exit principle).
+     * Hides the view on completion.
+     */
+    fun dismiss(onComplete: (() -> Unit)? = null) {
+        animator?.cancel()
+        animate()
+            .alpha(0f)
+            .scaleX(0.95f)
+            .scaleY(0.95f)
+            .setDuration(200)
+            .withEndAction {
+                visibility = GONE
+                onComplete?.invoke()
+            }
+            .start()
     }
 
     override fun onDraw(canvas: Canvas) {

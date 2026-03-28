@@ -3,6 +3,7 @@ package com.electricdreams.numo.ui.components
 import android.content.Context
 import android.view.View
 import com.electricdreams.numo.R
+import com.electricdreams.numo.ui.util.shake
 import android.widget.Button
 import android.widget.TextView
 import com.electricdreams.numo.core.cashu.CashuWalletManager
@@ -201,15 +202,7 @@ class AmountDisplayManager(
 
     /** Show shake animation on amount display */
     fun shakeAmountDisplay() {
-        val shake = object : android.view.animation.Animation() {
-            override fun applyTransformation(interpolatedTime: Float, t: android.view.animation.Transformation) {
-                val offset = (Math.sin(interpolatedTime * Math.PI * 8) * 10).toFloat()
-                t.matrix.setTranslate(offset, 0f)
-            }
-        }.apply {
-            duration = 400
-        }
-        amountDisplay.startAnimation(shake)
+        amountDisplay.shake(amplitude = 10f)
     }
 
     /** Convert fiat amount (in currency units, not cents) to satoshis */

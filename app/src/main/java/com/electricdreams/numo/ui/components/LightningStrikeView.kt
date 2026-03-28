@@ -10,6 +10,7 @@ import android.graphics.Path
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateInterpolator
+import com.electricdreams.numo.ui.util.isAnimationEnabled
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
@@ -51,6 +52,12 @@ class LightningStrikeView(context: Context) : View(context) {
     }
 
     fun strike() {
+        if (!context.isAnimationEnabled()) {
+            // Skip animation, just flash briefly and remove
+            postDelayed({ (parent as? ViewGroup)?.removeView(this) }, 100)
+            return
+        }
+
         post { generateBoltTree() }
 
         // Fade in (0–120ms) → hold (120–250ms) → fade out (250–550ms)

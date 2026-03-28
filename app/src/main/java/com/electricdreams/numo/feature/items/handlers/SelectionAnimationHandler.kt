@@ -360,16 +360,16 @@ class SelectionAnimationHandler(
     fun animateQuantityChange(quantityView: TextView) {
         val scaleUp = AnimatorSet().apply {
             playTogether(
-                ObjectAnimator.ofFloat(quantityView, View.SCALE_X, 1f, 1.15f),
-                ObjectAnimator.ofFloat(quantityView, View.SCALE_Y, 1f, 1.15f)
+                ObjectAnimator.ofFloat(quantityView, View.SCALE_X, 1f, 1.08f),
+                ObjectAnimator.ofFloat(quantityView, View.SCALE_Y, 1f, 1.08f)
             )
             duration = QUANTITY_BOUNCE_DURATION
         }
         
         val scaleDown = AnimatorSet().apply {
             playTogether(
-                ObjectAnimator.ofFloat(quantityView, View.SCALE_X, 1.15f, 1f),
-                ObjectAnimator.ofFloat(quantityView, View.SCALE_Y, 1.15f, 1f)
+                ObjectAnimator.ofFloat(quantityView, View.SCALE_X, 1.08f, 1f),
+                ObjectAnimator.ofFloat(quantityView, View.SCALE_Y, 1.08f, 1f)
             )
             duration = QUANTITY_BOUNCE_DURATION
             interpolator = appleSpringInterpolator

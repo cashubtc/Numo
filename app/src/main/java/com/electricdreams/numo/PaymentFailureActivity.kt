@@ -5,7 +5,6 @@ import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.view.animation.OvershootInterpolator
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -18,6 +17,7 @@ import androidx.core.view.WindowCompat
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.payment.PaymentIntentFactory
+import com.electricdreams.numo.ui.util.isAnimationEnabled
 
 /**
  * Activity that displays a payment failure screen when a payment fails or hangs.
@@ -114,11 +114,23 @@ class PaymentFailureActivity : AppCompatActivity() {
         finish()
     }
 
+    override fun finish() {
+        super.finish()
+        @Suppress("DEPRECATION")
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
+    }
+
     /**
      * Play a simple, elegant error animation mirroring the success animation
      * from [PaymentReceivedActivity] but using an error visual language.
      */
     private fun animateErrorIcon() {
+        if (!isAnimationEnabled()) {
+            errorCircle.visibility = View.VISIBLE; errorCircle.alpha = 1f; errorCircle.scaleX = 1f; errorCircle.scaleY = 1f
+            errorIcon.visibility = View.VISIBLE; errorIcon.alpha = 1f; errorIcon.scaleX = 1f; errorIcon.scaleY = 1f
+            return
+        }
+
         // Initial state
         errorCircle.alpha = 0f
         errorCircle.scaleX = 0.3f
@@ -149,13 +161,13 @@ class PaymentFailureActivity : AppCompatActivity() {
         val iconScaleX = ObjectAnimator.ofFloat(errorIcon, "scaleX", 0f, 1f).apply {
             duration = 500
             startDelay = 150
-            interpolator = OvershootInterpolator(3f)
+            interpolator = android.view.animation.DecelerateInterpolator(1.5f)
         }
 
         val iconScaleY = ObjectAnimator.ofFloat(errorIcon, "scaleY", 0f, 1f).apply {
             duration = 500
             startDelay = 150
-            interpolator = OvershootInterpolator(3f)
+            interpolator = android.view.animation.DecelerateInterpolator(1.5f)
         }
 
         val iconFadeIn = ObjectAnimator.ofFloat(errorIcon, "alpha", 0f, 1f).apply {

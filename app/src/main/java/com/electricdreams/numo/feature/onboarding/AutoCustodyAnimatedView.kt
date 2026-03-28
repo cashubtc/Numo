@@ -8,6 +8,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
+import com.electricdreams.numo.ui.util.isAnimationEnabled
 
 /**
  * Animated stacked notification banners for "Automatic self-custody" slide.
@@ -292,6 +293,12 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
     private fun startIntro() {
         if (animStarted) return
         animStarted = true
+
+        if (!context.isAnimationEnabled()) {
+            introProgress = 1f
+            invalidate()
+            return
+        }
 
         val frontIn = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 600

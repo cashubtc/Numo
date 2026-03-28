@@ -291,12 +291,7 @@ object DialogHelper {
      * Shake animation for invalid input
      */
     private fun animateShake(view: View) {
-        val shake = android.view.animation.TranslateAnimation(-10f, 10f, 0f, 0f).apply {
-            duration = 50
-            repeatCount = 5
-            repeatMode = android.view.animation.Animation.REVERSE
-        }
-        view.startAnimation(shake)
+        view.shake(amplitude = 10f)
     }
     
     /**

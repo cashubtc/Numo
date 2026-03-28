@@ -16,6 +16,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.electricdreams.numo.R
+import com.electricdreams.numo.ui.util.isAnimationEnabled
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -51,6 +52,12 @@ class OnboardingWelcomeAnimator(
         stop()
         resetAllViews()
 
+        if (!activity.isAnimationEnabled()) {
+            // Skip to final state: everything visible
+            showFinalState()
+            return
+        }
+
         container.post {
             scope.launch {
                 delay(300) // Brief pause on blank white
@@ -62,6 +69,18 @@ class OnboardingWelcomeAnimator(
                 startPhase4_CtaReveal()
             }
         }
+    }
+
+    private fun showFinalState() {
+        revealView.visibility = View.VISIBLE
+        letterViews.forEach { it.alpha = 1f; it.translationY = 0f; it.scaleX = 1f; it.scaleY = 1f }
+        tagline.alpha = 1f; tagline.translationY = 0f
+        acceptButton.alpha = 1f; acceptButton.translationY = 0f
+        termsText.alpha = 0.7f; termsText.translationY = 0f
+        val controller = WindowInsetsControllerCompat(activity.window, activity.window.decorView)
+        controller.isAppearanceLightStatusBars = false
+        controller.isAppearanceLightNavigationBars = false
+        systemBarsFlipped = true
     }
 
     fun stop() {
@@ -230,7 +249,7 @@ class OnboardingWelcomeAnimator(
                 ObjectAnimator.ofFloat(tagline, "translationY", 15f, 0f)
             )
             duration = 450
-            interpolator = DecelerateInterpolator()
+            interpolator = appleSpring
             addListener(onEnd { if (cont.isActive) cont.resume(Unit) })
         }
         cont.invokeOnCancellation { animSet.cancel() }

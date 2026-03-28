@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.PathInterpolator
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -177,7 +177,7 @@ class MintSelectionBottomSheet : BottomSheetDialogFragment() {
                 .translationY(0f)
                 .setStartDelay((position * 60).toLong())
                 .setDuration(300)
-                .setInterpolator(AccelerateDecelerateInterpolator())
+                .setInterpolator(PathInterpolator(0.175f, 0.885f, 0.32f, 1.1f))
                 .start()
         }
 
