@@ -9,13 +9,16 @@ import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
+import kotlin.math.cos
+import kotlin.math.sin
 
 /**
  * Animated "Zero Fees" illustration.
  * Phase 1: Fee percentages fade in scattered around the screen.
- * Phase 2: Each fee gets individually slashed — a line cuts through it,
- *          then it splits apart and fades away, one after another.
- * Phase 3: Large "0%" bounces in.
+ * Phase 2: Each fee gets slashed with a coral-red line,
+ *          then splits apart with particles and fades away.
+ * Phase 3: Large "0%" bounces in with a radial glow,
+ *          then breathes with a gentle pulse loop.
  */
 class ZeroFeesIllustration @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
@@ -31,6 +34,14 @@ class ZeroFeesIllustration @JvmOverloads constructor(
         var destroyed: Float = 0f       // 0..1 split + fade
     )
 
+    private data class Particle(
+        val startX: Float,
+        val startY: Float,
+        val angle: Float,
+        val speed: Float,   // max travel distance in px
+        val size: Float
+    )
+
     private val fees = listOf(
         FeeLabel("3%",   0.22f, 0.28f, 1.1f),
         FeeLabel("2.5%", 0.70f, 0.24f, 0.85f),
@@ -39,12 +50,15 @@ class ZeroFeesIllustration @JvmOverloads constructor(
         FeeLabel("2.9%", 0.45f, 0.40f, 0.8f),
     )
 
+    private val feeParticles = HashMap<Int, List<Particle>>()
+
     private var zeroAlpha = 0f
     private var zeroScale = 0.5f
 
     private var animStarted = false
     private var animScheduled = false
     private var animatorSet: AnimatorSet? = null
+    private var pulseAnimator: ValueAnimator? = null
     private var startRunnable: Runnable? = null
 
     private val feePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -54,7 +68,7 @@ class ZeroFeesIllustration @JvmOverloads constructor(
     }
 
     private val slashPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#BBFFFFFF")
+        color = Color.parseColor("#FF6B6B")
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
     }
@@ -63,6 +77,13 @@ class ZeroFeesIllustration @JvmOverloads constructor(
         color = Color.WHITE
         textAlign = Paint.Align.CENTER
         typeface = Typeface.create("sans-serif-black", Typeface.BOLD)
+    }
+
+    private val glowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+
+    private val particlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        style = Paint.Style.FILL
     }
 
     override fun onDraw(canvas: Canvas) {
@@ -74,17 +95,16 @@ class ZeroFeesIllustration @JvmOverloads constructor(
         val cy = h * 0.45f
         val s = w / 380f
 
-        for (fee in fees) {
+        for ((index, fee) in fees.withIndex()) {
             if (fee.alpha < 0.01f) continue
 
             val textSize = 34f * fee.size * s
             feePaint.textSize = textSize
-            slashPaint.strokeWidth = 2.5f * s
+            slashPaint.strokeWidth = 3.5f * s
 
             val x = fee.baseX * w
             val y = fee.baseY * h
 
-            // Measure text width for the slash line
             val textW = feePaint.measureText(fee.text)
             val fadeAlpha = fee.alpha * (1f - fee.destroyed)
 
@@ -114,7 +134,7 @@ class ZeroFeesIllustration @JvmOverloads constructor(
                 canvas.drawText(fee.text, x, y, feePaint)
             }
 
-            // Individual slash line across this fee
+            // Slash line across this fee
             if (fee.slashProgress > 0f && fee.destroyed < 0.99f) {
                 val slashAlpha = ((1f - fee.destroyed) * 220).toInt()
                 slashPaint.alpha = slashAlpha
@@ -130,6 +150,38 @@ class ZeroFeesIllustration @JvmOverloads constructor(
                     slashPaint
                 )
             }
+
+            // Particles for this fee
+            if (fee.destroyed > 0.01f) {
+                feeParticles[index]?.let { parts ->
+                    val life = (1f - fee.destroyed).coerceIn(0f, 1f)
+                    for (p in parts) {
+                        if (life <= 0.01f) continue
+                        val dist = fee.destroyed * p.speed
+                        val px = p.startX + cos(p.angle) * dist
+                        val py = p.startY + sin(p.angle) * dist
+                        particlePaint.alpha = (life * 180).toInt().coerceIn(0, 255)
+                        canvas.drawCircle(px, py, p.size * s, particlePaint)
+                    }
+                }
+            }
+        }
+
+        // Radial glow behind 0%
+        if (zeroAlpha > 0.01f) {
+            val glowR = 120f * s * zeroScale
+            val gCy = cy + 10f * s
+            glowPaint.shader = RadialGradient(
+                cx, gCy, glowR,
+                intArrayOf(
+                    Color.argb((zeroAlpha * 40).toInt(), 94, 255, 194),
+                    Color.argb((zeroAlpha * 15).toInt(), 94, 255, 194),
+                    Color.TRANSPARENT
+                ),
+                floatArrayOf(0f, 0.5f, 1f),
+                Shader.TileMode.CLAMP
+            )
+            canvas.drawCircle(cx, gCy, glowR, glowPaint)
         }
 
         // Draw "0%"
@@ -160,12 +212,15 @@ class ZeroFeesIllustration @JvmOverloads constructor(
         animatorSet?.removeAllListeners()
         animatorSet?.cancel()
         animatorSet = null
-        // Reset so animation replays fresh on re-attach
+        pulseAnimator?.removeAllListeners()
+        pulseAnimator?.cancel()
+        pulseAnimator = null
         animStarted = false
         animScheduled = false
         zeroAlpha = 0f
         zeroScale = 0.5f
         fees.forEach { it.alpha = 0f; it.slashProgress = 0f; it.destroyed = 0f }
+        feeParticles.clear()
     }
 
     private fun scheduleAnimation() {
@@ -176,10 +231,28 @@ class ZeroFeesIllustration @JvmOverloads constructor(
         postDelayed(startRunnable!!, 500)
     }
 
+    private fun spawnParticles(feeIndex: Int, x: Float, y: Float, s: Float) {
+        val seed = feeIndex * 31 + 7
+        val parts = (0 until 5).map { i ->
+            val angle = ((seed + i * 73) % 360) * (Math.PI.toFloat() / 180f)
+            Particle(
+                startX = x,
+                startY = y,
+                angle = angle,
+                speed = (30f + ((seed + i * 37) % 30)) * s,
+                size = 1.5f + ((seed + i * 53) % 20) / 10f
+            )
+        }
+        feeParticles[feeIndex] = parts
+    }
+
     private fun startAnimation() {
         if (animStarted) return
         animStarted = true
 
+        val w = width.toFloat()
+        val h = height.toFloat()
+        val s = w / 380f
         val animators = mutableListOf<android.animation.Animator>()
 
         // Phase 1: All fees fade in (staggered)
@@ -197,9 +270,9 @@ class ZeroFeesIllustration @JvmOverloads constructor(
         }
         animators.add(fadeIn)
 
-        // Phase 2: Each fee gets slashed individually (staggered)
+        // Phase 2: Each fee gets slashed (tighter 180ms stagger)
         fees.forEachIndexed { i, fee ->
-            val baseDelay = 1600L + i * 200L
+            val baseDelay = 1600L + i * 180L
 
             // Slash line draws
             val slash = ValueAnimator.ofFloat(0f, 1f).apply {
@@ -213,12 +286,17 @@ class ZeroFeesIllustration @JvmOverloads constructor(
             }
             animators.add(slash)
 
-            // Split + fade
+            // Split + fade (with 50ms hold after slash for visual beat)
             val destroy = ValueAnimator.ofFloat(0f, 1f).apply {
                 duration = 350
-                startDelay = baseDelay + 150L
+                startDelay = baseDelay + 250L
                 interpolator = AccelerateInterpolator(1.5f)
+                var particlesSpawned = false
                 addUpdateListener {
+                    if (!particlesSpawned) {
+                        particlesSpawned = true
+                        spawnParticles(i, fee.baseX * w, fee.baseY * h, s)
+                    }
                     fee.destroyed = it.animatedValue as Float
                     invalidate()
                 }
@@ -226,8 +304,8 @@ class ZeroFeesIllustration @JvmOverloads constructor(
             animators.add(destroy)
         }
 
-        // Phase 3: "0%" bounces in after all fees are destroyed
-        val lastFeeEnd = 1600L + (fees.size - 1) * 200L + 150L + 350L
+        // Phase 3: "0%" bounces in after all fees destroyed
+        val lastFeeEnd = 1600L + (fees.size - 1) * 180L + 250L + 350L
         val zeroIn = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 600
             startDelay = lastFeeEnd + 300L
@@ -238,11 +316,32 @@ class ZeroFeesIllustration @JvmOverloads constructor(
                 zeroScale = 0.5f + 0.5f * p
                 invalidate()
             }
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    startBreathingPulse()
+                }
+            })
         }
         animators.add(zeroIn)
 
         animatorSet = AnimatorSet().apply {
             playTogether(animators)
+            start()
+        }
+    }
+
+    private fun startBreathingPulse() {
+        if (!isAttachedToWindow) return
+        pulseAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 2000
+            repeatCount = ValueAnimator.INFINITE
+            repeatMode = ValueAnimator.REVERSE
+            interpolator = DecelerateInterpolator()
+            addUpdateListener {
+                val p = it.animatedValue as Float
+                zeroScale = 1f + 0.08f * p
+                invalidate()
+            }
             start()
         }
     }
