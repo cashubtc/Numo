@@ -130,7 +130,7 @@ class OnboardingWelcomeAnimator(
         systemBarsFlipped = false
     }
 
-    // === Phase 1: Circular Reveal (white → navy, ~1200ms) ===
+    // === Phase 1: Circular Reveal (white → navy, ~800ms) ===
     // Navy overlay expands from screen center. Status/nav bar colors flip to navy
     // only once the circle has actually reached the top/bottom edges.
 
@@ -155,7 +155,7 @@ class OnboardingWelcomeAnimator(
         val reveal = ViewAnimationUtils.createCircularReveal(
             revealView, centerX, centerY, 0f, maxRadius
         ).apply {
-            duration = 1200
+            duration = 800
             interpolator = AccelerateDecelerateInterpolator()
 
             addListener(object : AnimatorListenerAdapter() {
@@ -175,7 +175,7 @@ class OnboardingWelcomeAnimator(
 
         // Parallel animator to track progress and flip bar colors at the right moment
         val barTracker = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 1200
+            duration = 800
             interpolator = AccelerateDecelerateInterpolator()
             addUpdateListener {
                 val fraction = it.animatedFraction
