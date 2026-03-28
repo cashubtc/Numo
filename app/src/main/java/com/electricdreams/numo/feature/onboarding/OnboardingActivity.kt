@@ -172,7 +172,6 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var seedInputGrid: GridLayout
     private lateinit var pasteButton: MaterialButton
     private lateinit var seedContinueButton: MaterialButton
-    private lateinit var seedValidationStatus: View
     private lateinit var seedBackButton: ImageView
 
     // Step 4a: Generating Wallet (New)
@@ -339,8 +338,15 @@ class OnboardingActivity : AppCompatActivity() {
         seedInputGrid = findViewById(R.id.seed_input_grid)
         pasteButton = findViewById(R.id.paste_button)
         seedContinueButton = findViewById(R.id.seed_continue_button)
-        seedValidationStatus = findViewById(R.id.seed_validation_status)
         seedBackButton = findViewById(R.id.seed_back_button)
+
+        // Adjust seed container padding when keyboard shows/hides (edge-to-edge compatible)
+        ViewCompat.setOnApplyWindowInsetsListener(enterSeedContainer) { view, insets ->
+            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, maxOf(imeHeight, navBarHeight))
+            insets
+        }
 
         // Generating Wallet
         generatingContainer = findViewById(R.id.generating_container)
@@ -508,23 +514,6 @@ class OnboardingActivity : AppCompatActivity() {
                     context,
                     if (hasFocus) R.drawable.bg_seed_input_dark_focused else R.drawable.bg_seed_input_dark
                 )
-                // Scroll the focused input into view after keyboard resizes layout
-                if (hasFocus) {
-                    container.post {
-                        val scrollView = seedInputGrid.parent?.parent as? android.widget.ScrollView
-                        scrollView?.let {
-                            val offset = IntArray(2)
-                            container.getLocationInWindow(offset)
-                            val scrollViewBottom = IntArray(2)
-                            it.getLocationInWindow(scrollViewBottom)
-                            val visibleBottom = scrollViewBottom[1] + it.height
-                            val containerBottom = offset[1] + container.height
-                            if (containerBottom > visibleBottom) {
-                                it.smoothScrollBy(0, containerBottom - visibleBottom + 16.dpToPx())
-                            }
-                        }
-                    }
-                }
             }
 
             // Allow pasting an entire seed phrase into a single cell. When
