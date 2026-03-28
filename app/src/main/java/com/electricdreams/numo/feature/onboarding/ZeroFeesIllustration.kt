@@ -45,7 +45,7 @@ class ZeroFeesIllustration @JvmOverloads constructor(
 
     private val fees = listOf(
         FeeLabel("3%",   0.25f, 0.28f, 1.1f),
-        FeeLabel("2.5%", 0.50f, 0.25f, 0.85f),
+        FeeLabel("2.5%", 0.50f, 0.28f, 0.85f),
         FeeLabel("1.5%", 0.75f, 0.28f, 0.9f),
         FeeLabel("2%",   0.35f, 0.52f, 1.0f),
         FeeLabel("2.9%", 0.65f, 0.52f, 0.8f),
@@ -69,7 +69,7 @@ class ZeroFeesIllustration @JvmOverloads constructor(
     }
 
     private val slashPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#FF6B6B")
+        color = Color.WHITE
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
     }
