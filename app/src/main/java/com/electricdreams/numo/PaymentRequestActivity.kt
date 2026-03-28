@@ -44,7 +44,7 @@ import com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
 import com.electricdreams.numo.ui.util.QrCodeGenerator
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.feature.settings.DeveloperPrefs
-import com.electricdreams.numo.core.payment.PaymentService
+import com.electricdreams.numo.core.payment.IPaymentService
 import com.electricdreams.numo.core.payment.PaymentServiceFactory
 import com.electricdreams.numo.core.payment.PaymentState
 import com.electricdreams.numo.core.payment.impl.BTCPayPaymentService
@@ -119,7 +119,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var tabManager: PaymentTabManager
 
     // Payment service abstraction (Local CDK or BTCPay)
-    private lateinit var paymentService: PaymentService
+    private lateinit var paymentService: IPaymentService
 
     // Payment handlers
     private var nostrHandler: NostrPaymentHandler? = null
@@ -593,7 +593,6 @@ class PaymentRequestActivity : AppCompatActivity() {
                     }
                     cashuLoadingSpinner.visibility = View.GONE
 
-                    // Also use cashuPR for HCE
                     hcePaymentRequest = CashuPaymentHelper.stripTransports(payment.cashuPR!!) ?: payment.cashuPR
                     if (NdefHostCardEmulationService.isHceAvailable(this@PaymentRequestActivity)) {
                         val serviceIntent = Intent(this@PaymentRequestActivity, NdefHostCardEmulationService::class.java)
@@ -930,7 +929,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     private fun updateUnifiedQrCode() {
         val creq = nostrHandler?.paymentRequestBech32 ?: hcePaymentRequestBech32 ?: btcPayCashuPR ?: hcePaymentRequest
         val lnbc = lightningInvoice
-        
+
+
         // We only show the unified QR when BOTH Cashu and Lightning requests are ready
         // (unless lightning is explicitly disabled or errored out, but for simplicity we assume we need both if Lightning is supported)
         

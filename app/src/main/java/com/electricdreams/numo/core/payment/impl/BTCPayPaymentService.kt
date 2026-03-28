@@ -3,7 +3,7 @@ package com.electricdreams.numo.core.payment.impl
 import android.util.Log
 import com.electricdreams.numo.core.payment.BTCPayConfig
 import com.electricdreams.numo.core.payment.PaymentData
-import com.electricdreams.numo.core.payment.PaymentService
+import com.electricdreams.numo.core.payment.IPaymentService
 import com.electricdreams.numo.core.payment.PaymentState
 import com.electricdreams.numo.core.payment.RedeemResult
 import com.electricdreams.numo.core.wallet.Satoshis
@@ -23,7 +23,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import java.util.concurrent.TimeUnit
 
 /**
- * [PaymentService] backed by a BTCPay Server (Greenfield API) + BTCNutServer.
+ * [IPaymentService] backed by a BTCPay Server (Greenfield API) + BTCNutServer.
  *
  * Flow:
  * 1. `createPayment()` creates an invoice via BTCPay, then fetches payment methods
@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit
  */
 class BTCPayPaymentService(
     private val config: BTCPayConfig
-) : PaymentService {
+) : IPaymentService {
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
