@@ -1,7 +1,7 @@
 package com.electricdreams.numo.core.payment.impl
 
 import com.electricdreams.numo.core.payment.PaymentData
-import com.electricdreams.numo.core.payment.PaymentService
+import com.electricdreams.numo.core.payment.IPaymentService
 import com.electricdreams.numo.core.payment.PaymentState
 import com.electricdreams.numo.core.payment.RedeemResult
 import com.electricdreams.numo.core.util.MintManager
@@ -11,7 +11,7 @@ import com.electricdreams.numo.core.wallet.WalletProvider
 import com.electricdreams.numo.core.wallet.WalletResult
 
 /**
- * [PaymentService] backed by the local CDK wallet.
+ * [IPaymentService] backed by the local CDK wallet.
  *
  * Pure delegation — no new business logic. The existing Cashu/Lightning flows
  * in [com.electricdreams.numo.payment.LightningMintHandler] and
@@ -20,7 +20,7 @@ import com.electricdreams.numo.core.wallet.WalletResult
 class LocalPaymentService(
     private val walletProvider: WalletProvider,
     private val mintManager: MintManager
-) : PaymentService {
+) : IPaymentService {
 
     override suspend fun createPayment(
         amountSats: Long,

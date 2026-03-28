@@ -8,7 +8,7 @@ import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.util.MintManager
 
 /**
- * Creates the appropriate [PaymentService] based on user settings.
+ * Creates the appropriate [IPaymentService] based on user settings.
  *
  * When `btcpay_enabled` is true **and** the BTCPay configuration is complete
  * the factory returns a [BTCPayPaymentService]; otherwise it falls back to
@@ -16,7 +16,7 @@ import com.electricdreams.numo.core.util.MintManager
  */
 object PaymentServiceFactory {
 
-    fun create(context: Context): PaymentService {
+    fun create(context: Context): IPaymentService {
         val prefs = PreferenceStore.app(context)
 
         if (prefs.getBoolean("btcpay_enabled", false)) {
