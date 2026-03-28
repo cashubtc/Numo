@@ -522,6 +522,7 @@
                     <!-- Paste Button -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/paste_button"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
                         android:layout_width="wrap_content"
                         android:layout_height="44dp"
                         android:layout_gravity="center_horizontal"
@@ -529,15 +530,7 @@
                         android:text="@string/onboarding_seed_paste_button"
                         android:textSize="14sp"
                         android:textColor="#FFFFFF"
-                        android:textAllCaps="false"
-                        android:background="@drawable/bg_button_outlined_dark"
-                        app:backgroundTint="@null"
-                        app:cornerRadius="22dp"
-                        app:icon="@drawable/ic_copy"
-                        app:iconSize="18dp"
-                        app:iconTint="#FFFFFF"
-                        app:iconGravity="textStart"
-                        app:iconPadding="6dp" />
+                        android:textAllCaps="false" />
 
                     <!-- Validation Status -->
                     <LinearLayout
