@@ -533,33 +533,12 @@
                         android:textAllCaps="false" />
 
                     <!-- Validation Status -->
-                    <LinearLayout
+                    <!-- Validation status removed for cleaner UX -->
+                    <View
                         android:id="@+id/seed_validation_status"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="16dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:visibility="gone">
-
-                        <ImageView
-                            android:id="@+id/seed_validation_icon"
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
-                            android:src="@drawable/ic_check"
-                            app:tint="@color/numo_fluorescent_green" />
-
-                        <TextView
-                            android:id="@+id/seed_validation_text"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:text="@string/onboarding_seed_validation_ready"
-                            android:textSize="14sp"
-                            android:textColor="@color/numo_fluorescent_green" />
-
-                    </LinearLayout>
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone" />
 
                 </LinearLayout>
             </ScrollView>
@@ -626,15 +605,6 @@
                 android:textColor="#FFFFFF"
                 android:gravity="center" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/onboarding_generating_hint"
-                android:textSize="14sp"
-                android:textColor="#99FFFFFF"
-                android:gravity="center" />
-
         </LinearLayout>
     </FrameLayout>
 
@@ -665,18 +635,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="@string/onboarding_fetching_searching_backup"
+                android:text="@string/onboarding_status_restoring_wallet"
                 android:textSize="17sp"
                 android:textColor="#FFFFFF"
-                android:gravity="center" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/onboarding_fetching_checking_relays"
-                android:textSize="14sp"
-                android:textColor="#99FFFFFF"
                 android:gravity="center" />
 
         </LinearLayout>

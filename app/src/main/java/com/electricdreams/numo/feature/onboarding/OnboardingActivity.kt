@@ -54,6 +54,7 @@ import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.util.MintProfileService
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
 import com.electricdreams.numo.nostr.NostrMintBackup
+import com.electricdreams.numo.ui.seed.Bip39Wordlist
 import com.electricdreams.numo.ui.seed.SeedWordEditText
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
@@ -171,9 +172,7 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var seedInputGrid: GridLayout
     private lateinit var pasteButton: MaterialButton
     private lateinit var seedContinueButton: MaterialButton
-    private lateinit var seedValidationStatus: LinearLayout
-    private lateinit var seedValidationIcon: ImageView
-    private lateinit var seedValidationText: TextView
+    private lateinit var seedValidationStatus: View
     private lateinit var seedBackButton: ImageView
 
     // Step 4a: Generating Wallet (New)
@@ -341,8 +340,6 @@ class OnboardingActivity : AppCompatActivity() {
         pasteButton = findViewById(R.id.paste_button)
         seedContinueButton = findViewById(R.id.seed_continue_button)
         seedValidationStatus = findViewById(R.id.seed_validation_status)
-        seedValidationIcon = findViewById(R.id.seed_validation_icon)
-        seedValidationText = findViewById(R.id.seed_validation_text)
         seedBackButton = findViewById(R.id.seed_back_button)
 
         // Generating Wallet
@@ -487,12 +484,12 @@ class OnboardingActivity : AppCompatActivity() {
             setTextColor(android.graphics.Color.WHITE)
             setHintTextColor(android.graphics.Color.parseColor("#4DFFFFFF"))
             textSize = 15f
-            typeface = android.graphics.Typeface.MONOSPACE
             background = null
             isSingleLine = true
             inputType = android.text.InputType.TYPE_CLASS_TEXT or
-                    android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or
-                    android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                    android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            // Set typeface AFTER inputType since inputType can override it
+            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
             imeOptions = if (index == 12) EditorInfo.IME_ACTION_DONE else EditorInfo.IME_ACTION_NEXT
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
                 marginStart = 8.dpToPx()
@@ -931,26 +928,11 @@ class OnboardingActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                // Simulate a brief delay for UX
-                delay(800)
-
-                withContext(Dispatchers.Main) {
-                    generatingStatus.text = getString(R.string.onboarding_status_generating_seed)
-                }
-
-                delay(600)
-
                 // Generate new mnemonic
                 val mnemonic = withContext(Dispatchers.IO) {
                     generateMnemonic()
                 }
                 generatedMnemonic = mnemonic
-
-                withContext(Dispatchers.Main) {
-                    generatingStatus.text = getString(R.string.onboarding_status_setting_up_mints)
-                }
-
-                delay(500)
 
                 discoveredMints.clear()
                 selectedMints.clear()
@@ -981,7 +963,7 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun completeNewWalletSetup() {
         showStep(OnboardingStep.GENERATING_WALLET)
-        generatingStatus.text = getString(R.string.onboarding_status_initializing_wallet)
+        generatingStatus.text = getString(R.string.onboarding_status_creating_wallet)
 
         lifecycleScope.launch {
             try {
@@ -991,18 +973,8 @@ class OnboardingActivity : AppCompatActivity() {
                 PreferenceStore.wallet(this@OnboardingActivity).putString("wallet_mnemonic", mnemonic)
                 applySelectedMintsToMintManager()
 
-                withContext(Dispatchers.Main) {
-                    generatingStatus.text = getString(R.string.onboarding_status_connecting_mints)
-                }
-
-                delay(500)
-
                 // Initialize the wallet manager
                 CashuWalletManager.init(this@OnboardingActivity)
-
-                withContext(Dispatchers.Main) {
-                    generatingStatus.text = getString(R.string.onboarding_status_fetching_mints)
-                }
 
                 // Fetch mint info for selected mints concurrently
                 selectedMints.map { mintUrl ->
@@ -1036,36 +1008,26 @@ class OnboardingActivity : AppCompatActivity() {
         val words = seedInputs.map { it.text.toString().trim().lowercase() }
         val filledCount = words.count { it.isNotBlank() }
         val allFilled = filledCount == 12
-        val allValid = words.all { it.isBlank() || it.matches(Regex("^[a-z]+$")) }
+        var allBip39 = true
 
-        when {
-            filledCount == 0 -> {
-                seedValidationStatus.visibility = View.GONE
+        // Highlight invalid words
+        seedInputs.forEachIndexed { i, input ->
+            val word = words[i]
+            val container = input.parent as? View ?: return@forEachIndexed
+            val isInvalid = word.isNotBlank() && !Bip39Wordlist.isValid(word)
+            if (isInvalid) allBip39 = false
+
+            val hasFocus = input.hasFocus()
+            val bgRes = when {
+                isInvalid -> R.drawable.bg_seed_input_dark_error
+                hasFocus -> R.drawable.bg_seed_input_dark_focused
+                else -> R.drawable.bg_seed_input_dark
             }
-            !allValid -> {
-                seedValidationStatus.visibility = View.VISIBLE
-                seedValidationIcon.setImageResource(R.drawable.ic_close)
-                seedValidationIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_warning_red))
-                seedValidationText.text = getString(R.string.onboarding_seed_invalid_characters)
-                seedValidationText.setTextColor(ContextCompat.getColor(this, R.color.color_warning_red))
-            }
-            !allFilled -> {
-                seedValidationStatus.visibility = View.VISIBLE
-                seedValidationIcon.setImageResource(R.drawable.ic_warning)
-                seedValidationIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_warning))
-                seedValidationText.text = getString(R.string.onboarding_seed_words_entered_count, filledCount)
-                seedValidationText.setTextColor(ContextCompat.getColor(this, R.color.color_warning))
-            }
-            else -> {
-                seedValidationStatus.visibility = View.VISIBLE
-                seedValidationIcon.setImageResource(R.drawable.ic_check)
-                seedValidationIcon.setColorFilter(ContextCompat.getColor(this, R.color.numo_fluorescent_green))
-                seedValidationText.text = getString(R.string.onboarding_seed_validation_ready)
-                seedValidationText.setTextColor(ContextCompat.getColor(this, R.color.numo_fluorescent_green))
-            }
+            container.background = ContextCompat.getDrawable(this, bgRes)
+            input.setTextColor(if (isInvalid) android.graphics.Color.parseColor("#FF6B6B") else android.graphics.Color.WHITE)
         }
 
-        val canContinue = allFilled && allValid
+        val canContinue = allFilled && allBip39
         seedContinueButton.isEnabled = canContinue
         seedContinueButton.alpha = if (canContinue) 1f else 0.5f
 
@@ -1131,7 +1093,7 @@ class OnboardingActivity : AppCompatActivity() {
         enteredMnemonic = getMnemonic()
 
         showStep(OnboardingStep.FETCHING_BACKUP)
-        fetchingStatus.text = getString(R.string.onboarding_fetching_searching_backup)
+        fetchingStatus.text = getString(R.string.onboarding_status_restoring_wallet)
 
         lifecycleScope.launch {
             val mnemonic = enteredMnemonic ?: return@launch
