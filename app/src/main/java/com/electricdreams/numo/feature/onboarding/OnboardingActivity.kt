@@ -508,6 +508,23 @@ class OnboardingActivity : AppCompatActivity() {
                     context,
                     if (hasFocus) R.drawable.bg_seed_input_dark_focused else R.drawable.bg_seed_input_dark
                 )
+                // Scroll the focused input into view after keyboard resizes layout
+                if (hasFocus) {
+                    container.post {
+                        val scrollView = seedInputGrid.parent?.parent as? android.widget.ScrollView
+                        scrollView?.let {
+                            val offset = IntArray(2)
+                            container.getLocationInWindow(offset)
+                            val scrollViewBottom = IntArray(2)
+                            it.getLocationInWindow(scrollViewBottom)
+                            val visibleBottom = scrollViewBottom[1] + it.height
+                            val containerBottom = offset[1] + container.height
+                            if (containerBottom > visibleBottom) {
+                                it.smoothScrollBy(0, containerBottom - visibleBottom + 16.dpToPx())
+                            }
+                        }
+                    }
+                }
             }
 
             // Allow pasting an entire seed phrase into a single cell. When
@@ -1010,20 +1027,11 @@ class OnboardingActivity : AppCompatActivity() {
         val allFilled = filledCount == 12
         var allBip39 = true
 
-        // Highlight invalid words
+        // Highlight invalid words with red text
         seedInputs.forEachIndexed { i, input ->
             val word = words[i]
-            val container = input.parent as? View ?: return@forEachIndexed
             val isInvalid = word.isNotBlank() && !Bip39Wordlist.isValid(word)
             if (isInvalid) allBip39 = false
-
-            val hasFocus = input.hasFocus()
-            val bgRes = when {
-                isInvalid -> R.drawable.bg_seed_input_dark_error
-                hasFocus -> R.drawable.bg_seed_input_dark_focused
-                else -> R.drawable.bg_seed_input_dark
-            }
-            container.background = ContextCompat.getDrawable(this, bgRes)
             input.setTextColor(if (isInvalid) android.graphics.Color.parseColor("#FF6B6B") else android.graphics.Color.WHITE)
         }
 
