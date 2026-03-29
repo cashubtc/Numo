@@ -3,10 +3,11 @@
     android:id="@+id/hint_text"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center"
+    android:gravity="start"
     android:paddingTop="8dp"
     android:paddingBottom="12dp"
+    android:paddingHorizontal="20dp"
     android:text="@string/onboarding_mints_long_press_hint"
     android:textSize="12sp"
-    android:textColor="#73FFFFFF"
+    android:textColor="#FFFFFF"
     android:fontFamily="sans-serif" />
