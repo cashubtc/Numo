@@ -40,6 +40,7 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
         dialog.window?.setSoftInputMode(
+            WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE or
             WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
         )
         dialog.window?.navigationBarColor = android.graphics.Color.parseColor("#0A2540")
@@ -82,6 +83,14 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
         }
 
         setupBottomSheetBehavior()
+
+        // Auto-focus input and show keyboard after the sheet entrance animation
+        urlInput.postDelayed({
+            urlInput.requestFocus()
+            val imm = context?.getSystemService(android.content.Context.INPUT_METHOD_SERVICE)
+                as? android.view.inputmethod.InputMethodManager
+            imm?.showSoftInput(urlInput, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+        }, 300)
     }
 
     fun setLoading(loading: Boolean) {
