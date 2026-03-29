@@ -519,7 +519,7 @@
                         app:columnCount="2"
                         app:rowCount="6" />
 
-                    <!-- Paste Button (secondary) -->
+                    <!-- Paste Button (tertiary) -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/paste_button"
                         android:layout_width="match_parent"
@@ -529,7 +529,7 @@
                         android:textSize="17sp"
                         android:textColor="#FFFFFF"
                         android:textAllCaps="false"
-                        android:background="@drawable/bg_button_secondary_dark"
+                        android:background="@drawable/bg_button_tertiary_dark"
                         android:stateListAnimator="@null"
                         app:backgroundTint="@null"
                         app:cornerRadius="28dp"
