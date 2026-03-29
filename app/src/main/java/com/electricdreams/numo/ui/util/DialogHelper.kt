@@ -38,6 +38,7 @@ object DialogHelper {
         val confirmText: String = "Confirm",
         val cancelText: String = "Cancel",
         val isDestructive: Boolean = false,
+        val showCancelButton: Boolean = true,
         val onConfirm: () -> Unit,
         val onCancel: (() -> Unit)? = null
     )
@@ -83,6 +84,12 @@ object DialogHelper {
         // Destructive styling (solid red background)
         if (config.isDestructive) {
             confirmButton.background = ContextCompat.getDrawable(context, R.drawable.bg_button_destructive)
+        }
+
+        // Hide cancel button and make confirm full-width
+        if (!config.showCancelButton) {
+            cancelButton.visibility = View.GONE
+            (confirmButton.layoutParams as LinearLayout.LayoutParams).marginStart = 0
         }
         
         // Create dialog

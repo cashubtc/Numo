@@ -55,6 +55,7 @@ import com.electricdreams.numo.core.util.MintProfileService
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
 import com.electricdreams.numo.nostr.NostrMintBackup
 import com.electricdreams.numo.ui.seed.Bip39Wordlist
+import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.ui.seed.SeedWordEditText
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
@@ -1243,15 +1244,16 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun showSetDefaultConfirmationDialog(mintUrl: String, mintName: String) {
-        AlertDialog.Builder(this)
-            .setTitle(getString(R.string.onboarding_mints_set_default_title))
-            .setMessage(getString(R.string.onboarding_mints_set_default_message, mintName))
-            .setPositiveButton(getString(R.string.onboarding_mints_set_default_confirm)) { _, _ ->
+        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
+            title = getString(R.string.onboarding_mints_set_default_title),
+            message = getString(R.string.onboarding_mints_set_default_message, mintName),
+            confirmText = getString(R.string.onboarding_mints_set_default_confirm),
+            showCancelButton = false,
+            onConfirm = {
                 mintAdapter.confirmSetDefault(mintUrl)
                 updateContinueButtonState()
             }
-            .setNegativeButton(getString(R.string.onboarding_mints_set_default_cancel), null)
-            .show()
+        ))
     }
 
     private fun updateContinueButtonState() {
