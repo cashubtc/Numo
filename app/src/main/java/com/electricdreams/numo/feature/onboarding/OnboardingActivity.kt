@@ -389,6 +389,7 @@ class OnboardingActivity : AppCompatActivity() {
                 mintAdapter.confirmSetDefault(mintUrl)
                 updateContinueButtonState()
                 Snackbar.make(reviewMintsContainer, getString(R.string.onboarding_mints_set_default_toast, mintName), Snackbar.LENGTH_LONG).apply {
+                    anchorView = mintsContinueButton
                     setAction(R.string.common_undo) {
                         if (previousDefaultUrl != null) {
                             mintAdapter.swapDefaultInstant(previousDefaultUrl)
