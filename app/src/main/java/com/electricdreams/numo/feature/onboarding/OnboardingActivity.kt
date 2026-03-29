@@ -57,6 +57,7 @@ import com.electricdreams.numo.nostr.NostrMintBackup
 import com.electricdreams.numo.ui.seed.Bip39Wordlist
 import com.electricdreams.numo.ui.seed.SeedWordEditText
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.imageview.ShapeableImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -386,7 +387,13 @@ class OnboardingActivity : AppCompatActivity() {
             override fun onRequestSetDefault(mintUrl: String, mintName: String) {
                 mintAdapter.confirmSetDefault(mintUrl)
                 updateContinueButtonState()
-                Toast.makeText(this@OnboardingActivity, getString(R.string.onboarding_mints_set_default_toast, mintName), Toast.LENGTH_SHORT).show()
+                Snackbar.make(reviewMintsContainer, getString(R.string.onboarding_mints_set_default_toast, mintName), Snackbar.LENGTH_SHORT).apply {
+                    val margin = (16 * resources.displayMetrics.density).toInt()
+                    (view.layoutParams as? android.widget.FrameLayout.LayoutParams)?.let {
+                        it.setMargins(margin, 0, margin, margin)
+                        view.layoutParams = it
+                    }
+                }.show()
             }
         })
         mintAdapter.setHeaderStrings(

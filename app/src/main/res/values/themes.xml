@@ -35,6 +35,9 @@
         <!-- Popup menu styling -->
         <item name="popupMenuStyle">@style/Widget.Numo.PopupMenu</item>
         <item name="android:popupMenuStyle">@style/Widget.Numo.PopupMenu</item>
+        <!-- Snackbar styling -->
+        <item name="snackbarStyle">@style/Widget.Numo.Snackbar</item>
+        <item name="snackbarTextViewStyle">@style/Widget.Numo.Snackbar.Text</item>
     </style>
 
     <!-- Popup Menu Style -->

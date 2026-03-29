@@ -168,6 +168,24 @@
         <item name="android:gravity">center_vertical</item>
     </style>
 
+    <!-- Snackbar -->
+    <style name="Widget.Numo.Snackbar" parent="Widget.MaterialComponents.Snackbar">
+        <item name="backgroundTint">@color/color_bg_white</item>
+        <item name="android:elevation">8dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.Numo.Snackbar</item>
+    </style>
+
+    <style name="Widget.Numo.Snackbar.Text" parent="Widget.MaterialComponents.Snackbar.TextView">
+        <item name="android:textColor">@color/color_text_primary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="ShapeAppearance.Numo.Snackbar" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">10dp</item>
+    </style>
+
     <!-- Shape Appearances -->
     <style name="ShapeAppearance.Circle" parent="">
         <item name="cornerFamily">rounded</item>
