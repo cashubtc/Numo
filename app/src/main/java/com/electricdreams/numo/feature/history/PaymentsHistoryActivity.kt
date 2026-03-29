@@ -14,6 +14,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.electricdreams.numo.ui.util.DialogHelper
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
@@ -304,21 +305,25 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     }
 
     private fun showDeleteConfirmation(entry: HistoryEntry) {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.history_dialog_delete_title)
-            .setMessage(R.string.history_dialog_delete_message)
-            .setPositiveButton(R.string.history_dialog_delete_positive) { _, _ -> deletePaymentFromHistory(entry) }
-            .setNegativeButton(R.string.history_dialog_delete_negative, null)
-            .show()
+        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
+            title = getString(R.string.history_dialog_delete_title),
+            message = getString(R.string.history_dialog_delete_message),
+            confirmText = getString(R.string.history_dialog_delete_positive),
+            cancelText = getString(R.string.history_dialog_delete_negative),
+            isDestructive = true,
+            onConfirm = { deletePaymentFromHistory(entry) }
+        ))
     }
 
     private fun showClearHistoryConfirmation() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.history_dialog_clear_title)
-            .setMessage(R.string.history_dialog_clear_message)
-            .setPositiveButton(R.string.history_dialog_clear_positive) { _, _ -> clearAllHistory() }
-            .setNegativeButton(R.string.history_dialog_clear_negative, null)
-            .show()
+        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
+            title = getString(R.string.history_dialog_clear_title),
+            message = getString(R.string.history_dialog_clear_message),
+            confirmText = getString(R.string.history_dialog_clear_positive),
+            cancelText = getString(R.string.history_dialog_clear_negative),
+            isDestructive = true,
+            onConfirm = { clearAllHistory() }
+        ))
     }
 
     private fun showOverflowMenu(anchor: View) {

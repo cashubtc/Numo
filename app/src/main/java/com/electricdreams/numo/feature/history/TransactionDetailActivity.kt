@@ -9,7 +9,6 @@ import android.widget.LinearLayout
 import androidx.appcompat.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.R
@@ -476,12 +475,14 @@ class TransactionDetailActivity : AppCompatActivity() {
     }
 
     private fun showDeleteConfirmation() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.history_dialog_delete_title)
-            .setMessage(R.string.history_dialog_delete_message)
-            .setPositiveButton(R.string.history_dialog_delete_positive) { _, _ -> deleteTransaction() }
-            .setNegativeButton(R.string.history_dialog_delete_negative, null)
-            .show()
+        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
+            title = getString(R.string.history_dialog_delete_title),
+            message = getString(R.string.history_dialog_delete_message),
+            confirmText = getString(R.string.history_dialog_delete_positive),
+            cancelText = getString(R.string.history_dialog_delete_negative),
+            isDestructive = true,
+            onConfirm = { deleteTransaction() }
+        ))
     }
 
     private fun deleteTransaction() {

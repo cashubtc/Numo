@@ -14,8 +14,8 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.electricdreams.numo.ui.util.DialogHelper
 import androidx.core.content.ContextCompat
 import androidx.gridlayout.widget.GridLayout
 import androidx.lifecycle.lifecycleScope
@@ -615,14 +615,16 @@ class RestoreWalletActivity : AppCompatActivity() {
 
         val message = getString(R.string.restore_confirm_dialog_message, mintCount, currentSeedNote)
 
-        AlertDialog.Builder(this)
-            .setTitle(R.string.restore_confirm_dialog_title)
-            .setMessage(message)
-            .setPositiveButton(R.string.restore_confirm_dialog_positive) { _, _ ->
+        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
+            title = getString(R.string.restore_confirm_dialog_title),
+            message = message,
+            confirmText = getString(R.string.restore_confirm_dialog_positive),
+            cancelText = getString(R.string.common_cancel),
+            isDestructive = true,
+            onConfirm = {
                 performRestore()
             }
-            .setNegativeButton(R.string.common_cancel, null)
-            .show()
+        ))
     }
 
     private fun performRestore() {

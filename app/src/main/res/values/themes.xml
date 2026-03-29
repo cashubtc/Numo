@@ -99,6 +99,16 @@
         <item name="android:windowAnimationStyle">@style/Animation.AppCompat.Dialog</item>
     </style>
 
+    <!-- Bottom-floating dialog (non-floating so width can be MATCH_PARENT) -->
+    <style name="Theme.Numo.BottomFloatingDialog" parent="Theme.MaterialComponents.Light.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.5</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
     <!-- Bottom Sheet Animation -->
     <style name="Animation.Numo.BottomSheet" parent="Animation.AppCompat.Dialog">
         <item name="android:windowEnterAnimation">@anim/slide_up</item>

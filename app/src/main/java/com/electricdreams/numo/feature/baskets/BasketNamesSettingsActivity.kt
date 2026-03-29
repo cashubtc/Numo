@@ -11,6 +11,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.R
 import com.electricdreams.numo.ui.components.EmptyStateHelper
 
@@ -239,26 +240,30 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
     }
     
     private fun showDeleteConfirmation(name: String) {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.basket_names_dialog_delete_title)
-            .setMessage(getString(R.string.basket_names_dialog_delete_message, name))
-            .setPositiveButton(R.string.common_delete) { _, _ ->
+        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
+            title = getString(R.string.basket_names_dialog_delete_title),
+            message = getString(R.string.basket_names_dialog_delete_message, name),
+            confirmText = getString(R.string.common_delete),
+            cancelText = getString(R.string.common_cancel),
+            isDestructive = true,
+            onConfirm = {
                 basketNamesManager.removePresetName(name)
                 refreshNamesList()
             }
-            .setNegativeButton(R.string.common_cancel, null)
-            .show()
+        ))
     }
     
     private fun showClearAllConfirmation() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.basket_names_dialog_clear_all_title)
-            .setMessage(R.string.basket_names_dialog_clear_all_message)
-            .setPositiveButton(R.string.basket_names_dialog_clear_all_confirm) { _, _ ->
+        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
+            title = getString(R.string.basket_names_dialog_clear_all_title),
+            message = getString(R.string.basket_names_dialog_clear_all_message),
+            confirmText = getString(R.string.basket_names_dialog_clear_all_confirm),
+            cancelText = getString(R.string.common_cancel),
+            isDestructive = true,
+            onConfirm = {
                 basketNamesManager.clearAll()
                 refreshNamesList()
             }
-            .setNegativeButton(R.string.common_cancel, null)
-            .show()
+        ))
     }
 }
