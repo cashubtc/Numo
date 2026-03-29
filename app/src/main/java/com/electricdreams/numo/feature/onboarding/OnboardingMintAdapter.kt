@@ -156,8 +156,8 @@ class OnboardingMintAdapter(
             pendingSwapUrl = null
         }
 
-        // 2. Crossfade icon + name after the ring is halfway through
-        val crossfadeDelay = 350L
+        // 2. Crossfade icon + name early so new content is settled before ring ends
+        val crossfadeDelay = 150L
         val fadeDuration = 150L
 
         val appleSpring = PathInterpolator(0.175f, 0.885f, 0.32f, 1.1f)
