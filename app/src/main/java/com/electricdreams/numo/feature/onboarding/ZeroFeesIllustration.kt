@@ -44,11 +44,11 @@ class ZeroFeesIllustration @JvmOverloads constructor(
     )
 
     private val fees = listOf(
-        FeeLabel("3%",   0.25f, 0.28f, 1.0f),
-        FeeLabel("2.5%", 0.50f, 0.28f, 1.0f),
+        FeeLabel("3.5%", 0.25f, 0.28f, 1.0f),
+        FeeLabel("2.5%", 0.50f, 0.40f, 1.0f),
         FeeLabel("1.5%", 0.75f, 0.28f, 1.0f),
         FeeLabel("2%",   0.35f, 0.52f, 1.0f),
-        FeeLabel("2.9%", 0.65f, 0.52f, 1.0f),
+        FeeLabel("3%",   0.65f, 0.52f, 1.0f),
     )
 
     private val feeParticles = HashMap<Int, List<Particle>>()
