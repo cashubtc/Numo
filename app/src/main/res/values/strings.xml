@@ -181,10 +181,7 @@
     <string name="onboarding_mints_status_not_accepting">Not accepting</string>
     <string name="onboarding_mints_long_press_hint">Long press a mint to set as default</string>
     <string name="onboarding_mints_add_new_button">+ Add New Mint</string>
-    <string name="onboarding_mints_set_default_title">Set as Default?</string>
-    <string name="onboarding_mints_set_default_message">Make \"%1$s\" your default mint?</string>
-    <string name="onboarding_mints_set_default_confirm">Set as Default</string>
-    <string name="onboarding_mints_set_default_cancel">Cancel</string>
+    <string name="onboarding_mints_set_default_toast">%1$s set as default</string>
     <string name="onboarding_add_mint_sheet_title">Add a Mint</string>
     <string name="onboarding_add_mint_url_hint">Enter mint URL</string>
     <string name="onboarding_add_mint_button">Add</string>

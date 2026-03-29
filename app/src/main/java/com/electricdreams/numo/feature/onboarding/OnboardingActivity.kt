@@ -55,7 +55,6 @@ import com.electricdreams.numo.core.util.MintProfileService
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
 import com.electricdreams.numo.nostr.NostrMintBackup
 import com.electricdreams.numo.ui.seed.Bip39Wordlist
-import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.ui.seed.SeedWordEditText
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.imageview.ShapeableImageView
@@ -385,7 +384,9 @@ class OnboardingActivity : AppCompatActivity() {
                 showAddMintBottomSheet()
             }
             override fun onRequestSetDefault(mintUrl: String, mintName: String) {
-                showSetDefaultConfirmationDialog(mintUrl, mintName)
+                mintAdapter.confirmSetDefault(mintUrl)
+                updateContinueButtonState()
+                Toast.makeText(this@OnboardingActivity, getString(R.string.onboarding_mints_set_default_toast, mintName), Toast.LENGTH_SHORT).show()
             }
         })
         mintAdapter.setHeaderStrings(
@@ -1243,18 +1244,7 @@ class OnboardingActivity : AppCompatActivity() {
         sheet.show(supportFragmentManager, "AddMintBottomSheet")
     }
 
-    private fun showSetDefaultConfirmationDialog(mintUrl: String, mintName: String) {
-        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
-            title = getString(R.string.onboarding_mints_set_default_title),
-            message = getString(R.string.onboarding_mints_set_default_message, mintName),
-            confirmText = getString(R.string.onboarding_mints_set_default_confirm),
-            showCancelButton = false,
-            onConfirm = {
-                mintAdapter.confirmSetDefault(mintUrl)
-                updateContinueButtonState()
-            }
-        ))
-    }
+
 
     private fun updateContinueButtonState() {
         val totalSelected = mintAdapter.getAllSelectedMints().size

@@ -261,7 +261,7 @@ class OnboardingMintAdapter(
 
                 // Long-press to set as default
                 h.itemView.setOnLongClickListener { view ->
-                    view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                    view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
                     val mintName = listener.onResolveMintName(item.url)
                     listener.onRequestSetDefault(item.url, mintName)
                     true
