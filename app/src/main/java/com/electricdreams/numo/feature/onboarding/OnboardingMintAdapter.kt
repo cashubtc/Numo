@@ -374,6 +374,7 @@ class OnboardingMintAdapter(
                 }
 
                 // Long-press to set as default
+                h.itemView.isHapticFeedbackEnabled = false
                 h.itemView.setOnLongClickListener { view ->
                     // Scale pulse: press down then spring back
                     val spring = PathInterpolator(0.175f, 0.885f, 0.32f, 1.1f)
@@ -382,9 +383,9 @@ class OnboardingMintAdapter(
                         .setDuration(100)
                         .withEndAction {
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
-                                view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                                view.performHapticFeedback(HapticFeedbackConstants.CONFIRM, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
                             } else {
-                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
                             }
                             view.animate()
                                 .scaleX(1f).scaleY(1f)
