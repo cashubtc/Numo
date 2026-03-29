@@ -375,7 +375,6 @@ class OnboardingMintAdapter(
 
                 // Long-press to set as default
                 h.itemView.setOnLongClickListener { view ->
-                    view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
                     // Scale pulse: press down then spring back
                     val spring = PathInterpolator(0.175f, 0.885f, 0.32f, 1.1f)
                     view.animate()
