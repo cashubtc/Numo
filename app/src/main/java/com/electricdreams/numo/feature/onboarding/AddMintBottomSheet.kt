@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +18,8 @@ import com.electricdreams.numo.R
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.shape.MaterialShapeDrawable
+import com.google.android.material.shape.ShapeAppearanceModel
 
 class AddMintBottomSheet : BottomSheetDialogFragment() {
 
@@ -35,16 +38,24 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
         }
     }
 
-    override fun getTheme(): Int = R.style.Theme_Numo_BottomSheet
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
-        dialog.window?.setSoftInputMode(
-            WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE or
-            WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-        )
-        dialog.window?.navigationBarColor = android.graphics.Color.parseColor("#0A2540")
+        dialog.window?.apply {
+            setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE or
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+            )
+            navigationBarColor = android.graphics.Color.parseColor("#0A2540")
+            setDimAmount(0.6f)
+        }
         return dialog
+    }
+
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.let { window ->
+            Log.d("AddMintBottomSheet", "Window type: ${window.attributes.type}, token: ${window.attributes.token}")
+        }
     }
 
     override fun onCreateView(
@@ -82,15 +93,10 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
             listener?.onScanQrCode()
         }
 
-        setupBottomSheetBehavior()
+        // Focus immediately so the system includes the keyboard in the initial layout
+        urlInput.requestFocus()
 
-        // Auto-focus input and show keyboard after the sheet entrance animation
-        urlInput.postDelayed({
-            urlInput.requestFocus()
-            val imm = context?.getSystemService(android.content.Context.INPUT_METHOD_SERVICE)
-                as? android.view.inputmethod.InputMethodManager
-            imm?.showSoftInput(urlInput, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
-        }, 300)
+        setupBottomSheetBehavior()
     }
 
     fun setLoading(loading: Boolean) {
@@ -117,9 +123,20 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
                 com.google.android.material.R.id.design_bottom_sheet
             )
             bottomSheet?.let { sheet ->
-                sheet.setBackgroundColor(
-                    android.graphics.Color.parseColor("#0A2540")
-                )
+                // Apply background + rounded corners that were previously in the theme
+                val density = resources.displayMetrics.density
+                val shapeDrawable = MaterialShapeDrawable(
+                    ShapeAppearanceModel.builder()
+                        .setTopLeftCornerSize(20f * density)
+                        .setTopRightCornerSize(20f * density)
+                        .build()
+                ).apply {
+                    fillColor = android.content.res.ColorStateList.valueOf(
+                        android.graphics.Color.parseColor("#0A2540")
+                    )
+                }
+                sheet.background = shapeDrawable
+
                 val behavior = BottomSheetBehavior.from(sheet)
                 behavior.state = BottomSheetBehavior.STATE_EXPANDED
                 behavior.skipCollapsed = true

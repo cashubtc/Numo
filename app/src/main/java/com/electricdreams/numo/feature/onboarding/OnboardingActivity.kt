@@ -1389,17 +1389,20 @@ class OnboardingActivity : AppCompatActivity() {
             discoveredMints.add(mintUrl)
             selectedMints.add(mintUrl)
 
-            // Add as default — user manually added this mint, so they likely want it as default
-            mintAdapter.addMintAsDefault(mintUrl)
-            updateContinueButtonState()
-
+            // Dismiss sheet + keyboard first, then update the list after they're gone.
+            // Prevents the new content from rendering underneath the outgoing UI.
             addMintBottomSheet?.dismiss()
             addMintBottomSheet = null
-            Toast.makeText(
-                this@OnboardingActivity,
-                getString(R.string.mints_added_toast),
-                Toast.LENGTH_SHORT
-            ).show()
+
+            mintsRecyclerView.postDelayed({
+                mintAdapter.addMintAsDefault(mintUrl)
+                updateContinueButtonState()
+                Toast.makeText(
+                    this@OnboardingActivity,
+                    getString(R.string.mints_added_toast),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }, 350)
         }
     }
 
