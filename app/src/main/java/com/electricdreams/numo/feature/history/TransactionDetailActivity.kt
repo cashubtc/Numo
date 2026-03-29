@@ -399,27 +399,6 @@ class TransactionDetailActivity : AppCompatActivity() {
         ).show()
     }
 
-    private fun openWithApp() {
-        val cashuUri = "cashu:${entry.token}"
-        val uriIntent = Intent(Intent.ACTION_VIEW, Uri.parse(cashuUri)).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, cashuUri)
-        }
-
-        val chooserIntent = Intent.createChooser(uriIntent, "Open payment with...").apply {
-            putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(shareIntent))
-        }
-
-        try {
-            startActivity(chooserIntent)
-        } catch (e: Exception) {
-            Toast.makeText(this, R.string.history_toast_no_app, Toast.LENGTH_SHORT).show()
-        }
-    }
 
     private fun copyDestination(destination: String) {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager

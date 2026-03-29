@@ -304,16 +304,6 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun showDeleteConfirmation(entry: HistoryEntry) {
-        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
-            title = getString(R.string.history_dialog_delete_title),
-            message = getString(R.string.history_dialog_delete_message),
-            confirmText = getString(R.string.history_dialog_delete_positive),
-            cancelText = getString(R.string.history_dialog_delete_negative),
-            isDestructive = true,
-            onConfirm = { deletePaymentFromHistory(entry) }
-        ))
-    }
 
     private fun showClearHistoryConfirmation() {
         DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(

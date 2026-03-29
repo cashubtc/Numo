@@ -96,7 +96,7 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
             
             names.forEachIndexed { index, name ->
                 val itemView = inflater.inflate(R.layout.item_basket_name_preset, namesList, false)
-                bindNameItem(itemView, index, name, names.size)
+                bindNameItem(itemView, index, name)
                 namesList.addView(itemView)
                 
                 // Add divider between items (not after last)
@@ -110,7 +110,7 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
         }
     }
     
-    private fun bindNameItem(view: View, index: Int, name: String, totalCount: Int) {
+    private fun bindNameItem(view: View, index: Int, name: String) {
         val nameText = view.findViewById<TextView>(R.id.preset_name)
         val deleteButton = view.findViewById<ImageButton>(R.id.delete_button)
         

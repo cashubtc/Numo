@@ -9,7 +9,6 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
@@ -341,7 +340,7 @@ class MintDetailsActivity : AppCompatActivity() {
             versionRow.visibility = View.VISIBLE
             versionValue.text = versionInfo?.version
             // Only show URL divider if no software row above
-            urlDivider.visibility = if (hasSoftware) View.VISIBLE else View.VISIBLE
+            urlDivider.visibility = View.VISIBLE
         } else {
             versionRow.visibility = View.GONE
         }
@@ -535,51 +534,6 @@ class MintDetailsActivity : AppCompatActivity() {
                     .withEndAction { onComplete() }
                     .start()
             }
-            .start()
-    }
-
-    private fun startEntranceAnimations() {
-        // Icon bounce
-        iconContainer.scaleX = 0f
-        iconContainer.scaleY = 0f
-        iconContainer.animate()
-            .scaleX(1f)
-            .scaleY(1f)
-            .setDuration(400)
-            .setInterpolator(OvershootInterpolator(2f))
-            .start()
-        
-        // Name fade in
-        mintName.alpha = 0f
-        mintName.translationY = 20f
-        mintName.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setStartDelay(100)
-            .setDuration(300)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .start()
-        
-        // Balance pill slide up
-        balanceText.alpha = 0f
-        balanceText.translationY = 20f
-        balanceText.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setStartDelay(150)
-            .setDuration(300)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .start()
-        
-        // Details card slide up
-        detailsSection.alpha = 0f
-        detailsSection.translationY = 30f
-        detailsSection.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setStartDelay(200)
-            .setDuration(350)
-            .setInterpolator(AccelerateDecelerateInterpolator())
             .start()
     }
 }

@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -49,13 +48,6 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
             setDimAmount(0.6f)
         }
         return dialog
-    }
-
-    override fun onStart() {
-        super.onStart()
-        dialog?.window?.let { window ->
-            Log.d("AddMintBottomSheet", "Window type: ${window.attributes.type}, token: ${window.attributes.token}")
-        }
     }
 
     override fun onCreateView(
