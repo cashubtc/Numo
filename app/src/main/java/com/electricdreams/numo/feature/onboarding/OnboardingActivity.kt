@@ -409,6 +409,7 @@ class OnboardingActivity : AppCompatActivity() {
             acceptFromTitle = getString(R.string.onboarding_mints_accept_from_header)
         )
         mintsRecyclerView.layoutManager = LinearLayoutManager(this)
+        mintsRecyclerView.itemAnimator = null
         mintsRecyclerView.adapter = mintAdapter
 
         // Restoring
@@ -1339,8 +1340,8 @@ class OnboardingActivity : AppCompatActivity() {
                 onboardingMintDisplayNames[mintUrl] = displayName
 
                 if (currentStep == OnboardingStep.REVIEW_MINTS) {
-                    // Notify adapter to refresh name display for this mint
-                    mintAdapter.notifyDataSetChanged()
+                    // Refresh names only — avoids full rebind that flickers icons
+                    mintAdapter.refreshNames()
                 }
             }
         }

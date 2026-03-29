@@ -41,6 +41,12 @@ class OnboardingMintAdapter(
         private const val VIEW_TYPE_DEFAULT_HERO = 2
         private const val VIEW_TYPE_HINT = 3
         private const val VIEW_TYPE_ADD_MINT = 4
+        private const val PAYLOAD_NAME_ONLY = "name_only"
+    }
+
+    /** Refresh display names without re-binding icons. */
+    fun refreshNames() {
+        notifyItemRangeChanged(0, itemCount, PAYLOAD_NAME_ONLY)
     }
 
     private val items = mutableListOf<ListItem>()
@@ -292,6 +298,19 @@ class OnboardingMintAdapter(
         }
     }
 
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.contains(PAYLOAD_NAME_ONLY)) {
+            // Partial update: refresh names only, skip icon loading
+            when (val item = items[position]) {
+                is ListItem.DefaultHero -> (holder as DefaultHeroViewHolder).mintName.text = listener.onResolveMintName(item.url)
+                is ListItem.Mint -> (holder as MintViewHolder).name.text = listener.onResolveMintName(item.url)
+                else -> {}
+            }
+            return
+        }
+        super.onBindViewHolder(holder, position, payloads)
+    }
+
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         val context = holder.itemView.context
         val density = context.resources.displayMetrics.density
@@ -316,8 +335,6 @@ class OnboardingMintAdapter(
                 h.mintName.text = listener.onResolveMintName(item.url)
 
                 // Mint icon with rounded corners
-                h.mintIcon.setImageResource(R.drawable.ic_bitcoin)
-                h.mintIcon.setColorFilter(ContextCompat.getColor(context, R.color.color_primary))
                 h.mintIcon.setBackgroundColor(android.graphics.Color.parseColor("#1AFFFFFF"))
                 h.mintIcon.shapeAppearanceModel = h.mintIcon.shapeAppearanceModel.toBuilder()
                     .setAllCornerSizes(22f * density)
@@ -330,8 +347,6 @@ class OnboardingMintAdapter(
                 h.name.text = listener.onResolveMintName(item.url)
 
                 // Icon
-                h.icon.setImageResource(R.drawable.ic_bitcoin)
-                h.icon.setColorFilter(ContextCompat.getColor(context, R.color.color_primary))
                 h.icon.setBackgroundColor(android.graphics.Color.parseColor("#1AFFFFFF"))
                 h.icon.shapeAppearanceModel = h.icon.shapeAppearanceModel.toBuilder()
                     .setAllCornerSizes(20f * density)
