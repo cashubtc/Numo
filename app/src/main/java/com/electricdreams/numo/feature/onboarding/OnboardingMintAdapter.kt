@@ -10,6 +10,7 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
+import com.electricdreams.numo.ui.animation.GradientRingView
 import com.google.android.material.imageview.ShapeableImageView
 
 class OnboardingMintAdapter(
@@ -114,43 +115,91 @@ class OnboardingMintAdapter(
         return result
     }
 
-    /**
-     * Called by the Activity after the user confirms via the set-default dialog.
-     */
-    fun confirmSetDefault(mintUrl: String) {
-        val mintIndex = mints.indexOf(mintUrl)
-        if (mintIndex > 0) {
-            swapToDefault(mintIndex)
-        }
+    private var pendingSwapIndex = -1
+    private var pendingSwapUrl: String? = null
+    private var recyclerView: RecyclerView? = null
+
+    override fun onAttachedToRecyclerView(rv: RecyclerView) {
+        super.onAttachedToRecyclerView(rv)
+        recyclerView = rv
+    }
+
+    override fun onDetachedFromRecyclerView(rv: RecyclerView) {
+        super.onDetachedFromRecyclerView(rv)
+        recyclerView = null
     }
 
     /**
-     * Swaps a popular mint with the current default mint.
-     * Updates the hero card and the swapped popular mint row.
+     * Set a mint as the new default with a gradient-ring animation on the hero card.
      */
-    private fun swapToDefault(tappedMintIndex: Int) {
+    fun confirmSetDefault(mintUrl: String) {
+        val mintIndex = mints.indexOf(mintUrl)
+        if (mintIndex < 1) return
+
+        val hero = recyclerView?.findViewHolderForAdapterPosition(0) as? DefaultHeroViewHolder
+        if (hero == null) {
+            // Hero not visible — swap immediately without animation
+            swapData(mintIndex)
+            notifyItemChanged(0)
+            return
+        }
+
+        pendingSwapIndex = mintIndex
+        pendingSwapUrl = mintUrl
+
+        val newName = listener.onResolveMintName(mintUrl)
+
+        // 1. Spin the gradient ring around the avatar
+        hero.gradientRing.spin {
+            // 3. Ring done — swap the underlying data for the rest of the list
+            swapData(pendingSwapIndex)
+            pendingSwapIndex = -1
+            pendingSwapUrl = null
+        }
+
+        // 2. Crossfade icon + name after the ring is halfway through
+        val crossfadeDelay = 350L
+        val fadeDuration = 150L
+
+        hero.mintIcon.animate()
+            .alpha(0f)
+            .setDuration(fadeDuration)
+            .setStartDelay(crossfadeDelay)
+            .withEndAction {
+                listener.onLoadMintIcon(mintUrl, hero.mintIcon)
+                hero.mintIcon.animate().alpha(1f).setDuration(fadeDuration).start()
+            }
+            .start()
+
+        hero.mintName.animate()
+            .alpha(0f)
+            .setDuration(fadeDuration)
+            .setStartDelay(crossfadeDelay)
+            .withEndAction {
+                hero.mintName.text = newName
+                hero.mintName.animate().alpha(1f).setDuration(fadeDuration).start()
+            }
+            .start()
+    }
+
+    /**
+     * Swap data arrays and notify the list rows (not the hero — it's already animated).
+     */
+    private fun swapData(tappedMintIndex: Int) {
         if (tappedMintIndex < 1 || tappedMintIndex >= mints.size) return
 
         val oldDefault = mints[0]
         val newDefault = mints[tappedMintIndex]
 
-        // Old default becomes popular — add to accepted (was implicitly always on)
         accepted.add(oldDefault)
-        // New default loses checkbox — remove from accepted set
         accepted.remove(newDefault)
 
-        // Swap in the data list
         mints[0] = newDefault
         mints[tappedMintIndex] = oldDefault
 
-        // Adapter positions:
-        // [0] = DefaultHero
-        // [1] = Header "ACCEPT FROM"
-        // [2..] = popular mints (mints[i] is at adapter position i + 1)
         val tappedAdapterPos = tappedMintIndex + 1
 
         rebuildItems()
-        notifyItemChanged(0)               // Hero card shows new default
         notifyItemChanged(1)               // Header count may change
         notifyItemChanged(tappedAdapterPos) // Swapped popular mint row
 
@@ -308,6 +357,7 @@ class OnboardingMintAdapter(
     class DefaultHeroViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val mintIcon: ShapeableImageView = view.findViewById(R.id.hero_mint_icon)
         val mintName: TextView = view.findViewById(R.id.hero_mint_name)
+        val gradientRing: GradientRingView = view.findViewById(R.id.hero_gradient_ring)
     }
 
     class MintViewHolder(view: View) : RecyclerView.ViewHolder(view) {
