@@ -58,6 +58,23 @@ class ExplainerSlideAdapter : RecyclerView.Adapter<ExplainerSlideAdapter.SlideVi
                 holder.phoneRight.visibility = View.VISIBLE
                 holder.phoneLeft.setImageResource(R.drawable.img_minibits_nfc)
                 holder.phoneRight.setImageResource(R.drawable.img_numo_invoice)
+
+                // Scale margins to screen width so phones stay close on narrow devices
+                val screenWidth = holder.itemView.resources.displayMetrics.widthPixels
+                val density = holder.itemView.resources.displayMetrics.density
+                val inwardMargin = (screenWidth * 0.12f).toInt()   // ~12% of width
+                val outwardMargin = -(screenWidth * 0.33f).toInt() // ~33% of width
+
+                (holder.phoneLeft.layoutParams as? FrameLayout.LayoutParams)?.let {
+                    it.marginStart = outwardMargin
+                    it.marginEnd = inwardMargin
+                    holder.phoneLeft.layoutParams = it
+                }
+                (holder.phoneRight.layoutParams as? FrameLayout.LayoutParams)?.let {
+                    it.marginStart = inwardMargin
+                    it.marginEnd = outwardMargin
+                    holder.phoneRight.layoutParams = it
+                }
             }
 
             SLIDE_CUSTODY -> {
