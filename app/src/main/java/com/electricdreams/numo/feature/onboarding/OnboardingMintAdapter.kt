@@ -197,6 +197,21 @@ class OnboardingMintAdapter(
                     .start()
             }
             .start()
+
+        hero.mintSubtitle.animate()
+            .alpha(0f)
+            .setDuration(fadeDuration)
+            .setStartDelay(crossfadeDelay)
+            .withEndAction {
+                hero.mintSubtitle.translationX = 8f * hero.mintSubtitle.resources.displayMetrics.density
+                hero.mintSubtitle.animate()
+                    .alpha(1f)
+                    .translationX(0f)
+                    .setDuration(250)
+                    .setInterpolator(appleSpring)
+                    .start()
+            }
+            .start()
     }
 
     /**
@@ -392,6 +407,7 @@ class OnboardingMintAdapter(
     class DefaultHeroViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val mintIcon: ShapeableImageView = view.findViewById(R.id.hero_mint_icon)
         val mintName: TextView = view.findViewById(R.id.hero_mint_name)
+        val mintSubtitle: TextView = view.findViewById(R.id.hero_mint_subtitle)
         val gradientRing: GradientRingView = view.findViewById(R.id.hero_gradient_ring)
     }
 
