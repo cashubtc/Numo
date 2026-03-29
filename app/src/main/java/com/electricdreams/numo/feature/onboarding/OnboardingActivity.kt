@@ -1404,11 +1404,13 @@ class OnboardingActivity : AppCompatActivity() {
             mintsRecyclerView.postDelayed({
                 mintAdapter.addMintAsDefault(mintUrl)
                 updateContinueButtonState()
-                Toast.makeText(
-                    this@OnboardingActivity,
-                    getString(R.string.mints_added_toast),
-                    Toast.LENGTH_SHORT
-                ).show()
+                Snackbar.make(reviewMintsContainer, getString(R.string.mints_added_toast), Snackbar.LENGTH_SHORT).apply {
+                    val margin = (16 * resources.displayMetrics.density).toInt()
+                    (view.layoutParams as? android.widget.FrameLayout.LayoutParams)?.let {
+                        it.setMargins(margin, 0, margin, margin)
+                        view.layoutParams = it
+                    }
+                }.show()
             }, 350)
         }
     }
