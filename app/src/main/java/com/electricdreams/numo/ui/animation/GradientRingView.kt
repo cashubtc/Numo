@@ -11,7 +11,7 @@ import android.graphics.RectF
 import android.graphics.SweepGradient
 import android.util.AttributeSet
 import android.view.View
-import android.view.animation.LinearInterpolator
+import android.view.animation.PathInterpolator
 import androidx.core.content.ContextCompat
 import com.electricdreams.numo.R
 
@@ -32,7 +32,7 @@ class GradientRingView @JvmOverloads constructor(
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = strokePx
-        strokeCap = Paint.Cap.ROUND
+        strokeCap = Paint.Cap.BUTT
     }
 
     private val rect = RectF()
@@ -48,11 +48,11 @@ class GradientRingView @JvmOverloads constructor(
         val inset = strokePx / 2f
         rect.set(inset, inset, w - inset, h - inset)
 
-        // Comet-tail gradient: transparent → green across the 270° arc
+        // Comet-tail gradient: transparent tail → green head, with clean seam
         paint.shader = SweepGradient(
             w / 2f, h / 2f,
-            intArrayOf(Color.TRANSPARENT, Color.TRANSPARENT, ringColor),
-            floatArrayOf(0f, 0.15f, 0.95f)
+            intArrayOf(Color.TRANSPARENT, ringColor, ringColor, Color.TRANSPARENT),
+            floatArrayOf(0f, 0.7f, 0.85f, 1f)
         )
     }
 
@@ -74,8 +74,9 @@ class GradientRingView @JvmOverloads constructor(
         visibility = VISIBLE
 
         animator = ValueAnimator.ofFloat(0f, 360f).apply {
-            duration = 700L
-            interpolator = LinearInterpolator()
+            duration = 800L
+            // Fast start, smooth deceleration — feels like momentum, not a machine
+            interpolator = PathInterpolator(0.4f, 0f, 0.0f, 1f)
             addUpdateListener {
                 rotation = it.animatedValue as Float
                 invalidate()
