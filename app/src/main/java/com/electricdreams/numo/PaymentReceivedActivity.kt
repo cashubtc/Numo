@@ -283,11 +283,6 @@ class PaymentReceivedActivity : AppCompatActivity() {
         }
     }
     
-    override fun finish() {
-        super.finish()
-        @Suppress("DEPRECATION")
-        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
-    }
 
     private fun openTransactionDetails() {
         // Get the most recent payment from history (the one we just received)
