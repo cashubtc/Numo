@@ -119,7 +119,7 @@
     <string name="onboarding_restore_wallet_subtitle">Usa tu frase semilla existente</string>
 
     <!-- Explainer -->
-    <string name="explainer_teaser_title">Cmo funciona Numo?</string>
+    <string name="explainer_teaser_title">Toca para aprender cómo funciona Numo.</string>
     <string name="explainer_slide1_title">Toca para cobrar</string>
     <string name="explainer_slide1_body">Ingresa un monto, toca cobrar y tu cliente acerca su telfono al tuyo. El pago llega al instante por NFC.</string>
     <string name="explainer_slide2_title">Auto-custodia automtica</string>

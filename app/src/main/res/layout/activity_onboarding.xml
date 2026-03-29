@@ -272,20 +272,6 @@
                     android:layout_height="0dp"
                     android:layout_weight="1" />
 
-                <!-- "How does Numo work?" title above the card -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="24dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="12dp"
-                    android:text="@string/explainer_teaser_subtitle"
-                    android:textSize="16sp"
-                    android:fontFamily="sans-serif-medium"
-                    android:textColor="#99FFFFFF"
-                    android:textAllCaps="true"
-                    android:letterSpacing="0.05" />
-
                 <!-- Teaser card -->
                 <FrameLayout
                     android:id="@+id/teaser_card"
@@ -316,7 +302,7 @@
                                 android:paddingHorizontal="24dp"
                                 android:paddingBottom="12dp">
 
-                                <!-- "Tap. Pay. Done." tagline -->
+                                <!-- Teaser tagline -->
                                 <TextView
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
