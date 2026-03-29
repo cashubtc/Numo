@@ -5,6 +5,7 @@ import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.PathInterpolator
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
@@ -159,13 +160,24 @@ class OnboardingMintAdapter(
         val crossfadeDelay = 350L
         val fadeDuration = 150L
 
+        val appleSpring = PathInterpolator(0.175f, 0.885f, 0.32f, 1.1f)
+
         hero.mintIcon.animate()
             .alpha(0f)
             .setDuration(fadeDuration)
             .setStartDelay(crossfadeDelay)
             .withEndAction {
                 listener.onLoadMintIcon(mintUrl, hero.mintIcon)
-                hero.mintIcon.animate().alpha(1f).setDuration(fadeDuration).start()
+                // Fade in + settle bounce
+                hero.mintIcon.scaleX = 0.92f
+                hero.mintIcon.scaleY = 0.92f
+                hero.mintIcon.animate()
+                    .alpha(1f)
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(300)
+                    .setInterpolator(appleSpring)
+                    .start()
             }
             .start()
 
@@ -175,9 +187,34 @@ class OnboardingMintAdapter(
             .setStartDelay(crossfadeDelay)
             .withEndAction {
                 hero.mintName.text = newName
-                hero.mintName.animate().alpha(1f).setDuration(fadeDuration).start()
+                // Slide in from right + fade
+                hero.mintName.translationX = 8f * hero.mintName.resources.displayMetrics.density
+                hero.mintName.animate()
+                    .alpha(1f)
+                    .translationX(0f)
+                    .setDuration(250)
+                    .setInterpolator(appleSpring)
+                    .start()
             }
             .start()
+    }
+
+    /**
+     * Instant swap without animation — used for undo.
+     */
+    fun swapDefaultInstant(mintUrl: String) {
+        val mintIndex = mints.indexOf(mintUrl)
+        if (mintIndex < 1) return
+
+        val oldDefault = mints[0]
+        accepted.add(oldDefault)
+        accepted.remove(mintUrl)
+        mints[0] = mintUrl
+        mints[mintIndex] = oldDefault
+
+        rebuildItems()
+        notifyDataSetChanged()
+        listener.onDefaultMintChanged(mintUrl)
     }
 
     /**
