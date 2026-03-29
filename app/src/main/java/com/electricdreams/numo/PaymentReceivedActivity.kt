@@ -21,7 +21,6 @@ import androidx.core.view.WindowCompat
 import com.cashujdk.nut00.Token
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.payment.PaymentIntentFactory
-import com.electricdreams.numo.ui.util.isAnimationEnabled
 
 /**
  * Activity that displays a beautiful success screen when a payment is received
@@ -158,19 +157,10 @@ class PaymentReceivedActivity : AppCompatActivity() {
     }
     
     private fun animateCheckmark(onComplete: (() -> Unit)? = null) {
-        if (!isAnimationEnabled()) {
-            checkmarkCircle.visibility = View.VISIBLE
-            checkmarkIcon.visibility = View.VISIBLE
-            checkmarkCircle.alpha = 1f; checkmarkCircle.scaleX = 1f; checkmarkCircle.scaleY = 1f
-            checkmarkIcon.alpha = 1f; checkmarkIcon.scaleX = 1f; checkmarkIcon.scaleY = 1f
-            onComplete?.invoke()
-            return
-        }
-
         // Simple, elegant success animation
         // 1. Green circle scales in smoothly
         // 2. White checkmark pops in with overshoot
-
+        
         // Set initial states
         checkmarkCircle.alpha = 0f
         checkmarkCircle.scaleX = 0.3f
@@ -201,13 +191,13 @@ class PaymentReceivedActivity : AppCompatActivity() {
         val iconScaleX = ObjectAnimator.ofFloat(checkmarkIcon, "scaleX", 0f, 1f).apply {
             duration = 500
             startDelay = 150
-            interpolator = OvershootInterpolator(1.2f)
+            interpolator = OvershootInterpolator(3f)
         }
-
+        
         val iconScaleY = ObjectAnimator.ofFloat(checkmarkIcon, "scaleY", 0f, 1f).apply {
             duration = 500
             startDelay = 150
-            interpolator = OvershootInterpolator(1.2f)
+            interpolator = OvershootInterpolator(3f)
         }
         
         val iconFadeIn = ObjectAnimator.ofFloat(checkmarkIcon, "alpha", 0f, 1f).apply {
@@ -282,13 +272,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
             Toast.makeText(this, R.string.payment_received_error_no_share_app, Toast.LENGTH_SHORT).show()
         }
     }
-
-    override fun finish() {
-        super.finish()
-        @Suppress("DEPRECATION")
-        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
-    }
-
+    
     private fun openTransactionDetails() {
         // Get the most recent payment from history (the one we just received)
         val history = PaymentsHistoryActivity.getPaymentHistory(this)
