@@ -399,7 +399,7 @@ class OnboardingActivity : AppCompatActivity() {
                     setActionTextColor(ContextCompat.getColor(this@OnboardingActivity, R.color.color_text_primary))
                     val margin = (16 * resources.displayMetrics.density).toInt()
                     (view.layoutParams as? android.widget.FrameLayout.LayoutParams)?.let {
-                        it.setMargins(margin, 0, margin, margin)
+                        it.setMargins(margin, 0, margin, 0)
                         view.layoutParams = it
                     }
                 }.show()
