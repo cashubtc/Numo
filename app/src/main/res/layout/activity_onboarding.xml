@@ -495,10 +495,10 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:paddingHorizontal="20dp"
-                    android:paddingBottom="24dp">
+                    android:paddingBottom="32dp">
 
                     <!-- Instructions -->
                     <TextView
@@ -518,6 +518,12 @@
                         android:layout_marginTop="24dp"
                         app:columnCount="2"
                         app:rowCount="6" />
+
+                    <!-- Spacer pushes buttons to bottom when space allows -->
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
 
                     <!-- Paste Button (tertiary) -->
                     <com.google.android.material.button.MaterialButton
