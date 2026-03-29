@@ -519,25 +519,28 @@
                         app:columnCount="2"
                         app:rowCount="6" />
 
-                    <!-- Paste Button -->
+                    <!-- Paste Button (secondary) -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/paste_button"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="44dp"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="16dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="24dp"
                         android:text="@string/onboarding_seed_paste_button"
-                        android:textSize="14sp"
+                        android:textSize="17sp"
                         android:textColor="#FFFFFF"
-                        android:textAllCaps="false" />
+                        android:textAllCaps="false"
+                        android:background="@drawable/bg_button_secondary_dark"
+                        android:stateListAnimator="@null"
+                        app:backgroundTint="@null"
+                        app:cornerRadius="28dp"
+                        app:elevation="0dp" />
 
-                    <!-- Continue Button -->
+                    <!-- Continue Button (primary) -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/seed_continue_button"
                         android:layout_width="match_parent"
                         android:layout_height="56dp"
-                        android:layout_marginTop="24dp"
+                        android:layout_marginTop="12dp"
                         android:text="@string/onboarding_seed_continue"
                         android:textSize="17sp"
                         android:textColor="@color/button_text_onboarding"

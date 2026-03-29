@@ -26,6 +26,8 @@
         <!-- Surface colors -->
         <item name="colorSurface">@color/color_bg_white</item>
         <item name="colorOnSurface">@color/color_text_primary</item>
+        <!-- Normalize MaterialButton height across all variants -->
+        <item name="materialButtonStyle">@style/Widget.Numo.Button</item>
         <!-- Icon tint -->
         <item name="colorControlNormal">@color/color_text_secondary</item>
         <!-- Switch/toggle active color -->
