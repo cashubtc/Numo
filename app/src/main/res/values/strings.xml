@@ -659,6 +659,7 @@ Last updated: November 2024</string>
     <string name="common_save">Save</string>
     <string name="common_delete">Delete</string>
     <string name="common_confirm">Confirm</string>
+    <string name="common_undo">Undo</string>
 
     
     <string name="basket_names_settings_title">Basket Names</string>

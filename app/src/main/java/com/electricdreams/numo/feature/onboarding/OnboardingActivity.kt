@@ -385,9 +385,17 @@ class OnboardingActivity : AppCompatActivity() {
                 showAddMintBottomSheet()
             }
             override fun onRequestSetDefault(mintUrl: String, mintName: String) {
+                val previousDefaultUrl = mintAdapter.getDefaultMintUrl()
                 mintAdapter.confirmSetDefault(mintUrl)
                 updateContinueButtonState()
-                Snackbar.make(reviewMintsContainer, getString(R.string.onboarding_mints_set_default_toast, mintName), Snackbar.LENGTH_SHORT).apply {
+                Snackbar.make(reviewMintsContainer, getString(R.string.onboarding_mints_set_default_toast, mintName), Snackbar.LENGTH_LONG).apply {
+                    setAction(R.string.common_undo) {
+                        if (previousDefaultUrl != null) {
+                            mintAdapter.confirmSetDefault(previousDefaultUrl)
+                            updateContinueButtonState()
+                        }
+                    }
+                    setActionTextColor(ContextCompat.getColor(this@OnboardingActivity, R.color.color_text_primary))
                     val margin = (16 * resources.displayMetrics.density).toInt()
                     (view.layoutParams as? android.widget.FrameLayout.LayoutParams)?.let {
                         it.setMargins(margin, 0, margin, margin)
@@ -1404,13 +1412,11 @@ class OnboardingActivity : AppCompatActivity() {
             mintsRecyclerView.postDelayed({
                 mintAdapter.addMintAsDefault(mintUrl)
                 updateContinueButtonState()
-                Snackbar.make(reviewMintsContainer, getString(R.string.mints_added_toast), Snackbar.LENGTH_SHORT).apply {
-                    val margin = (16 * resources.displayMetrics.density).toInt()
-                    (view.layoutParams as? android.widget.FrameLayout.LayoutParams)?.let {
-                        it.setMargins(margin, 0, margin, margin)
-                        view.layoutParams = it
-                    }
-                }.show()
+                Toast.makeText(
+                    this@OnboardingActivity,
+                    getString(R.string.mints_added_toast),
+                    Toast.LENGTH_SHORT
+                ).show()
             }, 350)
         }
     }
@@ -1437,7 +1443,7 @@ class OnboardingActivity : AppCompatActivity() {
         }
 
         // The default mint (index 0 in adapter) becomes the preferred Lightning mint
-        val preferredMint = mintAdapter.getDefaultMintUrl().let { mintProfileService.normalizeUrl(it) }
+        val preferredMint = mintAdapter.getDefaultMintUrl()?.let { mintProfileService.normalizeUrl(it) } ?: ""
         if (preferredMint.isNotBlank()) {
             mintManager.setPreferredLightningMint(preferredMint)
         }

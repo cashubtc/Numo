@@ -96,9 +96,7 @@ class OnboardingMintAdapter(
         items.add(ListItem.AddMint)
     }
 
-    fun getDefaultMintUrl(): String {
-        return mints.firstOrNull() ?: ""
-    }
+    fun getDefaultMintUrl(): String? = mints.firstOrNull()
 
     fun getPopularMints(): List<String> {
         return mints.drop(1)
