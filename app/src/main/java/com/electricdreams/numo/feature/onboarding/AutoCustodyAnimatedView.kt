@@ -29,7 +29,7 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
     )
 
     // Settled positions for 3-card stack
-    private val settledY     = floatArrayOf(0f,  10f,  18f)
+    private val settledY     = floatArrayOf(0f,  14f,  26f)
     private val settledScale = floatArrayOf(1f,  0.95f, 0.90f)
     private val settledAlpha = floatArrayOf(1f,  0.45f, 0.18f)
 
