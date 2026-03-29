@@ -376,6 +376,24 @@ class OnboardingMintAdapter(
                 // Long-press to set as default
                 h.itemView.setOnLongClickListener { view ->
                     view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+                    // Scale pulse: press down then spring back
+                    val spring = PathInterpolator(0.175f, 0.885f, 0.32f, 1.1f)
+                    view.animate()
+                        .scaleX(0.96f).scaleY(0.96f)
+                        .setDuration(100)
+                        .withEndAction {
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                                view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+                            } else {
+                                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                            }
+                            view.animate()
+                                .scaleX(1f).scaleY(1f)
+                                .setDuration(250)
+                                .setInterpolator(spring)
+                                .start()
+                        }
+                        .start()
                     val mintName = listener.onResolveMintName(item.url)
                     listener.onRequestSetDefault(item.url, mintName)
                     true
