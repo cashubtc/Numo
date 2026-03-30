@@ -167,7 +167,6 @@
     <string name="onboarding_mint_generic_name">Mint</string>
     <string name="onboarding_mints_default_section_title">Default Mint</string>
     <string name="onboarding_mints_popular_section_title">Popular Mints</string>
-    <string name="onboarding_mints_popular_section_subtitle">Accept ecash from these mints</string>
     <string name="onboarding_mints_add_different_button">+ New Mint</string>
     <string name="onboarding_mints_hero_label">DEFAULT MINT</string>
     <string name="onboarding_mints_hero_subtitle">Holds your bitcoin</string>
