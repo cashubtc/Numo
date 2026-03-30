@@ -165,6 +165,8 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var chevronHint2: ImageView
     private lateinit var chevronHint3: ImageView
     private lateinit var chevronHintContainer: View
+    private lateinit var explainerBottomContainer: View
+    private lateinit var explainerCreateWalletButton: MaterialButton
     private var explainerOpen = false
     private var chevronAnimatorSet: AnimatorSet? = null
 
@@ -331,6 +333,8 @@ class OnboardingActivity : AppCompatActivity() {
         chevronHint2 = findViewById(R.id.chevron_hint_2)
         chevronHint3 = findViewById(R.id.chevron_hint_3)
         chevronHintContainer = findViewById(R.id.chevron_hint_container)
+        explainerBottomContainer = findViewById(R.id.explainer_bottom_container)
+        explainerCreateWalletButton = findViewById(R.id.explainer_create_wallet_button)
 
         setupExplainerViewPager()
 
@@ -434,43 +438,32 @@ class OnboardingActivity : AppCompatActivity() {
         val spannableString = SpannableString(fullText)
 
         val termsLabel = "Terms of Service"
-        val termsStart = fullText.indexOf(termsLabel)
-        if (termsStart != -1) {
-            val termsEnd = termsStart + termsLabel.length
-
-            val termsSpan = object : ClickableSpan() {
-                override fun onClick(widget: View) {
-                    showTermsDialog()
-                }
-
-                override fun updateDrawState(ds: TextPaint) {
-                    ds.isFakeBoldText = true
-                }
-            }
-
-            spannableString.setSpan(termsSpan, termsStart, termsEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        }
-
         val privacyLabel = "Privacy Policy"
-        val privacyStart = fullText.indexOf(privacyLabel)
-        if (privacyStart != -1) {
-            val privacyEnd = privacyStart + privacyLabel.length
 
-            val privacySpan = object : ClickableSpan() {
-                override fun onClick(widget: View) {
-                    showPrivacyDialog()
-                }
+        val addClickableSpan = { label: String, onClickAction: () -> Unit ->
+            val start = fullText.indexOf(label)
+            if (start != -1) {
+                val end = start + label.length
+                val clickableSpan = object : ClickableSpan() {
+                    override fun onClick(widget: View) {
+                        onClickAction()
+                    }
 
-                override fun updateDrawState(ds: TextPaint) {
-                    ds.isFakeBoldText = true
+                    override fun updateDrawState(ds: TextPaint) {
+                        ds.isUnderlineText = true
+                        ds.isFakeBoldText = true
+                    }
                 }
+                spannableString.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
-
-            spannableString.setSpan(privacySpan, privacyStart, privacyEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
+
+        addClickableSpan(termsLabel) { showTermsDialog() }
+        addClickableSpan(privacyLabel) { showPrivacyDialog() }
 
         termsText.text = spannableString
         termsText.movementMethod = LinkMovementMethod.getInstance()
+        termsText.highlightColor = android.graphics.Color.TRANSPARENT
     }
 
     private fun showTermsDialog() {
@@ -613,6 +606,11 @@ class OnboardingActivity : AppCompatActivity() {
         // Teaser + Explainer
         setupTeaserTouchListener()
         explainerCloseBtn.setOnClickListener { closeExplainer() }
+        explainerCreateWalletButton.setOnClickListener {
+            closeExplainer()
+            isRestoreFlow = false
+            startNewWalletFlow()
+        }
 
         // Enter Seed
         seedBackButton.setOnClickListener {
@@ -737,11 +735,33 @@ class OnboardingActivity : AppCompatActivity() {
         explainerViewPager.adapter = ExplainerSlideAdapter()
         explainerViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                // Show chevrons on slides 0 and 1, hide on last slide
+                val isLastSlide = position == (explainerViewPager.adapter?.itemCount ?: 0) - 1
+
+                // Hide chevrons on last slide
                 chevronHintContainer.animate()
-                    .alpha(if (position <= 1) 1f else 0f)
+                    .alpha(if (isLastSlide) 0f else 1f)
                     .setDuration(200)
+                    .withEndAction {
+                        chevronHintContainer.visibility = if (isLastSlide) View.INVISIBLE else View.VISIBLE
+                    }
                     .start()
+                    
+                // Show button on last slide
+                if (isLastSlide) {
+                    explainerCreateWalletButton.visibility = View.VISIBLE
+                    explainerCreateWalletButton.animate()
+                        .alpha(1f)
+                        .setDuration(200)
+                        .start()
+                } else {
+                    explainerCreateWalletButton.animate()
+                        .alpha(0f)
+                        .setDuration(200)
+                        .withEndAction { 
+                            explainerCreateWalletButton.visibility = View.INVISIBLE 
+                        }
+                        .start()
+                }
             }
         })
 
@@ -765,7 +785,9 @@ class OnboardingActivity : AppCompatActivity() {
             explainerCloseContainer.setPadding(
                 explainerCloseContainer.paddingStart, insets.top + dp16, 0, 0
             )
-            chevronHintContainer.setPadding(0, dp16, 0, insets.bottom + dp16)
+            
+            explainerBottomContainer.setPadding(0, 0, 0, insets.bottom + dp16)
+            
             windowInsets
         }
     }

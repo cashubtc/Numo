@@ -161,7 +161,9 @@
                 android:textColor="#FFFFFF"
                 android:alpha="0"
                 android:gravity="center"
-                android:paddingHorizontal="16dp" />
+                android:paddingHorizontal="16dp"
+                android:clickable="true"
+                android:focusable="true" />
 
             <Space
                 android:layout_width="match_parent"
@@ -211,6 +213,7 @@
                         android:fontFamily="sans-serif-black"
                         android:textAllCaps="true"
                         android:letterSpacing="-0.03"
+                        android:gravity="center"
                         android:lineSpacingMultiplier="1.05" />
 
                     <Space
@@ -389,42 +392,71 @@
                     android:layout_weight="1"
                     android:orientation="vertical" />
 
-                <!-- Swipe hint chevrons -->
-                <LinearLayout
-                    android:id="@+id/chevron_hint_container"
+                <!-- Swipe hint chevrons and Create Wallet Button -->
+                <FrameLayout
+                    android:id="@+id/explainer_bottom_container"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center_horizontal"
-                    android:paddingTop="16dp">
+                    android:layout_height="wrap_content">
 
-                    <ImageView
-                        android:id="@+id/chevron_hint_1"
-                        android:layout_width="24dp"
-                        android:layout_height="14dp"
-                        android:src="@drawable/ic_chevron_down_hint"
-                        android:alpha="0.12"
-                        android:contentDescription="@null" />
+                    <!-- Swipe hint chevrons -->
+                    <LinearLayout
+                        android:id="@+id/chevron_hint_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
 
-                    <ImageView
-                        android:id="@+id/chevron_hint_2"
-                        android:layout_width="24dp"
-                        android:layout_height="14dp"
-                        android:layout_marginTop="-6dp"
-                        android:src="@drawable/ic_chevron_down_hint"
-                        android:alpha="0.12"
-                        android:contentDescription="@null" />
+                        <ImageView
+                            android:id="@+id/chevron_hint_1"
+                            android:layout_width="24dp"
+                            android:layout_height="14dp"
+                            android:layout_marginTop="16dp"
+                            android:src="@drawable/ic_chevron_down_hint"
+                            android:alpha="0.12"
+                            android:contentDescription="@null" />
 
-                    <ImageView
-                        android:id="@+id/chevron_hint_3"
-                        android:layout_width="24dp"
-                        android:layout_height="14dp"
-                        android:layout_marginTop="-6dp"
-                        android:src="@drawable/ic_chevron_down_hint"
-                        android:alpha="0.12"
-                        android:contentDescription="@null" />
+                        <ImageView
+                            android:id="@+id/chevron_hint_2"
+                            android:layout_width="24dp"
+                            android:layout_height="14dp"
+                            android:layout_marginTop="-6dp"
+                            android:src="@drawable/ic_chevron_down_hint"
+                            android:alpha="0.12"
+                            android:contentDescription="@null" />
 
-                </LinearLayout>
+                        <ImageView
+                            android:id="@+id/chevron_hint_3"
+                            android:layout_width="24dp"
+                            android:layout_height="14dp"
+                            android:layout_marginTop="-6dp"
+                            android:layout_marginBottom="16dp"
+                            android:src="@drawable/ic_chevron_down_hint"
+                            android:alpha="0.12"
+                            android:contentDescription="@null" />
+
+                    </LinearLayout>
+
+                    <!-- Create Wallet Button (Explainer) -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/explainer_create_wallet_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_gravity="center"
+                        android:layout_marginHorizontal="24dp"
+                        android:text="@string/onboarding_create_wallet_title"
+                        android:textSize="17sp"
+                        android:textColor="@color/button_text_onboarding"
+                        android:textAllCaps="false"
+                        android:background="@drawable/bg_button_white"
+                        android:stateListAnimator="@null"
+                        app:backgroundTint="@null"
+                        app:cornerRadius="28dp"
+                        app:elevation="0dp"
+                        android:alpha="0"
+                        android:visibility="invisible" />
+
+                </FrameLayout>
 
             </LinearLayout>
 
