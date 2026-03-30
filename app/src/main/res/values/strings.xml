@@ -228,33 +228,7 @@
 
     
     <string name="dialog_terms_title">Terms of Service</string>
-    <string name="dialog_terms_body">NUMO WALLET - TERMS OF SERVICE
-
-1. ACCEPTANCE
-By using this wallet application, you agree to these terms.
-
-2. NATURE OF SERVICE
-This is a self-custodial Bitcoin wallet using Cashu ecash technology. You are solely responsible for your funds and seed phrase.
-
-3. SEED PHRASE
-Your 12-word seed phrase is the ONLY way to recover your wallet. Never share it. Store it securely offline. We cannot recover lost seed phrases.
-
-4. NO WARRANTY
-This software is provided "as is" without warranty of any kind. Use at your own risk.
-
-5. LIMITATION OF LIABILITY
-We are not liable for any loss of funds, whether through bugs, user error, or third-party mint failures.
-
-6. ECASH MINTS
-Ecash tokens are held by third-party mints. These mints may fail or become unavailable. Diversify across multiple mints.
-
-7. PRIVACY
-This wallet does not collect personal data. Transactions are processed through ecash mints which may have their own privacy policies.
-
-8. UPDATES
-These terms may be updated. Continued use constitutes acceptance.
-
-Last updated: November 2024</string>
+    <string name="dialog_terms_body">"NUMO WALLET - TERMS OF SERVICE\n\n1. ACCEPTANCE\nBy using this wallet application, you agree to these terms.\n\n2. NATURE OF SERVICE\nThis is a self-custodial Bitcoin wallet using Cashu ecash technology. You are solely responsible for your funds and seed phrase.\n\n3. SEED PHRASE\nYour 12-word seed phrase is the ONLY way to recover your wallet. Never share it. Store it securely offline. We cannot recover lost seed phrases.\n\n4. NO WARRANTY\nThis software is provided \"as is\" without warranty of any kind. Use at your own risk.\n\n5. LIMITATION OF LIABILITY\nWe are not liable for any loss of funds, whether through bugs, user error, or third-party mint failures.\n\n6. ECASH MINTS\nEcash tokens are held by third-party mints. These mints may fail or become unavailable. Diversify across multiple mints.\n\n7. PRIVACY\nThis wallet does not collect personal data. Transactions are processed through ecash mints which may have their own privacy policies.\n\n8. UPDATES\nThese terms may be updated. Continued use constitutes acceptance.\n\nLast updated: November 2024"</string>
     <string name="common_close">Close</string>
 
     
