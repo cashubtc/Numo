@@ -161,9 +161,7 @@
                 android:textColor="#FFFFFF"
                 android:alpha="0"
                 android:gravity="center"
-                android:paddingHorizontal="16dp"
-                android:clickable="true"
-                android:focusable="true" />
+                android:paddingHorizontal="16dp" />
 
             <Space
                 android:layout_width="match_parent"
