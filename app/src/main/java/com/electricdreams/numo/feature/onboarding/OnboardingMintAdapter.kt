@@ -335,7 +335,7 @@ class OnboardingMintAdapter(
                 h.mintName.text = listener.onResolveMintName(item.url)
 
                 // Mint icon with rounded corners
-                h.mintIcon.setBackgroundColor(android.graphics.Color.parseColor("#1AFFFFFF"))
+                h.mintIcon.setBackgroundColor(ContextCompat.getColor(h.itemView.context, R.color.color_onboarding_icon_bg))
                 h.mintIcon.shapeAppearanceModel = h.mintIcon.shapeAppearanceModel.toBuilder()
                     .setAllCornerSizes(22f * density)
                     .build()
@@ -347,7 +347,7 @@ class OnboardingMintAdapter(
                 h.name.text = listener.onResolveMintName(item.url)
 
                 // Icon
-                h.icon.setBackgroundColor(android.graphics.Color.parseColor("#1AFFFFFF"))
+                h.icon.setBackgroundColor(ContextCompat.getColor(h.itemView.context, R.color.color_onboarding_icon_bg))
                 h.icon.shapeAppearanceModel = h.icon.shapeAppearanceModel.toBuilder()
                     .setAllCornerSizes(20f * density)
                     .build()
@@ -423,12 +423,12 @@ class OnboardingMintAdapter(
             holder.checkbox.setImageResource(R.drawable.ic_checkbox_checked)
             holder.checkbox.setColorFilter(android.graphics.Color.WHITE)
             holder.status.text = context.getString(R.string.onboarding_mints_status_accepting)
-            holder.status.setTextColor(android.graphics.Color.parseColor("#99FFFFFF"))
+            holder.status.setTextColor(ContextCompat.getColor(context, R.color.color_onboarding_text_subtle))
         } else {
             holder.checkbox.setImageResource(R.drawable.ic_checkbox_unchecked)
-            holder.checkbox.setColorFilter(android.graphics.Color.parseColor("#4DFFFFFF"))
+            holder.checkbox.setColorFilter(ContextCompat.getColor(context, R.color.color_onboarding_text_disabled))
             holder.status.text = context.getString(R.string.onboarding_mints_status_not_accepting)
-            holder.status.setTextColor(android.graphics.Color.parseColor("#73FFFFFF"))
+            holder.status.setTextColor(ContextCompat.getColor(context, R.color.color_onboarding_text_muted))
         }
     }
 

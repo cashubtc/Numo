@@ -179,10 +179,6 @@
     <string name="onboarding_mints_status_not_accepting">Não aceitando</string>
     <string name="onboarding_mints_long_press_hint">Mantenha pressionado um mint para definir como padrão</string>
     <string name="onboarding_mints_add_new_button">+ Adicionar Novo Mint</string>
-    <string name="onboarding_mints_set_default_title">Definir como padrão?</string>
-    <string name="onboarding_mints_set_default_message">Tornar \"%1$s\" seu mint padrão?</string>
-    <string name="onboarding_mints_set_default_confirm">Definir como padrão</string>
-    <string name="onboarding_mints_set_default_cancel">Cancelar</string>
 
     <!-- Onboarding / Restoring -->
     <string name="onboarding_restoring_title">Restaurando carteira</string>

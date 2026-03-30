@@ -286,15 +286,15 @@ class OnboardingActivity : AppCompatActivity() {
             windowInsetsController.isAppearanceLightNavigationBars = true
         } else if (step == OnboardingStep.CHOOSE_PATH) {
             // Navy bars — nav bar matches dark teaser area at bottom
-            window.statusBarColor = android.graphics.Color.parseColor("#0A2540")
-            window.navigationBarColor = android.graphics.Color.parseColor("#0A2540")
+            window.statusBarColor = ContextCompat.getColor(this, R.color.numo_navy)
+            window.navigationBarColor = ContextCompat.getColor(this, R.color.numo_navy)
             windowInsetsController.isAppearanceLightStatusBars = false
             windowInsetsController.isAppearanceLightNavigationBars = false
         } else {
             // Navy bars for all other onboarding screens
-            val navyLight = android.graphics.Color.parseColor("#0A2540")
-            window.statusBarColor = navyLight
-            window.navigationBarColor = navyLight
+            val navy = ContextCompat.getColor(this, R.color.numo_navy)
+            window.statusBarColor = navy
+            window.navigationBarColor = navy
             windowInsetsController.isAppearanceLightStatusBars = false
             windowInsetsController.isAppearanceLightNavigationBars = false
         }
@@ -542,7 +542,7 @@ class OnboardingActivity : AppCompatActivity() {
 
         val indexText = TextView(this).apply {
             text = "$index"
-            setTextColor(android.graphics.Color.parseColor("#73FFFFFF"))
+            setTextColor(ContextCompat.getColor(context, R.color.color_onboarding_text_muted))
             textSize = 13f
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
             layoutParams = LinearLayout.LayoutParams(24.dpToPx(), LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -552,7 +552,7 @@ class OnboardingActivity : AppCompatActivity() {
         val input = SeedWordEditText(this).apply {
             hint = ""
             setTextColor(android.graphics.Color.WHITE)
-            setHintTextColor(android.graphics.Color.parseColor("#4DFFFFFF"))
+            setHintTextColor(ContextCompat.getColor(context, R.color.color_onboarding_text_disabled))
             textSize = 15f
             background = null
             isSingleLine = true
@@ -822,13 +822,9 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun setExplainerWindowBars(open: Boolean) {
         val controller = WindowInsetsControllerCompat(window, window.decorView)
-        val darkNavy = android.graphics.Color.parseColor("#0A2540")
-        if (open) {
-            window.statusBarColor = darkNavy
-        } else {
-            window.statusBarColor = android.graphics.Color.parseColor("#0A2540")
-        }
-        window.navigationBarColor = darkNavy // always dark navy at bottom
+        val navy = ContextCompat.getColor(this, R.color.numo_navy)
+        window.statusBarColor = navy
+        window.navigationBarColor = navy
         controller.isAppearanceLightStatusBars = false
         controller.isAppearanceLightNavigationBars = false
     }
@@ -1085,7 +1081,7 @@ class OnboardingActivity : AppCompatActivity() {
             val word = words[i]
             val isInvalid = word.isNotBlank() && !Bip39Wordlist.isValid(word)
             if (isInvalid) allBip39 = false
-            input.setTextColor(if (isInvalid) android.graphics.Color.parseColor("#FF6B6B") else android.graphics.Color.WHITE)
+            input.setTextColor(ContextCompat.getColor(this, if (isInvalid) R.color.color_seed_word_invalid else R.color.color_bg_white))
         }
 
         val canContinue = allFilled && allBip39
@@ -1270,7 +1266,7 @@ class OnboardingActivity : AppCompatActivity() {
             } else {
                 backupStatusCard.setBackgroundColor(ContextCompat.getColor(this, R.color.numo_navy))
                 backupStatusIcon.setImageResource(R.drawable.ic_cloud_off)
-                backupStatusIcon.setColorFilter(android.graphics.Color.parseColor("#73FFFFFF"))
+                backupStatusIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_onboarding_text_muted))
                 backupStatusTitle.text = getString(R.string.onboarding_backup_not_found_title)
                 backupStatusTitle.setTextColor(android.graphics.Color.WHITE)
                 backupStatusSubtitle.text = getString(R.string.onboarding_backup_not_found_subtitle)
@@ -1557,7 +1553,7 @@ class OnboardingActivity : AppCompatActivity() {
 
         val statusText = TextView(this).apply {
             text = getString(R.string.restore_progress_status_waiting)
-            setTextColor(android.graphics.Color.parseColor("#73FFFFFF"))
+            setTextColor(ContextCompat.getColor(context, R.color.color_onboarding_text_muted))
             textSize = 13f
             tag = "status"
         }
@@ -1705,7 +1701,7 @@ class OnboardingActivity : AppCompatActivity() {
 
         val detailText = TextView(this).apply {
             text = getString(R.string.restore_success_balance_line, after)
-            setTextColor(android.graphics.Color.parseColor("#99FFFFFF"))
+            setTextColor(ContextCompat.getColor(context, R.color.color_onboarding_text_subtle))
             textSize = 13f
         }
 
