@@ -44,8 +44,7 @@ class OnboardingMintAdapter(
         private const val FADE_DURATION = 150L
         private const val FADE_IN_DURATION = 300L
         private const val SLIDE_IN_DURATION = 250L
-        private const val EXIT_DURATION = 180L
-        private const val ENTER_DURATION = 280L
+        private const val MATERIALIZE_DURATION = 300L
         private const val TAP_PRESS_DURATION = 100L
         private const val TAP_RELEASE_DURATION = 250L
 
@@ -216,42 +215,44 @@ class OnboardingMintAdapter(
             }
             .start()
 
-        // 3. Animate the tapped popular-mint row in sync with the hero
+        // 3. Dissolve the tapped popular-mint row in sync with the hero
         val tappedAdapterPos = mintIndex + 1
         val mintHolder = recyclerView?.findViewHolderForAdapterPosition(tappedAdapterPos) as? MintViewHolder
         if (mintHolder != null) {
-            val slideUp = -16f * density
-            val slideIn = 12f * density
+            val dissolveUp = -4f * density   // barely perceptible directional hint
+            val materializeFrom = 6f * density
 
-            // Exit: slide up + shrink + fade out (mint flies toward hero)
+            // Exit: gentle dissolve — fade out with soft upward drift
             mintHolder.icon.animate()
-                .alpha(0f).translationY(slideUp).scaleX(0.85f).scaleY(0.85f)
-                .setDuration(EXIT_DURATION)
+                .alpha(0f).translationY(dissolveUp)
+                .setDuration(FADE_DURATION)
                 .setStartDelay(CROSSFADE_DELAY)
                 .withEndAction {
+                    // Brief pause, then materialize the replacement
                     listener.onLoadMintIcon(oldDefault, mintHolder.icon)
-                    // Enter: slide in from below + scale up with spring
-                    mintHolder.icon.translationY = slideIn
-                    mintHolder.icon.scaleX = 0.92f
-                    mintHolder.icon.scaleY = 0.92f
+                    mintHolder.icon.translationY = materializeFrom
+                    mintHolder.icon.scaleX = 0.97f
+                    mintHolder.icon.scaleY = 0.97f
                     mintHolder.icon.animate()
                         .alpha(1f).translationY(0f).scaleX(1f).scaleY(1f)
-                        .setDuration(ENTER_DURATION)
+                        .setDuration(MATERIALIZE_DURATION)
+                        .setStartDelay(30)
                         .setInterpolator(SPRING_INTERPOLATOR)
                         .start()
                 }
                 .start()
 
             mintHolder.name.animate()
-                .alpha(0f).translationY(slideUp)
-                .setDuration(EXIT_DURATION)
+                .alpha(0f).translationY(dissolveUp)
+                .setDuration(FADE_DURATION)
                 .setStartDelay(CROSSFADE_DELAY)
                 .withEndAction {
                     mintHolder.name.text = listener.onResolveMintName(oldDefault)
-                    mintHolder.name.translationY = slideIn
+                    mintHolder.name.translationY = materializeFrom
                     mintHolder.name.animate()
                         .alpha(1f).translationY(0f)
-                        .setDuration(ENTER_DURATION)
+                        .setDuration(MATERIALIZE_DURATION)
+                        .setStartDelay(30)
                         .setInterpolator(SPRING_INTERPOLATOR)
                         .start()
                 }
