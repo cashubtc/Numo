@@ -26,11 +26,18 @@
         <!-- Surface colors -->
         <item name="colorSurface">@color/color_bg_white</item>
         <item name="colorOnSurface">@color/color_text_primary</item>
+        <!-- Normalize MaterialButton height across all variants -->
+        <item name="materialButtonStyle">@style/Widget.Numo.Button</item>
         <!-- Icon tint -->
         <item name="colorControlNormal">@color/color_text_secondary</item>
+        <!-- Switch/toggle active color -->
+        <item name="colorControlActivated">@color/color_success_green</item>
         <!-- Popup menu styling -->
         <item name="popupMenuStyle">@style/Widget.Numo.PopupMenu</item>
         <item name="android:popupMenuStyle">@style/Widget.Numo.PopupMenu</item>
+        <!-- Snackbar styling -->
+        <item name="snackbarStyle">@style/Widget.Numo.Snackbar</item>
+        <item name="snackbarTextViewStyle">@style/Widget.Numo.Snackbar.Text</item>
     </style>
 
     <!-- Popup Menu Style -->
@@ -95,6 +102,16 @@
         <item name="android:windowAnimationStyle">@style/Animation.AppCompat.Dialog</item>
     </style>
 
+    <!-- Bottom-floating dialog (non-floating so width can be MATCH_PARENT) -->
+    <style name="Theme.Numo.BottomFloatingDialog" parent="Theme.MaterialComponents.Light.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.5</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowAnimationStyle">@null</item>
+    </style>
+
     <!-- Bottom Sheet Animation -->
     <style name="Animation.Numo.BottomSheet" parent="Animation.AppCompat.Dialog">
         <item name="android:windowEnterAnimation">@anim/slide_up</item>
@@ -103,23 +120,25 @@
     
     <!-- Apple-style Bottom Sheet Fragment Theme -->
     <style name="Theme.Numo.BottomSheet" parent="Theme.MaterialComponents.Light.BottomSheetDialog">
+        <item name="colorPrimary">@color/color_primary_green_light</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">true</item>
-        <item name="android:backgroundDimAmount">0.4</item>
+        <item name="android:backgroundDimAmount">0.6</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsFloating">false</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <!-- For bottom sheets, use a solid background under the gesture nav pill so it visually merges with the sheet. -->
-        <item name="android:navigationBarColor">@color/color_bg_white</item>
-        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:navigationBarColor">#0A2540</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="bottomSheetStyle">@style/Widget.Numo.BottomSheet</item>
     </style>
-    
+
     <!-- Bottom Sheet Widget Style -->
     <style name="Widget.Numo.BottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
-        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="backgroundTint">#0A2540</item>
         <item name="shapeAppearance">@style/ShapeAppearance.Numo.BottomSheet</item>
         <item name="behavior_peekHeight">auto</item>
         <item name="behavior_fitToContents">true</item>
+        <item name="android:elevation">16dp</item>
     </style>
     
     <!-- Bottom Sheet Shape -->

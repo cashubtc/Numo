@@ -118,6 +118,16 @@
     <string name="onboarding_restore_wallet_title">Restaurar do backup</string>
     <string name="onboarding_restore_wallet_subtitle">Use sua frase semente existente</string>
 
+    <!-- Explainer -->
+    <string name="explainer_teaser_title">Toque para saber como o Numo funciona.</string>
+    <string name="explainer_slide1_title">Toque para receber</string>
+    <string name="explainer_slide1_body">Digite um valor, toque em cobrar e seu cliente aproxima o telefone do seu. O pagamento chega instantaneamente por NFC.</string>
+    <string name="explainer_slide2_title">Auto-custdia automtica</string>
+    <string name="explainer_slide2_body">Configure o saque automtico para mover pagamentos recebidos diretamente para sua carteira Lightning. Numo  auto-custdia por padro.</string>
+    <string name="explainer_slide3_title">Zero taxas</string>
+    <string name="explainer_slide3_body">Numo  totalmente de cdigo aberto e no cobra taxas. Sem assinaturas, sem cortes, sem custos ocultos. Cada sat que voc recebe  seu.</string>
+    <string name="explainer_image_placeholder">Imagem de exemplo</string>
+
     <!-- Onboarding / Restore Seed Entry -->
     <string name="onboarding_seed_toolbar_back">Voltar</string>
     <string name="onboarding_seed_toolbar_title">Restaurar carteira</string>
@@ -158,6 +168,21 @@
     <string name="onboarding_mints_count">%1$d mint%2$s selecionado(s)</string>
     <string name="onboarding_mints_continue_restore">Restaurar carteira</string>
     <string name="onboarding_mints_continue_new_wallet">Continuar</string>
+    <string name="onboarding_mints_hero_label">MINT PADRÃO</string>
+    <string name="onboarding_mints_hero_subtitle">Guarda seu bitcoin</string>
+    <string name="onboarding_mints_hero_default_badge">Padrão</string>
+    <string name="onboarding_mints_hero_helper">Retire para sua própria carteira a qualquer momento, ou defina um limite de pagamento para fazê-lo automaticamente.</string>
+    <string name="onboarding_mints_accept_from_header">ACEITAR DE</string>
+    <string name="onboarding_mints_count_label">%1$d mints</string>
+    <string name="onboarding_mints_count_label_singular">%1$d mint</string>
+    <string name="onboarding_mints_status_accepting">Aceitando pagamentos</string>
+    <string name="onboarding_mints_status_not_accepting">Não aceitando</string>
+    <string name="onboarding_mints_long_press_hint">Mantenha pressionado um mint para definir como padrão</string>
+    <string name="onboarding_mints_add_new_button">+ Adicionar Novo Mint</string>
+    <string name="onboarding_mints_set_default_title">Definir como padrão?</string>
+    <string name="onboarding_mints_set_default_message">Tornar \"%1$s\" seu mint padrão?</string>
+    <string name="onboarding_mints_set_default_confirm">Definir como padrão</string>
+    <string name="onboarding_mints_set_default_cancel">Cancelar</string>
 
     <!-- Onboarding / Restoring -->
     <string name="onboarding_restoring_title">Restaurando carteira</string>

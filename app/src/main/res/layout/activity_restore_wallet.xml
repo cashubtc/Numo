@@ -131,7 +131,7 @@
                 <!-- Paste Button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/paste_button"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    style="@style/Widget.Numo.Button.Tertiary"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:layout_marginTop="20dp"
@@ -139,13 +139,7 @@
                     android:textSize="15sp"
                     android:textColor="@color/color_text_primary"
                     android:fontFamily="sans-serif-medium"
-                    app:cornerRadius="24dp"
-                    app:strokeColor="@color/color_divider"
-                    app:strokeWidth="1.5dp"
-                    app:icon="@drawable/ic_content_copy"
-                    app:iconTint="@color/color_text_primary"
-                    app:iconGravity="textStart"
-                    app:iconPadding="8dp" />
+                    app:cornerRadius="24dp" />
 
                 <!-- Validation Status -->
                 <LinearLayout

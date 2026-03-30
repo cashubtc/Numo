@@ -113,18 +113,28 @@
 
     
     <string name="onboarding_setup_title">Set Up Your Wallet</string>
-    <string name="onboarding_setup_subtitle">Choose how you would like to get started</string>
+    <string name="onboarding_setup_subtitle">Choose how you\'d like to get started</string>
     <string name="onboarding_create_wallet_title">Create New Wallet</string>
     <string name="onboarding_create_wallet_subtitle">Start fresh with a new seed phrase</string>
-    <string name="onboarding_restore_wallet_title">Restore from Backup</string>
+    <string name="onboarding_restore_wallet_title">Restore From Backup</string>
     <string name="onboarding_restore_wallet_subtitle">Use your existing seed phrase</string>
 
-    
+    <!-- Explainer -->
+    <string name="explainer_teaser_title">Tap to learn how Numo works.</string>
+    <string name="explainer_slide1_title">Tap to get paid</string>
+    <string name="explainer_slide1_body">Enter an amount, tap charge, and your customer holds their phone to yours. Payment lands instantly over NFC.</string>
+    <string name="explainer_slide2_title">Automatic self-custody</string>
+    <string name="explainer_slide2_body">Set up auto-withdraw to move incoming payments straight to your own Lightning wallet.</string>
+    <string name="explainer_slide3_title">Zero fees</string>
+    <string name="explainer_slide3_body">Numo is fully open-source and charges no fees. No subscriptions, no cuts, no hidden costs. Every sat you receive is yours.</string>
+    <string name="explainer_image_placeholder">Image placeholder</string>
+
+
     <string name="onboarding_seed_toolbar_back">Back</string>
     <string name="onboarding_seed_toolbar_title">Restore Wallet</string>
-    <string name="onboarding_seed_instruction_title">Enter your 12-word seed phrase</string>
+    <string name="onboarding_seed_instruction_title">Enter your 12 word seed phrase</string>
     <string name="onboarding_seed_instruction_body">Enter the words in the correct order to restore your wallet.</string>
-    <string name="onboarding_seed_paste_button">Paste from Clipboard</string>
+    <string name="onboarding_seed_paste_button">Paste</string>
     <string name="onboarding_seed_validation_ready">Ready to continue</string>
     <string name="onboarding_seed_invalid_characters">Invalid characters detected</string>
     <string name="onboarding_seed_words_entered_count">%1$d of 12 words entered</string>
@@ -133,18 +143,9 @@
     <string name="onboarding_seed_paste_invalid">Please paste a valid 12-word seed phrase</string>
     <string name="onboarding_seed_paste_success">Seed phrase pasted</string>
 
-    
-    <string name="onboarding_status_creating_wallet">Creating your wallet...</string>
-    <string name="onboarding_status_generating_seed">Generating seed phrase...</string>
-    <string name="onboarding_status_setting_up_mints">Setting up default mints...</string>
-    <string name="onboarding_status_initializing_wallet">Initializing wallet...</string>
-    <string name="onboarding_status_connecting_mints">Connecting to mints...</string>
-    <string name="onboarding_status_fetching_mints">Fetching mint information...</string>
-    <string name="onboarding_generating_hint">This will only take a moment</string>
 
-    
-    <string name="onboarding_fetching_searching_backup">Searching for backup...</string>
-    <string name="onboarding_fetching_checking_relays">Checking Nostr relays for your mint configuration</string>
+    <string name="onboarding_status_creating_wallet">Creating new wallet…</string>
+    <string name="onboarding_status_restoring_wallet">Restoring wallet…</string>
 
     
     <string name="onboarding_mints_toolbar_back">Back</string>
@@ -155,7 +156,7 @@
     <string name="onboarding_backup_not_found_subtitle">Using default mints</string>
     <string name="onboarding_mints_title">Select Mints</string>
     <string name="onboarding_mints_subtitle_restore">Select which mints to restore</string>
-    <string name="onboarding_mints_subtitle_description">These mints will hold your bitcoin. You can withdraw to your own wallet at any time, or set a payout threshold to do it automatically.</string>
+    <string name="onboarding_mints_subtitle_description">This mint will hold your bitcoin. You can withdraw to your own wallet at any time, or set a payout threshold to do it automatically.</string>
     <string name="onboarding_mints_count">%1$d mint%2$s selected</string>
     <string name="onboarding_mints_continue_restore">Restore Wallet</string>
     <string name="onboarding_mints_continue_new_wallet">Continue</string>
@@ -164,8 +165,30 @@
     <string name="onboarding_mints_scan_row_title">Scan QR Code</string>
     <string name="onboarding_mints_scan_row_subtitle">Tap to scan an address</string>
     <string name="onboarding_mint_generic_name">Mint</string>
+    <string name="onboarding_mints_default_section_title">Default Mint</string>
+    <string name="onboarding_mints_popular_section_title">Popular Mints</string>
+    <string name="onboarding_mints_popular_section_subtitle">Accept ecash from these mints</string>
+    <string name="onboarding_mints_add_different_button">+ New Mint</string>
+    <string name="onboarding_mints_hero_label">DEFAULT MINT</string>
+    <string name="onboarding_mints_hero_subtitle">Holds your bitcoin</string>
+    <string name="onboarding_mints_hero_default_badge">Default</string>
+    <string name="onboarding_mints_hero_helper">Withdraw to your own wallet anytime, or set a payout threshold to do it automatically.</string>
+    <string name="onboarding_mints_accept_from_header">ACCEPT FROM</string>
+    <string name="onboarding_mints_count_label">%1$d mints</string>
+    <string name="onboarding_mints_count_label_singular">%1$d mint</string>
+    <string name="onboarding_mints_status_accepting">Accepting payments</string>
+    <string name="onboarding_mints_status_not_accepting">Not accepting</string>
+    <string name="onboarding_mints_long_press_hint">Long press a mint to set as default</string>
+    <string name="onboarding_mints_add_new_button">+ Add New Mint</string>
+    <string name="onboarding_mints_set_default_toast">%1$s set as default</string>
+    <string name="onboarding_add_mint_sheet_title">Add a Mint</string>
+    <string name="onboarding_add_mint_url_hint">Enter mint URL</string>
+    <string name="onboarding_add_mint_button">Add</string>
+    <string name="onboarding_add_mint_or">or</string>
+    <string name="onboarding_add_mint_scan_qr">Scan</string>
+    <string name="onboarding_add_mint_loading">Adding mint…</string>
 
-    
+
     <string name="onboarding_restoring_title">Restoring Wallet</string>
     <string name="onboarding_restoring_initializing">Initializing restore...</string>
 
@@ -176,7 +199,7 @@
     <string name="onboarding_success_created_title">Wallet Created</string>
     <string name="onboarding_success_created_subtitle">Your wallet is ready to use</string>
     <string name="onboarding_success_balance_by_mint">BALANCE BY MINT</string>
-    <string name="onboarding_enter_wallet_button">Enter Wallet</string>
+    <string name="onboarding_enter_wallet_button">Continue</string>
 
     
     <string name="onboarding_error_creating_wallet">Error creating wallet: %1$s</string>
@@ -609,6 +632,7 @@
     <string name="common_save">Save</string>
     <string name="common_delete">Delete</string>
     <string name="common_confirm">Confirm</string>
+    <string name="common_undo">Undo</string>
 
     
     <string name="basket_names_settings_title">Basket Names</string>

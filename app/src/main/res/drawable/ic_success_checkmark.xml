@@ -4,15 +4,11 @@
     android:height="88dp"
     android:viewportWidth="88"
     android:viewportHeight="88">
-    <!-- Circle background -->
+    <!-- Mint green circle -->
     <path
-        android:fillColor="#E8F5E9"
-        android:pathData="M44,44m-44,0a44,44 0,1 1,88 0a44,44 0,1 1,-88 0"/>
-    <!-- Inner circle -->
-    <path
-        android:fillColor="#00C244"
-        android:pathData="M44,44m-32,0a32,32 0,1 1,64 0a32,32 0,1 1,-64 0"/>
-    <!-- Checkmark -->
+        android:fillColor="#5EFFC2"
+        android:pathData="M44,44m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0"/>
+    <!-- White checkmark -->
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M38.5,55.5L28,45l3.5,-3.5 7,7 15,-15 3.5,3.5z"/>
