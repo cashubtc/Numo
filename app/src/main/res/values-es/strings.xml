@@ -172,12 +172,8 @@
     <string name="onboarding_mints_hero_subtitle">Guarda tu bitcoin</string>
     <string name="onboarding_mints_hero_default_badge">Predeterminado</string>
     <string name="onboarding_mints_hero_helper">Retira a tu propia billetera en cualquier momento, o establece un umbral de pago para hacerlo automáticamente.</string>
-    <string name="onboarding_mints_accept_from_header">ACEPTAR DE</string>
-    <string name="onboarding_mints_count_label">%1$d mints</string>
-    <string name="onboarding_mints_count_label_singular">%1$d mint</string>
-    <string name="onboarding_mints_status_accepting">Aceptando pagos</string>
-    <string name="onboarding_mints_status_not_accepting">No aceptando</string>
-    <string name="onboarding_mints_long_press_hint">Mantén presionado un mint para establecerlo como predeterminado</string>
+    <string name="onboarding_mints_popular_header">MINTS POPULARES</string>
+    <string name="onboarding_mints_tap_hint">Toca para cambiar el mint predeterminado</string>
     <string name="onboarding_mints_add_new_button">+ Agregar Nuevo Mint</string>
 
     <!-- Onboarding / Restoring -->

@@ -375,9 +375,6 @@ class OnboardingActivity : AppCompatActivity() {
             override fun onResolveMintName(mintUrl: String): String {
                 return resolveOnboardingMintDisplayName(mintUrl)
             }
-            override fun onMintAcceptedChanged() {
-                updateContinueButtonState()
-            }
             override fun onDefaultMintChanged(newDefaultUrl: String) {
                 updateContinueButtonState()
             }
@@ -406,7 +403,7 @@ class OnboardingActivity : AppCompatActivity() {
             }
         })
         mintAdapter.setHeaderStrings(
-            acceptFromTitle = getString(R.string.onboarding_mints_accept_from_header)
+            headerTitle = getString(R.string.onboarding_mints_popular_header)
         )
         mintsRecyclerView.layoutManager = LinearLayoutManager(this)
         mintsRecyclerView.itemAnimator = null

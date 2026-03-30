@@ -173,12 +173,8 @@
     <string name="onboarding_mints_hero_subtitle">Holds your bitcoin</string>
     <string name="onboarding_mints_hero_default_badge">Default</string>
     <string name="onboarding_mints_hero_helper">Withdraw to your own wallet anytime, or set a payout threshold to do it automatically.</string>
-    <string name="onboarding_mints_accept_from_header">ACCEPT FROM</string>
-    <string name="onboarding_mints_count_label">%1$d mints</string>
-    <string name="onboarding_mints_count_label_singular">%1$d mint</string>
-    <string name="onboarding_mints_status_accepting">Accepting payments</string>
-    <string name="onboarding_mints_status_not_accepting">Not accepting</string>
-    <string name="onboarding_mints_long_press_hint">Long press a mint to set as default</string>
+    <string name="onboarding_mints_popular_header">POPULAR MINTS</string>
+    <string name="onboarding_mints_tap_hint">Tap to change default mint</string>
     <string name="onboarding_mints_add_new_button">+ Add New Mint</string>
     <string name="onboarding_mints_set_default_toast">%1$s set as default</string>
     <string name="onboarding_add_mint_sheet_title">Add a Mint</string>
