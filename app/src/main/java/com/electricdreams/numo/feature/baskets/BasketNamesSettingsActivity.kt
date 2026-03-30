@@ -1,6 +1,7 @@
 package com.electricdreams.numo.feature.baskets
 
 import android.os.Bundle
+import com.electricdreams.numo.util.setSoftInputModeResize
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -139,7 +140,7 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
-            setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+            setSoftInputModeResize()
         }
 
         dialog.setOnShowListener {
@@ -189,7 +190,7 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
-            setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+            setSoftInputModeResize()
         }
 
         dialog.setOnShowListener {

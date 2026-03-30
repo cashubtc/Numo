@@ -5,6 +5,8 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.AttributeSet
+import com.electricdreams.numo.util.getVibrator
+import com.electricdreams.numo.util.vibrateCompat
 import android.view.LayoutInflater
 import android.widget.Button
 import android.widget.GridLayout
@@ -38,7 +40,7 @@ class PinKeypadView @JvmOverloads constructor(
         useDefaultMargins = false
         alignmentMode = ALIGN_BOUNDS
 
-        vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator?
+        vibrator = context.getVibrator()
         setupKeypad()
     }
 
@@ -133,7 +135,7 @@ class PinKeypadView @JvmOverloads constructor(
                 v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
             } else {
                 @Suppress("DEPRECATION")
-                v.vibrate(15L)
+                v.vibrateCompat(15L)
             }
         }
     }

@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import com.electricdreams.numo.util.startActivityForResultCompat
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -266,7 +267,7 @@ class PinResetActivity : AppCompatActivity() {
                 onConfirm = {
                     val intent = Intent(this, PinSetupActivity::class.java)
                     intent.putExtra(PinSetupActivity.EXTRA_MODE, PinSetupActivity.MODE_CREATE)
-                    startActivityForResult(intent, REQUEST_NEW_PIN)
+                    startActivityForResultCompat(intent, REQUEST_NEW_PIN)
                 },
                 onCancel = {
                     setResult(Activity.RESULT_OK)
@@ -276,6 +277,7 @@ class PinResetActivity : AppCompatActivity() {
         )
     }
 
+    @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_NEW_PIN) {

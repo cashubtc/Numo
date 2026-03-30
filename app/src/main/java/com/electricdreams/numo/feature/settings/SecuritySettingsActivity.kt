@@ -3,6 +3,7 @@ package com.electricdreams.numo.feature.settings
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import com.electricdreams.numo.util.startActivityForResultCompat
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -53,7 +54,7 @@ class SecuritySettingsActivity : AppCompatActivity() {
 
         // Setup PIN
         setupPinItem.setOnClickListener {
-            startActivityForResult(
+            startActivityForResultCompat(
                 Intent(this, PinSetupActivity::class.java),
                 REQUEST_PIN_SETUP
             )
@@ -119,7 +120,7 @@ class SecuritySettingsActivity : AppCompatActivity() {
             putExtra(PinEntryActivity.EXTRA_TITLE, getString(R.string.security_settings_enter_pin_title))
             putExtra(PinEntryActivity.EXTRA_SUBTITLE, getString(R.string.security_settings_enter_pin_subtitle))
         }
-        startActivityForResult(intent, REQUEST_PIN_VERIFY)
+        startActivityForResultCompat(intent, REQUEST_PIN_VERIFY)
     }
 
     private fun openBackupMnemonic() {
@@ -131,7 +132,7 @@ class SecuritySettingsActivity : AppCompatActivity() {
     }
 
     private fun openChangePin() {
-        startActivityForResult(
+        startActivityForResultCompat(
             Intent(this, PinSetupActivity::class.java).apply {
                 putExtra(PinSetupActivity.EXTRA_MODE, PinSetupActivity.MODE_CHANGE)
             },
@@ -156,6 +157,7 @@ class SecuritySettingsActivity : AppCompatActivity() {
         )
     }
 
+    @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 

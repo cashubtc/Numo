@@ -4,6 +4,7 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
+import com.electricdreams.numo.util.setSoftInputModeResize
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.DecelerateInterpolator
@@ -568,7 +569,7 @@ class ItemSelectionActivity : AppCompatActivity() {
                 android.view.ViewGroup.LayoutParams.WRAP_CONTENT
             )
             // Ensure keyboard adjusts properly
-            setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+            setSoftInputModeResize()
         }
 
         dialog.setOnShowListener {

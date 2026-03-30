@@ -4,6 +4,9 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.os.Vibrator
+import com.electricdreams.numo.util.getVibrator
+import com.electricdreams.numo.util.vibrateCompat
 import android.view.View
 import android.widget.Button
 import android.widget.GridLayout
@@ -144,6 +147,7 @@ class PosUiCoordinator(
     }
 
     /** Handle NFC payment */
+    @Suppress("DEPRECATION")
     fun handleNfcPayment(tag: android.nfc.Tag) {
         nfcPaymentProcessor.handleNfcPayment(tag, amountDisplayManager.requestedAmount)
     }
@@ -171,8 +175,8 @@ class PosUiCoordinator(
         
         // Vibrate
         try {
-            val vibrator = activity.getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator?
-            vibrator?.vibrate(PATTERN_SUCCESS, -1)
+            val vibrator = activity.getVibrator()
+            vibrator?.vibrateCompat(PATTERN_SUCCESS, -1)
         } catch (e: Exception) {
             android.util.Log.e("PosUiCoordinator", "Error vibrating: ${e.message}")
         }

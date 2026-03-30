@@ -3,6 +3,7 @@ package com.electricdreams.numo.feature.pin
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import com.electricdreams.numo.util.startActivityForResultCompat
 
 /**
  * Helper class to add PIN protection to activities.
@@ -88,7 +89,7 @@ class PinProtectionHelper(private val activity: Activity) {
             putExtra(PinEntryActivity.EXTRA_SUBTITLE, "Verify to access this feature")
             putExtra(PinEntryActivity.EXTRA_ALLOW_BACK, true)
         }
-        activity.startActivityForResult(intent, REQUEST_PIN_VERIFY)
+        activity.startActivityForResultCompat(intent, REQUEST_PIN_VERIFY)
         return true
     }
 

@@ -3,6 +3,7 @@ package com.electricdreams.numo.feature.baskets
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import com.electricdreams.numo.util.setSoftInputModeResize
 import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -120,7 +121,7 @@ class SavedBasketsActivity : AppCompatActivity() {
                 android.view.ViewGroup.LayoutParams.MATCH_PARENT,
                 android.view.ViewGroup.LayoutParams.WRAP_CONTENT
             )
-            setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+            setSoftInputModeResize()
         }
 
         dialog.setOnShowListener {

@@ -2,6 +2,8 @@ package com.electricdreams.numo.ui.components
 
 import android.content.Context
 import android.os.Build
+import com.electricdreams.numo.util.getVibrator
+import com.electricdreams.numo.util.vibrateCompat
 import android.os.Vibrator
 import android.view.LayoutInflater
 import android.widget.Button
@@ -20,7 +22,7 @@ class KeypadManager(
     private var vibrator: Vibrator? = null
 
     init {
-        vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator?
+        vibrator = context.getVibrator()
         setupKeypad()
     }
 
@@ -97,7 +99,7 @@ class KeypadManager(
                 v.vibrate(android.os.VibrationEffect.createPredefined(android.os.VibrationEffect.EFFECT_CLICK))
             } else {
                 @Suppress("DEPRECATION")
-                v.vibrate(VIBRATE_KEYPAD)
+                v.vibrateCompat(VIBRATE_KEYPAD)
             }
         }
     }

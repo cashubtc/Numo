@@ -406,6 +406,7 @@ class ItemListActivity : AppCompatActivity() {
     }
 
     @Deprecated("Deprecated in Java")
+    @Suppress("DEPRECATION")
     override fun onBackPressed() {
         if (isReorderingMode) {
             exitReorderingMode()
