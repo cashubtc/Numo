@@ -130,7 +130,8 @@ class OnboardingMintAdapter(
     }
 
     /**
-     * Set a mint as the new default with a gradient-ring animation on the hero card.
+     * Set a mint as the new default with a gradient-ring animation on the hero card
+     * and a synchronized crossfade on the swapped popular-mint row.
      */
     fun confirmSetDefault(mintUrl: String) {
         val mintIndex = mints.indexOf(mintUrl)
@@ -144,6 +145,7 @@ class OnboardingMintAdapter(
             return
         }
 
+        val oldDefault = mints[0]
         pendingSwapIndex = mintIndex
         pendingSwapUrl = mintUrl
 
@@ -151,16 +153,15 @@ class OnboardingMintAdapter(
 
         // 1. Spin the gradient ring around the avatar
         hero.gradientRing.spin {
-            // 3. Ring done — swap the underlying data for the rest of the list
+            // Ring done — swap the underlying data
             swapData(pendingSwapIndex)
             pendingSwapIndex = -1
             pendingSwapUrl = null
         }
 
-        // 2. Crossfade icon + name early so new content is settled before ring ends
+        // 2. Crossfade hero icon + name (starts after short delay)
         val crossfadeDelay = 150L
         val fadeDuration = 150L
-
         val appleSpring = PathInterpolator(0.175f, 0.885f, 0.32f, 1.1f)
 
         hero.mintIcon.animate()
@@ -169,7 +170,6 @@ class OnboardingMintAdapter(
             .setStartDelay(crossfadeDelay)
             .withEndAction {
                 listener.onLoadMintIcon(mintUrl, hero.mintIcon)
-                // Fade in + settle bounce
                 hero.mintIcon.scaleX = 0.92f
                 hero.mintIcon.scaleY = 0.92f
                 hero.mintIcon.animate()
@@ -188,7 +188,6 @@ class OnboardingMintAdapter(
             .setStartDelay(crossfadeDelay)
             .withEndAction {
                 hero.mintName.text = newName
-                // Slide in from right + fade
                 hero.mintName.translationX = 8f * hero.mintName.resources.displayMetrics.density
                 hero.mintName.animate()
                     .alpha(1f)
@@ -213,6 +212,52 @@ class OnboardingMintAdapter(
                     .start()
             }
             .start()
+
+        // 3. Animate the tapped popular-mint row in sync with the hero
+        val tappedAdapterPos = mintIndex + 1
+        val mintHolder = recyclerView?.findViewHolderForAdapterPosition(tappedAdapterPos) as? MintViewHolder
+        if (mintHolder != null) {
+            val density = mintHolder.itemView.resources.displayMetrics.density
+            val slideUp = -16f * density
+            val slideIn = 12f * density
+            val exitDuration = 180L
+            val enterDuration = 280L
+
+            // Exit: slide up + shrink + fade out (mint flies toward hero)
+            mintHolder.icon.animate()
+                .alpha(0f).translationY(slideUp).scaleX(0.85f).scaleY(0.85f)
+                .setDuration(exitDuration)
+                .setStartDelay(crossfadeDelay)
+                .withEndAction {
+                    // Swap content
+                    listener.onLoadMintIcon(oldDefault, mintHolder.icon)
+                    // Enter: slide in from below + scale up with spring
+                    mintHolder.icon.translationY = slideIn
+                    mintHolder.icon.scaleX = 0.92f
+                    mintHolder.icon.scaleY = 0.92f
+                    mintHolder.icon.animate()
+                        .alpha(1f).translationY(0f).scaleX(1f).scaleY(1f)
+                        .setDuration(enterDuration)
+                        .setInterpolator(appleSpring)
+                        .start()
+                }
+                .start()
+
+            mintHolder.name.animate()
+                .alpha(0f).translationY(slideUp)
+                .setDuration(exitDuration)
+                .setStartDelay(crossfadeDelay)
+                .withEndAction {
+                    mintHolder.name.text = listener.onResolveMintName(oldDefault)
+                    mintHolder.name.translationY = slideIn
+                    mintHolder.name.animate()
+                        .alpha(1f).translationY(0f)
+                        .setDuration(enterDuration)
+                        .setInterpolator(appleSpring)
+                        .start()
+                }
+                .start()
+        }
     }
 
     /**
@@ -234,7 +279,7 @@ class OnboardingMintAdapter(
     }
 
     /**
-     * Swap data arrays and notify the list rows (not the hero — it's already animated).
+     * Swap data arrays only — visual animation is handled by confirmSetDefault.
      */
     private fun swapData(tappedMintIndex: Int) {
         if (tappedMintIndex < 1 || tappedMintIndex >= mints.size) return
@@ -248,11 +293,11 @@ class OnboardingMintAdapter(
         mints[0] = newDefault
         mints[tappedMintIndex] = oldDefault
 
-        val tappedAdapterPos = tappedMintIndex + 1
-
         rebuildItems()
-        notifyItemChanged(1)               // Header may change
-        notifyItemChanged(tappedAdapterPos) // Swapped popular mint row
+        // Rebind all popular mint rows so click listeners pick up the new URLs
+        for (i in 2 until items.size) {
+            notifyItemChanged(i)
+        }
 
         listener.onDefaultMintChanged(newDefault)
     }
