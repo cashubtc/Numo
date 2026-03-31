@@ -1036,7 +1036,7 @@ class OnboardingActivity : AppCompatActivity() {
                     refreshMintProfilesForReview()
                 }
 
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         this@OnboardingActivity,
@@ -1078,7 +1078,7 @@ class OnboardingActivity : AppCompatActivity() {
                     showSuccessScreen(isRestore = false)
                 }
 
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         this@OnboardingActivity,
@@ -1256,7 +1256,7 @@ class OnboardingActivity : AppCompatActivity() {
                     showSuccessScreen(isRestore = true)
                 }
 
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         this@OnboardingActivity,
