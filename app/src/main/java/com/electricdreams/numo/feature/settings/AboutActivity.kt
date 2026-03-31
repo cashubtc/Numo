@@ -121,17 +121,37 @@ class AboutActivity : AppCompatActivity() {
     }
 
     private fun showTermsDialog() {
-        AlertDialog.Builder(this)
+        val textView = android.widget.TextView(this).apply {
+            text = getString(R.string.terms_of_service_full)
+            typeface = android.graphics.Typeface.MONOSPACE
+            val padding = (16 * resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
+            textSize = 12f
+        }
+        val scrollView = android.widget.ScrollView(this).apply {
+            addView(textView)
+        }
+        androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle(R.string.settings_about_dialog_terms_title)
-            .setMessage(R.string.terms_of_service_full)
+            .setView(scrollView)
             .setPositiveButton(R.string.common_close, null)
             .show()
     }
 
     private fun showPrivacyDialog() {
-        AlertDialog.Builder(this)
+        val textView = android.widget.TextView(this).apply {
+            text = getString(R.string.privacy_policy_full)
+            typeface = android.graphics.Typeface.MONOSPACE
+            val padding = (16 * resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
+            textSize = 12f
+        }
+        val scrollView = android.widget.ScrollView(this).apply {
+            addView(textView)
+        }
+        androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle(R.string.settings_about_dialog_privacy_title)
-            .setMessage(R.string.privacy_policy_full)
+            .setView(scrollView)
             .setPositiveButton(R.string.common_close, null)
             .show()
     }

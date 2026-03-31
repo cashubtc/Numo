@@ -346,18 +346,35 @@ class OnboardingActivity : AppCompatActivity() {
         if (termsStart != -1) {
             val termsEnd = termsStart + termsLabel.length
 
-            val clickableSpan = object : ClickableSpan() {
+            val termsSpan = object : ClickableSpan() {
                 override fun onClick(widget: View) {
                     showTermsDialog()
                 }
 
                 override fun updateDrawState(ds: TextPaint) {
-                    // No super — avoids default blue color and underline
                     ds.isFakeBoldText = true
                 }
             }
 
-            spannableString.setSpan(clickableSpan, termsStart, termsEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            spannableString.setSpan(termsSpan, termsStart, termsEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+
+        val privacyLabel = "Privacy Policy"
+        val privacyStart = fullText.indexOf(privacyLabel)
+        if (privacyStart != -1) {
+            val privacyEnd = privacyStart + privacyLabel.length
+
+            val privacySpan = object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    showPrivacyDialog()
+                }
+
+                override fun updateDrawState(ds: TextPaint) {
+                    ds.isFakeBoldText = true
+                }
+            }
+
+            spannableString.setSpan(privacySpan, privacyStart, privacyEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
 
         termsText.text = spannableString
@@ -365,9 +382,37 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun showTermsDialog() {
+        val textView = TextView(this).apply {
+            text = getString(R.string.dialog_terms_body)
+            typeface = android.graphics.Typeface.MONOSPACE
+            val padding = (16 * resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
+            textSize = 12f
+        }
+        val scrollView = android.widget.ScrollView(this).apply {
+            addView(textView)
+        }
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_terms_title)
-            .setMessage(getString(R.string.dialog_terms_body))
+            .setView(scrollView)
+            .setPositiveButton(R.string.common_close, null)
+            .show()
+    }
+
+    private fun showPrivacyDialog() {
+        val textView = TextView(this).apply {
+            text = getString(R.string.privacy_policy_full)
+            typeface = android.graphics.Typeface.MONOSPACE
+            val padding = (16 * resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
+            textSize = 12f
+        }
+        val scrollView = android.widget.ScrollView(this).apply {
+            addView(textView)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.settings_about_dialog_privacy_title)
+            .setView(scrollView)
             .setPositiveButton(R.string.common_close, null)
             .show()
     }
