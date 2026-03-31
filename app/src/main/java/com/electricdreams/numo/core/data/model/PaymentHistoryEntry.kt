@@ -99,6 +99,10 @@ data class PaymentHistoryEntry(
     @SerializedName("swapToLightningMintJson")
     val swapToLightningMintJson: String? = null,
 
+    /** BTCPay Server invoice ID - for resuming BTCPay pending payments */
+    @SerializedName("btcPayInvoiceId")
+    val btcPayInvoiceId: String? = null,
+
     /** User-assigned label for this transaction */
     @SerializedName("label")
     override val label: String? = null,
@@ -152,6 +156,10 @@ data class PaymentHistoryEntry(
     /** Check if this payment is completed */
     override fun isCompleted(): Boolean = status == STATUS_COMPLETED
 
+    /** Check if this payment expired (BTCPay invoice expired before payment) */
+    override fun isExpired(): Boolean = status == STATUS_EXPIRED
+    override fun isFailed(): Boolean = status == STATUS_FAILED
+
     /** Check if this payment was via Lightning */
     fun isLightning(): Boolean = paymentType == TYPE_LIGHTNING
 
@@ -202,6 +210,8 @@ data class PaymentHistoryEntry(
         const val STATUS_PENDING = "pending"
         const val STATUS_COMPLETED = "completed"
         const val STATUS_CANCELLED = "cancelled"
+        const val STATUS_EXPIRED = "expired"
+        const val STATUS_FAILED = "failed"
 
         const val TYPE_CASHU = "cashu"
         const val TYPE_LIGHTNING = "lightning"
