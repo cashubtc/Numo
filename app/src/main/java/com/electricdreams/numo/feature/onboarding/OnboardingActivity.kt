@@ -147,6 +147,7 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var termsText: TextView
     private lateinit var acceptButton: MaterialButton
     private lateinit var circularRevealView: View
+    private lateinit var scrollingItemsContainer: FrameLayout
 
     // Step 2: Choose Path
     private lateinit var choosePathContainer: FrameLayout
@@ -315,6 +316,7 @@ class OnboardingActivity : AppCompatActivity() {
         termsText = findViewById(R.id.terms_text)
         acceptButton = findViewById(R.id.accept_button)
         circularRevealView = findViewById(R.id.welcome_circular_reveal)
+        scrollingItemsContainer = findViewById(R.id.scrolling_items_container)
 
         // Choose Path
         choosePathContainer = findViewById(R.id.choose_path_container)
@@ -990,7 +992,8 @@ class OnboardingActivity : AppCompatActivity() {
             tagline = welcomeTagline,
             acceptButton = acceptButton,
             termsText = termsText,
-            revealView = circularRevealView
+            revealView = circularRevealView,
+            emojiContainer = scrollingItemsContainer
         )
         welcomeAnimator?.start(lifecycleScope)
     }

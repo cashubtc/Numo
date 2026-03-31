@@ -31,6 +31,14 @@
             android:background="@color/numo_navy"
             android:visibility="invisible" />
 
+        <!-- Scrolling Items container (rendered behind text) -->
+        <FrameLayout
+            android:id="@+id/scrolling_items_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipChildren="false"
+            android:clipToPadding="false" />
+
         <!-- Content Layer (on top of emojis) -->
         <LinearLayout
             android:layout_width="match_parent"

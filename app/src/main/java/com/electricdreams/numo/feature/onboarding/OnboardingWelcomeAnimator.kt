@@ -7,6 +7,11 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
+import android.view.Gravity
+import android.view.animation.LinearInterpolator
+import android.widget.FrameLayout
 import android.view.View
 import android.view.ViewAnimationUtils
 import android.view.animation.AccelerateDecelerateInterpolator
@@ -40,12 +45,27 @@ class OnboardingWelcomeAnimator(
     private val tagline: TextView,
     private val acceptButton: MaterialButton,
     private val termsText: TextView,
-    private val revealView: View
+    private val revealView: View,
+    private val emojiContainer: FrameLayout
 ) {
     private val navyColor = ContextCompat.getColor(activity, R.color.numo_navy)
     private val whiteColor = ContextCompat.getColor(activity, android.R.color.white)
 
     private val activeAnimators = mutableListOf<Animator>()
+
+    // === Scrolling row tiles ===
+    private data class RowTile(val emoji: String, val colorRes: Int)
+    private val row1Emojis = listOf(RowTile("\uD83D\uDC55", R.color.chip_ribbon_cyan), RowTile("\uD83E\uDD69", R.color.chip_ribbon_pink), RowTile("\uD83C\uDF3F", R.color.chip_ribbon_lime), RowTile("\uD83E\uDD5C", R.color.chip_ribbon_green), RowTile("\u2615", R.color.chip_ribbon_orange), RowTile("\uD83C\uDFB8", R.color.chip_ribbon_cyan), RowTile("\uD83E\uDDE2", R.color.chip_ribbon_purple), RowTile("\uD83D\uDCF1", R.color.chip_ribbon_yellow))
+    private val row2Emojis = listOf(RowTile("\uD83C\uDF55", R.color.chip_ribbon_orange), RowTile("\uD83E\uDDC1", R.color.chip_ribbon_pink), RowTile("\uD83D\uDC8E", R.color.chip_ribbon_purple), RowTile("\uD83C\uDFA8", R.color.chip_ribbon_cyan), RowTile("\uD83C\uDF2E", R.color.chip_ribbon_yellow), RowTile("\uD83C\uDF77", R.color.chip_ribbon_pink), RowTile("\uD83E\uDDF5", R.color.chip_ribbon_lime), RowTile("\uD83C\uDFAA", R.color.chip_ribbon_green))
+    private val row3Emojis = listOf(RowTile("\uD83E\uDD56", R.color.chip_ribbon_yellow), RowTile("\uD83E\uDDC0", R.color.chip_ribbon_orange), RowTile("\uD83C\uDF3A", R.color.chip_ribbon_pink), RowTile("\uD83D\uDCE6", R.color.chip_ribbon_green), RowTile("\uD83C\uDF70", R.color.chip_ribbon_purple), RowTile("\uD83C\uDF73", R.color.chip_ribbon_lime), RowTile("\uD83D\uDECD\uFE0F", R.color.chip_ribbon_cyan), RowTile("\uD83C\uDF7A", R.color.chip_ribbon_orange))
+    private val row4Emojis = listOf(RowTile("\uD83E\uDDF4", R.color.chip_ribbon_cyan), RowTile("\uD83C\uDF4B", R.color.chip_ribbon_yellow), RowTile("\uD83C\uDFA7", R.color.chip_ribbon_purple), RowTile("\uD83E\uDDCA", R.color.chip_ribbon_lime), RowTile("\uD83C\uDF6B", R.color.chip_ribbon_orange), RowTile("\uD83C\uDFB2", R.color.chip_ribbon_green), RowTile("\uD83E\uDDF8", R.color.chip_ribbon_pink), RowTile("\uD83D\uDD11", R.color.chip_ribbon_cyan))
+    private val row5Emojis = listOf(RowTile("\uD83C\uDF81", R.color.chip_ribbon_pink), RowTile("\uD83E\uDD64", R.color.chip_ribbon_orange), RowTile("\uD83E\uDDF2", R.color.chip_ribbon_purple), RowTile("\uD83C\uDF7F", R.color.chip_ribbon_yellow), RowTile("\uD83E\uDDF3", R.color.chip_ribbon_green), RowTile("\uD83C\uDFAF", R.color.chip_ribbon_cyan), RowTile("\uD83C\uDF69", R.color.chip_ribbon_lime), RowTile("\uD83D\uDD2E", R.color.chip_ribbon_purple))
+
+    private data class ScrollingTile(val view: View, val initialX: Float, val speedPx: Float, val direction: Float, val wrapWidth: Float, val rowY: Float, val targetAlpha: Float)
+    private val scrollingTiles = mutableListOf<ScrollingTile>()
+    private var scrollAnimator: ValueAnimator? = null
+    private var scrollTime = 0f
+    private var rowGradientView: View? = null
     private var systemBarsFlipped = false
 
     fun start(scope: CoroutineScope) {
@@ -65,6 +85,7 @@ class OnboardingWelcomeAnimator(
                 delay(200)
                 startPhase2_LogoReveal()
                 startPhase3_Tagline()
+                startScrollingRows()
                 delay(400)
                 startPhase4_CtaReveal()
             }
@@ -77,6 +98,7 @@ class OnboardingWelcomeAnimator(
         tagline.alpha = 1f; tagline.translationY = 0f
         acceptButton.alpha = 1f; acceptButton.translationY = 0f
         termsText.alpha = 0.7f; termsText.translationY = 0f
+        startScrollingRowsFinalState()
         val controller = WindowInsetsControllerCompat(activity.window, activity.window.decorView)
         controller.isAppearanceLightStatusBars = false
         controller.isAppearanceLightNavigationBars = false
@@ -87,14 +109,22 @@ class OnboardingWelcomeAnimator(
         val animators = activeAnimators.toList()
         activeAnimators.clear()
         animators.forEach { it.cancel() }
+        scrollAnimator?.cancel()
+        scrollAnimator = null
+        scrollTime = 0f
+        scrollingTiles.clear()
+        rowGradientView = null
+        emojiContainer.removeAllViews()
         systemBarsFlipped = false
     }
 
     fun pause() {
+        scrollAnimator?.pause()
         activeAnimators.toList().forEach { it.pause() }
     }
 
     fun resume() {
+        scrollAnimator?.resume()
         activeAnimators.toList().forEach { it.resume() }
     }
 
@@ -103,6 +133,11 @@ class OnboardingWelcomeAnimator(
             ?.setBackgroundColor(whiteColor)
 
         revealView.visibility = View.INVISIBLE
+        emojiContainer.removeAllViews()
+        scrollingTiles.clear()
+        scrollAnimator?.cancel()
+        scrollAnimator = null
+        scrollTime = 0f
 
         val density = activity.resources.displayMetrics.density
         letterViews.forEach { letter ->
@@ -288,6 +323,142 @@ class OnboardingWelcomeAnimator(
     }
 
     // === Helpers ===
+
+
+    private fun startScrollingRowsFinalState() {
+        createScrollingRows()
+        startScrollAnimation()
+        scrollingTiles.forEach { tile -> tile.view.alpha = tile.targetAlpha }
+        rowGradientView?.alpha = 1f
+    }
+
+    private suspend fun startScrollingRows() {
+        createScrollingRows()
+        startScrollAnimation()
+
+        suspendCancellableCoroutine<Unit> { cont ->
+            val fadeAnim = ValueAnimator.ofFloat(0f, 1f).apply {
+                duration = 800
+                interpolator = DecelerateInterpolator()
+
+                addUpdateListener {
+                    val fraction = it.animatedFraction
+                    scrollingTiles.forEach { tile -> tile.view.alpha = tile.targetAlpha * fraction }
+                    rowGradientView?.alpha = fraction
+                }
+
+                addListener(onEnd { if (cont.isActive) cont.resume(Unit) })
+            }
+            cont.invokeOnCancellation { fadeAnim.cancel() }
+            trackAndStart(fadeAnim)
+        }
+    }
+
+    private fun createScrollingRows() {
+        val density = activity.resources.displayMetrics.density
+        val tileSizePx = (48 * density).toInt()
+        val spacingPx = (8 * density).toInt()
+        val stepPx = tileSizePx + spacingPx
+
+        data class RowConfig(
+            val emojis: List<RowTile>,
+            val direction: Float,  // 1.0 = R→L, -1.0 = L→R
+            val speedDp: Float,
+            val rowIndex: Int,
+            val alpha: Float       // target opacity for this row
+        )
+
+        val rows = listOf(
+            RowConfig(row1Emojis,  1f, 12f, 0, 0.22f),
+            RowConfig(row2Emojis, -1f,  9f, 1, 0.16f),
+            RowConfig(row3Emojis,  1f, 15f, 2, 0.11f),
+            RowConfig(row4Emojis, -1f,  7f, 3, 0.06f),
+            RowConfig(row5Emojis,  1f, 11f, 4, 0.03f)
+        )
+
+        scrollingTiles.clear()
+
+        rows.forEach { config ->
+            val wrapWidth = (config.emojis.size * stepPx).toFloat()
+            val speedPx = config.speedDp * density
+            val rowY = (config.rowIndex * stepPx).toFloat()
+
+            config.emojis.forEachIndexed { i, item ->
+                val tileView = createRowTileView(item, sizePx = tileSizePx)
+                tileView.translationY = rowY
+                tileView.alpha = 0f
+                emojiContainer.addView(tileView)
+
+                scrollingTiles.add(ScrollingTile(
+                    view = tileView,
+                    initialX = (i * stepPx).toFloat(),
+                    speedPx = speedPx,
+                    direction = config.direction,
+                    wrapWidth = wrapWidth,
+                    rowY = rowY,
+                    targetAlpha = config.alpha
+                ))
+            }
+        }
+
+        // Gradient overlay — aggressive fade so bottom rows dissolve into background
+        val totalRowsHeight = 5 * tileSizePx + 4 * spacingPx
+        val gradientHeight = (totalRowsHeight * 0.8f).toInt()
+        rowGradientView = View(activity).apply {
+            background = GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(Color.TRANSPARENT, Color.argb(220, 10, 37, 64), navyColor)
+            )
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                gradientHeight
+            ).apply {
+                gravity = Gravity.TOP
+                topMargin = totalRowsHeight - gradientHeight
+            }
+            alpha = 0f
+        }
+        emojiContainer.addView(rowGradientView)
+    }
+
+    private fun startScrollAnimation() {
+        scrollTime = 0f
+        scrollAnimator?.cancel()
+
+        scrollAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+            duration = 16L  // ~60fps tick
+            repeatCount = ValueAnimator.INFINITE
+            interpolator = LinearInterpolator()
+            addUpdateListener {
+                scrollTime += 0.016f
+                updateRowPositions()
+            }
+        }
+        scrollAnimator?.start()
+    }
+
+    private fun updateRowPositions() {
+        val containerWidth = emojiContainer.width.toFloat()
+
+        scrollingTiles.forEach { tile ->
+            val totalScroll = scrollTime * tile.speedPx
+            // Modulo wrap: tile scrolls continuously and wraps around
+            var x = tile.initialX - totalScroll * tile.direction
+            x = ((x % tile.wrapWidth) + tile.wrapWidth) % tile.wrapWidth
+            // Shift so tiles cover the visible area (centered around 0..containerWidth)
+            if (x > containerWidth) x -= tile.wrapWidth
+            tile.view.translationX = x
+        }
+    }
+
+    private fun createRowTileView(tile: RowTile, sizePx: Int): View {
+        return TextView(activity).apply {
+            text = tile.emoji
+            textSize = 22f
+            gravity = Gravity.CENTER
+            layoutParams = FrameLayout.LayoutParams(sizePx, sizePx)
+        }
+    }
 
     private fun onEnd(action: () -> Unit): AnimatorListenerAdapter {
         return object : AnimatorListenerAdapter() {
