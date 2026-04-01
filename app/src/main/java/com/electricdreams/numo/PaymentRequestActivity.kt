@@ -635,6 +635,14 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
     }
 
+    private fun generateThemedQrCode(text: String): android.graphics.Bitmap {
+        val currentNightMode = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        val isDarkTheme = currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val qrForeground = if (isDarkTheme) android.graphics.Color.WHITE else android.graphics.Color.BLACK
+        val qrBackground = android.graphics.Color.TRANSPARENT
+        return QrCodeGenerator.generate(text, 512, qrForeground, qrBackground)
+    }
+
     private fun updateUnifiedQrCode() {
         val creq = nostrHandler?.paymentRequestBech32
         val lnbc = lightningInvoice
@@ -668,7 +676,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         if (unifiedUri == null) return
 
         try {
-            val qrBitmap = QrCodeGenerator.generate(unifiedUri, 512)
+            val qrBitmap = generateThemedQrCode(unifiedUri)
             unifiedQrImageView.setImageBitmap(qrBitmap)
             unifiedQrImageView.visibility = View.VISIBLE
             unifiedLoadingSpinner.visibility = View.GONE
@@ -687,7 +695,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         val callback = object : NostrPaymentHandler.Callback {
             override fun onPaymentRequestReady(paymentRequest: String) {
                 try {
-                    val qrBitmap = QrCodeGenerator.generate(paymentRequest, 512)
+                    val qrBitmap = generateThemedQrCode(paymentRequest)
                     cashuQrImageView.setImageBitmap(qrBitmap)
                     cashuQrImageView.visibility = View.VISIBLE
                     cashuLoadingSpinner.visibility = View.GONE
@@ -766,7 +774,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 }
 
                 try {
-                    val qrBitmap = QrCodeGenerator.generate(bolt11, 512)
+                    val qrBitmap = generateThemedQrCode(bolt11)
                     lightningQrImageView.setImageBitmap(qrBitmap)
                     lightningQrImageView.visibility = View.VISIBLE
                     // Hide loading spinner and show the bolt icon
