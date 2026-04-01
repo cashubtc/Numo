@@ -19,6 +19,7 @@ import com.google.android.flexbox.FlexboxLayout
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.electricdreams.numo.ui.util.DialogHelper
 import androidx.cardview.widget.CardView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -695,10 +696,13 @@ class ItemSelectionActivity : AppCompatActivity() {
     }
 
     private fun showClearBasketDialog() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.item_selection_dialog_clear_basket_title)
-            .setMessage(R.string.item_selection_dialog_clear_basket_message)
-            .setPositiveButton(R.string.item_selection_dialog_clear_basket_positive) { _, _ ->
+        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
+            title = getString(R.string.item_selection_dialog_clear_basket_title),
+            message = getString(R.string.item_selection_dialog_clear_basket_message),
+            confirmText = getString(R.string.item_selection_dialog_clear_basket_positive),
+            cancelText = getString(R.string.common_cancel),
+            isDestructive = true,
+            onConfirm = {
                 // Reset to collapsed state before clearing (for next time basket appears)
                 animationHandler.resetToCollapsedState()
                 basketManager.clearBasket()
@@ -707,8 +711,7 @@ class ItemSelectionActivity : AppCompatActivity() {
                 refreshBasket()
                 updateUndoRedoState()
             }
-            .setNegativeButton(R.string.common_cancel, null)
-            .show()
+        ))
     }
 
     // ----- Category Filtering -----

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingHorizontal="32dp"
+    android:clipToPadding="false"
+    android:clipChildren="false">
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="32dp" />
+
+    <TextView
+        android:id="@+id/slide_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="42sp"
+        android:fontFamily="sans-serif-black"
+        android:textColor="@color/numo_fluorescent_green"
+        android:textAllCaps="true"
+        android:letterSpacing="-0.035"
+        android:lineSpacingMultiplier="1.0" />
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="16dp" />
+
+    <TextView
+        android:id="@+id/slide_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:maxWidth="300dp"
+        android:textSize="16sp"
+        android:textColor="#FFFFFF"
+        android:lineSpacingMultiplier="1.5" />
+
+    <FrameLayout
+        android:id="@+id/slide_illustration_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginHorizontal="-32dp"
+        android:clipChildren="true"
+        android:clipToPadding="true">
+
+        <!-- Default single illustration (used by slides 2, 3) -->
+        <ImageView
+            android:id="@+id/slide_illustration"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="32dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="@null" />
+
+        <!-- Phone from right (Numo invoice — merchant, behind) -->
+        <ImageView
+            android:id="@+id/slide_phone_right"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_marginStart="80dp"
+            android:layout_marginEnd="-120dp"
+            android:scaleType="fitCenter"
+            android:rotation="-5"
+            android:visibility="gone"
+            android:contentDescription="@null" />
+
+        <!-- Phone from left (Minibits NFC — customer, on top) -->
+        <ImageView
+            android:id="@+id/slide_phone_left"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_marginEnd="80dp"
+            android:layout_marginStart="-120dp"
+            android:scaleType="fitCenter"
+            android:rotation="5"
+            android:visibility="gone"
+            android:contentDescription="@null" />
+
+    </FrameLayout>
+
+</LinearLayout>

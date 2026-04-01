@@ -15,12 +15,10 @@
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="9dp"
+            android:background="@drawable/bg_nav_back_button"
             android:contentDescription="@string/common_back"
             android:src="@drawable/ic_chevron_back"
             android:tint="@color/color_text_primary"
@@ -55,34 +53,26 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
+                android:paddingHorizontal="20dp"
                 android:paddingTop="16dp"
                 android:paddingBottom="8dp"
                 android:text="@string/webhook_settings_description"
-                android:textSize="14sp"
-                android:textColor="@color/color_text_secondary"
-                android:lineSpacingExtra="2dp" />
+                android:textAppearance="@style/Text.Helper" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="20dp"
-                android:paddingBottom="8dp"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="14dp"
                 android:text="@string/webhook_settings_section_endpoints"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_secondary"
-                android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <LinearLayout
-                android:id="@+id/endpoints_card"
+                android:id="@+id/endpoints_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:orientation="vertical"
-                android:background="@drawable/bg_rounded_card_large">
+                android:orientation="vertical">
 
                 <LinearLayout
                     android:id="@+id/endpoints_list"
@@ -90,86 +80,54 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical" />
 
-                <TextView
+                <include
                     android:id="@+id/empty_state_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="24dp"
-                    android:text="@string/webhook_settings_empty"
-                    android:textColor="@color/color_text_tertiary"
-                    android:textSize="14sp" />
+                    layout="@layout/component_empty_state" />
             </LinearLayout>
 
-            <LinearLayout
+            <Button
                 android:id="@+id/add_endpoint_button"
+                style="@style/Widget.Button.Secondary.Outlined"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
                 android:layout_marginTop="8dp"
-                android:layout_marginHorizontal="16dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="16dp"
-                android:background="@drawable/bg_rounded_card_large"
-                android:clickable="true"
-                android:focusable="true">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_add"
-                    app:tint="@color/color_primary_green" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/webhook_settings_add_endpoint"
-                    android:textSize="16sp"
-                    android:textColor="@color/color_primary_green"
-                    android:fontFamily="sans-serif-medium" />
-            </LinearLayout>
+                android:text="+ Add Endpoint"
+                android:gravity="center" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="32dp"
-                android:paddingBottom="8dp"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="14dp"
                 android:text="@string/webhook_settings_section_actions"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_secondary"
-                android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <LinearLayout
                 android:id="@+id/sync_all_button"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginHorizontal="16dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="16dp"
-                android:background="@drawable/bg_rounded_card_large"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
-                android:focusable="true">
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="14dp"
                     android:src="@drawable/ic_refresh"
-                    app:tint="@color/color_text_primary" />
+                    app:tint="@color/color_icon_secondary" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/webhook_settings_sync_all"
-                    android:textSize="16sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium" />
+                    android:text="Sync All Endpoints"
+                    android:textAppearance="@style/Text.RowTitle" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

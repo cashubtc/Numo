@@ -65,6 +65,7 @@ class LanguageSettingsActivity : AppCompatActivity() {
             applyLanguage(newCode)
             updateSummary(newCode)
         }
+
     }
 
     private fun applyLanguage(langCode: String) {

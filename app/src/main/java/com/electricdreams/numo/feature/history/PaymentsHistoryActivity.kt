@@ -14,6 +14,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.electricdreams.numo.ui.util.DialogHelper
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
@@ -26,6 +27,7 @@ import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.databinding.ActivityHistoryBinding
+import com.electricdreams.numo.ui.components.EmptyStateHelper
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry
 import com.electricdreams.numo.payment.PaymentIntentFactory
@@ -302,22 +304,16 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun showDeleteConfirmation(entry: HistoryEntry) {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.history_dialog_delete_title)
-            .setMessage(R.string.history_dialog_delete_message)
-            .setPositiveButton(R.string.history_dialog_delete_positive) { _, _ -> deletePaymentFromHistory(entry) }
-            .setNegativeButton(R.string.history_dialog_delete_negative, null)
-            .show()
-    }
 
     private fun showClearHistoryConfirmation() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.history_dialog_clear_title)
-            .setMessage(R.string.history_dialog_clear_message)
-            .setPositiveButton(R.string.history_dialog_clear_positive) { _, _ -> clearAllHistory() }
-            .setNegativeButton(R.string.history_dialog_clear_negative, null)
-            .show()
+        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
+            title = getString(R.string.history_dialog_clear_title),
+            message = getString(R.string.history_dialog_clear_message),
+            confirmText = getString(R.string.history_dialog_clear_positive),
+            cancelText = getString(R.string.history_dialog_clear_negative),
+            isDestructive = true,
+            onConfirm = { clearAllHistory() }
+        ))
     }
 
     private fun showOverflowMenu(anchor: View) {
@@ -349,7 +345,15 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         adapter.setEntries(currentHistoryList)
 
         val isEmpty = currentHistoryList.isEmpty()
-        binding.emptyView.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        binding.emptyView.root.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        if (isEmpty) {
+            EmptyStateHelper.bind(
+                binding.emptyView.root,
+                R.drawable.ic_receipt,
+                "No Payments Yet",
+                "Payment history will appear here once you start accepting payments"
+            )
+        }
     }
 
     private fun clearAllHistory() {

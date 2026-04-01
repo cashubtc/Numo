@@ -9,6 +9,8 @@ import android.view.animation.OvershootInterpolator
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import com.electricdreams.numo.R
+import com.electricdreams.numo.ui.util.isAnimationEnabled
+import com.electricdreams.numo.ui.util.shake
 
 /**
  * A view that displays PIN entry progress as a row of dots.
@@ -132,10 +134,11 @@ class PinDotsView @JvmOverloads constructor(
     }
 
     private fun animateLastDot() {
+        if (!context.isAnimationEnabled()) return
         if (currentLength > 0 && currentLength <= dots.size) {
             val dot = dots[currentLength - 1]
-            val scaleX = ObjectAnimator.ofFloat(dot, "scaleX", 0.5f, 1.2f, 1f)
-            val scaleY = ObjectAnimator.ofFloat(dot, "scaleY", 0.5f, 1.2f, 1f)
+            val scaleX = ObjectAnimator.ofFloat(dot, "scaleX", 0.85f, 1.05f, 1f)
+            val scaleY = ObjectAnimator.ofFloat(dot, "scaleY", 0.85f, 1.05f, 1f)
             AnimatorSet().apply {
                 playTogether(scaleX, scaleY)
                 duration = 150
@@ -146,10 +149,12 @@ class PinDotsView @JvmOverloads constructor(
     }
 
     private fun animateError() {
+        if (!context.isAnimationEnabled()) {
+            postDelayed({ state = State.NORMAL; updateDotStates() }, 600)
+            return
+        }
         // Shake animation
-        val shake = ObjectAnimator.ofFloat(this, "translationX", 0f, -15f, 15f, -15f, 15f, -10f, 10f, -5f, 5f, 0f)
-        shake.duration = 400
-        shake.start()
+        shake(amplitude = 15f)
 
         // Reset state after animation
         postDelayed({
@@ -159,10 +164,11 @@ class PinDotsView @JvmOverloads constructor(
     }
 
     private fun animateSuccess() {
+        if (!context.isAnimationEnabled()) return
         // Scale up briefly then return
         dots.forEachIndexed { index, dot ->
-            val scaleX = ObjectAnimator.ofFloat(dot, "scaleX", 1f, 1.3f, 1f)
-            val scaleY = ObjectAnimator.ofFloat(dot, "scaleY", 1f, 1.3f, 1f)
+            val scaleX = ObjectAnimator.ofFloat(dot, "scaleX", 1f, 1.12f, 1f)
+            val scaleY = ObjectAnimator.ofFloat(dot, "scaleY", 1f, 1.12f, 1f)
             AnimatorSet().apply {
                 playTogether(scaleX, scaleY)
                 duration = 300

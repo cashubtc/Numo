@@ -54,7 +54,7 @@ class WithdrawLightningActivityTest {
                 assertEquals("Cashu container should be gone", View.GONE, cashuContainer.visibility)
                 
                 // Verify tab styling (checking text color is a proxy for selection)
-                val selectedColor = activity.getColor(R.color.color_text_primary)
+                val selectedColor = activity.getColor(R.color.color_bg_white)
                 assertEquals(selectedColor, tabLightning.currentTextColor)
             }
         }

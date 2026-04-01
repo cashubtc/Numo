@@ -45,6 +45,7 @@ class CurrencySettingsActivity : AppCompatActivity() {
             val selectedCurrency = getSelectedCurrency()
             currencyManager.setPreferredCurrency(selectedCurrency)
         }
+
     }
 
     private fun setSelectedCurrency(currencyCode: String) {

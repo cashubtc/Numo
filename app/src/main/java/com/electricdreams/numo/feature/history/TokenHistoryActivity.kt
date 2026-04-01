@@ -4,11 +4,12 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.View
-import androidx.appcompat.app.AlertDialog
+import com.electricdreams.numo.ui.util.DialogHelper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.R
+import com.electricdreams.numo.ui.components.EmptyStateHelper
 import com.electricdreams.numo.core.data.model.TokenHistoryEntry
 import com.electricdreams.numo.databinding.ActivityHistoryBinding
 import com.electricdreams.numo.ui.adapter.TokenHistoryAdapter
@@ -32,12 +33,14 @@ class TokenHistoryActivity : AppCompatActivity() {
 
         adapter = TokenHistoryAdapter().apply {
             setOnDeleteClickListener { entry, position ->
-                AlertDialog.Builder(this@TokenHistoryActivity)
-                    .setTitle(R.string.token_history_dialog_delete_title)
-                    .setMessage(R.string.token_history_dialog_delete_message)
-                    .setPositiveButton(R.string.token_history_dialog_delete_positive) { _, _ -> deleteTokenFromHistory(position) }
-                    .setNegativeButton(R.string.common_cancel, null)
-                    .show()
+                DialogHelper.showConfirmation(this@TokenHistoryActivity, DialogHelper.ConfirmationConfig(
+                    title = getString(R.string.token_history_dialog_delete_title),
+                    message = getString(R.string.token_history_dialog_delete_message),
+                    confirmText = getString(R.string.token_history_dialog_delete_positive),
+                    cancelText = getString(R.string.common_cancel),
+                    isDestructive = true,
+                    onConfirm = { deleteTokenFromHistory(position) }
+                ))
             }
         }
 
@@ -59,16 +62,26 @@ class TokenHistoryActivity : AppCompatActivity() {
         adapter.setEntries(history)
 
         val isEmpty = history.isEmpty()
-        binding.emptyView.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        binding.emptyView.root.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        if (isEmpty) {
+            EmptyStateHelper.bind(
+                binding.emptyView.root,
+                R.drawable.ic_receipt,
+                "No Tokens Yet",
+                "Cashu token history will appear here"
+            )
+        }
     }
 
     private fun showClearHistoryConfirmation() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.token_history_dialog_clear_title)
-            .setMessage(R.string.token_history_dialog_clear_message)
-            .setPositiveButton(R.string.token_history_dialog_clear_positive) { _, _ -> clearAllHistory() }
-            .setNegativeButton(R.string.common_cancel, null)
-            .show()
+        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
+            title = getString(R.string.token_history_dialog_clear_title),
+            message = getString(R.string.token_history_dialog_clear_message),
+            confirmText = getString(R.string.token_history_dialog_clear_positive),
+            cancelText = getString(R.string.common_cancel),
+            isDestructive = true,
+            onConfirm = { clearAllHistory() }
+        ))
     }
 
     private fun clearAllHistory() {

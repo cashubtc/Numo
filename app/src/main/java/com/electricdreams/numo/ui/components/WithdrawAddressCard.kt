@@ -6,12 +6,9 @@ import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.OvershootInterpolator
 import android.widget.Button
 import android.widget.EditText
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
+
 import android.widget.TextView
 import com.electricdreams.numo.R
 import com.google.android.material.card.MaterialCardView
@@ -39,14 +36,9 @@ class WithdrawAddressCard @JvmOverloads constructor(
 
     private var listener: OnContinueListener? = null
     
-    private val iconContainer: FrameLayout
-    private val addressIcon: ImageView
-    private val titleText: TextView
-    private val subtitleText: TextView
     private val addressInput: EditText
     private val amountInput: EditText
     private val continueButton: Button
-    private val inputContainer: LinearLayout
 
     init {
         LayoutInflater.from(context).inflate(R.layout.component_withdraw_address_card, this, true)
@@ -54,17 +46,12 @@ class WithdrawAddressCard @JvmOverloads constructor(
         // Setup card styling
         radius = resources.getDimension(R.dimen.card_corner_radius)
         cardElevation = 0f
-        setCardBackgroundColor(context.getColor(R.color.color_bg_card))
+        setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
         
         // Find views
-        iconContainer = findViewById(R.id.icon_container)
-        addressIcon = findViewById(R.id.address_icon)
-        titleText = findViewById(R.id.title_text)
-        subtitleText = findViewById(R.id.subtitle_text)
         addressInput = findViewById(R.id.address_input)
         amountInput = findViewById(R.id.amount_input)
         continueButton = findViewById(R.id.continue_button)
-        inputContainer = findViewById(R.id.input_container)
         
         setupListeners()
     }
@@ -117,10 +104,8 @@ class WithdrawAddressCard @JvmOverloads constructor(
     private fun updateButtonState() {
         val hasAddress = !addressInput.text.isNullOrBlank()
         val hasValidAmount = amountInput.text.toString().toLongOrNull()?.let { it > 0 } ?: false
-        val enabled = hasAddress && hasValidAmount
-        
-        continueButton.isEnabled = enabled
-        continueButton.alpha = if (enabled) 1f else 0.5f
+
+        continueButton.isEnabled = hasAddress && hasValidAmount
     }
 
     /**
@@ -190,17 +175,6 @@ class WithdrawAddressCard @JvmOverloads constructor(
             .setStartDelay(delay)
             .setDuration(350)
             .setInterpolator(AccelerateDecelerateInterpolator())
-            .start()
-        
-        // Icon bounce
-        iconContainer.scaleX = 0f
-        iconContainer.scaleY = 0f
-        iconContainer.animate()
-            .scaleX(1f)
-            .scaleY(1f)
-            .setStartDelay(delay + 150)
-            .setDuration(400)
-            .setInterpolator(OvershootInterpolator(2f))
             .start()
     }
 }

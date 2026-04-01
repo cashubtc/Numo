@@ -9,7 +9,6 @@ import android.widget.LinearLayout
 import androidx.appcompat.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.R
@@ -400,27 +399,6 @@ class TransactionDetailActivity : AppCompatActivity() {
         ).show()
     }
 
-    private fun openWithApp() {
-        val cashuUri = "cashu:${entry.token}"
-        val uriIntent = Intent(Intent.ACTION_VIEW, Uri.parse(cashuUri)).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, cashuUri)
-        }
-
-        val chooserIntent = Intent.createChooser(uriIntent, "Open payment with...").apply {
-            putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(shareIntent))
-        }
-
-        try {
-            startActivity(chooserIntent)
-        } catch (e: Exception) {
-            Toast.makeText(this, R.string.history_toast_no_app, Toast.LENGTH_SHORT).show()
-        }
-    }
 
     private fun copyDestination(destination: String) {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -476,12 +454,14 @@ class TransactionDetailActivity : AppCompatActivity() {
     }
 
     private fun showDeleteConfirmation() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.history_dialog_delete_title)
-            .setMessage(R.string.history_dialog_delete_message)
-            .setPositiveButton(R.string.history_dialog_delete_positive) { _, _ -> deleteTransaction() }
-            .setNegativeButton(R.string.history_dialog_delete_negative, null)
-            .show()
+        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
+            title = getString(R.string.history_dialog_delete_title),
+            message = getString(R.string.history_dialog_delete_message),
+            confirmText = getString(R.string.history_dialog_delete_positive),
+            cancelText = getString(R.string.history_dialog_delete_negative),
+            isDestructive = true,
+            onConfirm = { deleteTransaction() }
+        ))
     }
 
     private fun deleteTransaction() {

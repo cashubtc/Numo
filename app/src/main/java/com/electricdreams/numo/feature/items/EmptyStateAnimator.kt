@@ -15,6 +15,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.electricdreams.numo.R
+import com.electricdreams.numo.ui.util.isAnimationEnabled
 import kotlin.math.sin
 
 /**
@@ -82,6 +83,7 @@ class EmptyStateAnimator(
     )
 
     fun start() {
+        if (!context.isAnimationEnabled()) return
         // Prevent multiple simultaneous setups
         if (isSettingUp || isAnimationRunning) return
         isSettingUp = true
@@ -219,8 +221,8 @@ class EmptyStateAnimator(
             val targetY = containerHeight * startYPercent
             
             // Create pop-in animation set
-            val scaleXAnim = ObjectAnimator.ofFloat(tile.view, "scaleX", 0f, 1.1f, 1f)
-            val scaleYAnim = ObjectAnimator.ofFloat(tile.view, "scaleY", 0f, 1.1f, 1f)
+            val scaleXAnim = ObjectAnimator.ofFloat(tile.view, "scaleX", 0.85f, 1.1f, 1f)
+            val scaleYAnim = ObjectAnimator.ofFloat(tile.view, "scaleY", 0.85f, 1.1f, 1f)
             val alphaAnim = ObjectAnimator.ofFloat(tile.view, "alpha", 0f, 1f)
             val translateYAnim = ObjectAnimator.ofFloat(
                 tile.view, "translationY", 
@@ -328,6 +330,45 @@ class EmptyStateAnimator(
         floatAnimator = null
         floatingTiles.clear()
         tileContainer?.removeAllViews()
+    }
+
+    /**
+     * Animate tiles out (reverse pop-in: staggered shrink + fade), then stop.
+     * Calls [onComplete] after the last tile exits.
+     */
+    fun animateOut(onComplete: (() -> Unit)? = null) {
+        if (!isAnimationRunning || floatingTiles.isEmpty()) {
+            stop()
+            onComplete?.invoke()
+            return
+        }
+
+        floatAnimator?.cancel()
+        var completedCount = 0
+
+        floatingTiles.reversed().forEachIndexed { index, tile ->
+            val delay = index * 50L
+            val scaleX = ObjectAnimator.ofFloat(tile.view, "scaleX", tile.view.scaleX, 0.85f)
+            val scaleY = ObjectAnimator.ofFloat(tile.view, "scaleY", tile.view.scaleY, 0.85f)
+            val alpha = ObjectAnimator.ofFloat(tile.view, "alpha", tile.view.alpha, 0f)
+
+            AnimatorSet().apply {
+                playTogether(scaleX, scaleY, alpha)
+                duration = 250L
+                startDelay = delay
+                interpolator = android.view.animation.DecelerateInterpolator()
+                addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        completedCount++
+                        if (completedCount == floatingTiles.size) {
+                            stop()
+                            onComplete?.invoke()
+                        }
+                    }
+                })
+                start()
+            }
+        }
     }
 
     private fun createTileView(tile: TileItem, density: Float): View {

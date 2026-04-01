@@ -5,10 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.OvershootInterpolator
+import android.view.animation.PathInterpolator
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -127,12 +125,9 @@ class MintSelectionBottomSheet : BottomSheetDialogFragment() {
 
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val container: View = view.findViewById(R.id.mint_item_container)
-            val iconContainer: FrameLayout = view.findViewById(R.id.icon_container)
-            val mintIcon: ImageView = view.findViewById(R.id.mint_icon)
             val mintName: TextView = view.findViewById(R.id.mint_name)
             val mintUrl: TextView = view.findViewById(R.id.mint_url)
             val balanceText: TextView = view.findViewById(R.id.balance_text)
-            val chevron: ImageView = view.findViewById(R.id.chevron)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -152,11 +147,6 @@ class MintSelectionBottomSheet : BottomSheetDialogFragment() {
             // Balance with Amount formatting
             val amount = Amount(balance, Amount.Currency.BTC)
             holder.balanceText.text = amount.toString()
-            
-            // Icon styling
-            holder.mintIcon.setColorFilter(
-                ContextCompat.getColor(requireContext(), R.color.color_primary)
-            )
             
             // Click handler with ripple feedback
             holder.container.setOnClickListener {
@@ -187,18 +177,7 @@ class MintSelectionBottomSheet : BottomSheetDialogFragment() {
                 .translationY(0f)
                 .setStartDelay((position * 60).toLong())
                 .setDuration(300)
-                .setInterpolator(AccelerateDecelerateInterpolator())
-                .start()
-            
-            // Icon bounce animation
-            holder.iconContainer.scaleX = 0f
-            holder.iconContainer.scaleY = 0f
-            holder.iconContainer.animate()
-                .scaleX(1f)
-                .scaleY(1f)
-                .setStartDelay((position * 60 + 100).toLong())
-                .setDuration(350)
-                .setInterpolator(OvershootInterpolator(2f))
+                .setInterpolator(PathInterpolator(0.175f, 0.885f, 0.32f, 1.1f))
                 .start()
         }
 

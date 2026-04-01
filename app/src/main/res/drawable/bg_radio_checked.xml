@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Outer circle -->
+    <item>
+        <shape android:shape="oval">
+            <size android:width="22dp" android:height="22dp" />
+            <solid android:color="@color/color_text_primary" />
+        </shape>
+    </item>
+    <!-- Inner dot -->
+    <item
+        android:gravity="center"
+        android:width="10dp"
+        android:height="10dp">
+        <shape android:shape="oval">
+            <solid android:color="@color/color_bg_white" />
+        </shape>
+    </item>
+</layer-list>

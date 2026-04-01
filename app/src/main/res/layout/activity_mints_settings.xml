@@ -6,46 +6,51 @@
     android:background="@color/color_bg_white">
 
     <!-- Top Bar -->
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="8dp"
-        android:elevation="0dp"
         android:background="@color/color_bg_white"
+        android:paddingHorizontal="16dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_chevron_back"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="9dp"
+            android:background="@drawable/bg_nav_back_button"
             android:contentDescription="@string/common_back"
-            app:tint="@color/color_text_primary" />
+            android:src="@drawable/ic_chevron_back"
+            android:tint="@color/color_text_primary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:text="@string/mints_explore_title"
-            android:textSize="20sp"
-            android:textColor="@color/color_text_primary"
-            android:fontFamily="sans-serif-medium"
-            android:textAlignment="center" />
+            android:textAppearance="@style/Text.Title"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
             android:id="@+id/reset_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="9dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_refresh"
             android:contentDescription="@string/mints_reset_description"
-            app:tint="@color/color_text_tertiary" />
+            app:tint="@color/color_text_tertiary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Scrollable Content -->
     <ScrollView
@@ -54,11 +59,11 @@
         android:layout_height="0dp"
         android:clipToPadding="false"
         android:fillViewport="true"
-        android:background="@color/color_bg_surface"
         app:layout_constraintTop_toBottomOf="@id/top_bar"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
+            android:id="@+id/mints_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -72,7 +77,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="20dp"
                 android:paddingTop="16dp"
                 android:visibility="gone">
 
@@ -80,190 +84,224 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:layout_marginBottom="12dp"
-                    android:fontFamily="sans-serif"
+                    android:paddingHorizontal="20dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="14dp"
                     android:text="@string/mints_lightning_mint"
-                    android:textAllCaps="true"
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="13sp"
-                    android:letterSpacing="0.03" />
+                    android:textAppearance="@style/Text.SectionHeader" />
 
-                <!-- Lightning Mint Card -->
-                <androidx.cardview.widget.CardView
+                <!-- Lightning Mint Hero Card -->
+                <FrameLayout
                     android:id="@+id/lightning_mint_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardBackgroundColor="@color/color_bg_card"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="0dp">
+                    android:layout_marginHorizontal="20dp"
+                    android:clipChildren="false">
 
-                    <LinearLayout
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="20dp">
+                        app:cardBackgroundColor="@android:color/transparent"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="0dp">
 
-                        <!-- Top Row: Icon + Name/URL -->
-                        <LinearLayout
+                        <FrameLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
+                            android:background="@drawable/bg_hero_gradient_green"
+                            android:clipChildren="false">
 
-                            <!-- Icon Container (circular avatar) -->
+                            <!-- Decorative background lightning bolt with fade -->
                             <FrameLayout
-                                android:id="@+id/lightning_icon_container"
-                                android:layout_width="52dp"
-                                android:layout_height="52dp"
-                                android:layout_marginEnd="16dp">
+                                android:layout_width="140dp"
+                                android:layout_height="140dp"
+                                android:layout_gravity="bottom|end"
+                                android:layout_marginEnd="-30dp"
+                                android:layout_marginBottom="-30dp">
 
-                                <com.google.android.material.imageview.ShapeableImageView
-                                    android:id="@+id/lightning_mint_icon"
-                                    android:layout_width="52dp"
-                                    android:layout_height="52dp"
-                                    android:layout_gravity="center"
-                                    android:scaleType="centerCrop"
-                                    android:background="@color/color_bg_tertiary"
-                                    android:src="@drawable/ic_bitcoin"
-                                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Circle"
-                                    app:strokeColor="@color/color_bg_white"
-                                    app:strokeWidth="2dp"
-                                    android:contentDescription="@string/cd_mint_icon" />
+                                <ImageView
+                                    android:id="@+id/hero_bolt"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:alpha="0.08"
+                                    android:importantForAccessibility="no"
+                                    android:rotation="-15"
+                                    android:src="@drawable/ic_lightning_bolt"
+                                    app:tint="@color/color_success_green" />
+
+                                <View
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:background="@drawable/bg_hero_bolt_fade_green" />
 
                             </FrameLayout>
 
-                            <!-- Text Content -->
+                            <!-- Content -->
                             <LinearLayout
-                                android:layout_width="0dp"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
+                                android:orientation="vertical"
+                                android:padding="24dp">
 
-                                <TextView
-                                    android:id="@+id/lightning_mint_name"
-                                    android:layout_width="wrap_content"
+                                <!-- Top Row: Icon + Name/URL -->
+                                <LinearLayout
+                                    android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:text="Lightning Mint"
-                                    android:textColor="@color/color_text_primary"
-                                    android:textSize="17sp"
-                                    android:maxLines="1"
-                                    android:ellipsize="end" />
+                                    android:layout_marginTop="16dp"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical">
 
-                                <TextView
-                                    android:id="@+id/lightning_mint_url"
-                                    android:layout_width="wrap_content"
+                                    <!-- Icon Container (circular avatar) -->
+                                    <FrameLayout
+                                        android:id="@+id/lightning_icon_container"
+                                        android:layout_width="52dp"
+                                        android:layout_height="52dp"
+                                        android:layout_marginEnd="16dp">
+
+                                        <com.google.android.material.imageview.ShapeableImageView
+                                            android:id="@+id/lightning_mint_icon"
+                                            android:layout_width="52dp"
+                                            android:layout_height="52dp"
+                                            android:layout_gravity="center"
+                                            android:scaleType="centerCrop"
+                                            android:background="@color/color_bg_tertiary"
+                                            android:src="@drawable/ic_bitcoin"
+                                            app:shapeAppearanceOverlay="@style/ShapeAppearance.Circle"
+                                            app:strokeColor="@color/color_bg_white"
+                                            app:strokeWidth="2dp"
+                                            android:contentDescription="@string/cd_mint_icon" />
+
+                                    </FrameLayout>
+
+                                    <!-- Text Content -->
+                                    <LinearLayout
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:orientation="vertical">
+
+                                        <TextView
+                                            android:id="@+id/lightning_mint_name"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:fontFamily="sans-serif-medium"
+                                            android:text="Lightning Mint"
+                                            android:textColor="@color/color_text_primary"
+                                            android:textSize="17sp"
+                                            android:maxLines="1"
+                                            android:ellipsize="end" />
+
+                                        <TextView
+                                            android:id="@+id/lightning_mint_url"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginTop="2dp"
+                                            android:text="mint.example.com"
+                                            android:textColor="@color/color_text_tertiary"
+                                            android:textSize="13sp"
+                                            android:maxLines="1"
+                                            android:ellipsize="end" />
+
+                                    </LinearLayout>
+
+                                </LinearLayout>
+
+                                <!-- Divider -->
+                                <View
+                                    android:layout_width="match_parent"
+                                    android:layout_height="1dp"
+                                    android:layout_marginTop="16dp"
+                                    android:layout_marginBottom="14dp"
+                                    android:background="@color/color_divider" />
+
+                                <!-- Balance Row -->
+                                <LinearLayout
+                                    android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
-                                    android:text="mint.example.com"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/mints_balance"
+                                        android:textSize="15sp"
+                                        android:textColor="@color/color_text_secondary" />
+
+                                    <View
+                                        android:layout_width="0dp"
+                                        android:layout_height="0dp"
+                                        android:layout_weight="1" />
+
+                                    <TextView
+                                        android:id="@+id/lightning_mint_balance"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="&#8383;0"
+                                        android:textSize="17sp"
+                                        android:textColor="@color/color_text_primary"
+                                        android:fontFamily="sans-serif-medium" />
+
+                                </LinearLayout>
+
+                                <!-- Description -->
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="14dp"
+                                    android:text="@string/mints_lightning_description"
+                                    android:textSize="13sp"
                                     android:textColor="@color/color_text_tertiary"
-                                    android:textSize="13sp"
-                                    android:maxLines="1"
-                                    android:ellipsize="end" />
+                                    android:lineSpacingMultiplier="1.3" />
+
+                                <!-- Swap-to-Lightning-mint option -->
+                                <LinearLayout
+                                    android:id="@+id/swap_unknown_mints_row"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="16dp"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical">
+
+                                    <LinearLayout
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:orientation="vertical">
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="@string/mints_swap_unknown_mints_title"
+                                            android:textSize="15sp"
+                                            android:textColor="@color/color_text_primary"
+                                            android:fontFamily="sans-serif-medium" />
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginTop="2dp"
+                                            android:text="@string/mints_swap_unknown_mints_subtitle"
+                                            android:textSize="13sp"
+                                            android:textColor="@color/color_text_tertiary" />
+                                    </LinearLayout>
+
+                                    <androidx.appcompat.widget.SwitchCompat
+                                        android:id="@+id/swap_unknown_mints_switch"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        app:thumbTint="@color/selector_switch_thumb"
+                                        app:trackTint="@color/selector_switch_track" />
+
+                                </LinearLayout>
 
                             </LinearLayout>
 
-                            <!-- Lightning Badge -->
-                            <ImageView
-                                android:layout_width="28dp"
-                                android:layout_height="28dp"
-                                android:src="@drawable/ic_lightning_bolt"
-                                app:tint="@color/color_bitcoin_orange"
-                                android:contentDescription="@null" />
+                        </FrameLayout>
 
-                        </LinearLayout>
+                    </androidx.cardview.widget.CardView>
 
-                        <!-- Divider -->
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginTop="16dp"
-                            android:layout_marginBottom="14dp"
-                            android:background="@color/color_divider" />
-
-                        <!-- Balance Row -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/mints_balance"
-                                android:textSize="15sp"
-                                android:textColor="@color/color_text_secondary" />
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="0dp"
-                                android:layout_weight="1" />
-
-                            <TextView
-                                android:id="@+id/lightning_mint_balance"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="₿0"
-                                android:textSize="17sp"
-                                android:textColor="@color/color_text_primary"
-                                android:fontFamily="sans-serif-medium" />
-
-                        </LinearLayout>
-
-                        <!-- Description -->
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="14dp"
-                            android:text="@string/mints_lightning_description"
-                            android:textSize="13sp"
-                            android:textColor="@color/color_text_tertiary"
-                            android:lineSpacingMultiplier="1.3" />
-
-                        <!-- Swap-to-Lightning-mint option -->
-                        <LinearLayout
-                            android:id="@+id/swap_unknown_mints_row"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/mints_swap_unknown_mints_title"
-                                    android:textSize="15sp"
-                                    android:textColor="@color/color_text_primary"
-                                    android:fontFamily="sans-serif-medium" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
-                                    android:text="@string/mints_swap_unknown_mints_subtitle"
-                                    android:textSize="13sp"
-                                    android:textColor="@color/color_text_tertiary" />
-                            </LinearLayout>
-
-                            <androidx.appcompat.widget.SwitchCompat
-                                android:id="@+id/swap_unknown_mints_switch"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content" />
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
+                </FrameLayout>
 
             </LinearLayout>
 
@@ -274,15 +312,11 @@
                 android:id="@+id/all_mints_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="28dp"
-                android:layout_marginBottom="12dp"
-                android:fontFamily="sans-serif"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="14dp"
                 android:text="@string/mints_all_mints"
-                android:textAllCaps="true"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="13sp"
-                android:letterSpacing="0.03" />
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Mints Card -->
             <androidx.cardview.widget.CardView
@@ -324,7 +358,7 @@
                             android:id="@+id/total_balance_value"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="₿0"
+                            android:text="&#8383;0"
                             android:textSize="17sp"
                             android:textColor="@color/color_text_primary"
                             android:fontFamily="sans-serif-medium" />
@@ -394,22 +428,20 @@
                 android:id="@+id/add_mint_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="28dp"
-                android:layout_marginBottom="12dp"
-                android:fontFamily="sans-serif"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="14dp"
                 android:text="@string/mints_add_section"
-                android:textAllCaps="true"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="13sp"
-                android:letterSpacing="0.03" />
+                android:textAppearance="@style/Text.SectionHeader" />
 
-            <com.electricdreams.numo.ui.components.AddMintInputCard
-                android:id="@+id/add_mint_card"
+            <Button
+                android:id="@+id/add_mint_button"
+                style="@style/Widget.Button.Secondary.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="16dp" />
+                android:text="+ Add New Mint"
+                android:gravity="center" />
 
         </LinearLayout>
     </ScrollView>

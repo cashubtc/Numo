@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_bg_secondary"
+    android:background="@color/color_bg_white"
     android:orientation="vertical">
 
     <!-- Top App Bar -->
@@ -13,14 +13,14 @@
         android:layout_height="56dp"
         android:background="@color/color_bg_white"
         android:elevation="1dp"
-        android:paddingHorizontal="4dp">
+        android:paddingHorizontal="8dp">
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="9dp"
+            android:background="@drawable/bg_nav_back_button"
             android:contentDescription="@string/item_entry_toolbar_back"
             android:src="@drawable/ic_chevron_back"
             app:tint="@color/color_text_primary"
@@ -41,11 +41,12 @@
 
         <Button
             android:id="@+id/item_save_button"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+            style="@style/Widget.Numo.Button.Tertiary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/item_entry_button_save"
-            android:textAppearance="@style/Text.Button"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-medium"
             android:textColor="@color/color_primary_green"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -84,7 +85,7 @@
                         android:id="@+id/item_image_view"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="@color/color_bg_white"
+                        android:background="@android:color/transparent"
                         android:contentDescription="@string/item_entry_image_description"
                         android:scaleType="centerCrop" />
 
@@ -100,7 +101,7 @@
 
                 <Button
                     android:id="@+id/item_add_image_button"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    style="@style/Widget.Numo.Button.Tertiary"
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
                     android:text="@string/item_entry_button_add_photo"
@@ -110,7 +111,7 @@
 
                 <Button
                     android:id="@+id/item_remove_image_button"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    style="@style/Widget.Numo.Button.Tertiary"
                     android:layout_width="wrap_content"
                     android:layout_height="32dp"
                     android:text="@string/item_entry_button_remove_photo"
@@ -125,19 +126,20 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="8dp"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="14dp"
                 android:text="@string/item_entry_section_basic_information"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="24dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/color_bg_white">
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -152,7 +154,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp"
+                        android:paddingHorizontal="20dp"
                         android:minHeight="50dp">
 
                         <TextView
@@ -160,8 +162,7 @@
                             android:minWidth="100dp"
                             android:layout_height="wrap_content"
                             android:text="@string/item_entry_label_name"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_primary" />
+                            android:textAppearance="@style/Text.RowTitle" />
 
                         <EditText
                             android:id="@+id/item_name_input"
@@ -181,7 +182,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp"
+                        android:paddingHorizontal="20dp"
                         android:minHeight="50dp">
 
                         <TextView
@@ -189,8 +190,7 @@
                             android:minWidth="100dp"
                             android:layout_height="wrap_content"
                             android:text="@string/item_entry_label_variation"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_primary" />
+                            android:textAppearance="@style/Text.RowTitle" />
 
                         <EditText
                             android:id="@+id/item_variation_input"
@@ -210,7 +210,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="top"
-                        android:paddingHorizontal="16dp"
+                        android:paddingHorizontal="20dp"
                         android:paddingVertical="12dp"
                         android:minHeight="80dp">
 
@@ -219,8 +219,7 @@
                             android:minWidth="100dp"
                             android:layout_height="wrap_content"
                             android:text="@string/item_entry_label_description"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_primary" />
+                            android:textAppearance="@style/Text.RowTitle" />
 
                         <EditText
                             android:id="@+id/item_description_input"
@@ -242,25 +241,26 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="8dp"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="14dp"
                 android:text="@string/item_entry_section_category"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="8dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/color_bg_white">
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="0dp">
 
                     <!-- Category Tags Flow Layout -->
                     <com.google.android.flexbox.FlexboxLayout
@@ -341,25 +341,26 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="8dp"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="14dp"
                 android:text="@string/item_entry_section_pricing"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="8dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/color_bg_white">
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="0dp">
 
                     <!-- Price Type Toggle -->
                     <com.google.android.material.button.MaterialButtonToggleGroup
@@ -484,12 +485,12 @@
                 android:id="@+id/vat_section_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="8dp"
                 android:visibility="visible"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/color_bg_white">
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -504,7 +505,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp"
+                        android:paddingHorizontal="20dp"
                         android:minHeight="50dp">
 
                         <TextView
@@ -512,8 +513,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/item_entry_label_apply_vat"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_primary" />
+                            android:textAppearance="@style/Text.RowTitle" />
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switch_vat_enabled"
@@ -538,7 +538,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="16dp"
+                            android:paddingHorizontal="20dp"
                             android:minHeight="50dp">
 
                             <TextView
@@ -546,8 +546,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="@string/item_entry_label_price_includes_vat"
-                                android:textAppearance="@style/Text.Body"
-                                android:textColor="@color/color_text_primary" />
+                                android:textAppearance="@style/Text.RowTitle" />
 
                             <com.google.android.material.switchmaterial.SwitchMaterial
                                 android:id="@+id/switch_price_includes_vat"
@@ -563,7 +562,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="16dp"
+                            android:paddingHorizontal="20dp"
                             android:minHeight="50dp">
 
                             <TextView
@@ -571,8 +570,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="@string/item_entry_label_vat_rate"
-                                android:textAppearance="@style/Text.Body"
-                                android:textColor="@color/color_text_primary" />
+                                android:textAppearance="@style/Text.RowTitle" />
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -624,7 +622,7 @@
                 android:id="@+id/price_breakdown_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="8dp"
                 android:orientation="vertical"
                 android:visibility="gone"
@@ -744,19 +742,20 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="8dp"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="14dp"
                 android:text="@string/item_entry_section_identification"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="8dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/color_bg_white">
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -772,7 +771,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingStart="16dp"
+                        android:paddingStart="20dp"
                         android:paddingEnd="8dp"
                         android:minHeight="50dp">
 
@@ -781,8 +780,7 @@
                             android:minWidth="60dp"
                             android:layout_height="wrap_content"
                             android:text="@string/item_entry_label_gtin"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_primary" />
+                            android:textAppearance="@style/Text.RowTitle" />
 
                         <EditText
                             android:id="@+id/item_gtin_input"
@@ -813,8 +811,8 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
+                        android:paddingStart="20dp"
+                        android:paddingEnd="20dp"
                         android:minHeight="50dp">
 
                         <TextView
@@ -822,8 +820,7 @@
                             android:minWidth="60dp"
                             android:layout_height="wrap_content"
                             android:text="@string/item_entry_label_sku"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_primary" />
+                            android:textAppearance="@style/Text.RowTitle" />
 
                         <EditText
                             android:id="@+id/item_sku_input"
@@ -869,19 +866,20 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="8dp"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="14dp"
                 android:text="@string/item_entry_section_inventory"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="8dp"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/color_bg_white">
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -896,7 +894,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp"
+                        android:paddingHorizontal="20dp"
                         android:minHeight="50dp">
 
                         <TextView
@@ -904,8 +902,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/item_entry_label_track_quantity"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_primary" />
+                            android:textAppearance="@style/Text.RowTitle" />
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switch_track_inventory"
@@ -930,16 +927,15 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="16dp"
+                            android:paddingHorizontal="20dp"
                             android:minHeight="50dp">
 
                             <TextView
                                 android:layout_width="wrap_content"
-                            android:minWidth="120dp"
+                                android:minWidth="120dp"
                                 android:layout_height="wrap_content"
                                 android:text="@string/item_entry_label_current_stock"
-                                android:textAppearance="@style/Text.Body"
-                                android:textColor="@color/color_text_primary" />
+                                android:textAppearance="@style/Text.RowTitle" />
 
                             <EditText
                                 android:id="@+id/item_quantity_input"
@@ -960,7 +956,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="16dp"
+                            android:paddingHorizontal="20dp"
                             android:minHeight="50dp">
 
                             <TextView
@@ -968,8 +964,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="@string/item_entry_label_low_stock_alert"
-                                android:textAppearance="@style/Text.Body"
-                                android:textColor="@color/color_text_primary" />
+                                android:textAppearance="@style/Text.RowTitle" />
 
                             <com.google.android.material.switchmaterial.SwitchMaterial
                                 android:id="@+id/item_alert_checkbox"
@@ -985,17 +980,16 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="16dp"
+                            android:paddingHorizontal="20dp"
                             android:minHeight="50dp"
                             android:visibility="gone">
 
                             <TextView
                                 android:layout_width="wrap_content"
-                            android:minWidth="120dp"
+                                android:minWidth="120dp"
                                 android:layout_height="wrap_content"
                                 android:text="@string/item_entry_label_alert_when_below"
-                                android:textAppearance="@style/Text.Body"
-                                android:textColor="@color/color_text_primary" />
+                                android:textAppearance="@style/Text.RowTitle" />
 
                             <EditText
                                 android:id="@+id/item_alert_threshold_input"
@@ -1026,10 +1020,10 @@
             <!-- ==================== DELETE BUTTON (Edit mode only) ==================== -->
             <Button
                 android:id="@+id/item_cancel_button"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
+                style="@style/Widget.Numo.Button.Tertiary"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginHorizontal="20dp"
                 android:layout_marginBottom="32dp"
                 android:text="@string/item_entry_button_cancel"
                 android:textAppearance="@style/Text.Button"

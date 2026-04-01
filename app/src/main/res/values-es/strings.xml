@@ -118,6 +118,16 @@
     <string name="onboarding_restore_wallet_title">Restaurar desde copia de seguridad</string>
     <string name="onboarding_restore_wallet_subtitle">Usa tu frase semilla existente</string>
 
+    <!-- Explainer -->
+    <string name="explainer_teaser_title">Toca para aprender cómo funciona Numo.</string>
+    <string name="explainer_slide1_title">Toca para cobrar</string>
+    <string name="explainer_slide1_body">Ingresa un monto, toca cobrar y tu cliente acerca su telfono al tuyo. El pago llega al instante por NFC.</string>
+    <string name="explainer_slide2_title">Auto-custodia automtica</string>
+    <string name="explainer_slide2_body">Configura el retiro automtico para mover los pagos entrantes directamente a tu billetera Lightning. Numo es auto-custodia por defecto.</string>
+    <string name="explainer_slide3_title">Cero comisiones</string>
+    <string name="explainer_slide3_body">Numo es completamente de cdigo abierto y no cobra comisiones. Sin suscripciones, sin recortes, sin costos ocultos. Cada sat que recibes es tuyo.</string>
+    <string name="explainer_image_placeholder">Imagen de ejemplo</string>
+
     <!-- Onboarding / Restore Seed Entry -->
     <string name="onboarding_seed_toolbar_back">Atrás</string>
     <string name="onboarding_seed_toolbar_title">Restaurar cartera</string>
@@ -158,6 +168,21 @@
     <string name="onboarding_mints_count">Has seleccionado %1$d mint%2$s</string>
     <string name="onboarding_mints_continue_restore">Restaurar cartera</string>
     <string name="onboarding_mints_continue_new_wallet">Continuar</string>
+    <string name="onboarding_mints_hero_label">MINT PREDETERMINADO</string>
+    <string name="onboarding_mints_hero_subtitle">Guarda tu bitcoin</string>
+    <string name="onboarding_mints_hero_default_badge">Predeterminado</string>
+    <string name="onboarding_mints_hero_helper">Retira a tu propia billetera en cualquier momento, o establece un umbral de pago para hacerlo automáticamente.</string>
+    <string name="onboarding_mints_accept_from_header">ACEPTAR DE</string>
+    <string name="onboarding_mints_count_label">%1$d mints</string>
+    <string name="onboarding_mints_count_label_singular">%1$d mint</string>
+    <string name="onboarding_mints_status_accepting">Aceptando pagos</string>
+    <string name="onboarding_mints_status_not_accepting">No aceptando</string>
+    <string name="onboarding_mints_long_press_hint">Mantén presionado un mint para establecerlo como predeterminado</string>
+    <string name="onboarding_mints_add_new_button">+ Agregar Nuevo Mint</string>
+    <string name="onboarding_mints_set_default_title">¿Establecer como predeterminado?</string>
+    <string name="onboarding_mints_set_default_message">¿Hacer \"%1$s\" tu mint predeterminado?</string>
+    <string name="onboarding_mints_set_default_confirm">Establecer como predeterminado</string>
+    <string name="onboarding_mints_set_default_cancel">Cancelar</string>
 
     <!-- Onboarding / Restoring -->
     <string name="onboarding_restoring_title">Restaurando cartera</string>
@@ -291,7 +316,7 @@
     <string name="withdraw_lightning_option_address">📧 Dirección Lightning</string>
     <string name="withdraw_lightning_address_hint_label">Introduce una dirección Lightning</string>
     <string name="withdraw_lightning_address_hint_value">usuario@dominio.com</string>
-    <string name="withdraw_lightning_amount_label">Cantidad (sats)</string>
+    <string name="withdraw_lightning_amount_label">Cantidad</string>
     <string name="withdraw_lightning_amount_hint">1000</string>
     <string name="withdraw_lightning_button_continue">Continuar</string>
 
@@ -313,7 +338,7 @@
     <string name="withdraw_melt_amount_label">Cantidad</string>
     <string name="withdraw_melt_fee_label">Reserva de comisión</string>
     <string name="withdraw_melt_total_label">Total</string>
-    <string name="withdraw_melt_fee_note">La reserva de comisión se devolverá si la comisión real de Lightning es menor.</string>
+    <string name="withdraw_melt_fee_note">La reserva de comisión se devolverá si la comisión de Lightning es menor.</string>
     <string name="withdraw_melt_loading">Procesando retiro...</string>
 
     <!-- Withdraw - melt errors and states -->
@@ -636,8 +661,10 @@
 
     <!-- Auto-Withdraw Settings -->
     <string name="auto_withdraw_title">Retiros</string>
+    <string name="auto_withdraw_hero_label">RETIRO AUTOMÁTICO</string>
     <string name="auto_withdraw_hero_title">Retiro automático</string>
     <string name="auto_withdraw_hero_subtitle">Envía fondos automáticamente a tu cartera Lightning cuando el saldo supere un umbral</string>
+    <string name="auto_withdraw_hero_helper">Establece un umbral de pago y una dirección Lightning para retirar automáticamente cuando tu saldo alcance el límite.</string>
     <string name="auto_withdraw_status_active">Activo</string>
     <string name="auto_withdraw_status_inactive">Inactivo</string>
 
@@ -678,7 +705,7 @@
     <string name="auto_withdraw_progress_completed">Enviado correctamente</string>
     <string name="auto_withdraw_progress_failed">El retiro ha fallado</string>
 
-    <string name="auto_withdraw_settings_title">Retiro automático</string>
+    <string name="auto_withdraw_settings_title">Retiro</string>
     <string name="auto_withdraw_error_title">Detalles del error</string>
 
     <!-- Settings - Withdrawals menu item -->
@@ -710,6 +737,9 @@
     <string name="withdraw_amount_placeholder">Introduce la cantidad en sats</string>
     <string name="withdraw_continue_button">Continuar</string>
     <string name="withdraw_scan_qr">Escanear QR</string>
+    <string name="withdraw_scan_invoice_button">Escanear factura</string>
+    <string name="withdraw_invoice_helper">Ingrese una factura Lightning BOLT11</string>
+    <string name="withdraw_address_helper">Enviar a una dirección tipo email Lightning</string>
     <string name="withdraw_section_send_to">Enviar a</string>
     <string name="withdraw_balance_available">Disponible: %1$s</string>
 

@@ -3,21 +3,21 @@
     <!-- Disabled state -->
     <item android:state_enabled="false">
         <shape android:shape="rectangle">
-            <corners android:radius="26dp" />
+            <corners android:radius="100dp" />
             <solid android:color="@color/color_button_primary_disabled" />
         </shape>
     </item>
     <!-- Pressed state -->
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <corners android:radius="26dp" />
+            <corners android:radius="100dp" />
             <solid android:color="@color/color_button_primary_pressed" />
         </shape>
     </item>
     <!-- Enabled state -->
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="26dp" />
+            <corners android:radius="100dp" />
             <solid android:color="@color/color_primary_green" />
         </shape>
     </item>

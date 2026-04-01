@@ -16,12 +16,10 @@
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:padding="9dp"
+            android:background="@drawable/bg_nav_back_button"
             android:contentDescription="@string/common_back"
             android:src="@drawable/ic_close"
             android:tint="@color/color_text_primary"
@@ -48,6 +46,7 @@
         app:layout_constraintTop_toBottomOf="@id/top_bar">
 
         <LinearLayout
+            android:id="@+id/settings_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -60,161 +59,115 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
+                android:paddingHorizontal="20dp"
                 android:paddingTop="16dp"
-                android:paddingBottom="8dp"
+                android:paddingBottom="14dp"
                 android:text="@string/settings_section_terminal"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_secondary"
-                android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Items -->
             <LinearLayout
                 android:id="@+id/items_settings_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="14dp"
                     android:src="@drawable/ic_catalog"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:text="@string/settings_item_items_title"
-                    android:textSize="17sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_item_items_subtitle"
-                    android:textSize="14sp"
-                    android:textColor="@color/color_text_secondary"
-                    android:layout_marginTop="2dp" />
-                </LinearLayout>
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
+                    app:tint="@color/color_text_tertiary" />
+
             </LinearLayout>
 
             <!-- Tips -->
             <LinearLayout
                 android:id="@+id/tips_settings_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="14dp"
                     android:src="@drawable/ic_tip"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:text="@string/settings_item_tips_title"
-                    android:textSize="17sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_item_tips_subtitle"
-                    android:textSize="14sp"
-                    android:textColor="@color/color_text_secondary"
-                    android:layout_marginTop="2dp" />
-                </LinearLayout>
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
+                    app:tint="@color/color_text_tertiary" />
+
             </LinearLayout>
 
             <!-- Basket Names -->
             <LinearLayout
                 android:id="@+id/basket_names_settings_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="14dp"
                     android:src="@drawable/ic_shopping_bag"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_basket_names_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_basket_names_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
+                    android:text="@string/settings_item_basket_names_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
+                    app:tint="@color/color_text_tertiary" />
+
             </LinearLayout>
 
             <!-- ================= -->
@@ -224,210 +177,150 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="24dp"
-                android:paddingBottom="8dp"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="14dp"
                 android:text="@string/settings_section_payments"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_secondary"
-                android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Fiat Currency -->
             <LinearLayout
                 android:id="@+id/currency_settings_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="14dp"
                     android:src="@drawable/ic_switch_currency"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:text="@string/settings_item_currency_title"
-                    android:textSize="17sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_item_currency_subtitle"
-                    android:textSize="14sp"
-                    android:textColor="@color/color_text_secondary"
-                    android:layout_marginTop="2dp" />
-                </LinearLayout>
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
+                    app:tint="@color/color_text_tertiary" />
+
             </LinearLayout>
 
             <!-- Mints -->
             <LinearLayout
                 android:id="@+id/mints_settings_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="14dp"
                     android:src="@drawable/ic_bank"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_mints_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_mints_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
+                    android:text="@string/settings_item_mints_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
+                    app:tint="@color/color_text_tertiary" />
+
             </LinearLayout>
 
             <!-- Webhooks -->
             <LinearLayout
                 android:id="@+id/webhooks_settings_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="14dp"
                     android:src="@drawable/ic_link"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_webhooks_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_webhooks_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
+                    android:text="@string/settings_item_webhooks_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
+                    app:tint="@color/color_text_tertiary" />
+
             </LinearLayout>
 
             <!-- Withdrawals -->
             <LinearLayout
                 android:id="@+id/withdrawals_settings_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="14dp"
                     android:src="@drawable/ic_lightning_bolt"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_withdrawals_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_withdrawals_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
+                    android:text="@string/settings_item_withdrawals_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
+                    app:tint="@color/color_text_tertiary" />
+
             </LinearLayout>
 
             <!-- =========================== -->
@@ -436,63 +329,46 @@
 
             <TextView
                 android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingHorizontal="24dp"
-            android:paddingTop="24dp"
-            android:paddingBottom="8dp"
-            android:text="@string/settings_section_security"
-            android:textSize="13sp"
-            android:textColor="@color/color_text_secondary"
-            android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="14dp"
+                android:text="@string/settings_section_security"
+                android:textAppearance="@style/Text.SectionHeader" />
 
+            <!-- Security -->
             <LinearLayout
                 android:id="@+id/security_settings_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="14dp"
                     android:src="@drawable/ic_shield"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:text="@string/settings_item_security_title"
-                    android:textSize="17sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_item_security_subtitle"
-                    android:textSize="14sp"
-                    android:textColor="@color/color_text_secondary"
-                    android:layout_marginTop="2dp" />
-                </LinearLayout>
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
+                    app:tint="@color/color_text_tertiary" />
+
             </LinearLayout>
 
             <!-- =============== -->
@@ -502,161 +378,115 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="24dp"
-                android:paddingBottom="8dp"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="28dp"
+                android:paddingBottom="14dp"
                 android:text="@string/settings_section_general"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_secondary"
-                android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Language -->
             <LinearLayout
                 android:id="@+id/language_settings_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="14dp"
                     android:src="@drawable/ic_language"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_language_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_language_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
+                    android:text="@string/settings_item_language_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
+                    app:tint="@color/color_text_tertiary" />
+
             </LinearLayout>
 
             <!-- Theme -->
             <LinearLayout
                 android:id="@+id/theme_settings_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="14dp"
                     android:src="@drawable/ic_dark_mode"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:text="@string/settings_item_theme_title"
-                    android:textSize="17sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/settings_item_theme_subtitle"
-                    android:textSize="14sp"
-                    android:textColor="@color/color_text_secondary"
-                    android:layout_marginTop="2dp" />
-                </LinearLayout>
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
+                    app:tint="@color/color_text_tertiary" />
+
             </LinearLayout>
 
             <!-- About -->
             <LinearLayout
                 android:id="@+id/about_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_row_ripple"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingVertical="14dp"
+                android:paddingHorizontal="20dp">
 
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_marginEnd="14dp"
                     android:src="@drawable/ic_info"
                     app:tint="@color/color_icon_secondary" />
 
-                <LinearLayout
+                <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_about_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/settings_item_about_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
+                    android:text="@string/settings_item_about_title"
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
+                    app:tint="@color/color_text_tertiary" />
+
             </LinearLayout>
 
             <!-- ==================== -->
@@ -673,62 +503,44 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="24dp"
-                    android:paddingTop="24dp"
-                    android:paddingBottom="8dp"
+                    android:paddingHorizontal="20dp"
+                    android:paddingTop="28dp"
+                    android:paddingBottom="14dp"
                     android:text="@string/settings_section_developer"
-                    android:textSize="13sp"
-                    android:textColor="@color/color_text_secondary"
-                    android:fontFamily="sans-serif-medium"
-                    android:textAllCaps="true"
-                    android:letterSpacing="0.05" />
+                    android:textAppearance="@style/Text.SectionHeader" />
 
                 <LinearLayout
                     android:id="@+id/developer_settings_item"
                     android:layout_width="match_parent"
-                    android:layout_height="72dp"
-                    android:background="?attr/selectableItemBackground"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_row_ripple"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingHorizontal="24dp">
+                    android:paddingVertical="14dp"
+                    android:paddingHorizontal="20dp">
 
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:layout_marginEnd="16dp"
+                        android:layout_marginEnd="14dp"
                         android:src="@drawable/ic_settings"
                         app:tint="@color/color_icon_secondary" />
 
-                    <LinearLayout
+                    <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/settings_item_developer_title"
-                            android:textSize="17sp"
-                            android:textColor="@color/color_text_primary"
-                            android:fontFamily="sans-serif-medium" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/settings_item_developer_subtitle"
-                            android:textSize="14sp"
-                            android:textColor="@color/color_text_secondary"
-                            android:layout_marginTop="2dp" />
-                    </LinearLayout>
+                        android:text="@string/settings_item_developer_title"
+                        android:textAppearance="@style/Text.RowTitle" />
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
                         android:src="@drawable/ic_chevron_forward"
-                        app:tint="@color/color_icon_secondary" />
+                        app:tint="@color/color_text_tertiary" />
+
                 </LinearLayout>
 
             </LinearLayout>

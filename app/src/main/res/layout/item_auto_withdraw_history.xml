@@ -13,26 +13,55 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="20dp"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:paddingHorizontal="24dp"
         android:paddingVertical="16dp">
 
-        <!-- Status Icon Container -->
+        <!-- Icon container with status badge overlay -->
         <FrameLayout
             android:id="@+id/icon_container"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:background="@drawable/bg_circle"
-            android:backgroundTint="@color/color_bg_secondary"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
-            <ImageView
-                android:id="@+id/status_icon"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+            <!-- Main direction icon circle -->
+            <FrameLayout
+                android:layout_width="44dp"
+                android:layout_height="44dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_lightning_bolt"
-                app:tint="@color/color_success_green" />
+                android:background="@drawable/bg_chip_circle"
+                android:backgroundTint="@color/color_bg_light">
+
+                <ImageView
+                    android:id="@+id/status_icon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_arrow_up_send"
+                    app:tint="@color/color_text_primary" />
+            </FrameLayout>
+
+            <!-- Status badge (top-start corner) -->
+            <FrameLayout
+                android:id="@+id/status_badge_icon_container"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="top|start"
+                android:layout_marginStart="-4dp"
+                android:layout_marginTop="-4dp"
+                android:background="@drawable/bg_status_badge_green"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_check_small" />
+            </FrameLayout>
 
         </FrameLayout>
 
@@ -41,7 +70,7 @@
             android:id="@+id/amount_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="14dp"
             android:layout_marginEnd="12dp"
             android:ellipsize="end"
             android:fontFamily="sans-serif-medium"
@@ -58,11 +87,10 @@
             android:id="@+id/address_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="2dp"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="12dp"
             android:ellipsize="middle"
-            android:fontFamily="sans-serif"
             android:maxLines="1"
             android:textColor="@color/color_text_secondary"
             android:textSize="14sp"
@@ -76,14 +104,13 @@
             android:id="@+id/mint_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="14dp"
             android:layout_marginTop="2dp"
             android:layout_marginEnd="12dp"
             android:ellipsize="end"
-            android:fontFamily="sans-serif"
             android:maxLines="1"
-            android:textColor="@color/color_text_tertiary"
-            android:textSize="12sp"
+            android:textColor="@color/color_text_secondary"
+            android:textSize="14sp"
             app:layout_constraintEnd_toStartOf="@id/status_badge"
             app:layout_constraintStart_toEndOf="@id/icon_container"
             app:layout_constraintTop_toBottomOf="@id/address_text"
@@ -94,12 +121,11 @@
             android:id="@+id/timestamp_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="14dp"
             android:layout_marginTop="2dp"
             android:layout_marginEnd="12dp"
-            android:fontFamily="sans-serif"
-            android:textColor="@color/color_text_tertiary"
-            android:textSize="12sp"
+            android:textColor="@color/color_text_secondary"
+            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/icon_container"
             app:layout_constraintTop_toBottomOf="@id/mint_text"
@@ -138,17 +164,17 @@
             app:layout_constraintTop_toBottomOf="@id/status_badge"
             tools:visibility="visible" />
 
-        <!-- Expand indicator for failed items -->
+        <!-- Expand/share indicator -->
         <ImageView
             android:id="@+id/expand_indicator"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_marginTop="4dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:src="@drawable/ic_chevron_down"
             android:visibility="gone"
             app:tint="@color/color_text_tertiary"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/status_badge"
+            app:layout_constraintTop_toTopOf="@id/icon_container"
+            app:layout_constraintBottom_toBottomOf="parent"
             tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

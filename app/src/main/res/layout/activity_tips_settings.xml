@@ -96,7 +96,9 @@
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/tips_enabled_switch"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    app:thumbTint="@color/selector_switch_thumb"
+                    app:trackTint="@color/selector_switch_track" />
             </LinearLayout>
 
             <!-- Presets Section -->

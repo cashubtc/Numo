@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.View
 import android.view.animation.DecelerateInterpolator
+import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -16,6 +17,7 @@ import android.widget.ScrollView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -26,8 +28,8 @@ import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintIconCache
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.util.MintProfileService
+import com.electricdreams.numo.feature.onboarding.AddMintBottomSheet
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
-import com.electricdreams.numo.ui.components.AddMintInputCard
 import com.electricdreams.numo.ui.components.MintListItem
 import com.electricdreams.numo.ui.util.DialogHelper
 import androidx.appcompat.widget.SwitchCompat
@@ -55,7 +57,7 @@ class MintsSettingsActivity : AppCompatActivity() {
     private lateinit var backButton: ImageButton
     private lateinit var resetButton: ImageButton
     private lateinit var lightningMintSection: View
-    private lateinit var lightningMintCard: CardView
+    private lateinit var lightningMintCard: View
     private lateinit var lightningIconContainer: FrameLayout
     private lateinit var lightningMintIcon: ImageView
     private lateinit var lightningMintName: TextView
@@ -69,8 +71,8 @@ class MintsSettingsActivity : AppCompatActivity() {
     private lateinit var totalBalanceDivider: View
     private lateinit var mintsContainer: LinearLayout
     private lateinit var addMintHeader: TextView
-    private lateinit var addMintCard: AddMintInputCard
     private lateinit var emptyState: View
+    private lateinit var heroBolt: ImageView
     private lateinit var mintsScroll: ScrollView
 
     // State
@@ -93,7 +95,7 @@ class MintsSettingsActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             val qrValue = result.data?.getStringExtra(QRScannerActivity.EXTRA_QR_VALUE)
             qrValue?.let { url ->
-                addMintCard.setMintUrl(mintProfileService.normalizeUrl(url))
+                addNewMint(mintProfileService.normalizeUrl(url))
             }
         }
     }
@@ -133,10 +135,10 @@ class MintsSettingsActivity : AppCompatActivity() {
         initViews()
         setupInsetHandling()
         swapUnknownMintsSwitch.isChecked = mintManager.isSwapFromUnknownMintsEnabled()
+        updateHeroBoltColor(mintManager.isSwapFromUnknownMintsEnabled())
 
         setupListeners()
         loadMintsAndBalances()
-        startEntranceAnimations()
     }
 
     override fun onStart() {
@@ -175,8 +177,8 @@ class MintsSettingsActivity : AppCompatActivity() {
         totalBalanceDivider = findViewById(R.id.total_balance_divider)
         mintsContainer = findViewById(R.id.mints_container)
         addMintHeader = findViewById(R.id.add_mint_header)
-        addMintCard = findViewById(R.id.add_mint_card)
         emptyState = findViewById(R.id.empty_state)
+        heroBolt = findViewById(R.id.hero_bolt)
     }
 
     /**
@@ -207,21 +209,26 @@ class MintsSettingsActivity : AppCompatActivity() {
 
         swapUnknownMintsSwitch.setOnCheckedChangeListener { _, isChecked ->
             mintManager.setSwapFromUnknownMintsEnabled(isChecked)
+            updateHeroBoltColor(isChecked)
         }
 
         resetButton.setOnClickListener {
             showResetConfirmation()
         }
 
-        addMintCard.setOnAddMintListener(object : AddMintInputCard.OnAddMintListener {
-            override fun onAddMint(mintUrl: String) {
-                addNewMint(mintUrl)
-            }
+        val addMintButton = findViewById<Button>(R.id.add_mint_button)
+        addMintButton.setOnClickListener {
+            val sheet = AddMintBottomSheet.newInstance(object : AddMintBottomSheet.Listener {
+                override fun onAddMintUrl(url: String) {
+                    addNewMint(url)
+                }
 
-            override fun onScanQR() {
-                openQRScanner()
-            }
-        })
+                override fun onScanQrCode() {
+                    openQRScanner()
+                }
+            })
+            sheet.show(supportFragmentManager, "add_mint")
+        }
     }
 
     private fun openQRScanner() {
@@ -309,9 +316,6 @@ class MintsSettingsActivity : AppCompatActivity() {
 
             mintsContainer.addView(item)
             mintItems[mintUrl] = item
-
-            // Staggered entrance animation
-            item.animateEntrance(index * 50L)
         }
     }
 
@@ -386,6 +390,11 @@ class MintsSettingsActivity : AppCompatActivity() {
         loadLightningMintIcon(url)
     }
 
+    private fun updateHeroBoltColor(enabled: Boolean) {
+        val boltColor = if (enabled) R.color.color_bitcoin_orange else R.color.color_success_green
+        heroBolt.setColorFilter(ContextCompat.getColor(this, boltColor))
+    }
+
     private fun loadLightningMintIcon(url: String) {
         val cachedFile = MintIconCache.getCachedIconFile(url)
         if (cachedFile != null) {
@@ -439,12 +448,13 @@ class MintsSettingsActivity : AppCompatActivity() {
             return
         }
 
-        addMintCard.setLoading(true)
+        val sheet = supportFragmentManager.findFragmentByTag("add_mint") as? AddMintBottomSheet
+        sheet?.setLoading(true)
 
         lifecycleScope.launch {
             val validation = mintProfileService.validateMintUrl(mintUrl)
             if (!validation.isValid || validation.normalizedUrl == null) {
-                addMintCard.setLoading(false)
+                sheet?.setLoading(false)
                 Toast.makeText(
                     this@MintsSettingsActivity,
                     getString(R.string.mints_invalid_url),
@@ -455,7 +465,7 @@ class MintsSettingsActivity : AppCompatActivity() {
 
             val normalizedUrl = validation.normalizedUrl
             if (mintManager.getAllowedMints().contains(normalizedUrl)) {
-                addMintCard.setLoading(false)
+                sheet?.setLoading(false)
                 Toast.makeText(
                     this@MintsSettingsActivity,
                     getString(R.string.mints_already_exists),
@@ -468,20 +478,19 @@ class MintsSettingsActivity : AppCompatActivity() {
             if (added) {
                 mintProfileService.fetchAndStoreMintProfile(normalizedUrl)
                 loadMintsAndBalances()
-                addMintCard.clearInput()
-                addMintCard.collapseIfExpanded()
-                
+                sheet?.dismiss()
+
                 // Broadcast that mints changed so other activities can refresh
                 BalanceRefreshBroadcast.send(this@MintsSettingsActivity, BalanceRefreshBroadcast.REASON_MINT_ADDED)
-                
+
                 Toast.makeText(
                     this@MintsSettingsActivity,
                     getString(R.string.mints_added_toast),
                     Toast.LENGTH_SHORT
                 ).show()
+            } else {
+                sheet?.setLoading(false)
             }
-            
-            addMintCard.setLoading(false)
         }
     }
 
@@ -536,18 +545,4 @@ class MintsSettingsActivity : AppCompatActivity() {
         allMintsHeader.visibility = View.VISIBLE
     }
 
-    private fun startEntranceAnimations() {
-        // Lightning mint section slide in
-        lightningMintSection.alpha = 0f
-        lightningMintSection.translationY = -30f
-        lightningMintSection.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setDuration(350)
-            .setInterpolator(DecelerateInterpolator())
-            .start()
-
-        // Add mint card entrance
-        addMintCard.animateEntrance(400)
-    }
 }
