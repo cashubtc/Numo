@@ -427,10 +427,6 @@ object SwapToLightningMintManager {
         try {
             val mintUrl = MintUrl(lightningMintUrl)
             val mintWallet = wallet.getWallet(mintUrl, org.cashudevkit.CurrencyUnit.Sat)
-            if (mintWallet == null) {
-                Log.e(TAG, "tryFinalizePendingSwap: Failed to get wallet for mint $mintUrl")
-                return@withContext false
-            }
 
             val quote = mintWallet.checkMintQuote(lightningQuoteId)
             

@@ -34,6 +34,8 @@ class NfcEnableActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
+    @Suppress("DEPRECATION")
     override fun onBackPressed() {
         // Prevent going back without enabling NFC
         // Optionally minimize the app instead

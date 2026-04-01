@@ -205,7 +205,7 @@ class ImageHandler(
     private fun updateImagePreview(fromCamera: Boolean = false) {
         selectedImageUri?.let { uri ->
             try {
-                val bitmap = MediaStore.Images.Media.getBitmap(activity.contentResolver, uri)
+                val bitmap = com.electricdreams.numo.util.getBitmapCompat(activity.contentResolver, uri)
                 correctedBitmap = correctImageRotation(uri, bitmap, fromCamera)
                 itemImageView.setImageBitmap(correctedBitmap)
                 itemImageView.visibility = View.VISIBLE

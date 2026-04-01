@@ -8,6 +8,8 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
+import com.electricdreams.numo.util.createProgressDialog
+import com.electricdreams.numo.util.startActivityForResultCompat
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
@@ -116,6 +118,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         }
     }
 
+    @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -199,8 +202,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     }
 
     private fun checkAndFinalizeSwap(entry: PaymentHistoryEntry) {
-        val progressDialog = android.app.ProgressDialog(this).apply {
-            setMessage(getString(R.string.history_checking_payment_status))
+        val progressDialog = createProgressDialog(getString(R.string.history_checking_payment_status)).apply {
             setCancelable(false)
             show()
         }
@@ -239,12 +241,12 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
     private fun resumePendingPayment(entry: PaymentHistoryEntry) {
         val intent = PaymentIntentFactory.createResumePaymentIntent(this, entry)
-        startActivityForResult(intent, REQUEST_RESUME_PAYMENT)
+        startActivityForResultCompat(intent, REQUEST_RESUME_PAYMENT)
     }
 
     private fun showTransactionDetails(entry: HistoryEntry, position: Int) {
         val intent = PaymentIntentFactory.createTransactionDetailIntent(this, entry, position)
-        startActivityForResult(intent, REQUEST_TRANSACTION_DETAIL)
+        startActivityForResultCompat(intent, REQUEST_TRANSACTION_DETAIL)
     }
 
     private fun openPaymentWithApp(token: String) {

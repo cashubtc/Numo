@@ -3,6 +3,7 @@ package com.electricdreams.numo.feature.pin
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import com.electricdreams.numo.util.startActivityForResultCompat
 import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
@@ -234,10 +235,11 @@ class PinEntryActivity : AppCompatActivity() {
 
     private fun openPinReset() {
         val intent = Intent(this, PinResetActivity::class.java)
-        startActivityForResult(intent, REQUEST_PIN_RESET)
+        startActivityForResultCompat(intent, REQUEST_PIN_RESET)
     }
 
     @Deprecated("Deprecated in Java")
+    @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_PIN_RESET && resultCode == Activity.RESULT_OK) {
@@ -254,6 +256,7 @@ class PinEntryActivity : AppCompatActivity() {
     }
 
     @Deprecated("Deprecated in Java")
+    @Suppress("DEPRECATION")
     override fun onBackPressed() {
         val allowBack = intent.getBooleanExtra(EXTRA_ALLOW_BACK, true)
         if (allowBack) {

@@ -3,6 +3,7 @@ package com.electricdreams.numo.feature.settings
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import com.electricdreams.numo.util.startActivityForResultCompat
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.R
@@ -143,7 +144,7 @@ class SettingsActivity : AppCompatActivity() {
                 putExtra(PinEntryActivity.EXTRA_TITLE, getString(R.string.dialog_title_enter_pin))
                 putExtra(PinEntryActivity.EXTRA_SUBTITLE, getString(R.string.settings_verify_pin_subtitle))
             }
-            startActivityForResult(intent, REQUEST_PIN_VERIFY)
+            startActivityForResultCompat(intent, REQUEST_PIN_VERIFY)
         } else {
             // No PIN or recently verified
             startActivity(Intent(this, destination))
@@ -151,6 +152,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     @Deprecated("Deprecated in Java")
+    @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         

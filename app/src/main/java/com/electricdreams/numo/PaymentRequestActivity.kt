@@ -9,6 +9,8 @@ import android.content.ComponentName
 import android.nfc.NfcAdapter
 import android.nfc.cardemulation.CardEmulation
 import android.os.Bundle
+import com.electricdreams.numo.util.getVibrator
+import com.electricdreams.numo.util.vibrateCompat
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -312,7 +314,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 PaymentTabManager.PaymentTab.UNIFIED -> {
                     val creq = nostrHandler?.paymentRequestBech32
                     val lnbc = lightningHandler?.currentInvoice ?: lightningInvoice
-                    if (creq != null && lnbc != null) {
+                    if (lnbc != null) {
                         org.cashudevkit.createBip321Uri(creq, lnbc, null)
                     } else creq ?: lnbc
                 }
@@ -457,6 +459,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
+    @Suppress("DEPRECATION")
     override fun onBackPressed() {
         if (hasTerminalOutcome && currentOverlayActionMode == OverlayActionMode.SUCCESS) {
             animateSuccessScreenOut()
@@ -613,7 +617,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             return
         }
 
-        val payload = if (creq != null && lnbc != null) {
+        val payload = if (lnbc != null) {
             org.cashudevkit.createBip321Uri(creq, lnbc, null)
         } else creq ?: lnbc
 
@@ -657,7 +661,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             return
         }
         
-        val unifiedUri = if (creq != null && lnbc != null) {
+        val unifiedUri = if (lnbc != null) {
             org.cashudevkit.createBip321Uri(creq, lnbc, null)
         } else creq ?: lnbc
         
@@ -1370,8 +1374,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         
         // Vibrate when switching to processing phase
         try {
-            val vibrator = getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator?
-            vibrator?.vibrate(longArrayOf(0, 50), -1)
+            val vibrator = getVibrator()
+            vibrator?.vibrateCompat(longArrayOf(0, 50), -1)
         } catch (_: Exception) {}
         
         // Show "Processing... You can lift your phone" hint with a gentle crossfade
@@ -1459,8 +1463,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         } catch (_: Exception) {}
         
         // Vibrate
-        val vibrator = getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator?
-        vibrator?.vibrate(longArrayOf(0, 50, 100, 50), -1)
+        val vibrator = getVibrator()
+        vibrator?.vibrateCompat(longArrayOf(0, 50, 100, 50), -1)
     }
 
     private fun showNfcAnimationError(message: String) {

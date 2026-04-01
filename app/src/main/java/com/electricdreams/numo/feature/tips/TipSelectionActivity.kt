@@ -7,6 +7,10 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import com.electricdreams.numo.util.overridePendingTransitionCompat
+import com.electricdreams.numo.util.startActivityForResultCompat
+import com.electricdreams.numo.util.getVibrator
+import com.electricdreams.numo.util.vibrateCompat
 import android.os.Handler
 import android.os.Looper
 import android.os.VibrationEffect
@@ -91,7 +95,7 @@ class TipSelectionActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tip_selection)
 
-        vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator?
+        vibrator = getVibrator()
 
         setupWindowSettings()
         initializeFromIntent()
@@ -512,6 +516,7 @@ class TipSelectionActivity : AppCompatActivity() {
 
     private fun setupClickListeners() {
         // Close button
+        @Suppress("DEPRECATION")
         findViewById<View>(R.id.close_button).setOnClickListener {
             onBackPressed()
         }
@@ -870,12 +875,13 @@ class TipSelectionActivity : AppCompatActivity() {
             }
         }
         
-        startActivityForResult(intent, REQUEST_CODE_PAYMENT)
+        startActivityForResultCompat(intent, REQUEST_CODE_PAYMENT)
         
         // Smooth transition
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
+        overridePendingTransitionCompat(R.anim.slide_in_right, R.anim.slide_out_left)
     }
 
+    @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         
@@ -883,17 +889,19 @@ class TipSelectionActivity : AppCompatActivity() {
             // Pass the result back to the caller
             setResult(resultCode, data)
             finish()
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+            overridePendingTransitionCompat(R.anim.slide_in_left, R.anim.slide_out_right)
         }
     }
 
+    @Deprecated("Deprecated in Java")
+    @Suppress("DEPRECATION")
     override fun onBackPressed() {
         if (isCustomMode) {
             showTipOptionsMode()
         } else {
             setResult(Activity.RESULT_CANCELED)
             super.onBackPressed()
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+            overridePendingTransitionCompat(R.anim.slide_in_left, R.anim.slide_out_right)
         }
     }
 
@@ -903,7 +911,7 @@ class TipSelectionActivity : AppCompatActivity() {
                 v.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
             } else {
                 @Suppress("DEPRECATION")
-                v.vibrate(VIBRATE_KEYPAD)
+                v.vibrateCompat(VIBRATE_KEYPAD)
             }
         }
     }

@@ -218,6 +218,8 @@ class PinSetupActivity : AppCompatActivity() {
         errorMessage.visibility = View.INVISIBLE
     }
 
+    @Deprecated("Deprecated in Java")
+    @Suppress("DEPRECATION")
     override fun onBackPressed() {
         if (currentStep == Step.CONFIRM_PIN) {
             currentStep = Step.ENTER_PIN
