@@ -168,7 +168,10 @@ class NostrPaymentHandler(
             allowedMints,
             relayList,
             { token -> callback.onTokenReceived(token) },
-            { msg, t -> Log.e(TAG, "NostrPaymentListener error: $msg", t) }
+            { msg, t ->
+                Log.e(TAG, "NostrPaymentListener error: $msg", t)
+                callback.onError(msg ?: t?.message ?: "Unknown Nostr payment error")
+            }
         ).also { it.start() }
 
         Log.d(TAG, "Nostr payment listener started")
