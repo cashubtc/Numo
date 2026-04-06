@@ -118,7 +118,7 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 
-    implementation(files("libs/cashu-java-sdk-1.0-SNAPSHOT.jar"))
+    // implementation(files("libs/cashu-java-sdk-1.0-SNAPSHOT.jar"))
 
     // Jackson for JSON and CBOR processing
     implementation("com.fasterxml.jackson.core:jackson-databind:2.16.1")

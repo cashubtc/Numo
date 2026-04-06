@@ -969,7 +969,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Extract mint URL from token
         val mintUrl = try {
-            com.cashujdk.nut00.Token.decode(token).mint
+            org.cashudevkit.Token.decode(token).mintUrl().url
         } catch (e: Exception) {
             null
         }

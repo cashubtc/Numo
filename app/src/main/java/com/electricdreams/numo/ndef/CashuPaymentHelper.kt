@@ -3,9 +3,8 @@ package com.electricdreams.numo.ndef
 import android.content.Context
 import android.util.Base64
 import android.util.Log
-import com.cashujdk.nut18.PaymentRequest
-import com.cashujdk.nut18.Transport
-import com.cashujdk.nut18.TransportTag
+import com.google.gson.JsonObject
+import com.google.gson.JsonArray
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.payment.SwapToLightningMintManager
@@ -73,43 +72,38 @@ object CashuPaymentHelper {
         allowedMints: List<String>?,
     ): GeneratedPaymentRequest? {
         return try {
-            val paymentRequest = PaymentRequest().apply {
-                this.amount = Optional.of(amount)
-                unit = Optional.of("sat")
-                this.description = Optional.of(
-                    description ?: "Payment for $amount sats",
-                )
-
-                val id = java.util.UUID.randomUUID().toString().substring(0, 8)
-                this.id = Optional.of(id)
-
-                singleUse = Optional.of(true)
-
+            val jsonObj = JsonObject().apply {
+                addProperty("id", java.util.UUID.randomUUID().toString().substring(0, 8))
+                addProperty("amount", amount)
+                addProperty("unit", "sat")
+                addProperty("description", description ?: "Payment for $amount sats")
+                addProperty("single_use", true)
                 if (!allowedMints.isNullOrEmpty()) {
-                    val mintsArray = allowedMints.toTypedArray()
-                    mints = Optional.of(mintsArray)
-                    Log.d(TAG, "Added ${allowedMints.size} allowed mints to payment request")
+                    val mintsArray = JsonArray()
+                    allowedMints.forEach { mintsArray.add(it) }
+                    add("mints", mintsArray)
                 }
             }
-
-            val encoded = paymentRequest.encode()
-            Log.d(TAG, "Created payment request: $encoded")
+            
+            val jsonString = jsonObj.toString()
+            val encoded = "creqA" + android.util.Base64.encodeToString(jsonString.toByteArray(), android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP)
+            
             try {
                 val cdkRequest = org.cashudevkit.PaymentRequest.fromString(encoded)
                 val bech32 = cdkRequest.toBech32String()
                 Log.d(TAG, "Converted to bech32: $bech32")
                 GeneratedPaymentRequest(encoded, bech32)
-            } catch (e: Throwable) {
-                Log.e(TAG, "Error converting to bech32, returning CREQA format: ${e.message}", e)
+            } catch (e: Exception) {
+                Log.w(TAG, "Fallback: could not convert to bech32 via CDK: ${e.message}")
                 GeneratedPaymentRequest(encoded, encoded)
             }
+
         } catch (e: Exception) {
-            Log.e(TAG, "Error creating payment request: ${e.message}", e)
+            Log.e(TAG, "Failed to create PaymentRequest", e)
             null
         }
     }
 
-    @JvmStatic
     fun createPaymentRequest(amount: Long, description: String?): GeneratedPaymentRequest? =
         createPaymentRequest(amount, description, null)
 
@@ -121,51 +115,48 @@ object CashuPaymentHelper {
         nprofile: String,
     ): GeneratedPaymentRequest? {
         return try {
-            val paymentRequest = PaymentRequest().apply {
-                this.amount = Optional.of(amount)
-                unit = Optional.of("sat")
-                this.description = Optional.of(
-                    description ?: "Payment for $amount sats",
-                )
-
-                val id = java.util.UUID.randomUUID().toString().substring(0, 8)
-                this.id = Optional.of(id)
-
-                singleUse = Optional.of(true)
-
+            val jsonObj = JsonObject().apply {
+                addProperty("id", java.util.UUID.randomUUID().toString().substring(0, 8))
+                addProperty("amount", amount)
+                addProperty("unit", "sat")
+                addProperty("description", description ?: "Payment for $amount sats")
+                addProperty("single_use", true)
                 if (!allowedMints.isNullOrEmpty()) {
-                    val mintsArray = allowedMints.toTypedArray()
-                    mints = Optional.of(mintsArray)
-                    Log.d(TAG, "Added ${allowedMints.size} allowed mints to payment request (Nostr)")
+                    val mintsArray = JsonArray()
+                    allowedMints.forEach { mintsArray.add(it) }
+                    add("mints", mintsArray)
                 }
-
-                val nostrTransport = Transport().apply {
-                    type = "nostr"
-                    target = nprofile
-
-                    val nipTag = TransportTag().apply {
-                        key = "n"
-                        value = "17" // NIP-17
-                    }
-                    tags = Optional.of(arrayOf(nipTag))
+                
+                val transportsArray = JsonArray()
+                val nostrTransport = JsonObject().apply {
+                    addProperty("type", "nostr")
+                    addProperty("target", nprofile)
+                    
+                    val tagsArray = JsonArray()
+                    val tagArray = JsonArray()
+                    tagArray.add("n")
+                    tagsArray.add(tagArray)
+                    
+                    add("tags", tagsArray)
                 }
-
-                transport = Optional.of(arrayOf(nostrTransport))
+                transportsArray.add(nostrTransport)
+                add("transports", transportsArray)
             }
+            
+            val jsonString = jsonObj.toString()
+            val encoded = "creqA" + android.util.Base64.encodeToString(jsonString.toByteArray(), android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP)
 
-            val encoded = paymentRequest.encode()
-            Log.d(TAG, "Created Nostr payment request: $encoded")
             try {
                 val cdkRequest = org.cashudevkit.PaymentRequest.fromString(encoded)
                 val bech32 = cdkRequest.toBech32String()
-                Log.d(TAG, "Converted Nostr to bech32: $bech32")
+                Log.d(TAG, "Converted to bech32: $bech32")
                 GeneratedPaymentRequest(encoded, bech32)
-            } catch (e: Throwable) {
-                Log.e(TAG, "Error converting to bech32, returning CREQA format: ${e.message}", e)
+            } catch (e: Exception) {
+                Log.w(TAG, "Fallback: could not convert to bech32 via CDK: ${e.message}")
                 GeneratedPaymentRequest(encoded, encoded)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error creating Nostr payment request: ${e.message}", e)
+            Log.e(TAG, "Failed to create PaymentRequest", e)
             null
         }
     }
@@ -564,7 +555,7 @@ object CashuPaymentHelper {
         }
     }
 
-    // === Redemption from PaymentRequestPayload (still cashu-jdk proofs) ====
+    // === Redemption from PaymentRequestPayload =============================
 
     @JvmStatic
     @Throws(RedemptionException::class)
@@ -580,55 +571,31 @@ object CashuPaymentHelper {
         }
         try {
             Log.d(TAG, "payloadJson: $payloadJson")
-            val payload = PaymentRequestPayload.GSON.fromJson(
-                payloadJson,
-                PaymentRequestPayload::class.java,
-            ) ?: throw RedemptionException("Failed to parse PaymentRequestPayload")
+            val payload = org.cashudevkit.PaymentRequestPayload.fromString(payloadJson)
 
-            try {
-                payload.validate()
-            } catch (e: IllegalArgumentException) {
-                throw RedemptionException(e.message ?: "Invalid PaymentRequestPayload")
+            val mintUrl = payload.mint().url
+            val unit = payload.unit().let { tokenUnit ->
+                when (tokenUnit) {
+                    is CurrencyUnit.Sat -> "sat"
+                    is CurrencyUnit.Msat -> "msat"
+                    is CurrencyUnit.Eur -> "eur"
+                    is CurrencyUnit.Usd -> "usd"
+                    is CurrencyUnit.Custom -> tokenUnit.unit
+                    else -> "sat"
+                }
             }
-
-            val totalAmount = payload.proofs!!.map { it.asJsonObject.get("amount").asLong }.sum()
-            if (totalAmount < expectedAmount) {
-                throw RedemptionException(
-                    "Insufficient amount in payload proofs: ${'$'}totalAmount < expected ${'$'}expectedAmount",
-                )
+            
+            if (unit != "sat") {
+                 throw RedemptionException("Unsupported unit in PaymentRequestPayload: $unit")
             }
-
-            val cdkProofs = payload.proofs!!.map { proofJson ->
-                val proofObj = proofJson.asJsonObject
-                val amount = org.cashudevkit.Amount(proofObj.get("amount").asLong.toULong())
-                val id = proofObj.get("id").asString
-                val secret = proofObj.get("secret").asString
-                val c = proofObj.get("C").asString
-                val dleq = if (proofObj.has("dleq") && !proofObj.get("dleq").isJsonNull) {
-                    val d = proofObj.getAsJsonObject("dleq")
-                    org.cashudevkit.ProofDleq(
-                        e = d.get("e").asString,
-                        s = d.get("s").asString,
-                        r = d.get("r").asString
-                    )
-                } else null
-                
-                org.cashudevkit.Proof(
-                    amount = amount,
-                    secret = secret,
-                    c = c,
-                    keysetId = id,
-                    witness = null,
-                    dleq = dleq,
-                    p2pkE = null
-                )
-            }
+            
+            val proofs = payload.proofs()
 
             val swapResult = redeemProofsWithSwap(
                 appContext = appContext,
-                proofs = cdkProofs,
-                mintUrl = payload.mint!!,
-                unit = payload.unit!!,
+                proofs = proofs,
+                mintUrl = mintUrl,
+                unit = unit,
                 expectedAmount = expectedAmount,
                 allowedMints = allowedMints,
                 paymentContext = paymentContext,
@@ -636,43 +603,11 @@ object CashuPaymentHelper {
 
             // Return the payload JSON so it can be saved in history
             return if (swapResult == "SUCCESS_KNOWN") payloadJson else swapResult
-        } catch (e: JsonSyntaxException) {
-            throw RedemptionException("Invalid JSON for PaymentRequestPayload: ${'$'}{e.message}", e)
-        } catch (e: JsonIOException) {
-            val errorMsg = "PaymentRequestPayload redemption failed: ${'$'}{e.message}"
-            Log.e(TAG, errorMsg, e)
-            throw RedemptionException(errorMsg, e)
-        } catch (e: RedemptionException) {
-            throw e
         } catch (e: Exception) {
-            val errorMsg = "PaymentRequestPayload redemption failed: ${'$'}{e.message}"
+            if (e is RedemptionException) throw e
+            val errorMsg = "PaymentRequestPayload redemption failed: ${e.message}"
             Log.e(TAG, errorMsg, e)
             throw RedemptionException(errorMsg, e)
-        }
-    }
-
-    class PaymentRequestPayload {
-        var id: String? = null
-        var memo: String? = null
-        var mint: String? = null
-        var unit: String? = null
-        var proofs: JsonArray? = null
-
-        fun validate() {
-            require(!mint.isNullOrEmpty()) { "PaymentRequestPayload is missing mint" }
-            require(unit == "sat") { "Unsupported unit in PaymentRequestPayload: $unit" }
-            require(proofs != null && proofs!!.size() > 0) { "PaymentRequestPayload contains no proofs" }
-            
-            for (i in 0 until proofs!!.size()) {
-                val proof = proofs!!.get(i).asJsonObject
-                require(proof.has("id") && !proof.get("id").isJsonNull) { "Proof is missing id/keysetId" }
-                require(proof.has("amount") && !proof.get("amount").isJsonNull) { "Proof is missing amount" }
-            }
-        }
-
-        companion object {
-            @JvmField
-            val GSON: Gson = GsonBuilder().create()
         }
     }
 
