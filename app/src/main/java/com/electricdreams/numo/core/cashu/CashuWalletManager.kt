@@ -71,6 +71,25 @@ object CashuWalletManager : MintManager.MintChangeListener {
     }
 
     /**
+     * Wipes the wallet database completely.
+     * Caution: This deletes all existing eCash proofs.
+     */
+    fun wipeDatabase(context: Context) {
+        closeResources()
+        val appCtx = context.applicationContext
+        val deleted = appCtx.deleteDatabase(DB_FILE_NAME)
+        if (deleted) {
+            Log.d(TAG, "Deleted existing wallet database via deleteDatabase")
+        } else {
+            val dbFile = appCtx.getDatabasePath(DB_FILE_NAME)
+            if (dbFile.exists()) {
+                dbFile.delete()
+                Log.d(TAG, "Deleted existing wallet database via file deletion")
+            }
+        }
+    }
+
+    /**
      * Get the current wallet's mnemonic (seed phrase).
      * Returns null if wallet hasn't been initialized.
      */
@@ -114,21 +133,16 @@ object CashuWalletManager : MintManager.MintChangeListener {
             balancesBefore[mintUrl] = getBalanceForMint(mintUrl)
         }
 
-        // Close existing wallet
-        closeResources()
-
         // Delete existing database to start fresh
-        val dbFile = appContext.getDatabasePath(DB_FILE_NAME)
-        if (dbFile.exists()) {
-            dbFile.delete()
-            Log.d(TAG, "Deleted existing wallet database")
-        }
+        wipeDatabase(appContext)
+
         // Save new mnemonic
         val prefs = PreferenceStore.wallet(appContext)
         prefs.putString(KEY_MNEMONIC, newMnemonic)
         Log.i(TAG, "Saved new mnemonic for restore")
 
         // Recreate database
+        val dbFile = appContext.getDatabasePath(DB_FILE_NAME)
         dbFile.apply {
             parentFile?.let { parent ->
                 if (!parent.exists()) {

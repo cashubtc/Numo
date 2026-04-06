@@ -1057,6 +1057,9 @@ class OnboardingActivity : AppCompatActivity() {
             try {
                 val mnemonic = generatedMnemonic ?: throw IllegalStateException("No mnemonic generated")
 
+                // Wipe existing database to prevent mismatched eCash proofs from a previous installation or failed clear
+                CashuWalletManager.wipeDatabase(this@OnboardingActivity)
+
                 // Initialize CashuWalletManager with the generated mnemonic
                 PreferenceStore.wallet(this@OnboardingActivity).putString("wallet_mnemonic", mnemonic)
                 applySelectedMintsToMintManager()
