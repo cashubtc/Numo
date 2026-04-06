@@ -72,21 +72,20 @@ object CashuPaymentHelper {
         allowedMints: List<String>?,
     ): GeneratedPaymentRequest? {
         return try {
-            val jsonObj = JsonObject().apply {
-                addProperty("id", java.util.UUID.randomUUID().toString().substring(0, 8))
-                addProperty("amount", amount)
-                addProperty("unit", "sat")
-                addProperty("description", description ?: "Payment for $amount sats")
-                addProperty("single_use", true)
-                if (!allowedMints.isNullOrEmpty()) {
-                    val mintsArray = JsonArray()
-                    allowedMints.forEach { mintsArray.add(it) }
-                    add("mints", mintsArray)
-                }
+            val map = com.upokecenter.cbor.CBORObject.NewMap()
+            map.Add("i", java.util.UUID.randomUUID().toString().substring(0, 8))
+            map.Add("a", amount)
+            map.Add("u", "sat")
+            map.Add("d", description ?: "Payment for $amount sats")
+            map.Add("s", true)
+            if (!allowedMints.isNullOrEmpty()) {
+                val mintsArray = com.upokecenter.cbor.CBORObject.NewArray()
+                allowedMints.forEach { mintsArray.Add(it) }
+                map.Add("m", mintsArray)
             }
             
-            val jsonString = jsonObj.toString()
-            val encoded = "creqA" + android.util.Base64.encodeToString(jsonString.toByteArray(), android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or android.util.Base64.NO_PADDING)
+            val cborBytes = map.EncodeToBytes()
+            val encoded = "creqA" + android.util.Base64.encodeToString(cborBytes, android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or android.util.Base64.NO_PADDING)
             
             try {
                 val cdkRequest = org.cashudevkit.PaymentRequest.fromString(encoded)
@@ -115,48 +114,46 @@ object CashuPaymentHelper {
         nprofile: String,
     ): GeneratedPaymentRequest? {
         return try {
-            val jsonObj = JsonObject().apply {
-                addProperty("id", java.util.UUID.randomUUID().toString().substring(0, 8))
-                addProperty("amount", amount)
-                addProperty("unit", "sat")
-                addProperty("description", description ?: "Payment for $amount sats")
-                addProperty("single_use", true)
-                if (!allowedMints.isNullOrEmpty()) {
-                    val mintsArray = JsonArray()
-                    allowedMints.forEach { mintsArray.add(it) }
-                    add("mints", mintsArray)
-                }
-                
-                val transportsArray = JsonArray()
-                val nostrTransport = JsonObject().apply {
-                    addProperty("type", "nostr")
-                    addProperty("target", nprofile)
-                    
-                    val tagsArray = JsonArray()
-                    val tagArray = JsonArray()
-                    tagArray.add("n")
-                    tagsArray.add(tagArray)
-                    
-                    add("tags", tagsArray)
-                }
-                transportsArray.add(nostrTransport)
-                add("transports", transportsArray)
+            val map = com.upokecenter.cbor.CBORObject.NewMap()
+            map.Add("i", java.util.UUID.randomUUID().toString().substring(0, 8))
+            map.Add("a", amount)
+            map.Add("u", "sat")
+            map.Add("d", description ?: "Payment for $amount sats")
+            map.Add("s", true)
+            if (!allowedMints.isNullOrEmpty()) {
+                val mintsArray = com.upokecenter.cbor.CBORObject.NewArray()
+                allowedMints.forEach { mintsArray.Add(it) }
+                map.Add("m", mintsArray)
             }
             
-            val jsonString = jsonObj.toString()
-            val encoded = "creqA" + android.util.Base64.encodeToString(jsonString.toByteArray(), android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or android.util.Base64.NO_PADDING)
+            val nostrTransport = com.upokecenter.cbor.CBORObject.NewMap()
+            nostrTransport.Add("t", "nostr")
+            nostrTransport.Add("a", nprofile)
+            val gArrayOuter = com.upokecenter.cbor.CBORObject.NewArray()
+            val gArrayInner = com.upokecenter.cbor.CBORObject.NewArray()
+            gArrayInner.Add("n")
+            gArrayInner.Add("17")
+            gArrayOuter.Add(gArrayInner)
+            nostrTransport.Add("g", gArrayOuter)
+            
+            val transportsArray = com.upokecenter.cbor.CBORObject.NewArray()
+            transportsArray.Add(nostrTransport)
+            map.Add("t", transportsArray)
+            
+            val cborBytes = map.EncodeToBytes()
+            val encoded = "creqA" + android.util.Base64.encodeToString(cborBytes, android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or android.util.Base64.NO_PADDING)
 
             try {
                 val cdkRequest = org.cashudevkit.PaymentRequest.fromString(encoded)
                 val bech32 = cdkRequest.toBech32String()
-                Log.d(TAG, "Converted to bech32: $bech32")
+                Log.d(TAG, "Converted Nostr to bech32: $bech32")
                 GeneratedPaymentRequest(encoded, bech32)
-            } catch (e: Exception) {
-                Log.w(TAG, "Fallback: could not convert to bech32 via CDK: ${e.message}")
+            } catch (e: Throwable) {
+                Log.e(TAG, "Error converting to bech32, returning CREQA format: ${e.message}", e)
                 GeneratedPaymentRequest(encoded, encoded)
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to create PaymentRequest", e)
+            Log.e(TAG, "Error creating Nostr payment request: ${e.message}", e)
             null
         }
     }
