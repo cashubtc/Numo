@@ -86,7 +86,7 @@ object CashuPaymentHelper {
             }
             
             val jsonString = jsonObj.toString()
-            val encoded = "creqA" + android.util.Base64.encodeToString(jsonString.toByteArray(), android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP)
+            val encoded = "creqA" + android.util.Base64.encodeToString(jsonString.toByteArray(), android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or android.util.Base64.NO_PADDING)
             
             try {
                 val cdkRequest = org.cashudevkit.PaymentRequest.fromString(encoded)
@@ -144,7 +144,7 @@ object CashuPaymentHelper {
             }
             
             val jsonString = jsonObj.toString()
-            val encoded = "creqA" + android.util.Base64.encodeToString(jsonString.toByteArray(), android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP)
+            val encoded = "creqA" + android.util.Base64.encodeToString(jsonString.toByteArray(), android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or android.util.Base64.NO_PADDING)
 
             try {
                 val cdkRequest = org.cashudevkit.PaymentRequest.fromString(encoded)
