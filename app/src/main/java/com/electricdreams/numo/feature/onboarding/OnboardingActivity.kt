@@ -1058,7 +1058,6 @@ class OnboardingActivity : AppCompatActivity() {
                 val mnemonic = generatedMnemonic ?: throw IllegalStateException("No mnemonic generated")
 
                 // Initialize CashuWalletManager with the generated mnemonic
-                CashuWalletManager.wipeDatabase(this@OnboardingActivity)
                 PreferenceStore.wallet(this@OnboardingActivity).putString("wallet_mnemonic", mnemonic)
                 applySelectedMintsToMintManager()
 

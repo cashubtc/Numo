@@ -75,21 +75,6 @@ object CashuWalletManager : MintManager.MintChangeListener {
      * Returns null if wallet hasn't been initialized.
      */
 
-    /**
-     * Wipes the existing SQLite database. Only used during new wallet generation to ensure a clean state.
-     */
-    fun wipeDatabase(context: Context) {
-        if (!this::appContext.isInitialized) {
-            appContext = context.applicationContext
-        }
-        closeResources()
-        val dbFile = appContext.getDatabasePath(DB_FILE_NAME)
-        if (dbFile.exists()) {
-            dbFile.delete()
-            Log.d(TAG, "Deleted existing wallet database during new wallet generation")
-        }
-    }
-
     fun getMnemonic(): String? {
         if (!this::appContext.isInitialized) return null
         val prefs = PreferenceStore.wallet(appContext)
