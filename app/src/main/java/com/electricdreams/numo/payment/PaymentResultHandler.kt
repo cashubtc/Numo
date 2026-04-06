@@ -94,7 +94,7 @@ class PaymentResultHandler(
     /** Extract mint URL from token string */
     private fun extractMintUrlFromToken(tokenString: String?): String? = try {
         if (!tokenString.isNullOrEmpty()) {
-            com.cashujdk.nut00.Token.decode(tokenString).mint
+            org.cashudevkit.Token.decode(tokenString).mintUrl().url
         } else {
             null
         }

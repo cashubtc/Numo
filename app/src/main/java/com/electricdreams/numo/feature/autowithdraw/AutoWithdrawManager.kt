@@ -145,7 +145,7 @@ class AutoWithdrawManager private constructor(private val context: Context) {
         // Determine the mint URL
         val mintUrl: String? = if (token.isNotEmpty()) {
             try {
-                com.cashujdk.nut00.Token.decode(token).mint
+                org.cashudevkit.Token.decode(token).mintUrl().url
             } catch (e: Exception) {
                 Log.w(TAG, "Could not extract mint URL from token: ${e.message}")
                 null
