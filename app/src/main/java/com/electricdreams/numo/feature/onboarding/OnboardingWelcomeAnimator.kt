@@ -119,10 +119,12 @@ class OnboardingWelcomeAnimator(
     }
 
     fun pause() {
+        scrollAnimator?.pause()
         activeAnimators.toList().forEach { it.pause() }
     }
 
     fun resume() {
+        scrollAnimator?.resume()
         activeAnimators.toList().forEach { it.resume() }
     }
 
@@ -407,15 +409,21 @@ class OnboardingWelcomeAnimator(
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 intArrayOf(Color.TRANSPARENT, Color.argb(220, 10, 37, 64), navyColor)
             )
-            duration = 450
-            interpolator = appleSpring
-            addListener(onEnd { if (cont.isActive) cont.resume(Unit) })
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                gradientHeight
+            ).apply {
+                gravity = Gravity.TOP
+                topMargin = totalRowsHeight - gradientHeight
+            }
+            alpha = 0f
         }
-        cont.invokeOnCancellation { animSet.cancel() }
-        trackAndStart(animSet)
+        emojiContainer.addView(rowGradientView)
     }
 
-    // === Phase 4: CTA Reveal (500ms) ===
+    private fun startScrollAnimation() {
+        scrollTime = 0f
+        scrollAnimator?.cancel()
 
         scrollAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
             duration = 16L  // ~60fps tick
