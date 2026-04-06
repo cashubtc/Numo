@@ -345,8 +345,10 @@
                             android:layout_width="match_parent"
                             android:layout_height="56dp"
                             android:layout_marginTop="16dp"
+                            android:stateListAnimator="@null"
                             android:text="@string/withdraw_cashu_copy_token"
-                            app:cornerRadius="28dp"/>
+                            app:cornerRadius="28dp"
+                            app:elevation="0dp"/>
 
                     </LinearLayout>
                  </com.google.android.material.card.MaterialCardView>
