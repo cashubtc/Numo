@@ -9,7 +9,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/bg_bottom_sheet_dark"
         android:paddingBottom="32dp">
 
         <!-- Drag Handle -->
@@ -18,7 +17,7 @@
             android:layout_height="4dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="12dp"
-            android:background="@color/color_stroke_on_dark" />
+            android:background="@color/color_divider" />
 
         <!-- Title -->
         <TextView
@@ -28,7 +27,7 @@
             android:paddingHorizontal="24dp"
             android:text="@string/onboarding_add_mint_sheet_title"
             android:textSize="20sp"
-            android:textColor="@color/color_text_on_dark"
+            android:textColor="@color/color_text_primary"
             android:fontFamily="sans-serif-medium" />
 
         <!-- URL Input -->
@@ -40,9 +39,9 @@
             android:layout_marginHorizontal="24dp"
             android:hint="@string/onboarding_add_mint_url_hint"
             android:textSize="15sp"
-            android:textColor="@color/color_text_on_dark"
-            android:textColorHint="@color/color_onboarding_text_disabled"
-            android:background="@drawable/bg_seed_input_dark"
+            android:textColor="@color/color_text_primary"
+            android:textColorHint="@color/color_text_tertiary"
+            android:background="@drawable/rounded_edit_text"
             android:paddingHorizontal="16dp"
             android:inputType="textUri"
             android:singleLine="true"
@@ -91,7 +90,7 @@
                     android:layout_marginStart="10dp"
                     android:text="@string/onboarding_add_mint_loading"
                     android:textSize="15sp"
-                    android:textColor="@color/color_text_on_dark" />
+                    android:textColor="@color/color_text_secondary" />
 
             </LinearLayout>
 
@@ -109,19 +108,19 @@
             android:text="@string/onboarding_add_mint_scan_qr"
             android:textAllCaps="false"
             android:textSize="17sp"
-            android:textColor="@color/color_text_on_dark"
+            android:textColor="@color/color_text_primary"
             android:fontFamily="sans-serif-medium"
             android:stateListAnimator="@null"
             app:elevation="0dp"
             app:backgroundTint="@android:color/transparent"
-            app:strokeColor="@color/color_stroke_on_dark"
+            app:strokeColor="@color/color_chip_border"
             app:strokeWidth="1dp"
             app:cornerRadius="26dp"
             app:icon="@drawable/ic_qr_scan"
             app:iconGravity="textStart"
             app:iconPadding="8dp"
-            app:iconTint="@color/color_text_on_dark"
-            app:rippleColor="@color/color_onboarding_icon_bg" />
+            app:iconTint="@color/color_text_primary"
+            app:rippleColor="@color/color_ripple" />
 
     </LinearLayout>
 

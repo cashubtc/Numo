@@ -149,10 +149,6 @@
     <color name="color_nfc_success_gradient_start">#22C55E</color>
     <color name="color_nfc_success_gradient_end">#4ADE80</color>
 
-    <!-- Bottom Sheet Colors -->
-    <color name="color_bottom_sheet_bg">#0A2540</color>
-    <color name="color_bottom_sheet_nav_bar">#0A2540</color>
-
     <!-- Theme Background Colors (for ThemeManager) -->
     <color name="color_theme_obsidian">#0B1215</color>
     <color name="color_theme_bitcoin_orange">#F7931A</color>

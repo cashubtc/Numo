@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -45,7 +44,7 @@ class WebhookSettingsActivity : AppCompatActivity() {
     private lateinit var endpointsList: LinearLayout
     private lateinit var emptyStateText: View
     private lateinit var qrScannerLauncher: ActivityResultLauncher<Intent>
-    private var currentDialog: AlertDialog? = null
+    private var currentInputSheet: com.electricdreams.numo.ui.components.InputBottomSheet? = null
     private var isSyncing: Boolean = false
     private var syncJob: Job? = null
 
@@ -279,7 +278,7 @@ class WebhookSettingsActivity : AppCompatActivity() {
                             getString(R.string.webhook_settings_add_success),
                             Toast.LENGTH_SHORT,
                         ).show()
-                        currentDialog?.dismiss()
+                        currentInputSheet?.dismiss()
                     }
                     WebhookSettingsManager.SaveResult.DUPLICATE -> {
                         Toast.makeText(
@@ -306,14 +305,11 @@ class WebhookSettingsActivity : AppCompatActivity() {
 
     private fun populateDialogInput(value: String?) {
         if (value.isNullOrBlank()) return
-        currentDialog?.findViewById<EditText>(R.id.dialog_input)?.let { editText ->
-            editText.setText(value)
-            editText.setSelection(editText.text.length)
-        }
+        currentInputSheet?.populateInput(value)
     }
 
     private fun showAddEndpointDialog() {
-        currentDialog = DialogHelper.showInput(
+        currentInputSheet = DialogHelper.showInput(
             context = this,
             config = DialogHelper.InputConfig(
                 title = getString(R.string.webhook_settings_add_dialog_title),

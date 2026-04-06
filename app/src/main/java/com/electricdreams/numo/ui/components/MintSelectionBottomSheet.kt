@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.view.animation.PathInterpolator
 import android.widget.FrameLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
@@ -90,12 +89,9 @@ class MintSelectionBottomSheet : BottomSheetDialogFragment() {
             )
             
             bottomSheet?.let { sheet ->
-                sheet.setBackgroundColor(
-                    ContextCompat.getColor(requireContext(), R.color.color_bottom_sheet_bg)
-                )
-
+                // Let the theme (Widget.Numo.BottomSheet) handle background + corners
                 val behavior = BottomSheetBehavior.from(sheet)
-                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                behavior.isFitToContents = true
                 behavior.skipCollapsed = true
                 behavior.isDraggable = true
                 
