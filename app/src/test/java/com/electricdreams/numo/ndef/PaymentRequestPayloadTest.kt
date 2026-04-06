@@ -30,18 +30,17 @@ class PaymentRequestPayloadTest {
         assertEquals("https://mint.example", payload.mint)
         assertEquals("sat", payload.unit)
         assertNotNull(payload.proofs)
-        assertEquals(1, payload.proofs!!.size)
-        val proof = payload.proofs!![0]
-        assertEquals(8, proof.amount)
-        assertEquals("abc123", proof.keysetId)
-        val secret = proof.secret as com.cashujdk.nut00.StringSecret
-        assertEquals("secret-1", secret.secret)
-        assertEquals("deadbeef", proof.c)
-        assertNotNull(proof.dleq)
+        assertEquals(1, payload.proofs!!.size())
+        val proof = payload.proofs!!.get(0).asJsonObject
+        assertEquals(8L, proof.get("amount").asLong)
+        assertEquals("abc123", proof.get("id").asString)
+        assertEquals("secret-1", proof.get("secret").asString)
+        assertEquals("deadbeef", proof.get("C").asString)
+        assertNotNull(proof.get("dleq"))
     }
     
-    @Test(expected = com.google.gson.JsonParseException::class)
-    fun `GSON rejects proofs without keyset id`() {
+    @Test(expected = IllegalArgumentException::class)
+    fun `validation rejects proofs without keyset id`() {
         val json = """
             {
               "mint": "https://mint.example",
@@ -56,7 +55,7 @@ class PaymentRequestPayloadTest {
             }
         """.trimIndent()
 
-        PaymentRequestPayload.GSON.fromJson(json, PaymentRequestPayload::class.java)
+        PaymentRequestPayload.GSON.fromJson(json, PaymentRequestPayload::class.java).validate()
     }
 
     @Test(expected = IllegalArgumentException::class)
@@ -68,8 +67,6 @@ class PaymentRequestPayloadTest {
               "proofs": []
             }
         """.trimIndent()
-        PaymentRequestPayload.GSON.fromJson(json, PaymentRequestPayload::class.java).apply {
-            require(!(proofs == null || proofs!!.isEmpty())) { "Proofs should not be empty" }
-        }
+        PaymentRequestPayload.GSON.fromJson(json, PaymentRequestPayload::class.java).validate()
     }
 }

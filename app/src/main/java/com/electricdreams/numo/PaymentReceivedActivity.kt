@@ -18,7 +18,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowCompat
-import com.cashujdk.nut00.Token
+import org.cashudevkit.Token
+import org.cashudevkit.CurrencyUnit
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.payment.PaymentIntentFactory
 
@@ -132,14 +133,17 @@ class PaymentReceivedActivity : AppCompatActivity() {
             val decodedToken = Token.decode(token)
             
             // Extract unit
-            unit = decodedToken.unit
+            unit = when (val tokenUnit = decodedToken.unit()) {
+                is CurrencyUnit.Sat -> "sat"
+                is CurrencyUnit.Msat -> "msat"
+                is CurrencyUnit.Eur -> "eur"
+                is CurrencyUnit.Usd -> "usd"
+                is CurrencyUnit.Custom -> tokenUnit.unit
+                else -> "sat"
+            }
             
             // Calculate total amount from all proofs using the public API
-            amount = decodedToken.tokens.stream()
-                .mapToLong { t -> 
-                    t.getProofsShortId().stream().mapToLong { p -> p.amount }.sum()
-                }
-                .sum()
+            amount = decodedToken.value().value.toLong()
             
             Log.d(TAG, "Parsed token: amount=$amount, unit=$unit")
         } catch (e: Exception) {

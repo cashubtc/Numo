@@ -1,6 +1,6 @@
 package com.electricdreams.numo.core.data.model
 
-import com.cashujdk.nut00.Token
+import org.cashudevkit.Token
 import com.google.gson.annotations.SerializedName
 import java.util.Date
 import java.util.UUID
@@ -225,7 +225,7 @@ data class PaymentHistoryEntry(
             return try {
                 if (!tokenString.isNullOrEmpty()) {
                     val token = Token.decode(tokenString)
-                    token.mint
+                    token.mintUrl().url
                 } else {
                     null
                 }
