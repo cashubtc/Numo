@@ -127,14 +127,14 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowIsFloating">false</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">#0A2540</item>
+        <item name="android:navigationBarColor">@color/color_bottom_sheet_nav_bar</item>
         <item name="android:windowLightNavigationBar">false</item>
         <item name="bottomSheetStyle">@style/Widget.Numo.BottomSheet</item>
     </style>
 
     <!-- Bottom Sheet Widget Style -->
     <style name="Widget.Numo.BottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
-        <item name="backgroundTint">#0A2540</item>
+        <item name="backgroundTint">@color/color_bottom_sheet_bg</item>
         <item name="shapeAppearance">@style/ShapeAppearance.Numo.BottomSheet</item>
         <item name="behavior_peekHeight">auto</item>
         <item name="behavior_fitToContents">true</item>

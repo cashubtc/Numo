@@ -44,7 +44,7 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE or
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
             )
-            navigationBarColor = ContextCompat.getColor(requireContext(), R.color.numo_navy)
+            navigationBarColor = ContextCompat.getColor(requireContext(), R.color.color_bottom_sheet_nav_bar)
             setDimAmount(0.6f)
         }
         return dialog
@@ -124,7 +124,7 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
                         .build()
                 ).apply {
                     fillColor = android.content.res.ColorStateList.valueOf(
-                        ContextCompat.getColor(requireContext(), R.color.numo_navy)
+                        ContextCompat.getColor(requireContext(), R.color.color_bottom_sheet_bg)
                     )
                 }
                 sheet.background = shapeDrawable

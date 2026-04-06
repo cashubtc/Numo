@@ -76,6 +76,10 @@
     <color name="color_auto_withdraw_success">#4CAF50</color>
     <color name="color_auto_withdraw_error">#FF5252</color>
 
+    <!-- Bottom Sheet Colors (dark mode - match window background) -->
+    <color name="color_bottom_sheet_bg">@color/dark_windowBackground</color>
+    <color name="color_bottom_sheet_nav_bar">@color/dark_windowBackground</color>
+
     <!-- Lightning Strike Animation Colors (same in dark mode - bolt is always orange) -->
     <color name="color_lightning_bolt_core">#F7931A</color>
     <color name="color_lightning_bolt_inner_glow">#FFBB5C</color>

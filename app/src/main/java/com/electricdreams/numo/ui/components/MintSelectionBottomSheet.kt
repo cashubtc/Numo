@@ -91,7 +91,7 @@ class MintSelectionBottomSheet : BottomSheetDialogFragment() {
             
             bottomSheet?.let { sheet ->
                 sheet.setBackgroundColor(
-                    ContextCompat.getColor(requireContext(), R.color.color_bg_white)
+                    ContextCompat.getColor(requireContext(), R.color.color_bottom_sheet_bg)
                 )
 
                 val behavior = BottomSheetBehavior.from(sheet)
