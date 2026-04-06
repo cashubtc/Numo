@@ -440,6 +440,8 @@ class CheckoutScannerActivity : AppCompatActivity() {
         barcodeScanner?.close()
     }
 
+    @Deprecated("Deprecated in Java")
+    @Suppress("DEPRECATION")
     override fun onBackPressed() {
         if (basketUpdated) {
             setResult(RESULT_BASKET_UPDATED)

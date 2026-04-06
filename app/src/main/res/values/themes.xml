@@ -131,7 +131,7 @@
         <item name="android:windowLightNavigationBar">false</item>
         <item name="bottomSheetStyle">@style/Widget.Numo.BottomSheet</item>
     </style>
-    
+
     <!-- Bottom Sheet Widget Style -->
     <style name="Widget.Numo.BottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
         <item name="backgroundTint">#0A2540</item>

@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.PathInterpolator
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -21,17 +20,15 @@ class OnboardingMintAdapter(
     interface Listener {
         fun onLoadMintIcon(mintUrl: String, iconView: ShapeableImageView)
         fun onResolveMintName(mintUrl: String): String
-        fun onMintAcceptedChanged()
         fun onDefaultMintChanged(newDefaultUrl: String)
         fun onAddMintClicked()
         fun onRequestSetDefault(mintUrl: String, mintName: String)
     }
 
     sealed class ListItem {
-        data class Header(val title: String, val acceptedCount: Int) : ListItem()
+        data class Header(val title: String) : ListItem()
         data class DefaultHero(val url: String) : ListItem()
         data class Mint(val url: String) : ListItem()
-        object Hint : ListItem()
         object AddMint : ListItem()
     }
 
@@ -39,9 +36,19 @@ class OnboardingMintAdapter(
         private const val VIEW_TYPE_HEADER = 0
         private const val VIEW_TYPE_MINT = 1
         private const val VIEW_TYPE_DEFAULT_HERO = 2
-        private const val VIEW_TYPE_HINT = 3
         private const val VIEW_TYPE_ADD_MINT = 4
         private const val PAYLOAD_NAME_ONLY = "name_only"
+
+        // Animation timing constants
+        private const val CROSSFADE_DELAY = 150L
+        private const val FADE_DURATION = 150L
+        private const val FADE_IN_DURATION = 300L
+        private const val SLIDE_IN_DURATION = 250L
+        private const val MATERIALIZE_DURATION = 300L
+        private const val TAP_PRESS_DURATION = 100L
+        private const val TAP_RELEASE_DURATION = 250L
+
+        private val SPRING_INTERPOLATOR = PathInterpolator(0.175f, 0.885f, 0.32f, 1.1f)
     }
 
     /** Refresh display names without re-binding icons. */
@@ -53,10 +60,10 @@ class OnboardingMintAdapter(
     private val mints = mutableListOf<String>()
     val accepted = mutableSetOf<String>()
 
-    private var acceptFromTitle = ""
+    private var headerTitle = ""
 
-    fun setHeaderStrings(acceptFromTitle: String) {
-        this.acceptFromTitle = acceptFromTitle
+    fun setHeaderStrings(headerTitle: String) {
+        this.headerTitle = headerTitle
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -95,11 +102,10 @@ class OnboardingMintAdapter(
         if (mints.isNotEmpty()) {
             items.add(ListItem.DefaultHero(mints[0]))
         }
-        items.add(ListItem.Header(acceptFromTitle, accepted.size))
+        items.add(ListItem.Header(headerTitle))
         for (i in 1 until mints.size) {
             items.add(ListItem.Mint(mints[i]))
         }
-        items.add(ListItem.Hint)
         items.add(ListItem.AddMint)
     }
 
@@ -109,19 +115,14 @@ class OnboardingMintAdapter(
         return mints.drop(1)
     }
 
-    fun getAcceptedMints(): Set<String> = accepted.toSet()
-
     fun getAllSelectedMints(): Set<String> {
         val result = mutableSetOf<String>()
-        // Default mint is always selected
         mints.firstOrNull()?.let { result.add(it) }
-        // Plus all accepted popular mints
         result.addAll(accepted)
         return result
     }
 
     private var pendingSwapIndex = -1
-    private var pendingSwapUrl: String? = null
     private var recyclerView: RecyclerView? = null
 
     override fun onAttachedToRecyclerView(rv: RecyclerView) {
@@ -135,94 +136,134 @@ class OnboardingMintAdapter(
     }
 
     /**
-     * Set a mint as the new default with a gradient-ring animation on the hero card.
+     * Set a mint as the new default with a gradient-ring animation on the hero card
+     * and a synchronized crossfade on the swapped popular-mint row.
      */
     fun confirmSetDefault(mintUrl: String) {
         val mintIndex = mints.indexOf(mintUrl)
         if (mintIndex < 1) return
 
+        // Ignore taps while a swap animation is already in progress
+        if (pendingSwapIndex != -1) return
+
         val hero = recyclerView?.findViewHolderForAdapterPosition(0) as? DefaultHeroViewHolder
         if (hero == null) {
-            // Hero not visible — swap immediately without animation
             swapData(mintIndex)
             notifyItemChanged(0)
             return
         }
 
+        val oldDefault = mints[0]
         pendingSwapIndex = mintIndex
-        pendingSwapUrl = mintUrl
 
         val newName = listener.onResolveMintName(mintUrl)
+        val density = hero.itemView.resources.displayMetrics.density
 
         // 1. Spin the gradient ring around the avatar
         hero.gradientRing.spin {
-            // 3. Ring done — swap the underlying data for the rest of the list
             swapData(pendingSwapIndex)
             pendingSwapIndex = -1
-            pendingSwapUrl = null
         }
 
-        // 2. Crossfade icon + name early so new content is settled before ring ends
-        val crossfadeDelay = 150L
-        val fadeDuration = 150L
-
-        val appleSpring = PathInterpolator(0.175f, 0.885f, 0.32f, 1.1f)
-
+        // 2. Crossfade hero icon + name (starts after short delay)
         hero.mintIcon.animate()
             .alpha(0f)
-            .setDuration(fadeDuration)
-            .setStartDelay(crossfadeDelay)
+            .setDuration(FADE_DURATION)
+            .setStartDelay(CROSSFADE_DELAY)
             .withEndAction {
                 listener.onLoadMintIcon(mintUrl, hero.mintIcon)
-                // Fade in + settle bounce
                 hero.mintIcon.scaleX = 0.92f
                 hero.mintIcon.scaleY = 0.92f
                 hero.mintIcon.animate()
                     .alpha(1f)
                     .scaleX(1f)
                     .scaleY(1f)
-                    .setDuration(300)
-                    .setInterpolator(appleSpring)
+                    .setDuration(FADE_IN_DURATION)
+                    .setInterpolator(SPRING_INTERPOLATOR)
                     .start()
             }
             .start()
 
         hero.mintName.animate()
             .alpha(0f)
-            .setDuration(fadeDuration)
-            .setStartDelay(crossfadeDelay)
+            .setDuration(FADE_DURATION)
+            .setStartDelay(CROSSFADE_DELAY)
             .withEndAction {
                 hero.mintName.text = newName
-                // Slide in from right + fade
-                hero.mintName.translationX = 8f * hero.mintName.resources.displayMetrics.density
+                hero.mintName.translationX = 8f * density
                 hero.mintName.animate()
                     .alpha(1f)
                     .translationX(0f)
-                    .setDuration(250)
-                    .setInterpolator(appleSpring)
+                    .setDuration(SLIDE_IN_DURATION)
+                    .setInterpolator(SPRING_INTERPOLATOR)
                     .start()
             }
             .start()
 
         hero.mintSubtitle.animate()
             .alpha(0f)
-            .setDuration(fadeDuration)
-            .setStartDelay(crossfadeDelay)
+            .setDuration(FADE_DURATION)
+            .setStartDelay(CROSSFADE_DELAY)
             .withEndAction {
-                hero.mintSubtitle.translationX = 8f * hero.mintSubtitle.resources.displayMetrics.density
+                hero.mintSubtitle.translationX = 8f * density
                 hero.mintSubtitle.animate()
                     .alpha(1f)
                     .translationX(0f)
-                    .setDuration(250)
-                    .setInterpolator(appleSpring)
+                    .setDuration(SLIDE_IN_DURATION)
+                    .setInterpolator(SPRING_INTERPOLATOR)
                     .start()
             }
             .start()
+
+        // 3. Dissolve the tapped popular-mint row in sync with the hero
+        val tappedAdapterPos = mintIndex + 1
+        val mintHolder = recyclerView?.findViewHolderForAdapterPosition(tappedAdapterPos) as? MintViewHolder
+        if (mintHolder != null) {
+            val dissolveUp = -4f * density   // barely perceptible directional hint
+            val materializeFrom = 6f * density
+
+            // Exit: gentle dissolve — fade out with soft upward drift
+            mintHolder.icon.animate()
+                .alpha(0f).translationY(dissolveUp)
+                .setDuration(FADE_DURATION)
+                .setStartDelay(CROSSFADE_DELAY)
+                .withEndAction {
+                    // Brief pause, then materialize the replacement
+                    listener.onLoadMintIcon(oldDefault, mintHolder.icon)
+                    mintHolder.icon.translationY = materializeFrom
+                    mintHolder.icon.scaleX = 0.97f
+                    mintHolder.icon.scaleY = 0.97f
+                    mintHolder.icon.animate()
+                        .alpha(1f).translationY(0f).scaleX(1f).scaleY(1f)
+                        .setDuration(MATERIALIZE_DURATION)
+                        .setStartDelay(30)
+                        .setInterpolator(SPRING_INTERPOLATOR)
+                        .start()
+                }
+                .start()
+
+            mintHolder.name.animate()
+                .alpha(0f).translationY(dissolveUp)
+                .setDuration(FADE_DURATION)
+                .setStartDelay(CROSSFADE_DELAY)
+                .withEndAction {
+                    mintHolder.name.text = listener.onResolveMintName(oldDefault)
+                    mintHolder.name.translationY = materializeFrom
+                    mintHolder.name.animate()
+                        .alpha(1f).translationY(0f)
+                        .setDuration(MATERIALIZE_DURATION)
+                        .setStartDelay(30)
+                        .setInterpolator(SPRING_INTERPOLATOR)
+                        .start()
+                }
+                .start()
+        }
     }
 
     /**
      * Instant swap without animation — used for undo.
      */
+    @SuppressLint("NotifyDataSetChanged")
     fun swapDefaultInstant(mintUrl: String) {
         val mintIndex = mints.indexOf(mintUrl)
         if (mintIndex < 1) return
@@ -239,7 +280,7 @@ class OnboardingMintAdapter(
     }
 
     /**
-     * Swap data arrays and notify the list rows (not the hero — it's already animated).
+     * Swap data arrays only — visual animation is handled by confirmSetDefault.
      */
     private fun swapData(tappedMintIndex: Int) {
         if (tappedMintIndex < 1 || tappedMintIndex >= mints.size) return
@@ -256,8 +297,8 @@ class OnboardingMintAdapter(
         val tappedAdapterPos = tappedMintIndex + 1
 
         rebuildItems()
-        notifyItemChanged(1)               // Header count may change
-        notifyItemChanged(tappedAdapterPos) // Swapped popular mint row
+        // Rebind only the swapped row so its click listener picks up the new URL
+        notifyItemChanged(tappedAdapterPos)
 
         listener.onDefaultMintChanged(newDefault)
     }
@@ -268,7 +309,6 @@ class OnboardingMintAdapter(
         is ListItem.Header -> VIEW_TYPE_HEADER
         is ListItem.DefaultHero -> VIEW_TYPE_DEFAULT_HERO
         is ListItem.Mint -> VIEW_TYPE_MINT
-        is ListItem.Hint -> VIEW_TYPE_HINT
         is ListItem.AddMint -> VIEW_TYPE_ADD_MINT
     }
 
@@ -283,10 +323,6 @@ class OnboardingMintAdapter(
                 val view = inflater.inflate(R.layout.item_onboarding_mint_hero, parent, false)
                 DefaultHeroViewHolder(view)
             }
-            VIEW_TYPE_HINT -> {
-                val view = inflater.inflate(R.layout.item_onboarding_mint_hint, parent, false)
-                HintViewHolder(view)
-            }
             VIEW_TYPE_ADD_MINT -> {
                 val view = inflater.inflate(R.layout.item_onboarding_mint_add, parent, false)
                 AddMintViewHolder(view)
@@ -300,7 +336,6 @@ class OnboardingMintAdapter(
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
         if (payloads.contains(PAYLOAD_NAME_ONLY)) {
-            // Partial update: refresh names only, skip icon loading
             when (val item = items[position]) {
                 is ListItem.DefaultHero -> (holder as DefaultHeroViewHolder).mintName.text = listener.onResolveMintName(item.url)
                 is ListItem.Mint -> (holder as MintViewHolder).name.text = listener.onResolveMintName(item.url)
@@ -319,12 +354,7 @@ class OnboardingMintAdapter(
             is ListItem.Header -> {
                 val h = holder as HeaderViewHolder
                 h.title.text = item.title
-
-                h.count.text = if (item.acceptedCount == 1) {
-                    context.getString(R.string.onboarding_mints_count_label_singular, item.acceptedCount)
-                } else {
-                    context.getString(R.string.onboarding_mints_count_label, item.acceptedCount)
-                }
+                h.count.setText(R.string.onboarding_mints_tap_hint)
 
                 val lp = h.itemView.layoutParams as RecyclerView.LayoutParams
                 lp.topMargin = (20 * density).toInt()
@@ -334,8 +364,7 @@ class OnboardingMintAdapter(
                 val h = holder as DefaultHeroViewHolder
                 h.mintName.text = listener.onResolveMintName(item.url)
 
-                // Mint icon with rounded corners
-                h.mintIcon.setBackgroundColor(android.graphics.Color.parseColor("#1AFFFFFF"))
+                h.mintIcon.setBackgroundColor(ContextCompat.getColor(h.itemView.context, R.color.color_onboarding_icon_bg))
                 h.mintIcon.shapeAppearanceModel = h.mintIcon.shapeAppearanceModel.toBuilder()
                     .setAllCornerSizes(22f * density)
                     .build()
@@ -346,8 +375,7 @@ class OnboardingMintAdapter(
 
                 h.name.text = listener.onResolveMintName(item.url)
 
-                // Icon
-                h.icon.setBackgroundColor(android.graphics.Color.parseColor("#1AFFFFFF"))
+                h.icon.setBackgroundColor(ContextCompat.getColor(h.itemView.context, R.color.color_onboarding_icon_bg))
                 h.icon.shapeAppearanceModel = h.icon.shapeAppearanceModel.toBuilder()
                     .setAllCornerSizes(20f * density)
                     .build()
@@ -358,29 +386,18 @@ class OnboardingMintAdapter(
                     ContextCompat.getDrawable(context, R.drawable.bg_mint_item)
                 lp.bottomMargin = (8 * density).toInt()
 
-                // Status text and checkbox
-                val isAccepted = accepted.contains(item.url)
-                updateMintRowState(context, h, isAccepted)
+                // Reset any residual animation transforms from confirmSetDefault
+                h.icon.translationY = 0f
+                h.icon.scaleX = 1f
+                h.icon.scaleY = 1f
+                h.icon.alpha = 1f
+                h.name.translationY = 0f
+                h.name.alpha = 1f
 
-                // Checkbox toggle on row tap
-                h.itemView.setOnClickListener {
-                    val nowAccepted = !accepted.contains(item.url)
-                    if (nowAccepted) accepted.add(item.url) else accepted.remove(item.url)
-                    updateMintRowState(context, h, nowAccepted)
-                    // Update the header count
-                    rebuildItems()
-                    notifyItemChanged(1)
-                    listener.onMintAcceptedChanged()
-                }
-
-                // Long-press to set as default
-                h.itemView.isHapticFeedbackEnabled = false
-                h.itemView.setOnLongClickListener { view ->
-                    // Scale pulse: press down then spring back
-                    val spring = PathInterpolator(0.175f, 0.885f, 0.32f, 1.1f)
+                h.itemView.setOnClickListener { view ->
                     view.animate()
                         .scaleX(0.96f).scaleY(0.96f)
-                        .setDuration(100)
+                        .setDuration(TAP_PRESS_DURATION)
                         .withEndAction {
                             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
                                 view.performHapticFeedback(HapticFeedbackConstants.CONFIRM, HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING)
@@ -389,20 +406,16 @@ class OnboardingMintAdapter(
                             }
                             view.animate()
                                 .scaleX(1f).scaleY(1f)
-                                .setDuration(250)
-                                .setInterpolator(spring)
+                                .setDuration(TAP_RELEASE_DURATION)
+                                .setInterpolator(SPRING_INTERPOLATOR)
                                 .start()
                         }
                         .start()
                     val mintName = listener.onResolveMintName(item.url)
                     listener.onRequestSetDefault(item.url, mintName)
-                    true
                 }
 
                 h.itemView.layoutParams = lp
-            }
-            is ListItem.Hint -> {
-                // Static text — no binding needed
             }
             is ListItem.AddMint -> {
                 val h = holder as AddMintViewHolder
@@ -410,25 +423,6 @@ class OnboardingMintAdapter(
                     listener.onAddMintClicked()
                 }
             }
-        }
-
-    }
-
-    private fun updateMintRowState(
-        context: android.content.Context,
-        holder: MintViewHolder,
-        isAccepted: Boolean
-    ) {
-        if (isAccepted) {
-            holder.checkbox.setImageResource(R.drawable.ic_checkbox_checked)
-            holder.checkbox.setColorFilter(android.graphics.Color.WHITE)
-            holder.status.text = context.getString(R.string.onboarding_mints_status_accepting)
-            holder.status.setTextColor(android.graphics.Color.parseColor("#99FFFFFF"))
-        } else {
-            holder.checkbox.setImageResource(R.drawable.ic_checkbox_unchecked)
-            holder.checkbox.setColorFilter(android.graphics.Color.parseColor("#4DFFFFFF"))
-            holder.status.text = context.getString(R.string.onboarding_mints_status_not_accepting)
-            holder.status.setTextColor(android.graphics.Color.parseColor("#73FFFFFF"))
         }
     }
 
@@ -447,11 +441,7 @@ class OnboardingMintAdapter(
     class MintViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val icon: ShapeableImageView = view.findViewById(R.id.mint_icon)
         val name: TextView = view.findViewById(R.id.mint_name)
-        val status: TextView = view.findViewById(R.id.mint_status)
-        val checkbox: ImageView = view.findViewById(R.id.mint_checkbox)
     }
-
-    class HintViewHolder(view: View) : RecyclerView.ViewHolder(view)
 
     class AddMintViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val addText: TextView = view.findViewById(R.id.add_mint_text)

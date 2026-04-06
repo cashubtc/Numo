@@ -2,6 +2,7 @@ package com.electricdreams.numo.payment
 
 import android.content.Context
 import android.content.Intent
+import com.electricdreams.numo.util.startActivityForResultCompat
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.PaymentRequestActivity
@@ -25,7 +26,7 @@ class PaymentMethodHandler(
         
         val routing = PaymentRoutingCore.determinePaymentRoute(tipsManager.tipsEnabled)
         val intent = routing.buildIntent(activity, amount, formattedAmount, checkoutBasketJson)
-        activity.startActivityForResult(intent, REQUEST_CODE_PAYMENT)
+        activity.startActivityForResultCompat(intent, REQUEST_CODE_PAYMENT)
     }
 
     /** Proceed with NDEF payment (HCE) - preserved but not currently invoked in main flow */

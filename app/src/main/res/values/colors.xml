@@ -3,8 +3,7 @@
     <!-- Numo Brand Colors -->
     <color name="numo_fluorescent_green">#5EFFC2</color>
     <color name="numo_navy">#0A2540</color>
-    <color name="numo_navy_light">#0E3050</color>
-    
+
     <!-- Cash App Brand Colors -->
     <color name="color_primary_green">#0B1215</color>
     <color name="color_primary_green_light">#0B1215</color>
@@ -104,6 +103,18 @@
     <color name="empty_state_button_secondary_text">#6F6F73</color>
     <color name="empty_state_button_secondary_border">#4D6F6F73</color>
     <color name="empty_state_close_icon">#000000</color>
+
+    <!-- Onboarding Dark Theme (white-on-navy text hierarchy) -->
+    <color name="color_onboarding_text_muted">#73FFFFFF</color>
+    <color name="color_onboarding_text_subtle">#99FFFFFF</color>
+    <color name="color_onboarding_text_disabled">#4DFFFFFF</color>
+    <color name="color_onboarding_icon_bg">#1AFFFFFF</color>
+    <color name="color_seed_word_invalid">#FF6B6B</color>
+
+    <!-- Auto-Custody Illustration -->
+    <color name="color_card_shadow">#20000000</color>
+    <color name="color_auto_custody_pending_bg">#FFF0DB</color>
+    <color name="color_auto_custody_success_bg">#D4FFED</color>
 
     <!-- Hero Green Tints (for mint selection hero card) -->
     <color name="color_hero_green_border">#3300C244</color>

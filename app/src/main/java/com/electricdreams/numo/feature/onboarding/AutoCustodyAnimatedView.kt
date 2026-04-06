@@ -8,6 +8,8 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
+import androidx.core.content.ContextCompat
+import com.electricdreams.numo.R
 import com.electricdreams.numo.ui.util.isAnimationEnabled
 
 /**
@@ -55,35 +57,35 @@ class AutoCustodyAnimatedView @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
     private val shadowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#20000000")
+        color = ContextCompat.getColor(context, R.color.color_card_shadow)
         maskFilter = BlurMaskFilter(14f, BlurMaskFilter.Blur.NORMAL)
     }
     private val iconBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
     }
     private val spinnerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#F7931A")
+        color = ContextCompat.getColor(context, R.color.color_bitcoin_orange)
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
     }
     private val checkPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#00C244")
+        color = ContextCompat.getColor(context, R.color.color_success_green)
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
     }
     private val titlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#0A2540")
+        color = ContextCompat.getColor(context, R.color.numo_navy)
         typeface = Typeface.create("sans-serif-medium", Typeface.BOLD)
     }
     private val subtitlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#6F6F73")
+        color = ContextCompat.getColor(context, R.color.color_text_secondary)
         typeface = Typeface.create("sans-serif", Typeface.NORMAL)
     }
 
     // Colors
-    private val orangeBg = Color.parseColor("#FFF0DB")
-    private val greenBg = Color.parseColor("#D4FFED")
+    private val orangeBg = ContextCompat.getColor(context, R.color.color_auto_custody_pending_bg)
+    private val greenBg = ContextCompat.getColor(context, R.color.color_auto_custody_success_bg)
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)

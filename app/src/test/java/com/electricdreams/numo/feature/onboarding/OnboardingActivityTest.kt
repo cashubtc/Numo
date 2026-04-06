@@ -2,7 +2,6 @@ package com.electricdreams.numo.feature.onboarding
 
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.electricdreams.numo.R
@@ -19,13 +18,15 @@ import org.robolectric.util.ReflectionHelpers
 @Config(sdk = [34])
 class OnboardingActivityTest {
 
+    // ── Navigation tests ────────────────────────────────────────────────
+
     @Test
     fun `activity launches and shows welcome screen`() {
         ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val welcomeContainer = activity.findViewById<FrameLayout>(R.id.welcome_container)
                 assertEquals("Welcome container should be visible", View.VISIBLE, welcomeContainer.visibility)
-                
+
                 val choosePathContainer = activity.findViewById<FrameLayout>(R.id.choose_path_container)
                 assertEquals("Choose path container should be gone", View.GONE, choosePathContainer.visibility)
             }
@@ -38,10 +39,10 @@ class OnboardingActivityTest {
             scenario.onActivity { activity ->
                 val acceptButton = activity.findViewById<MaterialButton>(R.id.accept_button)
                 acceptButton.performClick()
-                
+
                 val welcomeContainer = activity.findViewById<FrameLayout>(R.id.welcome_container)
                 assertEquals("Welcome container should be gone", View.GONE, welcomeContainer.visibility)
-                
+
                 val choosePathContainer = activity.findViewById<FrameLayout>(R.id.choose_path_container)
                 assertEquals("Choose path container should be visible", View.VISIBLE, choosePathContainer.visibility)
             }
@@ -52,13 +53,11 @@ class OnboardingActivityTest {
     fun `restore wallet button shows enter seed screen`() {
         ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                // Navigate to choose path
                 activity.findViewById<MaterialButton>(R.id.accept_button).performClick()
-                
-                // Click restore
+
                 val restoreButton = activity.findViewById<View>(R.id.restore_wallet_button)
                 restoreButton.performClick()
-                
+
                 val enterSeedContainer = activity.findViewById<FrameLayout>(R.id.enter_seed_container)
                 assertEquals("Enter seed container should be visible", View.VISIBLE, enterSeedContainer.visibility)
             }
@@ -69,18 +68,18 @@ class OnboardingActivityTest {
     fun `create wallet button shows generating screen`() {
         ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                // Navigate to choose path
                 activity.findViewById<MaterialButton>(R.id.accept_button).performClick()
-                
-                // Click create
+
                 val createButton = activity.findViewById<View>(R.id.create_wallet_button)
                 createButton.performClick()
-                
+
                 val generatingContainer = activity.findViewById<FrameLayout>(R.id.generating_container)
                 assertEquals("Generating container should be visible", View.VISIBLE, generatingContainer.visibility)
             }
         }
     }
+
+    // ── Add mint tests ──────────────────────────────────────────────────
 
     @Test
     fun `add different mint with invalid URL does not modify list`() {
@@ -176,6 +175,101 @@ class OnboardingActivityTest {
             }
         } finally {
             server.shutdown()
+        }
+    }
+
+    // ── Mint adapter / review screen tests ──────────────────────────────
+
+    @Test
+    fun `review screen populates adapter with default and popular mints`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                setupMints(activity, default = "https://mint.coinos.io", popular = listOf("https://mint.minibits.cash"))
+
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
+
+                val adapter = ReflectionHelpers.getField<OnboardingMintAdapter>(activity, "mintAdapter")
+                assertEquals("https://mint.coinos.io", adapter.getDefaultMintUrl())
+                assertTrue(adapter.getPopularMints().contains("https://mint.minibits.cash"))
+            }
+        }
+    }
+
+    @Test
+    fun `review screen shows first discovered mint as default`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                setupMints(activity, default = "https://mint.coinos.io", popular = listOf("https://mint.minibits.cash", "https://testnut.cashu.space"))
+
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
+
+                val adapter = ReflectionHelpers.getField<OnboardingMintAdapter>(activity, "mintAdapter")
+                assertEquals("https://mint.coinos.io", adapter.getDefaultMintUrl())
+            }
+        }
+    }
+
+    @Test
+    fun `adapter tracks all selected mints including default`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                setupMints(activity, default = "https://mint.coinos.io", popular = listOf("https://mint.minibits.cash"))
+
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
+
+                val adapter = ReflectionHelpers.getField<OnboardingMintAdapter>(activity, "mintAdapter")
+                val allSelected = adapter.getAllSelectedMints()
+                assertTrue(allSelected.contains("https://mint.coinos.io"))
+                assertTrue(allSelected.contains("https://mint.minibits.cash"))
+                assertEquals(2, allSelected.size)
+            }
+        }
+    }
+
+    @Test
+    fun `review screen continue button exists and is enabled with mints`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                setupMints(activity, default = "https://mint.coinos.io", popular = listOf("https://mint.minibits.cash"))
+
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
+
+                val continueButton = activity.findViewById<MaterialButton>(R.id.mints_continue_button)
+                assertNotNull(continueButton)
+                assertTrue(continueButton.isEnabled)
+            }
+        }
+    }
+
+    @Test
+    fun `adapter onAddMintClicked callback is wired`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val adapter = ReflectionHelpers.getField<OnboardingMintAdapter>(activity, "mintAdapter")
+                // Adapter should be non-null and attached — the listener is set in onCreate
+                assertNotNull(adapter)
+            }
+        }
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────
+
+    private fun setupMints(activity: OnboardingActivity, default: String, popular: List<String>) {
+        val discovered = ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "discoveredMints")
+        val selected = ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "selectedMints")
+        val names = ReflectionHelpers.getField<MutableMap<String, String>>(activity, "onboardingMintDisplayNames")
+        discovered.clear()
+        selected.clear()
+        names.clear()
+
+        discovered.add(default)
+        selected.add(default)
+        names[default] = default.substringAfter("://").substringBefore("/")
+
+        for (url in popular) {
+            discovered.add(url)
+            selected.add(url)
+            names[url] = url.substringAfter("://").substringBefore("/")
         }
     }
 

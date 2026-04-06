@@ -33,21 +33,6 @@
             android:maxLines="1"
             android:ellipsize="end" />
 
-        <TextView
-            android:id="@+id/mint_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textSize="12sp"
-            android:fontFamily="sans-serif"
-            android:textColor="#99FFFFFF" />
-
     </LinearLayout>
-
-    <ImageView
-        android:id="@+id/mint_checkbox"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
-        android:importantForAccessibility="no" />
 
 </LinearLayout>

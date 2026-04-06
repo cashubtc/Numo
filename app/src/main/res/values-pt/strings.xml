@@ -172,17 +172,9 @@
     <string name="onboarding_mints_hero_subtitle">Guarda seu bitcoin</string>
     <string name="onboarding_mints_hero_default_badge">Padrão</string>
     <string name="onboarding_mints_hero_helper">Retire para sua própria carteira a qualquer momento, ou defina um limite de pagamento para fazê-lo automaticamente.</string>
-    <string name="onboarding_mints_accept_from_header">ACEITAR DE</string>
-    <string name="onboarding_mints_count_label">%1$d mints</string>
-    <string name="onboarding_mints_count_label_singular">%1$d mint</string>
-    <string name="onboarding_mints_status_accepting">Aceitando pagamentos</string>
-    <string name="onboarding_mints_status_not_accepting">Não aceitando</string>
-    <string name="onboarding_mints_long_press_hint">Mantenha pressionado um mint para definir como padrão</string>
+    <string name="onboarding_mints_popular_header">MINTS POPULARES</string>
+    <string name="onboarding_mints_tap_hint">Toque para mudar o mint padrão</string>
     <string name="onboarding_mints_add_new_button">+ Adicionar Novo Mint</string>
-    <string name="onboarding_mints_set_default_title">Definir como padrão?</string>
-    <string name="onboarding_mints_set_default_message">Tornar \"%1$s\" seu mint padrão?</string>
-    <string name="onboarding_mints_set_default_confirm">Definir como padrão</string>
-    <string name="onboarding_mints_set_default_cancel">Cancelar</string>
 
     <!-- Onboarding / Restoring -->
     <string name="onboarding_restoring_title">Restaurando carteira</string>

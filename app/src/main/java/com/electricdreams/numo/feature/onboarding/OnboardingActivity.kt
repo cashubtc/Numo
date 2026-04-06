@@ -147,6 +147,7 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var termsText: TextView
     private lateinit var acceptButton: MaterialButton
     private lateinit var circularRevealView: View
+    private lateinit var scrollingItemsContainer: FrameLayout
 
     // Step 2: Choose Path
     private lateinit var choosePathContainer: FrameLayout
@@ -165,6 +166,8 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var chevronHint2: ImageView
     private lateinit var chevronHint3: ImageView
     private lateinit var chevronHintContainer: View
+    private lateinit var explainerBottomContainer: View
+    private lateinit var explainerCreateWalletButton: MaterialButton
     private var explainerOpen = false
     private var chevronAnimatorSet: AnimatorSet? = null
 
@@ -286,15 +289,15 @@ class OnboardingActivity : AppCompatActivity() {
             windowInsetsController.isAppearanceLightNavigationBars = true
         } else if (step == OnboardingStep.CHOOSE_PATH) {
             // Navy bars — nav bar matches dark teaser area at bottom
-            window.statusBarColor = android.graphics.Color.parseColor("#0A2540")
-            window.navigationBarColor = android.graphics.Color.parseColor("#0A2540")
+            window.statusBarColor = ContextCompat.getColor(this, R.color.numo_navy)
+            window.navigationBarColor = ContextCompat.getColor(this, R.color.numo_navy)
             windowInsetsController.isAppearanceLightStatusBars = false
             windowInsetsController.isAppearanceLightNavigationBars = false
         } else {
             // Navy bars for all other onboarding screens
-            val navyLight = android.graphics.Color.parseColor("#0A2540")
-            window.statusBarColor = navyLight
-            window.navigationBarColor = navyLight
+            val navy = ContextCompat.getColor(this, R.color.numo_navy)
+            window.statusBarColor = navy
+            window.navigationBarColor = navy
             windowInsetsController.isAppearanceLightStatusBars = false
             windowInsetsController.isAppearanceLightNavigationBars = false
         }
@@ -313,6 +316,7 @@ class OnboardingActivity : AppCompatActivity() {
         termsText = findViewById(R.id.terms_text)
         acceptButton = findViewById(R.id.accept_button)
         circularRevealView = findViewById(R.id.welcome_circular_reveal)
+        scrollingItemsContainer = findViewById(R.id.scrolling_items_container)
 
         // Choose Path
         choosePathContainer = findViewById(R.id.choose_path_container)
@@ -331,6 +335,8 @@ class OnboardingActivity : AppCompatActivity() {
         chevronHint2 = findViewById(R.id.chevron_hint_2)
         chevronHint3 = findViewById(R.id.chevron_hint_3)
         chevronHintContainer = findViewById(R.id.chevron_hint_container)
+        explainerBottomContainer = findViewById(R.id.explainer_bottom_container)
+        explainerCreateWalletButton = findViewById(R.id.explainer_create_wallet_button)
 
         setupExplainerViewPager()
 
@@ -375,9 +381,6 @@ class OnboardingActivity : AppCompatActivity() {
             override fun onResolveMintName(mintUrl: String): String {
                 return resolveOnboardingMintDisplayName(mintUrl)
             }
-            override fun onMintAcceptedChanged() {
-                updateContinueButtonState()
-            }
             override fun onDefaultMintChanged(newDefaultUrl: String) {
                 updateContinueButtonState()
             }
@@ -406,7 +409,7 @@ class OnboardingActivity : AppCompatActivity() {
             }
         })
         mintAdapter.setHeaderStrings(
-            acceptFromTitle = getString(R.string.onboarding_mints_accept_from_header)
+            headerTitle = getString(R.string.onboarding_mints_popular_header)
         )
         mintsRecyclerView.layoutManager = LinearLayoutManager(this)
         mintsRecyclerView.itemAnimator = null
@@ -437,32 +440,66 @@ class OnboardingActivity : AppCompatActivity() {
         val spannableString = SpannableString(fullText)
 
         val termsLabel = "Terms of Service"
-        val termsStart = fullText.indexOf(termsLabel)
-        if (termsStart != -1) {
-            val termsEnd = termsStart + termsLabel.length
+        val privacyLabel = "Privacy Policy"
 
-            val clickableSpan = object : ClickableSpan() {
-                override fun onClick(widget: View) {
-                    showTermsDialog()
-                }
+        val addClickableSpan = { label: String, onClickAction: () -> Unit ->
+            val start = fullText.indexOf(label)
+            if (start != -1) {
+                val end = start + label.length
+                val clickableSpan = object : ClickableSpan() {
+                    override fun onClick(widget: View) {
+                        onClickAction()
+                    }
 
-                override fun updateDrawState(ds: TextPaint) {
-                    // No super — avoids default blue color and underline
-                    ds.isFakeBoldText = true
+                    override fun updateDrawState(ds: TextPaint) {
+                        ds.isUnderlineText = true
+                        ds.isFakeBoldText = true
+                    }
                 }
+                spannableString.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
-
-            spannableString.setSpan(clickableSpan, termsStart, termsEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
+
+        addClickableSpan(termsLabel) { showTermsDialog() }
+        addClickableSpan(privacyLabel) { showPrivacyDialog() }
 
         termsText.text = spannableString
         termsText.movementMethod = LinkMovementMethod.getInstance()
+        termsText.highlightColor = android.graphics.Color.TRANSPARENT
     }
 
     private fun showTermsDialog() {
+        val textView = TextView(this).apply {
+            text = getString(R.string.dialog_terms_body)
+            typeface = android.graphics.Typeface.MONOSPACE
+            val padding = (16 * resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
+            textSize = 12f
+        }
+        val scrollView = android.widget.ScrollView(this).apply {
+            addView(textView)
+        }
         AlertDialog.Builder(this)
             .setTitle(R.string.dialog_terms_title)
-            .setMessage(getString(R.string.dialog_terms_body))
+            .setView(scrollView)
+            .setPositiveButton(R.string.common_close, null)
+            .show()
+    }
+
+    private fun showPrivacyDialog() {
+        val textView = TextView(this).apply {
+            text = getString(R.string.privacy_policy_full)
+            typeface = android.graphics.Typeface.MONOSPACE
+            val padding = (16 * resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
+            textSize = 12f
+        }
+        val scrollView = android.widget.ScrollView(this).apply {
+            addView(textView)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.settings_about_dialog_privacy_title)
+            .setView(scrollView)
             .setPositiveButton(R.string.common_close, null)
             .show()
     }
@@ -497,7 +534,7 @@ class OnboardingActivity : AppCompatActivity() {
 
         val indexText = TextView(this).apply {
             text = "$index"
-            setTextColor(android.graphics.Color.parseColor("#73FFFFFF"))
+            setTextColor(ContextCompat.getColor(context, R.color.color_onboarding_text_muted))
             textSize = 13f
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
             layoutParams = LinearLayout.LayoutParams(24.dpToPx(), LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -507,7 +544,7 @@ class OnboardingActivity : AppCompatActivity() {
         val input = SeedWordEditText(this).apply {
             hint = ""
             setTextColor(android.graphics.Color.WHITE)
-            setHintTextColor(android.graphics.Color.parseColor("#4DFFFFFF"))
+            setHintTextColor(ContextCompat.getColor(context, R.color.color_onboarding_text_disabled))
             textSize = 15f
             background = null
             isSingleLine = true
@@ -571,6 +608,11 @@ class OnboardingActivity : AppCompatActivity() {
         // Teaser + Explainer
         setupTeaserTouchListener()
         explainerCloseBtn.setOnClickListener { closeExplainer() }
+        explainerCreateWalletButton.setOnClickListener {
+            closeExplainer()
+            isRestoreFlow = false
+            startNewWalletFlow()
+        }
 
         // Enter Seed
         seedBackButton.setOnClickListener {
@@ -695,11 +737,33 @@ class OnboardingActivity : AppCompatActivity() {
         explainerViewPager.adapter = ExplainerSlideAdapter()
         explainerViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
-                // Show chevrons on slides 0 and 1, hide on last slide
+                val isLastSlide = position == (explainerViewPager.adapter?.itemCount ?: 0) - 1
+
+                // Hide chevrons on last slide
                 chevronHintContainer.animate()
-                    .alpha(if (position <= 1) 1f else 0f)
+                    .alpha(if (isLastSlide) 0f else 1f)
                     .setDuration(200)
+                    .withEndAction {
+                        chevronHintContainer.visibility = if (isLastSlide) View.INVISIBLE else View.VISIBLE
+                    }
                     .start()
+                    
+                // Show button on last slide
+                if (isLastSlide) {
+                    explainerCreateWalletButton.visibility = View.VISIBLE
+                    explainerCreateWalletButton.animate()
+                        .alpha(1f)
+                        .setDuration(200)
+                        .start()
+                } else {
+                    explainerCreateWalletButton.animate()
+                        .alpha(0f)
+                        .setDuration(200)
+                        .withEndAction { 
+                            explainerCreateWalletButton.visibility = View.INVISIBLE 
+                        }
+                        .start()
+                }
             }
         })
 
@@ -723,7 +787,9 @@ class OnboardingActivity : AppCompatActivity() {
             explainerCloseContainer.setPadding(
                 explainerCloseContainer.paddingStart, insets.top + dp16, 0, 0
             )
-            chevronHintContainer.setPadding(0, dp16, 0, insets.bottom + dp16)
+            
+            explainerBottomContainer.setPadding(0, 0, 0, insets.bottom + dp16)
+            
             windowInsets
         }
     }
@@ -777,13 +843,9 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun setExplainerWindowBars(open: Boolean) {
         val controller = WindowInsetsControllerCompat(window, window.decorView)
-        val darkNavy = android.graphics.Color.parseColor("#0A2540")
-        if (open) {
-            window.statusBarColor = darkNavy
-        } else {
-            window.statusBarColor = android.graphics.Color.parseColor("#0A2540")
-        }
-        window.navigationBarColor = darkNavy // always dark navy at bottom
+        val navy = ContextCompat.getColor(this, R.color.numo_navy)
+        window.statusBarColor = navy
+        window.navigationBarColor = navy
         controller.isAppearanceLightStatusBars = false
         controller.isAppearanceLightNavigationBars = false
     }
@@ -930,7 +992,8 @@ class OnboardingActivity : AppCompatActivity() {
             tagline = welcomeTagline,
             acceptButton = acceptButton,
             termsText = termsText,
-            revealView = circularRevealView
+            revealView = circularRevealView,
+            emojiContainer = scrollingItemsContainer
         )
         welcomeAnimator?.start(lifecycleScope)
     }
@@ -973,7 +1036,7 @@ class OnboardingActivity : AppCompatActivity() {
                     refreshMintProfilesForReview()
                 }
 
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         this@OnboardingActivity,
@@ -1014,7 +1077,7 @@ class OnboardingActivity : AppCompatActivity() {
                     showSuccessScreen(isRestore = false)
                 }
 
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         this@OnboardingActivity,
@@ -1040,7 +1103,7 @@ class OnboardingActivity : AppCompatActivity() {
             val word = words[i]
             val isInvalid = word.isNotBlank() && !Bip39Wordlist.isValid(word)
             if (isInvalid) allBip39 = false
-            input.setTextColor(if (isInvalid) android.graphics.Color.parseColor("#FF6B6B") else android.graphics.Color.WHITE)
+            input.setTextColor(ContextCompat.getColor(this, if (isInvalid) R.color.color_seed_word_invalid else R.color.color_bg_white))
         }
 
         val canContinue = allFilled && allBip39
@@ -1192,7 +1255,7 @@ class OnboardingActivity : AppCompatActivity() {
                     showSuccessScreen(isRestore = true)
                 }
 
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         this@OnboardingActivity,
@@ -1225,7 +1288,7 @@ class OnboardingActivity : AppCompatActivity() {
             } else {
                 backupStatusCard.setBackgroundColor(ContextCompat.getColor(this, R.color.numo_navy))
                 backupStatusIcon.setImageResource(R.drawable.ic_cloud_off)
-                backupStatusIcon.setColorFilter(android.graphics.Color.parseColor("#73FFFFFF"))
+                backupStatusIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_onboarding_text_muted))
                 backupStatusTitle.text = getString(R.string.onboarding_backup_not_found_title)
                 backupStatusTitle.setTextColor(android.graphics.Color.WHITE)
                 backupStatusSubtitle.text = getString(R.string.onboarding_backup_not_found_subtitle)
@@ -1512,7 +1575,7 @@ class OnboardingActivity : AppCompatActivity() {
 
         val statusText = TextView(this).apply {
             text = getString(R.string.restore_progress_status_waiting)
-            setTextColor(android.graphics.Color.parseColor("#73FFFFFF"))
+            setTextColor(ContextCompat.getColor(context, R.color.color_onboarding_text_muted))
             textSize = 13f
             tag = "status"
         }
@@ -1660,7 +1723,7 @@ class OnboardingActivity : AppCompatActivity() {
 
         val detailText = TextView(this).apply {
             text = getString(R.string.restore_success_balance_line, after)
-            setTextColor(android.graphics.Color.parseColor("#99FFFFFF"))
+            setTextColor(ContextCompat.getColor(context, R.color.color_onboarding_text_subtle))
             textSize = 13f
         }
 

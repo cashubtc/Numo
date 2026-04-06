@@ -74,6 +74,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
      * Get the current wallet's mnemonic (seed phrase).
      * Returns null if wallet hasn't been initialized.
      */
+
     fun getMnemonic(): String? {
         if (!this::appContext.isInitialized) return null
         val prefs = PreferenceStore.wallet(appContext)

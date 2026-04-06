@@ -59,6 +59,7 @@ android {
         // avoid version coupling between Compose compiler and Kotlin.
         compose = false
         viewBinding = true
+        buildConfig = true
     }
 
     packaging {

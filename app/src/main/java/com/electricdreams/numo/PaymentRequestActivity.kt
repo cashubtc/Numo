@@ -9,6 +9,8 @@ import android.content.ComponentName
 import android.nfc.NfcAdapter
 import android.nfc.cardemulation.CardEmulation
 import android.os.Bundle
+import com.electricdreams.numo.util.getVibrator
+import com.electricdreams.numo.util.vibrateCompat
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -312,7 +314,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 PaymentTabManager.PaymentTab.UNIFIED -> {
                     val creq = nostrHandler?.paymentRequestBech32
                     val lnbc = lightningHandler?.currentInvoice ?: lightningInvoice
-                    if (creq != null && lnbc != null) {
+                    if (lnbc != null) {
                         org.cashudevkit.createBip321Uri(creq, lnbc, null)
                     } else creq ?: lnbc
                 }
@@ -457,6 +459,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
+    @Suppress("DEPRECATION")
     override fun onBackPressed() {
         if (hasTerminalOutcome && currentOverlayActionMode == OverlayActionMode.SUCCESS) {
             animateSuccessScreenOut()
@@ -613,7 +617,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             return
         }
 
-        val payload = if (creq != null && lnbc != null) {
+        val payload = if (lnbc != null) {
             org.cashudevkit.createBip321Uri(creq, lnbc, null)
         } else creq ?: lnbc
 
@@ -629,6 +633,14 @@ class PaymentRequestActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e(TAG, "setHceToUnified(): Error while setting HCE Unified payload: ${e.message}", e)
         }
+    }
+
+    private fun generateThemedQrCode(text: String): android.graphics.Bitmap {
+        val currentNightMode = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        val isDarkTheme = currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val qrForeground = if (isDarkTheme) android.graphics.Color.WHITE else android.graphics.Color.BLACK
+        val qrBackground = android.graphics.Color.TRANSPARENT
+        return QrCodeGenerator.generate(text, 512, qrForeground, qrBackground)
     }
 
     private fun updateUnifiedQrCode() {
@@ -657,14 +669,14 @@ class PaymentRequestActivity : AppCompatActivity() {
             return
         }
         
-        val unifiedUri = if (creq != null && lnbc != null) {
+        val unifiedUri = if (lnbc != null) {
             org.cashudevkit.createBip321Uri(creq, lnbc, null)
         } else creq ?: lnbc
         
         if (unifiedUri == null) return
 
         try {
-            val qrBitmap = QrCodeGenerator.generate(unifiedUri, 512)
+            val qrBitmap = generateThemedQrCode(unifiedUri)
             unifiedQrImageView.setImageBitmap(qrBitmap)
             unifiedQrImageView.visibility = View.VISIBLE
             unifiedLoadingSpinner.visibility = View.GONE
@@ -683,7 +695,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         val callback = object : NostrPaymentHandler.Callback {
             override fun onPaymentRequestReady(paymentRequest: String) {
                 try {
-                    val qrBitmap = QrCodeGenerator.generate(paymentRequest, 512)
+                    val qrBitmap = generateThemedQrCode(paymentRequest)
                     cashuQrImageView.setImageBitmap(qrBitmap)
                     cashuQrImageView.visibility = View.VISIBLE
                     cashuLoadingSpinner.visibility = View.GONE
@@ -762,7 +774,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 }
 
                 try {
-                    val qrBitmap = QrCodeGenerator.generate(bolt11, 512)
+                    val qrBitmap = generateThemedQrCode(bolt11)
                     lightningQrImageView.setImageBitmap(qrBitmap)
                     lightningQrImageView.visibility = View.VISIBLE
                     // Hide loading spinner and show the bolt icon
@@ -1370,8 +1382,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         
         // Vibrate when switching to processing phase
         try {
-            val vibrator = getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator?
-            vibrator?.vibrate(longArrayOf(0, 50), -1)
+            val vibrator = getVibrator()
+            vibrator?.vibrateCompat(longArrayOf(0, 50), -1)
         } catch (_: Exception) {}
         
         // Show "Processing... You can lift your phone" hint with a gentle crossfade
@@ -1459,8 +1471,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         } catch (_: Exception) {}
         
         // Vibrate
-        val vibrator = getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator?
-        vibrator?.vibrate(longArrayOf(0, 50, 100, 50), -1)
+        val vibrator = getVibrator()
+        vibrator?.vibrateCompat(longArrayOf(0, 50, 100, 50), -1)
     }
 
     private fun showNfcAnimationError(message: String) {

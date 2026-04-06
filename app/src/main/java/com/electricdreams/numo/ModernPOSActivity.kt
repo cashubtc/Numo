@@ -11,6 +11,8 @@ import android.nfc.NfcManager
 import android.nfc.cardemulation.CardEmulation
 import android.content.ComponentName
 import android.os.Bundle
+import com.electricdreams.numo.util.getVibrator
+import com.electricdreams.numo.util.vibrateCompat
 import android.os.Vibrator
 import android.util.Log
 import android.view.Menu
@@ -61,7 +63,7 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
         setContentView(R.layout.activity_modern_pos)
 
         // Initialize vibrator for haptic feedback used in auto-withdraw UI
-        vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator?
+        vibrator = getVibrator()
 
         val paymentAmount = intent.getLongExtra("EXTRA_PAYMENT_AMOUNT", 0L)
         Log.d(TAG, "Created ModernPOSActivity with payment amount from basket: $paymentAmount")
@@ -216,6 +218,7 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
         super.onConfigurationChanged(newConfig)
         // Dialog layout handled by managers
     }
+    @Suppress("DEPRECATION")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == PaymentMethodHandler.REQUEST_CODE_PAYMENT) {
