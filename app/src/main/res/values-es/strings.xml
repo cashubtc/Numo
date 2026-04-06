@@ -118,6 +118,16 @@
     <string name="onboarding_restore_wallet_title">Restaurar desde copia de seguridad</string>
     <string name="onboarding_restore_wallet_subtitle">Usa tu frase semilla existente</string>
 
+    <!-- Explainer -->
+    <string name="explainer_teaser_title">Toca para aprender cómo funciona Numo.</string>
+    <string name="explainer_slide1_title">Toca para cobrar</string>
+    <string name="explainer_slide1_body">Ingresa un monto, toca cobrar y tu cliente acerca su telfono al tuyo. El pago llega al instante por NFC.</string>
+    <string name="explainer_slide2_title">Auto-custodia automtica</string>
+    <string name="explainer_slide2_body">Configura el retiro automtico para mover los pagos entrantes directamente a tu billetera Lightning. Numo es auto-custodia por defecto.</string>
+    <string name="explainer_slide3_title">Cero comisiones</string>
+    <string name="explainer_slide3_body">Numo es completamente de cdigo abierto y no cobra comisiones. Sin suscripciones, sin recortes, sin costos ocultos. Cada sat que recibes es tuyo.</string>
+    <string name="explainer_image_placeholder">Imagen de ejemplo</string>
+
     <!-- Onboarding / Restore Seed Entry -->
     <string name="onboarding_seed_toolbar_back">Atrás</string>
     <string name="onboarding_seed_toolbar_title">Restaurar cartera</string>
@@ -158,6 +168,13 @@
     <string name="onboarding_mints_count">Has seleccionado %1$d mint%2$s</string>
     <string name="onboarding_mints_continue_restore">Restaurar cartera</string>
     <string name="onboarding_mints_continue_new_wallet">Continuar</string>
+    <string name="onboarding_mints_hero_label">MINT PREDETERMINADO</string>
+    <string name="onboarding_mints_hero_subtitle">Guarda tu bitcoin</string>
+    <string name="onboarding_mints_hero_default_badge">Predeterminado</string>
+    <string name="onboarding_mints_hero_helper">Retira a tu propia billetera en cualquier momento, o establece un umbral de pago para hacerlo automáticamente.</string>
+    <string name="onboarding_mints_popular_header">MINTS POPULARES</string>
+    <string name="onboarding_mints_tap_hint">Toca para cambiar el mint predeterminado</string>
+    <string name="onboarding_mints_add_new_button">+ Agregar Nuevo Mint</string>
 
     <!-- Onboarding / Restoring -->
     <string name="onboarding_restoring_title">Restaurando cartera</string>

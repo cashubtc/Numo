@@ -16,12 +16,17 @@ import android.text.TextPaint
 import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
+import android.view.MotionEvent
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
+import android.view.animation.OvershootInterpolator
+import androidx.viewpager2.widget.ViewPager2
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.FrameLayout
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -38,6 +43,8 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.gridlayout.widget.GridLayout
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.ModernPOSActivity
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
@@ -47,9 +54,10 @@ import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.util.MintProfileService
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
 import com.electricdreams.numo.nostr.NostrMintBackup
-import com.electricdreams.numo.ui.components.AddMintInputCard
+import com.electricdreams.numo.ui.seed.Bip39Wordlist
 import com.electricdreams.numo.ui.seed.SeedWordEditText
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.imageview.ShapeableImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -130,26 +138,44 @@ class OnboardingActivity : AppCompatActivity() {
     // Step 1: Welcome
     private lateinit var welcomeContainer: FrameLayout
     private lateinit var welcomeBackgroundOverlay: View
-    private lateinit var welcomeNavyCurve: ImageView
-    private lateinit var welcomeWordmark: ImageView
+    private lateinit var welcomeLetterN: ImageView
+    private lateinit var welcomeLetterU: ImageView
+    private lateinit var welcomeLetterM: ImageView
+    private lateinit var welcomeLetterO: ImageView
+    private lateinit var welcomeLetterContainer: android.widget.LinearLayout
     private lateinit var welcomeTagline: TextView
     private lateinit var termsText: TextView
     private lateinit var acceptButton: MaterialButton
-    private lateinit var emojiBurstContainer: FrameLayout
+    private lateinit var circularRevealView: View
+    private lateinit var scrollingItemsContainer: FrameLayout
 
     // Step 2: Choose Path
     private lateinit var choosePathContainer: FrameLayout
     private lateinit var createWalletButton: View
     private lateinit var restoreWalletButton: View
 
+    // Teaser + Explainer
+    private lateinit var teaserCard: View
+    private lateinit var explainerOverlay: View
+    private lateinit var explainerSheet: View
+    private lateinit var explainerBackdrop: View
+    private lateinit var explainerViewPager: ViewPager2
+    private lateinit var explainerCloseBtn: View
+    private lateinit var explainerCloseContainer: View
+    private lateinit var chevronHint1: ImageView
+    private lateinit var chevronHint2: ImageView
+    private lateinit var chevronHint3: ImageView
+    private lateinit var chevronHintContainer: View
+    private lateinit var explainerBottomContainer: View
+    private lateinit var explainerCreateWalletButton: MaterialButton
+    private var explainerOpen = false
+    private var chevronAnimatorSet: AnimatorSet? = null
+
     // Step 3: Enter Seed (Restore)
     private lateinit var enterSeedContainer: FrameLayout
     private lateinit var seedInputGrid: GridLayout
     private lateinit var pasteButton: MaterialButton
     private lateinit var seedContinueButton: MaterialButton
-    private lateinit var seedValidationStatus: LinearLayout
-    private lateinit var seedValidationIcon: ImageView
-    private lateinit var seedValidationText: TextView
     private lateinit var seedBackButton: ImageView
 
     // Step 4a: Generating Wallet (New)
@@ -166,10 +192,8 @@ class OnboardingActivity : AppCompatActivity() {
     private lateinit var backupStatusIcon: ImageView
     private lateinit var backupStatusTitle: TextView
     private lateinit var backupStatusSubtitle: TextView
-    private lateinit var mintsListContainer: LinearLayout
-    private lateinit var mintsCountText: TextView
-    private lateinit var mintsSubtitle: TextView
-    private lateinit var addDifferentMintCard: AddMintInputCard
+    private lateinit var mintsRecyclerView: RecyclerView
+    private lateinit var mintAdapter: OnboardingMintAdapter
     private lateinit var mintsContinueButton: MaterialButton
     private lateinit var mintsBackButton: ImageView
 
@@ -190,12 +214,19 @@ class OnboardingActivity : AppCompatActivity() {
     private val seedInputs = mutableListOf<SeedWordEditText>()
     private val mintProgressViews = mutableMapOf<String, View>()
 
+    private var addMintBottomSheet: AddMintBottomSheet? = null
+
     private val onboardingQrScannerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
             val qrValue = result.data?.getStringExtra(QRScannerActivity.EXTRA_QR_VALUE)
-            qrValue?.let { addDifferentMintCard.setMintUrl(mintProfileService.normalizeUrl(it)) }
+            qrValue?.let { scannedUrl ->
+                // Dismiss the bottom sheet if open and add the scanned mint
+                addMintBottomSheet?.dismiss()
+                addMintBottomSheet = null
+                addDifferentMint(mintProfileService.normalizeUrl(scannedUrl))
+            }
         }
     }
 
@@ -256,15 +287,19 @@ class OnboardingActivity : AppCompatActivity() {
             // Dark icons on white background
             windowInsetsController.isAppearanceLightStatusBars = true
             windowInsetsController.isAppearanceLightNavigationBars = true
+        } else if (step == OnboardingStep.CHOOSE_PATH) {
+            // Navy bars — nav bar matches dark teaser area at bottom
+            window.statusBarColor = ContextCompat.getColor(this, R.color.numo_navy)
+            window.navigationBarColor = ContextCompat.getColor(this, R.color.numo_navy)
+            windowInsetsController.isAppearanceLightStatusBars = false
+            windowInsetsController.isAppearanceLightNavigationBars = false
         } else {
-            // White/light bars for all other screens
-            val bgColor = android.graphics.Color.parseColor("#F6F7F8")
-            window.statusBarColor = bgColor
-            window.navigationBarColor = bgColor
-            
-            // Dark icons on light background
-            windowInsetsController.isAppearanceLightStatusBars = true
-            windowInsetsController.isAppearanceLightNavigationBars = true
+            // Navy bars for all other onboarding screens
+            val navy = ContextCompat.getColor(this, R.color.numo_navy)
+            window.statusBarColor = navy
+            window.navigationBarColor = navy
+            windowInsetsController.isAppearanceLightStatusBars = false
+            windowInsetsController.isAppearanceLightNavigationBars = false
         }
     }
 
@@ -272,27 +307,53 @@ class OnboardingActivity : AppCompatActivity() {
         // Welcome
         welcomeContainer = findViewById(R.id.welcome_container)
         welcomeBackgroundOverlay = findViewById(R.id.welcome_background_overlay)
-        welcomeNavyCurve = findViewById(R.id.welcome_navy_curve)
-        welcomeWordmark = findViewById(R.id.welcome_wordmark)
+        welcomeLetterN = findViewById(R.id.welcome_letter_n)
+        welcomeLetterU = findViewById(R.id.welcome_letter_u)
+        welcomeLetterM = findViewById(R.id.welcome_letter_m)
+        welcomeLetterO = findViewById(R.id.welcome_letter_o)
+        welcomeLetterContainer = findViewById(R.id.welcome_wordmark_letters)
         welcomeTagline = findViewById(R.id.welcome_tagline)
         termsText = findViewById(R.id.terms_text)
         acceptButton = findViewById(R.id.accept_button)
-        emojiBurstContainer = findViewById(R.id.emoji_burst_container)
+        circularRevealView = findViewById(R.id.welcome_circular_reveal)
+        scrollingItemsContainer = findViewById(R.id.scrolling_items_container)
 
         // Choose Path
         choosePathContainer = findViewById(R.id.choose_path_container)
         createWalletButton = findViewById(R.id.create_wallet_button)
         restoreWalletButton = findViewById(R.id.restore_wallet_button)
 
+        // Teaser + Explainer
+        teaserCard = findViewById(R.id.teaser_card)
+        explainerOverlay = findViewById(R.id.explainer_overlay)
+        explainerSheet = findViewById(R.id.explainer_sheet)
+        explainerBackdrop = findViewById(R.id.explainer_backdrop)
+        explainerViewPager = findViewById(R.id.explainer_view_pager)
+        explainerCloseBtn = findViewById(R.id.explainer_close_btn)
+        explainerCloseContainer = findViewById(R.id.explainer_close_container)
+        chevronHint1 = findViewById(R.id.chevron_hint_1)
+        chevronHint2 = findViewById(R.id.chevron_hint_2)
+        chevronHint3 = findViewById(R.id.chevron_hint_3)
+        chevronHintContainer = findViewById(R.id.chevron_hint_container)
+        explainerBottomContainer = findViewById(R.id.explainer_bottom_container)
+        explainerCreateWalletButton = findViewById(R.id.explainer_create_wallet_button)
+
+        setupExplainerViewPager()
+
         // Enter Seed
         enterSeedContainer = findViewById(R.id.enter_seed_container)
         seedInputGrid = findViewById(R.id.seed_input_grid)
         pasteButton = findViewById(R.id.paste_button)
         seedContinueButton = findViewById(R.id.seed_continue_button)
-        seedValidationStatus = findViewById(R.id.seed_validation_status)
-        seedValidationIcon = findViewById(R.id.seed_validation_icon)
-        seedValidationText = findViewById(R.id.seed_validation_text)
         seedBackButton = findViewById(R.id.seed_back_button)
+
+        // Adjust seed container padding when keyboard shows/hides (edge-to-edge compatible)
+        ViewCompat.setOnApplyWindowInsetsListener(enterSeedContainer) { view, insets ->
+            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+            val navBarHeight = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, maxOf(imeHeight, navBarHeight))
+            insets
+        }
 
         // Generating Wallet
         generatingContainer = findViewById(R.id.generating_container)
@@ -308,14 +369,51 @@ class OnboardingActivity : AppCompatActivity() {
         backupStatusIcon = findViewById(R.id.backup_status_icon)
         backupStatusTitle = findViewById(R.id.backup_status_title)
         backupStatusSubtitle = findViewById(R.id.backup_status_subtitle)
-        mintsListContainer = findViewById(R.id.mints_list_container)
-        mintsCountText = findViewById(R.id.mints_count_text)
-        mintsSubtitle = findViewById(R.id.mints_subtitle)
-        addDifferentMintCard = findViewById(R.id.add_different_mint_card)
-        addDifferentMintCard.setHeaderTitle(getString(R.string.onboarding_mints_add_different))
-        addDifferentMintCard.setOnboardingModeEnabled(true)
+        mintsRecyclerView = findViewById(R.id.mints_recycler_view)
         mintsContinueButton = findViewById(R.id.mints_continue_button)
         mintsBackButton = findViewById(R.id.mints_back_button)
+
+        // Setup RecyclerView + Adapter
+        mintAdapter = OnboardingMintAdapter(object : OnboardingMintAdapter.Listener {
+            override fun onLoadMintIcon(mintUrl: String, iconView: ShapeableImageView) {
+                loadMintIcon(mintUrl, iconView)
+            }
+            override fun onResolveMintName(mintUrl: String): String {
+                return resolveOnboardingMintDisplayName(mintUrl)
+            }
+            override fun onDefaultMintChanged(newDefaultUrl: String) {
+                updateContinueButtonState()
+            }
+            override fun onAddMintClicked() {
+                showAddMintBottomSheet()
+            }
+            override fun onRequestSetDefault(mintUrl: String, mintName: String) {
+                val previousDefaultUrl = mintAdapter.getDefaultMintUrl()
+                mintAdapter.confirmSetDefault(mintUrl)
+                updateContinueButtonState()
+                Snackbar.make(reviewMintsContainer, getString(R.string.onboarding_mints_set_default_toast, mintName), Snackbar.LENGTH_LONG).apply {
+                    anchorView = mintsContinueButton
+                    setAction(R.string.common_undo) {
+                        if (previousDefaultUrl != null) {
+                            mintAdapter.swapDefaultInstant(previousDefaultUrl)
+                            updateContinueButtonState()
+                        }
+                    }
+                    setActionTextColor(ContextCompat.getColor(this@OnboardingActivity, R.color.color_text_primary))
+                    val margin = (16 * resources.displayMetrics.density).toInt()
+                    (view.layoutParams as? android.widget.FrameLayout.LayoutParams)?.let {
+                        it.setMargins(margin, 0, margin, 0)
+                        view.layoutParams = it
+                    }
+                }.show()
+            }
+        })
+        mintAdapter.setHeaderStrings(
+            headerTitle = getString(R.string.onboarding_mints_popular_header)
+        )
+        mintsRecyclerView.layoutManager = LinearLayoutManager(this)
+        mintsRecyclerView.itemAnimator = null
+        mintsRecyclerView.adapter = mintAdapter
 
         // Restoring
         restoringContainer = findViewById(R.id.restoring_container)
@@ -342,43 +440,32 @@ class OnboardingActivity : AppCompatActivity() {
         val spannableString = SpannableString(fullText)
 
         val termsLabel = "Terms of Service"
-        val termsStart = fullText.indexOf(termsLabel)
-        if (termsStart != -1) {
-            val termsEnd = termsStart + termsLabel.length
-
-            val termsSpan = object : ClickableSpan() {
-                override fun onClick(widget: View) {
-                    showTermsDialog()
-                }
-
-                override fun updateDrawState(ds: TextPaint) {
-                    ds.isFakeBoldText = true
-                }
-            }
-
-            spannableString.setSpan(termsSpan, termsStart, termsEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        }
-
         val privacyLabel = "Privacy Policy"
-        val privacyStart = fullText.indexOf(privacyLabel)
-        if (privacyStart != -1) {
-            val privacyEnd = privacyStart + privacyLabel.length
 
-            val privacySpan = object : ClickableSpan() {
-                override fun onClick(widget: View) {
-                    showPrivacyDialog()
-                }
+        val addClickableSpan = { label: String, onClickAction: () -> Unit ->
+            val start = fullText.indexOf(label)
+            if (start != -1) {
+                val end = start + label.length
+                val clickableSpan = object : ClickableSpan() {
+                    override fun onClick(widget: View) {
+                        onClickAction()
+                    }
 
-                override fun updateDrawState(ds: TextPaint) {
-                    ds.isFakeBoldText = true
+                    override fun updateDrawState(ds: TextPaint) {
+                        ds.isUnderlineText = true
+                        ds.isFakeBoldText = true
+                    }
                 }
+                spannableString.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
-
-            spannableString.setSpan(privacySpan, privacyStart, privacyEnd, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
+
+        addClickableSpan(termsLabel) { showTermsDialog() }
+        addClickableSpan(privacyLabel) { showPrivacyDialog() }
 
         termsText.text = spannableString
         termsText.movementMethod = LinkMovementMethod.getInstance()
+        termsText.highlightColor = android.graphics.Color.TRANSPARENT
     }
 
     private fun showTermsDialog() {
@@ -441,13 +528,13 @@ class OnboardingActivity : AppCompatActivity() {
         val container = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = android.view.Gravity.CENTER_VERTICAL
-            background = ContextCompat.getDrawable(context, R.drawable.bg_seed_input)
+            background = ContextCompat.getDrawable(context, R.drawable.bg_seed_input_dark)
             setPadding(12.dpToPx(), 10.dpToPx(), 12.dpToPx(), 10.dpToPx())
         }
 
         val indexText = TextView(this).apply {
             text = "$index"
-            setTextColor(ContextCompat.getColor(context, R.color.color_text_tertiary))
+            setTextColor(ContextCompat.getColor(context, R.color.color_onboarding_text_muted))
             textSize = 13f
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
             layoutParams = LinearLayout.LayoutParams(24.dpToPx(), LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -456,15 +543,15 @@ class OnboardingActivity : AppCompatActivity() {
 
         val input = SeedWordEditText(this).apply {
             hint = ""
-            setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
-            setHintTextColor(ContextCompat.getColor(context, R.color.color_text_tertiary))
+            setTextColor(android.graphics.Color.WHITE)
+            setHintTextColor(ContextCompat.getColor(context, R.color.color_onboarding_text_disabled))
             textSize = 15f
-            typeface = android.graphics.Typeface.MONOSPACE
             background = null
             isSingleLine = true
             inputType = android.text.InputType.TYPE_CLASS_TEXT or
-                    android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or
-                    android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                    android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            // Set typeface AFTER inputType since inputType can override it
+            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
             imeOptions = if (index == 12) EditorInfo.IME_ACTION_DONE else EditorInfo.IME_ACTION_NEXT
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
                 marginStart = 8.dpToPx()
@@ -481,7 +568,7 @@ class OnboardingActivity : AppCompatActivity() {
             setOnFocusChangeListener { _, hasFocus ->
                 container.background = ContextCompat.getDrawable(
                     context,
-                    if (hasFocus) R.drawable.bg_seed_input_focused else R.drawable.bg_seed_input
+                    if (hasFocus) R.drawable.bg_seed_input_dark_focused else R.drawable.bg_seed_input_dark
                 )
             }
 
@@ -518,6 +605,15 @@ class OnboardingActivity : AppCompatActivity() {
             showStep(OnboardingStep.ENTER_SEED)
         }
 
+        // Teaser + Explainer
+        setupTeaserTouchListener()
+        explainerCloseBtn.setOnClickListener { closeExplainer() }
+        explainerCreateWalletButton.setOnClickListener {
+            closeExplainer()
+            isRestoreFlow = false
+            startNewWalletFlow()
+        }
+
         // Enter Seed
         seedBackButton.setOnClickListener {
             showStep(OnboardingStep.CHOOSE_PATH)
@@ -548,27 +644,31 @@ class OnboardingActivity : AppCompatActivity() {
             }
         }
 
-        addDifferentMintCard.setOnAddMintListener(object : AddMintInputCard.OnAddMintListener {
-            override fun onAddMint(mintUrl: String) {
-                addDifferentMint(mintUrl)
-            }
-
-            override fun onScanQR() {
-                openOnboardingMintQrScanner()
-            }
-        })
-
         // Success
         enterWalletButton.setOnClickListener {
             completeOnboarding()
         }
     }
 
+    private fun hideKeyboard() {
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        currentFocus?.let { imm.hideSoftInputFromWindow(it.windowToken, 0) }
+    }
+
     private fun showStep(step: OnboardingStep) {
+        // Always dismiss keyboard when changing steps
+        hideKeyboard()
+
         // Stop welcome animation if leaving welcome screen
         if (currentStep == OnboardingStep.WELCOME && step != OnboardingStep.WELCOME) {
             welcomeAnimator?.stop()
             welcomeAnimator = null
+        }
+
+        // Close explainer and stop chevron animation if leaving CHOOSE_PATH
+        if (currentStep == OnboardingStep.CHOOSE_PATH && step != OnboardingStep.CHOOSE_PATH) {
+            resetExplainer()
+            stopChevronPulseAnimation()
         }
 
         currentStep = step
@@ -604,7 +704,12 @@ class OnboardingActivity : AppCompatActivity() {
         if (step == OnboardingStep.WELCOME) {
             animateWelcomeScreen()
         } else {
-        animateContainerIn(containerToShow)
+            animateContainerIn(containerToShow)
+        }
+
+        // Start chevron animation when showing CHOOSE_PATH
+        if (step == OnboardingStep.CHOOSE_PATH) {
+            startChevronPulseAnimation()
         }
     }
 
@@ -623,24 +728,272 @@ class OnboardingActivity : AppCompatActivity() {
         }.start()
     }
 
+    // ══════════════════════════════════════════
+    // Explainer overlay
+    // ══════════════════════════════════════════
+
+    private fun setupExplainerViewPager() {
+        explainerViewPager.orientation = ViewPager2.ORIENTATION_VERTICAL
+        explainerViewPager.adapter = ExplainerSlideAdapter()
+        explainerViewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                val isLastSlide = position == (explainerViewPager.adapter?.itemCount ?: 0) - 1
+
+                // Hide chevrons on last slide
+                chevronHintContainer.animate()
+                    .alpha(if (isLastSlide) 0f else 1f)
+                    .setDuration(200)
+                    .withEndAction {
+                        chevronHintContainer.visibility = if (isLastSlide) View.INVISIBLE else View.VISIBLE
+                    }
+                    .start()
+                    
+                // Show button on last slide
+                if (isLastSlide) {
+                    explainerCreateWalletButton.visibility = View.VISIBLE
+                    explainerCreateWalletButton.animate()
+                        .alpha(1f)
+                        .setDuration(200)
+                        .start()
+                } else {
+                    explainerCreateWalletButton.animate()
+                        .alpha(0f)
+                        .setDuration(200)
+                        .withEndAction { 
+                            explainerCreateWalletButton.visibility = View.INVISIBLE 
+                        }
+                        .start()
+                }
+            }
+        })
+
+        // Tap chevrons to advance to next slide
+        chevronHintContainer.setOnClickListener {
+            val next = explainerViewPager.currentItem + 1
+            if (next < (explainerViewPager.adapter?.itemCount ?: 0)) {
+                explainerViewPager.setCurrentItem(next, true)
+            }
+        }
+
+        // Make explainer overlay extend behind system bars
+        val dp16 = (16 * resources.displayMetrics.density).toInt()
+        ViewCompat.setOnApplyWindowInsetsListener(explainerOverlay) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            (v.layoutParams as FrameLayout.LayoutParams).apply {
+                topMargin = -insets.top
+                bottomMargin = -insets.bottom
+            }
+            v.layoutParams = v.layoutParams
+            explainerCloseContainer.setPadding(
+                explainerCloseContainer.paddingStart, insets.top + dp16, 0, 0
+            )
+            
+            explainerBottomContainer.setPadding(0, 0, 0, insets.bottom + dp16)
+            
+            windowInsets
+        }
+    }
+
+    @android.annotation.SuppressLint("ClickableViewAccessibility")
+    private fun setupTeaserTouchListener() {
+        var startY = 0f
+        var isDragging = false
+
+        teaserCard.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    startY = event.rawY
+                    isDragging = false
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    val diff = startY - event.rawY
+                    if (diff > 10) {
+                        isDragging = true
+                        // Show the overlay and track finger
+                        explainerOverlay.visibility = View.VISIBLE
+                        val screenHeight = explainerOverlay.height.toFloat()
+                        val progress = (diff / screenHeight).coerceIn(0f, 1f)
+                        explainerSheet.translationY = screenHeight * (1f - progress)
+                        explainerBackdrop.alpha = progress
+                        // Fade out teaser proportionally
+                        teaserCard.alpha = 1f - progress
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    val diff = startY - event.rawY
+                    if (isDragging) {
+                        val threshold = 80 * resources.displayMetrics.density
+                        if (diff > threshold) {
+                            openExplainer()
+                        } else {
+                            snapExplainerClosed()
+                        }
+                    } else if (diff < 10 * resources.displayMetrics.density) {
+                        // Tap — open
+                        openExplainer()
+                    }
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun setExplainerWindowBars(open: Boolean) {
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        val navy = ContextCompat.getColor(this, R.color.numo_navy)
+        window.statusBarColor = navy
+        window.navigationBarColor = navy
+        controller.isAppearanceLightStatusBars = false
+        controller.isAppearanceLightNavigationBars = false
+    }
+
+    private fun openExplainer() {
+        explainerOpen = true
+        explainerOverlay.visibility = View.VISIBLE
+        setExplainerWindowBars(true)
+
+        // Reset adapter so animations replay fresh
+        explainerViewPager.adapter = ExplainerSlideAdapter()
+        explainerViewPager.setCurrentItem(0, false)
+        val screenHeight = explainerOverlay.height.toFloat()
+
+        // Animate sheet up
+        ObjectAnimator.ofFloat(explainerSheet, "translationY", explainerSheet.translationY, 0f).apply {
+            duration = 450
+            interpolator = android.view.animation.PathInterpolator(0.32f, 0.72f, 0f, 1f)
+        }.start()
+
+        // Fade in backdrop
+        ObjectAnimator.ofFloat(explainerBackdrop, "alpha", explainerBackdrop.alpha, 1f).apply {
+            duration = 350
+        }.start()
+
+        // Slide teaser down and fade out
+        ObjectAnimator.ofFloat(teaserCard, "translationY", 0f, screenHeight * 0.3f).apply {
+            duration = 350
+        }.start()
+        ObjectAnimator.ofFloat(teaserCard, "alpha", 1f, 0f).apply {
+            duration = 200
+        }.start()
+    }
+
+    private fun closeExplainer() {
+        explainerOpen = false
+        setExplainerWindowBars(false)
+        val screenHeight = explainerOverlay.height.toFloat()
+
+        // Animate sheet down
+        ObjectAnimator.ofFloat(explainerSheet, "translationY", 0f, screenHeight).apply {
+            duration = 450
+            interpolator = android.view.animation.PathInterpolator(0.32f, 0.72f, 0f, 1f)
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    explainerOverlay.visibility = View.GONE
+                    explainerViewPager.setCurrentItem(0, false)
+                }
+            })
+        }.start()
+
+        // Fade backdrop out
+        ObjectAnimator.ofFloat(explainerBackdrop, "alpha", 1f, 0f).apply {
+            duration = 350
+        }.start()
+
+        // Bounce teaser back in after a short delay
+        teaserCard.postDelayed({
+            teaserCard.translationY = 200f
+            ObjectAnimator.ofFloat(teaserCard, "translationY", 200f, 0f).apply {
+                duration = 500
+                interpolator = OvershootInterpolator(1.2f)
+            }.start()
+            ObjectAnimator.ofFloat(teaserCard, "alpha", 0f, 1f).apply {
+                duration = 300
+            }.start()
+        }, 300)
+    }
+
+    private fun snapExplainerClosed() {
+        setExplainerWindowBars(false)
+        val screenHeight = explainerOverlay.height.toFloat()
+
+        ObjectAnimator.ofFloat(explainerSheet, "translationY", explainerSheet.translationY, screenHeight).apply {
+            duration = 350
+            interpolator = DecelerateInterpolator()
+            addListener(object : android.animation.AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: android.animation.Animator) {
+                    explainerOverlay.visibility = View.GONE
+                }
+            })
+        }.start()
+
+        ObjectAnimator.ofFloat(explainerBackdrop, "alpha", explainerBackdrop.alpha, 0f).apply {
+            duration = 300
+        }.start()
+
+        // Restore teaser
+        ObjectAnimator.ofFloat(teaserCard, "alpha", teaserCard.alpha, 1f).apply {
+            duration = 200
+        }.start()
+    }
+
+    private fun resetExplainer() {
+        if (explainerOpen) {
+            explainerOpen = false
+            explainerOverlay.visibility = View.GONE
+            explainerSheet.translationY = 2000f
+            explainerBackdrop.alpha = 0f
+            teaserCard.translationY = 0f
+            teaserCard.alpha = 1f
+            explainerViewPager.setCurrentItem(0, false)
+        }
+    }
+
+    private fun startChevronPulseAnimation() {
+        stopChevronPulseAnimation()
+
+        val chevrons = listOf(chevronHint1, chevronHint2, chevronHint3)
+        val animators = chevrons.mapIndexed { index, chevron ->
+            ObjectAnimator.ofFloat(chevron, "alpha", 0.12f, 0.7f, 0.12f).apply {
+                duration = 1800
+                repeatCount = ValueAnimator.INFINITE
+                interpolator = AccelerateDecelerateInterpolator()
+                startDelay = (index * 200).toLong()
+            }
+        }
+
+        chevronAnimatorSet = AnimatorSet().apply {
+            playTogether(animators.map { it as android.animation.Animator })
+            start()
+        }
+    }
+
+    private fun stopChevronPulseAnimation() {
+        chevronAnimatorSet?.cancel()
+        chevronAnimatorSet = null
+    }
+
     /**
      * Cinematic welcome screen animation with 5 phases:
-     * 1. Logo splash with shimmer
-     * 2. Logo translates from center to top
+     * 1. Circular reveal (blank white → navy)
+     * 2. Staggered per-letter NUMO reveal (white on navy)
      * 3. Tagline fades in
-     * 4. Emoji tiles form circle then burst outward
-     * 5. Get Started button and terms fade in
+     * 4. Get Started button and terms fade in
      */
     private fun animateWelcomeScreen() {
         welcomeAnimator?.stop()
         welcomeAnimator = OnboardingWelcomeAnimator(
             activity = this,
             container = welcomeContainer,
-            wordmark = welcomeWordmark,
+            letterViews = listOf(welcomeLetterN, welcomeLetterU, welcomeLetterM, welcomeLetterO),
+            letterContainer = welcomeLetterContainer,
             tagline = welcomeTagline,
             acceptButton = acceptButton,
             termsText = termsText,
-            emojiContainer = emojiBurstContainer
+            revealView = circularRevealView,
+            emojiContainer = scrollingItemsContainer
         )
         welcomeAnimator?.start(lifecycleScope)
     }
@@ -663,32 +1016,18 @@ class OnboardingActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                // Simulate a brief delay for UX
-                delay(800)
-
-                withContext(Dispatchers.Main) {
-                    generatingStatus.text = getString(R.string.onboarding_status_generating_seed)
-                }
-
-                delay(600)
-
                 // Generate new mnemonic
                 val mnemonic = withContext(Dispatchers.IO) {
                     generateMnemonic()
                 }
                 generatedMnemonic = mnemonic
 
-                withContext(Dispatchers.Main) {
-                    generatingStatus.text = getString(R.string.onboarding_status_setting_up_mints)
-                }
-
-                delay(500)
-
                 discoveredMints.clear()
                 selectedMints.clear()
                 onboardingMintDisplayNames.clear()
-                discoveredMints.addAll(ONBOARDING_DEFAULT_MINTS)
-                selectedMints.addAll(ONBOARDING_DEFAULT_MINTS)
+                val healthyMints = filterHealthyMints(ONBOARDING_DEFAULT_MINTS.shuffled())
+                discoveredMints.addAll(healthyMints)
+                selectedMints.addAll(healthyMints)
                 backupFound = false
 
                 withContext(Dispatchers.Main) {
@@ -697,7 +1036,7 @@ class OnboardingActivity : AppCompatActivity() {
                     refreshMintProfilesForReview()
                 }
 
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         this@OnboardingActivity,
@@ -712,7 +1051,7 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun completeNewWalletSetup() {
         showStep(OnboardingStep.GENERATING_WALLET)
-        generatingStatus.text = getString(R.string.onboarding_status_initializing_wallet)
+        generatingStatus.text = getString(R.string.onboarding_status_creating_wallet)
 
         lifecycleScope.launch {
             try {
@@ -722,18 +1061,8 @@ class OnboardingActivity : AppCompatActivity() {
                 PreferenceStore.wallet(this@OnboardingActivity).putString("wallet_mnemonic", mnemonic)
                 applySelectedMintsToMintManager()
 
-                withContext(Dispatchers.Main) {
-                    generatingStatus.text = getString(R.string.onboarding_status_connecting_mints)
-                }
-
-                delay(500)
-
                 // Initialize the wallet manager
                 CashuWalletManager.init(this@OnboardingActivity)
-
-                withContext(Dispatchers.Main) {
-                    generatingStatus.text = getString(R.string.onboarding_status_fetching_mints)
-                }
 
                 // Fetch mint info for selected mints concurrently
                 selectedMints.map { mintUrl ->
@@ -748,7 +1077,7 @@ class OnboardingActivity : AppCompatActivity() {
                     showSuccessScreen(isRestore = false)
                 }
 
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         this@OnboardingActivity,
@@ -767,36 +1096,17 @@ class OnboardingActivity : AppCompatActivity() {
         val words = seedInputs.map { it.text.toString().trim().lowercase() }
         val filledCount = words.count { it.isNotBlank() }
         val allFilled = filledCount == 12
-        val allValid = words.all { it.isBlank() || it.matches(Regex("^[a-z]+$")) }
+        var allBip39 = true
 
-        when {
-            filledCount == 0 -> {
-                seedValidationStatus.visibility = View.GONE
-            }
-            !allValid -> {
-                seedValidationStatus.visibility = View.VISIBLE
-                seedValidationIcon.setImageResource(R.drawable.ic_close)
-                seedValidationIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_warning_red))
-                seedValidationText.text = getString(R.string.onboarding_seed_invalid_characters)
-                seedValidationText.setTextColor(ContextCompat.getColor(this, R.color.color_warning_red))
-            }
-            !allFilled -> {
-                seedValidationStatus.visibility = View.VISIBLE
-                seedValidationIcon.setImageResource(R.drawable.ic_warning)
-                seedValidationIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_warning))
-                seedValidationText.text = getString(R.string.onboarding_seed_words_entered_count, filledCount)
-                seedValidationText.setTextColor(ContextCompat.getColor(this, R.color.color_warning))
-            }
-            else -> {
-                seedValidationStatus.visibility = View.VISIBLE
-                seedValidationIcon.setImageResource(R.drawable.ic_check)
-                seedValidationIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_success_green))
-                seedValidationText.text = getString(R.string.onboarding_seed_validation_ready)
-                seedValidationText.setTextColor(ContextCompat.getColor(this, R.color.color_success_green))
-            }
+        // Highlight invalid words with red text
+        seedInputs.forEachIndexed { i, input ->
+            val word = words[i]
+            val isInvalid = word.isNotBlank() && !Bip39Wordlist.isValid(word)
+            if (isInvalid) allBip39 = false
+            input.setTextColor(ContextCompat.getColor(this, if (isInvalid) R.color.color_seed_word_invalid else R.color.color_bg_white))
         }
 
-        val canContinue = allFilled && allValid
+        val canContinue = allFilled && allBip39
         seedContinueButton.isEnabled = canContinue
         seedContinueButton.alpha = if (canContinue) 1f else 0.5f
 
@@ -862,7 +1172,7 @@ class OnboardingActivity : AppCompatActivity() {
         enteredMnemonic = getMnemonic()
 
         showStep(OnboardingStep.FETCHING_BACKUP)
-        fetchingStatus.text = getString(R.string.onboarding_fetching_searching_backup)
+        fetchingStatus.text = getString(R.string.onboarding_status_restoring_wallet)
 
         lifecycleScope.launch {
             val mnemonic = enteredMnemonic ?: return@launch
@@ -881,13 +1191,15 @@ class OnboardingActivity : AppCompatActivity() {
                 val normalizedBackupMints = result.mints
                     .map { mintProfileService.normalizeUrl(it) }
                     .filter { it.isNotBlank() }
+                    .shuffled()
                 discoveredMints.addAll(normalizedBackupMints)
                 selectedMints.addAll(normalizedBackupMints)
             } else {
                 backupFound = false
                 backupTimestamp = null
-                discoveredMints.addAll(ONBOARDING_DEFAULT_MINTS)
-                selectedMints.addAll(ONBOARDING_DEFAULT_MINTS)
+                val healthyMints = filterHealthyMints(ONBOARDING_DEFAULT_MINTS.shuffled())
+                discoveredMints.addAll(healthyMints)
+                selectedMints.addAll(healthyMints)
             }
 
             withContext(Dispatchers.Main) {
@@ -943,7 +1255,7 @@ class OnboardingActivity : AppCompatActivity() {
                     showSuccessScreen(isRestore = true)
                 }
 
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 withContext(Dispatchers.Main) {
                     Toast.makeText(
                         this@OnboardingActivity,
@@ -965,102 +1277,59 @@ class OnboardingActivity : AppCompatActivity() {
             if (backupFound) {
                 backupStatusCard.background = ContextCompat.getDrawable(this, R.drawable.bg_success_card)
                 backupStatusIcon.setImageResource(R.drawable.ic_cloud_done)
-                backupStatusIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_success_green))
+                backupStatusIcon.setColorFilter(ContextCompat.getColor(this, R.color.numo_fluorescent_green))
                 backupStatusTitle.text = getString(R.string.onboarding_backup_found_title)
-                backupStatusTitle.setTextColor(ContextCompat.getColor(this, R.color.color_success_green))
+                backupStatusTitle.setTextColor(ContextCompat.getColor(this, R.color.numo_fluorescent_green))
 
                 val dateStr = backupTimestamp?.let {
                     SimpleDateFormat("MMM d, yyyy 'at' h:mm a", Locale.getDefault()).format(Date(it * 1000))
                 } ?: getString(R.string.restore_backup_unknown_date)
                 backupStatusSubtitle.text = getString(R.string.onboarding_backup_found_subtitle, dateStr)
             } else {
-                backupStatusCard.background = ContextCompat.getDrawable(this, R.drawable.bg_info_card)
+                backupStatusCard.setBackgroundColor(ContextCompat.getColor(this, R.color.numo_navy))
                 backupStatusIcon.setImageResource(R.drawable.ic_cloud_off)
-                backupStatusIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_text_tertiary))
+                backupStatusIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_onboarding_text_muted))
                 backupStatusTitle.text = getString(R.string.onboarding_backup_not_found_title)
-                backupStatusTitle.setTextColor(ContextCompat.getColor(this, R.color.color_text_primary))
+                backupStatusTitle.setTextColor(android.graphics.Color.WHITE)
                 backupStatusSubtitle.text = getString(R.string.onboarding_backup_not_found_subtitle)
             }
-            mintsSubtitle.text = getString(R.string.onboarding_mints_subtitle_restore)
             mintsContinueButton.text = getString(R.string.onboarding_mints_continue_restore)
         } else {
             backupStatusCard.visibility = View.GONE
-            mintsSubtitle.text = getString(R.string.onboarding_mints_subtitle_description)
             mintsContinueButton.text = getString(R.string.onboarding_mints_continue_new_wallet)
         }
 
-        // Update mints list
-        mintsListContainer.removeAllViews()
+        // Populate the RecyclerView adapter
+        // First mint is the default, rest are popular
+        val mintList = discoveredMints.toList()
+        val defaultMint = mintList.firstOrNull() ?: return
+        val popularMints = mintList.drop(1)
+        // All popular mints start as accepted
+        val acceptedMints = selectedMints.filter { it != defaultMint }.toSet()
 
-        val sortedMints = discoveredMints.sortedBy { resolveOnboardingMintDisplayName(it).lowercase() }
-        for (mintUrl in sortedMints) {
-            val mintView = createMintSelectionView(mintUrl, selectedMints.contains(mintUrl))
-            mintsListContainer.addView(mintView)
-        }
-
-        updateMintsCount()
+        mintAdapter.setMints(defaultMint, popularMints, acceptedMints)
+        updateContinueButtonState()
     }
 
-    private fun createMintSelectionView(mintUrl: String, isSelected: Boolean): View {
-        val container = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = android.view.Gravity.CENTER_VERTICAL
-            setPadding(16.dpToPx(), 14.dpToPx(), 16.dpToPx(), 14.dpToPx())
-            background = ContextCompat.getDrawable(context, R.drawable.bg_mint_item)
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            ).apply {
-                bottomMargin = 8.dpToPx()
+    private fun showAddMintBottomSheet() {
+        val sheet = AddMintBottomSheet.newInstance(object : AddMintBottomSheet.Listener {
+            override fun onAddMintUrl(url: String) {
+                addDifferentMint(url)
             }
-        }
-
-        val mintIcon = ShapeableImageView(this).apply {
-            layoutParams = LinearLayout.LayoutParams(42.dpToPx(), 42.dpToPx())
-            setImageResource(R.drawable.ic_bitcoin)
-            setColorFilter(ContextCompat.getColor(context, R.color.color_primary))
-            scaleType = ImageView.ScaleType.CENTER_CROP
-            setBackgroundColor(ContextCompat.getColor(context, R.color.color_bg_tertiary))
-            shapeAppearanceModel = shapeAppearanceModel.toBuilder()
-                .setAllCornerSizes(21.dpToPx().toFloat())
-                .build()
-        }
-        loadMintIcon(mintUrl, mintIcon)
-
-        val nameText = TextView(this).apply {
-            text = resolveOnboardingMintDisplayName(mintUrl)
-            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
-                marginEnd = 14.dpToPx()
-                marginStart = 14.dpToPx()
+            override fun onScanQrCode() {
+                openOnboardingMintQrScanner()
             }
-            setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
-            textSize = 16f
-            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
-            maxLines = 1
-            ellipsize = android.text.TextUtils.TruncateAt.END
-        }
+        })
+        addMintBottomSheet = sheet
+        sheet.show(supportFragmentManager, "AddMintBottomSheet")
+    }
 
-        val checkbox = ImageView(this).apply {
-            layoutParams = LinearLayout.LayoutParams(24.dpToPx(), 24.dpToPx())
-            updateCheckboxState(this, isSelected)
-        }
 
-        container.addView(mintIcon)
-        container.addView(nameText)
-        container.addView(checkbox)
 
-        container.setOnClickListener {
-            val nowSelected = !selectedMints.contains(mintUrl)
-            if (nowSelected) {
-                selectedMints.add(mintUrl)
-            } else {
-                selectedMints.remove(mintUrl)
-            }
-            updateCheckboxState(checkbox, nowSelected)
-            updateMintsCount()
-        }
-
-        return container
+    private fun updateContinueButtonState() {
+        val totalSelected = mintAdapter.getAllSelectedMints().size
+        mintsContinueButton.isEnabled = totalSelected > 0
+        mintsContinueButton.alpha = if (totalSelected > 0) 1f else 0.35f
     }
 
     private fun loadMintIcon(mintUrl: String, iconView: ShapeableImageView) {
@@ -1109,9 +1378,22 @@ class OnboardingActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Pings each mint in parallel and returns only the ones that respond successfully.
+     * Falls back to the full list if all mints are unreachable.
+     */
+    private suspend fun filterHealthyMints(mints: List<String>): List<String> =
+        withContext(Dispatchers.IO) {
+            val results = mints.map { url ->
+                async { url to mintProfileService.validateMintUrl(url).isValid }
+            }.awaitAll()
+            val healthy = results.filter { it.second }.map { it.first }
+            healthy.ifEmpty { mints } // fall back to full list if none reachable
+        }
+
     private fun refreshMintProfilesForReview() {
-        val sortedMints = discoveredMints.toList().sorted()
-        for (mintUrl in sortedMints) {
+        val mintsList = discoveredMints.toList()
+        for (mintUrl in mintsList) {
             lifecycleScope.launch {
                 val result = mintProfileService.fetchAndStoreMintProfile(mintUrl, validateEndpoint = false)
 
@@ -1121,7 +1403,8 @@ class OnboardingActivity : AppCompatActivity() {
                 onboardingMintDisplayNames[mintUrl] = displayName
 
                 if (currentStep == OnboardingStep.REVIEW_MINTS) {
-                    updateReviewMintsUI()
+                    // Refresh names only — avoids full rebind that flickers icons
+                    mintAdapter.refreshNames()
                 }
             }
         }
@@ -1147,14 +1430,14 @@ class OnboardingActivity : AppCompatActivity() {
             return
         }
 
-        addDifferentMintCard.setLoading(true)
+        addMintBottomSheet?.setLoading(true)
 
         lifecycleScope.launch {
             val validation = withContext(Dispatchers.IO) {
                 mintProfileService.validateMintUrl(normalizedInput)
             }
             if (!validation.isValid || validation.normalizedUrl == null) {
-                addDifferentMintCard.setLoading(false)
+                addMintBottomSheet?.setLoading(false)
                 Toast.makeText(
                     this@OnboardingActivity,
                     getString(R.string.mints_invalid_url),
@@ -1165,7 +1448,7 @@ class OnboardingActivity : AppCompatActivity() {
 
             val mintUrl = validation.normalizedUrl
             if (discoveredMints.contains(mintUrl)) {
-                addDifferentMintCard.setLoading(false)
+                addMintBottomSheet?.setLoading(false)
                 Toast.makeText(
                     this@OnboardingActivity,
                     getString(R.string.mints_already_exists),
@@ -1186,21 +1469,29 @@ class OnboardingActivity : AppCompatActivity() {
             discoveredMints.add(mintUrl)
             selectedMints.add(mintUrl)
 
-            updateReviewMintsUI()
-            addDifferentMintCard.setLoading(false)
-            addDifferentMintCard.clearInput()
-            addDifferentMintCard.collapseIfExpanded()
-            Toast.makeText(
-                this@OnboardingActivity,
-                getString(R.string.mints_added_toast),
-                Toast.LENGTH_SHORT
-            ).show()
+            // Dismiss sheet + keyboard first, then update the list after they're gone.
+            // Prevents the new content from rendering underneath the outgoing UI.
+            addMintBottomSheet?.dismiss()
+            addMintBottomSheet = null
+
+            mintsRecyclerView.postDelayed({
+                mintAdapter.addMintAsDefault(mintUrl)
+                updateContinueButtonState()
+                Toast.makeText(
+                    this@OnboardingActivity,
+                    getString(R.string.mints_added_toast),
+                    Toast.LENGTH_SHORT
+                ).show()
+            }, 350)
         }
     }
 
     private fun applySelectedMintsToMintManager() {
         val mintManager = MintManager.getInstance(this)
-        val normalizedSelected = selectedMints
+
+        // Get selected mints from the adapter (default + accepted popular)
+        val allSelected = mintAdapter.getAllSelectedMints()
+        val normalizedSelected = allSelected
             .map { mintProfileService.normalizeUrl(it) }
             .filter { it.isNotBlank() }
             .toSet()
@@ -1216,30 +1507,11 @@ class OnboardingActivity : AppCompatActivity() {
             mintManager.addMint(mintUrl)
         }
 
-        val preferredMint = discoveredMints.firstOrNull { normalizedSelected.contains(it) }
-            ?: normalizedSelected.sorted().firstOrNull()
-        if (preferredMint != null) {
+        // The default mint (index 0 in adapter) becomes the preferred Lightning mint
+        val preferredMint = mintAdapter.getDefaultMintUrl()?.let { mintProfileService.normalizeUrl(it) } ?: ""
+        if (preferredMint.isNotBlank()) {
             mintManager.setPreferredLightningMint(preferredMint)
         }
-    }
-
-    private fun updateCheckboxState(checkbox: ImageView, isSelected: Boolean) {
-        if (isSelected) {
-            checkbox.setImageResource(R.drawable.ic_checkbox_checked)
-            checkbox.setColorFilter(ContextCompat.getColor(this, R.color.color_success_green))
-        } else {
-            checkbox.setImageResource(R.drawable.ic_checkbox_unchecked)
-            checkbox.setColorFilter(ContextCompat.getColor(this, R.color.color_text_tertiary))
-        }
-    }
-
-    private fun updateMintsCount() {
-        val count = selectedMints.size
-        val pluralSuffix = if (count != 1) "s" else ""
-        mintsCountText.text = getString(R.string.onboarding_mints_count, count, pluralSuffix)
-
-        mintsContinueButton.isEnabled = count > 0
-        mintsContinueButton.alpha = if (count > 0) 1f else 0.5f
     }
 
     // === Restore Progress ===
@@ -1273,7 +1545,7 @@ class OnboardingActivity : AppCompatActivity() {
                 FrameLayout.LayoutParams.MATCH_PARENT
             )
             isIndeterminate = true
-            indeterminateTintList = ContextCompat.getColorStateList(context, R.color.color_text_tertiary)
+            indeterminateTintList = ContextCompat.getColorStateList(context, R.color.numo_fluorescent_green)
         }
 
         val statusIcon = ImageView(this).apply {
@@ -1295,7 +1567,7 @@ class OnboardingActivity : AppCompatActivity() {
 
         val nameText = TextView(this).apply {
             text = mintManager.getMintDisplayName(mintUrl)
-            setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
+            setTextColor(android.graphics.Color.WHITE)
             textSize = 15f
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
             tag = "name"
@@ -1303,7 +1575,7 @@ class OnboardingActivity : AppCompatActivity() {
 
         val statusText = TextView(this).apply {
             text = getString(R.string.restore_progress_status_waiting)
-            setTextColor(ContextCompat.getColor(context, R.color.color_text_tertiary))
+            setTextColor(ContextCompat.getColor(context, R.color.color_onboarding_text_muted))
             textSize = 13f
             tag = "status"
         }
@@ -1350,7 +1622,7 @@ class OnboardingActivity : AppCompatActivity() {
                 spinner?.visibility = View.GONE
                 statusIcon?.visibility = View.VISIBLE
                 statusIcon?.setImageResource(R.drawable.ic_check)
-                statusIcon?.setColorFilter(ContextCompat.getColor(this, R.color.color_success_green))
+                statusIcon?.setColorFilter(ContextCompat.getColor(this, R.color.numo_fluorescent_green))
 
                 val diff = after - before
                 if (diff != 0L) {
@@ -1361,7 +1633,7 @@ class OnboardingActivity : AppCompatActivity() {
                     balanceText?.setTextColor(
                         ContextCompat.getColor(
                             this,
-                            if (diff >= 0) R.color.color_success_green else R.color.color_warning_red
+                            if (diff >= 0) R.color.numo_fluorescent_green else R.color.color_warning_red
                         )
                     )
                 }
@@ -1417,8 +1689,8 @@ class OnboardingActivity : AppCompatActivity() {
         }
 
         // Animate checkmark
-        val checkmark = successContainer.findViewById<ImageView>(R.id.success_checkmark)
-        checkmark?.let { animateCheckmark(it) }
+        val checkmark = successContainer.findViewById<com.electricdreams.numo.ui.animation.CheckmarkAnimationView>(R.id.success_checkmark)
+        checkmark?.play()
     }
 
     private fun createBalanceChangeItem(mintUrl: String, before: Long, after: Long, diff: Long): View {
@@ -1444,14 +1716,14 @@ class OnboardingActivity : AppCompatActivity() {
 
         val nameText = TextView(this).apply {
             text = mintManager.getMintDisplayName(mintUrl)
-            setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
+            setTextColor(android.graphics.Color.WHITE)
             textSize = 15f
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
         }
 
         val detailText = TextView(this).apply {
             text = getString(R.string.restore_success_balance_line, after)
-            setTextColor(ContextCompat.getColor(context, R.color.color_text_secondary))
+            setTextColor(ContextCompat.getColor(context, R.color.color_onboarding_text_subtle))
             textSize = 13f
         }
 
@@ -1464,9 +1736,9 @@ class OnboardingActivity : AppCompatActivity() {
                 ContextCompat.getColor(
                     context,
                     when {
-                        diff > 0 -> R.color.color_success_green
+                        diff > 0 -> R.color.numo_fluorescent_green
                         diff < 0 -> R.color.color_warning_red
-                        else -> R.color.color_text_secondary
+                        else -> R.color.numo_fluorescent_green
                     }
                 )
             )
@@ -1480,24 +1752,6 @@ class OnboardingActivity : AppCompatActivity() {
         return container
     }
 
-    private fun animateCheckmark(checkmark: View) {
-        checkmark.scaleX = 0f
-        checkmark.scaleY = 0f
-        checkmark.alpha = 0f
-
-        val scaleX = ObjectAnimator.ofFloat(checkmark, "scaleX", 0f, 1.2f, 1f)
-        val scaleY = ObjectAnimator.ofFloat(checkmark, "scaleY", 0f, 1.2f, 1f)
-        val alpha = ObjectAnimator.ofFloat(checkmark, "alpha", 0f, 1f)
-
-        AnimatorSet().apply {
-            playTogether(scaleX, scaleY, alpha)
-            duration = 500
-            interpolator = AccelerateDecelerateInterpolator()
-            startDelay = 200
-            start()
-        }
-    }
-
     private fun completeOnboarding() {
         setOnboardingComplete(this, true)
 
@@ -1508,6 +1762,8 @@ class OnboardingActivity : AppCompatActivity() {
         val intent = Intent(this, ModernPOSActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
+        @Suppress("DEPRECATION")
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         finish()
     }
 

@@ -28,6 +28,7 @@
         <item name="android:lineHeight">22sp</item>
         <item name="android:textColor">@color/color_text_primary</item>
         <item name="android:gravity">center</item>
+        <item name="android:letterSpacing">-0.012</item>
     </style>
 
     <style name="Text.SectionHeader">
@@ -61,8 +62,8 @@
 
     <style name="Text.Button">
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textSize">17sp</item>
-        <item name="android:letterSpacing">0.01</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:letterSpacing">-0.012</item>
         <item name="android:gravity">center</item>
     </style>
 
@@ -80,18 +81,25 @@
 
     <!-- Base Widget Styles -->
     <style name="Widget.App" parent=""/>
-    
+
+    <!-- Zero out hidden insets so all MaterialButton variants respect their declared height -->
+    <style name="Widget.Numo.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
     <style name="Widget.Button" parent="Widget.MaterialComponents.Button"/>
-    
+
     <style name="Widget.Button.Primary" parent="Widget.MaterialComponents.Button"/>
 
     <!-- Component Styles -->
     <style name="Widget.Button.Primary.Green">
         <item name="android:background">@drawable/bg_button_primary_green</item>
-        <item name="android:textColor">@color/color_bg_white</item>
+        <item name="android:textColor">@color/color_button_primary_green_text</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:textSize">17sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:letterSpacing">-0.012</item>
         <item name="android:minHeight">52dp</item>
         <item name="android:paddingStart">24dp</item>
         <item name="android:paddingEnd">24dp</item>
@@ -112,10 +120,39 @@
         <item name="android:stateListAnimator">@null</item>
     </style>
     
+    <!-- Tertiary: borderless text button with consistent sizing -->
+    <style name="Widget.Numo.Button.Tertiary" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="rippleColor">#1AFFFFFF</item>
+    </style>
+
     <style name="Widget.App.TopBar">
         <item name="android:layout_height">56dp</item>
         <item name="android:background">@color/color_bg_white</item>
         <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <!-- Snackbar -->
+    <style name="Widget.Numo.Snackbar" parent="Widget.MaterialComponents.Snackbar">
+        <item name="backgroundTint">@color/color_bg_white</item>
+        <item name="android:elevation">8dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.Numo.Snackbar</item>
+    </style>
+
+    <style name="Widget.Numo.Snackbar.Text" parent="Widget.MaterialComponents.Snackbar.TextView">
+        <item name="android:textColor">@color/color_text_primary</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="ShapeAppearance.Numo.Snackbar" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">10dp</item>
     </style>
 
     <!-- Shape Appearances -->

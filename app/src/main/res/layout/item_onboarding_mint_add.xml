@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="4dp"
+    android:paddingBottom="8dp">
+
+    <TextView
+        android:id="@+id/add_mint_text"
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:background="@drawable/bg_mint_add_button"
+        android:gravity="center"
+        android:text="@string/onboarding_mints_add_new_button"
+        android:textSize="15sp"
+        android:textColor="#99FFFFFF"
+        android:fontFamily="sans-serif-medium" />
+
+</FrameLayout>

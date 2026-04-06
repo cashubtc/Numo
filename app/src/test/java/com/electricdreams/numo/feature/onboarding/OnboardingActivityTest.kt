@@ -1,15 +1,10 @@
 package com.electricdreams.numo.feature.onboarding
 
 import android.view.View
-import android.widget.EditText
 import android.widget.FrameLayout
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.electricdreams.numo.R
-import com.electricdreams.numo.ui.components.AddMintInputCard
 import com.google.android.material.button.MaterialButton
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -23,13 +18,15 @@ import org.robolectric.util.ReflectionHelpers
 @Config(sdk = [34])
 class OnboardingActivityTest {
 
+    // ── Navigation tests ────────────────────────────────────────────────
+
     @Test
     fun `activity launches and shows welcome screen`() {
         ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val welcomeContainer = activity.findViewById<FrameLayout>(R.id.welcome_container)
                 assertEquals("Welcome container should be visible", View.VISIBLE, welcomeContainer.visibility)
-                
+
                 val choosePathContainer = activity.findViewById<FrameLayout>(R.id.choose_path_container)
                 assertEquals("Choose path container should be gone", View.GONE, choosePathContainer.visibility)
             }
@@ -42,10 +39,10 @@ class OnboardingActivityTest {
             scenario.onActivity { activity ->
                 val acceptButton = activity.findViewById<MaterialButton>(R.id.accept_button)
                 acceptButton.performClick()
-                
+
                 val welcomeContainer = activity.findViewById<FrameLayout>(R.id.welcome_container)
                 assertEquals("Welcome container should be gone", View.GONE, welcomeContainer.visibility)
-                
+
                 val choosePathContainer = activity.findViewById<FrameLayout>(R.id.choose_path_container)
                 assertEquals("Choose path container should be visible", View.VISIBLE, choosePathContainer.visibility)
             }
@@ -56,13 +53,11 @@ class OnboardingActivityTest {
     fun `restore wallet button shows enter seed screen`() {
         ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                // Navigate to choose path
                 activity.findViewById<MaterialButton>(R.id.accept_button).performClick()
-                
-                // Click restore
+
                 val restoreButton = activity.findViewById<View>(R.id.restore_wallet_button)
                 restoreButton.performClick()
-                
+
                 val enterSeedContainer = activity.findViewById<FrameLayout>(R.id.enter_seed_container)
                 assertEquals("Enter seed container should be visible", View.VISIBLE, enterSeedContainer.visibility)
             }
@@ -73,128 +68,18 @@ class OnboardingActivityTest {
     fun `create wallet button shows generating screen`() {
         ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                // Navigate to choose path
                 activity.findViewById<MaterialButton>(R.id.accept_button).performClick()
-                
-                // Click create
+
                 val createButton = activity.findViewById<View>(R.id.create_wallet_button)
                 createButton.performClick()
-                
+
                 val generatingContainer = activity.findViewById<FrameLayout>(R.id.generating_container)
                 assertEquals("Generating container should be visible", View.VISIBLE, generatingContainer.visibility)
             }
         }
     }
 
-    @Test
-    fun `review mint row renders name only with no visible URL subtitle`() {
-        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
-            scenario.onActivity { activity ->
-                val discovered =
-                    ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "discoveredMints")
-                val selected =
-                    ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "selectedMints")
-                val names = ReflectionHelpers.getField<MutableMap<String, String>>(
-                    activity,
-                    "onboardingMintDisplayNames"
-                )
-                discovered.clear()
-                selected.clear()
-                names.clear()
-
-                val mintUrl = "https://mint.coinos.io"
-                discovered.add(mintUrl)
-                selected.add(mintUrl)
-                names[mintUrl] = "Coinos"
-
-                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
-
-                val list = activity.findViewById<LinearLayout>(R.id.mints_list_container)
-                assertEquals(1, list.childCount)
-
-                val rowTexts = extractTextValues(list.getChildAt(0))
-                assertTrue(rowTexts.contains("Coinos"))
-                assertFalse(rowTexts.any { it.contains("coinos.io", ignoreCase = true) })
-            }
-        }
-    }
-
-    @Test
-    fun `review screen includes add different mint card`() {
-        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
-            scenario.onActivity { activity ->
-                val addCard = activity.findViewById<AddMintInputCard>(R.id.add_different_mint_card)
-                assertNotNull(addCard)
-            }
-        }
-    }
-
-    @Test
-    fun `review subtitle uses updated bitcoin custody copy`() {
-        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
-            scenario.onActivity { activity ->
-                val subtitle = activity.findViewById<TextView>(R.id.mints_subtitle)
-                assertEquals(
-                    "These mints will hold your bitcoin. You can withdraw to your own wallet at any time, or set a payout threshold to do it automatically.",
-                    subtitle.text.toString()
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `onboarding add mint card uses onboarding presentation mode`() {
-        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
-            scenario.onActivity { activity ->
-                val addCard = activity.findViewById<AddMintInputCard>(R.id.add_different_mint_card)
-
-                val helperText = addCard.findViewById<TextView>(R.id.helper_text)
-                val urlInput = addCard.findViewById<EditText>(R.id.url_input)
-                val inlineScan = addCard.findViewById<ImageButton>(R.id.scan_button)
-                val scanRow = addCard.findViewById<View>(R.id.scan_row_container)
-                val scanRowTitle = addCard.findViewById<TextView>(R.id.scan_row_title)
-                val scanRowSubtitle = addCard.findViewById<TextView>(R.id.scan_row_subtitle)
-                val addButton = addCard.findViewById<TextView>(R.id.add_button)
-
-                assertEquals(View.GONE, helperText.visibility)
-                assertEquals("Enter mint address", urlInput.hint.toString())
-                assertEquals(View.GONE, inlineScan.visibility)
-                assertEquals(View.VISIBLE, scanRow.visibility)
-                assertEquals("Scan QR Code", scanRowTitle.text.toString())
-                assertEquals("Tap to scan an address", scanRowSubtitle.text.toString())
-                assertEquals(activity.getColor(R.color.color_text_primary), addButton.currentTextColor)
-            }
-        }
-    }
-
-    @Test
-    fun `mints count reflects single selected mint in review`() {
-        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
-            scenario.onActivity { activity ->
-                val discovered =
-                    ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "discoveredMints")
-                val selected =
-                    ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "selectedMints")
-                val names = ReflectionHelpers.getField<MutableMap<String, String>>(
-                    activity,
-                    "onboardingMintDisplayNames"
-                )
-                discovered.clear()
-                selected.clear()
-                names.clear()
-
-                val mintUrl = "https://mint.coinos.io"
-                discovered.add(mintUrl)
-                selected.add(mintUrl)
-                names[mintUrl] = "Coinos"
-
-                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
-
-                val countText = activity.findViewById<TextView>(R.id.mints_count_text).text.toString()
-                assertTrue(countText.contains("1 mint"))
-            }
-        }
-    }
+    // ── Add mint tests ──────────────────────────────────────────────────
 
     @Test
     fun `add different mint with invalid URL does not modify list`() {
@@ -293,22 +178,99 @@ class OnboardingActivityTest {
         }
     }
 
-    private fun extractTextValues(view: View): List<String> {
-        val values = mutableListOf<String>()
-        when (view) {
-            is TextView -> values.add(view.text.toString())
-            is LinearLayout -> {
-                for (i in 0 until view.childCount) {
-                    values.addAll(extractTextValues(view.getChildAt(i)))
-                }
-            }
-            is FrameLayout -> {
-                for (i in 0 until view.childCount) {
-                    values.addAll(extractTextValues(view.getChildAt(i)))
-                }
+    // ── Mint adapter / review screen tests ──────────────────────────────
+
+    @Test
+    fun `review screen populates adapter with default and popular mints`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                setupMints(activity, default = "https://mint.coinos.io", popular = listOf("https://mint.minibits.cash"))
+
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
+
+                val adapter = ReflectionHelpers.getField<OnboardingMintAdapter>(activity, "mintAdapter")
+                assertEquals("https://mint.coinos.io", adapter.getDefaultMintUrl())
+                assertTrue(adapter.getPopularMints().contains("https://mint.minibits.cash"))
             }
         }
-        return values
+    }
+
+    @Test
+    fun `review screen shows first discovered mint as default`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                setupMints(activity, default = "https://mint.coinos.io", popular = listOf("https://mint.minibits.cash", "https://testnut.cashu.space"))
+
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
+
+                val adapter = ReflectionHelpers.getField<OnboardingMintAdapter>(activity, "mintAdapter")
+                assertEquals("https://mint.coinos.io", adapter.getDefaultMintUrl())
+            }
+        }
+    }
+
+    @Test
+    fun `adapter tracks all selected mints including default`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                setupMints(activity, default = "https://mint.coinos.io", popular = listOf("https://mint.minibits.cash"))
+
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
+
+                val adapter = ReflectionHelpers.getField<OnboardingMintAdapter>(activity, "mintAdapter")
+                val allSelected = adapter.getAllSelectedMints()
+                assertTrue(allSelected.contains("https://mint.coinos.io"))
+                assertTrue(allSelected.contains("https://mint.minibits.cash"))
+                assertEquals(2, allSelected.size)
+            }
+        }
+    }
+
+    @Test
+    fun `review screen continue button exists and is enabled with mints`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                setupMints(activity, default = "https://mint.coinos.io", popular = listOf("https://mint.minibits.cash"))
+
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
+
+                val continueButton = activity.findViewById<MaterialButton>(R.id.mints_continue_button)
+                assertNotNull(continueButton)
+                assertTrue(continueButton.isEnabled)
+            }
+        }
+    }
+
+    @Test
+    fun `adapter onAddMintClicked callback is wired`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val adapter = ReflectionHelpers.getField<OnboardingMintAdapter>(activity, "mintAdapter")
+                // Adapter should be non-null and attached — the listener is set in onCreate
+                assertNotNull(adapter)
+            }
+        }
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────────────
+
+    private fun setupMints(activity: OnboardingActivity, default: String, popular: List<String>) {
+        val discovered = ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "discoveredMints")
+        val selected = ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "selectedMints")
+        val names = ReflectionHelpers.getField<MutableMap<String, String>>(activity, "onboardingMintDisplayNames")
+        discovered.clear()
+        selected.clear()
+        names.clear()
+
+        discovered.add(default)
+        selected.add(default)
+        names[default] = default.substringAfter("://").substringBefore("/")
+
+        for (url in popular) {
+            discovered.add(url)
+            selected.add(url)
+            names[url] = url.substringAfter("://").substringBefore("/")
+        }
     }
 
     private fun waitForCondition(

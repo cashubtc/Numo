@@ -5,131 +5,129 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@drawable/bg_dialog_rounded">
+    android:background="@drawable/bg_dialog_bottom_sheet">
 
-    <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <!-- HEADER ROW - Close button + Title                                        -->
-    <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <!-- Close Button (top-left) -->
+    <ImageButton
+        android:id="@+id/close_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/common_close"
+        android:padding="12dp"
+        android:src="@drawable/ic_close"
+        app:tint="@color/color_text_secondary" />
+
+    <!-- Icon (optional, hidden by default) -->
+    <ImageView
+        android:id="@+id/dialog_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="4dp"
+        android:visibility="gone"
+        app:tint="@color/color_text_tertiary"
+        tools:src="@drawable/ic_warning"
+        tools:visibility="visible" />
+
+    <!-- Title (left-aligned, bold) -->
+    <TextView
+        android:id="@+id/dialog_title"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:paddingHorizontal="4dp">
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="24dp"
+        android:layout_marginTop="12dp"
+        android:text="Confirm"
+        android:textSize="22sp"
+        android:textColor="@color/color_text_primary"
+        android:fontFamily="sans-serif-medium"
+        android:letterSpacing="-0.02"
+        tools:text="Set as Default?" />
 
-        <!-- Close X Button (top-left) -->
-        <ImageButton
-            android:id="@+id/close_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/common_close"
-            android:padding="12dp"
-            android:src="@drawable/ic_close"
-            app:tint="@color/color_text_secondary"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
-        <!-- Title (centered) -->
-        <TextView
-            android:id="@+id/dialog_title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:paddingHorizontal="48dp"
-            android:text="Confirm"
-            android:textSize="17sp"
-            android:textColor="@color/color_text_primary"
-            android:fontFamily="sans-serif-medium"
-            android:maxLines="1"
-            android:ellipsize="end"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            tools:text="Reset Mints" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Subtitle (left-aligned, secondary color) -->
+    <TextView
+        android:id="@+id/dialog_subtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="24dp"
+        android:layout_marginTop="4dp"
+        android:textSize="15sp"
+        android:textColor="@color/color_text_tertiary"
+        android:fontFamily="sans-serif"
+        android:visibility="gone"
+        tools:text="This action can be changed later"
+        tools:visibility="visible" />
 
     <!-- Divider -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="24dp"
         android:background="@color/color_divider" />
 
-    <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <!-- CONTENT SECTION                                                          -->
-    <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <LinearLayout
+    <!-- Message / Description -->
+    <TextView
+        android:id="@+id/dialog_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="24dp"
+        android:text="Are you sure you want to proceed?"
+        android:textSize="15sp"
+        android:textColor="@color/color_text_secondary"
+        android:fontFamily="sans-serif"
+        android:lineSpacingMultiplier="1.4"
+        tools:text="Make &quot;Minibits mint&quot; your default mint?" />
 
-        <!-- Message / Description -->
-        <TextView
-            android:id="@+id/dialog_message"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Are you sure you want to proceed?"
-            android:textSize="15sp"
-            android:textColor="@color/color_text_secondary"
-            android:lineSpacingMultiplier="1.3"
-            tools:text="This will reset all mints to their default values. Your balances will not be affected." />
-
-    </LinearLayout>
-
-    <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <!-- ACTION BUTTONS                                                           -->
-    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- Action Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingHorizontal="20dp"
-        android:paddingBottom="20dp">
+        android:paddingBottom="24dp">
 
-        <!-- Cancel Button (Secondary - white background with border, no shadow) -->
+        <!-- Cancel Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/cancel_button"
             style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:layout_width="0dp"
-            android:layout_height="52dp"
+            android:layout_height="56dp"
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
             android:text="@string/common_cancel"
             android:textColor="@color/color_text_primary"
             android:textSize="16sp"
             android:textAllCaps="false"
-            android:maxLines="1"
-            android:ellipsize="end"
             android:fontFamily="sans-serif-medium"
             android:insetTop="0dp"
             android:insetBottom="0dp"
             android:stateListAnimator="@null"
             app:backgroundTint="@color/color_bg_white"
-            app:cornerRadius="14dp"
+            app:cornerRadius="28dp"
             app:rippleColor="@color/color_ripple"
             app:strokeWidth="1dp"
             app:strokeColor="@color/color_chip_border" />
 
-        <!-- Confirm Button (Primary - can be destructive red) -->
+        <!-- Confirm Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/confirm_button"
             android:layout_width="0dp"
-            android:layout_height="52dp"
+            android:layout_height="56dp"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
             android:text="@string/common_confirm"
             android:textColor="@color/color_bg_white"
             android:textSize="16sp"
             android:textAllCaps="false"
-            android:maxLines="1"
-            android:ellipsize="end"
             android:fontFamily="sans-serif-medium"
             android:insetTop="0dp"
             android:insetBottom="0dp"
+            android:stateListAnimator="@null"
             app:backgroundTint="@color/color_text_primary"
-            app:cornerRadius="14dp"
+            app:cornerRadius="28dp"
             app:rippleColor="#33FFFFFF"
             app:strokeWidth="0dp"
             app:elevation="0dp" />

@@ -3,7 +3,7 @@
     <!-- Numo Brand Colors -->
     <color name="numo_fluorescent_green">#5EFFC2</color>
     <color name="numo_navy">#0A2540</color>
-    
+
     <!-- Cash App Brand Colors -->
     <color name="color_primary_green">#0B1215</color>
     <color name="color_primary_green_light">#0B1215</color>
@@ -67,6 +67,7 @@
     <color name="inputBoxStrokeColor">@color/color_divider</color>
     <color name="buttonBackground">@color/color_primary_green_light</color>
     <color name="buttonText">@color/color_bg_white</color>
+    <color name="color_button_primary_text">#FFFFFF</color>
     <color name="navigationBarBackground">#F8F9FA</color>
     <color name="navigationBarDivider">@color/color_divider</color>
     <color name="navigationIconTint">#757575</color>
@@ -103,7 +104,24 @@
     <color name="empty_state_button_secondary_border">#4D6F6F73</color>
     <color name="empty_state_close_icon">#000000</color>
 
+    <!-- Onboarding Dark Theme (white-on-navy text hierarchy) -->
+    <color name="color_onboarding_text_muted">#73FFFFFF</color>
+    <color name="color_onboarding_text_subtle">#99FFFFFF</color>
+    <color name="color_onboarding_text_disabled">#4DFFFFFF</color>
+    <color name="color_onboarding_icon_bg">#1AFFFFFF</color>
+    <color name="color_seed_word_invalid">#FF6B6B</color>
+
+    <!-- Auto-Custody Illustration -->
+    <color name="color_card_shadow">#20000000</color>
+    <color name="color_auto_custody_pending_bg">#FFF0DB</color>
+    <color name="color_auto_custody_success_bg">#D4FFED</color>
+
+    <!-- Hero Green Tints (for mint selection hero card) -->
+    <color name="color_hero_green_border">#3300C244</color>
+    <color name="color_hero_green_tint">#1400C244</color>
+    <color name="color_default_pill_bg">#1A00C244</color>
+
     <!-- Button Colors (extracted from bg_button_primary_green.xml) -->
     <color name="color_button_primary_pressed">#1A2529</color>
-    <color name="color_button_primary_disabled">#33000000</color>
+    <color name="color_button_primary_disabled">@color/color_bg_tertiary</color>
 </resources>
