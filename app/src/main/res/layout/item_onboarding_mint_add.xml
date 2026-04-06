@@ -13,7 +13,7 @@
         android:gravity="center"
         android:text="@string/onboarding_mints_add_new_button"
         android:textSize="15sp"
-        android:textColor="#99FFFFFF"
+        android:textColor="@color/color_onboarding_text_subtle"
         android:fontFamily="sans-serif-medium" />
 
 </FrameLayout>

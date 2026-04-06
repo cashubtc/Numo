@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:maxWidth="300dp"
         android:textSize="16sp"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/color_text_on_dark"
         android:lineSpacingMultiplier="1.5" />
 
     <FrameLayout

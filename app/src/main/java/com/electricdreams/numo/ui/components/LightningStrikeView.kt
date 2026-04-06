@@ -4,15 +4,13 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateInterpolator
+import androidx.core.content.ContextCompat
+import com.electricdreams.numo.R
 import com.electricdreams.numo.ui.util.isAnimationEnabled
-import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.random.Random
 
 /**
@@ -27,21 +25,21 @@ class LightningStrikeView(context: Context) : View(context) {
     private data class BoltBranch(val path: Path, val depth: Int)
 
     private val corePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#F7931A")
+        color = ContextCompat.getColor(context, R.color.color_lightning_bolt_core)
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
     }
 
     private val innerGlowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#FFBB5C")
+        color = ContextCompat.getColor(context, R.color.color_lightning_bolt_inner_glow)
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
     }
 
     private val outerGlowPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#FFCC80")
+        color = ContextCompat.getColor(context, R.color.color_lightning_bolt_outer_glow)
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND

@@ -127,7 +127,7 @@
             android:stateListAnimator="@null"
             app:backgroundTint="@color/color_warning_red"
             app:cornerRadius="28dp"
-            app:rippleColor="#33FFFFFF"
+            app:rippleColor="@color/color_ripple_on_dark"
             app:strokeWidth="0dp"
             app:elevation="0dp" />
 

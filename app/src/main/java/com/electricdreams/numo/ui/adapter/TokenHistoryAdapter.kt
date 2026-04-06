@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.data.model.TokenHistoryEntry
@@ -32,9 +33,25 @@ class TokenHistoryAdapter : RecyclerView.Adapter<TokenHistoryAdapter.ViewHolder>
     }
 
     fun setEntries(newEntries: List<TokenHistoryEntry>) {
+        val oldEntries = ArrayList(entries)
+        val diffResult = DiffUtil.calculateDiff(EntryDiffCallback(oldEntries, newEntries))
         entries.clear()
         entries.addAll(newEntries)
-        notifyDataSetChanged()
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    private class EntryDiffCallback(
+        private val oldList: List<TokenHistoryEntry>,
+        private val newList: List<TokenHistoryEntry>
+    ) : DiffUtil.Callback() {
+        override fun getOldListSize(): Int = oldList.size
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldPos: Int, newPos: Int): Boolean =
+            oldList[oldPos].token == newList[newPos].token
+
+        override fun areContentsTheSame(oldPos: Int, newPos: Int): Boolean =
+            oldList[oldPos] == newList[newPos]
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {

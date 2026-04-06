@@ -18,7 +18,7 @@
             android:layout_height="4dp"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="12dp"
-            android:background="#26FFFFFF" />
+            android:background="@color/color_stroke_on_dark" />
 
         <!-- Title -->
         <TextView
@@ -28,7 +28,7 @@
             android:paddingHorizontal="24dp"
             android:text="@string/onboarding_add_mint_sheet_title"
             android:textSize="20sp"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/color_text_on_dark"
             android:fontFamily="sans-serif-medium" />
 
         <!-- URL Input -->
@@ -40,8 +40,8 @@
             android:layout_marginHorizontal="24dp"
             android:hint="@string/onboarding_add_mint_url_hint"
             android:textSize="15sp"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#4DFFFFFF"
+            android:textColor="@color/color_text_on_dark"
+            android:textColorHint="@color/color_onboarding_text_disabled"
             android:background="@drawable/bg_seed_input_dark"
             android:paddingHorizontal="16dp"
             android:inputType="textUri"
@@ -91,7 +91,7 @@
                     android:layout_marginStart="10dp"
                     android:text="@string/onboarding_add_mint_loading"
                     android:textSize="15sp"
-                    android:textColor="#FFFFFF" />
+                    android:textColor="@color/color_text_on_dark" />
 
             </LinearLayout>
 
@@ -109,19 +109,19 @@
             android:text="@string/onboarding_add_mint_scan_qr"
             android:textAllCaps="false"
             android:textSize="17sp"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/color_text_on_dark"
             android:fontFamily="sans-serif-medium"
             android:stateListAnimator="@null"
             app:elevation="0dp"
             app:backgroundTint="@android:color/transparent"
-            app:strokeColor="#26FFFFFF"
+            app:strokeColor="@color/color_stroke_on_dark"
             app:strokeWidth="1dp"
             app:cornerRadius="26dp"
             app:icon="@drawable/ic_qr_scan"
             app:iconGravity="textStart"
             app:iconPadding="8dp"
-            app:iconTint="#FFFFFF"
-            app:rippleColor="#1AFFFFFF" />
+            app:iconTint="@color/color_text_on_dark"
+            app:rippleColor="@color/color_onboarding_icon_bg" />
 
     </LinearLayout>
 

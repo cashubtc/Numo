@@ -84,7 +84,7 @@
                             android:layout_height="24dp"
                             android:layout_marginEnd="12dp"
                             android:src="@drawable/ic_warning"
-                            app:tint="#FF4B4B" />
+                            app:tint="@color/color_error" />
 
                         <TextView
                             android:layout_width="wrap_content"

@@ -133,7 +133,7 @@
                 android:text="@string/onboarding_welcome_tagline"
                 android:textSize="17sp"
                 android:lineHeight="24sp"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/color_text_on_dark"
                 android:gravity="center"
                 android:fontFamily="sans-serif-medium"
                 android:alpha="0"
@@ -156,7 +156,7 @@
                 android:alpha="0"
                 android:paddingVertical="4dp"
                 app:cornerRadius="32dp"
-                app:backgroundTint="#FFFFFF" />
+                app:backgroundTint="@color/color_bg_white" />
 
             <!-- Terms Text (below button) -->
             <TextView
@@ -166,7 +166,7 @@
                 android:layout_marginTop="12dp"
                 android:text="@string/onboarding_terms_text"
                 android:textSize="13sp"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/color_text_on_dark"
                 android:alpha="0"
                 android:gravity="center"
                 android:paddingHorizontal="16dp" />
@@ -215,7 +215,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/onboarding_setup_title"
                         android:textSize="32sp"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/color_text_on_dark"
                         android:fontFamily="sans-serif-black"
                         android:textAllCaps="true"
                         android:letterSpacing="-0.03"
@@ -242,7 +242,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/onboarding_create_wallet_title"
                             android:textSize="16sp"
-                            android:textColor="#0A2540"
+                            android:textColor="@color/numo_navy"
                             android:fontFamily="sans-serif-medium" />
 
                     </LinearLayout>
@@ -268,7 +268,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/onboarding_restore_wallet_title"
                             android:textSize="14sp"
-                            android:textColor="#80FFFFFF"
+                            android:textColor="@color/color_overlay_white_50"
                             android:fontFamily="sans-serif" />
 
                     </LinearLayout>
@@ -356,7 +356,7 @@
                 android:id="@+id/explainer_backdrop"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#80000000"
+                android:background="@color/color_overlay_dark"
                 android:alpha="0" />
 
             <!-- Sheet -->
@@ -381,7 +381,7 @@
                         android:layout_height="44dp"
                         android:padding="10dp"
                         android:src="@drawable/ic_close"
-                        app:tint="#FFFFFF"
+                        app:tint="@color/color_text_on_dark"
                         android:alpha="0.7"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:clickable="true"
@@ -494,7 +494,7 @@
                 android:padding="12dp"
                 android:src="@drawable/ic_chevron_back"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                app:tint="#99FFFFFF"
+                app:tint="@color/color_onboarding_text_subtle"
                 android:contentDescription="@string/onboarding_seed_toolbar_back" />
 
             <!-- Title -->
@@ -505,7 +505,7 @@
                 android:paddingTop="8dp"
                 android:text="@string/onboarding_seed_toolbar_title"
                 android:textSize="32sp"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/color_text_on_dark"
                 android:fontFamily="sans-serif-black"
                 android:textAllCaps="true"
                 android:letterSpacing="-0.03"
@@ -531,7 +531,7 @@
                         android:layout_marginTop="16dp"
                         android:text="@string/onboarding_seed_instruction_title"
                         android:textSize="24sp"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/color_text_on_dark"
                         android:fontFamily="sans-serif-medium" />
 
                     <!-- Seed Input Grid -->
@@ -557,7 +557,7 @@
                         android:layout_marginTop="24dp"
                         android:text="@string/onboarding_seed_paste_button"
                         android:textSize="17sp"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/color_text_on_dark"
                         android:textAllCaps="false"
                         android:background="@drawable/bg_button_tertiary_dark"
                         android:stateListAnimator="@null"
@@ -617,7 +617,7 @@
                 android:layout_marginTop="24dp"
                 android:text="@string/onboarding_status_creating_wallet"
                 android:textSize="17sp"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/color_text_on_dark"
                 android:gravity="center" />
 
         </LinearLayout>
@@ -652,7 +652,7 @@
                 android:layout_marginTop="24dp"
                 android:text="@string/onboarding_status_restoring_wallet"
                 android:textSize="17sp"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/color_text_on_dark"
                 android:gravity="center" />
 
         </LinearLayout>
@@ -682,7 +682,7 @@
                 android:padding="12dp"
                 android:src="@drawable/ic_chevron_back"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                app:tint="#99FFFFFF"
+                app:tint="@color/color_onboarding_text_subtle"
                 android:contentDescription="@string/onboarding_mints_toolbar_back" />
 
             <!-- Title -->
@@ -693,7 +693,7 @@
                 android:paddingTop="8dp"
                 android:text="@string/onboarding_mints_toolbar_title"
                 android:textSize="32sp"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/color_text_on_dark"
                 android:fontFamily="sans-serif-black"
                 android:textAllCaps="true"
                 android:letterSpacing="-0.03"
@@ -742,7 +742,7 @@
                         android:layout_marginTop="2dp"
                         android:text="@string/onboarding_backup_found_subtitle"
                         android:textSize="13sp"
-                        android:textColor="#99FFFFFF" />
+                        android:textColor="@color/color_onboarding_text_subtle" />
 
                 </LinearLayout>
 
@@ -815,7 +815,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/onboarding_restoring_title"
                     android:textSize="17sp"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/color_text_on_dark"
                     android:fontFamily="sans-serif-medium"
                     android:gravity="center" />
 
@@ -849,7 +849,7 @@
                         android:layout_marginTop="16dp"
                         android:text="@string/onboarding_restoring_initializing"
                         android:textSize="15sp"
-                        android:textColor="#99FFFFFF"
+                        android:textColor="@color/color_onboarding_text_subtle"
                         android:gravity="center" />
 
                     <!-- Mint Progress Items -->
@@ -901,7 +901,7 @@
                 android:layout_marginTop="32dp"
                 android:text="@string/onboarding_success_created_title"
                 android:textSize="28sp"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/color_text_on_dark"
                 android:fontFamily="sans-serif-medium"
                 android:gravity="center" />
 
@@ -912,7 +912,7 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/onboarding_success_created_subtitle"
                 android:textSize="16sp"
-                android:textColor="#99FFFFFF"
+                android:textColor="@color/color_onboarding_text_subtle"
                 android:gravity="center" />
 
             <Space
@@ -933,7 +933,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/onboarding_success_balance_by_mint"
                     android:textSize="12sp"
-                    android:textColor="#73FFFFFF"
+                    android:textColor="@color/color_onboarding_text_muted"
                     android:letterSpacing="0.1"
                     android:layout_marginBottom="12dp" />
 

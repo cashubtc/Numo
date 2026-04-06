@@ -98,7 +98,7 @@
                         android:ellipsize="end"
                         android:fontFamily="sans-serif-medium"
                         android:maxLines="1"
-                        android:textColor="#FFFFFF"
+                        android:textColor="@color/color_text_on_dark"
                         android:textSize="15sp" />
 
                     <TextView
@@ -108,7 +108,7 @@
                         android:layout_marginTop="2dp"
                         android:fontFamily="sans-serif"
                         android:text="@string/onboarding_mints_hero_subtitle"
-                        android:textColor="#99FFFFFF"
+                        android:textColor="@color/color_onboarding_text_subtle"
                         android:textSize="13sp" />
 
                 </LinearLayout>
@@ -135,7 +135,7 @@
                 android:fontFamily="sans-serif"
                 android:lineSpacingMultiplier="1.4"
                 android:text="@string/onboarding_mints_hero_helper"
-                android:textColor="#73FFFFFF"
+                android:textColor="@color/color_onboarding_text_muted"
                 android:textSize="13sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

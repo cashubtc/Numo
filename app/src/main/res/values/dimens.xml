@@ -84,6 +84,12 @@
     <!-- QR Scanner -->
     <dimen name="qr_viewfinder_size">280dp</dimen>
 
+    <!-- NFC Payment Animation -->
+    <dimen name="nfc_spinner_radius">38dp</dimen>
+    <dimen name="nfc_spinner_stroke_width">5dp</dimen>
+    <dimen name="nfc_result_circle_radius">72dp</dimen>
+    <dimen name="nfc_result_icon_stroke_width">6dp</dimen>
+
     <!-- 3D Card Effects -->
     <dimen name="card_elevation_3d_max">12dp</dimen>
     <dimen name="card_elevation_3d_min">2dp</dimen>

@@ -36,7 +36,7 @@
                 android:layout_height="20dp"
                 android:layout_gravity="center"
                 android:indeterminate="true"
-                android:indeterminateTint="#FFFFFF" />
+                android:indeterminateTint="@color/color_text_on_dark" />
 
             <!-- Success Icon (hidden by default) -->
             <ImageView
@@ -46,7 +46,7 @@
                 android:layout_gravity="center"
                 android:src="@drawable/ic_check"
                 android:visibility="gone"
-                app:tint="#4CAF50" />
+                app:tint="@color/color_auto_withdraw_success" />
 
             <!-- Error Icon (hidden by default) -->
             <ImageView
@@ -56,7 +56,7 @@
                 android:layout_gravity="center"
                 android:src="@drawable/ic_close"
                 android:visibility="gone"
-                app:tint="#FF5252" />
+                app:tint="@color/color_auto_withdraw_error" />
 
         </FrameLayout>
 
@@ -80,7 +80,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
                 android:text="@string/auto_withdraw_progress_sending"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/color_text_on_dark"
                 android:textSize="13sp" />
 
             <!-- Subtitle -->
@@ -91,7 +91,7 @@
                 android:layout_marginTop="1dp"
                 android:alpha="0.7"
                 android:fontFamily="sans-serif"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/color_text_on_dark"
                 android:textSize="11sp"
                 tools:text="Sending to wallet..." />
 
@@ -113,7 +113,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/color_text_on_dark"
                 android:textSize="14sp"
                 tools:text="10,000" />
 
@@ -123,7 +123,7 @@
                 android:alpha="0.7"
                 android:fontFamily="sans-serif"
                 android:text="sats"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/color_text_on_dark"
                 android:textSize="10sp" />
 
         </LinearLayout>

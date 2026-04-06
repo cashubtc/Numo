@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.Amount
@@ -23,14 +24,30 @@ class SelectionBasketAdapter(
     private var basketItems: List<BasketItem> = emptyList()
 
     fun updateItems(newItems: List<BasketItem>) {
-        val oldSize = basketItems.size
+        val oldItems = basketItems
+        val diffResult = DiffUtil.calculateDiff(BasketDiffCallback(oldItems, newItems))
         basketItems = newItems
+        diffResult.dispatchUpdatesTo(this)
+    }
 
-        // Simple diff - animate new items
-        if (newItems.size > oldSize) {
-            notifyItemInserted(0) // Newest items at top
-        } else {
-            notifyDataSetChanged()
+    private class BasketDiffCallback(
+        private val oldList: List<BasketItem>,
+        private val newList: List<BasketItem>
+    ) : DiffUtil.Callback() {
+        // Items are displayed in reverse order, so map adapter positions accordingly
+        override fun getOldListSize(): Int = oldList.size
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldPos: Int, newPos: Int): Boolean {
+            val oldItem = oldList[oldList.size - 1 - oldPos]
+            val newItem = newList[newList.size - 1 - newPos]
+            return oldItem.item.id == newItem.item.id
+        }
+
+        override fun areContentsTheSame(oldPos: Int, newPos: Int): Boolean {
+            val oldItem = oldList[oldList.size - 1 - oldPos]
+            val newItem = newList[newList.size - 1 - newPos]
+            return oldItem == newItem
         }
     }
 

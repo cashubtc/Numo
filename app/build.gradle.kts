@@ -114,7 +114,7 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
     // Project specific dependencies
-    implementation("org.bouncycastle:bcprov-jdk15on:1.70")
+    implementation("org.bouncycastle:bcprov-jdk18on:1.80")
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 

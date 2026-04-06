@@ -20,6 +20,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.widget.NestedScrollView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.Item
@@ -52,25 +53,33 @@ class SelectionItemsAdapter(
 
     fun updateItems(newItems: List<Item>) {
         // Combine original items with custom variation items
+        val oldItems = ArrayList(items)
+        val oldQuantities = HashMap(basketQuantities)
         items = (newItems + customVariationItems).toMutableList()
         refreshBasketQuantities()
-        notifyDataSetChanged()
+        val diffResult = DiffUtil.calculateDiff(ItemDiffCallback(oldItems, oldQuantities, items, basketQuantities))
+        diffResult.dispatchUpdatesTo(this)
     }
 
     fun clearAllQuantities() {
+        val oldItems = ArrayList(items)
+        val oldQuantities = HashMap(basketQuantities)
         basketQuantities.clear()
         customVariationItems.clear()
-        notifyDataSetChanged()
+        val diffResult = DiffUtil.calculateDiff(ItemDiffCallback(oldItems, oldQuantities, items, basketQuantities))
+        diffResult.dispatchUpdatesTo(this)
     }
-    
+
     fun syncQuantitiesFromBasket() {
+        val oldQuantities = HashMap(basketQuantities)
         refreshBasketQuantities()
-        notifyDataSetChanged()
+        val diffResult = DiffUtil.calculateDiff(ItemDiffCallback(items, oldQuantities, items, basketQuantities))
+        diffResult.dispatchUpdatesTo(this)
     }
 
     fun resetItemQuantity(itemId: String) {
         basketQuantities.remove(itemId)
-        
+
         // If it's a custom variation item with 0 quantity, remove it from the list
         if (itemId.startsWith("custom_")) {
             val customItem = customVariationItems.find { it.id == itemId }
@@ -84,7 +93,10 @@ class SelectionItemsAdapter(
                 }
             }
         }
-        notifyDataSetChanged()
+        val oldQuantities = HashMap(basketQuantities)
+        oldQuantities[itemId] = 0 // was just removed
+        val diffResult = DiffUtil.calculateDiff(ItemDiffCallback(items, oldQuantities, items, basketQuantities))
+        diffResult.dispatchUpdatesTo(this)
     }
 
     /**
@@ -156,6 +168,26 @@ class SelectionItemsAdapter(
         }
         if (expandedPosition >= 0) {
             notifyItemChanged(expandedPosition)
+        }
+    }
+
+    private class ItemDiffCallback(
+        private val oldList: List<Item>,
+        private val oldQuantities: Map<String, Int>,
+        private val newList: List<Item>,
+        private val newQuantities: Map<String, Int>
+    ) : DiffUtil.Callback() {
+        override fun getOldListSize(): Int = oldList.size
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldPos: Int, newPos: Int): Boolean =
+            oldList[oldPos].id == newList[newPos].id
+
+        override fun areContentsTheSame(oldPos: Int, newPos: Int): Boolean {
+            val oldItem = oldList[oldPos]
+            val newItem = newList[newPos]
+            return oldItem == newItem &&
+                (oldQuantities[oldItem.id] ?: 0) == (newQuantities[newItem.id] ?: 0)
         }
     }
 

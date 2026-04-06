@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.data.model.HistoryEntry
@@ -58,9 +59,10 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
      * Groups entries by month and builds a flat list of headers + items.
      */
     fun setEntries(newEntries: List<HistoryEntry>) {
-        items.clear()
+        val oldItems = ArrayList(items)
         openItemPosition = RecyclerView.NO_POSITION
 
+        val newItems = mutableListOf<ListItem>()
         val calendar = Calendar.getInstance()
         var lastMonthKey = ""
 
@@ -70,14 +72,50 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
             if (monthKey != lastMonthKey) {
                 val monthLabel = monthYearFormat.format(entry.date)
-                items.add(ListItem.Header(monthLabel))
+                newItems.add(ListItem.Header(monthLabel))
                 lastMonthKey = monthKey
             }
 
-            items.add(ListItem.Transaction(entry, index))
+            newItems.add(ListItem.Transaction(entry, index))
         }
 
-        notifyDataSetChanged()
+        val diffResult = DiffUtil.calculateDiff(ListItemDiffCallback(oldItems, newItems))
+        items.clear()
+        items.addAll(newItems)
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    private class ListItemDiffCallback(
+        private val oldList: List<ListItem>,
+        private val newList: List<ListItem>
+    ) : DiffUtil.Callback() {
+        override fun getOldListSize(): Int = oldList.size
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldPos: Int, newPos: Int): Boolean {
+            val old = oldList[oldPos]
+            val new = newList[newPos]
+            return when {
+                old is ListItem.Header && new is ListItem.Header -> old.monthLabel == new.monthLabel
+                old is ListItem.Transaction && new is ListItem.Transaction -> old.entry.id == new.entry.id
+                else -> false
+            }
+        }
+
+        override fun areContentsTheSame(oldPos: Int, newPos: Int): Boolean {
+            val old = oldList[oldPos]
+            val new = newList[newPos]
+            return when {
+                old is ListItem.Header && new is ListItem.Header -> old == new
+                old is ListItem.Transaction && new is ListItem.Transaction ->
+                    old.entry.id == new.entry.id &&
+                    old.entry.amount == new.entry.amount &&
+                    old.entry.status == new.entry.status &&
+                    old.entry.label == new.entry.label &&
+                    old.originalPosition == new.originalPosition
+                else -> false
+            }
+        }
     }
 
     fun closeOpenItem() {

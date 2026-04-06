@@ -124,4 +124,35 @@
     <!-- Button Colors (extracted from bg_button_primary_green.xml) -->
     <color name="color_button_primary_pressed">#1A2529</color>
     <color name="color_button_primary_disabled">@color/color_bg_tertiary</color>
+
+    <!-- Overlay & Semi-transparent Colors -->
+    <color name="color_overlay_dark">#80000000</color>
+    <color name="color_overlay_white_50">#80FFFFFF</color>
+    <color name="color_ripple_on_dark">#33FFFFFF</color>
+    <color name="color_stroke_on_dark">#26FFFFFF</color>
+    <color name="color_text_on_dark">#FFFFFF</color>
+    <color name="color_text_on_dark_high">#CCFFFFFF</color>
+    <color name="color_text_on_dark_medium">#B3FFFFFF</color>
+    <color name="color_bg_scanner">#000000</color>
+    <color name="color_icon_security_green">#388E3C</color>
+    <color name="color_auto_withdraw_success">#4CAF50</color>
+    <color name="color_auto_withdraw_error">#FF5252</color>
+
+    <!-- Lightning Strike Animation Colors -->
+    <color name="color_lightning_bolt_core">#F7931A</color>
+    <color name="color_lightning_bolt_inner_glow">#FFBB5C</color>
+    <color name="color_lightning_bolt_outer_glow">#FFCC80</color>
+
+    <!-- NFC Payment Animation Colors -->
+    <color name="color_nfc_idle">#0A0A0A</color>
+    <color name="color_nfc_success">#34C759</color>
+    <color name="color_nfc_success_gradient_start">#22C55E</color>
+    <color name="color_nfc_success_gradient_end">#4ADE80</color>
+
+    <!-- Theme Background Colors (for ThemeManager) -->
+    <color name="color_theme_obsidian">#0B1215</color>
+    <color name="color_theme_bitcoin_orange">#F7931A</color>
+    <color name="color_theme_green">#00C244</color>
+    <color name="color_theme_white">#FFFFFF</color>
+    <color name="color_theme_text_dark">#0B1215</color>
 </resources>

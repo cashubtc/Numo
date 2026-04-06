@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#000000">
+    android:background="@color/color_bg_scanner">
 
     <!-- Camera Preview -->
     <androidx.camera.view.PreviewView
@@ -206,7 +206,7 @@
         android:layout_gravity="bottom|center_horizontal"
         android:layout_marginBottom="120dp"
         android:text="@string/checkout_scanner_instruction_scan_to_add"
-        android:textColor="#CCFFFFFF"
+        android:textColor="@color/color_text_on_dark_high"
         android:textSize="15sp"
         android:fontFamily="sans-serif" />
 

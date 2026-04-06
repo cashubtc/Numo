@@ -41,12 +41,12 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         ERROR,
     }
 
-    private val colorIdle = Color.parseColor("#0A0A0A")
+    private val colorIdle = ContextCompat.getColor(context, R.color.color_nfc_idle)
     private val colorReading = ContextCompat.getColor(context, R.color.color_bitcoin_orange)
     private val colorProcessing = ContextCompat.getColor(context, R.color.color_accent_blue)
-    private val colorSuccess = Color.parseColor("#34C759")
-    private val colorSuccessGradientStart = Color.parseColor("#22C55E")
-    private val colorSuccessGradientEnd = Color.parseColor("#4ADE80")
+    private val colorSuccess = ContextCompat.getColor(context, R.color.color_nfc_success)
+    private val colorSuccessGradientStart = ContextCompat.getColor(context, R.color.color_nfc_success_gradient_start)
+    private val colorSuccessGradientEnd = ContextCompat.getColor(context, R.color.color_nfc_success_gradient_end)
     private val colorError = ContextCompat.getColor(context, R.color.color_error)
 
     private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -257,12 +257,12 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         centerY = h * 0.55f
 
         val minSize = min(w, h).toFloat()
-        spinnerRadius = dpToPx(38f).coerceAtMost(minSize * 0.24f)
-        spinnerStrokeWidth = dpToPx(5f)
-        resultCircleRadius = dpToPx(72f).coerceAtMost(minSize * 0.31f)
+        spinnerRadius = resources.getDimension(R.dimen.nfc_spinner_radius).coerceAtMost(minSize * 0.24f)
+        spinnerStrokeWidth = resources.getDimension(R.dimen.nfc_spinner_stroke_width)
+        resultCircleRadius = resources.getDimension(R.dimen.nfc_result_circle_radius).coerceAtMost(minSize * 0.31f)
 
         spinnerPaint.strokeWidth = spinnerStrokeWidth
-        resultIconPaint.strokeWidth = dpToPx(6f)
+        resultIconPaint.strokeWidth = resources.getDimension(R.dimen.nfc_result_icon_stroke_width)
         resultIconPaint.color = colorSuccess
         successGradient = LinearGradient(
             0f,
@@ -398,6 +398,4 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         super.onDetachedFromWindow()
         reset()
     }
-
-    private fun dpToPx(dp: Float): Float = dp * resources.displayMetrics.density
 }

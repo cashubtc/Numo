@@ -197,7 +197,7 @@
             android:background="@drawable/bg_button_charge"
             android:text="@string/pos_charge_button"
             android:textAllCaps="false"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/color_text_on_dark"
             android:textSize="18sp"
             android:textStyle="bold"
             android:elevation="0dp"

@@ -1,8 +1,8 @@
 package com.electricdreams.numo.feature.onboarding
 
-import android.annotation.SuppressLint
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
+import androidx.recyclerview.widget.DiffUtil
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.PathInterpolator
@@ -66,34 +66,37 @@ class OnboardingMintAdapter(
         this.headerTitle = headerTitle
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     fun setMints(defaultUrl: String, popularUrls: List<String>, acceptedUrls: Set<String>) {
+        val oldItems = ArrayList(items)
         mints.clear()
         mints.add(defaultUrl)
         mints.addAll(popularUrls)
         accepted.clear()
         accepted.addAll(acceptedUrls)
         rebuildItems()
-        notifyDataSetChanged()
+        val diffResult = DiffUtil.calculateDiff(ListItemDiffCallback(oldItems, items))
+        diffResult.dispatchUpdatesTo(this)
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     fun addMint(url: String) {
+        val oldItems = ArrayList(items)
         mints.add(url)
         accepted.add(url)
         rebuildItems()
-        notifyDataSetChanged()
+        val diffResult = DiffUtil.calculateDiff(ListItemDiffCallback(oldItems, items))
+        diffResult.dispatchUpdatesTo(this)
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     fun addMintAsDefault(url: String) {
+        val oldItems = ArrayList(items)
         val oldDefault = mints.firstOrNull()
         if (oldDefault != null) {
             accepted.add(oldDefault)
         }
         mints.add(0, url)
         rebuildItems()
-        notifyDataSetChanged()
+        val diffResult = DiffUtil.calculateDiff(ListItemDiffCallback(oldItems, items))
+        diffResult.dispatchUpdatesTo(this)
         listener.onDefaultMintChanged(url)
     }
 
@@ -107,6 +110,30 @@ class OnboardingMintAdapter(
             items.add(ListItem.Mint(mints[i]))
         }
         items.add(ListItem.AddMint)
+    }
+
+    private class ListItemDiffCallback(
+        private val oldList: List<ListItem>,
+        private val newList: List<ListItem>
+    ) : DiffUtil.Callback() {
+        override fun getOldListSize(): Int = oldList.size
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldPos: Int, newPos: Int): Boolean {
+            val old = oldList[oldPos]
+            val new = newList[newPos]
+            return when {
+                old is ListItem.Header && new is ListItem.Header -> true
+                old is ListItem.DefaultHero && new is ListItem.DefaultHero -> true
+                old is ListItem.Mint && new is ListItem.Mint -> old.url == new.url
+                old is ListItem.AddMint && new is ListItem.AddMint -> true
+                else -> false
+            }
+        }
+
+        override fun areContentsTheSame(oldPos: Int, newPos: Int): Boolean {
+            return oldList[oldPos] == newList[newPos]
+        }
     }
 
     fun getDefaultMintUrl(): String? = mints.firstOrNull()
@@ -263,11 +290,11 @@ class OnboardingMintAdapter(
     /**
      * Instant swap without animation — used for undo.
      */
-    @SuppressLint("NotifyDataSetChanged")
     fun swapDefaultInstant(mintUrl: String) {
         val mintIndex = mints.indexOf(mintUrl)
         if (mintIndex < 1) return
 
+        val oldItems = ArrayList(items)
         val oldDefault = mints[0]
         accepted.add(oldDefault)
         accepted.remove(mintUrl)
@@ -275,7 +302,8 @@ class OnboardingMintAdapter(
         mints[mintIndex] = oldDefault
 
         rebuildItems()
-        notifyDataSetChanged()
+        val diffResult = DiffUtil.calculateDiff(ListItemDiffCallback(oldItems, items))
+        diffResult.dispatchUpdatesTo(this)
         listener.onDefaultMintChanged(mintUrl)
     }
 
