@@ -36,13 +36,12 @@
             app:tint="@android:color/white" />
 
         <TextView
+            style="@style/Text.Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/barcode_scanner_title"
-            android:textColor="@android:color/white"
-            android:textSize="17sp"
-            android:fontFamily="sans-serif-medium" />
+            android:textColor="@android:color/white" />
 
     </FrameLayout>
 

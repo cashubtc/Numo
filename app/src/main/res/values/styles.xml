@@ -6,15 +6,43 @@
         <item name="android:textColor">@color/color_text_primary</item>
     </style>
 
-    <!-- Typography Styles -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Typography Scale                                          -->
+    <!--                                                            -->
+    <!-- 10 sizes on a ~1.33x ratio:                                -->
+    <!--   11sp  Badge/Overline                                     -->
+    <!--   13sp  Caption/Small                                      -->
+    <!--   14sp  Chip/SecondaryButton                               -->
+    <!--   15sp  Body/RowTitle                                      -->
+    <!--   16sp  Button                                             -->
+    <!--   17sp  Title                                              -->
+    <!--   18sp  Subtitle                                           -->
+    <!--   24sp  Heading                                            -->
+    <!--   48sp  Display                                            -->
+    <!--   64sp  Display Hero                                       -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <!-- Display: Large hero numbers (POS main amount) -->
+    <style name="Text.DisplayHero">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">64sp</item>
+        <item name="android:lineHeight">72sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+        <item name="android:gravity">center</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <!-- Display: Payment amounts, confirmation screens -->
     <style name="Text.DisplayAmount">
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">48sp</item>
+        <item name="android:lineHeight">56sp</item>
         <item name="android:textColor">@color/color_text_primary</item>
         <item name="android:gravity">center</item>
-        <item name="android:letterSpacing">0</item>
+        <item name="android:letterSpacing">-0.02</item>
     </style>
 
+    <!-- Heading: Page titles, major sections -->
     <style name="Text.Heading1">
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">24sp</item>
@@ -22,6 +50,15 @@
         <item name="android:textColor">@color/color_text_primary</item>
     </style>
 
+    <!-- Subtitle: Large section labels, tab text, prominent buttons -->
+    <style name="Text.Subtitle">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:lineHeight">24sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+    </style>
+
+    <!-- Title: Toolbar titles, dialog headers -->
     <style name="Text.Title">
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">17sp</item>
@@ -31,45 +68,25 @@
         <item name="android:letterSpacing">-0.012</item>
     </style>
 
-    <style name="Text.SectionHeader">
+    <!-- Button: Primary/secondary action labels -->
+    <style name="Text.Button">
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textSize">13sp</item>
-        <item name="android:textColor">@color/color_text_secondary</item>
-        <item name="android:letterSpacing">0.06</item>
-        <item name="android:textAllCaps">true</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:lineHeight">22sp</item>
+        <item name="android:letterSpacing">-0.012</item>
+        <item name="android:gravity">center</item>
     </style>
 
+    <!-- RowTitle: List item primary text, field labels -->
     <style name="Text.RowTitle">
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">15sp</item>
+        <item name="android:lineHeight">20sp</item>
         <item name="android:textColor">@color/color_text_primary</item>
         <item name="android:letterSpacing">-0.007</item>
     </style>
 
-    <style name="Text.RowSubtitle">
-        <item name="android:fontFamily">sans-serif</item>
-        <item name="android:textSize">13sp</item>
-        <item name="android:textColor">@color/color_text_tertiary</item>
-    </style>
-
-    <style name="Text.Helper">
-        <item name="android:fontFamily">sans-serif</item>
-        <item name="android:textSize">13sp</item>
-        <item name="android:textColor">@color/color_text_tertiary</item>
-    </style>
-
-    <style name="Text.SecondaryButton">
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColor">@color/color_text_secondary</item>
-    </style>
-
-    <style name="Text.Badge">
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textSize">11sp</item>
-        <item name="android:letterSpacing">0.03</item>
-    </style>
-
+    <!-- Body: Paragraph text, descriptions -->
     <style name="Text.Body">
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">15sp</item>
@@ -77,6 +94,7 @@
         <item name="android:textColor">@color/color_text_secondary</item>
     </style>
 
+    <!-- BodyBold: Emphasized body text -->
     <style name="Text.BodyBold">
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">15sp</item>
@@ -84,6 +102,41 @@
         <item name="android:textColor">@color/color_text_primary</item>
     </style>
 
+    <!-- Link: Tappable text links -->
+    <style name="Text.Link">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:textColor">@color/color_primary_purple</item>
+    </style>
+
+    <!-- Chip: Tag labels, filter pills -->
+    <style name="Text.Chip">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">18sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+    </style>
+
+    <!-- SecondaryButton: Tertiary action labels -->
+    <style name="Text.SecondaryButton">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">18sp</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
+    </style>
+
+    <!-- SectionHeader: ALL-CAPS group dividers -->
+    <style name="Text.SectionHeader">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:lineHeight">18sp</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
+        <item name="android:letterSpacing">0.06</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <!-- Caption: Timestamps, metadata, hints -->
     <style name="Text.Caption">
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">13sp</item>
@@ -91,23 +144,46 @@
         <item name="android:textColor">@color/color_text_tertiary</item>
     </style>
 
-    <style name="Text.Button">
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:letterSpacing">-0.012</item>
-        <item name="android:gravity">center</item>
+    <!-- RowSubtitle: List item secondary text -->
+    <style name="Text.RowSubtitle">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:lineHeight">18sp</item>
+        <item name="android:textColor">@color/color_text_tertiary</item>
     </style>
 
-    <style name="Text.Chip">
+    <!-- Helper: Form hints, contextual help -->
+    <style name="Text.Helper">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:lineHeight">18sp</item>
+        <item name="android:textColor">@color/color_text_tertiary</item>
+    </style>
+
+    <!-- Badge: Status indicators, counters -->
+    <style name="Text.Badge">
         <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:lineHeight">14sp</item>
+        <item name="android:letterSpacing">0.03</item>
+    </style>
+
+    <!-- Overline: Small labels above content -->
+    <style name="Text.Overline">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:lineHeight">14sp</item>
+        <item name="android:textColor">@color/color_text_tertiary</item>
+        <item name="android:letterSpacing">0.06</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <!-- Monospace: Seed words, addresses, technical data -->
+    <style name="Text.Mono">
+        <item name="android:fontFamily">monospace</item>
         <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">20sp</item>
         <item name="android:textColor">@color/color_text_primary</item>
-    </style>
-
-    <style name="Text.Link">
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textSize">15sp</item>
-        <item name="android:textColor">@color/color_primary_purple</item>
     </style>
 
     <!-- Base Widget Styles -->

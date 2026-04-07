@@ -36,15 +36,18 @@
     <dimen name="icon_size_large">48dp</dimen>
     <dimen name="icon_size_hero">56dp</dimen>
 
-    <!-- Typography Sizes -->
-    <dimen name="text_display_amount">52sp</dimen>
+    <!-- Typography Sizes (matches styles.xml type scale) -->
+    <dimen name="text_display_hero">64sp</dimen>
+    <dimen name="text_display_amount">48sp</dimen>
     <dimen name="text_heading1">24sp</dimen>
+    <dimen name="text_subtitle">18sp</dimen>
     <dimen name="text_title">17sp</dimen>
+    <dimen name="text_button">16sp</dimen>
     <dimen name="text_body">15sp</dimen>
-    <dimen name="text_caption">13sp</dimen>
-    <dimen name="text_button">17sp</dimen>
     <dimen name="text_chip">14sp</dimen>
+    <dimen name="text_caption">13sp</dimen>
     <dimen name="text_section_header">13sp</dimen>
+    <dimen name="text_badge">11sp</dimen>
 
     <!-- Margins -->
     <dimen name="margin_screen_horizontal">20dp</dimen>
