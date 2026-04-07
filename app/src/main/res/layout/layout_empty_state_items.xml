@@ -21,7 +21,7 @@
         <!-- Spacer for navigation area -->
         <View
             android:layout_width="match_parent"
-            android:layout_height="56dp" />
+            android:layout_height="@dimen/top_bar_height" />
 
         <!-- Animated Chip Ribbon Area -->
         <FrameLayout
@@ -131,18 +131,18 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_gravity="top|start"
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginTop="@dimen/space_s"
+        android:layout_marginStart="@dimen/space_s"
         android:elevation="10dp">
         
         <!-- Back Arrow (shown when from Settings → Items) -->
         <ImageButton
             android:id="@+id/empty_state_back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/common_back"
-            android:padding="12dp"
+            android:padding="@dimen/space_m"
             android:src="@drawable/ic_chevron_back"
             android:visibility="gone"
             app:tint="@color/empty_state_close_icon" />
@@ -150,11 +150,11 @@
         <!-- Close Button (shown when from Home → Items) -->
         <ImageButton
             android:id="@+id/empty_state_close_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/common_close"
-            android:padding="12dp"
+            android:padding="@dimen/space_m"
             android:src="@drawable/ic_close"
             android:visibility="visible"
             app:tint="@color/empty_state_close_icon" />

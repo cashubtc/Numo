@@ -11,10 +11,10 @@
     <LinearLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="8dp"
+        android:paddingHorizontal="@dimen/space_s"
         android:elevation="1dp"
         android:background="@color/color_bg_white"
         app:layout_constraintTop_toTopOf="parent">
@@ -54,16 +54,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- Hero Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="20dp"
-                android:paddingBottom="20dp">
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/margin_screen_horizontal"
+                android:paddingBottom="@dimen/margin_screen_horizontal">
 
                 <!-- Description -->
                 <TextView
@@ -87,9 +87,9 @@
                     android:id="@+id/names_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:paddingTop="28dp"
-                    android:paddingBottom="14dp"
+                    android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/basket_names_settings_presets_header"
                     android:textAppearance="@style/Text.SectionHeader"
                     android:visibility="gone"
@@ -125,18 +125,18 @@
                 style="@style/Widget.Button.Secondary.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="@dimen/space_m"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
                 android:text="@string/basket_names_settings_add_name"
                 android:drawableStart="@drawable/ic_add"
-                android:drawablePadding="8dp" />
+                android:drawablePadding="@dimen/space_s" />
 
             <!-- Example suggestions -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:paddingHorizontal="20dp"
+                android:layout_marginTop="@dimen/space_xl"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:text="@string/basket_names_settings_examples"
                 android:textSize="13sp"
                 android:textColor="@color/color_text_tertiary"
@@ -147,7 +147,7 @@
                 android:id="@+id/clear_all_button"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="@dimen/space_2xl"
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:clickable="true"

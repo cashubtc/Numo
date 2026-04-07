@@ -11,14 +11,14 @@
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
             <corners android:radius="26dp" />
-            <solid android:color="#1A2529" />
+            <solid android:color="@color/color_button_primary_pressed" />
         </shape>
     </item>
     <!-- Enabled state - 100% black -->
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="26dp" />
-            <solid android:color="#000000" />
+            <solid android:color="@color/black" />
         </shape>
     </item>
 </selector>

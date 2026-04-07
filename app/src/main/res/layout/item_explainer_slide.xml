@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingHorizontal="32dp"
+    android:paddingHorizontal="@dimen/space_2xl"
     android:clipToPadding="false"
     android:clipChildren="false">
 
@@ -50,7 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:layout_marginHorizontal="32dp"
+            android:layout_marginHorizontal="@dimen/space_2xl"
             android:scaleType="fitCenter"
             android:contentDescription="@null" />
 

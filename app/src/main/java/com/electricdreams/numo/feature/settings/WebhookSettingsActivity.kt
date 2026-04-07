@@ -114,7 +114,8 @@ class WebhookSettingsActivity : AppCompatActivity() {
                 getString(R.string.webhook_settings_auth_not_set)
             }
 
-            statusDot.setImageResource(R.drawable.bg_status_dot_gray)
+            statusDot.setImageResource(R.drawable.bg_status_dot)
+            statusDot.imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.GRAY)
             lifecycleScope.launch(Dispatchers.IO) {
                 var isReachable = false
                 try {
@@ -134,11 +135,12 @@ class WebhookSettingsActivity : AppCompatActivity() {
                 }
 
                 withContext(Dispatchers.Main) {
-                    if (isReachable) {
-                        statusDot.setImageResource(R.drawable.bg_status_dot_green)
+                    val tintColor = if (isReachable) {
+                        androidx.core.content.ContextCompat.getColor(this@WebhookSettingsActivity, R.color.color_success_green)
                     } else {
-                        statusDot.setImageResource(R.drawable.bg_status_dot_red)
+                        androidx.core.content.ContextCompat.getColor(this@WebhookSettingsActivity, R.color.color_error)
                     }
+                    statusDot.imageTintList = android.content.res.ColorStateList.valueOf(tintColor)
                 }
             }
 

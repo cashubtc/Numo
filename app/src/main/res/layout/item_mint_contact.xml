@@ -5,8 +5,8 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingVertical="14dp"
-    android:paddingHorizontal="20dp">
+    android:paddingVertical="@dimen/row_padding_vertical"
+    android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
     <!-- Method (label on left, takes space to push value right) -->
     <TextView
@@ -34,9 +34,9 @@
     <!-- Copy Button -->
     <ImageView
         android:id="@+id/copy_button"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="@dimen/icon_size_small"
+        android:layout_height="@dimen/icon_size_small"
+        android:layout_marginStart="@dimen/space_s"
         android:padding="4dp"
         android:src="@drawable/ic_copy"
         app:tint="@color/color_text_tertiary"

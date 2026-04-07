@@ -6,18 +6,18 @@
     android:gravity="center_horizontal"
     android:orientation="vertical"
     android:paddingVertical="40dp"
-    android:paddingHorizontal="24dp">
+    android:paddingHorizontal="@dimen/space_xl">
 
     <!-- Rounded square icon container -->
     <FrameLayout
-        android:layout_width="56dp"
-        android:layout_height="56dp"
+        android:layout_width="@dimen/icon_size_hero"
+        android:layout_height="@dimen/top_bar_height"
         android:background="@drawable/bg_empty_state_icon">
 
         <ImageView
             android:id="@+id/empty_state_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/icon_size_small"
+            android:layout_height="@dimen/icon_size_small"
             android:layout_gravity="center"
             app:tint="@color/color_text_tertiary" />
 
@@ -28,12 +28,10 @@
         android:id="@+id/empty_state_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:fontFamily="sans-serif-medium"
+        android:layout_marginTop="@dimen/space_l"
+        style="@style/Text.RowTitle"
         android:gravity="center"
-        android:letterSpacing="-0.012"
-        android:textColor="@color/color_text_primary"
-        android:textSize="15sp" />
+        android:letterSpacing="-0.012" />
 
     <!-- Description -->
     <TextView
@@ -41,12 +39,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:fontFamily="sans-serif"
+        style="@style/Text.RowSubtitle"
         android:gravity="center"
         android:lineSpacingMultiplier="1.5"
-        android:maxWidth="260dp"
-        android:textColor="@color/color_text_tertiary"
-        android:textSize="13sp" />
+        android:maxWidth="260dp" />
 
     <!-- Optional action button (hidden by default) -->
     <TextView
@@ -58,7 +54,7 @@
         android:drawablePadding="6dp"
         android:fontFamily="sans-serif-medium"
         android:gravity="center"
-        android:paddingHorizontal="20dp"
+        android:paddingHorizontal="@dimen/margin_screen_horizontal"
         android:paddingVertical="10dp"
         android:textColor="@color/color_text_secondary"
         android:textSize="13sp"

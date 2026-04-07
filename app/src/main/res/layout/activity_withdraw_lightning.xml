@@ -10,9 +10,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:background="@color/color_bg_white"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="@dimen/space_l"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
@@ -62,10 +62,10 @@
                 android:id="@+id/balance_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
                 android:layout_marginTop="20dp"
                 app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="@dimen/radius_card"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
@@ -75,7 +75,7 @@
                     android:background="@drawable/bg_hero_gradient"
                     android:gravity="center"
                     android:orientation="vertical"
-                    android:padding="24dp">
+                    android:padding="@dimen/space_xl">
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -91,7 +91,7 @@
                         android:id="@+id/balance_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="@dimen/space_s"
                         android:text="₿0"
                         android:textAppearance="@style/Text.DisplayAmount"
                         android:textColor="@color/color_text_primary"
@@ -110,7 +110,7 @@
                         android:id="@+id/mint_name_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="@dimen/space_s"
                         android:text="@string/withdraw_lightning_mint_name_label"
                         android:textAppearance="@style/Text.Caption"
                         android:textColor="@color/color_text_tertiary"
@@ -126,7 +126,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="@dimen/space_xl"
                 android:background="@drawable/bg_button_secondary_pill"
                 android:padding="5dp"
                 android:orientation="horizontal">
@@ -171,9 +171,9 @@
                     style="@style/Text.SectionHeader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
+                    android:layout_marginStart="@dimen/space_xl"
                     android:layout_marginTop="28dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="@dimen/space_m"
                     android:text="@string/auto_withdraw_section_destination" />
 
                 <!-- Invoice Card -->
@@ -181,7 +181,7 @@
                     android:id="@+id/invoice_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="20dp" />
+                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal" />
 
                 <!-- OR Divider -->
                 <LinearLayout
@@ -201,7 +201,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginHorizontal="@dimen/space_l"
                         android:text="@string/common_or"
                         android:textAppearance="@style/Text.Caption"
                         android:textColor="@color/color_text_tertiary"
@@ -222,7 +222,7 @@
                     android:id="@+id/address_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="20dp" />
+                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal" />
 
             </LinearLayout>
 
@@ -239,9 +239,9 @@
                     style="@style/Text.SectionHeader"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
+                    android:layout_marginStart="@dimen/space_xl"
                     android:layout_marginTop="28dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="@dimen/space_m"
                     android:text="@string/withdraw_tab_cashu" />
 
                 <!-- Amount Input Card -->
@@ -249,9 +249,9 @@
                     android:id="@+id/cashu_input_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
                     app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="16dp"
+                    app:cardCornerRadius="@dimen/radius_card"
                     app:cardElevation="0dp"
                     app:strokeWidth="0dp">
 
@@ -259,13 +259,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp">
+                        android:padding="@dimen/margin_screen_horizontal">
 
                         <!-- Amount Label -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="12dp"
+                            android:layout_marginBottom="@dimen/space_m"
                             android:fontFamily="sans-serif-medium"
                             android:text="@string/withdraw_lightning_amount_label"
                             android:textColor="@color/color_text_primary"
@@ -275,11 +275,11 @@
                             android:id="@+id/cashu_amount_input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
+                            android:layout_marginTop="@dimen/space_s"
                             android:background="@drawable/bg_input_pill"
                             android:hint="@string/withdraw_amount_placeholder"
                             android:inputType="number"
-                            android:minHeight="52dp"
+                            android:minHeight="@dimen/button_height"
                             android:padding="14dp"
                             android:textAppearance="@style/Text.Body"
                             android:textColor="@color/color_text_primary"
@@ -291,8 +291,8 @@
                             android:id="@+id/create_token_button"
                             style="@style/Widget.Button.Primary.Green"
                             android:layout_width="match_parent"
-                            android:layout_height="52dp"
-                            android:layout_marginTop="16dp"
+                            android:layout_height="@dimen/button_height"
+                            android:layout_marginTop="@dimen/space_l"
                             android:text="@string/withdraw_cashu_create_button"
                             android:textAllCaps="false"
                             android:textSize="17sp"
@@ -306,11 +306,11 @@
                     android:id="@+id/token_result_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
                     android:layout_marginTop="20dp"
-                    android:layout_marginBottom="24dp"
+                    android:layout_marginBottom="@dimen/space_xl"
                     app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="16dp"
+                    app:cardCornerRadius="@dimen/radius_card"
                     app:cardElevation="0dp"
                     app:strokeWidth="0dp"
                     android:visibility="gone">
@@ -319,14 +319,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="24dp"
+                        android:padding="@dimen/space_xl"
                         android:gravity="center">
 
                         <ImageView
                             android:id="@+id/token_qr_code"
                             android:layout_width="200dp"
                             android:layout_height="200dp"
-                            android:layout_marginBottom="16dp"/>
+                            android:layout_marginBottom="@dimen/space_l"/>
 
                         <TextView
                             android:id="@+id/token_text"
@@ -335,7 +335,7 @@
                             android:maxLines="2"
                             android:ellipsize="end"
                             android:background="@drawable/bg_input_pill"
-                            android:padding="12dp"
+                            android:padding="@dimen/space_m"
                             android:fontFamily="monospace"
                             android:textSize="12sp"
                             android:textColor="@color/color_text_secondary"/>
@@ -343,8 +343,8 @@
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/copy_token_button"
                             android:layout_width="match_parent"
-                            android:layout_height="56dp"
-                            android:layout_marginTop="16dp"
+                            android:layout_height="@dimen/top_bar_height"
+                            android:layout_marginTop="@dimen/space_l"
                             android:stateListAnimator="@null"
                             android:text="@string/withdraw_cashu_copy_token"
                             app:cornerRadius="28dp"

@@ -4,22 +4,22 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingTop="12dp"
-    android:paddingBottom="12dp">
+    android:paddingStart="@dimen/space_l"
+    android:paddingEnd="@dimen/space_l"
+    android:paddingTop="@dimen/space_m"
+    android:paddingBottom="@dimen/space_m">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/mint_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/icon_size_medium"
+        android:layout_height="@dimen/icon_size_medium"
         android:scaleType="centerCrop" />
 
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="@dimen/space_m"
         android:layout_marginEnd="10dp"
         android:orientation="vertical">
 
@@ -27,8 +27,7 @@
             android:id="@+id/mint_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="15sp"
-            android:fontFamily="sans-serif-medium"
+            style="@style/Text.RowTitle"
             android:textColor="@color/color_text_on_dark"
             android:maxLines="1"
             android:ellipsize="end" />

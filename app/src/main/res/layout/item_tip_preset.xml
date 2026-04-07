@@ -2,20 +2,20 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="56dp"
+    android:layout_height="@dimen/top_bar_height"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingStart="16dp"
-    android:paddingEnd="8dp"
+    android:paddingStart="@dimen/space_l"
+    android:paddingEnd="@dimen/space_s"
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true">
 
     <!-- Tip icon -->
     <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginEnd="16dp"
+        android:layout_width="@dimen/icon_size_small"
+        android:layout_height="@dimen/icon_size_small"
+        android:layout_marginEnd="@dimen/space_l"
         android:src="@drawable/ic_tip"
         app:tint="@color/color_icon_secondary" />
 
@@ -33,8 +33,8 @@
     <!-- Delete button -->
     <ImageButton
         android:id="@+id/delete_button"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/icon_size_large"
+        android:layout_height="@dimen/icon_size_large"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_delete"
         android:contentDescription="Remove preset"

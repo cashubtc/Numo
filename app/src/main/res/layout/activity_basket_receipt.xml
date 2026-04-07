@@ -11,21 +11,21 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:background="@color/color_bg_white"
         android:elevation="1dp"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
+        android:paddingStart="@dimen/space_s"
+        android:paddingEnd="@dimen/space_s"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_chevron_back"
             android:contentDescription="@string/common_back"
-            android:padding="12dp"
+            android:padding="@dimen/space_m"
             app:tint="@color/color_text_primary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -44,12 +44,12 @@
 
         <ImageButton
             android:id="@+id/print_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_print"
             android:contentDescription="@string/basket_receipt_print_content_description"
-            android:padding="12dp"
+            android:padding="@dimen/space_m"
             app:tint="@color/color_primary_green"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -70,8 +70,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="24dp"
-            android:paddingBottom="32dp">
+            android:paddingTop="@dimen/space_xl"
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- Hero Section -->
             <LinearLayout
@@ -79,7 +79,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center_horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingHorizontal="@dimen/space_xl">
 
                 <!-- Receipt Icon -->
                 <FrameLayout
@@ -126,7 +126,7 @@
                     android:id="@+id/checkout_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/space_s"
                     android:textSize="14sp"
                     android:textColor="@color/color_text_secondary"
                     tools:text="Nov 26, 2024 at 2:30 PM" />
@@ -137,7 +137,7 @@
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
-                android:layout_marginHorizontal="24dp"
+                android:layout_marginHorizontal="@dimen/space_xl"
                 android:layout_marginTop="28dp"
                 android:background="@color/color_divider" />
 
@@ -146,8 +146,8 @@
                 android:id="@+id/items_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
+                android:layout_marginStart="@dimen/space_xl"
+                android:layout_marginEnd="@dimen/space_xl"
                 android:layout_marginTop="20dp"
                 android:textSize="12sp"
                 android:fontFamily="sans-serif-medium"
@@ -162,8 +162,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="12dp"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="@dimen/space_m"
+                android:layout_marginHorizontal="@dimen/space_l"
                 android:background="@drawable/bg_rounded_card_large"
                 android:clipChildren="false"
                 android:clipToPadding="false">
@@ -179,9 +179,9 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginTop="20dp"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginHorizontal="@dimen/space_l"
                 android:background="@drawable/bg_rounded_card_large"
-                android:padding="16dp">
+                android:padding="@dimen/space_l">
 
                 <!-- Subtotal Row (Net) -->
                 <LinearLayout
@@ -273,8 +273,8 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginBottom="14dp"
+                    android:layout_marginTop="@dimen/row_icon_gap"
+                    android:layout_marginBottom="@dimen/row_icon_gap"
                     android:background="@color/color_divider" />
 
                 <!-- Final Total Row -->
@@ -327,9 +327,9 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:layout_marginTop="20dp"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginHorizontal="@dimen/space_l"
                 android:background="@drawable/bg_rounded_card_large"
-                android:padding="16dp">
+                android:padding="@dimen/space_l">
 
                 <!-- Paid With Row -->
                 <LinearLayout

@@ -3,9 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingHorizontal="24dp"
-    android:paddingTop="16dp"
-    android:paddingBottom="8dp">
+    android:paddingHorizontal="@dimen/space_xl"
+    android:paddingTop="@dimen/space_l"
+    android:paddingBottom="@dimen/space_s">
 
     <CheckBox
         android:id="@+id/dont_show_again_checkbox"

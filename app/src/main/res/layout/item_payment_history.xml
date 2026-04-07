@@ -18,8 +18,8 @@
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/icon_size_small"
+            android:layout_height="@dimen/icon_size_small"
             android:src="@drawable/ic_delete"
             app:tint="@color/white" />
 
@@ -41,8 +41,8 @@
         android:foreground="?attr/selectableItemBackground"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:paddingHorizontal="24dp"
-        android:paddingVertical="16dp">
+        android:paddingHorizontal="@dimen/space_xl"
+        android:paddingVertical="@dimen/space_l">
 
         <!-- Icon container with status badge overlay -->
         <FrameLayout
@@ -57,8 +57,8 @@
 
             <!-- Main direction icon circle -->
             <FrameLayout
-                android:layout_width="40dp"
-                android:layout_height="40dp"
+                android:layout_width="@dimen/icon_size_medium"
+                android:layout_height="@dimen/icon_size_medium"
                 android:layout_gravity="center"
                 android:background="@drawable/bg_chip_circle"
                 android:backgroundTint="@color/color_bg_light">
@@ -94,8 +94,8 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="14dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginStart="@dimen/row_icon_gap"
+            android:layout_marginEnd="@dimen/space_l"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/amount_container"

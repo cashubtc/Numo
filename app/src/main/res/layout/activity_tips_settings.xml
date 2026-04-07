@@ -10,18 +10,18 @@
     <LinearLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="8dp"
+        android:paddingHorizontal="@dimen/space_s"
         android:elevation="1dp"
         android:background="@color/color_bg_white"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_chevron_back"
             android:contentDescription="@string/tips_settings_toolbar_back"
@@ -54,15 +54,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- Description -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="8dp"
+                android:paddingHorizontal="@dimen/settings_horizontal_padding"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_s"
                 android:text="@string/tips_settings_description"
                 android:textSize="14sp"
                 android:textColor="@color/color_text_secondary"
@@ -74,13 +74,13 @@
                 android:layout_height="72dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingHorizontal="24dp"
+                android:paddingHorizontal="@dimen/settings_horizontal_padding"
                 android:background="?attr/selectableItemBackground">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/space_l"
                     android:src="@drawable/ic_tip"
                     app:tint="@color/color_primary_green" />
 
@@ -113,21 +113,17 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="24dp"
-                    android:paddingTop="24dp"
-                    android:paddingBottom="8dp"
+                    android:paddingHorizontal="@dimen/settings_horizontal_padding"
+                    android:paddingTop="@dimen/space_xl"
+                    android:paddingBottom="@dimen/space_s"
                     android:text="@string/tips_settings_presets_header"
-                    android:textSize="13sp"
-                    android:textColor="@color/color_text_secondary"
-                    android:fontFamily="sans-serif-medium"
-                    android:textAllCaps="true"
-                    android:letterSpacing="0.05" />
+                    style="@style/Text.SectionHeader" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="24dp"
-                    android:paddingBottom="12dp"
+                    android:paddingHorizontal="@dimen/settings_horizontal_padding"
+                    android:paddingBottom="@dimen/space_m"
                     android:text="@string/tips_settings_presets_description"
                     android:textSize="13sp"
                     android:textColor="@color/color_text_tertiary" />
@@ -136,7 +132,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginHorizontal="@dimen/space_l"
                     android:orientation="vertical"
                     android:background="@drawable/bg_rounded_card_large">
 
@@ -153,20 +149,20 @@
                 <LinearLayout
                     android:id="@+id/add_preset_button"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginHorizontal="16dp"
+                    android:layout_height="@dimen/settings_item_height"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:layout_marginHorizontal="@dimen/space_l"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="16dp"
+                    android:paddingHorizontal="@dimen/space_l"
                     android:background="@drawable/bg_rounded_card_large"
                     android:clickable="true"
                     android:focusable="true">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginEnd="16dp"
+                        android:layout_width="@dimen/icon_size_small"
+                        android:layout_height="@dimen/icon_size_small"
+                        android:layout_marginEnd="@dimen/space_l"
                         android:src="@drawable/ic_add"
                         app:tint="@color/color_primary_green" />
 
@@ -183,8 +179,8 @@
                 <LinearLayout
                     android:id="@+id/reset_defaults_button"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="24dp"
+                    android:layout_height="@dimen/settings_item_height"
+                    android:layout_marginTop="@dimen/space_xl"
                     android:orientation="horizontal"
                     android:gravity="center"
                     android:clickable="true"

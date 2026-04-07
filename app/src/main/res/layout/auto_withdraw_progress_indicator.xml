@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="top|center_horizontal"
-    android:paddingHorizontal="16dp"
+    android:paddingHorizontal="@dimen/space_l"
     android:paddingTop="6dp"
     android:visibility="gone">
 
@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:background="@drawable/bg_dynamic_island"
         android:minHeight="44dp"
-        android:paddingHorizontal="14dp"
+        android:paddingHorizontal="@dimen/row_padding_vertical"
         android:paddingVertical="10dp">
 
         <!-- Leading Icon / Spinner -->
@@ -41,8 +41,8 @@
             <!-- Success Icon (hidden by default) -->
             <ImageView
                 android:id="@+id/success_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="@dimen/icon_size_small"
+                android:layout_height="@dimen/icon_size_small"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_check"
                 android:visibility="gone"
@@ -51,8 +51,8 @@
             <!-- Error Icon (hidden by default) -->
             <ImageView
                 android:id="@+id/error_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="@dimen/icon_size_small"
+                android:layout_height="@dimen/icon_size_small"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_close"
                 android:visibility="gone"

@@ -10,10 +10,10 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:background="@color/color_bg_white"
         android:elevation="1dp"
-        android:paddingHorizontal="8dp">
+        android:paddingHorizontal="@dimen/space_s">
 
         <ImageButton
             android:id="@+id/back_button"
@@ -64,20 +64,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingVertical="24dp">
+            android:paddingVertical="@dimen/space_xl">
 
             <!-- ==================== IMAGE SECTION ==================== -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="@dimen/space_xl"
                 android:gravity="center_horizontal"
                 android:orientation="vertical">
 
                 <androidx.cardview.widget.CardView
                     android:layout_width="100dp"
                     android:layout_height="100dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="@dimen/space_m"
                     app:cardCornerRadius="50dp"
                     app:cardElevation="0dp">
 
@@ -126,18 +126,18 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="20dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:paddingTop="28dp"
-                android:paddingBottom="14dp"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/item_entry_section_basic_information"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="24dp"
-                app:cardCornerRadius="12dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_xl"
+                app:cardCornerRadius="@dimen/radius_m"
                 app:cardElevation="0dp"
                 app:cardBackgroundColor="@android:color/transparent">
 
@@ -154,7 +154,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingHorizontal="20dp"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
                         android:minHeight="50dp">
 
                         <TextView
@@ -182,7 +182,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingHorizontal="20dp"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
                         android:minHeight="50dp">
 
                         <TextView
@@ -210,8 +210,8 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="top"
-                        android:paddingHorizontal="20dp"
-                        android:paddingVertical="12dp"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:paddingVertical="@dimen/space_m"
                         android:minHeight="80dp">
 
                         <TextView
@@ -241,18 +241,18 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="20dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:paddingTop="28dp"
-                android:paddingBottom="14dp"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/item_entry_section_category"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="12dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_s"
+                app:cardCornerRadius="@dimen/radius_m"
                 app:cardElevation="0dp"
                 app:cardBackgroundColor="@android:color/transparent">
 
@@ -282,7 +282,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="@dimen/space_m"
                         android:visibility="gone">
 
                         <EditText
@@ -293,7 +293,7 @@
                             android:background="@drawable/bg_input_field_rounded"
                             android:hint="@string/item_entry_hint_new_category"
                             android:inputType="textCapWords"
-                            android:paddingHorizontal="12dp"
+                            android:paddingHorizontal="@dimen/space_m"
                             android:textSize="15sp"
                             android:textColorHint="@color/color_text_tertiary" />
 
@@ -301,7 +301,7 @@
                             android:id="@+id/btn_confirm_category"
                             android:layout_width="44dp"
                             android:layout_height="44dp"
-                            android:layout_marginStart="8dp"
+                            android:layout_marginStart="@dimen/space_s"
                             android:background="@drawable/bg_circle_green"
                             android:contentDescription="@string/item_entry_category_confirm"
                             android:src="@drawable/ic_check"
@@ -311,7 +311,7 @@
                             android:id="@+id/btn_cancel_category"
                             android:layout_width="44dp"
                             android:layout_height="44dp"
-                            android:layout_marginStart="8dp"
+                            android:layout_marginStart="@dimen/space_s"
                             android:background="?attr/selectableItemBackgroundBorderless"
                             android:contentDescription="@string/item_entry_category_cancel"
                             android:src="@drawable/ic_close"
@@ -332,8 +332,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_xl"
                 android:text="@string/item_entry_category_helper"
                 android:textAppearance="@style/Text.Caption" />
 
@@ -341,18 +341,18 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="20dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:paddingTop="28dp"
-                android:paddingBottom="14dp"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/item_entry_section_pricing"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="12dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_s"
+                app:cardCornerRadius="@dimen/radius_m"
                 app:cardElevation="0dp"
                 app:cardBackgroundColor="@android:color/transparent">
 
@@ -367,7 +367,7 @@
                         android:id="@+id/price_type_toggle"
                         android:layout_width="match_parent"
                         android:layout_height="44dp"
-                        android:layout_marginBottom="16dp"
+                        android:layout_marginBottom="@dimen/space_l"
                         app:singleSelection="true"
                         app:selectionRequired="true">
 
@@ -410,17 +410,17 @@
                             android:textSize="24sp"
                             android:textColor="@color/color_text_primary"
                             android:fontFamily="sans-serif-medium"
-                            android:layout_marginEnd="8dp" />
+                            android:layout_marginEnd="@dimen/space_s" />
 
                         <EditText
                             android:id="@+id/item_price_input"
                             android:layout_width="0dp"
-                            android:layout_height="56dp"
+                            android:layout_height="@dimen/top_bar_height"
                             android:layout_weight="1"
                             android:background="@drawable/bg_input_field_rounded"
                             android:hint="@string/item_entry_hint_price_fiat"
                             android:inputType="numberDecimal"
-                            android:paddingHorizontal="16dp"
+                            android:paddingHorizontal="@dimen/space_l"
                             android:textSize="20sp"
                             android:textColor="@color/color_text_primary"
                             android:textColorHint="@color/color_text_tertiary"
@@ -433,7 +433,7 @@
                             android:text="@string/item_entry_currency_code_default"
                             android:textSize="15sp"
                             android:textColor="@color/color_text_secondary"
-                            android:layout_marginStart="8dp" />
+                            android:layout_marginStart="@dimen/space_s" />
                     </LinearLayout>
 
                     <!-- Bitcoin (Sats) Price Input -->
@@ -452,17 +452,17 @@
                             android:textSize="24sp"
                             android:textColor="@color/color_bitcoin_orange"
                             android:fontFamily="sans-serif-medium"
-                            android:layout_marginEnd="8dp" />
+                            android:layout_marginEnd="@dimen/space_s" />
 
                         <EditText
                             android:id="@+id/item_sats_input"
                             android:layout_width="0dp"
-                            android:layout_height="56dp"
+                            android:layout_height="@dimen/top_bar_height"
                             android:layout_weight="1"
                             android:background="@drawable/bg_input_field_rounded"
                             android:hint="@string/item_entry_hint_price_sats"
                             android:inputType="number"
-                            android:paddingHorizontal="16dp"
+                            android:paddingHorizontal="@dimen/space_l"
                             android:textSize="20sp"
                             android:textColor="@color/color_text_primary"
                             android:textColorHint="@color/color_text_tertiary"
@@ -474,7 +474,7 @@
                             android:text="@string/item_entry_label_sats"
                             android:textSize="15sp"
                             android:textColor="@color/color_text_secondary"
-                            android:layout_marginStart="8dp" />
+                            android:layout_marginStart="@dimen/space_s" />
                     </LinearLayout>
 
                 </LinearLayout>
@@ -485,10 +485,10 @@
                 android:id="@+id/vat_section_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_s"
                 android:visibility="visible"
-                app:cardCornerRadius="12dp"
+                app:cardCornerRadius="@dimen/radius_m"
                 app:cardElevation="0dp"
                 app:cardBackgroundColor="@android:color/transparent">
 
@@ -505,7 +505,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingHorizontal="20dp"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
                         android:minHeight="50dp">
 
                         <TextView
@@ -538,7 +538,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="20dp"
+                            android:paddingHorizontal="@dimen/margin_screen_horizontal"
                             android:minHeight="50dp">
 
                             <TextView
@@ -562,7 +562,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="20dp"
+                            android:paddingHorizontal="@dimen/margin_screen_horizontal"
                             android:minHeight="50dp">
 
                             <TextView
@@ -581,7 +581,7 @@
 
                                 <EditText
                                     android:id="@+id/vat_rate_input"
-                                    android:layout_width="48dp"
+                                    android:layout_width="@dimen/icon_size_large"
                                     android:layout_height="36dp"
                                     android:background="@null"
                                     android:gravity="center"
@@ -622,12 +622,12 @@
                 android:id="@+id/price_breakdown_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_s"
                 android:orientation="vertical"
                 android:visibility="gone"
                 android:background="@drawable/bg_price_breakdown"
-                android:padding="16dp">
+                android:padding="@dimen/space_l">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -637,7 +637,7 @@
                     android:textColor="@color/color_text_secondary"
                     android:textAllCaps="true"
                     android:letterSpacing="0.05"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginBottom="@dimen/space_m" />
 
                 <!-- Net Price Row -->
                 <LinearLayout
@@ -645,7 +645,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                    android:layout_marginBottom="@dimen/space_s">
 
                     <TextView
                         android:layout_width="0dp"
@@ -672,7 +672,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="@dimen/space_m">
 
                     <TextView
                         android:id="@+id/text_vat_label"
@@ -699,7 +699,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/color_divider"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginBottom="@dimen/space_m" />
 
                 <!-- Gross Price Row (Total) -->
                 <LinearLayout
@@ -733,8 +733,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_xl"
                 android:text="@string/item_entry_price_helper"
                 android:textAppearance="@style/Text.Caption" />
 
@@ -742,18 +742,18 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="20dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:paddingTop="28dp"
-                android:paddingBottom="14dp"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/item_entry_section_identification"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="12dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_s"
+                app:cardCornerRadius="@dimen/radius_m"
                 app:cardElevation="0dp"
                 app:cardBackgroundColor="@android:color/transparent">
 
@@ -771,8 +771,8 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingStart="20dp"
-                        android:paddingEnd="8dp"
+                        android:paddingStart="@dimen/margin_screen_horizontal"
+                        android:paddingEnd="@dimen/space_s"
                         android:minHeight="50dp">
 
                         <TextView
@@ -811,8 +811,8 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingStart="20dp"
-                        android:paddingEnd="20dp"
+                        android:paddingStart="@dimen/margin_screen_horizontal"
+                        android:paddingEnd="@dimen/margin_screen_horizontal"
                         android:minHeight="50dp">
 
                         <TextView
@@ -843,8 +843,8 @@
                 android:id="@+id/gtin_error_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_l"
                 android:text="@string/item_entry_error_gtin_exists"
                 android:textSize="13sp"
                 android:textColor="@color/color_warning_red"
@@ -855,8 +855,8 @@
                 android:id="@+id/sku_error_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_l"
                 android:text="@string/item_entry_error_sku_exists"
                 android:textSize="13sp"
                 android:textColor="@color/color_warning_red"
@@ -866,18 +866,18 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="20dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:paddingTop="28dp"
-                android:paddingBottom="14dp"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/item_entry_section_inventory"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="12dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_s"
+                app:cardCornerRadius="@dimen/radius_m"
                 app:cardElevation="0dp"
                 app:cardBackgroundColor="@android:color/transparent">
 
@@ -894,7 +894,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingHorizontal="20dp"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
                         android:minHeight="50dp">
 
                         <TextView
@@ -927,7 +927,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="20dp"
+                            android:paddingHorizontal="@dimen/margin_screen_horizontal"
                             android:minHeight="50dp">
 
                             <TextView
@@ -956,7 +956,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="20dp"
+                            android:paddingHorizontal="@dimen/margin_screen_horizontal"
                             android:minHeight="50dp">
 
                             <TextView
@@ -980,7 +980,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="20dp"
+                            android:paddingHorizontal="@dimen/margin_screen_horizontal"
                             android:minHeight="50dp"
                             android:visibility="gone">
 
@@ -1012,8 +1012,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="32dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_2xl"
                 android:text="@string/item_entry_inventory_helper"
                 android:textAppearance="@style/Text.Caption" />
 
@@ -1023,8 +1023,8 @@
                 style="@style/Widget.Numo.Button.Tertiary"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="32dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_2xl"
                 android:text="@string/item_entry_button_cancel"
                 android:textAppearance="@style/Text.Button"
                 android:textColor="@color/color_text_secondary" />

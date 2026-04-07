@@ -5,7 +5,7 @@
     android:id="@+id/month_header_text"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingHorizontal="24dp"
-    android:paddingTop="24dp"
-    android:paddingBottom="8dp"
+    android:paddingHorizontal="@dimen/space_xl"
+    android:paddingTop="@dimen/space_xl"
+    android:paddingBottom="@dimen/space_s"
     tools:text="March" />

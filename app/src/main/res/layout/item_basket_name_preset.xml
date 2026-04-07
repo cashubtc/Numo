@@ -5,8 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingVertical="14dp"
-    android:paddingHorizontal="20dp"
+    android:paddingVertical="@dimen/row_padding_vertical"
+    android:paddingHorizontal="@dimen/margin_screen_horizontal"
     android:background="@drawable/bg_row_ripple">
 
     <!-- Name Text -->
@@ -26,8 +26,8 @@
     <!-- Delete Button -->
     <ImageButton
         android:id="@+id/delete_button"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/icon_size_medium"
+        android:layout_height="@dimen/icon_size_medium"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_close"
         android:contentDescription="@string/common_delete"

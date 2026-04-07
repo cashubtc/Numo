@@ -11,18 +11,18 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:background="@color/color_bg_white"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="@dimen/space_l"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
             android:id="@+id/back_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:padding="12dp"
+            android:minWidth="@dimen/icon_size_large"
+            android:minHeight="@dimen/icon_size_large"
+            android:padding="@dimen/space_m"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/common_back"
             android:src="@drawable/ic_close"
@@ -43,9 +43,9 @@
 
         <ImageButton
             android:id="@+id/overflow_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:padding="12dp"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
+            android:padding="@dimen/space_m"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/transaction_detail_overflow_menu"
             android:src="@drawable/ic_more_vert"
@@ -63,8 +63,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_horizontal"
-        android:paddingTop="16dp"
-        android:paddingBottom="24dp"
+        android:paddingTop="@dimen/space_l"
+        android:paddingBottom="@dimen/space_xl"
         app:layout_constraintTop_toBottomOf="@id/top_bar">
 
         <!-- "Total Balance" label -->
@@ -105,7 +105,7 @@
         android:layout_height="0dp"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:paddingBottom="16dp"
+        android:paddingBottom="@dimen/space_l"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/balance_section" />
 

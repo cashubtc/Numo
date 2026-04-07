@@ -11,10 +11,10 @@
     <LinearLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="8dp"
+        android:paddingHorizontal="@dimen/space_s"
         android:background="@color/color_bg_white"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -54,16 +54,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- Hero Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="24dp">
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_xl">
 
                 <!-- Hero Card -->
                 <androidx.cardview.widget.CardView
@@ -71,7 +71,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="16dp"
+                    app:cardCornerRadius="@dimen/radius_card"
                     app:cardElevation="0dp">
 
                     <FrameLayout
@@ -111,7 +111,7 @@
                         <androidx.constraintlayout.widget.ConstraintLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:padding="24dp">
+                            android:padding="@dimen/space_xl">
 
                             <!-- Status badge (top-left) -->
                             <LinearLayout
@@ -147,7 +147,7 @@
                                 android:id="@+id/hero_content_row"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="12dp"
+                                android:layout_marginTop="@dimen/space_m"
                                 android:orientation="vertical"
                                 app:layout_constraintEnd_toEndOf="parent"
                                 app:layout_constraintStart_toStartOf="parent"
@@ -198,14 +198,14 @@
                     android:focusable="true"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingVertical="14dp"
-                    android:paddingHorizontal="20dp">
+                    android:paddingVertical="@dimen/row_padding_vertical"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                     <ImageView
                         android:id="@+id/toggle_icon"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginEnd="14dp"
+                        android:layout_width="@dimen/icon_size_small"
+                        android:layout_height="@dimen/icon_size_small"
+                        android:layout_marginEnd="@dimen/row_icon_gap"
                         android:src="@drawable/ic_autoplay"
                         app:tint="@color/color_icon_secondary" />
 
@@ -256,45 +256,43 @@
                     style="@style/Text.SectionHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:paddingTop="28dp"
-                    android:paddingBottom="14dp"
+                    android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/auto_withdraw_section_destination" />
 
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
                     app:cardBackgroundColor="@color/color_bg_white"
-                    app:cardCornerRadius="16dp"
+                    app:cardCornerRadius="@dimen/radius_card"
                     app:cardElevation="0dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="20dp">
+                        android:padding="@dimen/margin_screen_horizontal">
 
                         <!-- Lightning Address Label -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="12dp"
-                            android:fontFamily="sans-serif-medium"
+                            android:layout_marginBottom="@dimen/space_m"
                             android:text="@string/auto_withdraw_lightning_address_label"
-                            android:textColor="@color/color_text_primary"
-                            android:textSize="15sp" />
+                            style="@style/Text.RowTitle" />
 
                         <!-- Input Field -->
                         <EditText
                             android:id="@+id/lightning_address_input"
                             android:layout_width="match_parent"
-                            android:layout_height="56dp"
+                            android:layout_height="@dimen/settings_item_height"
                             android:background="@drawable/bg_input_pill"
                             android:fontFamily="sans-serif"
                             android:hint="@string/auto_withdraw_lightning_address_hint"
                             android:inputType="textEmailAddress"
-                            android:paddingHorizontal="20dp"
+                            android:paddingHorizontal="@dimen/margin_screen_horizontal"
                             android:textColor="@color/color_text_primary"
                             android:textColorHint="@color/color_text_tertiary"
                             android:textSize="16sp" />
@@ -303,7 +301,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
+                            android:layout_marginTop="@dimen/space_s"
                             android:alpha="0.7"
                             android:text="@string/auto_withdraw_lightning_address_helper"
                             android:textColor="@color/color_text_secondary"
@@ -320,17 +318,17 @@
                     style="@style/Text.SectionHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:paddingTop="28dp"
-                    android:paddingBottom="14dp"
+                    android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/auto_withdraw_section_trigger" />
 
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
                     app:cardBackgroundColor="@color/color_bg_white"
-                    app:cardCornerRadius="16dp"
+                    app:cardCornerRadius="@dimen/radius_card"
                     app:cardElevation="0dp">
 
                     <LinearLayout
@@ -345,7 +343,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
-                            android:padding="20dp">
+                            android:padding="@dimen/margin_screen_horizontal">
 
                             <LinearLayout
                                 android:layout_width="match_parent"
@@ -384,7 +382,7 @@
                                     android:layout_height="wrap_content"
                                     android:background="@drawable/bg_input_pill"
                                     android:fontFamily="sans-serif-medium"
-                                    android:paddingHorizontal="16dp"
+                                    android:paddingHorizontal="@dimen/space_l"
                                     android:paddingVertical="10dp"
                                     android:text="₿50,000"
                                     android:textColor="@color/color_text_primary"
@@ -401,7 +399,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
-                            android:padding="20dp">
+                            android:padding="@dimen/margin_screen_horizontal">
 
                             <LinearLayout
                                 android:layout_width="match_parent"
@@ -441,7 +439,7 @@
                                     android:background="@drawable/bg_input_pill"
                                     android:fontFamily="sans-serif-medium"
                                     android:minWidth="64dp"
-                                    android:paddingHorizontal="16dp"
+                                    android:paddingHorizontal="@dimen/space_l"
                                     android:paddingVertical="10dp"
                                     android:text="95%"
                                     android:textAlignment="center"
@@ -455,7 +453,7 @@
                                 android:id="@+id/percentage_slider"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="16dp"
+                                android:layout_marginTop="@dimen/space_l"
                                 android:stepSize="1"
                                 android:valueFrom="50"
                                 android:valueTo="98"
@@ -506,9 +504,9 @@
                     style="@style/Text.SectionHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:paddingTop="28dp"
-                    android:paddingBottom="14dp"
+                    android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/manual_withdraw_section_title" />
 
                 <LinearLayout
@@ -520,13 +518,13 @@
                     android:focusable="true"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingVertical="14dp"
-                    android:paddingHorizontal="20dp">
+                    android:paddingVertical="@dimen/row_padding_vertical"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginEnd="14dp"
+                        android:layout_width="@dimen/icon_size_small"
+                        android:layout_height="@dimen/icon_size_small"
+                        android:layout_marginEnd="@dimen/row_icon_gap"
                         android:src="@drawable/ic_arrow_down_receive"
                         app:tint="@color/color_icon_secondary" />
 
@@ -566,9 +564,9 @@
                     android:id="@+id/history_section_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:paddingTop="28dp"
-                    android:paddingBottom="14dp"
+                    android:paddingBottom="@dimen/row_padding_vertical"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -587,7 +585,7 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:fontFamily="sans-serif-medium"
-                        android:paddingHorizontal="8dp"
+                        android:paddingHorizontal="@dimen/space_s"
                         android:paddingVertical="4dp"
                         android:text="@string/auto_withdraw_see_all"
                         android:textColor="@color/color_bitcoin_orange"
@@ -600,9 +598,9 @@
                     android:id="@+id/history_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="20dp"
+                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
                     app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="16dp"
+                    app:cardCornerRadius="@dimen/radius_card"
                     app:cardElevation="0dp">
 
                     <!-- Empty State -->
@@ -617,7 +615,7 @@
                         android:layout_height="wrap_content"
                         android:clipToPadding="false"
                         android:nestedScrollingEnabled="false"
-                        android:paddingVertical="8dp"
+                        android:paddingVertical="@dimen/space_s"
                         android:visibility="gone"
                         tools:listitem="@layout/item_auto_withdraw_history" />
 

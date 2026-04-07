@@ -11,9 +11,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingStart="8dp"
-        android:paddingEnd="20dp"
-        android:paddingVertical="14dp"
+        android:paddingStart="@dimen/space_s"
+        android:paddingEnd="@dimen/margin_screen_horizontal"
+        android:paddingVertical="@dimen/row_padding_vertical"
         android:background="?attr/selectableItemBackground">
 
         <!-- Drag Handle -->
@@ -34,8 +34,8 @@
             android:id="@+id/image_container"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:layout_marginStart="8dp"
-            app:cardCornerRadius="12dp"
+            android:layout_marginStart="@dimen/space_s"
+            app:cardCornerRadius="@dimen/radius_m"
             app:cardElevation="0dp"
             app:cardBackgroundColor="@color/color_bg_secondary"
             app:layout_constraintStart_toEndOf="@id/drag_handle"
@@ -64,8 +64,8 @@
             android:id="@+id/text_content"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginStart="@dimen/space_l"
+            android:layout_marginEnd="@dimen/space_m"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/right_content"
@@ -101,8 +101,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:textColor="@color/color_text_tertiary"
-                android:textSize="13sp"
+                style="@style/Text.RowSubtitle"
                 android:visibility="gone"
                 tools:text="12 in stock"
                 tools:visibility="visible" />
@@ -146,7 +145,7 @@
                 android:id="@+id/chevron"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="@dimen/space_s"
                 android:src="@drawable/ic_chevron_forward"
                 app:tint="@color/color_icon_tertiary"
                 android:contentDescription="@string/item_product_chevron_more" />
@@ -164,18 +163,18 @@
 
             <ImageButton
                 android:id="@+id/edit_item_button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
+                android:layout_width="@dimen/icon_size_large"
+                android:layout_height="@dimen/icon_size_large"
+                android:padding="@dimen/space_m"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_edit"
                 android:visibility="gone" />
 
             <ImageButton
                 android:id="@+id/delete_item_button"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:padding="12dp"
+                android:layout_width="@dimen/icon_size_large"
+                android:layout_height="@dimen/icon_size_large"
+                android:padding="@dimen/space_m"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_delete"
                 android:visibility="gone" />

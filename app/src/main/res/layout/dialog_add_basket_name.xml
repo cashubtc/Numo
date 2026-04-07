@@ -12,17 +12,17 @@
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:paddingHorizontal="4dp">
 
         <!-- Close X Button (top-left) -->
         <ImageButton
             android:id="@+id/close_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/common_close"
-            android:padding="12dp"
+            android:padding="@dimen/space_m"
             android:src="@drawable/ic_close"
             app:tint="@color/color_text_secondary"
             app:layout_constraintStart_toStartOf="parent"
@@ -34,9 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/basket_names_dialog_add_title"
-            android:textSize="17sp"
-            android:textColor="@color/color_text_primary"
-            android:fontFamily="sans-serif-medium"
+            style="@style/Text.Title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -57,7 +55,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="20dp">
+        android:padding="@dimen/margin_screen_horizontal">
 
         <!-- Subtitle / Description -->
         <TextView
@@ -80,9 +78,9 @@
             <EditText
                 android:id="@+id/name_input"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="@dimen/button_height"
                 android:background="@null"
-                android:paddingHorizontal="16dp"
+                android:paddingHorizontal="@dimen/space_l"
                 android:hint="@string/basket_names_dialog_add_hint"
                 android:textSize="16sp"
                 android:textColor="@color/color_text_primary"
@@ -103,8 +101,8 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/save_button"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginHorizontal="20dp"
+        android:layout_height="@dimen/top_bar_height"
+        android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
         android:layout_marginBottom="20dp"
         android:text="@string/basket_names_dialog_add_button"
         android:textColor="@color/color_bg_white"

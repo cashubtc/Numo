@@ -4,7 +4,7 @@
     android:viewportWidth="24"
     android:viewportHeight="24">
     <path
-        android:fillColor="@color/selector_lightning_mint"
+        android:fillColor="@color/color_bitcoin_orange"
         android:pathData="M13,2L3,14h8l-1,8l10,-12h-8l1,-8z"/>
 </vector>
 

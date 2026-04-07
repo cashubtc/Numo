@@ -4,18 +4,15 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingBottom="8dp">
+    android:paddingBottom="@dimen/space_s">
 
     <TextView
         android:id="@+id/header_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:fontFamily="sans-serif-medium"
-        android:letterSpacing="0.05"
-        android:textAllCaps="true"
-        android:textColor="@color/color_text_on_dark"
-        android:textSize="13sp" />
+        style="@style/Text.SectionHeader"
+        android:textColor="@color/color_text_on_dark" />
 
     <TextView
         android:id="@+id/header_count"

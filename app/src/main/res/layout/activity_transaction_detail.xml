@@ -11,20 +11,20 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:background="@color/color_bg_white"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
+        android:paddingStart="@dimen/space_l"
+        android:paddingEnd="@dimen/space_l"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_chevron_back"
             android:contentDescription="@string/transaction_detail_toolbar_back"
-            android:padding="12dp"
+            android:padding="@dimen/space_m"
             app:tint="@color/color_text_primary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -43,12 +43,12 @@
 
         <ImageButton
             android:id="@+id/overflow_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_more_vert"
             android:contentDescription="@string/transaction_detail_overflow_menu"
-            android:padding="12dp"
+            android:padding="@dimen/space_m"
             app:tint="@color/color_text_primary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -68,8 +68,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="32dp"
-            android:paddingBottom="32dp">
+            android:paddingTop="@dimen/space_2xl"
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- Large Fiat Amount Display -->
             <TextView
@@ -112,7 +112,7 @@
                 style="@style/Text.Caption"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/space_l"
                 android:gravity="center"
                 tools:text="March 15, 2026 at 11:31 AM" />
 
@@ -121,9 +121,9 @@
                 style="@style/Text.SectionHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginStart="@dimen/space_xl"
+                android:layout_marginEnd="@dimen/space_xl"
+                android:layout_marginTop="@dimen/space_2xl"
                 android:text="@string/transaction_detail_section_transaction_details" />
 
             <!-- Transaction Type Row -->
@@ -133,14 +133,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp">
+                android:paddingStart="@dimen/space_xl"
+                android:paddingEnd="@dimen/space_xl"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_l">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_card"
                     app:tint="@color/color_text_secondary"
                     android:contentDescription="@null" />
@@ -150,7 +150,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginStart="16dp">
+                    android:layout_marginStart="@dimen/space_l">
 
                     <TextView
                         style="@style/Text.BodyBold"
@@ -177,15 +177,15 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
+                android:paddingStart="@dimen/space_xl"
+                android:paddingEnd="@dimen/space_xl"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_l"
                 android:visibility="gone">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_switch_currency"
                     app:tint="@color/color_text_secondary"
                     android:contentDescription="@null" />
@@ -195,7 +195,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginStart="16dp">
+                    android:layout_marginStart="@dimen/space_l">
 
                     <TextView
                         style="@style/Text.BodyBold"
@@ -222,14 +222,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp">
+                android:paddingStart="@dimen/space_xl"
+                android:paddingEnd="@dimen/space_xl"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_l">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_bank"
                     app:tint="@color/color_text_secondary"
                     android:contentDescription="@null" />
@@ -239,7 +239,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginStart="16dp">
+                    android:layout_marginStart="@dimen/space_l">
 
                     <TextView
                         style="@style/Text.BodyBold"
@@ -268,15 +268,15 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
+                android:paddingStart="@dimen/space_xl"
+                android:paddingEnd="@dimen/space_xl"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_l"
                 android:visibility="gone">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_arrow_up_send"
                     app:tint="@color/color_text_secondary"
                     android:contentDescription="@null" />
@@ -286,7 +286,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginStart="16dp">
+                    android:layout_marginStart="@dimen/space_l">
 
                     <TextView
                         style="@style/Text.BodyBold"
@@ -325,14 +325,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp">
+                android:paddingStart="@dimen/space_xl"
+                android:paddingEnd="@dimen/space_xl"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_l">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_document"
                     app:tint="@color/color_text_secondary"
                     android:contentDescription="@null" />
@@ -342,7 +342,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginStart="16dp">
+                    android:layout_marginStart="@dimen/space_l">
 
                     <TextView
                         android:id="@+id/detail_invoice_label"
@@ -382,15 +382,15 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
+                android:paddingStart="@dimen/space_xl"
+                android:paddingEnd="@dimen/space_xl"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_l"
                 android:visibility="gone">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_label"
                     app:tint="@color/color_text_secondary"
                     android:contentDescription="@null" />
@@ -400,7 +400,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginStart="16dp">
+                    android:layout_marginStart="@dimen/space_l">
 
                     <TextView
                         style="@style/Text.BodyBold"
@@ -428,9 +428,9 @@
                 style="@style/Widget.Button.Secondary.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginStart="@dimen/space_xl"
+                android:layout_marginEnd="@dimen/space_xl"
+                android:layout_marginTop="@dimen/space_xl"
                 android:gravity="center"
                 android:text="@string/transaction_detail_print_receipt"
                 android:textAllCaps="false"

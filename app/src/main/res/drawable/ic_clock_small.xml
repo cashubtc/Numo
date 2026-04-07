@@ -9,13 +9,13 @@
         android:pathData="M12,12m-9,0a9,9 0,1 1,18 0a9,9 0,1 1,-18 0"
         android:strokeWidth="3"
         android:fillColor="#00000000"
-        android:strokeColor="#FFFFFF" />
+        android:strokeColor="@color/white" />
     <!-- Clock hands - thick strokes -->
     <path
         android:pathData="M12,7L12,12L15.5,14"
         android:strokeWidth="3"
         android:fillColor="#00000000"
-        android:strokeColor="#FFFFFF"
+        android:strokeColor="@color/white"
         android:strokeLineCap="round"
         android:strokeLineJoin="round" />
 </vector>

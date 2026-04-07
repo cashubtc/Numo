@@ -18,8 +18,8 @@
         <!-- Header Row -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:paddingHorizontal="8dp">
+            android:layout_height="@dimen/top_bar_height"
+            android:paddingHorizontal="@dimen/space_s">
 
             <ImageButton
                 android:id="@+id/back_button"
@@ -54,8 +54,8 @@
                 android:textColor="@color/color_accent_blue"
                 android:textSize="15sp"
                 android:fontFamily="sans-serif-medium"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="8dp"
+                android:paddingHorizontal="@dimen/space_m"
+                android:paddingVertical="@dimen/space_s"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:visibility="gone"
                 tools:visibility="visible"
@@ -80,9 +80,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipToPadding="false"
-            android:paddingTop="12dp"
-            android:paddingBottom="24dp"
-            android:paddingHorizontal="16dp"
+            android:paddingTop="@dimen/space_m"
+            android:paddingBottom="@dimen/space_xl"
+            android:paddingHorizontal="@dimen/space_l"
             tools:listitem="@layout/item_saved_basket" />
 
         <!-- Empty State -->
@@ -92,7 +92,7 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:orientation="vertical"
-            android:padding="32dp"
+            android:padding="@dimen/space_2xl"
             android:visibility="gone"
             tools:visibility="visible">
 
@@ -103,7 +103,7 @@
                 android:textColor="@color/color_text_primary"
                 android:textSize="18sp"
                 android:fontFamily="sans-serif-medium"
-                android:paddingBottom="8dp" />
+                android:paddingBottom="@dimen/space_s" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -112,7 +112,7 @@
                 android:textColor="@color/color_text_secondary"
                 android:textSize="14sp"
                 android:gravity="center"
-                android:paddingHorizontal="16dp" />
+                android:paddingHorizontal="@dimen/space_l" />
 
         </LinearLayout>
 

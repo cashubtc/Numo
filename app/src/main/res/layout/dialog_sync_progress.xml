@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="24dp"
+    android:padding="@dimen/space_xl"
     android:background="@drawable/bg_bottom_sheet">
 
     <TextView
@@ -14,7 +14,7 @@
         android:textSize="20sp"
         android:textColor="@color/color_text_primary"
         android:fontFamily="sans-serif-medium"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="@dimen/space_l" />
 
     <TextView
         android:id="@+id/sync_progress_message"
@@ -23,13 +23,13 @@
         android:text="Syncing..."
         android:textSize="16sp"
         android:textColor="@color/color_text_secondary"
-        android:layout_marginBottom="24dp" />
+        android:layout_marginBottom="@dimen/space_xl" />
 
     <ProgressBar
         android:id="@+id/sync_progress_bar"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="@dimen/space_s"
         />
 </LinearLayout>

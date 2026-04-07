@@ -9,22 +9,22 @@
     <!-- Close Button (top-left) -->
     <ImageButton
         android:id="@+id/close_button"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_width="@dimen/icon_size_large"
+        android:layout_height="@dimen/icon_size_large"
+        android:layout_marginStart="@dimen/space_s"
+        android:layout_marginTop="@dimen/space_s"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/common_close"
-        android:padding="12dp"
+        android:padding="@dimen/space_m"
         android:src="@drawable/ic_close"
         app:tint="@color/color_text_secondary" />
 
     <!-- Icon (optional, hidden by default) -->
     <ImageView
         android:id="@+id/dialog_icon"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginStart="24dp"
+        android:layout_width="@dimen/icon_size_medium"
+        android:layout_height="@dimen/icon_size_medium"
+        android:layout_marginStart="@dimen/space_xl"
         android:layout_marginTop="4dp"
         android:visibility="gone"
         app:tint="@color/color_text_tertiary"
@@ -36,8 +36,8 @@
         android:id="@+id/dialog_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="24dp"
-        android:layout_marginTop="12dp"
+        android:paddingHorizontal="@dimen/space_xl"
+        android:layout_marginTop="@dimen/space_m"
         android:text="Confirm"
         android:textSize="22sp"
         android:textColor="@color/color_text_primary"
@@ -50,7 +50,7 @@
         android:id="@+id/dialog_subtitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="24dp"
+        android:paddingHorizontal="@dimen/space_xl"
         android:layout_marginTop="4dp"
         android:textSize="15sp"
         android:textColor="@color/color_text_tertiary"
@@ -63,8 +63,8 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="@dimen/space_l"
+        android:layout_marginHorizontal="@dimen/space_xl"
         android:background="@color/color_divider" />
 
     <!-- Message / Description -->
@@ -72,11 +72,9 @@
         android:id="@+id/dialog_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="24dp"
+        android:padding="@dimen/space_xl"
         android:text="Are you sure you want to proceed?"
-        android:textSize="15sp"
-        android:textColor="@color/color_text_secondary"
-        android:fontFamily="sans-serif"
+        style="@style/Text.Body"
         android:lineSpacingMultiplier="1.4"
         tools:text="Make &quot;Minibits mint&quot; your default mint?" />
 
@@ -85,17 +83,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingHorizontal="20dp"
-        android:paddingBottom="24dp">
+        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+        android:paddingBottom="@dimen/space_xl">
 
         <!-- Cancel Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/cancel_button"
             style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:layout_width="0dp"
-            android:layout_height="56dp"
+            android:layout_height="@dimen/top_bar_height"
             android:layout_weight="1"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="@dimen/space_s"
             android:text="@string/common_cancel"
             android:textColor="@color/color_text_primary"
             android:textSize="16sp"
@@ -114,9 +112,9 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/confirm_button"
             android:layout_width="0dp"
-            android:layout_height="56dp"
+            android:layout_height="@dimen/top_bar_height"
             android:layout_weight="1"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="@dimen/space_s"
             android:text="@string/common_confirm"
             android:textColor="@color/color_bg_white"
             android:textSize="16sp"

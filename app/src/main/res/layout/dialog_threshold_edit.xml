@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:padding="@dimen/space_xl">
 
     <TextView
         android:layout_width="wrap_content"
@@ -11,7 +11,7 @@
         android:text="@string/auto_withdraw_threshold_subtitle"
         android:textColor="@color/color_text_secondary"
         android:textSize="14sp"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="@dimen/space_l" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,8 +19,8 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:background="@drawable/bg_input_pill"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="12dp">
+        android:paddingHorizontal="@dimen/space_l"
+        android:paddingVertical="@dimen/space_m">
 
         <TextView
             android:layout_width="wrap_content"
@@ -29,7 +29,7 @@
             android:textSize="20sp"
             android:textColor="@color/color_text_primary"
             android:fontFamily="sans-serif-medium"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="@dimen/space_s" />
 
         <EditText
             android:id="@+id/threshold_edit_text"
@@ -50,7 +50,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/space_s"
         android:text="Min: ₿1,000 • Max: ₿1,000,000"
         android:textColor="@color/color_text_tertiary"
         android:textSize="12sp" />

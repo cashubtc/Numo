@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingHorizontal="16dp"
+    android:paddingHorizontal="@dimen/space_l"
     android:paddingVertical="10dp"
     android:background="?attr/selectableItemBackground">
 
@@ -29,8 +29,8 @@
         android:id="@+id/text_content"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
+        android:layout_marginStart="@dimen/space_m"
+        android:layout_marginEnd="@dimen/space_m"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/item_total"
@@ -43,9 +43,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textColor="@color/color_text_primary"
-            android:textSize="15sp"
-            android:fontFamily="sans-serif-medium"
+            style="@style/Text.RowTitle"
             tools:text="Classic T-Shirt" />
 
         <TextView
@@ -54,8 +52,7 @@
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textColor="@color/color_text_tertiary"
-            android:textSize="13sp"
+            style="@style/Text.RowSubtitle"
             android:visibility="gone"
             tools:text="Medium / Navy Blue"
             tools:visibility="visible" />
@@ -79,8 +76,8 @@
         android:id="@+id/remove_button"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        android:layout_marginStart="8dp"
-        android:padding="8dp"
+        android:layout_marginStart="@dimen/space_s"
+        android:padding="@dimen/space_s"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="Remove item"
         android:src="@drawable/ic_close"

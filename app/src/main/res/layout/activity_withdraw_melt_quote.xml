@@ -9,9 +9,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:background="@color/color_bg_white"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="@dimen/space_l"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
@@ -50,15 +50,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- Summary Text -->
             <TextView
                 android:id="@+id/summary_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginTop="@dimen/space_xl"
                 android:gravity="center"
                 android:text="@string/withdraw_melt_summary"
                 android:textAppearance="@style/Text.Body"
@@ -69,10 +69,10 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginTop="@dimen/space_xl"
                 app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="@dimen/radius_card"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
@@ -80,7 +80,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/margin_screen_horizontal">
 
                         <TextView
                             style="@style/Text.SectionHeader"
@@ -94,9 +94,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="@string/withdraw_melt_destination_placeholder"
-                            android:textColor="@color/color_text_primary"
-                            android:textSize="15sp"
-                            android:fontFamily="sans-serif-medium" />
+                            style="@style/Text.RowTitle" />
 
                 </LinearLayout>
 
@@ -106,10 +104,10 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginTop="@dimen/space_l"
                 app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="@dimen/radius_card"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
@@ -117,7 +115,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp">
+                    android:padding="@dimen/margin_screen_horizontal">
 
                     <!-- Amount Row -->
                     <LinearLayout
@@ -130,18 +128,14 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/withdraw_melt_amount_label"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_secondary"
-                            android:textSize="15sp" />
+                            android:textAppearance="@style/Text.Body" />
 
                         <TextView
                             android:id="@+id/amount_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="₿0"
-                            android:textColor="@color/color_text_primary"
-                            android:textSize="15sp"
-                            android:fontFamily="sans-serif-medium" />
+                            style="@style/Text.RowTitle" />
 
                     </LinearLayout>
 
@@ -149,7 +143,7 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="@dimen/space_m"
                         android:orientation="horizontal">
 
                         <TextView
@@ -157,18 +151,14 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/withdraw_melt_fee_label"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_secondary"
-                            android:textSize="15sp" />
+                            android:textAppearance="@style/Text.Body" />
 
                         <TextView
                             android:id="@+id/fee_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="₿0"
-                            android:textColor="@color/color_text_primary"
-                            android:textSize="15sp"
-                            android:fontFamily="sans-serif-medium" />
+                            style="@style/Text.RowTitle" />
 
                     </LinearLayout>
 
@@ -176,7 +166,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginVertical="16dp"
+                        android:layout_marginVertical="@dimen/space_l"
                         android:background="@color/color_divider" />
 
                     <!-- Total Row -->
@@ -190,9 +180,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/withdraw_melt_total_label"
-                            android:textColor="@color/color_text_primary"
-                            android:textSize="15sp"
-                            android:fontFamily="sans-serif-medium" />
+                            style="@style/Text.RowTitle" />
 
                         <TextView
                             android:id="@+id/total_text"
@@ -213,8 +201,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginTop="@dimen/space_l"
                 android:gravity="center"
                 android:text="@string/withdraw_melt_fee_note"
                 android:textAppearance="@style/Text.Caption"
@@ -230,9 +218,9 @@
         android:id="@+id/confirm_button"
         style="@style/Widget.Button.Primary.Green"
         android:layout_width="match_parent"
-        android:layout_height="52dp"
+        android:layout_height="@dimen/button_height"
         android:layout_marginHorizontal="40dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="@dimen/space_xl"
         android:text="@string/withdraw_melt_title"
         android:textAllCaps="false"
         android:textSize="17sp"
@@ -251,19 +239,19 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- Lightning Icon -->
             <FrameLayout
-                android:layout_width="48dp"
-                android:layout_height="48dp"
+                android:layout_width="@dimen/icon_size_large"
+                android:layout_height="@dimen/icon_size_large"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="48dp"
+                android:layout_marginTop="@dimen/space_3xl"
                 android:background="@drawable/bg_processing_step_active">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_lightning_small"
                     android:tint="@color/color_bg_white" />
@@ -275,7 +263,7 @@
                 android:id="@+id/processing_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/space_l"
                 android:gravity="center"
                 android:text="@string/withdraw_processing_title"
                 android:textAppearance="@style/Text.Title"
@@ -286,8 +274,8 @@
                 android:id="@+id/processing_subtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginHorizontal="20dp"
+                android:layout_marginTop="@dimen/space_s"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
                 android:gravity="center"
                 android:text="@string/withdraw_processing_subtitle"
                 android:textAppearance="@style/Text.Body"
@@ -297,10 +285,10 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginTop="@dimen/space_xl"
                 app:cardBackgroundColor="@color/color_bg_card"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="@dimen/radius_card"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
@@ -308,7 +296,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:padding="20dp">
+                    android:padding="@dimen/margin_screen_horizontal">
 
                     <!-- Amount Column -->
                     <LinearLayout
@@ -329,16 +317,14 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:textColor="@color/color_text_primary"
-                            android:textSize="15sp"
-                            android:fontFamily="sans-serif-medium" />
+                            style="@style/Text.RowTitle" />
 
                     </LinearLayout>
 
                     <View
                         android:layout_width="1dp"
                         android:layout_height="match_parent"
-                        android:layout_marginHorizontal="16dp"
+                        android:layout_marginHorizontal="@dimen/space_l"
                         android:background="@color/color_divider" />
 
                     <!-- Destination Column -->
@@ -360,9 +346,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:textColor="@color/color_text_primary"
-                            android:textSize="15sp"
-                            android:fontFamily="sans-serif-medium" />
+                            style="@style/Text.RowTitle" />
 
                     </LinearLayout>
 
@@ -374,10 +358,10 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginTop="@dimen/space_l"
                 app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="@dimen/radius_card"
                 app:cardElevation="0dp"
                 app:strokeWidth="0dp">
 
@@ -385,7 +369,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp"
+                    android:padding="@dimen/margin_screen_horizontal"
                     android:animateLayoutChanges="true">
 
                     <!-- Spinner + Status -->
@@ -406,7 +390,7 @@
                             android:id="@+id/processing_status_text"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
+                            android:layout_marginStart="@dimen/space_l"
                             android:layout_weight="1"
                             android:text="@string/withdraw_processing_status_preparing"
                             android:textAppearance="@style/Text.BodyBold"
@@ -418,7 +402,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginVertical="16dp"
+                        android:layout_marginVertical="@dimen/space_l"
                         android:background="@color/color_divider" />
 
                     <!-- Step Indicators -->
@@ -445,7 +429,7 @@
                                 android:id="@+id/processing_step_preparing_label"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="12dp"
+                                android:layout_marginStart="@dimen/space_m"
                                 android:text="@string/withdraw_processing_step_preparing"
                                 android:textAppearance="@style/Text.Body"
                                 android:textColor="@color/color_text_primary" />
@@ -470,7 +454,7 @@
                                 android:id="@+id/processing_step_contacting_label"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="12dp"
+                                android:layout_marginStart="@dimen/space_m"
                                 android:text="@string/withdraw_processing_step_contacting"
                                 android:textAppearance="@style/Text.Body"
                                 android:textColor="@color/color_text_secondary"
@@ -496,7 +480,7 @@
                                 android:id="@+id/processing_step_settling_label"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="12dp"
+                                android:layout_marginStart="@dimen/space_m"
                                 android:text="@string/withdraw_processing_step_settling"
                                 android:textAppearance="@style/Text.Body"
                                 android:textColor="@color/color_text_secondary"
@@ -515,8 +499,8 @@
                 android:id="@+id/processing_hint_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginTop="@dimen/space_l"
                 android:gravity="center"
                 android:text="@string/withdraw_processing_hint"
                 android:textAppearance="@style/Text.Caption"

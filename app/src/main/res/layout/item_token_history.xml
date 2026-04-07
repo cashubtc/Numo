@@ -38,8 +38,8 @@
 
         <ImageButton
             android:id="@+id/copy_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/icon_size_medium"
+            android:layout_height="@dimen/icon_size_medium"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/token_history_copy"
             android:src="@drawable/ic_content_copy"
@@ -47,8 +47,8 @@
 
         <ImageButton
             android:id="@+id/open_with_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/icon_size_medium"
+            android:layout_height="@dimen/icon_size_medium"
             android:layout_marginStart="@dimen/space_xs"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/token_history_open_with"
@@ -57,8 +57,8 @@
 
         <ImageButton
             android:id="@+id/delete_button"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="@dimen/icon_size_medium"
+            android:layout_height="@dimen/icon_size_medium"
             android:layout_marginStart="@dimen/space_xs"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/token_history_delete"

@@ -11,15 +11,15 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="20dp"
-        android:paddingVertical="14dp">
+        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+        android:paddingVertical="@dimen/row_padding_vertical">
 
         <!-- Text Content -->
         <LinearLayout
             android:id="@+id/text_content"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="12dp"
+            android:layout_marginEnd="@dimen/space_m"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/right_content"
@@ -111,9 +111,9 @@
             <!-- Remove Button -->
             <ImageButton
                 android:id="@+id/remove_item_button"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_marginStart="8dp"
+                android:layout_width="@dimen/icon_size_medium"
+                android:layout_height="@dimen/icon_size_medium"
+                android:layout_marginStart="@dimen/space_s"
                 android:padding="10dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Remove item"
@@ -129,7 +129,7 @@
         android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="0.5dp"
-        android:layout_marginStart="20dp"
+        android:layout_marginStart="@dimen/margin_screen_horizontal"
         android:background="@color/color_divider" />
 
 </LinearLayout>

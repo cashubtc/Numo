@@ -9,9 +9,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:background="@color/color_bg_white"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="@dimen/space_l"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
@@ -50,15 +50,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- Section Header -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="14dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/language_settings_section_app_language"
                 android:textAppearance="@style/Text.SectionHeader" />
 
@@ -71,36 +71,36 @@
                 <RadioButton
                     android:id="@+id/radio_english"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="@dimen/settings_item_height"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
                     android:drawableEnd="@drawable/selector_radio_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:text="@string/language_settings_option_english"
                     android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_spanish"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="@dimen/settings_item_height"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
                     android:drawableEnd="@drawable/selector_radio_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:text="@string/language_settings_option_spanish"
                     android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_portuguese"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="@dimen/settings_item_height"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
                     android:drawableEnd="@drawable/selector_radio_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:text="@string/language_settings_option_portuguese"
                     android:textAppearance="@style/Text.RowTitle" />
 
@@ -111,8 +111,8 @@
                 android:id="@+id/current_language_summary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="16dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/space_l"
                 android:textSize="14sp"
                 android:textColor="@color/color_text_secondary" />
 

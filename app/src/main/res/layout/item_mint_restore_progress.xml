@@ -5,16 +5,16 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingVertical="12dp"
-    android:paddingHorizontal="16dp"
+    android:paddingVertical="@dimen/space_m"
+    android:paddingHorizontal="@dimen/space_l"
     android:background="@drawable/bg_seed_word"
-    android:layout_marginBottom="8dp">
+    android:layout_marginBottom="@dimen/space_s">
 
     <!-- Status Icon -->
     <FrameLayout
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_marginEnd="12dp">
+        android:layout_marginEnd="@dimen/space_m">
 
         <ProgressBar
             android:id="@+id/mint_spinner"
@@ -26,8 +26,8 @@
 
         <ImageView
             android:id="@+id/mint_status_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/icon_size_small"
+            android:layout_height="@dimen/icon_size_small"
             android:layout_gravity="center"
             android:visibility="gone" />
 

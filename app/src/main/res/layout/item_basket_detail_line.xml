@@ -4,15 +4,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingHorizontal="16dp"
-    android:paddingVertical="12dp">
+    android:paddingHorizontal="@dimen/space_l"
+    android:paddingVertical="@dimen/space_m">
 
     <!-- Quantity Badge - Rounded square with subtle background -->
     <TextView
         android:id="@+id/item_quantity"
         android:layout_width="28dp"
         android:layout_height="28dp"
-        android:background="@drawable/bg_quantity_badge_subtle"
+        android:background="@drawable/bg_quantity_badge"
         android:gravity="center"
         android:textColor="@color/color_text_primary"
         android:textSize="14sp"
@@ -27,8 +27,8 @@
         android:id="@+id/item_details"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="14dp"
-        android:layout_marginEnd="12dp"
+        android:layout_marginStart="@dimen/row_icon_gap"
+        android:layout_marginEnd="@dimen/space_m"
         android:orientation="vertical"
         app:layout_constraintStart_toEndOf="@id/item_quantity"
         app:layout_constraintEnd_toStartOf="@id/item_price"
@@ -54,8 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:textSize="13sp"
-            android:textColor="@color/color_text_tertiary"
+            style="@style/Text.RowSubtitle"
             android:ellipsize="end"
             android:maxLines="1"
             android:visibility="gone"

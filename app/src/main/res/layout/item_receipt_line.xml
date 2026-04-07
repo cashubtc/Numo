@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingHorizontal="16dp"
-    android:paddingVertical="14dp">
+    android:paddingHorizontal="@dimen/space_l"
+    android:paddingVertical="@dimen/row_padding_vertical">
 
     <!-- Main Item Row -->
     <LinearLayout
@@ -32,8 +32,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="12dp">
+            android:layout_marginStart="@dimen/space_m"
+            android:layout_marginEnd="@dimen/space_m">
 
             <!-- Item Name -->
             <TextView

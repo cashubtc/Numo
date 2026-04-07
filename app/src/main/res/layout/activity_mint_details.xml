@@ -9,10 +9,10 @@
     <LinearLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="8dp"
+        android:paddingHorizontal="@dimen/space_s"
         android:elevation="0dp"
         android:background="@color/color_bg_white"
         app:layout_constraintTop_toTopOf="parent">
@@ -49,8 +49,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="20dp"
-        android:paddingVertical="12dp"
+        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+        android:paddingVertical="@dimen/space_m"
         android:background="@color/color_error_bg"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/top_bar">
@@ -58,7 +58,7 @@
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginEnd="@dimen/space_m"
             android:src="@drawable/ic_warning"
             app:tint="@color/color_error" />
 
@@ -95,7 +95,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- ==================== -->
             <!-- HEADER SECTION (Hero Card) -->
@@ -103,8 +103,8 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                app:cardCornerRadius="16dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                app:cardCornerRadius="@dimen/radius_card"
                 app:cardBackgroundColor="@android:color/transparent"
                 app:cardElevation="0dp">
 
@@ -118,7 +118,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:gravity="center_horizontal"
-                        android:padding="24dp">
+                        android:padding="@dimen/space_xl">
 
                         <!-- Icon -->
                         <FrameLayout
@@ -147,11 +147,9 @@
                             android:id="@+id/mint_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
+                            android:layout_marginTop="@dimen/space_l"
                             android:text="Mint Name"
-                            android:textSize="24sp"
-                            android:textColor="@color/color_text_primary"
-                            android:fontFamily="sans-serif-medium"
+                            style="@style/Text.Heading1"
                             android:textAlignment="center" />
 
                         <!-- URL -->
@@ -161,8 +159,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="mint.example.com"
-                            android:textSize="13sp"
-                            android:textColor="@color/color_text_tertiary"
+                            style="@style/Text.RowSubtitle"
                             android:textAlignment="center" />
 
                         <!-- Balance Badge -->
@@ -170,8 +167,8 @@
                             android:id="@+id/balance_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="16dp"
-                            android:paddingHorizontal="20dp"
+                            android:layout_marginTop="@dimen/space_l"
+                            android:paddingHorizontal="@dimen/margin_screen_horizontal"
                             android:paddingVertical="10dp"
                             android:background="@drawable/bg_input_pill"
                             android:text="₿0"
@@ -184,10 +181,10 @@
                             android:id="@+id/lightning_badge"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
+                            android:layout_marginTop="@dimen/space_m"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="14dp"
+                            android:paddingHorizontal="@dimen/row_padding_vertical"
                             android:paddingVertical="6dp"
                             android:background="@drawable/bg_badge_lightning"
                             android:visibility="gone">
@@ -229,17 +226,17 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/Text.SectionHeader"
-                    android:paddingHorizontal="20dp"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="14dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                    android:paddingTop="@dimen/space_l"
+                    android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/mint_details_about" />
 
                 <TextView
                     android:id="@+id/description_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="14dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                    android:paddingVertical="@dimen/row_padding_vertical"
                     android:textSize="15sp"
                     android:textColor="@color/color_text_primary"
                     android:lineSpacingMultiplier="1.4" />
@@ -260,23 +257,23 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/Text.SectionHeader"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:paddingTop="28dp"
-                    android:paddingBottom="14dp"
+                    android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/mint_details_announcement" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingHorizontal="20dp"
-                    android:paddingVertical="14dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                    android:paddingVertical="@dimen/row_padding_vertical"
                     android:gravity="center_vertical">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginEnd="12dp"
+                        android:layout_width="@dimen/icon_size_small"
+                        android:layout_height="@dimen/icon_size_small"
+                        android:layout_marginEnd="@dimen/space_m"
                         android:src="@drawable/ic_info"
                         app:tint="@color/color_bitcoin_orange" />
 
@@ -306,9 +303,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/Text.SectionHeader"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:paddingTop="28dp"
-                    android:paddingBottom="14dp"
+                    android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/mint_details_details" />
 
                 <LinearLayout
@@ -323,8 +320,8 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingVertical="14dp"
-                        android:paddingHorizontal="20dp"
+                        android:paddingVertical="@dimen/row_padding_vertical"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
                         android:background="@drawable/bg_row_ripple"
                         android:clickable="true"
                         android:focusable="true">
@@ -349,7 +346,7 @@
                         <ImageView
                             android:layout_width="16dp"
                             android:layout_height="16dp"
-                            android:layout_marginStart="8dp"
+                            android:layout_marginStart="@dimen/space_s"
                             android:src="@drawable/ic_copy"
                             app:tint="@color/color_text_tertiary" />
 
@@ -360,7 +357,7 @@
                         android:id="@+id/url_divider"
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginStart="20dp"
+                        android:layout_marginStart="@dimen/margin_screen_horizontal"
                         android:background="@color/color_divider" />
 
                     <!-- Software Row -->
@@ -370,8 +367,8 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingVertical="14dp"
-                        android:paddingHorizontal="20dp"
+                        android:paddingVertical="@dimen/row_padding_vertical"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
                         android:visibility="gone">
 
                         <TextView
@@ -395,7 +392,7 @@
                         android:id="@+id/software_divider"
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:layout_marginStart="20dp"
+                        android:layout_marginStart="@dimen/margin_screen_horizontal"
                         android:background="@color/color_divider"
                         android:visibility="gone" />
 
@@ -406,8 +403,8 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingVertical="14dp"
-                        android:paddingHorizontal="20dp"
+                        android:paddingVertical="@dimen/row_padding_vertical"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
                         android:visibility="gone">
 
                         <TextView
@@ -444,9 +441,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/Text.SectionHeader"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:paddingTop="28dp"
-                    android:paddingBottom="14dp"
+                    android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/mint_details_contact" />
 
                 <LinearLayout
@@ -464,9 +461,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/Text.SectionHeader"
-                android:paddingHorizontal="20dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:paddingTop="28dp"
-                android:paddingBottom="14dp"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/mint_details_actions" />
 
             <LinearLayout
@@ -481,16 +478,16 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingVertical="14dp"
-                    android:paddingHorizontal="20dp"
+                    android:paddingVertical="@dimen/row_padding_vertical"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:background="@drawable/bg_row_ripple"
                     android:clickable="true"
                     android:focusable="true">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginEnd="16dp"
+                        android:layout_width="@dimen/icon_size_small"
+                        android:layout_height="@dimen/icon_size_small"
+                        android:layout_marginEnd="@dimen/space_l"
                         android:src="@drawable/ic_lightning_bolt"
                         app:tint="@color/color_icon_secondary" />
 
@@ -517,16 +514,16 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingVertical="14dp"
-                    android:paddingHorizontal="20dp"
+                    android:paddingVertical="@dimen/row_padding_vertical"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:background="@drawable/bg_row_ripple"
                     android:clickable="true"
                     android:focusable="true">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginEnd="16dp"
+                        android:layout_width="@dimen/icon_size_small"
+                        android:layout_height="@dimen/icon_size_small"
+                        android:layout_marginEnd="@dimen/space_l"
                         android:src="@drawable/ic_copy"
                         app:tint="@color/color_icon_secondary" />
 
@@ -552,16 +549,16 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingVertical="14dp"
-                    android:paddingHorizontal="20dp"
+                    android:paddingVertical="@dimen/row_padding_vertical"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:background="@drawable/bg_row_ripple"
                     android:clickable="true"
                     android:focusable="true">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginEnd="16dp"
+                        android:layout_width="@dimen/icon_size_small"
+                        android:layout_height="@dimen/icon_size_small"
+                        android:layout_marginEnd="@dimen/space_l"
                         android:src="@drawable/ic_trash"
                         app:tint="@color/color_error" />
 

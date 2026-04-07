@@ -5,8 +5,8 @@
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:background="@drawable/bg_seed_word"
-    android:paddingVertical="14dp"
-    android:paddingHorizontal="12dp"
+    android:paddingVertical="@dimen/row_padding_vertical"
+    android:paddingHorizontal="@dimen/space_m"
     android:layout_margin="4dp">
 
     <TextView
@@ -28,6 +28,6 @@
         android:textSize="15sp"
         android:textColor="@color/color_text_primary"
         android:fontFamily="monospace"
-        android:layout_marginStart="8dp" />
+        android:layout_marginStart="@dimen/space_s" />
 
 </LinearLayout>

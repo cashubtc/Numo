@@ -9,9 +9,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:background="@color/color_bg_white"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="@dimen/space_l"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
@@ -50,7 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- ================ -->
             <!-- TERMINAL SECTION -->
@@ -59,9 +59,9 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="14dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/settings_section_terminal"
                 android:textAppearance="@style/Text.SectionHeader" />
 
@@ -75,13 +75,13 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingVertical="14dp"
-                android:paddingHorizontal="20dp">
+                android:paddingVertical="@dimen/row_padding_vertical"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="14dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/row_icon_gap"
                     android:src="@drawable/ic_catalog"
                     app:tint="@color/color_icon_secondary" />
 
@@ -110,13 +110,13 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingVertical="14dp"
-                android:paddingHorizontal="20dp">
+                android:paddingVertical="@dimen/row_padding_vertical"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="14dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/row_icon_gap"
                     android:src="@drawable/ic_tip"
                     app:tint="@color/color_icon_secondary" />
 
@@ -145,13 +145,13 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingVertical="14dp"
-                android:paddingHorizontal="20dp">
+                android:paddingVertical="@dimen/row_padding_vertical"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="14dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/row_icon_gap"
                     android:src="@drawable/ic_shopping_bag"
                     app:tint="@color/color_icon_secondary" />
 
@@ -177,9 +177,9 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="20dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:paddingTop="28dp"
-                android:paddingBottom="14dp"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/settings_section_payments"
                 android:textAppearance="@style/Text.SectionHeader" />
 
@@ -193,13 +193,13 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingVertical="14dp"
-                android:paddingHorizontal="20dp">
+                android:paddingVertical="@dimen/row_padding_vertical"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="14dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/row_icon_gap"
                     android:src="@drawable/ic_switch_currency"
                     app:tint="@color/color_icon_secondary" />
 
@@ -228,13 +228,13 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingVertical="14dp"
-                android:paddingHorizontal="20dp">
+                android:paddingVertical="@dimen/row_padding_vertical"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="14dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/row_icon_gap"
                     android:src="@drawable/ic_bank"
                     app:tint="@color/color_icon_secondary" />
 
@@ -263,13 +263,13 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingVertical="14dp"
-                android:paddingHorizontal="20dp">
+                android:paddingVertical="@dimen/row_padding_vertical"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="14dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/row_icon_gap"
                     android:src="@drawable/ic_link"
                     app:tint="@color/color_icon_secondary" />
 
@@ -298,13 +298,13 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingVertical="14dp"
-                android:paddingHorizontal="20dp">
+                android:paddingVertical="@dimen/row_padding_vertical"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="14dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/row_icon_gap"
                     android:src="@drawable/ic_lightning_bolt"
                     app:tint="@color/color_icon_secondary" />
 
@@ -330,9 +330,9 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="20dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:paddingTop="28dp"
-                android:paddingBottom="14dp"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/settings_section_security"
                 android:textAppearance="@style/Text.SectionHeader" />
 
@@ -346,13 +346,13 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingVertical="14dp"
-                android:paddingHorizontal="20dp">
+                android:paddingVertical="@dimen/row_padding_vertical"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="14dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/row_icon_gap"
                     android:src="@drawable/ic_shield"
                     app:tint="@color/color_icon_secondary" />
 
@@ -378,9 +378,9 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="20dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:paddingTop="28dp"
-                android:paddingBottom="14dp"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/settings_section_general"
                 android:textAppearance="@style/Text.SectionHeader" />
 
@@ -394,13 +394,13 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingVertical="14dp"
-                android:paddingHorizontal="20dp">
+                android:paddingVertical="@dimen/row_padding_vertical"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="14dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/row_icon_gap"
                     android:src="@drawable/ic_language"
                     app:tint="@color/color_icon_secondary" />
 
@@ -429,13 +429,13 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingVertical="14dp"
-                android:paddingHorizontal="20dp">
+                android:paddingVertical="@dimen/row_padding_vertical"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="14dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/row_icon_gap"
                     android:src="@drawable/ic_dark_mode"
                     app:tint="@color/color_icon_secondary" />
 
@@ -464,13 +464,13 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingVertical="14dp"
-                android:paddingHorizontal="20dp">
+                android:paddingVertical="@dimen/row_padding_vertical"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="14dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/row_icon_gap"
                     android:src="@drawable/ic_info"
                     app:tint="@color/color_icon_secondary" />
 
@@ -503,9 +503,9 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:paddingTop="28dp"
-                    android:paddingBottom="14dp"
+                    android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/settings_section_developer"
                     android:textAppearance="@style/Text.SectionHeader" />
 
@@ -518,13 +518,13 @@
                     android:focusable="true"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingVertical="14dp"
-                    android:paddingHorizontal="20dp">
+                    android:paddingVertical="@dimen/row_padding_vertical"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginEnd="14dp"
+                        android:layout_width="@dimen/icon_size_small"
+                        android:layout_height="@dimen/icon_size_small"
+                        android:layout_marginEnd="@dimen/row_icon_gap"
                         android:src="@drawable/ic_settings"
                         app:tint="@color/color_icon_secondary" />
 

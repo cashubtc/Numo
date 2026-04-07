@@ -9,9 +9,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:background="@color/color_bg_white"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="@dimen/space_l"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
@@ -63,14 +63,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="@dimen/space_xl">
 
                 <!-- Warning Card -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp"
+                    android:padding="@dimen/margin_screen_horizontal"
                     android:background="@drawable/bg_warning_card">
 
                     <LinearLayout
@@ -80,9 +80,9 @@
                         android:gravity="center_vertical">
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_marginEnd="12dp"
+                            android:layout_width="@dimen/icon_size_small"
+                            android:layout_height="@dimen/icon_size_small"
+                            android:layout_marginEnd="@dimen/space_m"
                             android:src="@drawable/ic_warning"
                             app:tint="@color/color_error" />
 
@@ -98,7 +98,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="@dimen/space_s"
                         android:text="@string/restore_warning_body"
                         android:textSize="14sp"
                         android:textColor="@color/color_text_secondary"
@@ -111,7 +111,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="28dp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="@dimen/space_l"
                     android:text="@string/restore_seed_instruction_title"
                     android:textSize="15sp"
                     android:textColor="@color/color_text_secondary"
@@ -146,7 +146,7 @@
                     android:id="@+id/validation_status"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="@dimen/space_l"
                     android:gravity="center"
                     android:orientation="horizontal"
                     android:visibility="gone">
@@ -155,7 +155,7 @@
                         android:id="@+id/validation_icon"
                         android:layout_width="18dp"
                         android:layout_height="18dp"
-                        android:layout_marginEnd="8dp" />
+                        android:layout_marginEnd="@dimen/space_s" />
 
                     <TextView
                         android:id="@+id/validation_text"
@@ -172,14 +172,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp"
+            android:padding="@dimen/space_xl"
             android:background="@color/color_bg_white"
             android:elevation="8dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/continue_button"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="@dimen/top_bar_height"
                 android:stateListAnimator="@null"
                 android:text="@string/restore_seed_continue"
                 android:textSize="16sp"
@@ -214,19 +214,19 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:orientation="vertical"
-            android:paddingHorizontal="48dp"
+            android:paddingHorizontal="@dimen/space_3xl"
             android:gravity="center">
 
             <ProgressBar
                 android:layout_width="56dp"
-                android:layout_height="56dp"
+                android:layout_height="@dimen/top_bar_height"
                 android:indeterminate="true"
                 android:indeterminateTint="@color/color_text_primary" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="@dimen/space_xl"
                 android:text="@string/restore_fetching_title"
                 android:textSize="20sp"
                 android:textColor="@color/color_text_primary"
@@ -236,7 +236,7 @@
                 android:id="@+id/fetching_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/space_s"
                 android:text="@string/restore_fetching_status"
                 android:textSize="15sp"
                 android:textColor="@color/color_text_secondary"
@@ -267,7 +267,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="@dimen/space_xl">
 
                 <!-- Backup Status Card -->
                 <LinearLayout
@@ -276,14 +276,14 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:padding="16dp"
+                    android:padding="@dimen/space_l"
                     android:background="@drawable/bg_success_card">
 
                     <ImageView
                         android:id="@+id/backup_status_icon"
                         android:layout_width="28dp"
                         android:layout_height="28dp"
-                        android:layout_marginEnd="14dp"
+                        android:layout_marginEnd="@dimen/row_icon_gap"
                         android:src="@drawable/ic_cloud_done" />
 
                     <LinearLayout
@@ -330,7 +330,7 @@
                     android:id="@+id/mints_count_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="@dimen/space_m"
                     android:text="@string/restore_mints_count"
                     android:textSize="14sp"
                     android:textColor="@color/color_text_secondary" />
@@ -350,14 +350,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp"
+            android:padding="@dimen/space_xl"
             android:background="@color/color_bg_white"
             android:elevation="8dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/start_restore_button"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="@dimen/top_bar_height"
                 android:stateListAnimator="@null"
                 android:text="@string/restore_mints_start_button"
                 android:textSize="16sp"
@@ -395,21 +395,21 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:orientation="vertical"
-                android:paddingHorizontal="32dp"
-                android:paddingVertical="48dp"
+                android:paddingHorizontal="@dimen/space_2xl"
+                android:paddingVertical="@dimen/space_3xl"
                 android:gravity="center">
 
                 <ProgressBar
                     android:id="@+id/restore_progress_spinner"
                     android:layout_width="56dp"
-                    android:layout_height="56dp"
+                    android:layout_height="@dimen/top_bar_height"
                     android:indeterminate="true"
                     android:indeterminateTint="@color/color_text_primary" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="@dimen/space_xl"
                     android:text="@string/restore_progress_title"
                     android:textSize="20sp"
                     android:textColor="@color/color_text_primary"
@@ -419,7 +419,7 @@
                     android:id="@+id/restore_progress_status"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/space_s"
                     android:text="@string/restore_progress_status"
                     android:textSize="15sp"
                     android:textColor="@color/color_text_secondary"
@@ -430,7 +430,7 @@
                     android:id="@+id/mint_progress_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginTop="@dimen/space_2xl"
                     android:orientation="vertical"
                     android:visibility="gone" />
 
@@ -461,9 +461,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="32dp"
-                android:paddingTop="48dp"
-                android:paddingBottom="24dp"
+                android:paddingHorizontal="@dimen/space_2xl"
+                android:paddingTop="@dimen/space_3xl"
+                android:paddingBottom="@dimen/space_xl"
                 android:gravity="center_horizontal">
 
                 <ImageView
@@ -475,17 +475,15 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="@dimen/space_xl"
                     android:text="@string/restore_success_title"
-                    android:textSize="24sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium" />
+                    style="@style/Text.Heading1" />
 
                 <TextView
                     android:id="@+id/success_summary_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/space_s"
                     android:text="@string/restore_success_subtitle"
                     android:textSize="15sp"
                     android:textColor="@color/color_text_secondary"
@@ -496,7 +494,7 @@
                     android:id="@+id/balance_changes_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginTop="@dimen/space_2xl"
                     android:orientation="vertical" />
 
                 <View
@@ -508,7 +506,7 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/done_button"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="@dimen/top_bar_height"
                     android:stateListAnimator="@null"
                     android:text="@string/restore_success_done_button"
                     android:textSize="16sp"

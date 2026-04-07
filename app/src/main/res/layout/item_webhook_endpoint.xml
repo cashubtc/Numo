@@ -8,13 +8,13 @@
     android:focusable="true"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingVertical="14dp"
-    android:paddingHorizontal="20dp">
+    android:paddingVertical="@dimen/row_padding_vertical"
+    android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
     <ImageView
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginEnd="14dp"
+        android:layout_width="@dimen/icon_size_small"
+        android:layout_height="@dimen/icon_size_small"
+        android:layout_marginEnd="@dimen/row_icon_gap"
         android:src="@drawable/ic_link"
         app:tint="@color/color_icon_secondary" />
 
@@ -44,7 +44,8 @@
                 android:layout_width="8dp"
                 android:layout_height="8dp"
                 android:layout_marginEnd="6dp"
-                android:src="@drawable/bg_status_dot_gray" />
+                android:src="@drawable/bg_status_dot"
+                app:tint="#808080" />
 
             <TextView
                 android:id="@+id/endpoint_auth_status_text"
@@ -57,21 +58,21 @@
 
     <ImageButton
         android:id="@+id/edit_auth_button"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/icon_size_medium"
+        android:layout_height="@dimen/icon_size_medium"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/webhook_settings_edit_auth_key"
-        android:padding="8dp"
+        android:padding="@dimen/space_s"
         android:src="@drawable/ic_key"
         app:tint="@color/color_text_tertiary" />
 
     <ImageButton
         android:id="@+id/delete_button"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/icon_size_medium"
+        android:layout_height="@dimen/icon_size_medium"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/webhook_settings_delete_endpoint"
-        android:padding="8dp"
+        android:padding="@dimen/space_s"
         android:src="@drawable/ic_delete"
         app:tint="@color/color_text_tertiary" />
 

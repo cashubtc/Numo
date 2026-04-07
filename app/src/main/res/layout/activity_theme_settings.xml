@@ -9,9 +9,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/top_bar_height"
         android:background="@color/color_bg_white"
-        android:paddingHorizontal="16dp"
+        android:paddingHorizontal="@dimen/space_l"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
@@ -50,15 +50,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- Mode Section Header -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="14dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/theme_settings_section_mode"
                 android:textAppearance="@style/Text.SectionHeader" />
 
@@ -68,8 +68,8 @@
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingVertical="14dp"
-                android:paddingHorizontal="20dp"
+                android:paddingVertical="@dimen/row_padding_vertical"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:background="@drawable/bg_row_ripple">
 
                 <TextView
@@ -91,9 +91,9 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="20dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:paddingTop="28dp"
-                android:paddingBottom="14dp"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/theme_settings_section_app_theme"
                 android:textAppearance="@style/Text.SectionHeader" />
 
@@ -106,48 +106,48 @@
                 <RadioButton
                     android:id="@+id/radio_obsidian"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="@dimen/settings_item_height"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
                     android:drawableEnd="@drawable/selector_radio_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:text="@string/theme_settings_option_obsidian"
                     android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_bitcoin_orange"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="@dimen/settings_item_height"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
                     android:drawableEnd="@drawable/selector_radio_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:text="@string/theme_settings_option_bitcoin_orange"
                     android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_green"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="@dimen/settings_item_height"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
                     android:drawableEnd="@drawable/selector_radio_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:text="@string/theme_settings_option_green"
                     android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_white"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="@dimen/settings_item_height"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
                     android:drawableEnd="@drawable/selector_radio_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="20dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:text="@string/theme_settings_option_white"
                     android:textAppearance="@style/Text.RowTitle" />
             </RadioGroup>
