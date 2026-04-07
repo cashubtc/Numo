@@ -78,6 +78,7 @@ class SelectionItemsAdapter(
     }
 
     fun resetItemQuantity(itemId: String) {
+        val oldQuantities = HashMap(basketQuantities)
         basketQuantities.remove(itemId)
 
         // If it's a custom variation item with 0 quantity, remove it from the list
@@ -93,8 +94,6 @@ class SelectionItemsAdapter(
                 }
             }
         }
-        val oldQuantities = HashMap(basketQuantities)
-        oldQuantities[itemId] = 0 // was just removed
         val diffResult = DiffUtil.calculateDiff(ItemDiffCallback(items, oldQuantities, items, basketQuantities))
         diffResult.dispatchUpdatesTo(this)
     }
