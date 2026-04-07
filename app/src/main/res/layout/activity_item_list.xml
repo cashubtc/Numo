@@ -14,7 +14,7 @@
         android:layout_height="@dimen/top_bar_height"
         android:background="@color/color_bg_white"
         android:elevation="0dp"
-        android:paddingHorizontal="4dp">
+        android:paddingHorizontal="@dimen/space_xs">
 
         <ImageButton
             android:id="@+id/back_button"

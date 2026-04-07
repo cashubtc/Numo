@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/space_xl"
-        android:layout_marginBottom="4dp"
+        android:layout_marginBottom="@dimen/space_xs"
         android:text="@string/items_settings_section_title"
         android:textAppearance="@style/Text.SectionHeader" />
 
@@ -29,7 +29,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="@dimen/space_xs"
             android:text="@string/items_settings_description"
             android:textAppearance="@style/Text.Body" />
 

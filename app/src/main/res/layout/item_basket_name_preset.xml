@@ -31,7 +31,7 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_close"
         android:contentDescription="@string/common_delete"
-        android:padding="10dp"
+        android:padding="@dimen/space_m"
         app:tint="@color/color_icon_tertiary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"

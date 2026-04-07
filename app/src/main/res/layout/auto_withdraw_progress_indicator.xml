@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:layout_gravity="top|center_horizontal"
     android:paddingHorizontal="@dimen/space_l"
-    android:paddingTop="6dp"
+    android:paddingTop="@dimen/space_s"
     android:visibility="gone">
 
     <!-- Dynamic Island Container -->
@@ -18,7 +18,7 @@
         android:background="@drawable/bg_dynamic_island"
         android:minHeight="44dp"
         android:paddingHorizontal="@dimen/row_padding_vertical"
-        android:paddingVertical="10dp">
+        android:paddingVertical="@dimen/space_m">
 
         <!-- Leading Icon / Spinner -->
         <FrameLayout
@@ -65,8 +65,8 @@
             android:id="@+id/content_container"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginStart="@dimen/space_m"
+            android:layout_marginEnd="@dimen/space_m"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/trailing_container"

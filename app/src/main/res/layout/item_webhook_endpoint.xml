@@ -43,7 +43,7 @@
                 android:id="@+id/endpoint_status_dot"
                 android:layout_width="8dp"
                 android:layout_height="8dp"
-                android:layout_marginEnd="6dp"
+                android:layout_marginEnd="@dimen/space_s"
                 android:src="@drawable/bg_status_dot"
                 app:tint="#808080" />
 

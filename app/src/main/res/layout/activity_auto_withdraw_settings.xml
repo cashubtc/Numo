@@ -121,15 +121,15 @@
                                 android:background="@drawable/bg_status_pill_success"
                                 android:gravity="center"
                                 android:orientation="horizontal"
-                                android:paddingHorizontal="10dp"
-                                android:paddingVertical="4dp"
+                                android:paddingHorizontal="@dimen/space_m"
+                                android:paddingVertical="@dimen/space_xs"
                                 app:layout_constraintTop_toTopOf="parent"
                                 app:layout_constraintStart_toStartOf="parent">
                                 <View
                                     android:id="@+id/status_dot"
                                     android:layout_width="8dp"
                                     android:layout_height="8dp"
-                                    android:layout_marginEnd="6dp"
+                                    android:layout_marginEnd="@dimen/space_s"
                                     android:background="@drawable/bg_notification_dot"
                                     android:backgroundTint="@color/color_success_green" />
                                 <TextView
@@ -257,7 +257,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="28dp"
+                    android:paddingTop="@dimen/section_gap"
                     android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/auto_withdraw_section_destination" />
 
@@ -319,7 +319,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="28dp"
+                    android:paddingTop="@dimen/section_gap"
                     android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/auto_withdraw_section_trigger" />
 
@@ -383,7 +383,7 @@
                                     android:background="@drawable/bg_input_pill"
                                     android:fontFamily="sans-serif-medium"
                                     android:paddingHorizontal="@dimen/space_l"
-                                    android:paddingVertical="10dp"
+                                    android:paddingVertical="@dimen/space_m"
                                     android:text="₿50,000"
                                     android:textColor="@color/color_text_primary"
                                     android:textSize="16sp"
@@ -440,7 +440,7 @@
                                     android:fontFamily="sans-serif-medium"
                                     android:minWidth="64dp"
                                     android:paddingHorizontal="@dimen/space_l"
-                                    android:paddingVertical="10dp"
+                                    android:paddingVertical="@dimen/space_m"
                                     android:text="95%"
                                     android:textAlignment="center"
                                     android:textColor="@color/color_text_primary"
@@ -505,7 +505,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="28dp"
+                    android:paddingTop="@dimen/section_gap"
                     android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/manual_withdraw_section_title" />
 
@@ -565,7 +565,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="28dp"
+                    android:paddingTop="@dimen/section_gap"
                     android:paddingBottom="@dimen/row_padding_vertical"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
@@ -586,7 +586,7 @@
                         android:focusable="true"
                         android:fontFamily="sans-serif-medium"
                         android:paddingHorizontal="@dimen/space_s"
-                        android:paddingVertical="4dp"
+                        android:paddingVertical="@dimen/space_xs"
                         android:text="@string/auto_withdraw_see_all"
                         android:textColor="@color/color_bitcoin_orange"
                         android:textSize="14sp"

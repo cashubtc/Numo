@@ -12,7 +12,7 @@
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="@dimen/space_m"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="@dimen/margin_screen_horizontal"
         android:background="@drawable/bg_bottom_sheet_handle" />
 
     <!-- Header -->
@@ -35,7 +35,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="@dimen/space_xs"
         android:text="@string/mint_selection_subtitle"
             android:textAppearance="@style/Text.Body"
             android:textColor="@color/color_text_secondary"

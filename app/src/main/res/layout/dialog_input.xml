@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="@dimen/space_xl"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="@dimen/space_xs"
         android:text="Enter Value"
         android:textSize="22sp"
         android:textColor="@color/color_text_primary"
@@ -39,7 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="@dimen/space_xl"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="@dimen/space_xs"
         android:text="Enter a value below"
         android:textSize="15sp"
         android:textColor="@color/color_text_tertiary"
@@ -73,7 +73,7 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:background="@drawable/bg_input_field_rounded"
-            android:padding="4dp">
+            android:padding="@dimen/space_xs">
 
             <!-- Optional Prefix -->
             <TextView
@@ -85,7 +85,7 @@
                 android:textColor="@color/color_text_primary"
                 android:fontFamily="sans-serif-medium"
                 android:paddingStart="@dimen/space_l"
-                android:paddingEnd="4dp"
+                android:paddingEnd="@dimen/space_xs"
                 android:visibility="gone"
                 tools:visibility="visible" />
 
@@ -127,7 +127,7 @@
                 android:textSize="18sp"
                 android:textColor="@color/color_text_primary"
                 android:fontFamily="sans-serif-medium"
-                android:paddingStart="4dp"
+                android:paddingStart="@dimen/space_xs"
                 android:paddingEnd="@dimen/space_l"
                 android:visibility="gone"
                 tools:visibility="visible" />
@@ -140,7 +140,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_s"
-            android:layout_marginHorizontal="4dp"
+            android:layout_marginHorizontal="@dimen/space_xs"
             android:text="Min: 1,000 - Max: 1,000,000"
             android:textSize="13sp"
             android:textColor="@color/color_text_tertiary"
@@ -155,7 +155,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_bar_height"
         android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="@dimen/margin_screen_horizontal"
         android:layout_marginBottom="@dimen/space_xl"
         android:text="@string/common_save"
         android:textColor="@color/color_bg_white"

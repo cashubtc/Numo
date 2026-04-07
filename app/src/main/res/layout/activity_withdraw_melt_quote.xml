@@ -92,7 +92,7 @@
                             android:id="@+id/destination_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="@dimen/space_xs"
                             android:text="@string/withdraw_melt_destination_placeholder"
                             style="@style/Text.RowTitle" />
 
@@ -219,7 +219,7 @@
         style="@style/Widget.Button.Primary.Green"
         android:layout_width="match_parent"
         android:layout_height="@dimen/button_height"
-        android:layout_marginHorizontal="40dp"
+        android:layout_marginHorizontal="@dimen/space_2xl"
         android:layout_marginBottom="@dimen/space_xl"
         android:text="@string/withdraw_melt_title"
         android:textAllCaps="false"
@@ -316,7 +316,7 @@
                             android:id="@+id/processing_amount_value"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="@dimen/space_xs"
                             style="@style/Text.RowTitle" />
 
                     </LinearLayout>
@@ -345,7 +345,7 @@
                             android:id="@+id/processing_destination_value"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="@dimen/space_xs"
                             style="@style/Text.RowTitle" />
 
                     </LinearLayout>
@@ -417,7 +417,7 @@
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:paddingVertical="6dp">
+                            android:paddingVertical="@dimen/space_s">
 
                             <View
                                 android:id="@+id/processing_step_preparing_indicator"
@@ -442,7 +442,7 @@
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:paddingVertical="6dp">
+                            android:paddingVertical="@dimen/space_s">
 
                             <View
                                 android:id="@+id/processing_step_contacting_indicator"
@@ -468,7 +468,7 @@
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:paddingVertical="6dp">
+                            android:paddingVertical="@dimen/space_s">
 
                             <View
                                 android:id="@+id/processing_step_settling_indicator"

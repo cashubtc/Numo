@@ -35,7 +35,7 @@
             android:id="@+id/mint_url"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="@dimen/space_xs"
             android:text="mint.example.com"
             android:textColor="@color/color_text_secondary"
             android:textSize="14sp"

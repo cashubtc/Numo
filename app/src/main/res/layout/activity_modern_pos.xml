@@ -158,7 +158,7 @@
                     android:id="@+id/currency_switch_button"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:layout_marginStart="4dp"
+                    android:layout_marginStart="@dimen/space_xs"
                     android:background="@android:color/transparent"
                     android:clickable="false"
                     android:contentDescription="@string/pos_currency_switch_content_description"

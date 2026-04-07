@@ -79,7 +79,7 @@
                     android:id="@+id/basket_meta"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="@dimen/space_xs"
                     android:textColor="@color/color_text_tertiary"
                     android:textSize="12sp"
                     tools:text="6 items • Updated 5 min ago" />
@@ -105,7 +105,7 @@
                 <ImageView
                     android:layout_width="16dp"
                     android:layout_height="16dp"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="@dimen/space_xs"
                     android:layout_gravity="end"
                     android:src="@drawable/ic_chevron_right"
                     app:tint="@color/color_text_tertiary"

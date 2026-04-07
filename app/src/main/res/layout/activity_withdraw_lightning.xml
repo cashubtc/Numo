@@ -63,7 +63,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="@dimen/margin_screen_horizontal"
                 app:cardBackgroundColor="@android:color/transparent"
                 app:cardCornerRadius="@dimen/radius_card"
                 app:cardElevation="0dp"
@@ -102,7 +102,7 @@
                         android:id="@+id/fiat_balance_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="@dimen/space_xs"
                         android:textColor="@color/color_text_secondary"
                         android:textSize="16sp" />
 
@@ -172,7 +172,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/space_xl"
-                    android:layout_marginTop="28dp"
+                    android:layout_marginTop="@dimen/section_gap"
                     android:layout_marginBottom="@dimen/space_m"
                     android:text="@string/auto_withdraw_section_destination" />
 
@@ -187,8 +187,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="40dp"
-                    android:layout_marginVertical="20dp"
+                    android:layout_marginHorizontal="@dimen/space_2xl"
+                    android:layout_marginVertical="@dimen/margin_screen_horizontal"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -240,7 +240,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/space_xl"
-                    android:layout_marginTop="28dp"
+                    android:layout_marginTop="@dimen/section_gap"
                     android:layout_marginBottom="@dimen/space_m"
                     android:text="@string/withdraw_tab_cashu" />
 
@@ -307,7 +307,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="@dimen/margin_screen_horizontal"
                     android:layout_marginBottom="@dimen/space_xl"
                     app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="@dimen/radius_card"

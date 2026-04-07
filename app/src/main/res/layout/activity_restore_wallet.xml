@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:minWidth="44dp"
             android:minHeight="44dp"
-            android:padding="10dp"
+            android:padding="@dimen/space_m"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/onboarding_seed_toolbar_back"
             android:src="@drawable/ic_chevron_back"
@@ -110,7 +110,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="28dp"
+                    android:layout_marginTop="@dimen/section_gap"
                     android:layout_marginBottom="@dimen/space_l"
                     android:text="@string/restore_seed_instruction_title"
                     android:textSize="15sp"
@@ -126,7 +126,7 @@
                     app:columnCount="2"
                     app:rowCount="6"
                     app:useDefaultMargins="false"
-                    android:layout_marginHorizontal="4dp" />
+                    android:layout_marginHorizontal="@dimen/space_xs" />
 
                 <!-- Paste Button -->
                 <com.google.android.material.button.MaterialButton
@@ -134,7 +134,7 @@
                     style="@style/Widget.Numo.Button.Tertiary"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="@dimen/margin_screen_horizontal"
                     android:text="@string/restore_seed_paste_button"
                     android:textSize="15sp"
                     android:textColor="@color/color_text_primary"
@@ -317,8 +317,8 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="28dp"
-                    android:layout_marginBottom="4dp"
+                    android:layout_marginTop="@dimen/section_gap"
+                    android:layout_marginBottom="@dimen/space_xs"
                     android:text="@string/restore_mints_title"
                     android:textSize="13sp"
                     android:textColor="@color/color_text_tertiary"

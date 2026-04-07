@@ -178,7 +178,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="28dp"
+                android:paddingTop="@dimen/section_gap"
                 android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/settings_section_payments"
                 android:textAppearance="@style/Text.SectionHeader" />
@@ -331,7 +331,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="28dp"
+                android:paddingTop="@dimen/section_gap"
                 android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/settings_section_security"
                 android:textAppearance="@style/Text.SectionHeader" />
@@ -379,7 +379,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="28dp"
+                android:paddingTop="@dimen/section_gap"
                 android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/settings_section_general"
                 android:textAppearance="@style/Text.SectionHeader" />
@@ -504,7 +504,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="28dp"
+                    android:paddingTop="@dimen/section_gap"
                     android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/settings_section_developer"
                     android:textAppearance="@style/Text.SectionHeader" />

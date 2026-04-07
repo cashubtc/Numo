@@ -23,7 +23,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="@dimen/margin_screen_horizontal"
             android:paddingHorizontal="@dimen/space_xl"
             android:text="@string/onboarding_add_mint_sheet_title"
             android:textSize="20sp"
@@ -35,7 +35,7 @@
             android:id="@+id/mint_url_input"
             android:layout_width="match_parent"
             android:layout_height="@dimen/button_height"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="@dimen/margin_screen_horizontal"
             android:layout_marginHorizontal="@dimen/space_xl"
             android:hint="@string/onboarding_add_mint_url_hint"
             android:textSize="15sp"
@@ -87,7 +87,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="@dimen/space_m"
                     android:text="@string/onboarding_add_mint_loading"
                     android:textSize="15sp"
                     android:textColor="@color/color_text_secondary" />

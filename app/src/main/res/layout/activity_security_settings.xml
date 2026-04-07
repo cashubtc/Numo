@@ -164,7 +164,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="28dp"
+                android:paddingTop="@dimen/section_gap"
                 android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/security_settings_section_pin_protection"
                 android:textAppearance="@style/Text.SectionHeader" />
@@ -188,7 +188,7 @@
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:layout_marginEnd="10dp"
+                        android:layout_marginEnd="@dimen/space_m"
                         android:src="@drawable/ic_lock"
                         app:tint="@color/color_icon_security_green" />
 
@@ -367,7 +367,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="28dp"
+                android:paddingTop="@dimen/section_gap"
                 android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/security_settings_section_recovery"
                 android:textAppearance="@style/Text.SectionHeader" />

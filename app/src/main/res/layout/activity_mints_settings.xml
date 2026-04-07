@@ -308,7 +308,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="28dp"
+                android:paddingTop="@dimen/section_gap"
                 android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/mints_all_mints"
                 android:textAppearance="@style/Text.SectionHeader" />
@@ -409,7 +409,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="@dimen/space_xs"
                     android:text="@string/mints_empty_subtitle"
                     android:textColor="@color/color_text_tertiary"
                     android:textSize="14sp" />
@@ -424,7 +424,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="28dp"
+                android:paddingTop="@dimen/section_gap"
                 android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/mints_add_section"
                 android:textAppearance="@style/Text.SectionHeader" />

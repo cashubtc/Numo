@@ -129,7 +129,7 @@
                 android:id="@+id/welcome_tagline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="@dimen/margin_screen_horizontal"
                 android:text="@string/onboarding_welcome_tagline"
                 android:textSize="17sp"
                 android:lineHeight="24sp"
@@ -154,7 +154,7 @@
                 android:textColor="@color/numo_navy"
                 android:textAllCaps="false"
                 android:alpha="0"
-                android:paddingVertical="4dp"
+                android:paddingVertical="@dimen/space_xs"
                 app:cornerRadius="32dp"
                 app:backgroundTint="@color/color_bg_white" />
 
@@ -379,7 +379,7 @@
                         android:id="@+id/explainer_close_btn"
                         android:layout_width="44dp"
                         android:layout_height="44dp"
-                        android:padding="10dp"
+                        android:padding="@dimen/space_m"
                         android:src="@drawable/ic_close"
                         app:tint="@color/color_text_on_dark"
                         android:alpha="0.7"

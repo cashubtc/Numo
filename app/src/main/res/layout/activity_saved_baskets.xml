@@ -27,7 +27,7 @@
                 android:layout_height="44dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/saved_baskets_back"
-                android:padding="10dp"
+                android:padding="@dimen/space_m"
                 android:src="@drawable/ic_chevron_back"
                 app:tint="@color/color_text_primary"
                 app:layout_constraintBottom_toBottomOf="parent"

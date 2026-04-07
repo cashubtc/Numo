@@ -10,5 +10,5 @@
     android:maxLines="1"
     android:ellipsize="end"
     android:paddingHorizontal="@dimen/space_l"
-    android:paddingVertical="10dp"
+    android:paddingVertical="@dimen/space_m"
     tools:text="Table 5" />

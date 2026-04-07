@@ -92,7 +92,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="28dp"
+                android:paddingTop="@dimen/section_gap"
                 android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/theme_settings_section_app_theme"
                 android:textAppearance="@style/Text.SectionHeader" />

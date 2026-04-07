@@ -81,7 +81,7 @@
             style="@style/Text.DisplayAmount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="@dimen/space_xs"
             android:textColor="@color/color_text_primary"
             tools:text="$15.29" />
 

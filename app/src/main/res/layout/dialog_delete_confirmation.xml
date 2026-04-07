@@ -13,7 +13,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_bar_height"
-        android:paddingHorizontal="4dp">
+        android:paddingHorizontal="@dimen/space_xs">
 
         <!-- Close X Button (top-left) -->
         <ImageButton

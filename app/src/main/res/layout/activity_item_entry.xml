@@ -127,7 +127,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="28dp"
+                android:paddingTop="@dimen/section_gap"
                 android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/item_entry_section_basic_information"
                 android:textAppearance="@style/Text.SectionHeader" />
@@ -242,7 +242,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="28dp"
+                android:paddingTop="@dimen/section_gap"
                 android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/item_entry_section_category"
                 android:textAppearance="@style/Text.SectionHeader" />
@@ -342,7 +342,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="28dp"
+                android:paddingTop="@dimen/section_gap"
                 android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/item_entry_section_pricing"
                 android:textAppearance="@style/Text.SectionHeader" />
@@ -599,7 +599,7 @@
                                     android:text="%"
                                     android:textSize="16sp"
                                     android:textColor="@color/color_text_secondary"
-                                    android:layout_marginEnd="4dp" />
+                                    android:layout_marginEnd="@dimen/space_xs" />
 
                             </LinearLayout>
 
@@ -743,7 +743,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="28dp"
+                android:paddingTop="@dimen/section_gap"
                 android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/item_entry_section_identification"
                 android:textAppearance="@style/Text.SectionHeader" />
@@ -867,7 +867,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="28dp"
+                android:paddingTop="@dimen/section_gap"
                 android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/item_entry_section_inventory"
                 android:textAppearance="@style/Text.SectionHeader" />

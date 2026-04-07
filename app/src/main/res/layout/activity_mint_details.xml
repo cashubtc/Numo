@@ -157,7 +157,7 @@
                             android:id="@+id/mint_url"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="@dimen/space_xs"
                             android:text="mint.example.com"
                             style="@style/Text.RowSubtitle"
                             android:textAlignment="center" />
@@ -169,7 +169,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/space_l"
                             android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                            android:paddingVertical="10dp"
+                            android:paddingVertical="@dimen/space_m"
                             android:background="@drawable/bg_input_pill"
                             android:text="₿0"
                             android:textSize="18sp"
@@ -185,14 +185,14 @@
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
                             android:paddingHorizontal="@dimen/row_padding_vertical"
-                            android:paddingVertical="6dp"
+                            android:paddingVertical="@dimen/space_s"
                             android:background="@drawable/bg_badge_lightning"
                             android:visibility="gone">
 
                             <ImageView
                                 android:layout_width="16dp"
                                 android:layout_height="16dp"
-                                android:layout_marginEnd="6dp"
+                                android:layout_marginEnd="@dimen/space_s"
                                 android:src="@drawable/ic_lightning_bolt"
                                 app:tint="@color/color_bitcoin_orange" />
 
@@ -258,7 +258,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/Text.SectionHeader"
                     android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="28dp"
+                    android:paddingTop="@dimen/section_gap"
                     android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/mint_details_announcement" />
 
@@ -304,7 +304,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/Text.SectionHeader"
                     android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="28dp"
+                    android:paddingTop="@dimen/section_gap"
                     android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/mint_details_details" />
 
@@ -442,7 +442,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/Text.SectionHeader"
                     android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="28dp"
+                    android:paddingTop="@dimen/section_gap"
                     android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/mint_details_contact" />
 
@@ -462,7 +462,7 @@
                 android:layout_height="wrap_content"
                 android:textAppearance="@style/Text.SectionHeader"
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="28dp"
+                android:paddingTop="@dimen/section_gap"
                 android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/mint_details_actions" />
 

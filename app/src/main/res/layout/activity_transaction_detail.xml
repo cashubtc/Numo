@@ -86,7 +86,7 @@
                 android:id="@+id/detail_amount_subtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/space_xs"
                 android:gravity="center"
                 android:textSize="17sp"
                 android:fontFamily="sans-serif-medium"
@@ -98,7 +98,7 @@
                 android:id="@+id/detail_fiat_equivalent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="@dimen/space_xs"
                 android:gravity="center"
                 android:textSize="17sp"
                 android:fontFamily="sans-serif-medium"
@@ -312,7 +312,7 @@
                     android:layout_height="28dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_copy"
-                    android:padding="4dp"
+                    android:padding="@dimen/space_xs"
                     app:tint="@color/color_text_quaternary"
                     android:contentDescription="@string/transaction_detail_sent_to_label" />
 
@@ -369,7 +369,7 @@
                     android:layout_height="28dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_copy"
-                    android:padding="4dp"
+                    android:padding="@dimen/space_xs"
                     app:tint="@color/color_text_quaternary"
                     android:contentDescription="@string/transaction_detail_copy_invoice_hint" />
 

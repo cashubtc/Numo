@@ -78,7 +78,7 @@
                     android:id="@+id/version_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="@dimen/space_xs"
                     android:text="Version 1.0.0"
                     android:textSize="14sp"
                     android:textColor="@color/color_text_secondary"
@@ -215,7 +215,7 @@
             <LinearLayout
                 android:id="@+id/terms_item"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="@dimen/settings_item_height"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -249,7 +249,7 @@
             <LinearLayout
                 android:id="@+id/privacy_item"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="@dimen/settings_item_height"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -283,7 +283,7 @@
             <LinearLayout
                 android:id="@+id/website_item"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="@dimen/settings_item_height"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -330,7 +330,7 @@
             <LinearLayout
                 android:id="@+id/contact_item"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="@dimen/settings_item_height"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"

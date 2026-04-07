@@ -13,7 +13,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_bar_height"
-        android:paddingHorizontal="4dp">
+        android:paddingHorizontal="@dimen/space_xs">
 
         <!-- Close X Button (top-left) -->
         <ImageButton
@@ -70,10 +70,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="@dimen/margin_screen_horizontal"
             android:orientation="vertical"
             android:background="@drawable/bg_input_field_rounded"
-            android:padding="4dp">
+            android:padding="@dimen/space_xs">
 
             <EditText
                 android:id="@+id/basket_name_input"
@@ -103,7 +103,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_bar_height"
         android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="@dimen/margin_screen_horizontal"
         android:text="@string/dialog_rename_basket_save"
         android:textColor="@color/color_bg_white"
         android:textSize="16sp"

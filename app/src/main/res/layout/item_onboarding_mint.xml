@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:layout_marginStart="@dimen/space_m"
-        android:layout_marginEnd="10dp"
+        android:layout_marginEnd="@dimen/space_m"
         android:orientation="vertical">
 
         <TextView

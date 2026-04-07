@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:paddingVertical="40dp"
+    android:paddingVertical="@dimen/space_3xl"
     android:paddingHorizontal="@dimen/space_xl">
 
     <!-- Rounded square icon container -->
@@ -38,7 +38,7 @@
         android:id="@+id/empty_state_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
+        android:layout_marginTop="@dimen/space_xs"
         style="@style/Text.RowSubtitle"
         android:gravity="center"
         android:lineSpacingMultiplier="1.5"
@@ -49,13 +49,13 @@
         android:id="@+id/empty_state_action"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="@dimen/margin_screen_horizontal"
         android:background="@drawable/bg_empty_state_action_button"
-        android:drawablePadding="6dp"
+        android:drawablePadding="@dimen/space_s"
         android:fontFamily="sans-serif-medium"
         android:gravity="center"
         android:paddingHorizontal="@dimen/margin_screen_horizontal"
-        android:paddingVertical="10dp"
+        android:paddingVertical="@dimen/space_m"
         android:textColor="@color/color_text_secondary"
         android:textSize="13sp"
         android:visibility="gone" />
