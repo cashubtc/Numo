@@ -713,10 +713,19 @@ class PaymentRequestActivity : AppCompatActivity() {
                 }
             }
 
+            override fun onPaymentFailure(message: String) {
+                Log.e(TAG, "Nostr payment failure: $message")
+                // Atomically update Nostr identity ONLY on payment failure so retries won't hit the same event
+                nostrHandler?.rotateKeys(pendingPaymentId)
+                runOnUiThread {
+                    handlePaymentError("Nostr payment failed: $message")
+                }
+            }
+
             override fun onError(message: String) {
                 Log.e(TAG, "Nostr payment error: $message")
                 runOnUiThread {
-                    handlePaymentError("Nostr payment failed: $message")
+                    handlePaymentError("Nostr payment error: $message")
                 }
             }
         }

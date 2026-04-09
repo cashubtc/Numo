@@ -46,6 +46,7 @@ public final class NostrPaymentListener {
 
     public interface ErrorHandler {
         void onError(String message, Throwable t);
+        void onPaymentFailure(String message, Throwable t);
     }
 
     public NostrPaymentListener(byte[] secretKey32,
@@ -180,14 +181,14 @@ public final class NostrPaymentListener {
                 Log.e(TAG, "Redemption error for event from " + relayUrl + ": " + detail, e);
                 stop();
                 if (errorHandler != null) {
-                    errorHandler.onError(detail, e);
+                    errorHandler.onPaymentFailure(detail, e);
                 }
             } else {
                 String detail = re.getMessage() != null ? re.getMessage() : "Unknown error";
                 Log.e(TAG, "Unexpected runtime error during Nostr redemption from " + relayUrl + ": " + detail, re);
                 stop();
                 if (errorHandler != null) {
-                    errorHandler.onError(detail, re);
+                    errorHandler.onPaymentFailure(detail, re);
                 }
             }
         } catch (CashuPaymentHelper.RedemptionException e) {
@@ -195,14 +196,14 @@ public final class NostrPaymentListener {
             Log.e(TAG, "Redemption error for event from " + relayUrl + ": " + detail, e);
             stop();
             if (errorHandler != null) {
-                errorHandler.onError(detail, e);
+                errorHandler.onPaymentFailure(detail, e);
             }
         } catch (Exception e) {
             String detail = e.getMessage() != null ? e.getMessage() : "Unknown error";
             Log.e(TAG, "Error handling nostr event from " + relayUrl + ": " + detail, e);
             stop();
             if (errorHandler != null) {
-                errorHandler.onError(detail, e);
+                errorHandler.onPaymentFailure(detail, e);
             }
         }
     }
