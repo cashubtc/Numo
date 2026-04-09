@@ -33,6 +33,9 @@ class NostrPaymentHandler(
         /** Called when a Cashu token is received via Nostr */
         fun onTokenReceived(token: String)
         
+        /** Called when a payment attempt fails */
+        fun onPaymentFailure(message: String)
+        
         /** Called when an error occurs */
         fun onError(message: String)
     }
@@ -168,10 +171,48 @@ class NostrPaymentHandler(
             allowedMints,
             relayList,
             { token -> callback.onTokenReceived(token) },
-            { msg, t -> Log.e(TAG, "NostrPaymentListener error: $msg", t) }
+            object : NostrPaymentListener.ErrorHandler {
+                override fun onError(message: String, t: Throwable?) {
+                    Log.e(TAG, "NostrPaymentListener error: $message", t)
+                    callback.onError(message ?: t?.message ?: "Unknown Nostr payment error")
+                }
+
+                override fun onPaymentFailure(message: String, t: Throwable?) {
+                    Log.e(TAG, "NostrPaymentListener payment failure: $message", t)
+                    callback.onPaymentFailure(message ?: t?.message ?: "Unknown Nostr payment failure")
+                }
+            }
         ).also { it.start() }
 
         Log.d(TAG, "Nostr payment listener started")
+    }
+
+    /**
+     * Atomically rotates the Nostr identity keys for a pending payment so that
+     * if the payment fails and is retried, the paying wallet won't hit the
+     * same rejected event again.
+     * 
+     * @param pendingPaymentId The pending payment ID to update
+     */
+    fun rotateKeys(pendingPaymentId: String?) {
+        if (pendingPaymentId == null) return
+        
+        Log.d(TAG, "Rotating nostr keys for pending payment id=$pendingPaymentId")
+        // Generate new ephemeral keys
+        val eph = NostrKeyPair.generate()
+        keyPair = eph
+        
+        val profile = Nip19.encodeNprofile(eph.publicKeyBytes, NOSTR_RELAYS.toList())
+        nprofile = profile
+        secretHex = eph.hexSec
+
+        // Update the database immediately
+        PaymentsHistoryActivity.updatePendingWithNostrInfo(
+            context = context,
+            paymentId = pendingPaymentId,
+            nostrSecretHex = eph.hexSec,
+            nostrNprofile = profile,
+        )
     }
 
     /**
