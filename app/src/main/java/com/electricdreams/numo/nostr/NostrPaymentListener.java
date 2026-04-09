@@ -176,33 +176,25 @@ public final class NostrPaymentListener {
             Throwable cause = re.getCause();
             if (cause instanceof CashuPaymentHelper.RedemptionException) {
                 CashuPaymentHelper.RedemptionException e = (CashuPaymentHelper.RedemptionException) cause;
-                String detail = e.getMessage() != null ? e.getMessage() : "Unknown redemption error";
-                Log.e(TAG, "Redemption error for event from " + relayUrl + ": " + detail, e);
-                stop();
+                Log.e(TAG, "Redemption error for event from " + relayUrl + ": " + e.getMessage(), e);
                 if (errorHandler != null) {
-                    errorHandler.onError(detail, e);
+                    errorHandler.onError("PaymentRequestPayload redemption failed", e);
                 }
             } else {
-                String detail = re.getMessage() != null ? re.getMessage() : "Unknown error";
-                Log.e(TAG, "Unexpected runtime error during Nostr redemption from " + relayUrl + ": " + detail, re);
-                stop();
+                Log.e(TAG, "Unexpected runtime error during Nostr redemption from " + relayUrl + ": " + re.getMessage(), re);
                 if (errorHandler != null) {
-                    errorHandler.onError(detail, re);
+                    errorHandler.onError("Unexpected error during Nostr redemption", re);
                 }
             }
         } catch (CashuPaymentHelper.RedemptionException e) {
-            String detail = e.getMessage() != null ? e.getMessage() : "Unknown redemption error";
-            Log.e(TAG, "Redemption error for event from " + relayUrl + ": " + detail, e);
-            stop();
+            Log.e(TAG, "Redemption error for event from " + relayUrl + ": " + e.getMessage(), e);
             if (errorHandler != null) {
-                errorHandler.onError(detail, e);
+                errorHandler.onError("PaymentRequestPayload redemption failed", e);
             }
         } catch (Exception e) {
-            String detail = e.getMessage() != null ? e.getMessage() : "Unknown error";
-            Log.e(TAG, "Error handling nostr event from " + relayUrl + ": " + detail, e);
-            stop();
+            Log.e(TAG, "Error handling nostr event from " + relayUrl + ": " + e.getMessage(), e);
             if (errorHandler != null) {
-                errorHandler.onError(detail, e);
+                errorHandler.onError("nostr event handling failed", e);
             }
         }
     }

@@ -715,9 +715,14 @@ class PaymentRequestActivity : AppCompatActivity() {
 
             override fun onError(message: String) {
                 Log.e(TAG, "Nostr payment error: $message")
-                runOnUiThread {
-                    handlePaymentError("Nostr payment failed: $message")
-                }
+
+                // Show inline status and delegate to unified failure handling
+                statusText.text = getString(R.string.payment_request_status_error_generic, message)
+
+                // Treat this as a terminal failure for this payment request
+                // and show the global payment failure screen so the user can
+                // explicitly retry the latest pending payment.
+                handlePaymentError("Nostr payment failed: $message")
             }
         }
 

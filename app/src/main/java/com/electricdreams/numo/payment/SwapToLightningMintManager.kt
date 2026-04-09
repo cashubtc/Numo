@@ -201,13 +201,6 @@ object SwapToLightningMintManager {
                 "minFeeOverheadCeil=$minOverhead and feeReserveEstimate=$feeReserveEstimate"
         )
 
-        if (lightningAmount <= 0L) {
-            val msg = "Adjusted lightning amount is non-positive after fees (overhead=$minOverhead, feeReserve=$feeReserveEstimate, received=${paymentContext.amountSats})"
-            Log.e(TAG, msg)
-            try { tempWallet.close() } catch (_: Throwable) {}
-            return@withContext SwapResult.Failure(msg)
-        }
-
         Log.d(
             TAG,
             "swapFromUnknownMint: requesting Lightning mint quote: " +
