@@ -580,7 +580,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 history[index] = updated
 
                 val prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
+                prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).commit()
             }
         }
 
