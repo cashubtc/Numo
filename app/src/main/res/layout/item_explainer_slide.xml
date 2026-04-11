@@ -19,7 +19,7 @@
         android:fontFamily="sans-serif-black"
         android:textColor="@color/numo_fluorescent_green"
         android:textAllCaps="true"
-        android:letterSpacing="-0.035"
+        android:letterSpacing="-0.02"
         android:lineSpacingMultiplier="1.0" />
 
     <Space

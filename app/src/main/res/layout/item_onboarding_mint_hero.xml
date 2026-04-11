@@ -47,7 +47,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.05"
+                android:letterSpacing="0.06"
                 android:text="@string/onboarding_mints_hero_label"
                 android:textColor="@color/numo_fluorescent_green"
                 android:textSize="13sp"

@@ -218,7 +218,7 @@
                         android:textColor="@color/color_text_on_dark"
                         android:fontFamily="sans-serif-black"
                         android:textAllCaps="true"
-                        android:letterSpacing="-0.03"
+                        android:letterSpacing="-0.02"
                         android:gravity="center"
                         android:lineSpacingMultiplier="1.05" />
 
@@ -320,7 +320,7 @@
                                     android:fontFamily="sans-serif-black"
                                     android:textColor="@color/numo_navy"
                                     android:textAllCaps="true"
-                                    android:letterSpacing="-0.03"
+                                    android:letterSpacing="-0.02"
                                     android:lineSpacingMultiplier="1.05" />
 
                             </LinearLayout>
@@ -508,7 +508,7 @@
                 android:textColor="@color/color_text_on_dark"
                 android:fontFamily="sans-serif-black"
                 android:textAllCaps="true"
-                android:letterSpacing="-0.03"
+                android:letterSpacing="-0.02"
                 android:lineSpacingMultiplier="1.05" />
 
             <ScrollView
@@ -696,7 +696,7 @@
                 android:textColor="@color/color_text_on_dark"
                 android:fontFamily="sans-serif-black"
                 android:textAllCaps="true"
-                android:letterSpacing="-0.03"
+                android:letterSpacing="-0.02"
                 android:lineSpacingMultiplier="1.05" />
 
             <!-- Backup Status Card -->
@@ -932,9 +932,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/onboarding_success_balance_by_mint"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textColor="@color/color_onboarding_text_muted"
-                    android:letterSpacing="0.1"
+                    android:letterSpacing="0.06"
                     android:layout_marginBottom="@dimen/space_m" />
 
                 <LinearLayout

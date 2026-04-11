@@ -228,7 +228,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_xl"
                 android:text="@string/restore_fetching_title"
-                android:textSize="20sp"
+                android:textSize="22sp"
                 android:textColor="@color/color_text_primary"
                 android:fontFamily="sans-serif-medium" />
 
@@ -324,7 +324,7 @@
                     android:textColor="@color/color_text_tertiary"
                     android:fontFamily="sans-serif-medium"
                     android:textAllCaps="true"
-                    android:letterSpacing="0.05" />
+                    android:letterSpacing="0.06" />
 
                 <TextView
                     android:id="@+id/mints_count_text"
@@ -411,7 +411,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_xl"
                     android:text="@string/restore_progress_title"
-                    android:textSize="20sp"
+                    android:textSize="22sp"
                     android:textColor="@color/color_text_primary"
                     android:fontFamily="sans-serif-medium" />
 

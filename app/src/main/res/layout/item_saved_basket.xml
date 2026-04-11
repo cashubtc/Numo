@@ -81,7 +81,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_xs"
                     android:textColor="@color/color_text_tertiary"
-                    android:textSize="12sp"
+                    android:textSize="13sp"
                     tools:text="6 items • Updated 5 min ago" />
 
             </LinearLayout>

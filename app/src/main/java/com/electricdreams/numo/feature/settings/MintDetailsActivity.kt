@@ -74,10 +74,8 @@ class MintDetailsActivity : AppCompatActivity() {
     private lateinit var detailsSection: LinearLayout
     private lateinit var urlRow: View
     private lateinit var urlValue: TextView
-    private lateinit var urlDivider: View
     private lateinit var softwareRow: View
     private lateinit var softwareValue: TextView
-    private lateinit var softwareDivider: View
     private lateinit var versionRow: View
     private lateinit var versionValue: TextView
     private lateinit var contactSection: LinearLayout
@@ -85,7 +83,6 @@ class MintDetailsActivity : AppCompatActivity() {
     
     // Actions
     private lateinit var setLightningButton: LinearLayout
-    private lateinit var actionDivider1: View
     private lateinit var copyUrlButton: LinearLayout
     private lateinit var deleteButton: LinearLayout
 
@@ -168,17 +165,14 @@ class MintDetailsActivity : AppCompatActivity() {
         detailsSection = findViewById(R.id.details_section)
         urlRow = findViewById(R.id.url_row)
         urlValue = findViewById(R.id.url_value)
-        urlDivider = findViewById(R.id.url_divider)
         softwareRow = findViewById(R.id.software_row)
         softwareValue = findViewById(R.id.software_value)
-        softwareDivider = findViewById(R.id.software_divider)
         versionRow = findViewById(R.id.version_row)
         versionValue = findViewById(R.id.version_value)
         contactSection = findViewById(R.id.contact_section)
         contactContainer = findViewById(R.id.contact_container)
         
         setLightningButton = findViewById(R.id.set_lightning_button)
-        actionDivider1 = findViewById(R.id.action_divider_1)
         copyUrlButton = findViewById(R.id.copy_url_button)
         deleteButton = findViewById(R.id.delete_button)
     }
@@ -246,11 +240,9 @@ class MintDetailsActivity : AppCompatActivity() {
         if (isLightningMint) {
             lightningBadge.visibility = View.VISIBLE
             setLightningButton.visibility = View.GONE
-            actionDivider1.visibility = View.GONE
         } else {
             lightningBadge.visibility = View.GONE
             setLightningButton.visibility = View.VISIBLE
-            actionDivider1.visibility = View.VISIBLE
         }
     }
 
@@ -304,7 +296,6 @@ class MintDetailsActivity : AppCompatActivity() {
         descriptionSection.visibility = View.GONE
         motdSection.visibility = View.GONE
         softwareRow.visibility = View.GONE
-        softwareDivider.visibility = View.GONE
         versionRow.visibility = View.GONE
         contactSection.visibility = View.GONE
         contactContainer.removeAllViews()
@@ -329,18 +320,14 @@ class MintDetailsActivity : AppCompatActivity() {
         
         if (hasSoftware) {
             softwareRow.visibility = View.VISIBLE
-            softwareDivider.visibility = View.VISIBLE
             softwareValue.text = versionInfo?.name
         } else {
             softwareRow.visibility = View.GONE
-            softwareDivider.visibility = View.GONE
         }
-        
+
         if (hasVersion) {
             versionRow.visibility = View.VISIBLE
             versionValue.text = versionInfo?.version
-            // Only show URL divider if no software row above
-            urlDivider.visibility = View.VISIBLE
         } else {
             versionRow.visibility = View.GONE
         }
@@ -376,8 +363,8 @@ class MintDetailsActivity : AppCompatActivity() {
             }
             iconView.setImageResource(iconRes)
             
-            // Set method label
-            methodView.text = contact.method.uppercase()
+            // Set method label (title case, matching Details row labels)
+            methodView.text = contact.method.replaceFirstChar { it.uppercase() }
             
             // Set info text
             infoView.text = contact.info
@@ -388,20 +375,6 @@ class MintDetailsActivity : AppCompatActivity() {
             }
             
             contactContainer.addView(contactView)
-            
-            // Add divider if not last item
-            if (index < contacts.size - 1) {
-                val divider = View(this).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        resources.getDimensionPixelSize(R.dimen.divider_height)
-                    ).apply {
-                        marginStart = resources.getDimensionPixelSize(R.dimen.contact_divider_margin)
-                    }
-                    setBackgroundColor(getColor(R.color.color_divider))
-                }
-                contactContainer.addView(divider)
-            }
         }
     }
 

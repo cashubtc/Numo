@@ -17,7 +17,7 @@
         android:backgroundTint="@color/color_text_primary"
         android:gravity="center"
         android:textColor="@color/color_bg_white"
-        android:textSize="12sp"
+        android:textSize="11sp"
         android:fontFamily="sans-serif-medium"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

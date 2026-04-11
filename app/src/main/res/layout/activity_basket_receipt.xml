@@ -149,10 +149,10 @@
                 android:layout_marginStart="@dimen/space_xl"
                 android:layout_marginEnd="@dimen/space_xl"
                 android:layout_marginTop="@dimen/margin_screen_horizontal"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:fontFamily="sans-serif-medium"
                 android:textColor="@color/color_text_secondary"
-                android:letterSpacing="0.08"
+                android:letterSpacing="0.06"
                 android:text="ITEMS"
                 tools:text="3 ITEMS" />
 
@@ -298,7 +298,7 @@
                         android:id="@+id/final_total_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="20sp"
+                        android:textSize="18sp"
                         android:textColor="@color/color_text_primary"
                         android:fontFamily="sans-serif-medium"
                         tools:text="$74.97" />

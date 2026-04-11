@@ -421,7 +421,7 @@
                             android:hint="@string/item_entry_hint_price_fiat"
                             android:inputType="numberDecimal"
                             android:paddingHorizontal="@dimen/space_l"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textColor="@color/color_text_primary"
                             android:textColorHint="@color/color_text_tertiary"
                             android:fontFamily="sans-serif-medium" />
@@ -463,7 +463,7 @@
                             android:hint="@string/item_entry_hint_price_sats"
                             android:inputType="number"
                             android:paddingHorizontal="@dimen/space_l"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textColor="@color/color_text_primary"
                             android:textColorHint="@color/color_text_tertiary"
                             android:fontFamily="sans-serif-medium" />
@@ -633,10 +633,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/item_entry_price_breakdown_title"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textColor="@color/color_text_secondary"
                     android:textAllCaps="true"
-                    android:letterSpacing="0.05"
+                    android:letterSpacing="0.06"
                     android:layout_marginBottom="@dimen/space_m" />
 
                 <!-- Net Price Row -->

@@ -122,7 +122,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/tip_selection_custom_tip_label"
                 android:textColor="@color/color_text_primary"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold" />
 
             <TextView

@@ -26,7 +26,7 @@
             android:layout_marginTop="@dimen/margin_screen_horizontal"
             android:paddingHorizontal="@dimen/space_xl"
             android:text="@string/onboarding_add_mint_sheet_title"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:textColor="@color/color_text_primary"
             android:fontFamily="sans-serif-medium" />
 

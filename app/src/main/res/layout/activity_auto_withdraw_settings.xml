@@ -478,14 +478,14 @@
                                     android:layout_weight="1"
                                     android:text="50%"
                                     android:textColor="@color/color_text_tertiary"
-                                    android:textSize="12sp" />
+                                    android:textSize="13sp" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="98%"
                                     android:textColor="@color/color_text_tertiary"
-                                    android:textSize="12sp" />
+                                    android:textSize="13sp" />
 
                             </LinearLayout>
 

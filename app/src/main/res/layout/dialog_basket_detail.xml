@@ -69,7 +69,7 @@
                 android:id="@+id/basket_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textColor="@color/color_text_primary"
                 android:fontFamily="sans-serif-medium"
                 tools:text="Table 5" />
@@ -86,7 +86,7 @@
                 android:textSize="11sp"
                 android:textColor="@android:color/white"
                 android:fontFamily="sans-serif-medium"
-                android:letterSpacing="0.04"
+                android:letterSpacing="0.03"
                 android:background="@drawable/bg_badge_success_pill" />
 
         </LinearLayout>
@@ -135,7 +135,7 @@
             android:paddingHorizontal="@dimen/space_l"
             android:paddingTop="@dimen/row_padding_vertical"
             android:paddingBottom="@dimen/space_m"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:fontFamily="sans-serif-medium"
             android:textColor="@color/color_text_tertiary"
             android:letterSpacing="0.06"

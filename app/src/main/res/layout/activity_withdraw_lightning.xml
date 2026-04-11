@@ -85,7 +85,7 @@
                         android:textColor="@color/color_text_secondary"
                         android:textSize="13sp"
                         android:textAllCaps="true"
-                        android:letterSpacing="0.05" />
+                        android:letterSpacing="0.06" />
 
                     <TextView
                         android:id="@+id/balance_text"
@@ -207,7 +207,7 @@
                         android:textColor="@color/color_text_tertiary"
                         android:textSize="12sp"
                         android:textAllCaps="true"
-                        android:letterSpacing="0.1" />
+                        android:letterSpacing="0.06" />
 
                     <View
                         android:layout_width="0dp"

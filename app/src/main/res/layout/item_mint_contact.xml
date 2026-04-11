@@ -8,25 +8,23 @@
     android:paddingVertical="@dimen/row_padding_vertical"
     android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
-    <!-- Method (label on left, takes space to push value right) -->
+    <!-- Method (label on left, matches DETAILS row labels) -->
     <TextView
         android:id="@+id/contact_method"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="Email"
-        android:textSize="15sp"
-        android:textColor="@color/color_text_secondary" />
+        android:textAppearance="@style/Text.RowTitle" />
 
-    <!-- Info (right-aligned value) -->
+    <!-- Info (right-aligned value, matches DETAILS row values) -->
     <TextView
         android:id="@+id/contact_info"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxWidth="200dp"
         android:text="contact@example.com"
-        android:textSize="15sp"
-        android:textColor="@color/color_text_primary"
+        android:textAppearance="@style/Text.RowSubtitle"
         android:textAlignment="textEnd"
         android:maxLines="1"
         android:ellipsize="middle" />

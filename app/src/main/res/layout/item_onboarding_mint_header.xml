@@ -20,6 +20,6 @@
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif"
         android:textColor="@color/color_onboarding_text_muted"
-        android:textSize="12sp" />
+        android:textSize="13sp" />
 
 </LinearLayout>

@@ -142,7 +142,7 @@
             android:paddingVertical="@dimen/space_xs"
             android:text="Sent"
             android:textColor="@color/color_success_green"
-            android:textSize="12sp"
+            android:textSize="11sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/icon_container"
             tools:text="Sent" />
@@ -205,7 +205,7 @@
                 android:fontFamily="sans-serif-medium"
                 android:text="@string/auto_withdraw_error_title"
                 android:textColor="@color/color_error"
-                android:textSize="12sp" />
+                android:textSize="11sp" />
 
             <TextView
                 android:id="@+id/error_text"
