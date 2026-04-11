@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Dark mode: fade from black to transparent -->
+<!-- Dark mode: fade from background color to transparent -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <gradient
         android:type="linear"
         android:angle="90"
-        android:startColor="#FF000000"
-        android:endColor="#00000000" />
+        android:startColor="#FF0B1215"
+        android:endColor="#000B1215" />
 </shape>
 
