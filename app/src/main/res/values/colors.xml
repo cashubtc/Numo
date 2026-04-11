@@ -25,8 +25,13 @@
 
     <!-- Brand Aliases -->
     <color name="color_primary">@color/numo_green</color>
-    <color name="color_primary_green">@color/numo_dark</color>
-    <color name="color_primary_green_light">@color/numo_dark</color>
+
+    <!-- Primary brand foreground: dark-on-light, light-on-dark.
+         Named "green" for historical reasons — actually numo_dark/white.
+         Prefer color_brand_foreground in new code. -->
+    <color name="color_brand_foreground">@color/numo_dark</color>
+    <color name="color_primary_green">@color/color_brand_foreground</color>
+    <color name="color_primary_green_light">@color/color_brand_foreground</color>
     <color name="color_primary_green_pressed">@color/numo_green_pressed</color>
     <color name="color_primary_purple">@color/numo_purple</color>
     <color name="color_primary_blue">@color/numo_cyan</color>
@@ -111,6 +116,44 @@
     <!-- Info/Warning Card Backgrounds -->
     <color name="color_warning_card_bg">#FFF3E0</color>
     <color name="color_pin_info_card_bg">#E8F5E9</color>
+    <color name="color_info_card_bg">#F5F5F5</color>
+    <color name="color_error_card_bg">#FCECE8</color>
+
+    <!-- Status Pill Backgrounds -->
+    <color name="color_status_success_bg">#E8F5E9</color>
+    <color name="color_status_pending_bg">#FFF3E0</color>
+    <color name="color_status_error_bg">#FFEBEE</color>
+
+    <!-- Dynamic Island -->
+    <color name="color_dynamic_island_success">#1B5E20</color>
+    <color name="color_dynamic_island_error">#B71C1C</color>
+
+    <!-- Badge Backgrounds -->
+    <color name="color_badge_lightning_bg">#14FF9500</color>
+
+    <!-- Hero Gradient Tints -->
+    <color name="color_hero_gradient_end">#FFFCF9</color>
+    <color name="color_hero_gradient_active_end">#F9FCFA</color>
+    <color name="color_hero_gradient_green_end">#F2FBF5</color>
+
+    <!-- Opacity Scale (white) -->
+    <color name="color_white_10">#1AFFFFFF</color>
+    <color name="color_white_15">#26FFFFFF</color>
+    <color name="color_white_30">#4DFFFFFF</color>
+    <color name="color_white_34">#56FFFFFF</color>
+    <color name="color_white_50">@color/color_overlay_white_50</color>
+    <color name="color_white_80">#CCFFFFFF</color>
+    <color name="color_white_90">#E6FFFFFF</color>
+
+    <!-- Opacity Scale (black) -->
+    <color name="color_black_20">#33000000</color>
+    <color name="color_black_30">#4D000000</color>
+    <color name="color_black_40">@color/color_scrim</color>
+    <color name="color_black_50">@color/color_overlay_dark</color>
+    <color name="color_black_80">#CC000000</color>
+
+    <!-- Chip Pressed State -->
+    <color name="color_chip_pressed">#E8E9EC</color>
 
     <!-- Brand Accent Tokens (for secondary screen warmth) -->
     <color name="color_section_header">@color/numo_navy</color>

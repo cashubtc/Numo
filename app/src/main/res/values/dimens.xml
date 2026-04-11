@@ -29,7 +29,7 @@
     <dimen name="radius_search">20dp</dimen>
     <dimen name="radius_small">8dp</dimen>
     <dimen name="radius_m">12dp</dimen>
-    <dimen name="radius_l">16dp</dimen>
+    <dimen name="radius_l">@dimen/radius_card</dimen>
 
     <!-- Icon Sizes -->
     <dimen name="icon_size_small">24dp</dimen>
@@ -55,13 +55,15 @@
     <dimen name="margin_screen_vertical">16dp</dimen>
     <dimen name="margin_content_horizontal">16dp</dimen>
 
-    <!-- Elevation -->
+    <!-- Elevation Scale -->
     <dimen name="elevation_card">2dp</dimen>
+    <dimen name="elevation_raised">4dp</dimen>
     <dimen name="elevation_dialog">8dp</dimen>
-    <dimen name="card_elevation_small">2dp</dimen>
-    
-    <!-- Card Corner Radius -->
-    <dimen name="card_corner_radius">16dp</dimen>
+    <dimen name="elevation_sheet">12dp</dimen>
+    <dimen name="elevation_modal">16dp</dimen>
+
+    <!-- Card Corner Radius (alias — prefer radius_card in new code) -->
+    <dimen name="card_corner_radius">@dimen/radius_card</dimen>
 
     <!-- Divider -->
     <dimen name="divider_height">0.5dp</dimen>

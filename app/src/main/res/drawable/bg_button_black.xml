@@ -4,7 +4,7 @@
     <item android:state_enabled="false">
         <shape android:shape="rectangle">
             <corners android:radius="26dp" />
-            <solid android:color="#33000000" />
+            <solid android:color="@color/color_black_20" />
         </shape>
     </item>
     <!-- Pressed state - slightly lighter black -->
