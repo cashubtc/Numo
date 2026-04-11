@@ -95,13 +95,14 @@
     <string name="payment_received_error_no_details">Os detalhes da transação não estão disponíveis</string>
 
     <!-- Payment failure -->
-    <string name="payment_failure_title">Pagamento falhou</string>
-    <string name="payment_failure_message">Ocorreu um erro ao processar este pagamento.</string>
+    <string name="payment_failure_title">Pagamento não recebido</string>
+    <string name="payment_failure_message">Não foi possível concluir este pagamento. Tente novamente ou inicie uma nova cobrança.</string>
+    <string name="payment_failure_reassurance">Nenhum valor foi transferido — é seguro tentar novamente.</string>
     <string name="payment_failure_button_try_again">Tentar novamente</string>
     <string name="payment_failure_button_close">Fechar</string>
     <string name="payment_failure_close_content_description">Fechar</string>
-    <string name="payment_failure_error_background_description">Fundo de erro</string>
-    <string name="payment_failure_error_icon_description">Erro</string>
+    <string name="payment_failure_error_background_description">Indicador de erro</string>
+    <string name="payment_failure_error_icon_description">Pagamento não recebido</string>
     <string name="payment_failure_error_no_pending">Não há pagamento pendente para tentar novamente</string>
 
     <!-- Onboarding / Welcome -->

@@ -70,7 +70,7 @@
         app:backgroundTint="@color/color_bg_white"
         app:strokeColor="@color/color_chip_border"
         app:strokeWidth="1dp"
-        app:cornerRadius="26dp"
+        app:cornerRadius="@dimen/radius_pill"
         app:elevation="0dp"
         app:icon="@drawable/ic_qr_scan"
         app:iconGravity="textStart"

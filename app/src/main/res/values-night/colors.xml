@@ -79,12 +79,21 @@
     <color name="color_warning_card_bg">#3A2810</color>
     <color name="color_pin_info_card_bg">#103321</color>
 
+    <!-- Brand Accent Tokens (for secondary screen warmth) -->
+    <color name="color_section_header">#8FABC4</color>
+    <color name="color_brand_surface_tint">#B0C4D8</color>
+    <color name="color_balance_bg">#111920</color>
+
+    <!-- Payment Failure (calm, neutral) -->
+    <color name="color_failure_icon_bg">@color/numo_red</color>
+    <color name="color_failure_reassurance">@color/color_text_secondary</color>
+
     <!-- Empty State Theme Colors -->
-    <color name="empty_state_background">#000000</color>
-    <color name="empty_state_title">#FFFFFF</color>
+    <color name="empty_state_background">@color/color_bg_white</color>
+    <color name="empty_state_title">@color/color_text_primary</color>
     <color name="empty_state_subtitle">#9B9B9F</color>
-    <color name="empty_state_button_primary_bg">#FFFFFF</color>
-    <color name="empty_state_button_primary_text">#000000</color>
+    <color name="empty_state_button_primary_bg">@color/color_text_primary</color>
+    <color name="empty_state_button_primary_text">@color/color_bg_white</color>
     <color name="empty_state_button_secondary_bg">@android:color/transparent</color>
     <color name="empty_state_button_secondary_text">#9B9B9F</color>
     <color name="empty_state_button_secondary_border">#4D9B9B9F</color>

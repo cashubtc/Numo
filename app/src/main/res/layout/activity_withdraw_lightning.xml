@@ -17,10 +17,10 @@
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:padding="9dp"
-            android:background="@drawable/bg_nav_back_button"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
+            android:padding="@dimen/space_m"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/withdraw_lightning_toolbar_back"
             android:src="@drawable/ic_chevron_back"
             app:tint="@color/color_text_primary"
@@ -347,7 +347,7 @@
                             android:layout_marginTop="@dimen/space_l"
                             android:stateListAnimator="@null"
                             android:text="@string/withdraw_cashu_copy_token"
-                            app:cornerRadius="28dp"
+                            app:cornerRadius="@dimen/radius_button"
                             app:elevation="0dp"/>
 
                     </LinearLayout>

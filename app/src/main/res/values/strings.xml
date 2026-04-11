@@ -96,13 +96,14 @@
     <string name="payment_received_error_no_details">Transaction details not available</string>
 
     
-    <string name="payment_failure_title">Payment failed</string>
-    <string name="payment_failure_message">Something went wrong while processing this payment.</string>
+    <string name="payment_failure_title">Payment not received</string>
+    <string name="payment_failure_message">This payment could not be completed. You can try again or start a new charge.</string>
+    <string name="payment_failure_reassurance">No funds were transferred — it\'s safe to retry.</string>
     <string name="payment_failure_button_try_again">Try again</string>
     <string name="payment_failure_button_close">Close</string>
     <string name="payment_failure_close_content_description">Close</string>
-    <string name="payment_failure_error_background_description">Error background</string>
-    <string name="payment_failure_error_icon_description">Error</string>
+    <string name="payment_failure_error_background_description">Error indicator</string>
+    <string name="payment_failure_error_icon_description">Payment not received</string>
     <string name="payment_failure_error_no_pending">No pending payment to retry</string>
 
     
@@ -250,8 +251,8 @@
     <string name="common_close">Close</string>
 
     
-    <string name="empty_state_items_title">Create your catalog</string>
-    <string name="empty_state_items_subtitle">Add products to start accepting payments with your POS.</string>
+    <string name="empty_state_items_title">Add your first item</string>
+    <string name="empty_state_items_subtitle">Create menu items or products so you can charge with a single tap instead of typing amounts.</string>
     <string name="empty_state_items_add_button">Add item</string>
     <string name="empty_state_items_import_button">Import from CSV</string>
 
@@ -294,15 +295,15 @@
     <string name="dialog_pin_hint">PIN</string>
 
     
-    <string name="nfc_payment_error_enter_amount_first">Please enter an amount first</string>
-    <string name="nfc_payment_error_rescan_not_supported">PIN-based rescan not supported in this build</string>
-    <string name="nfc_payment_error_insufficient_funds">Insufficient funds on card</string>
-    <string name="nfc_payment_error_pin_flow_not_implemented">PIN-required flow not implemented in this build</string>
-    <string name="nfc_payment_error_card_sw">Card Error: (SW: 0x%04X)</string>
-    <string name="nfc_payment_error_generic">Payment failed: %1$s</string>
-    <string name="nfc_payment_error_nfc_comm">NFC Communication Error: %1$s</string>
-    <string name="nfc_payment_error_satocash">Satocash Card Error: %1$s (SW: 0x%2$04X)</string>
-    <string name="nfc_payment_error_unexpected">An unexpected error occurred: %1$s</string>
+    <string name="nfc_payment_error_enter_amount_first">Enter an amount to charge</string>
+    <string name="nfc_payment_error_rescan_not_supported">This card type isn\'t supported yet</string>
+    <string name="nfc_payment_error_insufficient_funds">Not enough funds on this card — ask the customer to top up or use another payment method</string>
+    <string name="nfc_payment_error_pin_flow_not_implemented">This card requires a PIN, which isn\'t supported yet</string>
+    <string name="nfc_payment_error_card_sw">The card couldn\'t be read. Try tapping again. (Code: 0x%04X)</string>
+    <string name="nfc_payment_error_generic">Payment not completed: %1$s</string>
+    <string name="nfc_payment_error_nfc_comm">Tap lost — hold the card steady and try again</string>
+    <string name="nfc_payment_error_satocash">Card couldn\'t be read: %1$s (Code: 0x%2$04X)</string>
+    <string name="nfc_payment_error_unexpected">Something went wrong. Try again — no funds were transferred.</string>
     <string name="nfc_payment_hint_keep_close">Keep phone close</string>
     <string name="nfc_payment_hint_processing">Processing payment...\nYou can lift your phone</string>
 
@@ -380,7 +381,8 @@
     
     <string name="history_toolbar_title">Activity</string>
     <string name="history_section_payment_history">PAYMENT HISTORY</string>
-    <string name="history_empty">No payment history</string>
+    <string name="history_empty">Your payments will appear here</string>
+    <string name="history_empty_subtitle">After your first charge, you\'ll see a record of every payment received.</string>
 
     <string name="transaction_row_copy">Copy</string>
     <string name="transaction_row_open">Open</string>
@@ -572,7 +574,7 @@
     <string name="item_selection_basket_items_count">%1$d items</string>
     <string name="item_selection_charge_button">Charge</string>
     <string name="item_selection_charge_button_default">Charge</string>
-    <string name="pos_error_no_mints_configured">Add at least one mint in Settings → Mints before charging customers.</string>
+    <string name="pos_error_no_mints_configured">To accept payments, add a mint first. Go to Settings → Mints to get started.</string>
 
     <string name="item_selection_save_button">Save</string>
     <string name="item_selection_saved_baskets_button">Saved</string>
@@ -702,9 +704,9 @@
     
     <string name="auto_withdraw_section_history">Recent Activity</string>
     <string name="auto_withdraw_see_all">See All</string>
-    <string name="auto_withdraw_history_empty">No automatic withdrawals yet</string>
-    <string name="auto_withdraw_history_empty_title">No Activity Yet</string>
-    <string name="auto_withdraw_history_empty_subtitle">Withdrawals will appear here</string>
+    <string name="auto_withdraw_history_empty">No withdrawals yet</string>
+    <string name="auto_withdraw_history_empty_title">No withdrawals yet</string>
+    <string name="auto_withdraw_history_empty_subtitle">When auto-withdraw is enabled, your payments are sent to your wallet automatically. Activity will show here.</string>
     
     <string name="auto_withdraw_status_completed">Sent</string>
     <string name="auto_withdraw_status_pending">Pending</string>

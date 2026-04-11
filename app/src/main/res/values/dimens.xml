@@ -23,6 +23,7 @@
 
     <!-- Border Radii -->
     <dimen name="radius_pill">26dp</dimen>
+    <dimen name="radius_button">28dp</dimen>
     <dimen name="radius_chip">18dp</dimen>
     <dimen name="radius_card">16dp</dimen>
     <dimen name="radius_search">20dp</dimen>
@@ -79,6 +80,7 @@
     <dimen name="row_padding_horizontal">16dp</dimen>
     <dimen name="row_icon_size">40dp</dimen>
     <dimen name="row_icon_gap">14dp</dimen>
+    <dimen name="row_subtitle_gap">2dp</dimen>
     <dimen name="section_header_margin_bottom">14dp</dimen>
     <dimen name="section_gap">28dp</dimen>
     <dimen name="nav_back_size">36dp</dimen>

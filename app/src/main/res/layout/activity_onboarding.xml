@@ -457,7 +457,7 @@
                         android:background="@drawable/bg_button_white"
                         android:stateListAnimator="@null"
                         app:backgroundTint="@null"
-                        app:cornerRadius="28dp"
+                        app:cornerRadius="@dimen/radius_button"
                         app:elevation="0dp"
                         android:alpha="0"
                         android:visibility="invisible" />
@@ -562,7 +562,7 @@
                         android:background="@drawable/bg_button_tertiary_dark"
                         android:stateListAnimator="@null"
                         app:backgroundTint="@null"
-                        app:cornerRadius="28dp"
+                        app:cornerRadius="@dimen/radius_button"
                         app:elevation="0dp" />
 
                     <!-- Continue Button (primary) -->
@@ -580,7 +580,7 @@
                         android:background="@drawable/bg_button_white"
                         android:stateListAnimator="@null"
                         app:backgroundTint="@null"
-                        app:cornerRadius="28dp"
+                        app:cornerRadius="@dimen/radius_button"
                         app:elevation="0dp" />
 
                 </LinearLayout>
@@ -781,7 +781,7 @@
                     android:background="@drawable/bg_button_white"
                     android:stateListAnimator="@null"
                     app:backgroundTint="@null"
-                    app:cornerRadius="28dp"
+                    app:cornerRadius="@dimen/radius_button"
                     app:elevation="0dp" />
 
             </LinearLayout>
@@ -962,7 +962,7 @@
                 android:background="@drawable/bg_button_white"
                 android:stateListAnimator="@null"
                 app:backgroundTint="@null"
-                app:cornerRadius="28dp"
+                app:cornerRadius="@dimen/radius_button"
                 app:elevation="0dp" />
 
             <Space

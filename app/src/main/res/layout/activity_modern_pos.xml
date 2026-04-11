@@ -156,16 +156,14 @@
 
                 <ImageButton
                     android:id="@+id/currency_switch_button"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
                     android:layout_marginStart="@dimen/space_xs"
                     android:background="@android:color/transparent"
                     android:clickable="false"
                     android:contentDescription="@string/pos_currency_switch_content_description"
                     android:focusable="false"
                     android:rotation="90"
-                    android:scaleX="0.7"
-                    android:scaleY="0.8"
                     android:src="@drawable/ic_switch_currency"
                     app:tint="@color/color_bg_white" />
             </LinearLayout>

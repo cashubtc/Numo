@@ -126,12 +126,12 @@
         <item name="android:textColor">@color/color_text_secondary</item>
     </style>
 
-    <!-- SectionHeader: ALL-CAPS group dividers -->
+    <!-- SectionHeader: ALL-CAPS group dividers (brand-tinted navy) -->
     <style name="Text.SectionHeader">
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">13sp</item>
         <item name="android:lineHeight">18sp</item>
-        <item name="android:textColor">@color/color_text_secondary</item>
+        <item name="android:textColor">@color/color_section_header</item>
         <item name="android:letterSpacing">0.06</item>
         <item name="android:textAllCaps">true</item>
     </style>
@@ -260,6 +260,78 @@
     <style name="ShapeAppearance.Numo.Snackbar" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">10dp</item>
+    </style>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Dialog Buttons                                            -->
+    <!-- Reusable button styles for confirmation/input dialogs     -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <!-- Dialog: Primary action (dark fill) -->
+    <style name="Widget.Numo.Button.Dialog.Confirm" parent="Widget.MaterialComponents.Button">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textColor">@color/color_bg_white</item>
+        <item name="android:textSize">@dimen/text_button</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@color/color_text_primary</item>
+        <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="rippleColor">@color/color_ripple_on_dark</item>
+        <item name="strokeWidth">0dp</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- Dialog: Cancel action (outlined) -->
+    <style name="Widget.Numo.Button.Dialog.Cancel" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+        <item name="android:textSize">@dimen/text_button</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@color/color_bg_white</item>
+        <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="rippleColor">@color/color_ripple</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="strokeColor">@color/color_chip_border</item>
+    </style>
+
+    <!-- Dialog: Destructive action (red fill) -->
+    <style name="Widget.Numo.Button.Dialog.Destructive" parent="Widget.MaterialComponents.Button">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textColor">@color/color_bg_white</item>
+        <item name="android:textSize">@dimen/text_button</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@color/color_error</item>
+        <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="rippleColor">@color/color_ripple_on_dark</item>
+        <item name="strokeWidth">0dp</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Dialog Typography                                         -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <!-- Dialog title (22sp, left-aligned, tight) -->
+    <style name="Text.DialogTitle">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <!-- Dialog subtitle (15sp, secondary) -->
+    <style name="Text.DialogSubtitle">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/color_text_tertiary</item>
     </style>
 
     <!-- Shape Appearances -->

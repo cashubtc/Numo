@@ -66,7 +66,7 @@
                 android:background="@drawable/bg_button_white"
                 android:stateListAnimator="@null"
                 app:backgroundTint="@null"
-                app:cornerRadius="28dp"
+                app:cornerRadius="@dimen/radius_button"
                 app:elevation="0dp"
                 android:enabled="false" />
 
@@ -115,7 +115,7 @@
             app:backgroundTint="@android:color/transparent"
             app:strokeColor="@color/color_chip_border"
             app:strokeWidth="1dp"
-            app:cornerRadius="26dp"
+            app:cornerRadius="@dimen/radius_pill"
             app:icon="@drawable/ic_qr_scan"
             app:iconGravity="textStart"
             app:iconPadding="@dimen/space_s"

@@ -45,7 +45,7 @@
                 android:layout_height="8dp"
                 android:layout_marginEnd="@dimen/space_s"
                 android:src="@drawable/bg_status_dot"
-                app:tint="#808080" />
+                app:tint="@color/color_text_tertiary" />
 
             <TextView
                 android:id="@+id/endpoint_auth_status_text"

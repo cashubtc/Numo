@@ -16,10 +16,10 @@
 
         <ImageButton
             android:id="@+id/back_button"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:padding="9dp"
-            android:background="@drawable/bg_nav_back_button"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
+            android:padding="@dimen/space_m"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/common_back"
             android:src="@drawable/ic_chevron_back"
             android:tint="@color/color_text_primary"

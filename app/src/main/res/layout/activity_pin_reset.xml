@@ -171,7 +171,7 @@
                 android:backgroundTint="@color/color_warning_red"
                 android:enabled="false"
                 android:alpha="0.5"
-                app:cornerRadius="28dp" />
+                app:cornerRadius="@dimen/radius_button" />
 
         </LinearLayout>
     </ScrollView>
