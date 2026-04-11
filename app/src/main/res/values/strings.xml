@@ -544,6 +544,11 @@
     <string name="item_entry_button_cancel">Cancel</string>
     <string name="item_entry_button_delete">Delete Item</string>
     <string name="item_entry_delete_confirmation_message">This item will be permanently removed from your catalog.</string>
+    <string name="item_entry_more_details">Additional Options</string>
+    <string name="item_entry_more_details_expand">Show additional options</string>
+    <string name="item_entry_identification_helper">Optional — for items with barcodes or internal tracking codes.</string>
+    <string name="item_entry_toast_item_saved">Item saved</string>
+    <string name="item_entry_toast_item_updated">Item updated</string>
 
     
     <string name="item_product_drag_handle_description">Drag to reorder</string>

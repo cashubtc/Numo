@@ -238,6 +238,17 @@
         <item name="rippleColor">@color/color_white_10</item>
     </style>
 
+    <!-- TextInputLayout: Outlined price input with prefix/suffix -->
+    <style name="Widget.Numo.TextInputLayout.OutlinedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">14dp</item>
+        <item name="boxCornerRadiusTopEnd">14dp</item>
+        <item name="boxCornerRadiusBottomStart">14dp</item>
+        <item name="boxCornerRadiusBottomEnd">14dp</item>
+        <item name="boxStrokeColor">@color/color_divider</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="hintEnabled">false</item>
+    </style>
+
     <style name="Widget.App.TopBar">
         <item name="android:layout_height">56dp</item>
         <item name="android:background">@color/color_bg_white</item>

@@ -6,13 +6,15 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
+import androidx.core.widget.doAfterTextChanged
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.Item
 import com.electricdreams.numo.core.model.PriceType
@@ -59,6 +61,7 @@ class ItemEntryActivity : AppCompatActivity() {
     private var editItemId: String? = null
     private var isEditMode: Boolean = false
     private var currentItem: Item? = null
+    private var moreDetailsExpanded: Boolean = false
 
     // Activity Result Launchers
     private val selectGalleryLauncher: ActivityResultLauncher<String> =
@@ -141,12 +144,10 @@ class ItemEntryActivity : AppCompatActivity() {
             priceTypeToggle = findViewById(R.id.price_type_toggle),
             btnPriceFiat = findViewById(R.id.btn_price_fiat),
             btnPriceBitcoin = findViewById(R.id.btn_price_bitcoin),
-            fiatPriceContainer = findViewById(R.id.fiat_price_container),
-            satsPriceContainer = findViewById(R.id.sats_price_container),
+            fiatPriceLayout = findViewById(R.id.fiat_price_layout),
+            satsPriceLayout = findViewById(R.id.sats_price_layout),
             priceInput = findViewById(R.id.item_price_input),
             satsInput = findViewById(R.id.item_sats_input),
-            currencySymbol = findViewById(R.id.currency_symbol),
-            currencyCode = findViewById(R.id.currency_code),
             vatSectionCard = findViewById(R.id.vat_section_card),
             switchVatEnabled = findViewById(R.id.switch_vat_enabled),
             vatFieldsContainer = findViewById(R.id.vat_fields_container),
@@ -228,15 +229,50 @@ class ItemEntryActivity : AppCompatActivity() {
         findViewById<View>(R.id.back_button)?.setOnClickListener { finish() }
         findViewById<Button>(R.id.item_save_button).setOnClickListener { saveItem() }
         findViewById<Button>(R.id.item_cancel_button).setOnClickListener {
-            if (isEditMode) showDeleteConfirmationDialog() else finish()
+            showDeleteConfirmationDialog()
+        }
+
+        // More Details expand/collapse
+        findViewById<View>(R.id.more_details_toggle).setOnClickListener {
+            toggleMoreDetails()
+        }
+
+        // Inline validation on focus change
+        setupInlineValidation()
+    }
+
+    private fun toggleMoreDetails() {
+        moreDetailsExpanded = !moreDetailsExpanded
+        val container = findViewById<LinearLayout>(R.id.more_details_container)
+        val chevron = findViewById<ImageView>(R.id.more_details_chevron)
+
+        if (moreDetailsExpanded) {
+            container.visibility = View.VISIBLE
+            chevron.animate().rotation(180f).setDuration(200).start()
+        } else {
+            container.visibility = View.GONE
+            chevron.animate().rotation(0f).setDuration(200).start()
+        }
+    }
+
+    private fun setupInlineValidation() {
+        nameInput.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus && nameInput.text.toString().trim().isEmpty()) {
+                nameInput.error = getString(R.string.item_entry_error_name_required)
+            }
+        }
+        nameInput.doAfterTextChanged { text ->
+            if (!text.isNullOrBlank()) nameInput.error = null
         }
     }
 
     private fun setupEditMode() {
         findViewById<TextView>(R.id.toolbar_title)?.text = getString(R.string.item_entry_title_edit)
-        findViewById<Button>(R.id.item_cancel_button).apply {
-            text = getString(R.string.item_entry_button_delete)
-            setTextColor(ContextCompat.getColor(this@ItemEntryActivity, R.color.color_warning_red))
+        // Show the dedicated delete button
+        findViewById<Button>(R.id.item_cancel_button).visibility = View.VISIBLE
+        // Auto-expand more details in edit mode so all fields are visible
+        if (!moreDetailsExpanded) {
+            toggleMoreDetails()
         }
     }
 
@@ -275,6 +311,24 @@ class ItemEntryActivity : AppCompatActivity() {
         inventoryHandler.setTrackingEnabled(item.trackInventory)
         inventoryHandler.setQuantity(item.quantity)
         inventoryHandler.setAlertSettings(item.alertEnabled, item.alertThreshold)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString("name", nameInput.text.toString())
+        outState.putString("variation", variationInput.text.toString())
+        outState.putString("description", descriptionInput.text.toString())
+        outState.putBoolean("moreDetailsExpanded", moreDetailsExpanded)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        nameInput.setText(savedInstanceState.getString("name", ""))
+        variationInput.setText(savedInstanceState.getString("variation", ""))
+        descriptionInput.setText(savedInstanceState.getString("description", ""))
+        if (savedInstanceState.getBoolean("moreDetailsExpanded", false) && !moreDetailsExpanded) {
+            toggleMoreDetails()
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -337,6 +391,8 @@ class ItemEntryActivity : AppCompatActivity() {
         }
 
         saveImageIfNeeded(item)
+        val toastRes = if (isEditMode) R.string.item_entry_toast_item_updated else R.string.item_entry_toast_item_saved
+        Toast.makeText(this, toastRes, Toast.LENGTH_SHORT).show()
         setResult(RESULT_OK)
         finish()
     }
