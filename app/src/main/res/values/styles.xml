@@ -247,6 +247,7 @@
         <item name="boxStrokeColor">@color/color_divider</item>
         <item name="boxStrokeWidth">1dp</item>
         <item name="hintEnabled">false</item>
+        <item name="expandedHintEnabled">false</item>
     </style>
 
     <style name="Widget.App.TopBar">
