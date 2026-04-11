@@ -15,18 +15,23 @@
         style="@style/Text.RowTitle" />
 
     <!-- Address Input -->
-    <EditText
-        android:id="@+id/address_input"
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        android:background="@drawable/bg_input_pill"
-        android:fontFamily="sans-serif"
-        android:hint="@string/withdraw_lightning_address_hint_value"
-        android:inputType="textEmailAddress"
-        android:paddingHorizontal="@dimen/margin_screen_horizontal"
-        android:textColor="@color/color_text_primary"
-        android:textColorHint="@color/color_text_tertiary"
-        android:textSize="16sp" />
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/address_input"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/top_bar_height"
+            android:fontFamily="sans-serif"
+            android:hint="@string/withdraw_lightning_address_hint_value"
+            android:inputType="textEmailAddress"
+            android:textColor="@color/color_text_primary"
+            android:textColorHint="@color/color_text_tertiary"
+            android:textSize="16sp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Amount Label -->
     <TextView
@@ -38,18 +43,23 @@
         style="@style/Text.RowTitle" />
 
     <!-- Amount Input -->
-    <EditText
-        android:id="@+id/amount_input"
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        android:background="@drawable/bg_input_pill"
-        android:fontFamily="sans-serif"
-        android:hint="@string/withdraw_amount_placeholder"
-        android:inputType="number"
-        android:paddingHorizontal="@dimen/margin_screen_horizontal"
-        android:textColor="@color/color_text_primary"
-        android:textColorHint="@color/color_text_tertiary"
-        android:textSize="16sp" />
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/amount_input"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/top_bar_height"
+            android:fontFamily="sans-serif"
+            android:hint="@string/withdraw_amount_placeholder"
+            android:inputType="number"
+            android:textColor="@color/color_text_primary"
+            android:textColorHint="@color/color_text_tertiary"
+            android:textSize="16sp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Continue Button -->
     <Button

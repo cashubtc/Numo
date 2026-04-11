@@ -198,7 +198,7 @@
                 android:layout_height="44dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="@dimen/space_s"
-                android:background="@drawable/bg_variation_input"
+                android:background="@drawable/bg_outlined_input"
                 android:gravity="center_vertical"
                 android:paddingHorizontal="@dimen/row_padding_vertical">
 

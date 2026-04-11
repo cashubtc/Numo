@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -13,30 +14,17 @@
         android:textSize="14sp"
         android:layout_marginBottom="@dimen/space_l" />
 
-    <LinearLayout
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:background="@drawable/bg_input_pill"
-        android:paddingHorizontal="@dimen/space_l"
-        android:paddingVertical="@dimen/space_m">
+        app:prefixText="₿"
+        app:prefixTextAppearance="@style/Text.InputAffix">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="₿"
-            android:textSize="18sp"
-            android:textColor="@color/color_text_primary"
-            android:fontFamily="sans-serif-medium"
-            android:layout_marginEnd="@dimen/space_s" />
-
-        <EditText
+        <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/threshold_edit_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@null"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height"
             android:fontFamily="sans-serif-medium"
             android:inputType="number"
             android:maxLength="7"
@@ -45,7 +33,7 @@
             android:hint="50000"
             android:textColorHint="@color/color_text_tertiary" />
 
-    </LinearLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <TextView
         android:layout_width="wrap_content"

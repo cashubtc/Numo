@@ -274,17 +274,22 @@
                         android:layout_marginTop="@dimen/space_m"
                         android:visibility="gone">
 
-                        <EditText
-                            android:id="@+id/new_category_input"
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
                             android:layout_width="0dp"
-                            android:layout_height="44dp"
-                            android:layout_weight="1"
-                            android:background="@drawable/bg_input_field_rounded"
-                            android:hint="@string/item_entry_hint_new_category"
-                            android:inputType="textCapWords"
-                            android:paddingHorizontal="@dimen/space_m"
-                            android:textSize="15sp"
-                            android:textColorHint="@color/color_text_tertiary" />
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/new_category_input"
+                                android:layout_width="match_parent"
+                                android:layout_height="44dp"
+                                android:hint="@string/item_entry_hint_new_category"
+                                android:inputType="textCapWords"
+                                android:textSize="15sp"
+                                android:textColorHint="@color/color_text_tertiary" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
 
                         <ImageButton
                             android:id="@+id/btn_confirm_category"
@@ -529,7 +534,7 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:gravity="center_vertical"
-                                android:background="@drawable/bg_vat_input">
+                                android:background="@drawable/bg_outlined_input">
 
                                 <EditText
                                     android:id="@+id/vat_rate_input"

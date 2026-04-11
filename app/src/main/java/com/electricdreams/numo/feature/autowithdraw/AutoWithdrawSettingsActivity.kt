@@ -324,7 +324,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             statusDot.backgroundTintList = ContextCompat.getColorStateList(this, R.color.color_text_tertiary)
             statusText.text = getString(R.string.auto_withdraw_status_inactive)
             statusText.setTextColor(ContextCompat.getColor(this, R.color.color_text_tertiary))
-            statusContainer.background = ContextCompat.getDrawable(this, R.drawable.bg_input_pill)
+            statusContainer.background = ContextCompat.getDrawable(this, R.drawable.bg_pill_badge)
         }
     }
 

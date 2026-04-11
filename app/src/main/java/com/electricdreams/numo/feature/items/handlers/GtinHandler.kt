@@ -107,7 +107,7 @@ class GtinHandler(
         isGtinValid = !hasError
 
         if (hasError) {
-            gtinContainer.setBackgroundResource(R.drawable.bg_input_field_error)
+            gtinContainer.setBackgroundResource(R.drawable.bg_outlined_input_error)
             gtinErrorText.visibility = View.VISIBLE
         } else {
             gtinContainer.setBackgroundResource(0) // Remove background (handled by card)

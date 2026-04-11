@@ -9,6 +9,7 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.R
 import com.electricdreams.numo.ndef.NdefHostCardEmulationService
@@ -95,6 +96,7 @@ class NfcPaymentProcessor(
             val input = EditText(activity).apply {
                 inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_VARIATION_PASSWORD
                 hint = activity.getString(R.string.dialog_pin_hint)
+                background = ContextCompat.getDrawable(activity, R.drawable.bg_outlined_input)
             }
             layout.addView(input)
             

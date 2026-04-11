@@ -62,68 +62,49 @@
 
         <!-- Input Field Container -->
         <LinearLayout
-            android:id="@+id/input_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="@drawable/bg_input_field_rounded"
-            android:padding="@dimen/space_xs">
+            android:gravity="center_vertical">
 
-            <!-- Optional Prefix -->
-            <TextView
-                android:id="@+id/input_prefix"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="&#8383;"
-                android:textSize="18sp"
-                android:textColor="@color/color_text_primary"
-                android:fontFamily="sans-serif-medium"
-                android:paddingStart="@dimen/space_l"
-                android:paddingEnd="@dimen/space_xs"
-                android:visibility="gone"
-                tools:visibility="visible" />
-
-            <EditText
-                android:id="@+id/dialog_input"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/input_container"
+                style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
                 android:layout_width="0dp"
-                android:layout_height="@dimen/button_height"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:background="@null"
-                android:paddingHorizontal="@dimen/space_l"
-                android:hint="Enter value"
-                android:textSize="16sp"
-                android:textColor="@color/color_text_primary"
-                android:textColorHint="@color/color_text_tertiary"
-                android:fontFamily="sans-serif"
-                android:inputType="text"
-                android:maxLines="1"
-                android:imeOptions="actionDone"
-                tools:text="50000" />
+                app:prefixText="&#8383;"
+                app:prefixTextAppearance="@style/Text.InputAffix"
+                app:suffixText="%"
+                app:suffixTextAppearance="@style/Text.InputAffix"
+                tools:hint="Enter value">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/dialog_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/button_height"
+                    android:hint="Enter value"
+                    android:textSize="16sp"
+                    android:textColor="@color/color_text_primary"
+                    android:textColorHint="@color/color_text_tertiary"
+                    android:fontFamily="sans-serif"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:imeOptions="actionDone"
+                    tools:text="50000" />
+
+            </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Optional Scan Button -->
             <ImageButton
                 android:id="@+id/input_scan_button"
                 android:layout_width="@dimen/icon_size_large"
                 android:layout_height="@dimen/icon_size_large"
+                android:layout_marginStart="@dimen/space_s"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_qr_code"
                 android:padding="@dimen/space_m"
                 app:tint="@color/color_text_secondary"
-                android:visibility="gone"
-                tools:visibility="visible" />
-
-            <!-- Optional Suffix -->
-            <TextView
-                android:id="@+id/input_suffix"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="%"
-                android:textSize="18sp"
-                android:textColor="@color/color_text_primary"
-                android:fontFamily="sans-serif-medium"
-                android:paddingStart="@dimen/space_xs"
-                android:paddingEnd="@dimen/space_l"
                 android:visibility="gone"
                 tools:visibility="visible" />
 

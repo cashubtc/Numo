@@ -81,7 +81,7 @@ class TipSelectionView @JvmOverloads constructor(
             textSize = 14f
             setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
             setHintTextColor(ContextCompat.getColor(context, R.color.color_text_tertiary))
-            background = ContextCompat.getDrawable(context, R.drawable.bg_input_field_rounded)
+            background = ContextCompat.getDrawable(context, R.drawable.bg_outlined_input)
             setPadding(dpToPx(8), dpToPx(4), dpToPx(8), dpToPx(4))
             imeOptions = EditorInfo.IME_ACTION_DONE
             

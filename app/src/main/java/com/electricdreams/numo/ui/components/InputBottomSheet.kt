@@ -78,7 +78,7 @@ class InputBottomSheet : BottomSheetDialogFragment() {
     fun populateInput(value: String) {
         _binding?.dialogInput?.let { editText ->
             editText.setText(value)
-            editText.setSelection(editText.text.length)
+            editText.setSelection(editText.text?.length ?: 0)
         }
     }
 
@@ -96,24 +96,18 @@ class InputBottomSheet : BottomSheetDialogFragment() {
         binding.dialogInput.hint = cfg.hint
         binding.dialogInput.setText(cfg.initialValue)
         binding.dialogInput.inputType = cfg.inputType
-        binding.dialogInput.setSelection(binding.dialogInput.text.length)
+        binding.dialogInput.setSelection(binding.dialogInput.text?.length ?: 0)
 
-        cfg.prefix?.let { prefix ->
-            binding.inputPrefix.text = prefix
-            binding.inputPrefix.visibility = View.VISIBLE
-            binding.dialogInput.setPadding(
-                dpToPx(8), binding.dialogInput.paddingTop,
-                binding.dialogInput.paddingRight, binding.dialogInput.paddingBottom
-            )
+        if (cfg.prefix != null) {
+            binding.inputContainer.prefixText = cfg.prefix
+        } else {
+            binding.inputContainer.prefixText = null
         }
 
-        cfg.suffix?.let { suffix ->
-            binding.inputSuffix.text = suffix
-            binding.inputSuffix.visibility = View.VISIBLE
-            binding.dialogInput.setPadding(
-                binding.dialogInput.paddingLeft, binding.dialogInput.paddingTop,
-                dpToPx(8), binding.dialogInput.paddingBottom
-            )
+        if (cfg.suffix != null) {
+            binding.inputContainer.suffixText = cfg.suffix
+        } else {
+            binding.inputContainer.suffixText = null
         }
 
         cfg.helperText?.let { helper ->

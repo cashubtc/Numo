@@ -170,7 +170,7 @@
                             android:layout_marginTop="@dimen/space_l"
                             android:paddingHorizontal="@dimen/margin_screen_horizontal"
                             android:paddingVertical="@dimen/space_m"
-                            android:background="@drawable/bg_input_pill"
+                            android:background="@drawable/bg_pill_badge"
                             android:text="₿0"
                             android:textAppearance="@style/Text.Subtitle" />
 

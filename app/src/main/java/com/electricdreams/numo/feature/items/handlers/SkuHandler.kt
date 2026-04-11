@@ -65,7 +65,7 @@ class SkuHandler(
         isSkuValid = !hasError
 
         if (hasError) {
-            skuContainer.setBackgroundResource(R.drawable.bg_input_field_error)
+            skuContainer.setBackgroundResource(R.drawable.bg_outlined_input_error)
             skuErrorText.visibility = View.VISIBLE
         } else {
             skuContainer.setBackgroundResource(0)

@@ -31,22 +31,27 @@
             android:fontFamily="sans-serif-medium" />
 
         <!-- URL Input -->
-        <EditText
-            android:id="@+id/mint_url_input"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/button_height"
+            android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_screen_horizontal"
-            android:layout_marginHorizontal="@dimen/space_xl"
-            android:hint="@string/onboarding_add_mint_url_hint"
-            android:textSize="15sp"
-            android:textColor="@color/color_text_primary"
-            android:textColorHint="@color/color_text_tertiary"
-            android:background="@drawable/rounded_edit_text"
-            android:paddingHorizontal="@dimen/space_l"
-            android:inputType="textUri"
-            android:singleLine="true"
-            android:imeOptions="actionDone"
-            android:importantForAutofill="no" />
+            android:layout_marginHorizontal="@dimen/space_xl">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/mint_url_input"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:hint="@string/onboarding_add_mint_url_hint"
+                android:textSize="15sp"
+                android:textColor="@color/color_text_primary"
+                android:textColorHint="@color/color_text_tertiary"
+                android:inputType="textUri"
+                android:singleLine="true"
+                android:imeOptions="actionDone"
+                android:importantForAutofill="no" />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Add Button / Loading Container -->
         <FrameLayout

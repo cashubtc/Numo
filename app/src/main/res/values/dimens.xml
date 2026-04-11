@@ -28,6 +28,7 @@
     <dimen name="radius_card">16dp</dimen>
     <dimen name="radius_search">20dp</dimen>
     <dimen name="radius_small">8dp</dimen>
+    <dimen name="radius_input">12dp</dimen>
     <dimen name="radius_m">12dp</dimen>
     <dimen name="radius_l">@dimen/radius_card</dimen>
 

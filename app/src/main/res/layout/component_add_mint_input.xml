@@ -97,19 +97,24 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
-                    <EditText
-                        android:id="@+id/url_input"
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
                         android:layout_width="0dp"
-                        android:layout_height="@dimen/icon_size_large"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_input_field"
-                        android:paddingHorizontal="@dimen/row_padding_vertical"
-                        android:hint="@string/mints_url_hint"
-                        android:inputType="textUri"
-                        android:textSize="14sp"
-                        android:fontFamily="monospace"
-                        android:maxLines="1"
-                        android:imeOptions="actionDone" />
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/url_input"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/icon_size_large"
+                            android:hint="@string/mints_url_hint"
+                            android:inputType="textUri"
+                            android:textSize="14sp"
+                            android:fontFamily="monospace"
+                            android:maxLines="1"
+                            android:imeOptions="actionDone" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <ImageButton
                         android:id="@+id/scan_button"
