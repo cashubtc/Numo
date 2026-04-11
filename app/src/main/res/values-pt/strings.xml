@@ -447,28 +447,29 @@
     <!-- Item entry / edit -->
     <string name="item_entry_toolbar_back">Voltar</string>
     <string name="item_entry_title_add">Adicionar item</string>
+    <string name="item_entry_title_edit">Editar item</string>
     <string name="item_entry_button_save">Salvar</string>
     <string name="item_entry_image_description">Imagem do item</string>
     <string name="item_entry_image_placeholder">Sem imagem</string>
     <string name="item_entry_button_add_photo">Adicionar foto</string>
     <string name="item_entry_button_remove_photo">Remover foto</string>
 
-    <string name="item_entry_section_basic_information">INFORMAÇÕES BÁSICAS</string>
+    <string name="item_entry_section_basic_information">DETALHES</string>
     <string name="item_entry_label_name">Nome</string>
-    <string name="item_entry_hint_name">Nome do item</string>
+    <string name="item_entry_hint_name">Ex.: Cappuccino</string>
     <string name="item_entry_label_variation">Variação</string>
     <string name="item_entry_hint_variation">Ex.: Pequeno, Grande</string>
     <string name="item_entry_label_description">Descrição</string>
-    <string name="item_entry_hint_description">Opcional</string>
+    <string name="item_entry_hint_description">Notas sobre este item</string>
 
     <string name="item_entry_section_category">CATEGORIA</string>
-    <string name="item_entry_hint_new_category">Nome da nova categoria</string>
+    <string name="item_entry_hint_new_category">Nome da categoria</string>
     <string name="item_entry_category_confirm">Confirmar</string>
     <string name="item_entry_category_cancel">Cancelar</string>
-    <string name="item_entry_category_helper">Selecione uma categoria existente ou crie uma nova.</string>
+    <string name="item_entry_category_helper">Selecione uma categoria ou crie uma nova.</string>
 
     <string name="item_entry_section_pricing">PREÇO</string>
-    <string name="item_entry_price_type_fiat">Fiat</string>
+    <string name="item_entry_price_type_fiat">Moeda local</string>
     <string name="item_entry_price_type_bitcoin">Bitcoin</string>
     <string name="item_entry_currency_symbol_default">$</string>
     <string name="item_entry_hint_price_fiat">0.00</string>
@@ -477,40 +478,51 @@
     <string name="item_entry_hint_price_sats">0</string>
     <string name="item_entry_label_sats">sats</string>
 
-    <string name="item_entry_label_apply_vat">Aplicar imposto</string>
+    <string name="item_entry_label_apply_vat">Aplicar imposto (IVA)</string>
     <string name="item_entry_label_price_includes_vat">O preço inclui imposto</string>
     <string name="item_entry_label_vat_rate">Taxa de imposto</string>
     <string name="item_entry_hint_vat_rate">20</string>
 
     <string name="item_entry_price_breakdown_title">Detalhamento do preço</string>
-    <string name="item_entry_price_breakdown_net_label">Preço líquido (sem imposto)</string>
+    <string name="item_entry_price_breakdown_net_label">Preço sem imposto</string>
     <string name="item_entry_price_breakdown_net_value_default">$0.00</string>
     <string name="item_entry_price_breakdown_vat_label">Imposto (20%)</string>
     <string name="item_entry_price_breakdown_vat_value_default">$0.00</string>
-    <string name="item_entry_price_breakdown_total_label">Total (com imposto)</string>
+    <string name="item_entry_price_breakdown_total_label">O cliente paga</string>
     <string name="item_entry_price_breakdown_total_value_default">$0.00</string>
 
     <string name="item_entry_price_helper">Defina um preço fixo na sua moeda preferida. Preços em Bitcoin são em satoshis (sats).</string>
 
-    <string name="item_entry_section_identification">IDENTIFICAÇÃO</string>
-    <string name="item_entry_label_gtin">GTIN</string>
-    <string name="item_entry_hint_gtin">Escaneie ou insira o código de barras</string>
+    <string name="item_entry_section_identification">CÓDIGO DE BARRAS E SKU</string>
+    <string name="item_entry_label_gtin">Código de barras</string>
+    <string name="item_entry_hint_gtin">Escaneie ou digite o código</string>
     <string name="item_entry_scan_barcode">Escanear código de barras</string>
     <string name="item_entry_label_sku">SKU</string>
-    <string name="item_entry_hint_sku">Código de estoque interno</string>
-    <string name="item_entry_error_gtin_exists">Este GTIN já existe</string>
-    <string name="item_entry_error_sku_exists">Este SKU já existe</string>
+    <string name="item_entry_hint_sku">Seu código interno de produto</string>
+    <string name="item_entry_error_gtin_exists">Outro item já usa este código de barras</string>
+    <string name="item_entry_error_sku_exists">Outro item já usa este SKU</string>
+    <string name="item_entry_error_name_required">Dê um nome ao seu item</string>
+    <string name="item_entry_error_price_required">Insira um preço</string>
+    <string name="item_entry_error_price_positive">O preço não pode ser negativo</string>
+    <string name="item_entry_error_price_decimals">Use até 2 casas decimais</string>
+    <string name="item_entry_error_sats_required">Insira um preço em sats</string>
+    <string name="item_entry_error_sats_positive">Sats não podem ser negativos</string>
+    <string name="item_entry_error_sats_whole_number">Sats devem ser um número inteiro</string>
+    <string name="item_entry_error_quantity_positive">O estoque não pode ser negativo</string>
+    <string name="item_entry_error_threshold_positive">O limite não pode ser negativo</string>
 
     <string name="item_entry_section_inventory">ESTOQUE</string>
-    <string name="item_entry_label_track_quantity">Controlar quantidade</string>
-    <string name="item_entry_label_current_stock">Estoque atual</string>
+    <string name="item_entry_label_track_quantity">Controlar estoque</string>
+    <string name="item_entry_label_current_stock">Em estoque</string>
     <string name="item_entry_hint_current_stock">0</string>
     <string name="item_entry_label_low_stock_alert">Alerta de estoque baixo</string>
     <string name="item_entry_label_alert_when_below">Alertar quando abaixo de</string>
     <string name="item_entry_hint_alert_threshold">5</string>
-    <string name="item_entry_inventory_helper">Ative o controle de estoque para monitorar os níveis e receber alertas de estoque baixo.</string>
+    <string name="item_entry_inventory_helper">Receba avisos quando o estoque estiver baixo.</string>
 
     <string name="item_entry_button_cancel">Cancelar</string>
+    <string name="item_entry_button_delete">Excluir item</string>
+    <string name="item_entry_delete_confirmation_message">Este item será removido permanentemente do seu catálogo.</string>
 
     <!-- Item product row -->
     <string name="item_product_drag_handle_description">Arraste para reordenar</string>

@@ -39,7 +39,7 @@ class ItemFormValidator(
         // Validate name
         val name = nameInput.text.toString().trim()
         if (name.isEmpty()) {
-            nameInput.error = "Item name is required"
+            nameInput.error = activity.getString(R.string.item_entry_error_name_required)
             nameInput.requestFocus()
             return ValidationResult(false)
         }
@@ -67,7 +67,7 @@ class ItemFormValidator(
                 val priceInput = pricingHandler.getPriceInput()
                 val priceStr = priceInput.text.toString().trim()
                 if (priceStr.isEmpty()) {
-                    priceInput.error = "Price is required"
+                    priceInput.error = activity.getString(R.string.item_entry_error_price_required)
                     priceInput.requestFocus()
                     return ValidationResult(false)
                 }
@@ -76,14 +76,14 @@ class ItemFormValidator(
                 val normalizedPriceStr = priceStr.replace(",", ".")
                 val enteredPrice = normalizedPriceStr.toDoubleOrNull() ?: 0.0
                 if (enteredPrice < 0) {
-                    priceInput.error = "Price must be positive"
+                    priceInput.error = activity.getString(R.string.item_entry_error_price_positive)
                     priceInput.requestFocus()
                     return ValidationResult(false)
                 }
 
                 // Validate max 2 decimal places (accepting both . and , as separators)
                 if (!pricingHandler.isValidFiatPrice(priceStr)) {
-                    priceInput.error = "Maximum 2 decimal places allowed"
+                    priceInput.error = activity.getString(R.string.item_entry_error_price_decimals)
                     priceInput.requestFocus()
                     return ValidationResult(false)
                 }
@@ -100,21 +100,21 @@ class ItemFormValidator(
                 val satsInput = pricingHandler.getSatsInput()
                 val satsStr = satsInput.text.toString().trim()
                 if (satsStr.isEmpty()) {
-                    satsInput.error = "Price in sats is required"
+                    satsInput.error = activity.getString(R.string.item_entry_error_sats_required)
                     satsInput.requestFocus()
                     return ValidationResult(false)
                 }
 
                 satsPrice = satsStr.toLongOrNull() ?: 0L
                 if (satsPrice < 0) {
-                    satsInput.error = "Sats must be positive"
+                    satsInput.error = activity.getString(R.string.item_entry_error_sats_positive)
                     satsInput.requestFocus()
                     return ValidationResult(false)
                 }
 
                 // Validate it's an integer (no decimals)
                 if (satsStr.contains(".") || satsStr.contains(",")) {
-                    satsInput.error = "Sats must be a whole number"
+                    satsInput.error = activity.getString(R.string.item_entry_error_sats_whole_number)
                     satsInput.requestFocus()
                     return ValidationResult(false)
                 }
@@ -128,7 +128,7 @@ class ItemFormValidator(
         if (inventoryHandler.isTrackingEnabled()) {
             quantity = inventoryHandler.getQuantity()
             if (quantity < 0) {
-                inventoryHandler.getQuantityInput().error = "Quantity must be positive"
+                inventoryHandler.getQuantityInput().error = activity.getString(R.string.item_entry_error_quantity_positive)
                 inventoryHandler.getQuantityInput().requestFocus()
                 return ValidationResult(false)
             }
@@ -136,7 +136,7 @@ class ItemFormValidator(
             if (inventoryHandler.isAlertEnabled()) {
                 alertThreshold = inventoryHandler.getAlertThreshold()
                 if (alertThreshold < 0) {
-                    inventoryHandler.getAlertThresholdInput().error = "Threshold must be positive"
+                    inventoryHandler.getAlertThresholdInput().error = activity.getString(R.string.item_entry_error_threshold_positive)
                     inventoryHandler.getAlertThresholdInput().requestFocus()
                     return ValidationResult(false)
                 }

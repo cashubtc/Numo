@@ -233,9 +233,9 @@ class ItemEntryActivity : AppCompatActivity() {
     }
 
     private fun setupEditMode() {
-        findViewById<TextView>(R.id.toolbar_title)?.text = "Edit Item"
+        findViewById<TextView>(R.id.toolbar_title)?.text = getString(R.string.item_entry_title_edit)
         findViewById<Button>(R.id.item_cancel_button).apply {
-            text = "Delete Item"
+            text = getString(R.string.item_entry_button_delete)
             setTextColor(ContextCompat.getColor(this@ItemEntryActivity, R.color.color_warning_red))
         }
     }
