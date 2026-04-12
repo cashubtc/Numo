@@ -88,8 +88,10 @@ class SelectionItemsAdapter(
                 customVariationItems.remove(customItem)
                 val index = items.indexOfFirst { it.id == itemId }
                 if (index >= 0) {
+                    val oldItems = ArrayList(items)
                     items.removeAt(index)
-                    notifyItemRemoved(index)
+                    val diffResult = DiffUtil.calculateDiff(ItemDiffCallback(oldItems, oldQuantities, items, basketQuantities))
+                    diffResult.dispatchUpdatesTo(this)
                     return
                 }
             }
