@@ -139,9 +139,8 @@ class AmountDisplayManager(
                 val fiatValue = bitcoinPriceWorker?.satoshisToFiat(satsValue) ?: 0.0
                 val currencyCode = CurrencyManager.getInstance(context).getCurrentCurrency()
                 val currency = Amount.Currency.fromCode(currencyCode)
-                val fiatCents = if (currency.isZeroDecimal()) fiatValue.toLong() else (fiatValue * 100).toLong()
                 
-                secondaryDisplayText = Amount(fiatCents, currency).toShortString()
+                secondaryDisplayText = Amount.fromMajorUnits(fiatValue, currency).toShortString()
                 switchCurrencyButton.visibility = View.VISIBLE
             } else {
                 // No price data - just show "BTC" without swap icon
