@@ -14,7 +14,7 @@
         android:layout_height="@dimen/top_bar_height"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="@dimen/space_s"
+        android:paddingHorizontal="@dimen/space_l"
         android:background="@color/color_bg_white"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -217,7 +217,7 @@
                     android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:paddingTop="@dimen/section_gap"
                     android:paddingBottom="@dimen/row_padding_vertical"
-                    android:text="ITEMS"
+                    android:text="@string/basket_receipt_items_header_default"
                     tools:text="3 ITEMS" />
 
                 <!-- Items List Container -->

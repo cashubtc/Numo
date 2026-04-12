@@ -136,8 +136,7 @@
                 android:id="@+id/item_price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="15sp"
+                android:textAppearance="@style/Text.Body"
                 tools:text="$24.99" />
 
             <!-- Disclosure Chevron -->
@@ -167,6 +166,7 @@
                 android:layout_height="@dimen/icon_size_large"
                 android:padding="@dimen/space_m"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/cd_edit"
                 android:src="@drawable/ic_edit"
                 android:visibility="gone" />
 
@@ -176,6 +176,7 @@
                 android:layout_height="@dimen/icon_size_large"
                 android:padding="@dimen/space_m"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/cd_delete"
                 android:src="@drawable/ic_delete"
                 android:visibility="gone" />
         </LinearLayout>

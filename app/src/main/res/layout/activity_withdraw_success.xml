@@ -34,9 +34,7 @@
                 android:layout_marginBottom="@dimen/space_s"
                 android:gravity="center"
                 android:text="@string/withdraw_success_amount"
-                android:textColor="@color/color_text_primary"
-                android:textSize="28sp"
-                android:textStyle="bold" />
+                android:textAppearance="@style/Text.DisplayLarge" />
 
             <!-- Destination text -->
             <TextView
@@ -46,8 +44,8 @@
                 android:layout_marginBottom="@dimen/space_2xl"
                 android:gravity="center"
                 android:text="@string/withdraw_success_destination"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="16sp" />
+                android:textAppearance="@style/Text.Body"
+                android:textColor="@color/color_text_secondary" />
 
             <!-- Animated checkmark container with clipChildren disabled -->
             <FrameLayout
@@ -91,9 +89,8 @@
         android:background="@drawable/bg_button_secondary_gray"
         android:text="@string/withdraw_success_close"
         android:textAllCaps="false"
+        android:textAppearance="@style/Text.Subtitle"
         android:textColor="@color/color_bg_white"
-        android:textSize="18sp"
-        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

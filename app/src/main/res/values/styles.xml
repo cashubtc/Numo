@@ -42,6 +42,22 @@
         <item name="android:letterSpacing">-0.02</item>
     </style>
 
+    <!-- DisplayXL: Onboarding hero numbers, large secondary displays -->
+    <style name="Text.DisplayXL">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:lineHeight">38sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+    </style>
+
+    <!-- DisplayLarge: Secondary amount displays -->
+    <style name="Text.DisplayLarge">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:lineHeight">34sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+    </style>
+
     <!-- Heading: Page titles, major sections -->
     <style name="Text.Heading1">
         <item name="android:fontFamily">sans-serif-medium</item>

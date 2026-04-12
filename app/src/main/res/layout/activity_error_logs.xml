@@ -25,7 +25,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/common_back"
             android:src="@drawable/ic_close"
-            android:tint="@color/color_text_primary"
+            app:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -87,6 +87,7 @@
             android:text="@string/developer_error_logs_filter_today" />
 
         <ImageView
+            android:importantForAccessibility="no"
             android:id="@+id/date_filter_button"
             android:layout_width="@dimen/icon_size_small"
             android:layout_height="@dimen/icon_size_small"

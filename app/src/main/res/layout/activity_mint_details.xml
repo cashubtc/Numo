@@ -12,7 +12,7 @@
         android:layout_height="@dimen/top_bar_height"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="@dimen/space_s"
+        android:paddingHorizontal="@dimen/space_l"
         android:elevation="0dp"
         android:background="@color/color_bg_white"
         app:layout_constraintTop_toTopOf="parent">
@@ -56,6 +56,7 @@
         app:layout_constraintTop_toBottomOf="@id/top_bar">
 
         <ImageView
+            android:importantForAccessibility="no"
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:layout_marginEnd="@dimen/space_m"
@@ -73,8 +74,8 @@
 
         <ImageButton
             android:id="@+id/error_retry_button"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_refresh"
             app:tint="@color/color_error"
@@ -188,6 +189,7 @@
                             android:visibility="gone">
 
                             <ImageView
+                                android:importantForAccessibility="no"
                                 android:layout_width="16dp"
                                 android:layout_height="16dp"
                                 android:layout_marginEnd="@dimen/space_s"
@@ -268,6 +270,7 @@
                     android:gravity="center_vertical">
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         android:layout_width="@dimen/icon_size_small"
                         android:layout_height="@dimen/icon_size_small"
                         android:layout_marginEnd="@dimen/space_m"
@@ -305,12 +308,7 @@
                     android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/mint_details_details" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <!-- URL Row -->
+                <!-- URL Row -->
                     <LinearLayout
                         android:id="@+id/url_row"
                         android:layout_width="match_parent"
@@ -341,6 +339,7 @@
                             android:ellipsize="middle" />
 
                         <ImageView
+                            android:importantForAccessibility="no"
                             android:layout_width="16dp"
                             android:layout_height="16dp"
                             android:layout_marginStart="@dimen/space_s"
@@ -401,8 +400,6 @@
                             android:textAppearance="@style/Text.RowSubtitle"
                             android:textAlignment="textEnd" />
 
-                    </LinearLayout>
-
                 </LinearLayout>
 
             </LinearLayout>
@@ -446,12 +443,7 @@
                 android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/mint_details_actions" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <!-- Set as Lightning Mint Button -->
+            <!-- Set as Lightning Mint Button -->
                 <LinearLayout
                     android:id="@+id/set_lightning_button"
                     android:layout_width="match_parent"
@@ -465,6 +457,7 @@
                     android:focusable="true">
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         android:layout_width="@dimen/icon_size_small"
                         android:layout_height="@dimen/icon_size_small"
                         android:layout_marginEnd="@dimen/row_icon_gap"
@@ -493,6 +486,7 @@
                     android:focusable="true">
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         android:layout_width="@dimen/icon_size_small"
                         android:layout_height="@dimen/icon_size_small"
                         android:layout_marginEnd="@dimen/row_icon_gap"
@@ -521,6 +515,7 @@
                     android:focusable="true">
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         android:layout_width="@dimen/icon_size_small"
                         android:layout_height="@dimen/icon_size_small"
                         android:layout_marginEnd="@dimen/row_icon_gap"
@@ -533,8 +528,6 @@
                         android:textAppearance="@style/Text.RowTitle"
                         android:text="@string/mint_details_delete"
                         android:textColor="@color/color_error" />
-
-                </LinearLayout>
 
             </LinearLayout>
 

@@ -37,9 +37,7 @@
             android:layout_marginBottom="@dimen/space_l"
             android:gravity="center"
             android:text="@string/nfc_enable_title"
-            android:textColor="@color/color_text_primary"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:textAppearance="@style/Text.Heading1" />
 
         <!-- Message -->
         <TextView
@@ -47,23 +45,19 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="@string/nfc_enable_message"
-            android:textColor="@color/color_text_secondary"
-            android:textSize="16sp" />
+            android:textAppearance="@style/Text.Body" />
 
     </LinearLayout>
 
     <!-- Settings Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/settings_button"
+        style="@style/Widget.Numo.Button.Dialog.Confirm"
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_bar_height"
         android:layout_marginHorizontal="@dimen/space_xl"
         android:layout_marginBottom="@dimen/space_3xl"
         android:text="@string/nfc_enable_button"
-        android:textAllCaps="false"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:cornerRadius="@dimen/radius_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

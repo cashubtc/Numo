@@ -26,9 +26,7 @@
             android:layout_marginTop="@dimen/margin_screen_horizontal"
             android:paddingHorizontal="@dimen/space_xl"
             android:text="@string/onboarding_add_mint_sheet_title"
-            android:textSize="22sp"
-            android:textColor="@color/color_text_primary"
-            android:fontFamily="sans-serif-medium" />
+            android:textAppearance="@style/Text.DialogTitle" />
 
         <!-- URL Input -->
         <com.google.android.material.textfield.TextInputLayout
@@ -94,8 +92,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/space_m"
                     android:text="@string/onboarding_add_mint_loading"
-                    android:textSize="15sp"
-                    android:textColor="@color/color_text_secondary" />
+                    android:textAppearance="@style/Text.Body" />
 
             </LinearLayout>
 

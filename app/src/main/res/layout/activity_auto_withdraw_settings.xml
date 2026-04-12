@@ -14,7 +14,7 @@
         android:layout_height="@dimen/top_bar_height"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="@dimen/space_s"
+        android:paddingHorizontal="@dimen/space_l"
         android:background="@color/color_bg_white"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -136,10 +136,9 @@
                                     android:id="@+id/status_text"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-medium"
+                                    android:textAppearance="@style/Text.Badge"
                                     android:text="@string/auto_withdraw_status_inactive"
-                                    android:textColor="@color/color_success_green"
-                                    android:textSize="11sp" />
+                                    android:textColor="@color/color_success_green" />
                             </LinearLayout>
 
                             <!-- Title Row -->
@@ -157,20 +156,17 @@
                                     android:id="@+id/hero_title"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-medium"
+                                    android:textAppearance="@style/Text.RowTitle"
                                     android:text="@string/auto_withdraw_hero_title"
-                                    android:textColor="@color/color_text_primary"
-                                    android:textSize="17sp"
                                     android:letterSpacing="-0.012" />
                                 <TextView
                                     android:id="@+id/hero_subtitle"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="2dp"
-                                    android:fontFamily="sans-serif"
+                                    android:textAppearance="@style/Text.Caption"
                                     android:text="@string/auto_withdraw_hero_subtitle"
-                                    android:textColor="@color/color_text_secondary"
-                                    android:textSize="13sp" />
+                                    android:textColor="@color/color_text_secondary" />
 
                             </LinearLayout>
 
@@ -180,15 +176,9 @@
 
             </LinearLayout>
 
-            <!-- Main Content Area -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <!-- ==================== -->
-                <!-- MAIN TOGGLE ROW -->
-                <!-- ==================== -->
+            <!-- ==================== -->
+            <!-- MAIN TOGGLE ROW -->
+            <!-- ==================== -->
                 <LinearLayout
                     android:id="@+id/enable_toggle_row"
                     android:layout_width="match_parent"
@@ -202,6 +192,7 @@
                     android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         android:id="@+id/toggle_icon"
                         android:layout_width="@dimen/icon_size_small"
                         android:layout_height="@dimen/icon_size_small"
@@ -296,9 +287,9 @@
                                 android:fontFamily="sans-serif"
                                 android:hint="@string/auto_withdraw_lightning_address_hint"
                                 android:inputType="textEmailAddress"
+                                android:textAppearance="@style/Text.Body"
                                 android:textColor="@color/color_text_primary"
-                                android:textColorHint="@color/color_text_tertiary"
-                                android:textSize="16sp" />
+                                android:textColorHint="@color/color_text_tertiary" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -309,8 +300,7 @@
                             android:layout_marginTop="@dimen/space_s"
                             android:alpha="0.7"
                             android:text="@string/auto_withdraw_lightning_address_helper"
-                            android:textColor="@color/color_text_secondary"
-                            android:textSize="13sp" />
+                            android:textAppearance="@style/Text.Helper" />
 
                     </LinearLayout>
 
@@ -347,14 +337,9 @@
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
                             android:padding="@dimen/margin_screen_horizontal">
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:gravity="center_vertical"
-                                android:orientation="horizontal">
 
                                 <LinearLayout
                                     android:layout_width="0dp"
@@ -365,18 +350,16 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:fontFamily="sans-serif-medium"
-                                        android:text="@string/auto_withdraw_threshold_title"
-                                        android:textColor="@color/color_text_primary"
-                                        android:textSize="17sp" />
+                                        android:textAppearance="@style/Text.RowTitle"
+                                        android:text="@string/auto_withdraw_threshold_title" />
 
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:layout_marginTop="2dp"
                                         android:text="@string/auto_withdraw_threshold_subtitle"
-                                        android:textColor="@color/color_text_secondary"
-                                        android:textSize="14sp" />
+                                        android:textAppearance="@style/Text.RowSubtitle"
+                                        android:textColor="@color/color_text_secondary" />
 
                                 </LinearLayout>
 
@@ -390,12 +373,9 @@
                                     android:paddingHorizontal="@dimen/space_l"
                                     android:paddingVertical="@dimen/space_m"
                                     android:text="₿50,000"
-                                    android:textColor="@color/color_text_primary"
-                                    android:textSize="16sp"
+                                    android:textAppearance="@style/Text.RowTitle"
                                     android:clickable="true"
                                     android:focusable="true" />
-
-                            </LinearLayout>
 
                         </LinearLayout>
 
@@ -421,18 +401,16 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:fontFamily="sans-serif-medium"
-                                        android:text="@string/auto_withdraw_percentage_title"
-                                        android:textColor="@color/color_text_primary"
-                                        android:textSize="17sp" />
+                                        android:textAppearance="@style/Text.RowTitle"
+                                        android:text="@string/auto_withdraw_percentage_title" />
 
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:layout_marginTop="2dp"
                                         android:text="@string/auto_withdraw_percentage_subtitle"
-                                        android:textColor="@color/color_text_secondary"
-                                        android:textSize="14sp" />
+                                        android:textAppearance="@style/Text.RowSubtitle"
+                                        android:textColor="@color/color_text_secondary" />
 
                                 </LinearLayout>
 
@@ -448,8 +426,7 @@
                                     android:paddingVertical="@dimen/space_m"
                                     android:text="95%"
                                     android:textAlignment="center"
-                                    android:textColor="@color/color_text_primary"
-                                    android:textSize="16sp" />
+                                    android:textAppearance="@style/Text.RowTitle" />
 
                             </LinearLayout>
 
@@ -481,16 +458,14 @@
                                     android:layout_width="0dp"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
-                                    android:text="50%"
-                                    android:textColor="@color/color_text_tertiary"
-                                    android:textSize="13sp" />
+                                    android:text="@string/auto_withdraw_percentage_min"
+                                    android:textAppearance="@style/Text.Caption" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="98%"
-                                    android:textColor="@color/color_text_tertiary"
-                                    android:textSize="13sp" />
+                                    android:text="@string/auto_withdraw_percentage_max"
+                                    android:textAppearance="@style/Text.Caption" />
 
                             </LinearLayout>
 
@@ -527,6 +502,7 @@
                     android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         android:layout_width="@dimen/icon_size_small"
                         android:layout_height="@dimen/icon_size_small"
                         android:layout_marginEnd="@dimen/row_icon_gap"
@@ -555,6 +531,7 @@
                     </LinearLayout>
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/ic_chevron_forward"
@@ -593,8 +570,8 @@
                         android:paddingHorizontal="@dimen/space_s"
                         android:paddingVertical="@dimen/space_xs"
                         android:text="@string/auto_withdraw_see_all"
+                        android:textAppearance="@style/Text.SecondaryButton"
                         android:textColor="@color/color_bitcoin_orange"
-                        android:textSize="14sp"
                         android:visibility="gone" />
 
                 </LinearLayout>
@@ -625,8 +602,6 @@
                         tools:listitem="@layout/item_auto_withdraw_history" />
 
                 </androidx.cardview.widget.CardView>
-
-            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>

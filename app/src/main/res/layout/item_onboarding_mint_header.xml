@@ -18,8 +18,7 @@
         android:id="@+id/header_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="sans-serif"
-        android:textColor="@color/color_onboarding_text_muted"
-        android:textSize="13sp" />
+        android:textAppearance="@style/Text.Caption"
+        android:textColor="@color/color_onboarding_text_muted" />
 
 </LinearLayout>

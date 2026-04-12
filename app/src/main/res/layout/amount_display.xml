@@ -6,6 +6,5 @@
     android:gravity="center"
     android:padding="@dimen/space_l"
     android:text="0"
-    android:textColor="?android:attr/textColor"
-    android:textSize="36sp"
-    android:textStyle="bold" />
+    android:textAppearance="@style/Text.DisplayXL"
+    android:textColor="?android:attr/textColor" />

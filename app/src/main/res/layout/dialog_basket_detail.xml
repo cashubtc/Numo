@@ -69,9 +69,7 @@
                 android:id="@+id/basket_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="18sp"
-                android:textColor="@color/color_text_primary"
-                android:fontFamily="sans-serif-medium"
+                android:textAppearance="@style/Text.Subtitle"
                 tools:text="Table 5" />
 
             <!-- PAID Badge -->
@@ -83,9 +81,8 @@
                 android:paddingHorizontal="@dimen/space_s"
                 android:paddingVertical="3dp"
                 android:text="@string/basket_archive_paid_badge"
-                android:textSize="11sp"
+                android:textAppearance="@style/Text.Badge"
                 android:textColor="@android:color/white"
-                android:fontFamily="sans-serif-medium"
                 android:letterSpacing="0.03"
                 android:background="@drawable/bg_badge_success_pill" />
 
@@ -97,8 +94,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_xs"
-            android:textSize="14sp"
-            android:textColor="@color/color_text_tertiary"
+            android:textAppearance="@style/Text.RowSubtitle"
             tools:text="Nov 26, 2024 at 2:30 PM" />
 
         <!-- Total Amount (Large) -->
@@ -107,9 +103,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_l"
+            android:textAppearance="@style/Text.DisplayXL"
             android:textSize="34sp"
-            android:textColor="@color/color_text_primary"
-            android:fontFamily="sans-serif-medium"
             android:letterSpacing="-0.02"
             tools:text="$74.97" />
 
@@ -135,9 +130,8 @@
             android:paddingHorizontal="@dimen/space_l"
             android:paddingTop="@dimen/row_padding_vertical"
             android:paddingBottom="@dimen/space_m"
-            android:textSize="11sp"
-            android:fontFamily="sans-serif-medium"
-            android:textColor="@color/color_text_tertiary"
+            android:textAppearance="@style/Text.Overline"
+            android:textAllCaps="false"
             android:letterSpacing="0.06"
             tools:text="3 ITEMS" />
 
@@ -171,24 +165,13 @@
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/view_payment_button"
+        style="@style/Widget.Numo.Button.Dialog.Confirm"
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_bar_height"
         android:layout_marginTop="@dimen/margin_screen_horizontal"
         android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
         android:layout_marginBottom="@dimen/margin_screen_horizontal"
         android:text="@string/basket_archive_detail_view_payment"
-        android:textColor="@color/color_bg_white"
-        android:textSize="16sp"
-        android:textAllCaps="false"
-        android:fontFamily="sans-serif-medium"
-        android:insetTop="0dp"
-        android:insetBottom="0dp"
-        android:stateListAnimator="@null"
-        app:backgroundTint="@color/color_text_primary"
-        app:cornerRadius="@dimen/radius_button"
-        app:rippleColor="@color/color_ripple_on_dark"
-        app:strokeWidth="0dp"
-        app:elevation="0dp"
         app:icon="@drawable/ic_receipt"
         app:iconTint="@android:color/white"
         app:iconPadding="@dimen/space_s"

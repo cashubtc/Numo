@@ -22,7 +22,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/common_back"
             android:src="@drawable/ic_close"
-            android:tint="@color/color_text_primary"
+            app:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -79,6 +79,7 @@
                 android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -92,11 +93,6 @@
                     android:text="@string/settings_item_items_title"
                     android:textAppearance="@style/Text.RowTitle" />
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
 
             </LinearLayout>
 
@@ -114,6 +110,7 @@
                 android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -127,11 +124,6 @@
                     android:text="@string/settings_item_tips_title"
                     android:textAppearance="@style/Text.RowTitle" />
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
 
             </LinearLayout>
 
@@ -149,6 +141,7 @@
                 android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -162,11 +155,6 @@
                     android:text="@string/settings_item_basket_names_title"
                     android:textAppearance="@style/Text.RowTitle" />
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
 
             </LinearLayout>
 
@@ -197,6 +185,7 @@
                 android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -210,11 +199,6 @@
                     android:text="@string/settings_item_currency_title"
                     android:textAppearance="@style/Text.RowTitle" />
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
 
             </LinearLayout>
 
@@ -232,6 +216,7 @@
                 android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -245,11 +230,6 @@
                     android:text="@string/settings_item_mints_title"
                     android:textAppearance="@style/Text.RowTitle" />
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
 
             </LinearLayout>
 
@@ -267,6 +247,7 @@
                 android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -280,11 +261,6 @@
                     android:text="@string/settings_item_webhooks_title"
                     android:textAppearance="@style/Text.RowTitle" />
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
 
             </LinearLayout>
 
@@ -302,6 +278,7 @@
                 android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -315,11 +292,6 @@
                     android:text="@string/settings_item_withdrawals_title"
                     android:textAppearance="@style/Text.RowTitle" />
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
 
             </LinearLayout>
 
@@ -350,6 +322,7 @@
                 android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -363,11 +336,6 @@
                     android:text="@string/settings_item_security_title"
                     android:textAppearance="@style/Text.RowTitle" />
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
 
             </LinearLayout>
 
@@ -398,6 +366,7 @@
                 android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -411,11 +380,6 @@
                     android:text="@string/settings_item_language_title"
                     android:textAppearance="@style/Text.RowTitle" />
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
 
             </LinearLayout>
 
@@ -433,6 +397,7 @@
                 android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -446,11 +411,6 @@
                     android:text="@string/settings_item_theme_title"
                     android:textAppearance="@style/Text.RowTitle" />
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
 
             </LinearLayout>
 
@@ -468,6 +428,7 @@
                 android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -481,11 +442,6 @@
                     android:text="@string/settings_item_about_title"
                     android:textAppearance="@style/Text.RowTitle" />
 
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
 
             </LinearLayout>
 
@@ -522,6 +478,7 @@
                     android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         android:layout_width="@dimen/icon_size_small"
                         android:layout_height="@dimen/icon_size_small"
                         android:layout_marginEnd="@dimen/row_icon_gap"
@@ -535,11 +492,7 @@
                         android:text="@string/settings_item_developer_title"
                         android:textAppearance="@style/Text.RowTitle" />
 
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_forward"
-                        app:tint="@color/color_text_tertiary" />
+
 
                 </LinearLayout>
 

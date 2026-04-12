@@ -23,7 +23,7 @@
             android:layout_width="@dimen/icon_size_large"
             android:layout_height="@dimen/icon_size_large"
             android:layout_marginEnd="0dp"
-            android:contentDescription="Mint icon"
+            android:contentDescription="@string/cd_mint_icon"
             android:importantForAccessibility="no"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_bitcoin"
@@ -59,7 +59,7 @@
                     android:layout_width="22dp"
                     android:layout_height="22dp"
                     android:button="@null"
-                    android:contentDescription="Select as Lightning mint"
+                    android:contentDescription="@string/desc_select_lightning_mint"
                     android:drawableStart="@drawable/ic_lightning_small"
                     android:drawablePadding="0dp"
                     android:gravity="center" />
@@ -73,9 +73,7 @@
                     android:layout_weight="1"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
+                    android:textAppearance="@style/Text.RowTitle"
                     tools:text="Minibits" />
 
             </LinearLayout>
@@ -88,10 +86,10 @@
                 android:layout_marginTop="2dp"
                 android:layout_marginStart="28dp"
                 android:ellipsize="end"
+                android:textAppearance="@style/Text.Badge"
                 android:fontFamily="monospace"
                 android:maxLines="1"
                 android:textColor="@color/color_text_tertiary"
-                android:textSize="11sp"
                 tools:text="mint.minibits.cash/Bitcoin" />
 
         </LinearLayout>
@@ -106,10 +104,10 @@
 
             <ImageButton
                 android:id="@+id/remove_mint_button"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Remove mint"
+                android:contentDescription="@string/mint_remove_description"
                 android:padding="@dimen/space_s"
                 android:src="@drawable/ic_delete"
                 app:tint="@color/color_icon_secondary" />
@@ -144,8 +142,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/mints_settings_balance_label"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="14sp" />
+                android:textAppearance="@style/Text.SecondaryButton" />
 
             <View
                 android:layout_width="0dp"
@@ -165,9 +162,7 @@
                 android:id="@+id/mint_balance_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/color_text_primary"
-                android:textSize="16sp"
-                android:textStyle="bold"
+                android:textAppearance="@style/Text.RowTitle"
                 tools:text="₿21,000" />
 
         </LinearLayout>

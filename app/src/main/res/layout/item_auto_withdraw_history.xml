@@ -37,6 +37,7 @@
                 android:backgroundTint="@color/color_bg_light">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:id="@+id/status_icon"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
@@ -57,6 +58,7 @@
                 android:visibility="gone">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="12dp"
                     android:layout_height="12dp"
                     android:layout_gravity="center"
@@ -73,10 +75,8 @@
             android:layout_marginStart="@dimen/row_icon_gap"
             android:layout_marginEnd="@dimen/space_m"
             android:ellipsize="end"
-            android:fontFamily="sans-serif-medium"
+            android:textAppearance="@style/Text.RowTitle"
             android:maxLines="1"
-            android:textColor="@color/color_text_primary"
-            android:textSize="17sp"
             app:layout_constraintEnd_toStartOf="@id/status_badge"
             app:layout_constraintStart_toEndOf="@id/icon_container"
             app:layout_constraintTop_toTopOf="@id/icon_container"
@@ -92,8 +92,8 @@
             android:layout_marginEnd="@dimen/space_m"
             android:ellipsize="middle"
             android:maxLines="1"
+            android:textAppearance="@style/Text.RowSubtitle"
             android:textColor="@color/color_text_secondary"
-            android:textSize="14sp"
             app:layout_constraintEnd_toStartOf="@id/status_badge"
             app:layout_constraintStart_toEndOf="@id/icon_container"
             app:layout_constraintTop_toBottomOf="@id/amount_text"
@@ -109,8 +109,8 @@
             android:layout_marginEnd="@dimen/space_m"
             android:ellipsize="end"
             android:maxLines="1"
+            android:textAppearance="@style/Text.RowSubtitle"
             android:textColor="@color/color_text_secondary"
-            android:textSize="14sp"
             app:layout_constraintEnd_toStartOf="@id/status_badge"
             app:layout_constraintStart_toEndOf="@id/icon_container"
             app:layout_constraintTop_toBottomOf="@id/address_text"
@@ -124,8 +124,8 @@
             android:layout_marginStart="@dimen/row_icon_gap"
             android:layout_marginTop="2dp"
             android:layout_marginEnd="@dimen/space_m"
+            android:textAppearance="@style/Text.RowSubtitle"
             android:textColor="@color/color_text_secondary"
-            android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/icon_container"
             app:layout_constraintTop_toBottomOf="@id/mint_text"
@@ -140,9 +140,9 @@
             android:fontFamily="sans-serif-medium"
             android:paddingHorizontal="@dimen/space_m"
             android:paddingVertical="@dimen/space_xs"
-            android:text="Sent"
+            android:text="@string/auto_withdraw_status_completed"
+            android:textAppearance="@style/Text.Badge"
             android:textColor="@color/color_success_green"
-            android:textSize="11sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/icon_container"
             tools:text="Sent" />
@@ -157,15 +157,16 @@
             android:fontFamily="sans-serif"
             android:paddingHorizontal="@dimen/space_s"
             android:paddingVertical="2dp"
-            android:text="AUTO"
+            android:text="@string/label_auto"
+            android:textAppearance="@style/Text.Badge"
             android:textColor="@color/color_text_secondary"
-            android:textSize="10sp"
             app:layout_constraintEnd_toEndOf="@id/status_badge"
             app:layout_constraintTop_toBottomOf="@id/status_badge"
             tools:visibility="visible" />
 
         <!-- Expand/share indicator -->
         <ImageView
+            android:importantForAccessibility="no"
             android:id="@+id/expand_indicator"
             android:layout_width="20dp"
             android:layout_height="20dp"
@@ -204,8 +205,8 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
                 android:text="@string/auto_withdraw_error_title"
-                android:textColor="@color/color_error"
-                android:textSize="11sp" />
+                android:textAppearance="@style/Text.Badge"
+                android:textColor="@color/color_error" />
 
             <TextView
                 android:id="@+id/error_text"
@@ -213,8 +214,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_xs"
                 android:fontFamily="sans-serif"
+                android:textAppearance="@style/Text.Caption"
                 android:textColor="@color/color_text_secondary"
-                android:textSize="13sp"
                 tools:text="Payment failed: Quote state is UNPAID" />
 
         </LinearLayout>

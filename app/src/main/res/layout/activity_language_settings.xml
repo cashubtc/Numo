@@ -22,7 +22,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/common_back"
             android:src="@drawable/ic_chevron_back"
-            android:tint="@color/color_text_primary"
+            app:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -113,7 +113,7 @@
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:paddingTop="@dimen/space_l"
-                android:textSize="14sp"
+                android:textAppearance="@style/Text.Body"
                 android:textColor="@color/color_text_secondary" />
 
         </LinearLayout>

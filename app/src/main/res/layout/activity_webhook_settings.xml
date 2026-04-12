@@ -21,7 +21,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/common_back"
             android:src="@drawable/ic_chevron_back"
-            android:tint="@color/color_text_primary"
+            app:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -92,7 +92,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
                 android:layout_marginTop="@dimen/space_s"
-                android:text="+ Add Endpoint"
+                android:text="@string/action_add_endpoint"
                 android:gravity="center" />
 
             <TextView
@@ -117,6 +117,7 @@
                 android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -126,7 +127,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Sync All Endpoints"
+                    android:text="@string/action_sync_all_endpoints"
                     android:textAppearance="@style/Text.RowTitle" />
             </LinearLayout>
         </LinearLayout>

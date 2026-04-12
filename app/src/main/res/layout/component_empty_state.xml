@@ -16,6 +16,7 @@
 
         <ImageView
             android:id="@+id/empty_state_icon"
+            android:importantForAccessibility="no"
             android:layout_width="@dimen/icon_size_small"
             android:layout_height="@dimen/icon_size_small"
             android:layout_gravity="center"
@@ -52,12 +53,12 @@
         android:layout_marginTop="@dimen/margin_screen_horizontal"
         android:background="@drawable/bg_empty_state_action_button"
         android:drawablePadding="@dimen/space_s"
+        android:textAppearance="@style/Text.Caption"
         android:fontFamily="sans-serif-medium"
         android:gravity="center"
         android:paddingHorizontal="@dimen/margin_screen_horizontal"
         android:paddingVertical="@dimen/space_m"
         android:textColor="@color/color_text_secondary"
-        android:textSize="13sp"
         android:visibility="gone" />
 
 </LinearLayout>

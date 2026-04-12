@@ -15,6 +15,7 @@
         android:layout_width="@dimen/icon_size_medium"
         android:layout_height="@dimen/icon_size_medium"
         android:background="@drawable/bg_chip_default"
+        android:contentDescription="@string/cd_transaction_status"
         android:padding="@dimen/space_s"
         android:src="@drawable/ic_history"
         app:layout_constraintBottom_toBottomOf="parent"

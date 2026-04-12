@@ -41,9 +41,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="@string/checkout_scanner_title"
-            android:textColor="@android:color/white"
-            android:textSize="17sp"
-            android:fontFamily="sans-serif-medium" />
+            android:textAppearance="@style/Text.Title"
+            android:textColor="@android:color/white" />
 
     </FrameLayout>
 
@@ -84,7 +83,7 @@
                     android:id="@+id/item_image"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:contentDescription="Item image"
+                    android:contentDescription="@string/desc_item_image"
                     android:scaleType="centerCrop" />
 
                 <ImageView
@@ -111,9 +110,7 @@
                     android:layout_height="wrap_content"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="17sp"
-                    android:fontFamily="sans-serif-medium"
+                    android:textAppearance="@style/Text.RowTitle"
                     tools:text="Classic T-Shirt" />
 
                 <TextView
@@ -123,8 +120,7 @@
                     android:layout_marginTop="2dp"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:textColor="@color/color_text_tertiary"
-                    android:textSize="14sp"
+                    android:textAppearance="@style/Text.RowSubtitle"
                     android:visibility="gone"
                     tools:text="Medium / Navy Blue"
                     tools:visibility="visible" />
@@ -134,8 +130,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="15sp"
+                    android:textAppearance="@style/Text.Body"
                     tools:text="$24.99" />
 
             </LinearLayout>
@@ -156,7 +151,7 @@
                     android:src="@drawable/ic_minus"
                     app:tint="@color/color_text_primary"
                     android:scaleType="fitCenter"
-                    android:contentDescription="Decrease quantity" />
+                    android:contentDescription="@string/desc_decrease_quantity" />
 
                 <TextView
                     android:id="@+id/item_quantity"
@@ -164,9 +159,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="1"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="18sp"
-                    android:fontFamily="sans-serif-medium" />
+                    android:textAppearance="@style/Text.Subtitle" />
 
                 <ImageButton
                     android:id="@+id/increase_button"
@@ -177,7 +170,7 @@
                     android:src="@drawable/ic_plus"
                     app:tint="@color/color_text_primary"
                     android:scaleType="fitCenter"
-                    android:contentDescription="Increase quantity" />
+                    android:contentDescription="@string/desc_increase_quantity" />
 
             </LinearLayout>
 
@@ -192,9 +185,8 @@
             android:background="@drawable/bg_close_button_scanner"
             android:text="@string/checkout_scanner_done_button"
             android:textAllCaps="false"
-            android:textColor="@android:color/white"
-            android:textSize="17sp"
-            android:fontFamily="sans-serif-medium" />
+            android:textAppearance="@style/Text.Button"
+            android:textColor="@android:color/white" />
 
     </LinearLayout>
 
@@ -206,8 +198,7 @@
         android:layout_gravity="bottom|center_horizontal"
         android:layout_marginBottom="120dp"
         android:text="@string/checkout_scanner_instruction_scan_to_add"
-        android:textColor="@color/color_text_on_dark_high"
-        android:textSize="15sp"
-        android:fontFamily="sans-serif" />
+        android:textAppearance="@style/Text.Body"
+        android:textColor="@color/color_text_on_dark_high" />
 
 </FrameLayout>

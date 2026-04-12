@@ -12,8 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_bar_height"
         android:background="@color/color_bg_white"
-        android:elevation="1dp"
-        android:paddingHorizontal="@dimen/space_s">
+        android:elevation="0dp"
+        android:paddingHorizontal="@dimen/space_l">
 
         <ImageButton
             android:id="@+id/back_button"
@@ -553,9 +553,8 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="%"
-                                    android:textSize="16sp"
-                                    android:textColor="@color/color_text_secondary"
+                                    android:text="@string/label_percent_symbol"
+                                    android:textAppearance="@style/Text.Body"
                                     android:layout_marginEnd="@dimen/space_xs" />
 
                             </LinearLayout>
@@ -583,9 +582,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/item_entry_price_breakdown_title"
-                    android:textSize="11sp"
+                    android:textAppearance="@style/Text.Overline"
                     android:textColor="@color/color_text_secondary"
-                    android:textAllCaps="true"
                     android:letterSpacing="0.06"
                     android:layout_marginBottom="@dimen/space_m" />
 
@@ -602,17 +600,14 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/item_entry_price_breakdown_net_label"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_secondary" />
+                        android:textAppearance="@style/Text.Body" />
 
                     <TextView
                         android:id="@+id/text_net_price"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/item_entry_price_breakdown_net_value_default"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.BodyBold" />
 
                 </LinearLayout>
 
@@ -630,17 +625,14 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/item_entry_price_breakdown_vat_label"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_secondary" />
+                        android:textAppearance="@style/Text.Body" />
 
                     <TextView
                         android:id="@+id/text_vat_amount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/item_entry_price_breakdown_vat_value_default"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.BodyBold" />
 
                 </LinearLayout>
 
@@ -663,18 +655,15 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/item_entry_price_breakdown_total_label"
-                        android:textSize="16sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.RowTitle" />
 
                     <TextView
                         android:id="@+id/text_gross_price"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/item_entry_price_breakdown_total_value_default"
-                        android:textSize="18sp"
-                        android:textColor="@color/color_primary_green"
-                        android:fontFamily="sans-serif-bold" />
+                        android:textAppearance="@style/Text.Subtitle"
+                        android:textColor="@color/color_primary_green" />
 
                 </LinearLayout>
 
@@ -843,7 +832,7 @@
                 android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
                 android:layout_marginBottom="@dimen/space_l"
                 android:text="@string/item_entry_error_gtin_exists"
-                android:textSize="13sp"
+                android:textAppearance="@style/Text.Caption"
                 android:textColor="@color/color_warning_red"
                 android:visibility="gone" />
 
@@ -855,7 +844,7 @@
                 android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
                 android:layout_marginBottom="@dimen/space_s"
                 android:text="@string/item_entry_error_sku_exists"
-                android:textSize="13sp"
+                android:textAppearance="@style/Text.Caption"
                 android:textColor="@color/color_warning_red"
                 android:visibility="gone" />
 

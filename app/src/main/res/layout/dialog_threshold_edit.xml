@@ -10,8 +10,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/auto_withdraw_threshold_subtitle"
+        android:textAppearance="@style/Text.Body"
         android:textColor="@color/color_text_secondary"
-        android:textSize="14sp"
         android:layout_marginBottom="@dimen/space_l" />
 
     <com.google.android.material.textfield.TextInputLayout
@@ -28,8 +28,8 @@
             android:fontFamily="sans-serif-medium"
             android:inputType="number"
             android:maxLength="7"
+            android:textAppearance="@style/Text.Subtitle"
             android:textColor="@color/color_text_primary"
-            android:textSize="18sp"
             android:hint="50000"
             android:textColorHint="@color/color_text_tertiary" />
 
@@ -39,8 +39,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/space_s"
-        android:text="Min: ₿1,000 • Max: ₿1,000,000"
-        android:textColor="@color/color_text_tertiary"
-        android:textSize="13sp" />
+        android:text="@string/auto_withdraw_threshold_helper"
+        android:textAppearance="@style/Text.Helper" />
 
 </LinearLayout>

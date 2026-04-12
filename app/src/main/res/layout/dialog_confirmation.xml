@@ -4,82 +4,109 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@drawable/bg_dialog_rounded">
 
-    <!-- Close Button (top-left) -->
-    <ImageButton
-        android:id="@+id/close_button"
-        android:layout_width="@dimen/icon_size_large"
-        android:layout_height="@dimen/icon_size_large"
-        android:layout_marginStart="@dimen/space_s"
-        android:layout_marginTop="@dimen/space_s"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/common_close"
-        android:padding="@dimen/space_m"
-        android:src="@drawable/ic_close"
-        app:tint="@color/color_text_secondary" />
-
-    <!-- Icon (optional, hidden by default) -->
-    <ImageView
-        android:id="@+id/dialog_icon"
-        android:layout_width="@dimen/icon_size_medium"
-        android:layout_height="@dimen/icon_size_medium"
-        android:layout_marginStart="@dimen/space_xl"
-        android:layout_marginTop="@dimen/space_xs"
-        android:visibility="gone"
-        app:tint="@color/color_text_tertiary"
-        tools:src="@drawable/ic_warning"
-        tools:visibility="visible" />
-
-    <!-- Title -->
-    <TextView
-        android:id="@+id/dialog_title"
-        style="@style/Text.DialogTitle"
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- HEADER ROW - Close button + Title                                        -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="@dimen/space_xl"
-        android:layout_marginTop="@dimen/space_m"
-        android:text="Confirm"
-        tools:text="Set as Default?" />
+        android:layout_height="@dimen/top_bar_height"
+        android:paddingHorizontal="@dimen/space_xs">
 
-    <!-- Subtitle -->
-    <TextView
-        android:id="@+id/dialog_subtitle"
-        style="@style/Text.DialogSubtitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="@dimen/space_xl"
-        android:layout_marginTop="@dimen/space_xs"
-        android:visibility="gone"
-        tools:text="This action can be changed later"
-        tools:visibility="visible" />
+        <!-- Close X Button (top-left) -->
+        <ImageButton
+            android:id="@+id/close_button"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/common_close"
+            android:padding="@dimen/space_m"
+            android:src="@drawable/ic_close"
+            app:tint="@color/color_text_secondary"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <!-- Title (centered) -->
+        <TextView
+            android:id="@+id/dialog_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingHorizontal="@dimen/space_3xl"
+            android:text="@string/common_confirm"
+            style="@style/Text.Title"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="Set as Default?" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Divider -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="@dimen/divider_height_thick"
-        android:layout_marginTop="@dimen/space_l"
-        android:layout_marginHorizontal="@dimen/space_xl"
+        android:layout_height="1dp"
         android:background="@color/color_divider" />
 
-    <!-- Message / Description -->
-    <TextView
-        android:id="@+id/dialog_message"
-        style="@style/Text.Body"
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- CONTENT SECTION                                                          -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/space_xl"
-        android:text="Are you sure you want to proceed?"
-        android:lineSpacingMultiplier="1.4"
-        tools:text="Make &quot;Minibits mint&quot; your default mint?" />
+        android:orientation="vertical"
+        android:padding="@dimen/margin_screen_horizontal">
 
-    <!-- Action Buttons -->
+        <!-- Icon (optional, hidden by default) -->
+        <ImageView
+            android:id="@+id/dialog_icon"
+            android:importantForAccessibility="no"
+            android:layout_width="@dimen/icon_size_medium"
+            android:layout_height="@dimen/icon_size_medium"
+            android:layout_marginBottom="@dimen/space_m"
+            android:visibility="gone"
+            app:tint="@color/color_text_tertiary"
+            tools:src="@drawable/ic_warning"
+            tools:visibility="visible" />
+
+        <!-- Subtitle (optional, hidden by default) -->
+        <TextView
+            android:id="@+id/dialog_subtitle"
+            style="@style/Text.DialogSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/space_m"
+            android:visibility="gone"
+            tools:text="This action can be changed later"
+            tools:visibility="visible" />
+
+        <!-- Message / Description -->
+        <TextView
+            android:id="@+id/dialog_message"
+            style="@style/Text.Body"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_confirm_message_default"
+            android:lineSpacingMultiplier="1.3"
+            tools:text="Make &quot;Minibits mint&quot; your default mint?" />
+
+    </LinearLayout>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- ACTION BUTTONS                                                           -->
+    <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingHorizontal="@dimen/margin_screen_horizontal"
-        android:paddingBottom="@dimen/space_xl">
+        android:paddingBottom="@dimen/margin_screen_horizontal">
 
         <!-- Cancel Button -->
         <com.google.android.material.button.MaterialButton

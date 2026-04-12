@@ -29,9 +29,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/basket_archive_paid_badge"
+                android:textAppearance="@style/Text.Badge"
                 android:textColor="@color/color_bg_white"
-                android:textSize="10sp"
-                android:fontFamily="sans-serif-medium"
                 android:paddingHorizontal="@dimen/space_s"
                 android:paddingVertical="2dp"
                 android:background="@drawable/bg_badge_success"
@@ -42,17 +41,16 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textColor="@color/color_text_primary"
-                android:textSize="17sp"
-                android:fontFamily="sans-serif-medium"
+                android:textAppearance="@style/Text.RowTitle"
                 android:ellipsize="end"
                 android:maxLines="1"
                 tools:text="Table 5" />
 
             <ImageButton
                 android:id="@+id/delete_button"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="8dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/basket_archive_delete"
                 android:src="@drawable/ic_trash"
@@ -66,8 +64,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:textColor="@color/color_text_tertiary"
-            android:textSize="13sp"
+            android:textAppearance="@style/Text.Caption"
             tools:text="Mar 15, 2024 at 2:30 PM" />
 
         <!-- Divider -->
@@ -82,8 +79,8 @@
             android:id="@+id/basket_items_summary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textAppearance="@style/Text.Body"
             android:textColor="@color/color_text_secondary"
-            android:textSize="14sp"
             android:lineSpacingMultiplier="1.2"
             tools:text="2 × Coffee, 1 × Sandwich + 1 more" />
 
@@ -100,17 +97,14 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textColor="@color/color_text_primary"
-                android:textSize="18sp"
-                android:fontFamily="sans-serif-medium"
+                android:textAppearance="@style/Text.Subtitle"
                 tools:text="$12.50" />
 
             <TextView
                 android:id="@+id/basket_item_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/color_text_tertiary"
-                android:textSize="13sp"
+                android:textAppearance="@style/Text.Caption"
                 tools:text="4 items" />
 
         </LinearLayout>
@@ -122,9 +116,8 @@
             android:layout_height="44dp"
             android:layout_marginTop="@dimen/space_m"
             android:text="@string/basket_archive_view_payment"
+            android:textAppearance="@style/Text.BodyBold"
             android:textColor="@color/color_accent_blue"
-            android:textSize="15sp"
-            android:fontFamily="sans-serif-medium"
             app:backgroundTint="@color/color_bg_secondary"
             app:cornerRadius="@dimen/radius_m"
             app:rippleColor="@color/color_accent_blue"

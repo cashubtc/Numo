@@ -15,6 +15,7 @@
         android:id="@+id/slide_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textAppearance="@style/Text.DisplayAmount"
         android:textSize="42sp"
         android:fontFamily="sans-serif-black"
         android:textColor="@color/numo_fluorescent_green"
@@ -31,7 +32,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:maxWidth="300dp"
-        android:textSize="16sp"
+        android:textAppearance="@style/Text.Body"
         android:textColor="@color/color_text_on_dark"
         android:lineSpacingMultiplier="1.5" />
 

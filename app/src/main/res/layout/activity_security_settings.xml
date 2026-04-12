@@ -22,7 +22,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/common_back"
             android:src="@drawable/ic_chevron_back"
-            android:tint="@color/color_text_primary"
+            app:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -63,7 +63,7 @@
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:paddingTop="@dimen/space_l"
                 android:paddingBottom="@dimen/row_padding_vertical"
-                android:text="Wallet Backup"
+                android:text="@string/security_settings_section_backup"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Security Info Card -->
@@ -83,6 +83,7 @@
                     android:gravity="center_vertical">
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         android:layout_width="@dimen/icon_size_small"
                         android:layout_height="@dimen/icon_size_small"
                         android:layout_marginEnd="@dimen/space_m"
@@ -93,9 +94,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/security_settings_card_title"
-                        android:textSize="16sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.RowTitle" />
                 </LinearLayout>
 
                 <TextView
@@ -103,7 +102,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_s"
                     android:text="@string/security_settings_card_body"
-                    android:textSize="14sp"
+                    android:textAppearance="@style/Text.Body"
                     android:textColor="@color/color_text_secondary"
                     android:lineSpacingMultiplier="1.3" />
 
@@ -123,6 +122,7 @@
                 android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -150,6 +150,7 @@
                 </LinearLayout>
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
@@ -186,6 +187,7 @@
                     android:gravity="center_vertical">
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:layout_marginEnd="@dimen/space_m"
@@ -196,9 +198,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/security_settings_pin_info_title"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_success_green"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.Chip"
+                        android:textColor="@color/color_success_green" />
                 </LinearLayout>
 
                 <TextView
@@ -206,7 +207,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_s"
                     android:text="@string/security_settings_pin_info_body"
-                    android:textSize="13sp"
+                    android:textAppearance="@style/Text.Caption"
                     android:textColor="@color/color_text_secondary"
                     android:lineSpacingMultiplier="1.3" />
 
@@ -226,6 +227,7 @@
                 android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -255,6 +257,7 @@
                 </LinearLayout>
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
@@ -276,6 +279,7 @@
                 android:visibility="gone">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -303,6 +307,7 @@
                 </LinearLayout>
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
@@ -324,6 +329,7 @@
                 android:visibility="gone">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -352,6 +358,7 @@
                 </LinearLayout>
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"
@@ -386,6 +393,7 @@
                 android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/row_icon_gap"
@@ -413,6 +421,7 @@
                 </LinearLayout>
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:src="@drawable/ic_chevron_forward"

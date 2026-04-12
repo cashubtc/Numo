@@ -22,9 +22,9 @@
             android:minHeight="@dimen/icon_size_large"
             android:padding="@dimen/space_m"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
+            android:contentDescription="@string/desc_back"
             android:src="@drawable/ic_chevron_back"
-            android:tint="@color/color_text_primary"
+            app:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -65,13 +65,13 @@
                     android:layout_width="80dp"
                     android:layout_height="80dp"
                     android:src="@mipmap/ic_launcher"
-                    android:contentDescription="App Icon" />
+                    android:contentDescription="@string/desc_app_icon" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_l"
-                    android:text="Numo"
+                    android:text="@string/app_name"
                     style="@style/Text.Heading1" />
 
                 <TextView
@@ -80,7 +80,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_xs"
                     android:text="Version 1.0.0"
-                    android:textSize="14sp"
+                    android:textAppearance="@style/Text.SecondaryButton"
                     android:textColor="@color/color_text_secondary"
                     android:padding="@dimen/space_s"
                     android:background="?attr/selectableItemBackgroundBorderless" />
@@ -224,6 +224,7 @@
                 android:paddingHorizontal="@dimen/settings_horizontal_padding">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/space_l"
@@ -235,10 +236,10 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/about_terms_of_service"
-                    android:textSize="17sp"
-                    android:textColor="@color/color_text_primary" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_chevron_forward"
@@ -258,6 +259,7 @@
                 android:paddingHorizontal="@dimen/settings_horizontal_padding">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/space_l"
@@ -269,10 +271,10 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/about_privacy_policy"
-                    android:textSize="17sp"
-                    android:textColor="@color/color_text_primary" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_chevron_forward"
@@ -292,6 +294,7 @@
                 android:paddingHorizontal="@dimen/settings_horizontal_padding">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/space_l"
@@ -308,18 +311,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/about_website"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary" />
+                        android:textAppearance="@style/Text.RowTitle" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="numopay.org"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary" />
+                        android:text="@string/about_website_url"
+                        android:textAppearance="@style/Text.RowSubtitle" />
                 </LinearLayout>
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_open_external"
@@ -339,6 +341,7 @@
                 android:paddingHorizontal="@dimen/settings_horizontal_padding">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/space_l"
@@ -355,18 +358,17 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/about_contact_us"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary" />
+                        android:textAppearance="@style/Text.RowTitle" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="numopay@proton.me"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary" />
+                        android:text="@string/about_contact_email"
+                        android:textAppearance="@style/Text.RowSubtitle" />
                 </LinearLayout>
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_open_external"
@@ -381,8 +383,7 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/space_2xl"
                 android:text=""
-                android:textSize="13sp"
-                android:textColor="@color/color_text_tertiary"
+                android:textAppearance="@style/Text.Caption"
                 android:visibility="gone" />
 
         </LinearLayout>

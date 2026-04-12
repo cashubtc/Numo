@@ -100,13 +100,11 @@
         <!-- Cancel Button - Green Pill -->
         <Button
             android:id="@+id/nfc_cancel_button"
+            style="@style/Widget.Button.Primary.Green"
             android:layout_width="match_parent"
             android:layout_height="@dimen/button_height"
             android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-            android:background="@drawable/bg_button_primary_green"
-            android:text="@string/common_cancel"
-            android:textAppearance="@style/Text.Button"
-            android:textColor="@color/color_bg_white" />
+            android:text="@string/common_cancel" />
 
     </LinearLayout>
 

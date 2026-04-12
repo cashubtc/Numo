@@ -327,6 +327,7 @@
 
                         <ImageView
                             android:id="@+id/token_qr_code"
+                            android:contentDescription="@string/cd_qr_code"
                             android:layout_width="200dp"
                             android:layout_height="200dp"
                             android:layout_marginBottom="@dimen/space_l"/>
@@ -345,13 +346,11 @@
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/copy_token_button"
+                            style="@style/Widget.Numo.Button.Dialog.Confirm"
                             android:layout_width="match_parent"
                             android:layout_height="@dimen/top_bar_height"
                             android:layout_marginTop="@dimen/space_l"
-                            android:stateListAnimator="@null"
-                            android:text="@string/withdraw_cashu_copy_token"
-                            app:cornerRadius="@dimen/radius_button"
-                            app:elevation="0dp"/>
+                            android:text="@string/withdraw_cashu_copy_token" />
 
                     </LinearLayout>
                  </com.google.android.material.card.MaterialCardView>

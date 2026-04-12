@@ -54,9 +54,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/qr_scanner_title"
-                android:textColor="@android:color/white"
-                android:textSize="17sp"
-                android:fontFamily="sans-serif-medium" />
+                android:textAppearance="@style/Text.Title"
+                android:textColor="@android:color/white" />
 
         </FrameLayout>
 
@@ -70,9 +69,8 @@
         android:layout_gravity="bottom|center_horizontal"
         android:layout_marginBottom="120dp"
         android:text="@string/qr_scanner_instruction"
+        android:textAppearance="@style/Text.Body"
         android:textColor="@color/color_text_on_dark_medium"
-        android:textSize="15sp"
-        android:textAlignment="center"
-        android:fontFamily="sans-serif" />
+        android:textAlignment="center" />
 
 </FrameLayout>

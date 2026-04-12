@@ -6,9 +6,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/bg_category_chip"
     android:gravity="center"
-    android:textColor="@color/color_text_primary"
-    android:textSize="14sp"
-    android:fontFamily="sans-serif-medium"
+    android:textAppearance="@style/Text.Chip"
     android:maxLines="1"
     android:ellipsize="end"
     tools:text="Electronics" />

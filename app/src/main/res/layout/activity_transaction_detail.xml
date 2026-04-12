@@ -13,8 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_bar_height"
         android:background="@color/color_bg_white"
-        android:paddingStart="@dimen/space_m"
-        android:paddingEnd="@dimen/space_m"
+        android:paddingStart="@dimen/space_l"
+        android:paddingEnd="@dimen/space_l"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
@@ -302,8 +302,8 @@
 
                 <ImageButton
                     android:id="@+id/btn_copy_destination"
-                    android:layout_width="@dimen/icon_size_xs"
-                    android:layout_height="@dimen/icon_size_xs"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_copy"
                     android:padding="@dimen/space_xs"
@@ -359,8 +359,8 @@
 
                 <ImageButton
                     android:id="@+id/btn_copy_invoice"
-                    android:layout_width="@dimen/icon_size_xs"
-                    android:layout_height="@dimen/icon_size_xs"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_copy"
                     android:padding="@dimen/space_xs"

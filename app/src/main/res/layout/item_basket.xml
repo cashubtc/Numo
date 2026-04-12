@@ -33,9 +33,7 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="@color/color_text_primary"
-                android:textSize="16sp"
-                android:fontFamily="sans-serif-medium"
+                android:textAppearance="@style/Text.RowTitle"
                 tools:text="Classic T-Shirt" />
 
             <!-- Item Variation (grey, smaller) -->
@@ -46,8 +44,7 @@
                 android:layout_marginTop="1dp"
                 android:ellipsize="end"
                 android:maxLines="1"
-                android:textColor="@color/color_text_tertiary"
-                android:textSize="14sp"
+                android:textAppearance="@style/Text.RowSubtitle"
                 android:visibility="gone"
                 tools:text="Medium / Navy Blue"
                 tools:visibility="visible" />
@@ -63,8 +60,7 @@
                     android:id="@+id/item_quantity"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/color_text_tertiary"
-                    android:textSize="14sp"
+                    android:textAppearance="@style/Text.RowSubtitle"
                     tools:text="Qty: 2" />
 
                 <TextView
@@ -72,15 +68,13 @@
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/space_xs"
                     android:text="•"
-                    android:textColor="@color/color_text_tertiary"
-                    android:textSize="14sp" />
+                    android:textAppearance="@style/Text.RowSubtitle" />
 
                 <TextView
                     android:id="@+id/item_price"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/color_text_tertiary"
-                    android:textSize="14sp"
+                    android:textAppearance="@style/Text.RowSubtitle"
                     tools:text="$24.99 each" />
 
             </LinearLayout>
@@ -103,9 +97,7 @@
                 android:id="@+id/item_total"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/color_text_primary"
-                android:textSize="16sp"
-                android:fontFamily="sans-serif-medium"
+                android:textAppearance="@style/Text.RowTitle"
                 tools:text="$49.98" />
 
             <!-- Remove Button -->
@@ -116,7 +108,7 @@
                 android:layout_marginStart="@dimen/space_s"
                 android:padding="@dimen/space_m"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="Remove item"
+                android:contentDescription="@string/desc_remove_item"
                 android:src="@drawable/ic_close"
                 app:tint="@color/color_icon_tertiary" />
 

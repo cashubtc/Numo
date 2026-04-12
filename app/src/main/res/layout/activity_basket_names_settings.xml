@@ -14,8 +14,8 @@
         android:layout_height="@dimen/top_bar_height"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="@dimen/space_s"
-        android:elevation="1dp"
+        android:paddingHorizontal="@dimen/space_l"
+        android:elevation="0dp"
         android:background="@color/color_bg_white"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -138,8 +138,7 @@
                 android:layout_marginTop="@dimen/space_xl"
                 android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:text="@string/basket_names_settings_examples"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_tertiary"
+                android:textAppearance="@style/Text.Caption"
                 android:lineSpacingMultiplier="1.4" />
 
             <!-- Clear All Button (only shown when items exist) -->
@@ -160,7 +159,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/basket_names_settings_clear_all"
-                    android:textSize="16sp"
+                    android:textAppearance="@style/Text.Link"
                     android:textColor="@color/color_warning_red" />
             </LinearLayout>
 

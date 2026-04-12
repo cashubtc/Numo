@@ -40,6 +40,7 @@
 
             <!-- Success Icon (hidden by default) -->
             <ImageView
+                android:importantForAccessibility="no"
                 android:id="@+id/success_icon"
                 android:layout_width="@dimen/icon_size_small"
                 android:layout_height="@dimen/icon_size_small"
@@ -50,6 +51,7 @@
 
             <!-- Error Icon (hidden by default) -->
             <ImageView
+                android:importantForAccessibility="no"
                 android:id="@+id/error_icon"
                 android:layout_width="@dimen/icon_size_small"
                 android:layout_height="@dimen/icon_size_small"
@@ -78,10 +80,10 @@
                 android:id="@+id/progress_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textAppearance="@style/Text.Caption"
                 android:fontFamily="sans-serif-medium"
                 android:text="@string/auto_withdraw_progress_sending"
-                android:textColor="@color/color_text_on_dark"
-                android:textSize="13sp" />
+                android:textColor="@color/color_text_on_dark" />
 
             <!-- Subtitle -->
             <TextView
@@ -89,10 +91,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="1dp"
+                android:textAppearance="@style/Text.Badge"
                 android:alpha="0.7"
                 android:fontFamily="sans-serif"
                 android:textColor="@color/color_text_on_dark"
-                android:textSize="11sp"
                 tools:text="Sending to wallet..." />
 
         </LinearLayout>
@@ -112,19 +114,18 @@
                 android:id="@+id/progress_amount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-medium"
+                android:textAppearance="@style/Text.Chip"
                 android:textColor="@color/color_text_on_dark"
-                android:textSize="14sp"
                 tools:text="10,000" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textAppearance="@style/Text.Badge"
                 android:alpha="0.7"
                 android:fontFamily="sans-serif"
-                android:text="sats"
-                android:textColor="@color/color_text_on_dark"
-                android:textSize="10sp" />
+                android:text="@string/item_entry_label_sats"
+                android:textColor="@color/color_text_on_dark" />
 
         </LinearLayout>
 

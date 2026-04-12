@@ -13,6 +13,7 @@
 
     <!-- Tip icon -->
     <ImageView
+        android:importantForAccessibility="no"
         android:layout_width="@dimen/icon_size_small"
         android:layout_height="@dimen/icon_size_small"
         android:layout_marginEnd="@dimen/space_l"
@@ -26,9 +27,8 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="10%"
-        android:textSize="17sp"
-        android:textColor="@color/color_text_primary"
-        android:fontFamily="sans-serif" />
+        android:textAppearance="@style/Text.Body"
+        android:textColor="@color/color_text_primary" />
 
     <!-- Delete button -->
     <ImageButton
@@ -37,7 +37,7 @@
         android:layout_height="@dimen/icon_size_large"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_delete"
-        android:contentDescription="Remove preset"
+        android:contentDescription="@string/desc_remove_preset"
         app:tint="@color/color_text_tertiary" />
 
 </LinearLayout>

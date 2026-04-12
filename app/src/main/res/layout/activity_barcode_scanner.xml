@@ -53,8 +53,7 @@
         android:layout_gravity="bottom|center_horizontal"
         android:layout_marginBottom="120dp"
         android:text="@string/barcode_scanner_instruction_position_barcode"
-        android:textColor="@color/color_text_on_dark_high"
-        android:textSize="15sp"
-        android:fontFamily="sans-serif" />
+        android:textAppearance="@style/Text.Body"
+        android:textColor="@color/color_text_on_dark_high" />
 
 </FrameLayout>

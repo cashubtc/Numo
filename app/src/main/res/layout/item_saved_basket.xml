@@ -55,9 +55,7 @@
                     android:id="@+id/basket_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="16sp"
-                    android:fontFamily="sans-serif-medium"
+                    android:textAppearance="@style/Text.RowTitle"
                     android:maxLines="1"
                     android:ellipsize="end"
                     tools:text="Table 5" />
@@ -68,8 +66,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="2dp"
+                    android:textAppearance="@style/Text.RowSubtitle"
                     android:textColor="@color/color_text_secondary"
-                    android:textSize="14sp"
                     android:maxLines="1"
                     android:ellipsize="end"
                     tools:text="4 × Coffee, 2 × Pizza + 2 more" />
@@ -80,8 +78,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_xs"
-                    android:textColor="@color/color_text_tertiary"
-                    android:textSize="13sp"
+                    android:textAppearance="@style/Text.Caption"
                     tools:text="6 items • Updated 5 min ago" />
 
             </LinearLayout>
@@ -97,9 +94,7 @@
                     android:id="@+id/basket_total"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/color_text_primary"
-                    android:textSize="17sp"
-                    android:fontFamily="sans-serif-medium"
+                    android:textAppearance="@style/Text.RowTitle"
                     tools:text="$45.99" />
 
                 <ImageView
@@ -138,9 +133,8 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/saved_baskets_action_rename"
+                android:textAppearance="@style/Text.SecondaryButton"
                 android:textColor="@color/color_accent_blue"
-                android:textSize="14sp"
-                android:fontFamily="sans-serif-medium"
                 android:background="?attr/selectableItemBackground" />
 
             <!-- Vertical Divider -->
@@ -157,9 +151,8 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:text="@string/saved_baskets_action_delete"
+                android:textAppearance="@style/Text.SecondaryButton"
                 android:textColor="@color/color_warning_red"
-                android:textSize="14sp"
-                android:fontFamily="sans-serif-medium"
                 android:background="?attr/selectableItemBackground" />
 
         </LinearLayout>

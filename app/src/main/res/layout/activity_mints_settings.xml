@@ -22,7 +22,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/common_back"
             android:src="@drawable/ic_chevron_back"
-            android:tint="@color/color_text_primary"
+            app:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -39,8 +39,8 @@
 
         <ImageButton
             android:id="@+id/reset_button"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:padding="9dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_refresh"
@@ -91,19 +91,14 @@
                     android:textAppearance="@style/Text.SectionHeader" />
 
                 <!-- Lightning Mint Hero Card -->
-                <FrameLayout
+                <androidx.cardview.widget.CardView
                     android:id="@+id/lightning_mint_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                    android:clipChildren="false">
-
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:cardBackgroundColor="@android:color/transparent"
-                        app:cardCornerRadius="@dimen/radius_card"
-                        app:cardElevation="0dp">
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardCornerRadius="@dimen/radius_card"
+                    app:cardElevation="0dp">
 
                         <FrameLayout
                             android:layout_width="match_parent"
@@ -185,9 +180,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Lightning Mint"
-                                            android:textSize="17sp"
-                                            android:textColor="@color/color_text_primary"
-                                            android:fontFamily="sans-serif-medium"
+                                            android:textAppearance="@style/Text.RowTitle"
                                             android:maxLines="1"
                                             android:ellipsize="end" />
 
@@ -197,8 +190,7 @@
                                             android:layout_height="wrap_content"
                                             android:layout_marginTop="2dp"
                                             android:text="mint.example.com"
-                                            android:textColor="@color/color_text_tertiary"
-                                            android:textSize="13sp"
+                                            android:textAppearance="@style/Text.RowSubtitle"
                                             android:maxLines="1"
                                             android:ellipsize="end" />
 
@@ -237,9 +229,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="&#8383;0"
-                                        android:textSize="17sp"
-                                        android:textColor="@color/color_text_primary"
-                                        android:fontFamily="sans-serif-medium" />
+                                        android:textAppearance="@style/Text.RowTitle" />
 
                                 </LinearLayout>
 
@@ -294,9 +284,7 @@
 
                         </FrameLayout>
 
-                    </androidx.cardview.widget.CardView>
-
-                </FrameLayout>
+                </androidx.cardview.widget.CardView>
 
             </LinearLayout>
 
@@ -345,18 +333,15 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/mints_total_balance"
-                            android:textSize="14sp"
-                            android:textColor="@color/color_text_secondary"
-                            android:fontFamily="sans-serif" />
+                            android:textAppearance="@style/Text.Body"
+                            android:textColor="@color/color_text_secondary" />
 
                         <TextView
                             android:id="@+id/total_balance_value"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="&#8383;0"
-                            android:textSize="17sp"
-                            android:textColor="@color/color_text_primary"
-                            android:fontFamily="sans-serif-medium" />
+                            android:textAppearance="@style/Text.RowTitle" />
 
                     </LinearLayout>
 
@@ -391,6 +376,7 @@
                 android:visibility="gone">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_hero"
                     android:layout_height="@dimen/settings_item_height"
                     android:alpha="0.3"
@@ -401,18 +387,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_l"
-                    android:fontFamily="sans-serif-medium"
                     android:text="@string/mints_empty_title"
-                    android:textColor="@color/color_text_secondary"
-                    android:textSize="16sp" />
+                    android:textAppearance="@style/Text.RowTitle"
+                    android:textColor="@color/color_text_secondary" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_xs"
                     android:text="@string/mints_empty_subtitle"
-                    android:textColor="@color/color_text_tertiary"
-                    android:textSize="14sp" />
+                    android:textAppearance="@style/Text.RowSubtitle" />
 
             </LinearLayout>
 
@@ -435,7 +419,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                android:text="+ Add New Mint"
+                android:text="@string/action_add_new_mint"
                 android:gravity="center" />
 
         </LinearLayout>

@@ -18,6 +18,7 @@
         android:orientation="vertical">
 
         <ImageView
+            android:importantForAccessibility="no"
             android:layout_width="@dimen/icon_size_small"
             android:layout_height="@dimen/icon_size_small"
             android:src="@drawable/ic_delete"
@@ -28,9 +29,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_xs"
             android:text="@string/common_delete"
-            android:textColor="@color/white"
-            android:textSize="11sp"
-            android:textStyle="bold" />
+            android:textAppearance="@style/Text.Badge"
+            android:textColor="@color/white" />
     </LinearLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -64,6 +64,7 @@
                 android:backgroundTint="@color/color_bg_light">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:id="@+id/icon"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
@@ -83,6 +84,7 @@
                 android:background="@drawable/bg_status_badge_green">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:id="@+id/status_badge_icon"
                     android:layout_width="12dp"
                     android:layout_height="12dp"

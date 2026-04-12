@@ -11,6 +11,7 @@
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/mint_icon"
+        android:contentDescription="@string/cd_mint_icon"
         android:layout_width="@dimen/icon_size_medium"
         android:layout_height="@dimen/icon_size_medium"
         android:scaleType="centerCrop" />

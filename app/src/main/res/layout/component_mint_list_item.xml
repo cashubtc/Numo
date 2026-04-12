@@ -57,9 +57,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Mint Name"
-                android:textSize="16sp"
-                android:textColor="@color/color_text_primary"
-                android:fontFamily="sans-serif-medium"
+                android:textAppearance="@style/Text.RowTitle"
                 android:maxLines="1"
                 android:ellipsize="end" />
 
@@ -81,9 +79,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="₿0"
-            android:textSize="15sp"
+            android:textAppearance="@style/Text.BodyBold"
             android:textColor="@color/color_text_secondary"
-            android:fontFamily="sans-serif-medium"
             android:layout_marginEnd="@dimen/space_s" />
 
         <!-- Chevron -->

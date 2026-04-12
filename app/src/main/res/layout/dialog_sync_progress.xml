@@ -11,18 +11,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/webhook_settings_sync_all"
-        android:textSize="22sp"
-        android:textColor="@color/color_text_primary"
-        android:fontFamily="sans-serif-medium"
+        android:textAppearance="@style/Text.DialogTitle"
         android:layout_marginBottom="@dimen/space_l" />
 
     <TextView
         android:id="@+id/sync_progress_message"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Syncing..."
-        android:textSize="16sp"
-        android:textColor="@color/color_text_secondary"
+        android:text="@string/dialog_sync_progress_message"
+        android:textAppearance="@style/Text.Body"
         android:layout_marginBottom="@dimen/space_xl" />
 
     <ProgressBar

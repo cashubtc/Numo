@@ -25,9 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Mint Name"
-            android:fontFamily="sans-serif-medium"
-            android:textColor="@color/color_text_primary"
-            android:textSize="17sp"
+            android:textAppearance="@style/Text.RowTitle"
             android:maxLines="1"
             android:ellipsize="end" />
 
@@ -37,8 +35,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_xs"
             android:text="mint.example.com"
+            android:textAppearance="@style/Text.RowSubtitle"
             android:textColor="@color/color_text_secondary"
-            android:textSize="14sp"
             android:maxLines="1"
             android:ellipsize="end" />
 
@@ -50,9 +48,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="₿1,234"
-        android:fontFamily="sans-serif-medium"
+        android:textAppearance="@style/Text.BodyBold"
         android:textColor="@color/color_success_green"
-        android:textSize="15sp"
         android:layout_marginEnd="@dimen/space_s" />
 
     <!-- Chevron -->

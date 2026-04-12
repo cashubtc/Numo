@@ -841,6 +841,12 @@
     
     <string name="cd_mint_icon">Mint icon</string>
     <string name="cd_mint_selected">Selected as Lightning mint</string>
+    <string name="cd_edit">Edit</string>
+    <string name="cd_delete">Delete</string>
+    <string name="cd_restore_success">Wallet restored successfully</string>
+    <string name="cd_scan_qr">Scan QR code</string>
+    <string name="cd_qr_code">QR code</string>
+    <string name="cd_transaction_status">Transaction status</string>
 
     
     <string name="mint_action_info">Info</string>
@@ -912,4 +918,32 @@
     <string name="payment_request_tab_unified">Unified</string>
     <string name="payment_request_default_description">Payment of %1$d sats</string>
     <string name="payment_request_lightning_description">Numo POS payment of %1$d sats</string>
+
+    <!-- Extracted from layout hardcoded strings -->
+    <string name="basket_receipt_items_header_default">ITEMS</string>
+    <string name="action_add_new_mint">+ Add New Mint</string>
+    <string name="action_add_endpoint">+ Add Endpoint</string>
+    <string name="action_sync_all_endpoints">Sync All Endpoints</string>
+    <string name="dialog_confirm_message_default">Are you sure you want to proceed?</string>
+    <string name="dialog_ndef_payment_title">NFC Payment</string>
+    <string name="dialog_ndef_payment_status">Tap a device to your phone to receive payment</string>
+    <string name="dialog_sync_progress_message">Syncing…</string>
+    <string name="dialog_input_title_default">Enter Value</string>
+    <string name="dialog_input_description_default">Enter a value below</string>
+    <string name="hint_enter_value">Enter value</string>
+    <string name="dialog_input_helper_default">Min: 1,000 - Max: 1,000,000</string>
+    <string name="label_auto">AUTO</string>
+    <string name="about_website_url" translatable="false">numopay.org</string>
+    <string name="about_contact_email" translatable="false">numopay@proton.me</string>
+    <string name="desc_back">Back</string>
+    <string name="desc_app_icon">App Icon</string>
+    <string name="desc_item_image">Item image</string>
+    <string name="desc_decrease_quantity">Decrease quantity</string>
+    <string name="desc_increase_quantity">Increase quantity</string>
+    <string name="desc_remove_item">Remove item</string>
+    <string name="desc_select_lightning_mint">Select as Lightning mint</string>
+    <string name="desc_remove_preset">Remove preset</string>
+    <string name="label_percent_symbol" translatable="false">%</string>
+    <string name="auto_withdraw_percentage_min" translatable="false">50%</string>
+    <string name="auto_withdraw_percentage_max" translatable="false">98%</string>
 </resources>

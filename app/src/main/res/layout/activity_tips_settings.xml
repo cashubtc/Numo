@@ -13,8 +13,8 @@
         android:layout_height="@dimen/top_bar_height"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="@dimen/space_s"
-        android:elevation="1dp"
+        android:paddingHorizontal="@dimen/space_l"
+        android:elevation="0dp"
         android:background="@color/color_bg_white"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -32,9 +32,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/tips_settings_title"
-            android:textSize="22sp"
-            android:textColor="@color/color_text_primary"
-            android:fontFamily="sans-serif-medium"
+            android:textAppearance="@style/Text.DialogTitle"
             android:textAlignment="center" />
 
         <!-- Spacer to balance layout -->
@@ -64,7 +62,7 @@
                 android:paddingTop="@dimen/space_l"
                 android:paddingBottom="@dimen/space_s"
                 android:text="@string/tips_settings_description"
-                android:textSize="14sp"
+                android:textAppearance="@style/Text.Body"
                 android:textColor="@color/color_text_secondary"
                 android:lineSpacingExtra="2dp" />
 
@@ -78,6 +76,7 @@
                 android:background="?attr/selectableItemBackground">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/space_l"
@@ -89,9 +88,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/tips_settings_enable_label"
-                    android:textSize="17sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/tips_enabled_switch"
@@ -125,8 +122,7 @@
                     android:paddingHorizontal="@dimen/settings_horizontal_padding"
                     android:paddingBottom="@dimen/space_m"
                     android:text="@string/tips_settings_presets_description"
-                    android:textSize="13sp"
-                    android:textColor="@color/color_text_tertiary" />
+                    android:textAppearance="@style/Text.Caption" />
 
                 <!-- Card Container for Presets -->
                 <LinearLayout
@@ -160,6 +156,7 @@
                     android:focusable="true">
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         android:layout_width="@dimen/icon_size_small"
                         android:layout_height="@dimen/icon_size_small"
                         android:layout_marginEnd="@dimen/space_l"
@@ -170,9 +167,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/tips_settings_add_preset"
-                        android:textSize="16sp"
-                        android:textColor="@color/color_primary_green"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.Button"
+                        android:textColor="@color/color_primary_green" />
                 </LinearLayout>
 
                 <!-- Reset to Defaults -->
@@ -191,7 +187,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/tips_settings_reset_defaults"
-                        android:textSize="16sp"
+                        android:textAppearance="@style/Text.Body"
                         android:textColor="@color/color_text_secondary" />
                 </LinearLayout>
             </LinearLayout>

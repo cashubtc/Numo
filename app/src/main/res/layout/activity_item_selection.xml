@@ -34,8 +34,8 @@
                 <!-- Header Row -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/icon_size_large"
-                    android:paddingHorizontal="@dimen/space_s">
+                    android:layout_height="@dimen/top_bar_height"
+                    android:paddingHorizontal="@dimen/space_l">
 
                     <ImageButton
                         android:id="@+id/back_button"
@@ -69,9 +69,8 @@
                         android:gravity="center"
                         android:paddingHorizontal="@dimen/space_m"
                         android:text="@string/item_selection_saved_baskets_button"
+                        android:textAppearance="@style/Text.Link"
                         android:textColor="@color/color_accent_blue"
-                        android:textSize="15sp"
-                        android:fontFamily="sans-serif-medium"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -109,9 +108,9 @@
                         android:background="@drawable/bg_category_badge"
                         android:gravity="center"
                         android:paddingHorizontal="@dimen/space_s"
-                        android:textColor="@color/color_bg_white"
-                        android:textSize="13sp"
+                        android:textAppearance="@style/Text.Caption"
                         android:fontFamily="sans-serif-medium"
+                        android:textColor="@color/color_bg_white"
                         android:maxLines="1"
                         android:ellipsize="end"
                         android:visibility="gone"
@@ -129,9 +128,9 @@
                         android:imeOptions="actionSearch"
                         android:inputType="text"
                         android:maxLines="1"
+                        android:textAppearance="@style/Text.Body"
                         android:textColor="@color/color_text_primary"
-                        android:textColorHint="@color/color_text_tertiary"
-                        android:textSize="16sp" />
+                        android:textColorHint="@color/color_text_tertiary" />
 
                     <!-- Scan Button (default) -->
                     <ImageButton
@@ -232,9 +231,8 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/space_l"
                                 android:text="@string/item_selection_empty_title"
-                                android:textColor="@color/color_text_secondary"
-                                android:textSize="17sp"
-                                android:fontFamily="sans-serif-medium" />
+                                android:textAppearance="@style/Text.RowTitle"
+                                android:textColor="@color/color_text_secondary" />
 
                             <TextView
                                 android:id="@+id/empty_subtitle"
@@ -242,8 +240,8 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/space_xs"
                                 android:text="@string/item_selection_empty_subtitle"
+                                android:textAppearance="@style/Text.Body"
                                 android:textColor="@color/color_text_tertiary"
-                                android:textSize="15sp"
                                 android:gravity="center" />
 
                         </LinearLayout>
@@ -270,9 +268,8 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/space_l"
                                 android:text="@string/item_selection_no_results_title"
-                                android:textColor="@color/color_text_secondary"
-                                android:textSize="17sp"
-                                android:fontFamily="sans-serif-medium" />
+                                android:textAppearance="@style/Text.RowTitle"
+                                android:textColor="@color/color_text_secondary" />
 
                             <TextView
                                 android:id="@+id/no_results_subtitle"
@@ -280,8 +277,8 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="@dimen/space_xs"
                                 android:text="@string/item_selection_no_results_subtitle"
-                                android:textColor="@color/color_text_tertiary"
-                                android:textSize="15sp" />
+                                android:textAppearance="@style/Text.Body"
+                                android:textColor="@color/color_text_tertiary" />
 
                         </LinearLayout>
 
@@ -354,9 +351,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="@dimen/space_s"
-                            android:textColor="@color/color_text_secondary"
-                            android:textSize="15sp"
-                            android:fontFamily="sans-serif"
+                            android:textAppearance="@style/Text.Body"
                             tools:text="3 items"
                             app:layout_constraintStart_toEndOf="@id/basket_icon"
                             app:layout_constraintTop_toTopOf="parent"
@@ -367,9 +362,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginEnd="@dimen/space_s"
-                            android:textColor="@color/color_text_primary"
-                            android:textSize="18sp"
-                            android:fontFamily="sans-serif-medium"
+                            android:textAppearance="@style/Text.Subtitle"
                             tools:text="$74.97"
                             app:layout_constraintEnd_toStartOf="@id/basket_chevron"
                             app:layout_constraintTop_toTopOf="parent"
@@ -423,9 +416,7 @@
                                 android:padding="@dimen/space_xs"
                                 android:gravity="center_vertical"
                                 android:text="@string/item_selection_undo_button_short"
-                                android:textColor="@color/color_text_secondary"
-                                android:textSize="14sp"
-                                android:fontFamily="sans-serif-medium"
+                                android:textAppearance="@style/Text.SecondaryButton"
                                 android:background="?attr/selectableItemBackgroundBorderless"
                                 android:alpha="0.35" />
 
@@ -437,9 +428,7 @@
                                 android:padding="@dimen/space_xs"
                                 android:gravity="center_vertical"
                                 android:text="@string/item_selection_redo_button_short"
-                                android:textColor="@color/color_text_secondary"
-                                android:textSize="14sp"
-                                android:fontFamily="sans-serif-medium"
+                                android:textAppearance="@style/Text.SecondaryButton"
                                 android:background="?attr/selectableItemBackgroundBorderless"
                                 android:alpha="0.35" />
 
@@ -450,9 +439,8 @@
                                 android:layout_marginStart="@dimen/space_m"
                                 android:padding="@dimen/space_xs"
                                 android:text="@string/item_selection_basket_clear"
+                                android:textAppearance="@style/Text.SecondaryButton"
                                 android:textColor="@color/color_warning_red"
-                                android:textSize="14sp"
-                                android:fontFamily="sans-serif-medium"
                                 android:background="?attr/selectableItemBackgroundBorderless" />
 
                         </LinearLayout>
@@ -503,9 +491,8 @@
                         android:background="@drawable/bg_save_button"
                         android:text="@string/item_selection_save_button"
                         android:textAllCaps="false"
-                        android:textColor="@color/color_bg_white"
-                        android:textSize="16sp"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.Button"
+                        android:textColor="@color/color_bg_white" />
 
                 </androidx.cardview.widget.CardView>
 
@@ -525,9 +512,8 @@
                         android:background="@drawable/bg_checkout_button"
                         android:text="@string/item_selection_charge_button_default"
                         android:textAllCaps="false"
+                        android:textAppearance="@style/Text.Button"
                         android:textColor="@color/color_bg_white"
-                        android:textSize="16sp"
-                        android:fontFamily="sans-serif-medium"
                         tools:text="Charge" />
 
                 </androidx.cardview.widget.CardView>

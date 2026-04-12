@@ -12,6 +12,7 @@
     android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
     <ImageView
+        android:importantForAccessibility="no"
         android:layout_width="@dimen/icon_size_small"
         android:layout_height="@dimen/icon_size_small"
         android:layout_marginEnd="@dimen/row_icon_gap"
@@ -40,6 +41,7 @@
             android:layout_marginTop="2dp">
 
             <ImageView
+                android:importantForAccessibility="no"
                 android:id="@+id/endpoint_status_dot"
                 android:layout_width="8dp"
                 android:layout_height="8dp"

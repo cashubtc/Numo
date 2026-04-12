@@ -22,7 +22,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/withdraw_melt_toolbar_back"
             android:src="@drawable/ic_chevron_back"
-            android:tint="@color/color_text_primary"
+            app:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -61,9 +61,7 @@
                 android:layout_marginTop="@dimen/space_xl"
                 android:gravity="center"
                 android:text="@string/withdraw_melt_summary"
-                android:textAppearance="@style/Text.Body"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="15sp" />
+                android:textAppearance="@style/Text.Body" />
 
             <!-- Destination Card -->
             <com.google.android.material.card.MaterialCardView
@@ -187,9 +185,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="₿0"
-                            android:textColor="@color/color_text_primary"
-                            android:textSize="17sp"
-                            android:fontFamily="sans-serif-medium" />
+                            android:textAppearance="@style/Text.RowTitle" />
 
                     </LinearLayout>
 
@@ -206,8 +202,7 @@
                 android:gravity="center"
                 android:text="@string/withdraw_melt_fee_note"
                 android:textAppearance="@style/Text.Caption"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="13sp" />
+                android:textColor="@color/color_text_secondary" />
 
         </LinearLayout>
 
@@ -223,7 +218,6 @@
         android:layout_marginBottom="@dimen/space_xl"
         android:text="@string/withdraw_melt_title"
         android:textAllCaps="false"
-        android:textSize="17sp"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <!-- Processing Container (replaces confirmation content via container swap) -->
@@ -250,6 +244,7 @@
                 android:background="@drawable/bg_processing_step_active">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_gravity="center"

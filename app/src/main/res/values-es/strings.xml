@@ -888,4 +888,35 @@
     <string name="payment_request_tab_unified">Unificado</string>
     <string name="payment_request_default_description">Pago de %1$d sats</string>
     <string name="payment_request_lightning_description">Pago Numo POS de %1$d sats</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_edit">Editar</string>
+    <string name="cd_delete">Eliminar</string>
+    <string name="cd_restore_success">Billetera restaurada exitosamente</string>
+    <string name="cd_scan_qr">Escanear código QR</string>
+    <string name="cd_qr_code">Código QR</string>
+    <string name="cd_transaction_status">Estado de la transacción</string>
+
+    <!-- Extracted UI strings -->
+    <string name="basket_receipt_items_header_default">ARTÍCULOS</string>
+    <string name="action_add_new_mint">+ Agregar Nuevo Mint</string>
+    <string name="action_add_endpoint">+ Agregar Endpoint</string>
+    <string name="action_sync_all_endpoints">Sincronizar Todos los Endpoints</string>
+    <string name="dialog_confirm_message_default">¿Estás seguro de que deseas continuar?</string>
+    <string name="dialog_ndef_payment_title">Pago NFC</string>
+    <string name="dialog_ndef_payment_status">Acerca un dispositivo a tu teléfono para recibir el pago</string>
+    <string name="dialog_sync_progress_message">Sincronizando…</string>
+    <string name="dialog_input_title_default">Ingresar Valor</string>
+    <string name="dialog_input_description_default">Ingresa un valor a continuación</string>
+    <string name="hint_enter_value">Ingresar valor</string>
+    <string name="dialog_input_helper_default">Mín: 1,000 - Máx: 1,000,000</string>
+    <string name="label_auto">AUTO</string>
+    <string name="desc_back">Atrás</string>
+    <string name="desc_app_icon">Ícono de la aplicación</string>
+    <string name="desc_item_image">Imagen del artículo</string>
+    <string name="desc_decrease_quantity">Disminuir cantidad</string>
+    <string name="desc_increase_quantity">Aumentar cantidad</string>
+    <string name="desc_remove_item">Eliminar artículo</string>
+    <string name="desc_select_lightning_mint">Seleccionar como mint Lightning</string>
+    <string name="desc_remove_preset">Eliminar preajuste</string>
 </resources>

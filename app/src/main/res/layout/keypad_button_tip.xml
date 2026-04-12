@@ -17,9 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="1"
-        android:textColor="@color/color_text_primary"
-        android:textSize="28sp"
-        android:textStyle="bold"
+        android:textAppearance="@style/Text.DisplayLarge"
         android:includeFontPadding="false" />
 
 </FrameLayout>

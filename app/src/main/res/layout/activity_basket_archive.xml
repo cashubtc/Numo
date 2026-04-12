@@ -13,13 +13,13 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@color/color_bg_white"
-        android:elevation="2dp">
+        android:elevation="0dp">
 
         <!-- Header Row -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/top_bar_height"
-            android:paddingHorizontal="@dimen/space_s">
+            android:paddingHorizontal="@dimen/space_l">
 
             <ImageButton
                 android:id="@+id/back_button"
@@ -38,9 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/basket_archive_title"
-                android:textColor="@color/color_text_primary"
-                android:textSize="17sp"
-                android:fontFamily="sans-serif-medium"
+                android:textAppearance="@style/Text.Title"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -83,17 +81,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/basket_archive_empty_title"
-                android:textColor="@color/color_text_primary"
-                android:textSize="18sp"
-                android:fontFamily="sans-serif-medium"
+                android:textAppearance="@style/Text.Subtitle"
                 android:paddingBottom="@dimen/space_s" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/basket_archive_empty_subtitle"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="14sp"
+                android:textAppearance="@style/Text.Body"
                 android:gravity="center"
                 android:paddingHorizontal="@dimen/space_l" />
 

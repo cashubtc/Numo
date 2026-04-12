@@ -24,7 +24,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/common_back"
             android:src="@drawable/ic_close"
-            android:tint="@color/color_text_primary"
+            app:tint="@color/color_text_primary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -76,6 +76,7 @@
                 android:paddingHorizontal="@dimen/settings_horizontal_padding">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/space_l"
@@ -92,20 +93,18 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/developer_settings_restart_onboarding_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.RowTitle" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/developer_settings_restart_onboarding_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
+                        android:textAppearance="@style/Text.RowSubtitle"
                         android:layout_marginTop="2dp" />
                 </LinearLayout>
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_chevron_forward"
@@ -145,16 +144,13 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/developer_settings_lightning_invoice_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.RowTitle" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/developer_settings_lightning_invoice_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
+                        android:textAppearance="@style/Text.RowSubtitle"
                         android:layout_marginTop="2dp" />
                 </LinearLayout>
 
@@ -177,6 +173,7 @@
                 android:paddingHorizontal="@dimen/settings_horizontal_padding">
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:layout_marginEnd="@dimen/space_l"
@@ -193,20 +190,18 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/developer_error_logs_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.RowTitle" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/developer_error_logs_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
+                        android:textAppearance="@style/Text.RowSubtitle"
                         android:layout_marginTop="2dp" />
                 </LinearLayout>
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:layout_width="@dimen/icon_size_small"
                     android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_chevron_forward"
@@ -220,7 +215,7 @@
                 android:paddingHorizontal="@dimen/settings_horizontal_padding"
                 android:paddingTop="@dimen/space_l"
                 android:text="@string/developer_settings_warning"
-                android:textSize="13sp"
+                android:textAppearance="@style/Text.Caption"
                 android:textColor="@color/color_warning"
                 android:background="@color/color_bg_secondary"
                 android:padding="@dimen/space_l"

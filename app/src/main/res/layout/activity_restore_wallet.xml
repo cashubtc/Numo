@@ -80,6 +80,7 @@
                         android:gravity="center_vertical">
 
                         <ImageView
+                            android:importantForAccessibility="no"
                             android:layout_width="@dimen/icon_size_small"
                             android:layout_height="@dimen/icon_size_small"
                             android:layout_marginEnd="@dimen/space_m"
@@ -90,9 +91,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/restore_warning_title"
-                            android:textSize="16sp"
-                            android:textColor="@color/color_text_primary"
-                            android:fontFamily="sans-serif-medium" />
+                            android:textAppearance="@style/Text.RowTitle" />
                     </LinearLayout>
 
                     <TextView
@@ -100,7 +99,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/space_s"
                         android:text="@string/restore_warning_body"
-                        android:textSize="14sp"
+                        android:textAppearance="@style/Text.Body"
                         android:textColor="@color/color_text_secondary"
                         android:lineSpacingMultiplier="1.3" />
 
@@ -113,9 +112,8 @@
                     android:layout_marginTop="@dimen/section_gap"
                     android:layout_marginBottom="@dimen/space_l"
                     android:text="@string/restore_seed_instruction_title"
-                    android:textSize="15sp"
+                    android:textAppearance="@style/Text.BodyBold"
                     android:textColor="@color/color_text_secondary"
-                    android:fontFamily="sans-serif-medium"
                     android:gravity="center" />
 
                 <!-- Seed Input Grid -->
@@ -136,9 +134,7 @@
                     android:layout_height="48dp"
                     android:layout_marginTop="@dimen/margin_screen_horizontal"
                     android:text="@string/restore_seed_paste_button"
-                    android:textSize="15sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium"
+                    android:textAppearance="@style/Text.BodyBold"
                     app:cornerRadius="24dp" />
 
                 <!-- Validation Status -->
@@ -153,6 +149,7 @@
 
                     <ImageView
                         android:id="@+id/validation_icon"
+                        android:importantForAccessibility="no"
                         android:layout_width="18dp"
                         android:layout_height="18dp"
                         android:layout_marginEnd="@dimen/space_s" />
@@ -161,7 +158,7 @@
                         android:id="@+id/validation_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textSize="14sp" />
+                        android:textAppearance="@style/Text.Chip" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -174,22 +171,16 @@
             android:orientation="vertical"
             android:padding="@dimen/space_xl"
             android:background="@color/color_bg_white"
-            android:elevation="8dp">
+            android:elevation="@dimen/elevation_dialog">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/continue_button"
+                style="@style/Widget.Numo.Button.Dialog.Confirm"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/top_bar_height"
-                android:stateListAnimator="@null"
                 android:text="@string/restore_seed_continue"
-                android:textSize="16sp"
-                android:textColor="@color/color_bg_white"
-                android:fontFamily="sans-serif-medium"
-                android:backgroundTint="@color/color_text_primary"
                 android:enabled="false"
-                android:alpha="0.5"
-                app:cornerRadius="@dimen/radius_button"
-                app:elevation="0dp" />
+                android:alpha="0.5" />
 
         </LinearLayout>
 
@@ -228,9 +219,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_xl"
                 android:text="@string/restore_fetching_title"
-                android:textSize="22sp"
-                android:textColor="@color/color_text_primary"
-                android:fontFamily="sans-serif-medium" />
+                android:textAppearance="@style/Text.DialogTitle" />
 
             <TextView
                 android:id="@+id/fetching_status"
@@ -238,8 +227,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_s"
                 android:text="@string/restore_fetching_status"
-                android:textSize="15sp"
-                android:textColor="@color/color_text_secondary"
+                android:textAppearance="@style/Text.Body"
                 android:gravity="center" />
 
         </LinearLayout>
@@ -281,6 +269,7 @@
 
                     <ImageView
                         android:id="@+id/backup_status_icon"
+                        android:importantForAccessibility="no"
                         android:layout_width="28dp"
                         android:layout_height="28dp"
                         android:layout_marginEnd="@dimen/row_icon_gap"
@@ -297,9 +286,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/restore_backup_found_title"
-                            android:textSize="15sp"
-                            android:textColor="@color/color_success_green"
-                            android:fontFamily="sans-serif-medium" />
+                            android:textAppearance="@style/Text.BodyBold"
+                            android:textColor="@color/color_success_green" />
 
                         <TextView
                             android:id="@+id/backup_status_subtitle"
@@ -307,7 +295,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text="@string/restore_backup_found_subtitle"
-                            android:textSize="13sp"
+                            android:textAppearance="@style/Text.Caption"
                             android:textColor="@color/color_text_secondary" />
 
                     </LinearLayout>
@@ -320,11 +308,7 @@
                     android:layout_marginTop="@dimen/section_gap"
                     android:layout_marginBottom="@dimen/space_xs"
                     android:text="@string/restore_mints_title"
-                    android:textSize="13sp"
-                    android:textColor="@color/color_text_tertiary"
-                    android:fontFamily="sans-serif-medium"
-                    android:textAllCaps="true"
-                    android:letterSpacing="0.06" />
+                    android:textAppearance="@style/Text.SectionHeader" />
 
                 <TextView
                     android:id="@+id/mints_count_text"
@@ -332,7 +316,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/space_m"
                     android:text="@string/restore_mints_count"
-                    android:textSize="14sp"
+                    android:textAppearance="@style/Text.Body"
                     android:textColor="@color/color_text_secondary" />
 
                 <!-- Mints List Container -->
@@ -352,20 +336,14 @@
             android:orientation="vertical"
             android:padding="@dimen/space_xl"
             android:background="@color/color_bg_white"
-            android:elevation="8dp">
+            android:elevation="@dimen/elevation_dialog">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/start_restore_button"
+                style="@style/Widget.Button.Primary.Green"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/top_bar_height"
-                android:stateListAnimator="@null"
-                android:text="@string/restore_mints_start_button"
-                android:textSize="16sp"
-                android:textColor="@color/color_bg_white"
-                android:fontFamily="sans-serif-medium"
-                android:backgroundTint="@color/color_success_green"
-                app:cornerRadius="@dimen/radius_button"
-                app:elevation="0dp" />
+                android:text="@string/restore_mints_start_button" />
 
         </LinearLayout>
 
@@ -411,9 +389,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_xl"
                     android:text="@string/restore_progress_title"
-                    android:textSize="22sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium" />
+                    android:textAppearance="@style/Text.DialogTitle" />
 
                 <TextView
                     android:id="@+id/restore_progress_status"
@@ -421,8 +397,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_s"
                     android:text="@string/restore_progress_status"
-                    android:textSize="15sp"
-                    android:textColor="@color/color_text_secondary"
+                    android:textAppearance="@style/Text.Body"
                     android:gravity="center" />
 
                 <!-- Mint Progress Container -->
@@ -470,6 +445,7 @@
                     android:layout_width="80dp"
                     android:layout_height="80dp"
                     android:src="@drawable/ic_checkmark_circle_2"
+                    android:contentDescription="@string/cd_restore_success"
                     app:tint="@color/color_success_green" />
 
                 <TextView
@@ -485,8 +461,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_s"
                     android:text="@string/restore_success_subtitle"
-                    android:textSize="15sp"
-                    android:textColor="@color/color_text_secondary"
+                    android:textAppearance="@style/Text.Body"
                     android:gravity="center" />
 
                 <!-- Balance Changes Container -->
@@ -505,16 +480,10 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/done_button"
+                    style="@style/Widget.Button.Primary.Green"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/top_bar_height"
-                    android:stateListAnimator="@null"
-                    android:text="@string/restore_success_done_button"
-                    android:textSize="16sp"
-                    android:textColor="@color/color_bg_white"
-                    android:fontFamily="sans-serif-medium"
-                    android:backgroundTint="@color/color_success_green"
-                    app:cornerRadius="@dimen/radius_button"
-                    app:elevation="0dp" />
+                    android:text="@string/restore_success_done_button" />
 
             </LinearLayout>
         </ScrollView>

@@ -62,8 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/dialog_save_basket_subtitle"
-            android:textSize="15sp"
-            android:textColor="@color/color_text_secondary"
+            android:textAppearance="@style/Text.Body"
             android:lineSpacingMultiplier="1.3" />
 
         <!-- Input Field -->
@@ -78,10 +77,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/button_height"
                 android:hint="@string/dialog_save_basket_hint"
-                android:textSize="16sp"
+                android:textAppearance="@style/Text.Body"
                 android:textColor="@color/color_text_primary"
                 android:textColorHint="@color/color_text_tertiary"
-                android:fontFamily="sans-serif"
                 android:inputType="textCapWords"
                 android:maxLines="1"
                 android:imeOptions="actionDone"
@@ -96,8 +94,7 @@
             android:layout_marginTop="@dimen/space_s"
             android:layout_marginHorizontal="@dimen/space_xs"
             android:text="@string/dialog_save_basket_helper"
-            android:textSize="13sp"
-            android:textColor="@color/color_text_tertiary" />
+            android:textAppearance="@style/Text.Helper" />
 
         <!-- Preset Names Chips -->
         <com.google.android.flexbox.FlexboxLayout
@@ -118,22 +115,11 @@
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/save_button"
+        style="@style/Widget.Numo.Button.Dialog.Confirm"
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_bar_height"
         android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
         android:layout_marginBottom="@dimen/margin_screen_horizontal"
-        android:text="@string/dialog_save_basket_save"
-        android:textColor="@color/color_bg_white"
-        android:textSize="16sp"
-        android:textAllCaps="false"
-        android:fontFamily="sans-serif-medium"
-        android:insetTop="0dp"
-        android:insetBottom="0dp"
-        android:stateListAnimator="@null"
-        app:backgroundTint="@color/color_text_primary"
-        app:cornerRadius="@dimen/radius_button"
-        app:rippleColor="@color/color_ripple_on_dark"
-        app:strokeWidth="0dp"
-        app:elevation="0dp" />
+        android:text="@string/dialog_save_basket_save" />
 
 </LinearLayout>

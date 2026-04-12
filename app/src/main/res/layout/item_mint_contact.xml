@@ -45,6 +45,7 @@
 
     <!-- Hidden icon view for compatibility -->
     <ImageView
+        android:importantForAccessibility="no"
         android:id="@+id/contact_icon"
         android:layout_width="0dp"
         android:layout_height="0dp"

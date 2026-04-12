@@ -88,8 +88,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
+                android:textAppearance="@style/Text.RowSubtitle"
                 android:textColor="@color/color_text_secondary"
-                android:textSize="14sp"
                 tools:text="$24.99" />
 
             <!-- Stock indicator (if tracking inventory) -->
@@ -98,8 +98,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:textColor="@color/color_text_tertiary"
-                android:textSize="13sp"
+                android:textAppearance="@style/Text.Caption"
                 android:visibility="gone"
                 tools:text="12 in stock" />
 
@@ -130,8 +129,8 @@
 
             <ImageButton
                 android:id="@+id/decrease_quantity_button"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:padding="@dimen/space_s"
                 android:background="@drawable/bg_quantity_button"
                 android:src="@drawable/ic_minus"
@@ -145,14 +144,12 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="0"
-                android:textColor="@color/color_text_primary"
-                android:textSize="17sp"
-                android:fontFamily="sans-serif-medium" />
+                android:textAppearance="@style/Text.RowTitle" />
 
             <ImageButton
                 android:id="@+id/increase_quantity_button"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:padding="@dimen/space_s"
                 android:background="@drawable/bg_quantity_button"
                 android:src="@drawable/ic_plus"
@@ -211,9 +208,9 @@
                     android:imeOptions="actionDone"
                     android:inputType="text|textCapSentences"
                     android:maxLines="1"
+                    android:textAppearance="@style/Text.Body"
                     android:textColor="@color/color_text_primary"
-                    android:textColorHint="@color/color_text_tertiary"
-                    android:textSize="15sp" />
+                    android:textColorHint="@color/color_text_tertiary" />
 
             </LinearLayout>
 
@@ -225,9 +222,8 @@
                 android:paddingHorizontal="18dp"
                 android:gravity="center"
                 android:text="@string/item_selection_add_variation"
+                android:textAppearance="@style/Text.BodyBold"
                 android:textColor="@color/color_bg_white"
-                android:textSize="15sp"
-                android:fontFamily="sans-serif-medium"
                 android:background="@drawable/bg_add_variation_button" />
 
         </LinearLayout>
@@ -238,8 +234,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/space_s"
             android:text="@string/item_selection_variation_helper"
-            android:textColor="@color/color_text_tertiary"
-            android:textSize="13sp" />
+            android:textAppearance="@style/Text.Helper" />
 
     </LinearLayout>
 

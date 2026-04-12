@@ -74,9 +74,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/empty_state_items_title"
+                android:textAppearance="@style/Text.DisplayLarge"
                 android:textColor="@color/empty_state_title"
-                android:textSize="28sp"
-                android:fontFamily="sans-serif-medium"
                 android:gravity="center"
                 android:lineSpacingMultiplier="1.1" />
 
@@ -87,9 +86,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_m"
                 android:text="@string/empty_state_items_subtitle"
+                android:textAppearance="@style/Text.Body"
                 android:textColor="@color/empty_state_subtitle"
-                android:textSize="16sp"
-                android:fontFamily="sans-serif"
                 android:gravity="center"
                 android:lineSpacingMultiplier="1.3"
                 android:paddingHorizontal="@dimen/space_l" />
@@ -102,9 +100,8 @@
                 android:layout_marginTop="@dimen/space_xl"
                 android:background="@drawable/bg_button_empty_state_primary"
                 android:text="@string/empty_state_items_add_button"
+                android:textAppearance="@style/Text.Button"
                 android:textColor="@color/empty_state_button_primary_text"
-                android:textSize="17sp"
-                android:fontFamily="sans-serif-medium"
                 android:textAllCaps="false"
                 android:stateListAnimator="@null" />
 
@@ -117,9 +114,8 @@
                 android:paddingVertical="@dimen/space_m"
                 android:paddingHorizontal="@dimen/space_l"
                 android:text="@string/empty_state_items_import_button"
+                android:textAppearance="@style/Text.Button"
                 android:textColor="@color/empty_state_button_secondary_text"
-                android:textSize="16sp"
-                android:fontFamily="sans-serif-medium"
                 android:background="?attr/selectableItemBackgroundBorderless" />
 
         </LinearLayout>
@@ -133,7 +129,7 @@
         android:layout_gravity="top|start"
         android:layout_marginTop="@dimen/space_s"
         android:layout_marginStart="@dimen/space_s"
-        android:elevation="10dp">
+        android:elevation="@dimen/elevation_sheet">
         
         <!-- Back Arrow (shown when from Settings → Items) -->
         <ImageButton

@@ -18,9 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="15%"
-        android:textColor="@color/color_text_primary"
-        android:textSize="28sp"
-        android:textStyle="bold"
+        android:textAppearance="@style/Text.DisplayLarge"
         android:includeFontPadding="false" />
 
     <!-- Total Amount Text (in grey) -->
@@ -30,8 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/space_xs"
         android:text="$28.75"
-        android:textColor="@color/color_text_secondary"
-        android:textSize="15sp"
+        android:textAppearance="@style/Text.Body"
         android:visibility="gone" />
 
 </LinearLayout>
