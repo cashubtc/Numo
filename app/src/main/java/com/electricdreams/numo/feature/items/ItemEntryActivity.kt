@@ -319,6 +319,8 @@ class ItemEntryActivity : AppCompatActivity() {
         outState.putString("variation", variationInput.text.toString())
         outState.putString("description", descriptionInput.text.toString())
         outState.putBoolean("moreDetailsExpanded", moreDetailsExpanded)
+        imageHandler.selectedImageUri?.let { outState.putParcelable("selectedImageUri", it) }
+        outState.putString("currentPriceType", pricingHandler.getCurrentPriceType().name)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -328,6 +330,12 @@ class ItemEntryActivity : AppCompatActivity() {
         descriptionInput.setText(savedInstanceState.getString("description", ""))
         if (savedInstanceState.getBoolean("moreDetailsExpanded", false) && !moreDetailsExpanded) {
             toggleMoreDetails()
+        }
+        savedInstanceState.getParcelable<android.net.Uri>("selectedImageUri")?.let {
+            imageHandler.handleGalleryResult(it) // re-trigger preview
+        }
+        savedInstanceState.getString("currentPriceType")?.let {
+            pricingHandler.setCurrentPriceType(PriceType.valueOf(it))
         }
     }
 
