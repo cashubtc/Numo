@@ -3,9 +3,10 @@ package com.electricdreams.numo.feature.history
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
+import com.electricdreams.numo.core.util.MintManager
+import com.google.android.material.button.MaterialButton
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.Amount
@@ -48,7 +49,7 @@ class BasketReceiptActivity : AppCompatActivity() {
     private lateinit var finalTotalValue: TextView
     private lateinit var satsEquivalentText: TextView
     private lateinit var paidAmountText: TextView
-    private lateinit var printButton: ImageButton
+    private lateinit var printButton: MaterialButton
 
     private var basket: CheckoutBasket? = null
     
@@ -82,9 +83,9 @@ class BasketReceiptActivity : AppCompatActivity() {
 
     private fun initializeViews() {
         // Back button
-        findViewById<ImageButton>(R.id.back_button).setOnClickListener { finish() }
-        
-        // Print button
+        findViewById<View>(R.id.back_button).setOnClickListener { finish() }
+
+        // Print button (bottom action)
         printButton = findViewById(R.id.print_button)
         printButton.setOnClickListener { printReceipt() }
 
@@ -199,18 +200,69 @@ class BasketReceiptActivity : AppCompatActivity() {
         return fiatTotal + satsInFiat
     }
 
+    /**
+     * True when the entered currency differs from sats — i.e. there's a
+     * real fiat↔sats conversion worth showing.
+     */
+    private fun hasCrossCurrencyConversion(): Boolean {
+        val entryCurrency = Amount.Currency.fromCode(enteredCurrency)
+        return enteredAmount > 0 && totalSatoshis > 0 && entryCurrency != Amount.Currency.BTC
+    }
+
+    /**
+     * Returns true when the receipt is a simple single payment with no basket,
+     * no tip, and no cross-currency conversion — i.e. the breakdown sections
+     * would just repeat the hero amount.
+     */
+    private fun isSimplePayment(): Boolean {
+        if (basket != null) return false
+        if (tipAmountSats > 0) return false
+        if (hasCrossCurrencyConversion()) return false
+        return true
+    }
+
     private fun displayReceipt() {
-        // Display hero section
         displayHeroSection()
+        displayDetails()
 
-        // Display items
-        displayItems()
+        if (isSimplePayment()) {
+            findViewById<View>(R.id.breakdown_container).visibility = View.GONE
+        } else {
+            displayItems()
+            displayTotals()
+            displayPaymentInfo()
+        }
+    }
 
-        // Display totals
-        displayTotals()
+    private fun displayDetails() {
+        // Payment type
+        val paymentTypeText: TextView = findViewById(R.id.detail_payment_type)
+        paymentTypeText.text = when (paymentType) {
+            "lightning" -> getString(R.string.basket_receipt_type_lightning)
+            "cashu" -> getString(R.string.basket_receipt_type_cashu)
+            else -> getString(R.string.basket_receipt_type_payment)
+        }
 
-        // Display payment info
-        displayPaymentInfo()
+        // Mint
+        val mintRow: View = findViewById(R.id.row_mint)
+        val mintText: TextView = findViewById(R.id.detail_mint)
+        if (!mintUrl.isNullOrEmpty()) {
+            mintText.text = MintManager.getInstance(this).getMintDisplayName(mintUrl!!)
+            mintRow.visibility = View.VISIBLE
+        }
+
+        // Transaction ID
+        val txIdRow: View = findViewById(R.id.row_transaction_id)
+        val txIdText: TextView = findViewById(R.id.detail_transaction_id)
+        if (!transactionId.isNullOrEmpty()) {
+            txIdText.text = formatTruncatedId(transactionId!!)
+            txIdRow.visibility = View.VISIBLE
+        }
+    }
+
+    private fun formatTruncatedId(id: String): String {
+        if (id.length <= 18) return id
+        return "${id.take(6)}…${id.takeLast(6)}"
     }
 
     private fun displayHeroSection() {
@@ -228,9 +280,9 @@ class BasketReceiptActivity : AppCompatActivity() {
             // Primary: Sats amount (base, not including tip)
             val satsAmount = Amount(baseSats, Amount.Currency.BTC)
             totalAmountText.text = satsAmount.toString()
-            
-            // Secondary: Fiat equivalent
-            if (baseFiat > 0) {
+
+            // Secondary: Fiat equivalent (only if there's a real cross-currency conversion)
+            if (hasCrossCurrencyConversion()) {
                 val fiatEquiv = Amount(baseFiat, currency)
                 totalSubtitleText.text = "≈ $fiatEquiv"
                 totalSubtitleText.visibility = View.VISIBLE
@@ -241,12 +293,11 @@ class BasketReceiptActivity : AppCompatActivity() {
             // Primary: Fiat amount (entered amount is already base amount)
             val fiatAmount = Amount(baseFiat, currency)
             totalAmountText.text = fiatAmount.toString()
-            
-            // Secondary: Sats paid (base amount)
+
+            // Secondary: Sats equivalent
             if (baseSats > 0) {
                 val satsAmount = Amount(baseSats, Amount.Currency.BTC)
-                totalSubtitleText.text = satsAmount.toString()
-                totalSubtitleText.setTextColor(resources.getColor(R.color.color_text_tertiary, theme))
+                totalSubtitleText.text = "≈ $satsAmount"
                 totalSubtitleText.visibility = View.VISIBLE
             } else {
                 totalSubtitleText.visibility = View.GONE
@@ -383,28 +434,27 @@ class BasketReceiptActivity : AppCompatActivity() {
         val unitPriceText = view.findViewById<TextView>(R.id.item_unit_price)
         val totalText = view.findViewById<TextView>(R.id.item_total)
         val vatDetailRow = view.findViewById<LinearLayout>(R.id.vat_detail_row)
-        
+
         if (enteredAmount > 0) {
-            // Fiat payment
+            // Fiat payment — show fiat as price, sats equivalent below
             val amount = Amount(enteredAmount, currency)
-            unitPriceText.text = amount.toString()
+            unitPriceText.visibility = View.GONE
             totalText.text = amount.toString()
-            
-            // Show sats equivalent
+
             if (totalSatoshis > 0) {
                 val satsAmount = Amount(totalSatoshis, Amount.Currency.BTC)
                 val vatLabel = view.findViewById<TextView>(R.id.vat_label)
                 val vatAmountText = view.findViewById<TextView>(R.id.vat_amount)
-                vatLabel.text = getString(R.string.basket_receipt_paid_equivalent_label)
+                vatLabel.text = "≈"
                 vatAmountText.text = satsAmount.toString()
                 vatDetailRow.visibility = View.VISIBLE
             } else {
                 vatDetailRow.visibility = View.GONE
             }
         } else {
-            // Sats payment
+            // Sats-only payment — just show the amount, no redundant unit price
             val satsAmount = Amount(totalSatoshis, Amount.Currency.BTC)
-            unitPriceText.text = satsAmount.toString()
+            unitPriceText.visibility = View.GONE
             totalText.text = satsAmount.toString()
             vatDetailRow.visibility = View.GONE
         }
@@ -473,23 +523,21 @@ class BasketReceiptActivity : AppCompatActivity() {
             satsItemsRow.visibility = View.GONE
         }
 
-        // Final total (BASE amount, excluding tip) - this is for accounting
+        // Final total (BASE amount, excluding tip)
         if (showSatsAsPrimary) {
-            finalTotalLabel.text = "Total"
             finalTotalValue.text = Amount(baseSats, Amount.Currency.BTC).toString()
-            
-            if (baseFiat > 0) {
+
+            if (hasCrossCurrencyConversion()) {
                 satsEquivalentText.text = "≈ ${Amount(baseFiat, currency)}"
                 satsEquivalentText.visibility = View.VISIBLE
             } else {
                 satsEquivalentText.visibility = View.GONE
             }
         } else {
-            finalTotalLabel.text = "Total"
             finalTotalValue.text = Amount(baseFiat, currency).toString()
-            
+
             if (baseSats > 0) {
-                satsEquivalentText.text = Amount(baseSats, Amount.Currency.BTC).toString()
+                satsEquivalentText.text = "≈ ${Amount(baseSats, Amount.Currency.BTC)}"
                 satsEquivalentText.visibility = View.VISIBLE
             } else {
                 satsEquivalentText.visibility = View.GONE

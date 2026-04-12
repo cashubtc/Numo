@@ -136,6 +136,15 @@
         <item name="android:textAllCaps">true</item>
     </style>
 
+    <!-- AmountSubtitle: Secondary currency display below primary amount -->
+    <style name="Text.AmountSubtitle">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:lineHeight">22sp</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
+        <item name="android:gravity">center</item>
+    </style>
+
     <!-- Caption: Timestamps, metadata, hints -->
     <style name="Text.Caption">
         <item name="android:fontFamily">sans-serif</item>

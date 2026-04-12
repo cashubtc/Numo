@@ -13,8 +13,8 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_bar_height"
         android:background="@color/color_bg_white"
-        android:paddingStart="@dimen/space_l"
-        android:paddingEnd="@dimen/space_l"
+        android:paddingStart="@dimen/space_m"
+        android:paddingEnd="@dimen/space_m"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
@@ -84,25 +84,19 @@
             <!-- Secondary amount (sat equivalent for fiat entries, or fiat equivalent for sat entries) -->
             <TextView
                 android:id="@+id/detail_amount_subtitle"
+                style="@style/Text.AmountSubtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_xs"
-                android:gravity="center"
-                android:textSize="17sp"
-                android:fontFamily="sans-serif-medium"
-                android:textColor="@color/color_text_secondary"
                 tools:text="₿27,849" />
 
             <!-- Fiat equivalent (shown below sat amount on sat-entry transactions) -->
             <TextView
                 android:id="@+id/detail_fiat_equivalent"
+                style="@style/Text.AmountSubtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_xs"
-                android:gravity="center"
-                android:textSize="17sp"
-                android:fontFamily="sans-serif-medium"
-                android:textColor="@color/color_text_secondary"
                 android:visibility="gone"
                 tools:text="$0.01" />
 
@@ -163,7 +157,7 @@
                         style="@style/Text.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/row_subtitle_gap"
                         tools:text="Cashu" />
 
                 </LinearLayout>
@@ -208,7 +202,7 @@
                         style="@style/Text.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/row_subtitle_gap"
                         tools:text="$71,833.46" />
 
                 </LinearLayout>
@@ -252,7 +246,7 @@
                         style="@style/Text.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/row_subtitle_gap"
                         android:maxLines="2"
                         android:ellipsize="end"
                         tools:text="https://mint.minibits.cash/Bitcoin" />
@@ -299,7 +293,7 @@
                         style="@style/Text.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/row_subtitle_gap"
                         android:maxLines="2"
                         android:ellipsize="end"
                         tools:text="erik@primal.net" />
@@ -308,8 +302,8 @@
 
                 <ImageButton
                     android:id="@+id/btn_copy_destination"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
+                    android:layout_width="@dimen/icon_size_xs"
+                    android:layout_height="@dimen/icon_size_xs"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_copy"
                     android:padding="@dimen/space_xs"
@@ -356,7 +350,7 @@
                         style="@style/Text.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/row_subtitle_gap"
                         android:maxLines="1"
                         android:ellipsize="middle"
                         tools:text="lnbc1pvjluezpp5qqqsyq..." />
@@ -365,8 +359,8 @@
 
                 <ImageButton
                     android:id="@+id/btn_copy_invoice"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
+                    android:layout_width="@dimen/icon_size_xs"
+                    android:layout_height="@dimen/icon_size_xs"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_copy"
                     android:padding="@dimen/space_xs"
@@ -413,7 +407,7 @@
                         style="@style/Text.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/row_subtitle_gap"
                         android:maxLines="2"
                         android:ellipsize="end"
                         tools:text="Coffee order" />

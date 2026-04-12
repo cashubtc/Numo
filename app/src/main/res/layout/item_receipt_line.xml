@@ -17,11 +17,11 @@
         <!-- Quantity Badge -->
         <TextView
             android:id="@+id/item_quantity"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="@dimen/icon_size_xs"
+            android:layout_height="@dimen/icon_size_xs"
             android:background="@drawable/bg_quantity_badge"
             android:gravity="center"
-            android:textSize="13sp"
+            style="@style/Text.Caption"
             android:textColor="@color/color_text_primary"
             android:fontFamily="sans-serif-medium"
             tools:text="2" />
@@ -38,11 +38,9 @@
             <!-- Item Name -->
             <TextView
                 android:id="@+id/item_name"
+                style="@style/Text.RowTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textColor="@color/color_text_primary"
-                android:fontFamily="sans-serif-medium"
                 android:ellipsize="end"
                 android:maxLines="2"
                 tools:text="Cappuccino - Large" />
@@ -50,11 +48,10 @@
             <!-- Unit Price -->
             <TextView
                 android:id="@+id/item_unit_price"
+                style="@style/Text.Caption"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:textSize="14sp"
-                android:textColor="@color/color_text_tertiary"
+                android:layout_marginTop="@dimen/row_subtitle_gap"
                 tools:text="$4.50 each" />
 
         </LinearLayout>
@@ -62,11 +59,9 @@
         <!-- Line Total -->
         <TextView
             android:id="@+id/item_total"
+            style="@style/Text.RowTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="@color/color_text_primary"
-            android:fontFamily="sans-serif-medium"
             tools:text="$9.00" />
 
     </LinearLayout>
@@ -78,25 +73,23 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="@dimen/space_xs"
-        android:layout_marginStart="40dp"
+        android:layout_marginStart="@dimen/row_icon_size"
         android:visibility="gone"
         tools:visibility="visible">
 
         <TextView
             android:id="@+id/vat_label"
+            style="@style/Text.Caption"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="13sp"
-            android:textColor="@color/color_text_tertiary"
             tools:text="incl. 20% VAT" />
 
         <TextView
             android:id="@+id/vat_amount"
+            style="@style/Text.Caption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="13sp"
-            android:textColor="@color/color_text_tertiary"
             tools:text="$1.50" />
 
     </LinearLayout>
