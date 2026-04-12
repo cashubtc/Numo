@@ -41,140 +41,89 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <ScrollView
+    <!-- Search Bar -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/search_card"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="16dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="@color/color_divider"
         app:layout_constraintTop_toBottomOf="@id/top_bar">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:layout_height="56dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp">
 
-            <!-- Section Header -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="4dp"
-                android:text="@string/currency_settings_section_preferred_currency"
-                android:textAppearance="@style/Text.SectionHeader" />
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_search"
+                app:tint="@color/color_text_secondary" />
 
-            <!-- Currency Radio Group -->
-            <RadioGroup
-                android:id="@+id/currency_radio_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+            <EditText
+                android:id="@+id/currency_search_input"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:background="@null"
+                android:hint="@string/currency_settings_search_hint"
+                android:inputType="textNoSuggestions"
+                android:maxLines="1"
+                android:textAppearance="@style/Text.Body"
+                android:textColorHint="@color/color_text_secondary" />
 
-                <RadioButton
-                    android:id="@+id/radio_usd"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
-                    android:text="@string/currency_settings_option_usd"
-                    android:textAppearance="@style/Text.BodyBold" />
-
-                <RadioButton
-                    android:id="@+id/radio_eur"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
-                    android:text="@string/currency_settings_option_eur"
-                    android:textAppearance="@style/Text.BodyBold" />
-
-                <RadioButton
-                    android:id="@+id/radio_gbp"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
-                    android:text="@string/currency_settings_option_gbp"
-                    android:textAppearance="@style/Text.BodyBold" />
-
-                <RadioButton
-                    android:id="@+id/radio_jpy"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
-                    android:text="@string/currency_settings_option_jpy"
-                    android:textAppearance="@style/Text.BodyBold" />
-
-                <RadioButton
-                    android:id="@+id/radio_dkk"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
-                    android:text="@string/currency_settings_option_dkk"
-                    android:textAppearance="@style/Text.BodyBold" />
-
-                <RadioButton
-                    android:id="@+id/radio_sek"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
-                    android:text="@string/currency_settings_option_sek"
-                    android:textAppearance="@style/Text.BodyBold" />
-
-                <RadioButton
-                    android:id="@+id/radio_nok"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
-                    android:text="@string/currency_settings_option_nok"
-                    android:textAppearance="@style/Text.BodyBold" />
-
-                <RadioButton
-                    android:id="@+id/radio_krw"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
-                    android:text="@string/currency_settings_option_krw"
-                    android:textAppearance="@style/Text.BodyBold" />
-            </RadioGroup>
+            <ImageButton
+                android:id="@+id/clear_search_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                app:tint="@color/color_text_secondary"
+                android:visibility="gone" />
 
         </LinearLayout>
-    </ScrollView>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Section Header -->
+    <TextView
+        android:id="@+id/section_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="8dp"
+        android:text="@string/currency_settings_section_preferred_currency"
+        android:textAppearance="@style/Text.SectionHeader"
+        app:layout_constraintTop_toBottomOf="@id/search_card" />
+
+    <!-- Currency RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/currency_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingBottom="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/section_header" />
+
+    <TextView
+        android:id="@+id/empty_state_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:gravity="center"
+        android:text="No currencies found"
+        android:textAppearance="@style/Text.Body"
+        android:textColor="@color/color_text_secondary"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/section_header" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -14,3 +14,4 @@ local.properties
 release
 opencode.json
 .kotlin/
+.opencode/

@@ -4,6 +4,7 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
 import java.util.Locale
+import java.util.Currency as JavaCurrency
 
 /**
  * Represents a monetary amount with currency.
@@ -20,48 +21,143 @@ data class Amount(
     val value: Long,
     val currency: Currency,
 ) {
-    enum class Currency(val symbol: String) {
-        BTC("₿"),
-        USD("$"),
-        EUR("€"),
-        GBP("£"),
-        JPY("¥"),
-        DKK("kr."),
-        SEK("kr"),
-        NOK("kr"),
-        KRW("₩");
-
+    class Currency private constructor(
+        val name: String,
+        val symbol: String,
+        val isBtc: Boolean = false
+    ) {
         /** Returns true for currencies with no decimal places (e.g. JPY, KRW). */
-        fun isZeroDecimal(): Boolean = this == JPY || this == KRW
+        fun isZeroDecimal(): Boolean {
+            if (isBtc) return true
+            return runCatching {
+                JavaCurrency.getInstance(name).defaultFractionDigits == 0
+            }.getOrDefault(false)
+        }
 
         /**
          * Get the appropriate locale for formatting this currency.
          * This determines decimal separator conventions.
          */
-        fun getLocale(): Locale = when (this) {
-            USD -> Locale.US          // Period decimal: $4.20
-            EUR -> Locale.GERMANY     // Comma decimal: €4,20
-            GBP -> Locale.UK          // Period decimal: £4.20
-            JPY -> Locale.JAPAN       // No decimals: ¥420
-            BTC -> Locale.US          // Comma thousand separator: ₿1,000
-            DKK -> Locale("da", "DK") // Comma decimal: DKK 100,00
-            SEK -> Locale("sv", "SE") // Comma decimal: SEK 100,00
-            NOK -> Locale("nb", "NO") // Comma decimal: NOK 100,00
-            KRW -> Locale.KOREA       // No decimals: ₩101,816,000
+        fun getLocale(): Locale {
+            if (isBtc) return Locale.US
+            
+            // Fast paths for common currencies to match old behavior perfectly
+            return when (name) {
+                "USD" -> Locale.US          // Period decimal: $4.20
+                "EUR" -> Locale.GERMANY     // Comma decimal: €4,20
+                "GBP" -> Locale.UK          // Period decimal: £4.20
+                "JPY" -> Locale.JAPAN       // No decimals: ¥420
+                "DKK" -> Locale("da", "DK") // Comma decimal: DKK 100,00
+                "SEK" -> Locale("sv", "SE") // Comma decimal: SEK 100,00
+                "NOK" -> Locale("nb", "NO") // Comma decimal: NOK 100,00
+                "KRW" -> Locale.KOREA       // No decimals: ₩101,816,000
+                else -> {
+                    // Try to find a matching locale for this currency
+                    val availableLocales = Locale.getAvailableLocales()
+                    availableLocales.firstOrNull { locale ->
+                        runCatching { JavaCurrency.getInstance(locale).currencyCode == name }.getOrDefault(false)
+                    } ?: Locale.US // Fallback to US format
+                }
+            }
+        }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other !is Currency) return false
+            return name == other.name
+        }
+
+        override fun hashCode(): Int {
+            return name.hashCode()
         }
 
         companion object {
+            @JvmField
+            val BTC = Currency("BTC", "₿", true)
+            @JvmField
+            val USD = Currency("USD", "$")
+            @JvmField
+            val EUR = Currency("EUR", "€")
+            @JvmField
+            val GBP = Currency("GBP", "£")
+            @JvmField
+            val JPY = Currency("JPY", "¥")
+            @JvmField
+            val DKK = Currency("DKK", "kr.")
+            @JvmField
+            val SEK = Currency("SEK", "kr")
+            @JvmField
+            val NOK = Currency("NOK", "kr")
+            @JvmField
+            val KRW = Currency("KRW", "₩")
+
             @JvmStatic
             fun fromCode(code: String): Currency = when {
                 code.equals("SAT", ignoreCase = true) ||
-                    code.equals("SATS", ignoreCase = true) -> BTC
-                else -> runCatching { valueOf(code.uppercase(Locale.US)) }
-                    .getOrElse { USD }
+                    code.equals("SATS", ignoreCase = true) ||
+                    code.equals("BTC", ignoreCase = true) -> BTC
+                else -> {
+                    val upperCode = code.uppercase(Locale.US)
+                    // Fast path for known
+                    when (upperCode) {
+                        "USD" -> USD
+                        "EUR" -> EUR
+                        "GBP" -> GBP
+                        "JPY" -> JPY
+                        "DKK" -> DKK
+                        "SEK" -> SEK
+                        "NOK" -> NOK
+                        "KRW" -> KRW
+                        else -> runCatching {
+                            val javaCurrency = JavaCurrency.getInstance(upperCode)
+                            // If a symbol is available, use it, otherwise use the code
+                            val symbol = try {
+                                javaCurrency.getSymbol(Locale.getDefault())
+                            } catch (e: Exception) {
+                                upperCode
+                            }
+                            Currency(upperCode, symbol)
+                        }.getOrElse { USD }
+                    }
+                }
             }
 
             /** Find currency by its symbol (e.g., "$" -> USD) */
             @JvmStatic
-            fun fromSymbol(symbol: String): Currency? = entries.find { it.symbol == symbol }
+            fun fromSymbol(symbol: String): Currency? {
+                if (symbol == "₿") return BTC
+                
+                // Check known ones first
+                val known = listOf(USD, EUR, GBP, JPY, DKK, SEK, NOK, KRW)
+                known.find { it.symbol == symbol }?.let { return it }
+
+                // Search through available currencies
+                return runCatching {
+                    JavaCurrency.getAvailableCurrencies().find { it.symbol == symbol }?.let {
+                        Currency(it.currencyCode, it.symbol)
+                    }
+                }.getOrNull()
+            }
+            
+            @JvmStatic
+            fun getMatchingCurrencies(prefix: String): List<Currency> {
+                if (prefix.isEmpty()) return emptyList()
+                
+                val knownMatches = listOf(BTC, USD, EUR, GBP, JPY, DKK, SEK, NOK, KRW)
+                    .filter { prefix.startsWith(it.symbol) }
+                    
+                if (knownMatches.isNotEmpty()) {
+                    return knownMatches.sortedByDescending { it.symbol.length }
+                }
+                
+                // Fallback to searching all available currencies
+                return runCatching {
+                    JavaCurrency.getAvailableCurrencies()
+                        .filter { prefix.startsWith(it.symbol) }
+                        .map { Currency(it.currencyCode, it.symbol) }
+                        .sortedByDescending { it.symbol.length }
+                }.getOrDefault(emptyList())
+            }
         }
     }
 
@@ -75,19 +171,19 @@ data class Amount(
      * - BTC: ₿1,000
      */
     override fun toString(): String {
-        return when (currency) {
-            Currency.BTC -> {
+        return when {
+            currency.isBtc -> {
                 val formatter = NumberFormat.getNumberInstance(currency.getLocale())
                 "${currency.symbol}${formatter.format(value)}"
             }
-            Currency.JPY, Currency.KRW -> {
-                // JPY/KRW have no decimal places (stored as cents internally, divide by 100)
+            currency.isZeroDecimal() -> {
+                // Have no decimal places (stored as cents internally, divide by 100)
                 val major = value / 100.0
                 val formatter = NumberFormat.getIntegerInstance(currency.getLocale())
                 "${currency.symbol}${formatter.format(major.toLong())}"
             }
             else -> {
-                // USD, EUR, GBP - 2 decimal places with currency-appropriate separator
+                // 2 decimal places with currency-appropriate separator
                 val major = value / 100.0
                 val symbols = DecimalFormatSymbols(currency.getLocale())
                 val formatter = DecimalFormat("#,##0.00", symbols)
@@ -101,12 +197,12 @@ data class Amount(
      * Useful for input fields and calculations.
      */
     fun toStringWithoutSymbol(): String {
-        return when (currency) {
-            Currency.BTC -> {
+        return when {
+            currency.isBtc -> {
                 val formatter = NumberFormat.getNumberInstance(currency.getLocale())
                 formatter.format(value)
             }
-            Currency.JPY, Currency.KRW -> {
+            currency.isZeroDecimal() -> {
                 val major = value / 100.0
                 val formatter = NumberFormat.getIntegerInstance(currency.getLocale())
                 formatter.format(major.toLong())
@@ -137,9 +233,7 @@ data class Amount(
 
             // Find matching currencies by matching the start of the string
             // We sort by symbol length descending to match longest symbols first (e.g. "kr." vs "kr")
-            val matchingCurrencies = Currency.entries
-                .filter { formatted.startsWith(it.symbol) }
-                .sortedByDescending { it.symbol.length }
+            val matchingCurrencies = Currency.getMatchingCurrencies(formatted)
             
             if (matchingCurrencies.isEmpty()) return null
             
@@ -165,14 +259,14 @@ data class Amount(
             numericPart = normalizeNumericInput(numericPart)
             
             return try {
-                when (currency) {
-                    Currency.BTC -> {
+                when {
+                    currency.isBtc -> {
                         // For BTC, value is in satoshis (no decimal conversion needed)
                         val sats = numericPart.replace(",", "").toLong()
                         Amount(sats, currency)
                     }
-                    Currency.JPY, Currency.KRW -> {
-                        // JPY/KRW have no decimal places, but stored as cents internally
+                    currency.isZeroDecimal() -> {
+                        // have no decimal places, but stored as cents internally
                         val amount = numericPart.replace(",", "").toDouble()
                         Amount((amount * 100).toLong(), currency)
                     }
@@ -202,8 +296,8 @@ data class Amount(
          */
         @JvmStatic
         fun fromMajorUnits(majorUnits: Double, currency: Currency): Amount {
-            return when (currency) {
-                Currency.BTC -> Amount(majorUnits.toLong(), currency)
+            return when {
+                currency.isBtc -> Amount(majorUnits.toLong(), currency)
                 else -> Amount(Math.round(majorUnits * 100), currency)
             }
         }

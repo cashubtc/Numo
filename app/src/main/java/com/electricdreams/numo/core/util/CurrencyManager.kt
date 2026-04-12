@@ -21,7 +21,7 @@ class CurrencyManager private constructor(context: Context) {
         private const val PREFS_NAME = "CurrencyPreferences"
         private const val KEY_CURRENCY = "preferredCurrency"
 
-        // Supported currencies
+        // Legacy compatibility - keeping these as constants for places that still reference them
         const val CURRENCY_USD = "USD"
         const val CURRENCY_EUR = "EUR"
         const val CURRENCY_GBP = "GBP"
@@ -40,7 +40,7 @@ class CurrencyManager private constructor(context: Context) {
             JSONObject(response).getJSONObject("data").getDouble("amount")
         }
 
-        /** Add entries here for currencies not on Coinbase. */
+        /** Add entries here for currencies not on Coinbase (or where we prefer a different source). */
         private val CUSTOM_APIS = mapOf(
             CURRENCY_JPY to PriceApiConfig(
                 url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=jpy",
@@ -91,16 +91,8 @@ class CurrencyManager private constructor(context: Context) {
     fun getCurrentCurrency(): String = currentCurrency
 
     /** Get the currency symbol for the current currency. */
-    fun getCurrentSymbol(): String = when (currentCurrency) {
-        CURRENCY_EUR -> "€"
-        CURRENCY_GBP -> "£"
-        CURRENCY_JPY -> "¥"
-        CURRENCY_USD -> "$"
-        CURRENCY_DKK -> "kr."
-        CURRENCY_SEK -> "kr"
-        CURRENCY_NOK -> "kr"
-        CURRENCY_KRW -> "₩"
-        else -> "$"
+    fun getCurrentSymbol(): String {
+        return Amount.Currency.fromCode(currentCurrency).symbol
     }
 
     /** Set the preferred currency and save to preferences. */
@@ -124,11 +116,11 @@ class CurrencyManager private constructor(context: Context) {
 
     /** Check if a currency code is valid and supported. */
     fun isValidCurrency(currencyCode: String?): Boolean {
-        return when (currencyCode) {
-            CURRENCY_USD, CURRENCY_EUR, CURRENCY_GBP, CURRENCY_JPY,
-            CURRENCY_DKK, CURRENCY_SEK, CURRENCY_NOK, CURRENCY_KRW -> true
-            else -> false
-        }
+        if (currencyCode.isNullOrEmpty()) return false
+        return runCatching {
+            java.util.Currency.getInstance(currencyCode.uppercase())
+            true
+        }.getOrDefault(false)
     }
 
     /** Get the API URL for the current currency. Falls back to Coinbase. */

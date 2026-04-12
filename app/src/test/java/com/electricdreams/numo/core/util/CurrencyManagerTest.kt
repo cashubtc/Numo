@@ -85,9 +85,13 @@ class CurrencyManagerTest {
         assertTrue(currencyManager.isValidCurrency("GBP"))
         assertTrue(currencyManager.isValidCurrency("JPY"))
         
-        assertFalse(currencyManager.isValidCurrency("CAD"))
+        // Now supports all fiat currencies
+        assertTrue(currencyManager.isValidCurrency("CAD"))
+        assertTrue(currencyManager.isValidCurrency("COP"))
+        
         assertFalse(currencyManager.isValidCurrency(""))
         assertFalse(currencyManager.isValidCurrency(null))
+        assertFalse(currencyManager.isValidCurrency("INVALID"))
     }
 
     @Test
