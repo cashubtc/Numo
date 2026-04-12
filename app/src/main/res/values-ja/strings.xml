@@ -108,7 +108,7 @@
     
     <string name="onboarding_welcome_tagline">手数料なしでビットコイン支払いを即座に受け入れます。</string>
     <string name="onboarding_welcome_message">Cashu eCash テクノロジーを使用して、手数料ゼロで即座にビットコイン支払いを受け入れます。</string>
-    <string name="onboarding_terms_text">続行すると、サービス利用規約とプライバシー ポリシーに同意したことになります。</string>
+    <string name="onboarding_terms_text">続行すると、<annotation id="terms">サービス利用規約</annotation>と<annotation id="privacy">プライバシー ポリシー</annotation>に同意したことになります。</string>
     <string name="onboarding_get_started">始めましょう</string>
 
     

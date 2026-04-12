@@ -108,7 +108,7 @@
     
     <string name="onboarding_welcome_tagline">수수료 없이 즉시 비트코인 ​​결제를 수락하세요.</string>
     <string name="onboarding_welcome_message">Cashu ecash 기술을 사용하여 수수료 없이 즉시 비트코인 ​​결제를 수락하세요.</string>
-    <string name="onboarding_terms_text">계속하면 서비스 약관 및 개인정보 보호정책에 동의하게 됩니다.</string>
+    <string name="onboarding_terms_text">계속하면 <annotation id="terms">서비스 약관</annotation> 및 <annotation id="privacy">개인정보 보호정책</annotation>에 동의하게 됩니다.</string>
     <string name="onboarding_get_started">시작하기</string>
 
     

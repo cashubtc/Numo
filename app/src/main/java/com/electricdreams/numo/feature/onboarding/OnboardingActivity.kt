@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.SpannableString
 import android.text.Spanned
+import android.text.SpannedString
 import android.text.TextPaint
 import android.text.TextWatcher
 import android.text.method.LinkMovementMethod
@@ -436,32 +437,30 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     private fun setupTermsText() {
-        val fullText = getString(R.string.onboarding_terms_text)
+        val fullText = getText(R.string.onboarding_terms_text)
         val spannableString = SpannableString(fullText)
+        
+        if (fullText is Spanned) {
+            val annotations = fullText.getSpans(0, fullText.length, android.text.Annotation::class.java)
+            for (annotation in annotations) {
+                if (annotation.key == "id") {
+                    val start = fullText.getSpanStart(annotation)
+                    val end = fullText.getSpanEnd(annotation)
+                    val clickableSpan = object : ClickableSpan() {
+                        override fun onClick(widget: View) {
+                            if (annotation.value == "terms") showTermsDialog()
+                            else if (annotation.value == "privacy") showPrivacyDialog()
+                        }
 
-        val termsLabel = "Terms of Service"
-        val privacyLabel = "Privacy Policy"
-
-        val addClickableSpan = { label: String, onClickAction: () -> Unit ->
-            val start = fullText.indexOf(label)
-            if (start != -1) {
-                val end = start + label.length
-                val clickableSpan = object : ClickableSpan() {
-                    override fun onClick(widget: View) {
-                        onClickAction()
+                        override fun updateDrawState(ds: TextPaint) {
+                            ds.isUnderlineText = true
+                            ds.isFakeBoldText = true
+                        }
                     }
-
-                    override fun updateDrawState(ds: TextPaint) {
-                        ds.isUnderlineText = true
-                        ds.isFakeBoldText = true
-                    }
+                    spannableString.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                 }
-                spannableString.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
         }
-
-        addClickableSpan(termsLabel) { showTermsDialog() }
-        addClickableSpan(privacyLabel) { showPrivacyDialog() }
 
         termsText.text = spannableString
         termsText.movementMethod = LinkMovementMethod.getInstance()

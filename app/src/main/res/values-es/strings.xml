@@ -107,7 +107,7 @@
     <!-- Onboarding / Welcome -->
     <string name="onboarding_welcome_tagline">Acepta pagos en Bitcoin al instante y sin comisiones.</string>
     <string name="onboarding_welcome_message">Acepta pagos en Bitcoin al instante y sin comisiones usando la tecnología Cashu ecash.</string>
-    <string name="onboarding_terms_text">Al continuar, aceptas nuestros Términos de servicio y Política de privacidad</string>
+    <string name="onboarding_terms_text">Al continuar, aceptas nuestros <annotation id="terms">Términos de servicio</annotation> y <annotation id="privacy">Política de privacidad</annotation></string>
     <string name="onboarding_get_started">Comenzar</string>
 
     <!-- Onboarding / Choose Path -->

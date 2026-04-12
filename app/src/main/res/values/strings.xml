@@ -108,7 +108,7 @@
     
     <string name="onboarding_welcome_tagline">Accept Bitcoin payments instantly with zero fees.</string>
     <string name="onboarding_welcome_message">Accept Bitcoin payments instantly with zero fees using Cashu ecash technology.</string>
-    <string name="onboarding_terms_text">By continuing, you agree to our Terms of Service and Privacy Policy</string>
+    <string name="onboarding_terms_text">By continuing, you agree to our <annotation id="terms">Terms of Service</annotation> and <annotation id="privacy">Privacy Policy</annotation></string>
     <string name="onboarding_get_started">Get Started</string>
 
     
