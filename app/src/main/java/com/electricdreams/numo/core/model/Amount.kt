@@ -167,6 +167,42 @@ data class Amount(
     }
 
     /**
+     * Format the amount as a string with the currency symbol, abbreviating large numbers with K/M/B.
+     */
+    fun toShortString(): String {
+        return when {
+            currency.isBtc -> {
+                // For BTC, value is satoshis. We explicitly abbreviate with K/M/B to avoid confusion with BTC conversion
+                val sats = value.toDouble()
+                if (sats >= 100_000.0) { // >= 100,000 sats -> 100k
+                    "${currency.symbol}${formatAbbreviated(sats, currency.getLocale())}"
+                } else {
+                    toString()
+                }
+            }
+            else -> {
+                val major = value / 100.0
+                if (major >= 100_000.0) { // >= 100,000 -> 100k
+                    "${currency.symbol}${formatAbbreviated(major, currency.getLocale())}"
+                } else {
+                    toString()
+                }
+            }
+        }
+    }
+
+    private fun formatAbbreviated(number: Double, locale: Locale): String {
+        val symbols = DecimalFormatSymbols(locale)
+        val formatter = DecimalFormat("#,##0.#", symbols)
+        return when {
+            number >= 1_000_000_000 -> "${formatter.format(number / 1_000_000_000)}B"
+            number >= 1_000_000 -> "${formatter.format(number / 1_000_000)}M"
+            number >= 1_000 -> "${formatter.format(number / 1_000)}k"
+            else -> formatter.format(number)
+        }
+    }
+
+    /**
      * Format the amount as a string with the currency symbol.
      * Uses currency-appropriate decimal separator:
      * - USD: $4.20

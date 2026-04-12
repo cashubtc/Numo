@@ -62,10 +62,7 @@ class AmountDisplayManager(
                 if (isUsdInputMode) {
                     // Currently in fiat mode, converting to satoshi mode
                     val rawInput = currentInputStr.toLong()
-                    val scale = getFiatScale()
-                    val fiatAmount = if (scale > 1L) {
-                        (rawInput * scale).toDouble()
-                    } else if (currency.isZeroDecimal()) {
+                    val fiatAmount = if (currency.isZeroDecimal()) {
                         rawInput.toDouble()
                     } else {
                         rawInput / 100.0
@@ -77,11 +74,7 @@ class AmountDisplayManager(
                     // Currently in satoshi mode, converting to fiat mode
                     val satoshis = currentInputStr.toLong()
                     val fiatAmount = bitcoinPriceWorker?.satoshisToFiat(satoshis) ?: 0.0
-                    val scale = getFiatScale()
-                    
-                    val storedValue = if (scale > 1L) {
-                        (fiatAmount / scale).toLong()
-                    } else if (currency.isZeroDecimal()) {
+                    val storedValue = if (currency.isZeroDecimal()) {
                         fiatAmount.toLong()
                     } else {
                         (fiatAmount * 100).toLong()
@@ -121,32 +114,34 @@ class AmountDisplayManager(
             val currency = Amount.Currency.fromCode(currencyCode)
             
             val rawInput = if (currentInputStr.isEmpty()) 0L else currentInputStr.toLong()
-            val scale = getFiatScale()
             
-            val fiatCents = if (scale > 1L) {
-                rawInput * scale * 100
-            } else if (currency.isZeroDecimal()) {
+            val fiatCents = if (currency.isZeroDecimal()) {
                 rawInput * 100
             } else {
                 rawInput
             }
             
             amountDisplayText = Amount(fiatCents, currency).toString()
+            amountDisplayText = if (amountDisplayText.length > 9) Amount(fiatCents, currency).toShortString() else amountDisplayText
             
             // Convert fiat to satoshis for secondary display and requestedAmount
             val fiatAmount = fiatCents / 100.0
             satsValue = fiatToSatoshis(fiatAmount)
-            secondaryDisplayText = Amount(satsValue, Amount.Currency.BTC).toString()
+            secondaryDisplayText = Amount(satsValue, Amount.Currency.BTC).toShortString()
         } else {
             // Input mode: satoshi, display sats as primary, fiat as secondary
             satsValue = if (currentInputStr.isEmpty()) 0L else currentInputStr.toLong()
             amountDisplayText = formatAmount(currentInputStr)
+            amountDisplayText = if (amountDisplayText.length > 9) Amount(satsValue, Amount.Currency.BTC).toShortString() else amountDisplayText
             
             if (hasBitcoinPrice) {
                 // Show fiat conversion with swap icon
                 val fiatValue = bitcoinPriceWorker?.satoshisToFiat(satsValue) ?: 0.0
-                secondaryDisplayText = bitcoinPriceWorker?.formatFiatAmount(fiatValue)
-                    ?: CurrencyManager.getInstance(context).formatCurrencyAmount(0.0)
+                val currencyCode = CurrencyManager.getInstance(context).getCurrentCurrency()
+                val currency = Amount.Currency.fromCode(currencyCode)
+                val fiatCents = if (currency.isZeroDecimal()) fiatValue.toLong() else (fiatValue * 100).toLong()
+                
+                secondaryDisplayText = Amount(fiatCents, currency).toShortString()
                 switchCurrencyButton.visibility = View.VISIBLE
             } else {
                 // No price data - just show "BTC" without swap icon
@@ -216,21 +211,6 @@ class AmountDisplayManager(
             duration = 400
         }
         amountDisplay.startAnimation(shake)
-    }
-
-    private fun getFiatScale(): Long {
-        val currentPrice = bitcoinPriceWorker?.getCurrentPrice() ?: 0.0
-        val usdPrice = bitcoinPriceWorker?.getBtcUsdPrice() ?: 0.0
-        
-        if (currentPrice <= 0.0 || usdPrice <= 0.0) return 1L
-        
-        val usdRate = currentPrice / usdPrice
-        
-        return when {
-            usdRate >= 500_000.0 -> 1_000_000L
-            usdRate >= 500.0 -> 1_000L
-            else -> 1L
-        }
     }
 
     /** Convert fiat amount (in currency units, not cents) to satoshis */
