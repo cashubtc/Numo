@@ -29,6 +29,11 @@ data class Amount(
         /** Returns true for currencies with no decimal places (e.g. JPY, KRW). */
         fun isZeroDecimal(): Boolean {
             if (isBtc) return true
+            
+            // ISO 4217 specifies decimals for some highly inflated currencies that never use them in practice
+            val practicalZeroDecimal = setOf("COP", "VND", "IDR", "CLP", "ARS", "VES", "LBP", "UGX", "ZWL", "GNF", "PYG")
+            if (name in practicalZeroDecimal) return true
+            
             return runCatching {
                 JavaCurrency.getInstance(name).defaultFractionDigits == 0
             }.getOrDefault(false)
