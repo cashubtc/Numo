@@ -43,6 +43,10 @@ class InputBottomSheet : BottomSheetDialogFragment() {
         }
     }
 
+import android.content.DialogInterface
+
+    private var actionHandled = false
+
     override fun getTheme(): Int = R.style.Theme_Numo_BottomSheet
 
     override fun onCreateView(
@@ -70,6 +74,14 @@ class InputBottomSheet : BottomSheetDialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onCancel(dialog: DialogInterface) {
+        super.onCancel(dialog)
+        if (!actionHandled) {
+            actionHandled = true
+            config?.onCancel?.invoke()
+        }
     }
 
     /**
@@ -126,6 +138,7 @@ class InputBottomSheet : BottomSheetDialogFragment() {
         binding.saveButton.text = cfg.saveText
 
         binding.closeButton.setOnClickListener {
+            actionHandled = true
             hideKeyboard()
             dismiss()
             cfg.onCancel?.invoke()
@@ -137,6 +150,7 @@ class InputBottomSheet : BottomSheetDialogFragment() {
                 binding.inputContainer.shake()
                 return@setOnClickListener
             }
+            actionHandled = true
             hideKeyboard()
             dismiss()
             cfg.onSave(value)

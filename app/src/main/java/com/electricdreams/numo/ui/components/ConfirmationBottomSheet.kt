@@ -44,6 +44,10 @@ class ConfirmationBottomSheet : BottomSheetDialogFragment() {
         }
     }
 
+import android.content.DialogInterface
+
+    private var actionHandled = false
+
     override fun getTheme(): Int = R.style.Theme_Numo_BottomSheet
 
     override fun onCreateView(
@@ -64,6 +68,14 @@ class ConfirmationBottomSheet : BottomSheetDialogFragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    override fun onCancel(dialog: DialogInterface) {
+        super.onCancel(dialog)
+        if (!actionHandled) {
+            actionHandled = true
+            config?.onCancel?.invoke()
+        }
     }
 
     private fun bindConfig() {
@@ -98,16 +110,19 @@ class ConfirmationBottomSheet : BottomSheetDialogFragment() {
         }
 
         binding.closeButton.setOnClickListener {
+            actionHandled = true
             dismiss()
             cfg.onCancel?.invoke()
         }
 
         binding.cancelButton.setOnClickListener {
+            actionHandled = true
             dismiss()
             cfg.onCancel?.invoke()
         }
 
         binding.confirmButton.setOnClickListener {
+            actionHandled = true
             dismiss()
             cfg.onConfirm()
         }
