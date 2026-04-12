@@ -1,0 +1,889 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">누모</string>
+    <string name="navigation_drawer_open">탐색 창 열기</string>
+    <string name="navigation_drawer_close">탐색 창 닫기</string>
+    <string name="item_list_title">카탈로그 항목 관리</string>
+    
+    
+    <string name="service_description">카슈 결제 서비스</string>
+    <string name="ndef_aid_description">NDEF 태그 유형 4</string>
+
+    
+    <string name="payment_request_qr_description">캐슈 결제요청 QR코드</string>
+
+    
+    <string name="tips_settings_toolbar_back">뒤쪽에</string>
+    <string name="tips_settings_title">팁</string>
+    <string name="tips_settings_description">고객이 결제 시 팁을 추가할 수 있도록 허용합니다. 팁 사전 설정은 결제 화면에 빠른 선택 버튼으로 표시됩니다.</string>
+    <string name="tips_settings_enable_label">팁 활성화</string>
+    <string name="tips_settings_presets_header">팁 사전 설정</string>
+    <string name="tips_settings_presets_description">빠른 선택 팁 비율을 구성합니다. 고객은 맞춤 금액을 입력할 수도 있습니다.</string>
+    <string name="tips_settings_add_preset">프리셋 추가</string>
+    <string name="tips_settings_reset_defaults">기본값으로 재설정</string>
+
+    
+    <string name="tip_percentage_format">%1$d%%</string>
+    <string name="tips_dialog_add_preset_title">팁 사전 설정 추가</string>
+    <string name="tips_dialog_add_preset_hint">백분율(1~100)을 입력하세요.</string>
+    <string name="tips_dialog_add_preset_positive">추가하다</string>
+    <string name="tips_dialog_add_preset_negative">취소</string>
+    <string name="tips_error_invalid_percentage">유효한 백분율(1~100)을 입력하세요.</string>
+    <string name="tips_error_could_not_add_preset">사전 설정을 추가할 수 없습니다(이미 존재하거나 최대 용량에 도달했을 수 있음).</string>
+
+    <string name="tips_dialog_edit_preset_title">팁 사전 설정 편집</string>
+    <string name="tips_dialog_edit_preset_positive">구하다</string>
+
+    <string name="tips_dialog_remove_preset_title">사전 설정 제거</string>
+    <string name="tips_dialog_remove_preset_message">팁 사전 설정에서 %1$d%%을(를) 제거하시겠습니까?</string>
+    <string name="tips_dialog_remove_preset_positive">제거하다</string>
+
+    <string name="tips_dialog_reset_defaults_title">기본값으로 재설정</string>
+    <string name="tips_dialog_reset_defaults_message" formatted="false">팁 사전 설정을 기본값(5%, 10%, 15%, 20%)으로 재설정하시겠습니까?</string>
+    <string name="tips_dialog_reset_defaults_positive">다시 놓기</string>
+    <string name="tips_toast_reset_to_defaults">사전 설정이 기본값으로 재설정됨</string>
+
+    
+    <string name="tip_selection_close_content_description">닫다</string>
+    <string name="tip_selection_order_total_label">주문 합계</string>
+    <string name="tip_selection_question_add_tip">팁을 추가하시겠습니까?</string>
+    <string name="tip_selection_custom_tip_label">맞춤 팁</string>
+    <string name="tip_selection_custom_tip_subtitle">금액 입력</string>
+    <string name="tip_selection_no_tip_button">팁 없음</string>
+    <string name="tip_selection_custom_currency_switch_to_btc">₿로 전환</string>
+    <string name="tip_selection_custom_currency_switch_to_fiat">%1$s로 전환</string>
+    <string name="tip_selection_custom_question">팁 금액을 입력하세요</string>
+    <string name="tip_selection_main_back">뒤쪽에</string>
+    <string name="tip_selection_main_confirm">확인하다</string>
+
+    
+    <string name="payment_request_close_content_description">닫다</string>
+    <string name="payment_request_share_content_description">공유하다</string>
+    <string name="payment_request_pay_label">지불하다</string>
+    <string name="payment_request_instruction_scan_or_tap">스캔하거나 탭하여 결제하세요</string>
+    <string name="payment_request_nfc_reading">NFC에서 읽는 중...</string>
+    <string name="payment_request_animation_close">완료</string>
+
+    <string name="payment_request_error_invalid_amount">잘못된 결제 금액</string>
+    <string name="payment_request_error_ndef_prepare">NDEF 결제 데이터를 준비하지 못했습니다.</string>
+    <string name="payment_request_error_nothing_to_share">아직 공유할 내용이 없습니다.</string>
+
+    <string name="payment_request_status_preparing">결제 요청 준비 중...</string>
+    <string name="payment_request_status_waiting_for_payment">결제를 기다리는 중...</string>
+    <string name="payment_request_status_error_qr">QR 코드 생성 오류</string>
+    <string name="payment_request_status_error_generic">오류: %1$s</string>
+    <string name="payment_request_status_success">결제 성공!</string>
+    <string name="payment_request_status_failed">결제 실패: %1$s</string>
+    <string name="payment_request_lightning_error_failed">라이트닝 결제 실패: %1$s</string>
+
+    <string name="payment_request_tip_info_with_percentage">%1$s 팁 포함(%2$d%%)</string>
+    <string name="payment_request_tip_info_no_percentage">%1$s 팁 포함</string>
+
+    <string name="payment_request_share_chooser_title">결제 요청 공유</string>
+
+    
+    <string name="payment_received_amount">%1$s을(를) 받았습니다.</string>
+    <string name="payment_received_button_view_details">세부정보 보기</string>
+    <string name="payment_received_button_close">닫다</string>
+    <string name="payment_received_close_content_description">닫다</string>
+    <string name="payment_received_share_content_description">공유하다</string>
+    <string name="payment_received_success_background_description">성공 배경</string>
+    <string name="payment_received_success_icon_description">성공</string>
+
+    <string name="payment_received_error_no_token">공유할 토큰이 없습니다.</string>
+    <string name="payment_received_share_chooser_title">토큰 공유</string>
+    <string name="payment_received_error_no_share_app">이 토큰을 공유할 수 있는 앱이 없습니다.</string>
+    <string name="payment_received_error_no_details">거래 세부정보를 확인할 수 없습니다.</string>
+
+    
+    <string name="payment_failure_title">결제 실패</string>
+    <string name="payment_failure_message">결제를 처리하는 중에 문제가 발생했습니다.</string>
+    <string name="payment_failure_button_try_again">다시 시도하세요</string>
+    <string name="payment_failure_button_close">닫다</string>
+    <string name="payment_failure_close_content_description">닫다</string>
+    <string name="payment_failure_error_background_description">오류 배경</string>
+    <string name="payment_failure_error_icon_description">오류</string>
+    <string name="payment_failure_error_no_pending">재시도할 대기 중인 결제가 없습니다.</string>
+
+    
+    <string name="onboarding_welcome_tagline">수수료 없이 즉시 비트코인 ​​결제를 수락하세요.</string>
+    <string name="onboarding_welcome_message">Cashu ecash 기술을 사용하여 수수료 없이 즉시 비트코인 ​​결제를 수락하세요.</string>
+    <string name="onboarding_terms_text">계속하면 서비스 약관 및 개인정보 보호정책에 동의하게 됩니다.</string>
+    <string name="onboarding_get_started">시작하기</string>
+
+    
+    <string name="onboarding_setup_title">지갑 설정</string>
+    <string name="onboarding_setup_subtitle">시작하고 싶은 방법을 선택하세요</string>
+    <string name="onboarding_create_wallet_title">새 지갑 만들기</string>
+    <string name="onboarding_create_wallet_subtitle">새로운 시드 문구로 새롭게 시작해보세요</string>
+    <string name="onboarding_restore_wallet_title">백업에서 복원</string>
+    <string name="onboarding_restore_wallet_subtitle">기존 시드 문구 사용</string>
+
+    
+    <string name="explainer_teaser_title">Numo 작동 방식을 알아보려면 탭하세요.</string>
+    <string name="explainer_slide1_title">결제하려면 탭하세요.</string>
+    <string name="explainer_slide1_body">금액을 입력하고 충전을 탭하면 고객이 귀하의 휴대폰을 들고 있습니다. NFC를 통해 즉시 결제가 이루어집니다.</string>
+    <string name="explainer_slide2_title">자동 자기 양육권</string>
+    <string name="explainer_slide2_body">자동 인출을 설정하면 들어오는 결제 금액을 자신의 라이트닝 지갑으로 바로 이동할 수 있습니다.</string>
+    <string name="explainer_slide3_title">수수료 없음</string>
+    <string name="explainer_slide3_body">Numo는 완전한 오픈 소스이며 수수료가 없습니다. 구독, 삭감, 숨겨진 비용이 없습니다. 당신이 받는 모든 토요일은 당신의 것입니다.</string>
+    <string name="explainer_image_placeholder">이미지 자리 표시자</string>
+
+
+    <string name="onboarding_seed_toolbar_back">뒤쪽에</string>
+    <string name="onboarding_seed_toolbar_title">지갑 복원</string>
+    <string name="onboarding_seed_instruction_title">12단어 시드 문구를 입력하세요.</string>
+    <string name="onboarding_seed_instruction_body">지갑을 복원하려면 올바른 순서로 단어를 입력하세요.</string>
+    <string name="onboarding_seed_paste_button">반죽</string>
+    <string name="onboarding_seed_validation_ready">계속할 준비가 되었습니다</string>
+    <string name="onboarding_seed_invalid_characters">잘못된 문자가 감지되었습니다.</string>
+    <string name="onboarding_seed_words_entered_count">12개 단어 중 %1$d개 입력됨</string>
+    <string name="onboarding_seed_continue">계속하다</string>
+    <string name="onboarding_clipboard_empty">클립보드가 비어 있습니다.</string>
+    <string name="onboarding_seed_paste_invalid">유효한 12단어 시드 문구를 붙여넣으세요.</string>
+    <string name="onboarding_seed_paste_success">붙여넣은 시드 문구</string>
+
+
+    <string name="onboarding_status_creating_wallet">새 지갑을 만드는 중…</string>
+    <string name="onboarding_status_restoring_wallet">지갑 복원 중…</string>
+
+    
+    <string name="onboarding_mints_toolbar_back">뒤쪽에</string>
+    <string name="onboarding_mints_toolbar_title">당신의 민트</string>
+    <string name="onboarding_backup_found_title">백업 발견됨</string>
+    <string name="onboarding_backup_found_subtitle">마지막으로 백업된 %1$s</string>
+    <string name="onboarding_backup_not_found_title">백업을 찾을 수 없습니다.</string>
+    <string name="onboarding_backup_not_found_subtitle">기본 민트 사용</string>
+    <string name="onboarding_mints_title">민트 선택</string>
+    <string name="onboarding_mints_subtitle_restore">복원할 민트를 선택하세요</string>
+    <string name="onboarding_mints_subtitle_description">이 민트는 귀하의 비트코인을 보관할 것입니다. 언제든지 자신의 지갑으로 인출할 수 있으며, 지급 기준액을 설정해 자동으로 인출할 수도 있습니다.</string>
+    <string name="onboarding_mints_count">%1$d개 민트%2$s 선택됨</string>
+    <string name="onboarding_mints_continue_restore">지갑 복원</string>
+    <string name="onboarding_mints_continue_new_wallet">계속하다</string>
+    <string name="onboarding_mints_add_different">다른 민트 추가</string>
+    <string name="onboarding_mints_add_hint">민트 주소를 입력하세요</string>
+    <string name="onboarding_mints_scan_row_title">QR 코드 스캔</string>
+    <string name="onboarding_mints_scan_row_subtitle">주소를 스캔하려면 탭하세요.</string>
+    <string name="onboarding_mint_generic_name">박하</string>
+    <string name="onboarding_mints_default_section_title">기본 민트</string>
+    <string name="onboarding_mints_popular_section_title">인기 민트</string>
+    <string name="onboarding_mints_add_different_button">+ 뉴 민트</string>
+    <string name="onboarding_mints_hero_label">기본 민트</string>
+    <string name="onboarding_mints_hero_subtitle">귀하의 비트코인을 보유하고 있습니다.</string>
+    <string name="onboarding_mints_hero_default_badge">기본</string>
+    <string name="onboarding_mints_hero_helper">언제든지 자신의 지갑으로 인출하거나 지급 기준액을 설정하여 자동으로 인출하세요.</string>
+    <string name="onboarding_mints_popular_header">인기 민트</string>
+    <string name="onboarding_mints_tap_hint">기본 민트를 변경하려면 탭하세요.</string>
+    <string name="onboarding_mints_add_new_button">+ 새 민트 추가</string>
+    <string name="onboarding_mints_set_default_toast">%1$s가 기본값으로 설정됨</string>
+    <string name="onboarding_add_mint_sheet_title">민트 추가</string>
+    <string name="onboarding_add_mint_url_hint">민트 URL을 입력하세요</string>
+    <string name="onboarding_add_mint_button">추가하다</string>
+    <string name="onboarding_add_mint_or">또는</string>
+    <string name="onboarding_add_mint_scan_qr">주사</string>
+    <string name="onboarding_add_mint_loading">민트 추가...</string>
+
+
+    <string name="onboarding_restoring_title">지갑 복원 중</string>
+    <string name="onboarding_restoring_initializing">복원 초기화 중...</string>
+
+    
+    <string name="onboarding_success_restored_title">지갑이 복원되었습니다.</string>
+    <string name="onboarding_success_restored_recovered">%1$d개의 토요일을 복구했습니다.</string>
+    <string name="onboarding_success_restored_total_balance">총 잔액: %1$d 토요일</string>
+    <string name="onboarding_success_created_title">지갑이 생성되었습니다.</string>
+    <string name="onboarding_success_created_subtitle">지갑을 사용할 준비가 되었습니다</string>
+    <string name="onboarding_success_balance_by_mint">민트별 밸런스</string>
+    <string name="onboarding_enter_wallet_button">계속하다</string>
+
+    
+    <string name="onboarding_error_creating_wallet">지갑 생성 오류: %1$s</string>
+    <string name="onboarding_error_initializing_wallet">지갑 초기화 오류: %1$s</string>
+
+    
+    <string name="restore_warning_title">중요한 경고</string>
+    <string name="restore_warning_body">시드 문구에서 복원하면 현재 지갑이 대체됩니다. 계속하기 전에 현재 시드 문구를 백업했는지 확인하세요.</string>
+    <string name="restore_seed_instruction_title">12단어 시드 문구를 입력하세요.</string>
+    <string name="restore_seed_paste_button">클립보드에서 붙여넣기</string>
+    <string name="restore_seed_continue">계속하다</string>
+
+    <string name="restore_fetching_title">백업 확인 중</string>
+    <string name="restore_fetching_status">Nostr 릴레이 검색 중...</string>
+
+    <string name="restore_backup_found_title">백업 발견됨</string>
+    <string name="restore_backup_found_subtitle">마지막 백업일: 2024년 1월 1일</string>
+    <string name="restore_backup_unknown_date">날짜를 알 수 없음</string>
+
+    <string name="restore_mints_title">복원할 민트를 선택하세요</string>
+    <string name="restore_mints_count">선택한 민트 0개</string>
+    <string name="restore_mints_start_button">복원 시작</string>
+    <string name="restore_confirm_dialog_message">이렇게 하면 입력한 시드 문구에서 지갑이 복원됩니다.\n\n⚠️ 중요:\n• 현재 시드 문구를 백업했는지 확인하세요\n• 이 작업은 취소할 수 없습니다.\n• 복원은 선택한 %1$d개의 민트에 대해 시도됩니다.\n\n%2$s</string>
+    <string name="restore_confirm_current_seed_note">현재 시드 문구는 \"%1$s...\"로 시작합니다.</string>
+
+    <string name="restore_progress_title">지갑 복원 중</string>
+    <string name="restore_progress_status">민트에 연결 중...</string>
+    <string name="restore_progress_status_waiting">대기 중...</string>
+    <string name="restore_progress_balance_increase">+%1$d 토요일</string>
+    <string name="restore_progress_balance_decrease">%1$d 토요일</string>
+
+    <string name="restore_success_title">지갑이 복원되었습니다.</string>
+    <string name="restore_success_subtitle">지갑이 성공적으로 복원되었습니다</string>
+    <string name="restore_success_balance_line">%1$d 토요일</string>
+    <string name="restore_success_done_button">완료</string>
+
+    <string name="restore_error_failed">복원 실패: %1$s</string>
+    <string name="restore_error_no_mints_selected">복원할 민트를 하나 이상 선택하세요.</string>
+
+    
+    <string name="seed_phrase_toolbar_back">뒤쪽에</string>
+    <string name="seed_phrase_toolbar_title">씨앗 문구</string>
+    <string name="seed_phrase_warning_title">이 비밀을 지켜주세요!</string>
+    <string name="seed_phrase_warning_body">이 12개 단어를 아는 사람은 누구나 귀하의 자금에 접근할 수 있습니다. 이를 적어서 안전한 곳에 보관하십시오. 누구와도 공유하지 마십시오.</string>
+    <string name="seed_phrase_title">귀하의 회복 문구</string>
+    <string name="seed_phrase_show_button">보여주다</string>
+    <string name="seed_phrase_copy_button">클립보드에 복사</string>
+    <string name="seed_phrase_clipboard_disclaimer">붙여넣은 후에는 클립보드를 지워야 합니다.</string>
+
+    
+    <string name="dialog_terms_title">서비스 약관</string>
+    <string name="dialog_terms_body">"NUMO WALLET - 서비스 약관\n\n1. 동의\n이 지갑 애플리케이션을 사용하면 이러한 약관에 동의하는 것입니다.\n\n2. 서비스의 성격\n이것은 Cashu ecash 기술을 사용하는 자체 관리형 비트코인 지갑입니다. 자금과 시드 문구에 대한 책임은 전적으로 귀하에게 있습니다.\n\n3. 시드 문구\n12단어 시드 문구는 지갑을 복구할 수 있는 유일한 방법입니다. 절대 사용하지 마세요. 오프라인으로 안전하게 저장하세요.\n\n4. 보증 없음\n이 소프트웨어는 어떠한 종류의 보증도 없이 \"있는 그대로\" 제공됩니다. 사용에 따른 책임은 사용자 본인에게 있습니다.\n\n5. 책임의 제한\n우리는 버그, 사용자 오류 또는 제3자 발행 실패에 대해 책임을 지지 않습니다.\n\n6. 이러한 민트는 실패하거나 사용할 수 없게 될 수 있습니다.\n\n7. 개인 정보 보호\n이 지갑은 개인 정보 보호 정책이 있을 수 있는 ecash 민트를 통해 처리됩니다.\n\n이 약관은 2024년 11월에 업데이트될 수 있습니다.</string>
+    <string name="common_close">닫다</string>
+
+    
+    <string name="empty_state_items_title">카탈로그 만들기</string>
+    <string name="empty_state_items_subtitle">POS로 결제를 수락하려면 제품을 추가하세요.</string>
+    <string name="empty_state_items_add_button">항목 추가</string>
+    <string name="empty_state_items_import_button">CSV에서 가져오기</string>
+
+    
+    <string name="common_back">뒤쪽에</string>
+    <string name="common_search">찾다</string>
+    <string name="developer_settings_title">개발자 설정</string>
+    <string name="developer_settings_section_debugging">디버깅</string>
+    <string name="developer_settings_restart_onboarding_title">온보딩 다시 시작</string>
+    <string name="developer_settings_restart_onboarding_subtitle">온보딩 흐름을 다시 시작하세요.</string>
+    <string name="developer_settings_lightning_invoice_title">라이트닝 송장 지연</string>
+    <string name="developer_settings_lightning_invoice_subtitle">Lightning 탭이 선택된 경우에만 송장 가져오기</string>
+    <string name="developer_settings_warning">⚠️ 개발자 설정은 테스트 및 디버깅 목적으로만 사용됩니다. 주의해서 사용하세요.</string>
+
+    
+    <string name="developer_error_logs_title">오류 로그</string>
+    <string name="developer_error_logs_subtitle">최근 오류 로그 보기 및 내보내기</string>
+    <string name="developer_error_logs_section_title">오류 로그</string>
+    <string name="developer_error_logs_filter_label">최대 오류 표시</string>
+    <string name="developer_error_logs_filter_today">오늘</string>
+    <string name="developer_error_logs_copy_all">모두 복사</string>
+    <string name="developer_error_logs_share">공유하다</string>
+    <string name="developer_error_logs_empty">사용 가능한 오류 로그가 없습니다.</string>
+    <string name="developer_error_logs_copied">오류 로그가 클립보드에 복사되었습니다.</string>
+    <string name="developer_error_logs_share_title">오류 로그 공유</string>
+
+    
+    <string name="nfc_dialog_title_scan_to_pay">스캔하여 결제</string>
+    <string name="nfc_dialog_content_description_contactless">비접촉 결제</string>
+    <string name="nfc_dialog_content_description_cashu">카슈</string>
+    <string name="nfc_dialog_subtitle_or_scan_qr">또는 QR 코드를 스캔하세요</string>
+    <string name="nfc_dialog_waiting_message">NFC를 기다리는 중...</string>
+    <string name="nfc_enable_title">NFC 활성화</string>
+    <string name="nfc_enable_message">탭하여 결제하려면 NFC가 필요합니다. 설정에서 활성화해 주세요.</string>
+    <string name="nfc_enable_button">설정</string>
+    <string name="common_cancel">취소</string>
+
+    
+    <string name="dialog_title_enter_pin">PIN 입력</string>
+    <string name="dialog_pin_hint">핀</string>
+
+    
+    <string name="nfc_payment_error_enter_amount_first">먼저 금액을 입력해주세요</string>
+    <string name="nfc_payment_error_rescan_not_supported">이 빌드에서는 PIN 기반 재검색이 지원되지 않습니다.</string>
+    <string name="nfc_payment_error_insufficient_funds">카드 잔액이 부족합니다.</string>
+    <string name="nfc_payment_error_pin_flow_not_implemented">이 빌드에서는 PIN이 필요한 흐름이 구현되지 않았습니다.</string>
+    <string name="nfc_payment_error_card_sw">카드 오류: (SW: 0x%04X)</string>
+    <string name="nfc_payment_error_generic">결제 실패: %1$s</string>
+    <string name="nfc_payment_error_nfc_comm">NFC 통신 오류: %1$s</string>
+    <string name="nfc_payment_error_satocash">Satocash 카드 오류: %1$s(SW: 0x%2$04X)</string>
+    <string name="nfc_payment_error_unexpected">예상치 못한 오류가 발생했습니다: %1$s</string>
+    <string name="nfc_payment_hint_keep_close">휴대전화를 가까이에 두세요</string>
+    <string name="nfc_payment_hint_processing">결제 처리 중...\n휴대전화를 들어도 됩니다.</string>
+
+    
+    <string name="common_ok">좋아요</string>
+    <string name="common_or">또는</string>
+
+    
+    <string name="withdraw_lightning_toolbar_back">뒤쪽에</string>
+    <string name="withdraw_lightning_title">철회하다</string>
+    <string name="withdraw_lightning_balance_label">사용 가능한 잔액</string>
+    <string name="withdraw_lightning_mint_name_label">민트 이름</string>
+    <string name="withdraw_lightning_section_withdraw_to">철수하다</string>
+    <string name="withdraw_lightning_option_invoice">⚡ 라이트닝 송장</string>
+    <string name="withdraw_lightning_invoice_hint_label">Lightning 송장 입력(BOLT11)</string>
+    <string name="withdraw_lightning_invoice_hint_value">엘앤비...</string>
+    <string name="withdraw_lightning_option_address">📧 라이트닝 주소</string>
+    <string name="withdraw_lightning_address_hint_label">라이트닝 주소를 입력하세요</string>
+    <string name="withdraw_lightning_address_hint_value">사용자@도메인.com</string>
+    <string name="withdraw_lightning_amount_label">금액(토)</string>
+    <string name="withdraw_lightning_amount_hint">1000</string>
+    <string name="withdraw_lightning_button_continue">계속하다</string>
+
+    
+    <string name="withdraw_lightning_error_invalid_mint_url">잘못된 민트 URL</string>
+    <string name="withdraw_lightning_error_enter_invoice">Lightning 송장을 입력하세요.</string>
+    <string name="withdraw_lightning_error_wallet_not_initialized">지갑이 초기화되지 않았습니다</string>
+    <string name="withdraw_lightning_error_insufficient_balance">잔액이 부족합니다. 금액 + 수수료(%1$d sats)가 잔액(%2$d sats)을 초과합니다. %3$d sats 미만의 금액을 사용해 보세요.</string>
+    <string name="withdraw_lightning_error_enter_address">라이트닝 주소를 입력하세요</string>
+    <string name="withdraw_lightning_error_enter_valid_amount">올바른 금액을 입력하세요.</string>
+    <string name="withdraw_lightning_error_generic">오류: %1$s</string>
+
+    
+    <string name="withdraw_melt_toolbar_back">뒤쪽에</string>
+    <string name="withdraw_melt_title">출금 확인</string>
+    <string name="withdraw_melt_summary">%1$s에서 출금</string>
+    <string name="withdraw_melt_destination_label">에게</string>
+    <string name="withdraw_melt_destination_placeholder">사용자@도메인.com</string>
+    <string name="withdraw_melt_amount_label">양</string>
+    <string name="withdraw_melt_fee_label">수수료 적립금</string>
+    <string name="withdraw_melt_total_label">총</string>
+    <string name="withdraw_melt_fee_note">실제 라이트닝 수수료가 더 낮을 경우 수수료 적립금이 반환됩니다.</string>
+    <string name="withdraw_melt_loading">철회 처리 중...</string>
+
+    
+    <string name="withdraw_melt_error_invalid_data">잘못된 용융 견적 데이터</string>
+    <string name="withdraw_melt_error_wallet_not_initialized">지갑이 초기화되지 않았습니다</string>
+    <string name="withdraw_melt_error_invoice_not_paid">결제 실패: 청구서가 결제되지 않았습니다.</string>
+    <string name="withdraw_melt_error_pending">결제가 보류 중입니다. 나중에 다시 확인해 주세요.</string>
+    <string name="withdraw_melt_error_unknown_state">결제 실패: 알 수 없는 상태</string>
+    <string name="withdraw_melt_error_generic">오류: %1$s</string>
+    <string name="withdraw_melt_destination_unknown">알려지지 않은</string>
+    <string name="withdraw_processing_title">출금 처리 중</string>
+    <string name="withdraw_processing_subtitle">전송이 완료되는 동안 기기를 켜두세요.</string>
+    <string name="withdraw_processing_amount_label">양</string>
+    <string name="withdraw_processing_destination_label">목적지</string>
+    <string name="withdraw_processing_status_preparing">인출 준비 중</string>
+    <string name="withdraw_processing_status_contacting">민트에게 연락하기</string>
+    <string name="withdraw_processing_status_settling">라이트닝 합의를 기다리는 중</string>
+    <string name="withdraw_processing_step_preparing">자금 준비</string>
+    <string name="withdraw_processing_step_contacting">민트에게 연락하는중</string>
+    <string name="withdraw_processing_step_settling">번개 정착</string>
+    <string name="withdraw_processing_hint">이 작업은 일반적으로 10초 미만이 소요됩니다. 완료되면 안전하게 이 화면을 종료할 수 있습니다.</string>
+
+    <string name="withdraw_melt_destination_invoice_fallback">라이트닝 송장</string>
+
+    
+    <string name="withdraw_success_amount">%1$s를 보냈습니다.</string>
+    <string name="withdraw_success_destination">%1$s(으)로</string>
+    <string name="withdraw_success_destination_fallback">번개</string>
+    <string name="withdraw_success_close">닫다</string>
+    <string name="withdraw_success_background_description">성공 배경</string>
+    <string name="withdraw_success_icon_description">성공</string>
+
+    
+    <string name="history_toolbar_title">활동</string>
+    <string name="history_section_payment_history">결제 내역</string>
+    <string name="history_empty">결제 내역이 없습니다</string>
+
+    <string name="transaction_row_copy">복사</string>
+    <string name="transaction_row_open">열려 있는</string>
+    <string name="transaction_row_delete">삭제</string>
+
+    <string name="token_history_copy">토큰 복사</string>
+    <string name="token_history_open_with">다음을 사용하여 토큰 열기...</string>
+    <string name="token_history_delete">토큰 삭제</string>
+
+    <string name="transaction_details_amount_placeholder">$0</string>
+    <string name="transaction_details_date_label">날짜</string>
+    <string name="transaction_details_token_placeholder">토큰...</string>
+    <string name="transaction_details_copy_token">토큰 복사</string>
+    <string name="transaction_details_open_with">다음으로 열기...</string>
+    <string name="transaction_details_delete_transaction">거래 삭제</string>
+
+    <string name="payment_history_title">지불</string>
+    <string name="payment_history_status_pending">보류 중</string>
+    <string name="history_checking_payment_status">결제 상태 확인 중...</string>
+
+    <string name="transaction_detail_toolbar_back">뒤쪽에</string>
+    <string name="transaction_detail_toolbar_title">거래 세부정보</string>
+    <string name="transaction_detail_toolbar_share">공유하다</string>
+
+    <string name="transaction_detail_type_payment_received">결제 완료</string>
+    <string name="transaction_detail_mint_label">민트에서</string>
+    <string name="transaction_detail_view_receipt">영수증 보기</string>
+    <string name="transaction_detail_section_transaction_details">거래 세부정보</string>
+
+    <string name="transaction_detail_payment_type_label">결제 유형</string>
+    <string name="transaction_detail_payment_type_cashu">카슈</string>
+    <string name="transaction_detail_amount_label">양</string>
+    <string name="transaction_detail_token_unit_label">토큰 단위</string>
+    <string name="transaction_detail_entered_as_label">다음으로 입력됨</string>
+    <string name="transaction_detail_entered_amount_label">입력금액</string>
+    <string name="transaction_detail_bitcoin_price_label">비트코인 가격</string>
+    <string name="transaction_detail_tip_label">팁</string>
+    <string name="transaction_detail_tip_equivalent_label">(동등한)</string>
+    <string name="transaction_detail_total_paid_label">총 지불액</string>
+    <string name="transaction_detail_mint_label_short">박하</string>
+
+    <string name="transaction_detail_lightning_invoice_header">라이트닝 송장</string>
+    <string name="transaction_detail_lightning_invoice_placeholder">엘앤비...</string>
+    <string name="transaction_detail_copy_invoice_hint">인보이스를 복사하려면 탭하세요.</string>
+
+    <string name="transaction_detail_token_header">카슈토큰</string>
+    <string name="transaction_detail_token_placeholder">캐슈아...</string>
+
+    <string name="transaction_detail_payment_request_header">결제 요청</string>
+    <string name="transaction_detail_payment_request_placeholder">...</string>
+
+    <string name="transaction_detail_button_copy_token">토큰 복사</string>
+    <string name="transaction_detail_button_open_with">다음으로 열기...</string>
+    <string name="transaction_detail_button_delete">거래 삭제</string>
+
+    <string name="mint_restore_name_placeholder">민트 이름</string>
+    <string name="mint_restore_status_restoring">복원 중...</string>
+    <string name="mint_restore_balance_change_placeholder">+0 토요일</string>
+
+    
+    <string name="items_settings_section_title">품목 카탈로그</string>
+    <string name="items_settings_status_empty">카탈로그에 항목이 없습니다.</string>
+    <string name="items_settings_description">빠른 결제를 위해 제품 카탈로그를 관리하세요.</string>
+    <string name="items_settings_import_csv">CSV 가져오기</string>
+    <string name="items_settings_export_csv">CSV 내보내기</string>
+    <string name="items_settings_manage">관리하다</string>
+    <string name="items_settings_clear_all">모든 항목 지우기</string>
+
+    
+    <string name="item_list_toolbar_back">뒤쪽에</string>
+    <string name="item_list_toolbar_title">품목</string>
+    <string name="item_list_add_item">항목 추가</string>
+    <string name="item_list_done_reordering">재정렬 완료</string>
+    <string name="item_list_empty_icon_description">항목 없음</string>
+    <string name="item_list_empty_title">항목 없음</string>
+    <string name="item_list_empty_subtitle">첫 번째 항목을 추가하려면 +를 탭하세요.</string>
+    <string name="item_list_import_from_csv">CSV에서 가져오기</string>
+    <string name="item_list_export_to_csv">CSV로 내보내기</string>
+    <string name="item_list_toast_exported">CSV로 내보낸 카탈로그</string>
+    <string name="item_list_toast_error_exporting">카탈로그를 내보내는 중 오류가 발생했습니다.</string>
+    <string name="item_list_clear_all">모든 항목 지우기</string>
+
+    
+    <string name="item_entry_toolbar_back">뒤쪽에</string>
+    <string name="item_entry_title_add">항목 추가</string>
+    <string name="item_entry_button_save">구하다</string>
+    <string name="item_entry_image_description">아이템 이미지</string>
+    <string name="item_entry_image_placeholder">이미지 없음</string>
+    <string name="item_entry_button_add_photo">사진 추가</string>
+    <string name="item_entry_button_remove_photo">사진 삭제</string>
+
+    <string name="item_entry_section_basic_information">기본정보</string>
+    <string name="item_entry_label_name">이름</string>
+    <string name="item_entry_hint_name">품목 이름</string>
+    <string name="item_entry_label_variation">변화</string>
+    <string name="item_entry_hint_variation">예를 들어 소형, 대형</string>
+    <string name="item_entry_label_description">설명</string>
+    <string name="item_entry_hint_description">선택 과목</string>
+
+    <string name="item_entry_section_category">범주</string>
+    <string name="item_entry_hint_new_category">새 카테고리 이름</string>
+    <string name="item_entry_category_confirm">확인하다</string>
+    <string name="item_entry_category_cancel">취소</string>
+    <string name="item_entry_category_helper">기존 카테고리를 선택하거나 새 카테고리를 만듭니다.</string>
+
+    <string name="item_entry_section_pricing">가격</string>
+    <string name="item_entry_price_type_fiat">명령</string>
+    <string name="item_entry_price_type_bitcoin">비트코인</string>
+    <string name="item_entry_currency_symbol_default">$</string>
+    <string name="item_entry_hint_price_fiat">0.00</string>
+    <string name="item_entry_currency_code_default">USD</string>
+    <string name="item_entry_bitcoin_symbol">₿</string>
+    <string name="item_entry_hint_price_sats">0</string>
+    <string name="item_entry_label_sats">토</string>
+
+    <string name="item_entry_label_apply_vat">부가가치세 적용</string>
+    <string name="item_entry_label_price_includes_vat">가격에는 VAT가 포함되어 있습니다</string>
+    <string name="item_entry_label_vat_rate">부가가치세율</string>
+    <string name="item_entry_hint_vat_rate">20</string>
+
+    <string name="item_entry_price_breakdown_title">가격 내역</string>
+    <string name="item_entry_price_breakdown_net_label">순 가격(VAT 제외)</string>
+    <string name="item_entry_price_breakdown_net_value_default">$0.00</string>
+    <string name="item_entry_price_breakdown_vat_label">부가가치세(20%)</string>
+    <string name="item_entry_price_breakdown_vat_value_default">$0.00</string>
+    <string name="item_entry_price_breakdown_total_label">합계(부가세 포함)</string>
+    <string name="item_entry_price_breakdown_total_value_default">$0.00</string>
+
+    <string name="item_entry_price_helper">원하는 통화로 고정 가격을 설정하세요. 비트코인 가격은 사토시(sat) 단위로 표시됩니다.</string>
+
+    <string name="item_entry_section_identification">신분증</string>
+    <string name="item_entry_label_gtin">GTIN</string>
+    <string name="item_entry_hint_gtin">바코드 스캔 또는 입력</string>
+    <string name="item_entry_scan_barcode">바코드 스캔</string>
+    <string name="item_entry_label_sku">SKU</string>
+    <string name="item_entry_hint_sku">내부 주식 코드</string>
+    <string name="item_entry_error_gtin_exists">이 GTIN은 이미 존재합니다.</string>
+    <string name="item_entry_error_sku_exists">이 SKU는 이미 존재합니다.</string>
+
+    <string name="item_entry_section_inventory">목록</string>
+    <string name="item_entry_label_track_quantity">트랙 수량</string>
+    <string name="item_entry_label_current_stock">현재 재고</string>
+    <string name="item_entry_hint_current_stock">0</string>
+    <string name="item_entry_label_low_stock_alert">재고 부족 경고</string>
+    <string name="item_entry_label_alert_when_below">아래일 때 경고</string>
+    <string name="item_entry_hint_alert_threshold">5</string>
+    <string name="item_entry_inventory_helper">재고 추적을 활성화하여 재고 수준을 모니터링하고 재고 부족 알림을 받으세요.</string>
+
+    <string name="item_entry_button_cancel">취소</string>
+
+    
+    <string name="item_product_drag_handle_description">드래그하여 재정렬하세요.</string>
+    <string name="item_product_image_description">아이템 이미지</string>
+    <string name="item_product_image_placeholder">이미지 없음</string>
+    <string name="item_product_chevron_more">더</string>
+
+    
+    <string name="item_selection_image_description">아이템 이미지</string>
+    <string name="item_selection_image_placeholder">이미지 없음</string>
+    <string name="item_selection_decrease_quantity">수량 감소</string>
+    <string name="item_selection_increase_quantity">수량 늘리기</string>
+    <string name="item_selection_variation_hint">맞춤 변형 추가...</string>
+    <string name="item_selection_add_variation">추가하다</string>
+    <string name="item_selection_variation_helper">이 변형으로 새 항목을 만듭니다.</string>
+
+    
+    <string name="item_selection_toolbar_back">뒤쪽에</string>
+    <string name="item_selection_toolbar_title">점검</string>
+    <string name="item_selection_search_icon_description">찾다</string>
+    <string name="item_selection_search_hint">항목 검색...</string>
+    <string name="item_selection_scan_barcode">바코드 스캔</string>
+    <string name="item_selection_clear_filters">필터 지우기</string>
+
+    <string name="item_selection_empty_icon_description">항목 없음</string>
+    <string name="item_selection_empty_title">항목을 찾을 수 없습니다</string>
+    <string name="item_selection_empty_subtitle">설정 → 항목에서 항목을 추가하세요.</string>
+
+    <string name="item_selection_no_results_icon_description">결과 없음</string>
+    <string name="item_selection_no_results_title">일치하는 항목이 없습니다.</string>
+    <string name="item_selection_no_results_subtitle">다른 검색어를 사용해 보세요.</string>
+
+    <string name="item_selection_basket_icon_description">바구니</string>
+    <string name="item_selection_basket_title">바구니</string>
+    <string name="item_selection_basket_clear">분명한</string>
+    <string name="item_selection_basket_total_label">총</string>
+    <string name="item_selection_basket_expand">장바구니 펼치기</string>
+    <string name="item_selection_basket_collapse">바구니 접기</string>
+    <string name="item_selection_basket_item_count">%1$d개 항목</string>
+    <string name="item_selection_basket_items_count">%1$d개 항목</string>
+    <string name="item_selection_charge_button">요금</string>
+    <string name="item_selection_charge_button_default">요금</string>
+    <string name="pos_error_no_mints_configured">고객에게 과금하기 전에 설정 → 민트에서 최소 1개의 민트를 추가하세요.</string>
+
+    <string name="item_selection_save_button">구하다</string>
+    <string name="item_selection_saved_baskets_button">저장됨</string>
+    <string name="item_selection_save_basket_hint">이름을 입력하세요(선택사항).</string>
+
+    
+    <string name="dialog_save_basket_title">장바구니 저장</string>
+    <string name="dialog_save_basket_subtitle">나중에 쉽게 찾을 수 있도록 장바구니에 이름을 지정하세요.</string>
+    <string name="dialog_save_basket_hint">표 5, 존 순서 등</string>
+    <string name="dialog_save_basket_helper">기본 이름을 사용하려면 비워 두세요.</string>
+    <string name="dialog_save_basket_save">장바구니 저장</string>
+
+    
+    <string name="dialog_rename_basket_title">바구니 이름 바꾸기</string>
+    <string name="dialog_rename_basket_subtitle">이 장바구니의 이름을 업데이트하세요.</string>
+    <string name="dialog_rename_basket_hint">새 이름을 입력하세요</string>
+    <string name="dialog_rename_basket_save">변경 사항 저장</string>
+    <string name="item_selection_editing_basket">편집 중: %1$s</string>
+
+    
+    <string name="saved_baskets_back">뒤쪽에</string>
+    <string name="saved_baskets_title">저장된 바구니</string>
+    <string name="saved_baskets_empty_icon">저장된 장바구니 없음</string>
+    <string name="saved_baskets_empty_title">저장된 장바구니 없음</string>
+    <string name="saved_baskets_empty_subtitle">나중에 사용할 수 있도록 바구니를 저장해 두세요.\n식탁이나 식당 테이블에 딱 맞습니다.</string>
+    <string name="saved_baskets_meta_format">%1$s • %2$s</string>
+    <string name="saved_baskets_action_rename">이름 바꾸기</string>
+    <string name="saved_baskets_action_delete">삭제</string>
+    <string name="saved_baskets_rename_title">바구니 이름 바꾸기</string>
+    <string name="saved_baskets_rename_hint">장바구니 이름을 입력하세요</string>
+    <string name="saved_baskets_delete_title">바구니 삭제</string>
+    <string name="saved_baskets_delete_message">\"%1$s\"을(를) 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.</string>
+
+    
+    <string name="basket_archive_back">뒤쪽에</string>
+    <string name="basket_archive_title">주문 내역</string>
+    <string name="basket_archive_empty_icon">보관된 주문 없음</string>
+    <string name="basket_archive_empty_title">완료된 주문이 없습니다.</string>
+    <string name="basket_archive_empty_subtitle">완료된 주문이 여기에 표시됩니다.\n판매 내역을 추적하는 데 적합합니다.</string>
+    <string name="basket_archive_paid_badge">유급의</string>
+    <string name="basket_archive_view_payment">결제 보기</string>
+    <string name="basket_archive_delete">삭제</string>
+    <string name="basket_archive_delete_title">주문 삭제</string>
+    <string name="basket_archive_delete_message">\"%1$s\"을(를) 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.</string>
+    <string name="basket_archive_total_label">총</string>
+    <string name="basket_archive_detail_title">주문 세부정보</string>
+    <string name="saved_baskets_view_archive">보관소</string>
+    <string name="basket_archive_detail_view_payment">결제 보기</string>
+
+
+    
+    <string name="common_save">구하다</string>
+    <string name="common_delete">삭제</string>
+    <string name="common_confirm">확인하다</string>
+    <string name="common_undo">끄르다</string>
+
+    
+    <string name="basket_names_settings_title">바구니 이름</string>
+    <string name="basket_names_settings_description">빠른 바구니 저장을 위해 사전 설정 이름을 만드세요.\n레스토랑 테이블이나 고객 주문에 적합합니다.</string>
+    <string name="basket_names_settings_presets_header">사전 설정 이름</string>
+    <string name="basket_names_settings_empty_title">사전 설정된 이름 없음</string>
+    <string name="basket_names_settings_empty_subtitle">빠른 장바구니 저장을 위해 이름을 추가하세요.</string>
+    <string name="basket_names_settings_add_name">이름 추가</string>
+    <string name="basket_names_settings_examples">예: 표 1, 표 2, VIP, 테이크아웃, John\'s Order</string>
+    <string name="basket_names_settings_clear_all">모든 이름 지우기</string>
+
+    
+    <string name="basket_names_dialog_add_title">프리셋 이름 추가</string>
+    <string name="basket_names_dialog_add_subtitle">바구니에 대한 빠른 선택 이름 만들기</string>
+    <string name="basket_names_dialog_add_hint">예를 들어 표 1</string>
+    <string name="basket_names_dialog_add_save">이름 추가</string>
+
+    <string name="basket_names_dialog_edit_title">이름 편집</string>
+    <string name="basket_names_dialog_edit_subtitle">사전 설정 이름 업데이트</string>
+    <string name="basket_names_dialog_edit_hint">이름을 입력하세요</string>
+    <string name="basket_names_dialog_edit_save">변경 사항 저장</string>
+
+    <string name="basket_names_dialog_add_button">이름 추가</string>
+    <string name="basket_names_dialog_edit_button">변경 사항 저장</string>
+
+    <string name="basket_names_dialog_delete_title">이름 삭제</string>
+    <string name="basket_names_dialog_delete_message">사전 설정에서 \"%1$s\"을(를) 제거하시겠습니까?</string>
+
+    <string name="basket_names_dialog_clear_all_title">모든 이름 지우기</string>
+    <string name="basket_names_dialog_clear_all_message">모든 사전 설정 이름을 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.</string>
+    <string name="basket_names_dialog_clear_all_confirm">모두 지우기</string>
+
+    
+    <string name="basket_names_error_empty">이름을 입력하세요</string>
+    <string name="basket_names_error_duplicate">이미 존재하는 이름입니다.</string>
+
+    
+    <plurals name="saved_baskets_item_count">
+        <item quantity="one">%1$d개 항목</item>
+        <item quantity="other">%1$d개 항목</item>
+    </plurals>
+
+    
+    <string name="auto_withdraw_title">인출</string>
+    <string name="auto_withdraw_hero_title">자동 출금</string>
+    <string name="auto_withdraw_hero_subtitle">잔액이 임계값을 초과하면 자동으로 Lightning 지갑으로 자금을 보냅니다.</string>
+    <string name="auto_withdraw_status_active">활동적인</string>
+    <string name="auto_withdraw_status_inactive">비활성</string>
+    
+    <string name="auto_withdraw_enable_title">자동 출금</string>
+    <string name="auto_withdraw_enable_subtitle">잔액이 기준액을 초과하면 자동으로 인출됩니다.</string>
+    
+    <string name="auto_withdraw_section_destination">목적지</string>
+    <string name="auto_withdraw_section_trigger">트리거 설정</string>
+    <string name="auto_withdraw_section_config">구성</string>
+    <string name="auto_withdraw_lightning_address_label">라이트닝 주소</string>
+    <string name="auto_withdraw_lightning_address_hint">you@wallet.com</string>
+    <string name="auto_withdraw_lightning_address_helper">이 주소로 자금이 자동으로 전송됩니다</string>
+    
+    <string name="auto_withdraw_threshold_title">균형 임계값</string>
+    <string name="auto_withdraw_threshold_subtitle">잔액이 초과되면 트리거됩니다.</string>
+    <string name="auto_withdraw_threshold_label">한계점</string>
+    <string name="auto_withdraw_threshold_hint">잔액이 이 금액에 도달하면 출금이 시작됩니다.</string>
+    <string name="auto_withdraw_threshold_helper">최소: ₿1,000 • 최대: ₿1,000,000</string>
+    
+    <string name="auto_withdraw_percentage_title">인출금액</string>
+    <string name="auto_withdraw_percentage_subtitle">보낼 잔액 비율</string>
+    <string name="auto_withdraw_percentage_label">인출 비율</string>
+    <string name="auto_withdraw_percentage_hint">인출할 잔액 비율(수수료를 위해 일부 유지)</string>
+    
+    <string name="auto_withdraw_section_history">최근 활동</string>
+    <string name="auto_withdraw_see_all">모두 보기</string>
+    <string name="auto_withdraw_history_empty">아직 자동출금은 없습니다</string>
+    <string name="auto_withdraw_history_empty_title">아직 활동이 없습니다</string>
+    <string name="auto_withdraw_history_empty_subtitle">출금 내역이 여기에 표시됩니다.</string>
+    
+    <string name="auto_withdraw_status_completed">전송된</string>
+    <string name="auto_withdraw_status_pending">보류 중</string>
+    <string name="auto_withdraw_status_failed">실패한</string>
+    
+    <string name="auto_withdraw_progress_started">자동 출금...</string>
+    <string name="auto_withdraw_progress_quote">견적을 받는 중...</string>
+    <string name="auto_withdraw_progress_sending">지갑으로 보내는 중...</string>
+    <string name="auto_withdraw_progress_completed">성공적으로 전송되었습니다!</string>
+    <string name="auto_withdraw_progress_failed">출금 실패</string>
+    
+    <string name="auto_withdraw_settings_title">자동 출금</string>
+    <string name="auto_withdraw_error_title">오류 세부정보</string>
+
+    
+    <string name="settings_item_withdrawals_title">인출</string>
+    <string name="settings_item_withdrawals_subtitle">자동 출금 설정 및 내역</string>
+
+    
+    <string name="manual_withdraw_section_title">수동 출금</string>
+    <string name="manual_withdraw_title">지금 출금하세요</string>
+    <string name="manual_withdraw_subtitle">Lightning 송장 또는 주소로 자금 보내기</string>
+    <string name="manual_withdraw_select_mint">민트 선택</string>
+    <string name="manual_withdraw_no_balance">인출할 수 있는 잔액이 없습니다. 먼저 지갑에 자금을 추가하세요.</string>
+
+    
+    <string name="mints_settings_balance_label">균형</string>
+
+    
+    <string name="mint_selection_title">민트 선택</string>
+    <string name="mint_selection_subtitle">인출할 민트를 선택하세요</string>
+    <string name="mint_selection_icon_description">민트 아이콘</string>
+    <string name="mint_selection_select_description">이 민트를 선택하세요</string>
+
+    
+    <string name="withdraw_invoice_card_title">라이트닝 송장</string>
+    <string name="withdraw_invoice_card_subtitle">즉시 결제하려면 송장을 붙여넣으세요.</string>
+    <string name="withdraw_address_card_title">라이트닝 주소</string>
+    <string name="withdraw_address_card_subtitle">이메일과 같은 주소로 보내기</string>
+    <string name="withdraw_invoice_placeholder">lnbc1...</string>
+    <string name="withdraw_amount_placeholder">금액을 토요일로 입력하세요</string>
+    <string name="withdraw_continue_button">계속하다</string>
+    <string name="withdraw_scan_qr">QR 스캔</string>
+    <string name="withdraw_section_send_to">보내기</string>
+    <string name="withdraw_balance_available">사용 가능: %1$s</string>
+
+    <string name="withdraw_tab_lightning">번개</string>
+    <string name="withdraw_tab_cashu">카슈토큰</string>
+    
+    <string name="withdraw_cashu_amount_card_title">양</string>
+    <string name="withdraw_cashu_amount_card_subtitle">토큰을 생성할 금액을 입력하세요</string>
+    <string name="withdraw_cashu_create_button">토큰 생성</string>
+    <string name="withdraw_cashu_result_title">카슈토큰</string>
+    <string name="withdraw_cashu_result_subtitle">출금하려면 이 토큰을 공유하세요.</string>
+    <string name="withdraw_cashu_copy_token">토큰 복사</string>
+    <string name="withdraw_cashu_copied">토큰이 클립보드에 복사되었습니다.</string>
+    <string name="withdraw_cashu_creating">토큰 생성 중...</string>
+
+    
+    <string name="qr_scanner_title">QR 코드 스캔</string>
+    <string name="qr_scanner_instruction">QR 코드를 카메라로 가리키세요.</string>
+    <string name="qr_scanner_permission_required">QR 코드를 스캔하려면 카메라 권한이 필요합니다</string>
+
+    
+    <string name="mints_explore_title">민트</string>
+    <string name="mints_total_balance">총 잔액</string>
+    <string name="mints_your_mints">당신의 민트</string>
+    <string name="mints_add_new_mint">새로운 민트 추가</string>
+    <string name="mints_enter_url">민트 URL을 입력하거나 QR 코드를 스캔하세요.</string>
+    <string name="mints_url_hint">https://mint.example.com</string>
+    <string name="mints_add_button">민트 추가</string>
+    <string name="mints_scan_qr">QR 스캔</string>
+    <string name="mints_scan_mint_qr">민트QR 스캔</string>
+    <string name="mints_scan_instruction">민트 QR코드를 카메라로 가리킨다</string>
+    <string name="mints_empty_title">민트 없음</string>
+    <string name="mints_empty_subtitle">ecash를 시작하려면 민트를 추가하세요</string>
+    <string name="mints_remove_title">민트 제거</string>
+    <string name="mints_remove_message">%1$s을(를) 제거하시겠습니까? 이 조폐국의 모든 잔액은 손실됩니다.</string>
+    <string name="mints_remove_confirm">제거하다</string>
+    <string name="mints_removed_toast">민트가 제거됨</string>
+    <string name="mints_already_exists">이 민트는 이미 추가되었습니다.</string>
+    <string name="mints_invalid_url">잘못된 민트 URL입니다. 확인하신 후 다시 시도해 주세요.</string>
+    <string name="mints_added_toast">민트 추가됨</string>
+    <string name="mints_reset_title">민트 재설정</string>
+    <string name="mints_reset_message">기본 민트로 재설정하시겠습니까? 이렇게 하면 모든 맞춤 민트가 제거됩니다.</string>
+    <string name="mints_reset_confirm">다시 놓기</string>
+    <string name="mints_reset_toast">민트가 기본값으로 재설정됨</string>
+    <string name="mints_reset_description">기본값으로 재설정</string>
+    <string name="mint_icon_description">민트 아이콘</string>
+    <string name="mint_selected_description">선택된</string>
+    <string name="mint_remove_description">민트 제거</string>
+
+    <plurals name="mints_count">
+        <item quantity="one">%1$d 민트</item>
+        <item quantity="other">%1$d 민트</item>
+    </plurals>
+
+    
+    <string name="mints_lightning_mint">라이트닝 민트</string>
+    <string name="mints_all_mints">모든 민트</string>
+    <string name="mints_balance">균형</string>
+    <string name="mints_lightning_description">모든 라이트닝 지불금은 이 조폐국으로 수령됩니다. 아래 민트를 탭하여 라이트닝 민트로 설정하세요.</string>
+    <string name="mints_set_as_lightning">라이트닝민트로 설정</string>
+    <string name="mints_lightning_changed">라이트닝 민트 업데이트됨</string>
+
+    
+    <string name="mints_swap_unknown_mints_title">알 수 없는 조폐국으로부터의 지불 수락</string>
+    <string name="mints_swap_unknown_mints_subtitle">활성화되면 알 수 없는 민트의 토큰이 자동으로 라이트닝 민트로 교환됩니다.</string>
+
+    
+    <string name="cd_mint_icon">민트 아이콘</string>
+    <string name="cd_mint_selected">라이트닝민트로 선정</string>
+
+    
+    <string name="mint_action_info">정보</string>
+    <string name="mint_action_delete">삭제</string>
+    <string name="mints_add_section">민트 추가</string>
+
+    
+    <string name="mint_details_title">민트 세부정보</string>
+    <string name="mint_details_about">에 대한</string>
+    <string name="mint_details_announcement">발표</string>
+    <string name="mint_details_contact">연락하다</string>
+    <string name="mint_details_details">세부</string>
+    <string name="mint_details_actions">행위</string>
+    <string name="mint_details_url">URL</string>
+    <string name="mint_details_software">소프트웨어</string>
+    <string name="mint_details_version">버전</string>
+    <string name="mint_details_features">특징</string>
+    <string name="mint_details_copy_url">민트 URL 복사</string>
+    <string name="mint_details_delete">민트 삭제</string>
+    <string name="mint_details_copied">클립보드에 복사됨</string>
+    <string name="mint_details_copy">복사</string>
+    <string name="mint_details_fetch_error">민트 정보를 가져올 수 없습니다.</string>
+    <string name="common_retry">다시 해 보다</string>
+
+    <string name="mint_details_software_value">소프트웨어: %1$s</string>
+    <string name="mint_details_version_value">버전: %1$s</string>
+    <string name="mint_details_software_unknown">소프트웨어: 알 수 없음</string>
+    <string name="mint_details_version_unknown">버전: 알 수 없음</string>
+
+    
+    <string name="developer_error_logs_entry_details_title">오류 세부정보</string>
+    <string name="developer_error_logs_entry_copy">항목 복사</string>
+    <string name="developer_error_logs_clear_dialog_title">오류 로그 지우기</string>
+    <string name="developer_error_logs_clear_dialog_message">저장된 오류 로그를 모두 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.</string>
+
+    <string name="history_dialog_dont_show_again">"앞으로 보여주지 마세요"</string>
+    <string name="history_dialog_pending_delete_title">"대기 중인 결제를 삭제하시겠습니까?"</string>
+    <string name="history_dialog_pending_delete_message">"이 요청을 삭제하면 이 요청으로 전송된 자금을 복구할 수 없습니다."</string>
+
+    
+    <string name="pin_setup_create_title">PIN 만들기</string>
+    <string name="pin_setup_new_pin_title">새 PIN</string>
+    <string name="pin_setup_create_subtitle">민감한 설정을 보호하려면 4~16자리 PIN을 선택하세요.</string>
+    <string name="pin_setup_confirm_title">PIN 확인</string>
+    <string name="pin_setup_confirm_subtitle">확인을 위해 PIN을 다시 입력하세요.</string>
+    <string name="pin_setup_digits">%d자리</string>
+    <string name="pin_setup_continue">계속하다</string>
+    <string name="pin_setup_back">뒤쪽에</string>
+    <string name="pin_setup_enter_at_least">%d자리 이상을 입력하세요.</string>
+    <string name="pin_setup_more_needed">%1$d자리%2$s · %3$d개 더 필요</string>
+    <string name="pin_setup_set_pin">PIN 설정</string>
+
+    
+    <string name="pin_entry_title">PIN 입력</string>
+    <string name="pin_entry_subtitle">계속하려면 PIN을 입력하세요.</string>
+    <string name="pin_entry_forgot">PIN을 잊으셨나요?</string>
+    <string name="pin_entry_too_many_attempts">시도 횟수가 너무 많음</string>
+    <string name="pin_entry_try_again_minutes">%1$d분%2$s 후에 다시 시도하세요</string>
+    <string name="pin_entry_try_again_seconds">%1$d초%2$s 후에 다시 시도하세요</string>
+    <string name="pin_entry_reset_recovery">복구 문구로 재설정</string>
+
+    
+    <string name="pin_reset_title">PIN 재설정</string>
+    <string name="pin_reset_warning_title">PIN 재설정</string>
+    <string name="pin_reset_warning_message">PIN을 재설정하려면 12단어 복구 문구를 입력하세요. 기존 PIN은 제거되며 새 PIN을 설정할 수 있습니다.</string>
+    <string name="pin_reset_recovery_phrase">회복 문구</string>
+    <string name="pin_reset_paste_clipboard">클립보드에서 붙여넣기</string>
+    <string name="pin_reset_button">PIN 재설정</string>
+    <string name="payment_request_tab_unified">통합</string>
+    <string name="payment_request_default_description">%1$d 토요일 결제</string>
+    <string name="payment_request_lightning_description">%1$d sats의 Numo POS 결제</string>
+</resources>

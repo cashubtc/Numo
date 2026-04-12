@@ -1,0 +1,889 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">ヌモ</string>
+    <string name="navigation_drawer_open">ナビゲーションドロワーを開く</string>
+    <string name="navigation_drawer_close">ナビゲーションドロワーを閉じる</string>
+    <string name="item_list_title">カタログアイテムの管理</string>
+    
+    
+    <string name="service_description">キャッシュ決済サービス</string>
+    <string name="ndef_aid_description">NDEF タグ タイプ 4</string>
+
+    
+    <string name="payment_request_qr_description">キャッシュ決済リクエストQRコード</string>
+
+    
+    <string name="tips_settings_toolbar_back">戻る</string>
+    <string name="tips_settings_title">ヒント</string>
+    <string name="tips_settings_description">顧客が支払い時にチップを追加できるようにします。チップのプリセットは、支払い画面にクイック選択ボタンとして表示されます。</string>
+    <string name="tips_settings_enable_label">ヒントを有効にする</string>
+    <string name="tips_settings_presets_header">先端プリセット</string>
+    <string name="tips_settings_presets_description">クイック選択のチップの割合を設定します。顧客はカスタム金額を入力することもできます。</string>
+    <string name="tips_settings_add_preset">プリセットの追加</string>
+    <string name="tips_settings_reset_defaults">デフォルトにリセット</string>
+
+    
+    <string name="tip_percentage_format">%1$d%%</string>
+    <string name="tips_dialog_add_preset_title">先端プリセットを追加</string>
+    <string name="tips_dialog_add_preset_hint">割合を入力してください (1 ～ 100)</string>
+    <string name="tips_dialog_add_preset_positive">追加</string>
+    <string name="tips_dialog_add_preset_negative">キャンセル</string>
+    <string name="tips_error_invalid_percentage">有効な割合 (1 ～ 100) を入力してください</string>
+    <string name="tips_error_could_not_add_preset">プリセットを追加できませんでした (すでに存在しているか、最大容量に達している可能性があります)</string>
+
+    <string name="tips_dialog_edit_preset_title">先端プリセットの編集</string>
+    <string name="tips_dialog_edit_preset_positive">保存</string>
+
+    <string name="tips_dialog_remove_preset_title">プリセットの削除</string>
+    <string name="tips_dialog_remove_preset_message">%1$d%% をチッププリセットから削除しますか?</string>
+    <string name="tips_dialog_remove_preset_positive">取り除く</string>
+
+    <string name="tips_dialog_reset_defaults_title">デフォルトにリセット</string>
+    <string name="tips_dialog_reset_defaults_message" formatted="false">チップのプリセットをデフォルト値 (5%、10%、15%、20%) にリセットしますか?</string>
+    <string name="tips_dialog_reset_defaults_positive">リセット</string>
+    <string name="tips_toast_reset_to_defaults">プリセットがデフォルトにリセットされる</string>
+
+    
+    <string name="tip_selection_close_content_description">近い</string>
+    <string name="tip_selection_order_total_label">注文合計</string>
+    <string name="tip_selection_question_add_tip">ヒントを追加しますか?</string>
+    <string name="tip_selection_custom_tip_label">カスタムチップ</string>
+    <string name="tip_selection_custom_tip_subtitle">金額を入力してください</string>
+    <string name="tip_selection_no_tip_button">チップなし</string>
+    <string name="tip_selection_custom_currency_switch_to_btc">₿に切り替える</string>
+    <string name="tip_selection_custom_currency_switch_to_fiat">%1$s に切り替えます</string>
+    <string name="tip_selection_custom_question">チップ金額を入力してください</string>
+    <string name="tip_selection_main_back">戻る</string>
+    <string name="tip_selection_main_confirm">確認する</string>
+
+    
+    <string name="payment_request_close_content_description">近い</string>
+    <string name="payment_request_share_content_description">共有</string>
+    <string name="payment_request_pay_label">支払う</string>
+    <string name="payment_request_instruction_scan_or_tap">スキャンまたはタップして支払う</string>
+    <string name="payment_request_nfc_reading">NFCから読み取り中...</string>
+    <string name="payment_request_animation_close">終わり</string>
+
+    <string name="payment_request_error_invalid_amount">無効な支払い金額</string>
+    <string name="payment_request_error_ndef_prepare">NDEF 支払いデータの準備に失敗しました</string>
+    <string name="payment_request_error_nothing_to_share">まだ共有するものはありません</string>
+
+    <string name="payment_request_status_preparing">支払いリクエストを準備しています...</string>
+    <string name="payment_request_status_waiting_for_payment">支払いを待っています...</string>
+    <string name="payment_request_status_error_qr">QRコード生成エラー</string>
+    <string name="payment_request_status_error_generic">エラー: %1$s</string>
+    <string name="payment_request_status_success">支払いが成功しました！</string>
+    <string name="payment_request_status_failed">支払いに失敗しました: %1$s</string>
+    <string name="payment_request_lightning_error_failed">Lightning の支払いに失敗しました: %1$s</string>
+
+    <string name="payment_request_tip_info_with_percentage">%1$s チップ (%2$d%%) を含む</string>
+    <string name="payment_request_tip_info_no_percentage">%1$s チップが含まれます</string>
+
+    <string name="payment_request_share_chooser_title">シェア支払いリクエスト</string>
+
+    
+    <string name="payment_received_amount">%1$sを受信しました。</string>
+    <string name="payment_received_button_view_details">詳細を見る</string>
+    <string name="payment_received_button_close">近い</string>
+    <string name="payment_received_close_content_description">近い</string>
+    <string name="payment_received_share_content_description">共有</string>
+    <string name="payment_received_success_background_description">成功の背景</string>
+    <string name="payment_received_success_icon_description">成功</string>
+
+    <string name="payment_received_error_no_token">共有するトークンがありません</string>
+    <string name="payment_received_share_chooser_title">トークンを共有する</string>
+    <string name="payment_received_error_no_share_app">このトークンを共有できるアプリはありません</string>
+    <string name="payment_received_error_no_details">取引の詳細は利用できません</string>
+
+    
+    <string name="payment_failure_title">支払いに失敗しました</string>
+    <string name="payment_failure_message">この支払いの処理中に問題が発生しました。</string>
+    <string name="payment_failure_button_try_again">もう一度やり直してください</string>
+    <string name="payment_failure_button_close">近い</string>
+    <string name="payment_failure_close_content_description">近い</string>
+    <string name="payment_failure_error_background_description">エラーの背景</string>
+    <string name="payment_failure_error_icon_description">エラー</string>
+    <string name="payment_failure_error_no_pending">再試行するための保留中の支払いはありません</string>
+
+    
+    <string name="onboarding_welcome_tagline">手数料なしでビットコイン支払いを即座に受け入れます。</string>
+    <string name="onboarding_welcome_message">Cashu eCash テクノロジーを使用して、手数料ゼロで即座にビットコイン支払いを受け入れます。</string>
+    <string name="onboarding_terms_text">続行すると、サービス利用規約とプライバシー ポリシーに同意したことになります。</string>
+    <string name="onboarding_get_started">始めましょう</string>
+
+    
+    <string name="onboarding_setup_title">ウォレットを設定する</string>
+    <string name="onboarding_setup_subtitle">開始方法を選択してください</string>
+    <string name="onboarding_create_wallet_title">新しいウォレットを作成する</string>
+    <string name="onboarding_create_wallet_subtitle">新しいシードフレーズで新たにスタートする</string>
+    <string name="onboarding_restore_wallet_title">バックアップから復元</string>
+    <string name="onboarding_restore_wallet_subtitle">既存のシードフレーズを使用する</string>
+
+    
+    <string name="explainer_teaser_title">タップして Numo の仕組みを確認してください。</string>
+    <string name="explainer_slide1_title">タップして支払いを受け取る</string>
+    <string name="explainer_slide1_body">金額を入力して「チャージ」をタップすると、顧客は自分の携帯電話をあなたの携帯電話にかざします。支払いは NFC 経由で即座に行われます。</string>
+    <string name="explainer_slide2_title">自動自己保管</string>
+    <string name="explainer_slide2_body">自動出金を設定して、受信した支払いを自分の Lightning ウォレットに直接移動します。</string>
+    <string name="explainer_slide3_title">手数料ゼロ</string>
+    <string name="explainer_slide3_body">Numo は完全にオープンソースであり、料金はかかりません。サブスクリプション、カット、隠れたコストはありません。あなたが受け取ったすべてのシートはあなたのものです。</string>
+    <string name="explainer_image_placeholder">画像プレースホルダ</string>
+
+
+    <string name="onboarding_seed_toolbar_back">戻る</string>
+    <string name="onboarding_seed_toolbar_title">ウォレットを復元する</string>
+    <string name="onboarding_seed_instruction_title">12 単語のシード フレーズを入力してください</string>
+    <string name="onboarding_seed_instruction_body">正しい順序で単語を入力してウォレットを復元します。</string>
+    <string name="onboarding_seed_paste_button">ペースト</string>
+    <string name="onboarding_seed_validation_ready">続行する準備ができました</string>
+    <string name="onboarding_seed_invalid_characters">無効な文字が検出されました</string>
+    <string name="onboarding_seed_words_entered_count">%1$d/12 単語が入力されました</string>
+    <string name="onboarding_seed_continue">続く</string>
+    <string name="onboarding_clipboard_empty">クリップボードが空です</string>
+    <string name="onboarding_seed_paste_invalid">有効な 12 単語のシード フレーズを貼り付けてください</string>
+    <string name="onboarding_seed_paste_success">シードフレーズを貼り付けました</string>
+
+
+    <string name="onboarding_status_creating_wallet">新しいウォレットを作成中…</string>
+    <string name="onboarding_status_restoring_wallet">ウォレットを復元中…</string>
+
+    
+    <string name="onboarding_mints_toolbar_back">戻る</string>
+    <string name="onboarding_mints_toolbar_title">あなたのミント</string>
+    <string name="onboarding_backup_found_title">バックアップが見つかりました</string>
+    <string name="onboarding_backup_found_subtitle">最後にバックアップしたのは %1$s</string>
+    <string name="onboarding_backup_not_found_title">バックアップが見つかりませんでした</string>
+    <string name="onboarding_backup_not_found_subtitle">デフォルトのミントの使用</string>
+    <string name="onboarding_mints_title">セレクトミント</string>
+    <string name="onboarding_mints_subtitle_restore">復元するミントを選択してください</string>
+    <string name="onboarding_mints_subtitle_description">このミントにはビットコインが保管されます。いつでも自分のウォレットに出金することができます。また、出金しきい値を設定して自動的に出金することもできます。</string>
+    <string name="onboarding_mints_count">%1$d ミント%2$s が選択されました</string>
+    <string name="onboarding_mints_continue_restore">ウォレットを復元する</string>
+    <string name="onboarding_mints_continue_new_wallet">続く</string>
+    <string name="onboarding_mints_add_different">別のミントを追加する</string>
+    <string name="onboarding_mints_add_hint">造幣局の住所を入力してください</string>
+    <string name="onboarding_mints_scan_row_title">QRコードをスキャン</string>
+    <string name="onboarding_mints_scan_row_subtitle">タップして住所をスキャンします</string>
+    <string name="onboarding_mint_generic_name">ミント</string>
+    <string name="onboarding_mints_default_section_title">デフォルトのミント</string>
+    <string name="onboarding_mints_popular_section_title">人気のミント</string>
+    <string name="onboarding_mints_add_different_button">+ ニューミント</string>
+    <string name="onboarding_mints_hero_label">デフォルトのミント</string>
+    <string name="onboarding_mints_hero_subtitle">あなたのビットコインを保持します</string>
+    <string name="onboarding_mints_hero_default_badge">デフォルト</string>
+    <string name="onboarding_mints_hero_helper">いつでも自分のウォレットに引き出したり、出金しきい値を設定して自動的に引き出したりできます。</string>
+    <string name="onboarding_mints_popular_header">人気のミント</string>
+    <string name="onboarding_mints_tap_hint">タップしてデフォルトのミントを変更します</string>
+    <string name="onboarding_mints_add_new_button">+ 新しいミントを追加</string>
+    <string name="onboarding_mints_set_default_toast">%1$s がデフォルトとして設定されました</string>
+    <string name="onboarding_add_mint_sheet_title">ミントを追加する</string>
+    <string name="onboarding_add_mint_url_hint">ミントのURLを入力してください</string>
+    <string name="onboarding_add_mint_button">追加</string>
+    <string name="onboarding_add_mint_or">または</string>
+    <string name="onboarding_add_mint_scan_qr">スキャン</string>
+    <string name="onboarding_add_mint_loading">ミントを加えて…</string>
+
+
+    <string name="onboarding_restoring_title">ウォレットの復元</string>
+    <string name="onboarding_restoring_initializing">復元を初期化しています...</string>
+
+    
+    <string name="onboarding_success_restored_title">ウォレットが復元されました</string>
+    <string name="onboarding_success_restored_recovered">%1$d 個の衛星を回復しました</string>
+    <string name="onboarding_success_restored_total_balance">合計残高: %1$d 飽和</string>
+    <string name="onboarding_success_created_title">ウォレットが作成されました</string>
+    <string name="onboarding_success_created_subtitle">ウォレットを使用する準備ができました</string>
+    <string name="onboarding_success_balance_by_mint">ミントによるバランス</string>
+    <string name="onboarding_enter_wallet_button">続く</string>
+
+    
+    <string name="onboarding_error_creating_wallet">ウォレット作成エラー: %1$s</string>
+    <string name="onboarding_error_initializing_wallet">ウォレットの初期化中にエラーが発生しました: %1$s</string>
+
+    
+    <string name="restore_warning_title">重要な警告</string>
+    <string name="restore_warning_body">シードフレーズから復元すると、現在のウォレットが置き換えられます。続行する前に、現在のシード フレーズをバックアップしていることを確認してください。</string>
+    <string name="restore_seed_instruction_title">12 単語のシード フレーズを入力してください</string>
+    <string name="restore_seed_paste_button">クリップボードから貼り付け</string>
+    <string name="restore_seed_continue">続く</string>
+
+    <string name="restore_fetching_title">バックアップを確認しています</string>
+    <string name="restore_fetching_status">Nostr リレーを検索しています...</string>
+
+    <string name="restore_backup_found_title">バックアップが見つかりました</string>
+    <string name="restore_backup_found_subtitle">最終バックアップ日: 2024 年 1 月 1 日</string>
+    <string name="restore_backup_unknown_date">日付不明</string>
+
+    <string name="restore_mints_title">復元するミントを選択してください</string>
+    <string name="restore_mints_count">0 個のミントが選択されました</string>
+    <string name="restore_mints_start_button">復元の開始</string>
+    <string name="restore_confirm_dialog_message">これにより、入力したシード フレーズからウォレットが復元されます。\n\n⚠️ 重要:\n• 現在のシード フレーズをバックアップしていることを確認してください\n• この操作は元に戻すことができません\n• 選択された %1$d 個のミントに対して復元が試行されます\n\n%2$s</string>
+    <string name="restore_confirm_current_seed_note">現在のシード フレーズは「%1$s...」で始まります。</string>
+
+    <string name="restore_progress_title">ウォレットの復元</string>
+    <string name="restore_progress_status">ミントに接続中...</string>
+    <string name="restore_progress_status_waiting">待っている...</string>
+    <string name="restore_progress_balance_increase">+%1$d 衛星</string>
+    <string name="restore_progress_balance_decrease">%1$d 個の衛星</string>
+
+    <string name="restore_success_title">ウォレットが復元されました</string>
+    <string name="restore_success_subtitle">ウォレットは正常に復元されました</string>
+    <string name="restore_success_balance_line">%1$d 個の衛星</string>
+    <string name="restore_success_done_button">終わり</string>
+
+    <string name="restore_error_failed">復元に失敗しました: %1$s</string>
+    <string name="restore_error_no_mints_selected">復元するミントを少なくとも 1 つ選択してください。</string>
+
+    
+    <string name="seed_phrase_toolbar_back">戻る</string>
+    <string name="seed_phrase_toolbar_title">シードフレーズ</string>
+    <string name="seed_phrase_warning_title">このことは秘密にしておいてください！</string>
+    <string name="seed_phrase_warning_body">これら 12 個の単語を持っている人は誰でもあなたの資金にアクセスできます。それらを書き留めて安全な場所に保管してください。決して他人と共有しないでください。</string>
+    <string name="seed_phrase_title">あなたの回復フレーズ</string>
+    <string name="seed_phrase_show_button">見せる</string>
+    <string name="seed_phrase_copy_button">クリップボードにコピー</string>
+    <string name="seed_phrase_clipboard_disclaimer">貼り付けた後は必ずクリップボードをクリアしてください</string>
+
+    
+    <string name="dialog_terms_title">利用規約</string>
+    <string name="dialog_terms_body">「NUMO ウォレット - 利用規約\n\n1. 同意\nこのウォレット アプリケーションを使用すると、これらの利用規約に同意したものとみなされます。\n\n2. サービスの性質\nこれは、Cashu ecash テクノロジーを使用した自己保管型ビットコイン ウォレットです。資金とシード フレーズについてはお客様が単独で責任を負います。\n\n3. シード フレーズ\n12 単語のシード フレーズが回復する唯一の方法です。ウォレットは絶対に共有しないでください。紛失したシード フレーズは復元できません。\n\nこのソフトウェアは、いかなる種類の保証もなしに「現状のまま」提供されます。\n\n5. 責任の制限\n当社は、バグ、ユーザー エラー、またはサードパーティのミントの障害による資金の損失については責任を負いません。\n\n6.トークンはサードパーティのミントによって保持され、複数のミントで分散される場合があります。\n\n7. プライバシー\nこのウォレットは独自のプライバシー ポリシーを持つ eCash ミントを通じて処理されます。\n\nこれらの規約は更新される可能性があります。\n\n最終更新日: 2024 年 11 月。</string>
+    <string name="common_close">近い</string>
+
+    
+    <string name="empty_state_items_title">カタログを作成する</string>
+    <string name="empty_state_items_subtitle">商品を追加して、POS での支払いの受け入れを開始します。</string>
+    <string name="empty_state_items_add_button">アイテムの追加</string>
+    <string name="empty_state_items_import_button">CSVからインポート</string>
+
+    
+    <string name="common_back">戻る</string>
+    <string name="common_search">検索</string>
+    <string name="developer_settings_title">開発者設定</string>
+    <string name="developer_settings_section_debugging">デバッグ</string>
+    <string name="developer_settings_restart_onboarding_title">オンボーディングを再開する</string>
+    <string name="developer_settings_restart_onboarding_subtitle">オンボーディング フローを再度開始する</string>
+    <string name="developer_settings_lightning_invoice_title">ライトニング請求書の遅延</string>
+    <string name="developer_settings_lightning_invoice_subtitle">Lightning タブが選択されている場合のみ請求書を取得します</string>
+    <string name="developer_settings_warning">⚠️ 開発者設定はテストとデバッグのみを目的としています。慎重に使用してください。</string>
+
+    
+    <string name="developer_error_logs_title">エラーログ</string>
+    <string name="developer_error_logs_subtitle">最近のエラー ログを表示およびエクスポートする</string>
+    <string name="developer_error_logs_section_title">エラーログ</string>
+    <string name="developer_error_logs_filter_label">までのエラーを表示</string>
+    <string name="developer_error_logs_filter_today">今日</string>
+    <string name="developer_error_logs_copy_all">すべてコピー</string>
+    <string name="developer_error_logs_share">共有</string>
+    <string name="developer_error_logs_empty">利用可能なエラー ログはありません。</string>
+    <string name="developer_error_logs_copied">エラーログがクリップボードにコピーされました</string>
+    <string name="developer_error_logs_share_title">エラーログの共有</string>
+
+    
+    <string name="nfc_dialog_title_scan_to_pay">スキャンして支払う</string>
+    <string name="nfc_dialog_content_description_contactless">非接触型決済</string>
+    <string name="nfc_dialog_content_description_cashu">カシュ</string>
+    <string name="nfc_dialog_subtitle_or_scan_qr">またはQRコードをスキャンしてください</string>
+    <string name="nfc_dialog_waiting_message">NFCを待っています...</string>
+    <string name="nfc_enable_title">NFCを有効にする</string>
+    <string name="nfc_enable_message">タップして支払うにはNFCが必要です。設定で有効にしてください。</string>
+    <string name="nfc_enable_button">設定</string>
+    <string name="common_cancel">キャンセル</string>
+
+    
+    <string name="dialog_title_enter_pin">PINを入力してください</string>
+    <string name="dialog_pin_hint">ピン</string>
+
+    
+    <string name="nfc_payment_error_enter_amount_first">最初に金額を入力してください</string>
+    <string name="nfc_payment_error_rescan_not_supported">PIN ベースの再スキャンはこのビルドではサポートされていません</string>
+    <string name="nfc_payment_error_insufficient_funds">カードの残高が不足しています</string>
+    <string name="nfc_payment_error_pin_flow_not_implemented">PIN が必要なフローはこのビルドには実装されていません</string>
+    <string name="nfc_payment_error_card_sw">カード エラー: (SW: 0x%04X)</string>
+    <string name="nfc_payment_error_generic">支払いに失敗しました: %1$s</string>
+    <string name="nfc_payment_error_nfc_comm">NFC 通信エラー: %1$s</string>
+    <string name="nfc_payment_error_satocash">SATOCASH カード エラー: %1$s (SW: 0x%2$04X)</string>
+    <string name="nfc_payment_error_unexpected">予期しないエラーが発生しました: %1$s</string>
+    <string name="nfc_payment_hint_keep_close">携帯電話を近くに置いておく</string>
+    <string name="nfc_payment_hint_processing">支払いを処理しています...\n携帯電話を持ち上げても大丈夫です</string>
+
+    
+    <string name="common_ok">わかりました</string>
+    <string name="common_or">または</string>
+
+    
+    <string name="withdraw_lightning_toolbar_back">戻る</string>
+    <string name="withdraw_lightning_title">撤回する</string>
+    <string name="withdraw_lightning_balance_label">利用可能残高</string>
+    <string name="withdraw_lightning_mint_name_label">造幣局の名前</string>
+    <string name="withdraw_lightning_section_withdraw_to">に撤退する</string>
+    <string name="withdraw_lightning_option_invoice">⚡ ライトニング請求書</string>
+    <string name="withdraw_lightning_invoice_hint_label">Lightning 請求書を入力します (BOLT11)</string>
+    <string name="withdraw_lightning_invoice_hint_value">lnbc...</string>
+    <string name="withdraw_lightning_option_address">📧 ライトニングアドレス</string>
+    <string name="withdraw_lightning_address_hint_label">Lightning アドレスを入力してください</string>
+    <string name="withdraw_lightning_address_hint_value">user@domain.com</string>
+    <string name="withdraw_lightning_amount_label">金額（飽和）</string>
+    <string name="withdraw_lightning_amount_hint">1000</string>
+    <string name="withdraw_lightning_button_continue">続く</string>
+
+    
+    <string name="withdraw_lightning_error_invalid_mint_url">無効なミント URL</string>
+    <string name="withdraw_lightning_error_enter_invoice">Lightning 請求書を入力してください</string>
+    <string name="withdraw_lightning_error_wallet_not_initialized">ウォレットが初期化されていません</string>
+    <string name="withdraw_lightning_error_insufficient_balance">バランスが不十分です。金額 + 手数料 (%1$d sats) が残高 (%2$d sats) を超えています。 %3$d sats 未満の量をお試しください。</string>
+    <string name="withdraw_lightning_error_enter_address">Lightning アドレスを入力してください</string>
+    <string name="withdraw_lightning_error_enter_valid_amount">有効な金額を入力してください</string>
+    <string name="withdraw_lightning_error_generic">エラー: %1$s</string>
+
+    
+    <string name="withdraw_melt_toolbar_back">戻る</string>
+    <string name="withdraw_melt_title">出金の確認</string>
+    <string name="withdraw_melt_summary">%1$s からの出金</string>
+    <string name="withdraw_melt_destination_label">に</string>
+    <string name="withdraw_melt_destination_placeholder">user@domain.com</string>
+    <string name="withdraw_melt_amount_label">額</string>
+    <string name="withdraw_melt_fee_label">料金準備金</string>
+    <string name="withdraw_melt_total_label">合計</string>
+    <string name="withdraw_melt_fee_note">実際の Lightning 料金が低い場合、料金リザーブは返還されます。</string>
+    <string name="withdraw_melt_loading">出金処理中...</string>
+
+    
+    <string name="withdraw_melt_error_invalid_data">無効なメルト見積もりデータ</string>
+    <string name="withdraw_melt_error_wallet_not_initialized">ウォレットが初期化されていません</string>
+    <string name="withdraw_melt_error_invoice_not_paid">支払いに失敗しました: 請求書が支払われませんでした</string>
+    <string name="withdraw_melt_error_pending">支払いは保留中です。後でもう一度確認してください。</string>
+    <string name="withdraw_melt_error_unknown_state">支払いに失敗しました: 不明な状態</string>
+    <string name="withdraw_melt_error_generic">エラー: %1$s</string>
+    <string name="withdraw_melt_destination_unknown">未知</string>
+    <string name="withdraw_processing_title">出金処理中</string>
+    <string name="withdraw_processing_subtitle">転送が完了するまでデバイスを起動したままにしてください</string>
+    <string name="withdraw_processing_amount_label">額</string>
+    <string name="withdraw_processing_destination_label">行き先</string>
+    <string name="withdraw_processing_status_preparing">出金の準備</string>
+    <string name="withdraw_processing_status_contacting">造幣局への連絡</string>
+    <string name="withdraw_processing_status_settling">ライトニング決済待ち</string>
+    <string name="withdraw_processing_step_preparing">資金の準備</string>
+    <string name="withdraw_processing_step_contacting">ミントへの連絡</string>
+    <string name="withdraw_processing_step_settling">雷の決済</string>
+    <string name="withdraw_processing_hint">通常、これには 10 秒もかかりません。完了したら、この画面から離れても問題ありません。</string>
+
+    <string name="withdraw_melt_destination_invoice_fallback">ライトニング請求書</string>
+
+    
+    <string name="withdraw_success_amount">%1$s を送信しました。</string>
+    <string name="withdraw_success_destination">%1$s へ</string>
+    <string name="withdraw_success_destination_fallback">稲妻</string>
+    <string name="withdraw_success_close">近い</string>
+    <string name="withdraw_success_background_description">成功の背景</string>
+    <string name="withdraw_success_icon_description">成功</string>
+
+    
+    <string name="history_toolbar_title">活動</string>
+    <string name="history_section_payment_history">支払い履歴</string>
+    <string name="history_empty">支払い履歴がありません</string>
+
+    <string name="transaction_row_copy">コピー</string>
+    <string name="transaction_row_open">開ける</string>
+    <string name="transaction_row_delete">消去</string>
+
+    <string name="token_history_copy">トークンをコピーする</string>
+    <string name="token_history_open_with">トークンを開くには...</string>
+    <string name="token_history_delete">トークンの削除</string>
+
+    <string name="transaction_details_amount_placeholder">$0</string>
+    <string name="transaction_details_date_label">日付</string>
+    <string name="transaction_details_token_placeholder">トークン...</string>
+    <string name="transaction_details_copy_token">トークンのコピー</string>
+    <string name="transaction_details_open_with">開く...</string>
+    <string name="transaction_details_delete_transaction">トランザクションの削除</string>
+
+    <string name="payment_history_title">支払い</string>
+    <string name="payment_history_status_pending">保留中</string>
+    <string name="history_checking_payment_status">支払い状況を確認しています...</string>
+
+    <string name="transaction_detail_toolbar_back">戻る</string>
+    <string name="transaction_detail_toolbar_title">取引詳細</string>
+    <string name="transaction_detail_toolbar_share">共有</string>
+
+    <string name="transaction_detail_type_payment_received">支払いを受領しました</string>
+    <string name="transaction_detail_mint_label">ミントより</string>
+    <string name="transaction_detail_view_receipt">領収書を見る</string>
+    <string name="transaction_detail_section_transaction_details">取引の詳細</string>
+
+    <string name="transaction_detail_payment_type_label">支払いタイプ</string>
+    <string name="transaction_detail_payment_type_cashu">カシュ</string>
+    <string name="transaction_detail_amount_label">額</string>
+    <string name="transaction_detail_token_unit_label">トークンユニット</string>
+    <string name="transaction_detail_entered_as_label">として入力</string>
+    <string name="transaction_detail_entered_amount_label">入力金額</string>
+    <string name="transaction_detail_bitcoin_price_label">ビットコイン価格</string>
+    <string name="transaction_detail_tip_label">ヒント</string>
+    <string name="transaction_detail_tip_equivalent_label">（同等）</string>
+    <string name="transaction_detail_total_paid_label">支払総額</string>
+    <string name="transaction_detail_mint_label_short">ミント</string>
+
+    <string name="transaction_detail_lightning_invoice_header">ライトニング請求書</string>
+    <string name="transaction_detail_lightning_invoice_placeholder">lnbc...</string>
+    <string name="transaction_detail_copy_invoice_hint">タップして請求書をコピーします</string>
+
+    <string name="transaction_detail_token_header">カシュトークン</string>
+    <string name="transaction_detail_token_placeholder">カシュア…</string>
+
+    <string name="transaction_detail_payment_request_header">支払い要求</string>
+    <string name="transaction_detail_payment_request_placeholder">...</string>
+
+    <string name="transaction_detail_button_copy_token">トークンのコピー</string>
+    <string name="transaction_detail_button_open_with">開く...</string>
+    <string name="transaction_detail_button_delete">トランザクションの削除</string>
+
+    <string name="mint_restore_name_placeholder">造幣局の名前</string>
+    <string name="mint_restore_status_restoring">復元中...</string>
+    <string name="mint_restore_balance_change_placeholder">+0 衛星</string>
+
+    
+    <string name="items_settings_section_title">アイテムカタログ</string>
+    <string name="items_settings_status_empty">カタログに商品がありません</string>
+    <string name="items_settings_description">製品カタログを管理して、簡単にチェックアウトできます。</string>
+    <string name="items_settings_import_csv">CSVのインポート</string>
+    <string name="items_settings_export_csv">CSVのエクスポート</string>
+    <string name="items_settings_manage">管理</string>
+    <string name="items_settings_clear_all">すべての項目をクリア</string>
+
+    
+    <string name="item_list_toolbar_back">戻る</string>
+    <string name="item_list_toolbar_title">アイテム</string>
+    <string name="item_list_add_item">アイテムの追加</string>
+    <string name="item_list_done_reordering">並べ替えが完了しました</string>
+    <string name="item_list_empty_icon_description">アイテムがありません</string>
+    <string name="item_list_empty_title">アイテムがありません</string>
+    <string name="item_list_empty_subtitle">+ をタップして最初の項目を追加します</string>
+    <string name="item_list_import_from_csv">CSVからインポート</string>
+    <string name="item_list_export_to_csv">CSVにエクスポート</string>
+    <string name="item_list_toast_exported">カタログをCSVにエクスポート</string>
+    <string name="item_list_toast_error_exporting">カタログのエクスポート中にエラーが発生しました</string>
+    <string name="item_list_clear_all">すべての項目をクリア</string>
+
+    
+    <string name="item_entry_toolbar_back">戻る</string>
+    <string name="item_entry_title_add">アイテムの追加</string>
+    <string name="item_entry_button_save">保存</string>
+    <string name="item_entry_image_description">商品画像</string>
+    <string name="item_entry_image_placeholder">画像なし</string>
+    <string name="item_entry_button_add_photo">写真を追加</string>
+    <string name="item_entry_button_remove_photo">写真を削除</string>
+
+    <string name="item_entry_section_basic_information">基本情報</string>
+    <string name="item_entry_label_name">名前</string>
+    <string name="item_entry_hint_name">項目名</string>
+    <string name="item_entry_label_variation">変化</string>
+    <string name="item_entry_hint_variation">例えば小、大</string>
+    <string name="item_entry_label_description">説明</string>
+    <string name="item_entry_hint_description">オプション</string>
+
+    <string name="item_entry_section_category">カテゴリ</string>
+    <string name="item_entry_hint_new_category">新しいカテゴリ名</string>
+    <string name="item_entry_category_confirm">確認する</string>
+    <string name="item_entry_category_cancel">キャンセル</string>
+    <string name="item_entry_category_helper">既存のカテゴリを選択するか、新しいカテゴリを作成します。</string>
+
+    <string name="item_entry_section_pricing">価格設定</string>
+    <string name="item_entry_price_type_fiat">フィアット</string>
+    <string name="item_entry_price_type_bitcoin">ビットコイン</string>
+    <string name="item_entry_currency_symbol_default">$</string>
+    <string name="item_entry_hint_price_fiat">0.00</string>
+    <string name="item_entry_currency_code_default">米ドル</string>
+    <string name="item_entry_bitcoin_symbol">₿</string>
+    <string name="item_entry_hint_price_sats">0</string>
+    <string name="item_entry_label_sats">座っています</string>
+
+    <string name="item_entry_label_apply_vat">VATを適用する</string>
+    <string name="item_entry_label_price_includes_vat">価格には消費税が含まれています</string>
+    <string name="item_entry_label_vat_rate">VAT率</string>
+    <string name="item_entry_hint_vat_rate">20</string>
+
+    <string name="item_entry_price_breakdown_title">価格の内訳</string>
+    <string name="item_entry_price_breakdown_net_label">正味価格 (VAT を除く)</string>
+    <string name="item_entry_price_breakdown_net_value_default">$0.00</string>
+    <string name="item_entry_price_breakdown_vat_label">付加価値税 (20%)</string>
+    <string name="item_entry_price_breakdown_vat_value_default">$0.00</string>
+    <string name="item_entry_price_breakdown_total_label">合計（VATを含む）</string>
+    <string name="item_entry_price_breakdown_total_value_default">$0.00</string>
+
+    <string name="item_entry_price_helper">希望の通貨で固定価格を設定します。ビットコインの価格はサトシ（sats）で表されます。</string>
+
+    <string name="item_entry_section_identification">識別</string>
+    <string name="item_entry_label_gtin">GTIN</string>
+    <string name="item_entry_hint_gtin">バーコードをスキャンまたは入力</string>
+    <string name="item_entry_scan_barcode">バーコードをスキャンする</string>
+    <string name="item_entry_label_sku">SKU</string>
+    <string name="item_entry_hint_sku">社内証券コード</string>
+    <string name="item_entry_error_gtin_exists">この GTIN はすでに存在します</string>
+    <string name="item_entry_error_sku_exists">この SKU はすでに存在します</string>
+
+    <string name="item_entry_section_inventory">在庫</string>
+    <string name="item_entry_label_track_quantity">数量を追跡する</string>
+    <string name="item_entry_label_current_stock">現在の在庫</string>
+    <string name="item_entry_hint_current_stock">0</string>
+    <string name="item_entry_label_low_stock_alert">在庫不足アラート</string>
+    <string name="item_entry_label_alert_when_below">以下の場合に警告</string>
+    <string name="item_entry_hint_alert_threshold">5</string>
+    <string name="item_entry_inventory_helper">在庫追跡を有効にして在庫レベルを監視し、在庫不足のアラートを受け取ります。</string>
+
+    <string name="item_entry_button_cancel">キャンセル</string>
+
+    
+    <string name="item_product_drag_handle_description">ドラッグして並べ替えます</string>
+    <string name="item_product_image_description">商品画像</string>
+    <string name="item_product_image_placeholder">画像なし</string>
+    <string name="item_product_chevron_more">もっと</string>
+
+    
+    <string name="item_selection_image_description">商品画像</string>
+    <string name="item_selection_image_placeholder">画像なし</string>
+    <string name="item_selection_decrease_quantity">数量を減らす</string>
+    <string name="item_selection_increase_quantity">数量を増やす</string>
+    <string name="item_selection_variation_hint">カスタムバリエーションを追加...</string>
+    <string name="item_selection_add_variation">追加</string>
+    <string name="item_selection_variation_helper">このバリエーションで新しいアイテムを作成します</string>
+
+    
+    <string name="item_selection_toolbar_back">戻る</string>
+    <string name="item_selection_toolbar_title">チェックアウト</string>
+    <string name="item_selection_search_icon_description">検索</string>
+    <string name="item_selection_search_hint">アイテムを検索...</string>
+    <string name="item_selection_scan_barcode">バーコードをスキャンする</string>
+    <string name="item_selection_clear_filters">フィルターをクリアする</string>
+
+    <string name="item_selection_empty_icon_description">アイテムがありません</string>
+    <string name="item_selection_empty_title">項目が見つかりませんでした</string>
+    <string name="item_selection_empty_subtitle">「設定」→「項目」で項目を追加します</string>
+
+    <string name="item_selection_no_results_icon_description">結果はありません</string>
+    <string name="item_selection_no_results_title">一致するアイテムはありません</string>
+    <string name="item_selection_no_results_subtitle">別の検索語を試してください</string>
+
+    <string name="item_selection_basket_icon_description">バスケット</string>
+    <string name="item_selection_basket_title">バスケット</string>
+    <string name="item_selection_basket_clear">クリア</string>
+    <string name="item_selection_basket_total_label">合計</string>
+    <string name="item_selection_basket_expand">バスケットを展開する</string>
+    <string name="item_selection_basket_collapse">バスケットを折りたたむ</string>
+    <string name="item_selection_basket_item_count">%1$d 個のアイテム</string>
+    <string name="item_selection_basket_items_count">%1$d 個のアイテム</string>
+    <string name="item_selection_charge_button">充電</string>
+    <string name="item_selection_charge_button_default">充電</string>
+    <string name="pos_error_no_mints_configured">顧客に請求する前に、[設定] → [ミント] で少なくとも 1 つのミントを追加します。</string>
+
+    <string name="item_selection_save_button">保存</string>
+    <string name="item_selection_saved_baskets_button">保存されました</string>
+    <string name="item_selection_save_basket_hint">名前を入力します (オプション)</string>
+
+    
+    <string name="dialog_save_basket_title">バスケットを保存</string>
+    <string name="dialog_save_basket_subtitle">後で簡単に見つけられるように、バスケットに名前を付けます。</string>
+    <string name="dialog_save_basket_hint">表5、ジョンの順序など</string>
+    <string name="dialog_save_basket_helper">デフォルト名を使用するには空のままにしてください</string>
+    <string name="dialog_save_basket_save">バスケットを保存</string>
+
+    
+    <string name="dialog_rename_basket_title">バスケットの名前を変更</string>
+    <string name="dialog_rename_basket_subtitle">このバスケットの名前を更新します。</string>
+    <string name="dialog_rename_basket_hint">新しい名前を入力してください</string>
+    <string name="dialog_rename_basket_save">変更を保存</string>
+    <string name="item_selection_editing_basket">編集中: %1$s</string>
+
+    
+    <string name="saved_baskets_back">戻る</string>
+    <string name="saved_baskets_title">保存されたバスケット</string>
+    <string name="saved_baskets_empty_icon">保存されたバスケットはありません</string>
+    <string name="saved_baskets_empty_title">保存されたバスケットはありません</string>
+    <string name="saved_baskets_empty_subtitle">後で使えるようにバスケットを保存しておきます。\nタブやレストランのテーブルに最適です。</string>
+    <string name="saved_baskets_meta_format">%1$s • %2$s</string>
+    <string name="saved_baskets_action_rename">名前の変更</string>
+    <string name="saved_baskets_action_delete">消去</string>
+    <string name="saved_baskets_rename_title">バスケットの名前を変更</string>
+    <string name="saved_baskets_rename_hint">バスケット名を入力してください</string>
+    <string name="saved_baskets_delete_title">バスケットの削除</string>
+    <string name="saved_baskets_delete_message">「%1$s」を削除しますか?これを元に戻すことはできません。</string>
+
+    
+    <string name="basket_archive_back">戻る</string>
+    <string name="basket_archive_title">注文履歴</string>
+    <string name="basket_archive_empty_icon">アーカイブされた注文はありません</string>
+    <string name="basket_archive_empty_title">完了した注文はありません</string>
+    <string name="basket_archive_empty_subtitle">完了した注文はここに表示されます。\n販売履歴の追跡に最適です。</string>
+    <string name="basket_archive_paid_badge">有料</string>
+    <string name="basket_archive_view_payment">支払いを見る</string>
+    <string name="basket_archive_delete">消去</string>
+    <string name="basket_archive_delete_title">注文の削除</string>
+    <string name="basket_archive_delete_message">「%1$s」を削除しますか?これを元に戻すことはできません。</string>
+    <string name="basket_archive_total_label">合計</string>
+    <string name="basket_archive_detail_title">注文の詳細</string>
+    <string name="saved_baskets_view_archive">アーカイブ</string>
+    <string name="basket_archive_detail_view_payment">支払いを見る</string>
+
+
+    
+    <string name="common_save">保存</string>
+    <string name="common_delete">消去</string>
+    <string name="common_confirm">確認する</string>
+    <string name="common_undo">元に戻す</string>
+
+    
+    <string name="basket_names_settings_title">バスケット名</string>
+    <string name="basket_names_settings_description">プリセット名を作成してバスケットにすばやく保存できます。\nレストランのテーブルや顧客の注文に最適です。</string>
+    <string name="basket_names_settings_presets_header">プリセット名</string>
+    <string name="basket_names_settings_empty_title">プリセット名はありません</string>
+    <string name="basket_names_settings_empty_subtitle">名前を追加してバスケットをすばやく保存する</string>
+    <string name="basket_names_settings_add_name">名前を追加</string>
+    <string name="basket_names_settings_examples">例: テーブル 1、テーブル 2、VIP、テイクアウト、ジョンの注文</string>
+    <string name="basket_names_settings_clear_all">すべての名前を消去</string>
+
+    
+    <string name="basket_names_dialog_add_title">プリセット名の追加</string>
+    <string name="basket_names_dialog_add_subtitle">バスケットのクイック選択名を作成する</string>
+    <string name="basket_names_dialog_add_hint">例えば表1</string>
+    <string name="basket_names_dialog_add_save">名前を追加</string>
+
+    <string name="basket_names_dialog_edit_title">名前の編集</string>
+    <string name="basket_names_dialog_edit_subtitle">プリセット名を更新する</string>
+    <string name="basket_names_dialog_edit_hint">名前を入力してください</string>
+    <string name="basket_names_dialog_edit_save">変更を保存</string>
+
+    <string name="basket_names_dialog_add_button">名前を追加</string>
+    <string name="basket_names_dialog_edit_button">変更を保存</string>
+
+    <string name="basket_names_dialog_delete_title">名前の削除</string>
+    <string name="basket_names_dialog_delete_message">「%1$s」をプリセットから削除しますか?</string>
+
+    <string name="basket_names_dialog_clear_all_title">すべての名前を消去</string>
+    <string name="basket_names_dialog_clear_all_message">すべてのプリセット名を削除しますか?これを元に戻すことはできません。</string>
+    <string name="basket_names_dialog_clear_all_confirm">すべてクリア</string>
+
+    
+    <string name="basket_names_error_empty">名前を入力してください</string>
+    <string name="basket_names_error_duplicate">この名前はすでに存在します</string>
+
+    
+    <plurals name="saved_baskets_item_count">
+        <item quantity="one">%1$d 個のアイテム</item>
+        <item quantity="other">%1$d 個のアイテム</item>
+    </plurals>
+
+    
+    <string name="auto_withdraw_title">出金</string>
+    <string name="auto_withdraw_hero_title">自動引き出し</string>
+    <string name="auto_withdraw_hero_subtitle">残高がしきい値を超えると、Lightning ウォレットに資金が自動的に送金されます</string>
+    <string name="auto_withdraw_status_active">アクティブ</string>
+    <string name="auto_withdraw_status_inactive">非アクティブ</string>
+    
+    <string name="auto_withdraw_enable_title">自動引き出し</string>
+    <string name="auto_withdraw_enable_subtitle">残高が基準値を超えると自動的に引き落とされる</string>
+    
+    <string name="auto_withdraw_section_destination">行き先</string>
+    <string name="auto_withdraw_section_trigger">トリガー設定</string>
+    <string name="auto_withdraw_section_config">構成</string>
+    <string name="auto_withdraw_lightning_address_label">ライトニングアドレス</string>
+    <string name="auto_withdraw_lightning_address_hint">you@wallet.com</string>
+    <string name="auto_withdraw_lightning_address_helper">資金はこのアドレスに自動的に送金されます</string>
+    
+    <string name="auto_withdraw_threshold_title">バランスしきい値</string>
+    <string name="auto_withdraw_threshold_subtitle">残高超過時に発動</string>
+    <string name="auto_withdraw_threshold_label">しきい値</string>
+    <string name="auto_withdraw_threshold_hint">残高がこの金額に達すると引き出しがトリガーされます</string>
+    <string name="auto_withdraw_threshold_helper">最小: ₿1,000 • 最大: ₿1,000,000</string>
+    
+    <string name="auto_withdraw_percentage_title">出金金額</string>
+    <string name="auto_withdraw_percentage_subtitle">送金する残高の割合</string>
+    <string name="auto_withdraw_percentage_label">出金率</string>
+    <string name="auto_withdraw_percentage_hint">出金する残高の割合（一部は手数料のために取っておきます）</string>
+    
+    <string name="auto_withdraw_section_history">最近の活動</string>
+    <string name="auto_withdraw_see_all">すべて見る</string>
+    <string name="auto_withdraw_history_empty">まだ自動引き落としはありません</string>
+    <string name="auto_withdraw_history_empty_title">まだアクティビティはありません</string>
+    <string name="auto_withdraw_history_empty_subtitle">出金はここに表示されます</string>
+    
+    <string name="auto_withdraw_status_completed">送信済み</string>
+    <string name="auto_withdraw_status_pending">保留中</string>
+    <string name="auto_withdraw_status_failed">失敗した</string>
+    
+    <string name="auto_withdraw_progress_started">自動引き落とし中...</string>
+    <string name="auto_withdraw_progress_quote">見積もりを取得しています...</string>
+    <string name="auto_withdraw_progress_sending">ウォレットに送信中...</string>
+    <string name="auto_withdraw_progress_completed">無事送信されました！</string>
+    <string name="auto_withdraw_progress_failed">出金に失敗しました</string>
+    
+    <string name="auto_withdraw_settings_title">自動引き出し</string>
+    <string name="auto_withdraw_error_title">エラーの詳細</string>
+
+    
+    <string name="settings_item_withdrawals_title">出金</string>
+    <string name="settings_item_withdrawals_subtitle">自動出金設定と履歴</string>
+
+    
+    <string name="manual_withdraw_section_title">手動引き出し</string>
+    <string name="manual_withdraw_title">今すぐ撤退</string>
+    <string name="manual_withdraw_subtitle">Lightning の請求書または住所に資金を送金します</string>
+    <string name="manual_withdraw_select_mint">ミントを選択</string>
+    <string name="manual_withdraw_no_balance">出金できる残高がありません。まずウォレットに資金を追加してください。</string>
+
+    
+    <string name="mints_settings_balance_label">バランス</string>
+
+    
+    <string name="mint_selection_title">ミントを選択</string>
+    <string name="mint_selection_subtitle">どのミントから引き出すかを選択してください</string>
+    <string name="mint_selection_icon_description">ミントアイコン</string>
+    <string name="mint_selection_select_description">このミントを選択してください</string>
+
+    
+    <string name="withdraw_invoice_card_title">ライトニング請求書</string>
+    <string name="withdraw_invoice_card_subtitle">請求書を貼り付けてすぐに支払います</string>
+    <string name="withdraw_address_card_title">ライトニングアドレス</string>
+    <string name="withdraw_address_card_subtitle">電子メールのようなアドレスに送信する</string>
+    <string name="withdraw_invoice_placeholder">lnbc1...</string>
+    <string name="withdraw_amount_placeholder">金額をsatで入力してください</string>
+    <string name="withdraw_continue_button">続く</string>
+    <string name="withdraw_scan_qr">QRをスキャン</string>
+    <string name="withdraw_section_send_to">送信先</string>
+    <string name="withdraw_balance_available">利用可能: %1$s</string>
+
+    <string name="withdraw_tab_lightning">稲妻</string>
+    <string name="withdraw_tab_cashu">キャッシュトークン</string>
+    
+    <string name="withdraw_cashu_amount_card_title">額</string>
+    <string name="withdraw_cashu_amount_card_subtitle">トークンを作成する金額を入力してください</string>
+    <string name="withdraw_cashu_create_button">トークンの作成</string>
+    <string name="withdraw_cashu_result_title">キャッシュトークン</string>
+    <string name="withdraw_cashu_result_subtitle">このトークンを共有して引き出します</string>
+    <string name="withdraw_cashu_copy_token">トークンのコピー</string>
+    <string name="withdraw_cashu_copied">トークンがクリップボードにコピーされました</string>
+    <string name="withdraw_cashu_creating">トークンを作成しています...</string>
+
+    
+    <string name="qr_scanner_title">QRコードをスキャン</string>
+    <string name="qr_scanner_instruction">QRコードにカメラを向ける</string>
+    <string name="qr_scanner_permission_required">QRコードをスキャンするにはカメラの許可が必要です</string>
+
+    
+    <string name="mints_explore_title">ミント</string>
+    <string name="mints_total_balance">合計残高</string>
+    <string name="mints_your_mints">あなたのミント</string>
+    <string name="mints_add_new_mint">新しいミントを追加</string>
+    <string name="mints_enter_url">mint URLを入力するか、QRコードをスキャンしてください</string>
+    <string name="mints_url_hint">https://mint.example.com</string>
+    <string name="mints_add_button">ミントを加える</string>
+    <string name="mints_scan_qr">QRをスキャン</string>
+    <string name="mints_scan_mint_qr">ミントQRをスキャン</string>
+    <string name="mints_scan_instruction">ミントのQRコードにカメラを向ける</string>
+    <string name="mints_empty_title">ミントなし</string>
+    <string name="mints_empty_subtitle">eCash を始めるにはミントを追加してください</string>
+    <string name="mints_remove_title">ミントを取り除く</string>
+    <string name="mints_remove_message">%1$sを削除しますか?このミントのバランスは崩れてしまいます。</string>
+    <string name="mints_remove_confirm">取り除く</string>
+    <string name="mints_removed_toast">ミントを取り除いた</string>
+    <string name="mints_already_exists">このミントはすでに追加されています</string>
+    <string name="mints_invalid_url">ミント URL が無効です。確認してもう一度お試しください。</string>
+    <string name="mints_added_toast">ミントを追加しました</string>
+    <string name="mints_reset_title">ミントをリセットする</string>
+    <string name="mints_reset_message">デフォルトのミントにリセットしますか?これにより、すべてのカスタムミントが削除されます。</string>
+    <string name="mints_reset_confirm">リセット</string>
+    <string name="mints_reset_toast">ミントがデフォルトにリセットされる</string>
+    <string name="mints_reset_description">デフォルトにリセットする</string>
+    <string name="mint_icon_description">ミントアイコン</string>
+    <string name="mint_selected_description">選択済み</string>
+    <string name="mint_remove_description">ミントを取り除く</string>
+
+    <plurals name="mints_count">
+        <item quantity="one">%1$d ミント</item>
+        <item quantity="other">%1$d ミント</item>
+    </plurals>
+
+    
+    <string name="mints_lightning_mint">ライトニングミント</string>
+    <string name="mints_all_mints">オールミント</string>
+    <string name="mints_balance">バランス</string>
+    <string name="mints_lightning_description">Lightning の支払いはすべてこの造幣局に受け取られます。以下のミントをタップして、Lightning ミントとして設定します。</string>
+    <string name="mints_set_as_lightning">ライトニングミントとして設定</string>
+    <string name="mints_lightning_changed">ライトニングミントが更新されました</string>
+
+    
+    <string name="mints_swap_unknown_mints_title">未知の造幣局からの支払いを受け入れる</string>
+    <string name="mints_swap_unknown_mints_subtitle">有効にすると、不明なミントからのトークンが自動的に Lightning ミントに交換されます。</string>
+
+    
+    <string name="cd_mint_icon">ミントアイコン</string>
+    <string name="cd_mint_selected">ライトニングミントに選ばれました</string>
+
+    
+    <string name="mint_action_info">情報</string>
+    <string name="mint_action_delete">消去</string>
+    <string name="mints_add_section">ミントを加える</string>
+
+    
+    <string name="mint_details_title">ミントの詳細</string>
+    <string name="mint_details_about">について</string>
+    <string name="mint_details_announcement">発表</string>
+    <string name="mint_details_contact">接触</string>
+    <string name="mint_details_details">詳細</string>
+    <string name="mint_details_actions">アクション</string>
+    <string name="mint_details_url">URL</string>
+    <string name="mint_details_software">ソフトウェア</string>
+    <string name="mint_details_version">バージョン</string>
+    <string name="mint_details_features">特徴</string>
+    <string name="mint_details_copy_url">MintのURLをコピーする</string>
+    <string name="mint_details_delete">ミントの削除</string>
+    <string name="mint_details_copied">クリップボードにコピーされました</string>
+    <string name="mint_details_copy">コピー</string>
+    <string name="mint_details_fetch_error">ミント情報を取得できません</string>
+    <string name="common_retry">リトライ</string>
+
+    <string name="mint_details_software_value">ソフトウェア: %1$s</string>
+    <string name="mint_details_version_value">バージョン: %1$s</string>
+    <string name="mint_details_software_unknown">ソフトウェア: 不明</string>
+    <string name="mint_details_version_unknown">バージョン: 不明</string>
+
+    
+    <string name="developer_error_logs_entry_details_title">エラーの詳細</string>
+    <string name="developer_error_logs_entry_copy">エントリのコピー</string>
+    <string name="developer_error_logs_clear_dialog_title">エラーログをクリアする</string>
+    <string name="developer_error_logs_clear_dialog_message">保存されているエラー ログをすべてクリアしますか?これを元に戻すことはできません。</string>
+
+    <string name="history_dialog_dont_show_again">「今後は表示しないでください」</string>
+    <string name="history_dialog_pending_delete_title">「保留中の支払いを削除しますか?」</string>
+    <string name="history_dialog_pending_delete_message">「このリクエストを削除すると、このリクエストに送信された資金を取り戻すことはできません。」</string>
+
+    
+    <string name="pin_setup_create_title">PIN を作成する</string>
+    <string name="pin_setup_new_pin_title">新しいPIN</string>
+    <string name="pin_setup_create_subtitle">機密設定を保護するには、4 ～ 16 桁の PIN を選択してください</string>
+    <string name="pin_setup_confirm_title">PINの確認</string>
+    <string name="pin_setup_confirm_subtitle">確認のためPINを再入力してください</string>
+    <string name="pin_setup_digits">%d 桁</string>
+    <string name="pin_setup_continue">続く</string>
+    <string name="pin_setup_back">戻る</string>
+    <string name="pin_setup_enter_at_least">少なくとも %d 桁を入力してください</string>
+    <string name="pin_setup_more_needed">%1$d 桁 %2$s · さらに %3$d 必要です</string>
+    <string name="pin_setup_set_pin">暗証番号を設定する</string>
+
+    
+    <string name="pin_entry_title">PINを入力してください</string>
+    <string name="pin_entry_subtitle">続行するにはPINを入力してください</string>
+    <string name="pin_entry_forgot">PIN をお忘れですか?</string>
+    <string name="pin_entry_too_many_attempts">試行が多すぎます</string>
+    <string name="pin_entry_try_again_minutes">%1$d 分後に再試行してください%2$s</string>
+    <string name="pin_entry_try_again_seconds">%1$d 秒後に再試行してください%2$s</string>
+    <string name="pin_entry_reset_recovery">リカバリーフレーズでリセット</string>
+
+    
+    <string name="pin_reset_title">PINのリセット</string>
+    <string name="pin_reset_warning_title">PIN をリセットする</string>
+    <string name="pin_reset_warning_message">12 単語の回復フレーズを入力して PIN をリセットします。既存の PIN が削除され、新しい PIN を設定できます。</string>
+    <string name="pin_reset_recovery_phrase">リカバリーフレーズ</string>
+    <string name="pin_reset_paste_clipboard">クリップボードから貼り付け</string>
+    <string name="pin_reset_button">PINのリセット</string>
+    <string name="payment_request_tab_unified">統合された</string>
+    <string name="payment_request_default_description">%1$d の支払い</string>
+    <string name="payment_request_lightning_description">%1$d 衛星の Numo POS 支払い</string>
+</resources>
