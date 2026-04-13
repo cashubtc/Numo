@@ -146,6 +146,14 @@
 
     <string name="onboarding_status_creating_wallet">Creating new wallet…</string>
     <string name="onboarding_status_restoring_wallet">Restoring wallet…</string>
+    <string name="onboarding_status_generating_seed">Generating seed phrase…</string>
+    <string name="onboarding_status_setting_up_mints">Setting up default mints…</string>
+    <string name="onboarding_status_initializing_wallet">Initializing wallet…</string>
+    <string name="onboarding_status_connecting_mints">Connecting to mints…</string>
+    <string name="onboarding_status_fetching_mints">Fetching mints information…</string>
+    <string name="onboarding_generating_hint">This will only take a moment</string>
+    <string name="onboarding_fetching_searching_backup">Searching for backup…</string>
+    <string name="onboarding_fetching_checking_relays">Checking Nostr relays for your mint configuration</string>
 
     
     <string name="onboarding_mints_toolbar_back">Back</string>
