@@ -164,6 +164,13 @@ class PaymentRequestActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_request)
+        
+        // Apply window insets to handle edge-to-edge correctly (especially for API 35+)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, insets.top, 0, insets.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
 
         // Initialize views
         unifiedQrImageView = findViewById(R.id.unified_qr)
