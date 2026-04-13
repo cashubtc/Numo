@@ -95,6 +95,8 @@ data class Amount(
             val NOK = Currency("NOK", "kr")
             @JvmField
             val KRW = Currency("KRW", "₩")
+            
+            private val cache = java.util.concurrent.ConcurrentHashMap<String, Currency>()
 
             @JvmStatic
             fun fromCode(code: String): Currency = when {
@@ -113,16 +115,28 @@ data class Amount(
                         "SEK" -> SEK
                         "NOK" -> NOK
                         "KRW" -> KRW
-                        else -> runCatching {
-                            val javaCurrency = JavaCurrency.getInstance(upperCode)
-                            // If a symbol is available, use it, otherwise use the code
-                            val symbol = try {
-                                javaCurrency.getSymbol(Locale.getDefault())
-                            } catch (e: Exception) {
-                                upperCode
-                            }
-                            Currency(upperCode, symbol)
-                        }.getOrElse { USD }
+                        else -> cache.getOrPut(upperCode) {
+                            runCatching {
+                                val javaCurrency = JavaCurrency.getInstance(upperCode)
+                                // Try to find the shortest native symbol available across all locales
+                                val symbol = runCatching {
+                                    val nativeLocales = Locale.getAvailableLocales().filter {
+                                        runCatching { JavaCurrency.getInstance(it).currencyCode == upperCode }.getOrDefault(false)
+                                    }
+                                    val symbols = nativeLocales.map { javaCurrency.getSymbol(it) }
+                                    val distinctSymbols = symbols.filter { it != upperCode }
+                                    
+                                    if (distinctSymbols.isNotEmpty()) {
+                                        distinctSymbols.minByOrNull { it.length } ?: upperCode
+                                    } else {
+                                        val defaultSym = javaCurrency.getSymbol(Locale.getDefault())
+                                        if (defaultSym != upperCode) defaultSym else upperCode
+                                    }
+                                }.getOrDefault(upperCode)
+                                
+                                Currency(upperCode, symbol)
+                            }.getOrElse { USD }
+                        }
                     }
                 }
             }
@@ -138,9 +152,9 @@ data class Amount(
 
                 // Search through available currencies
                 return runCatching {
-                    JavaCurrency.getAvailableCurrencies().find { it.symbol == symbol }?.let {
-                        Currency(it.currencyCode, it.symbol)
-                    }
+                    JavaCurrency.getAvailableCurrencies()
+                        .map { fromCode(it.currencyCode) }
+                        .find { it.symbol == symbol }
                 }.getOrNull()
             }
             
@@ -158,8 +172,8 @@ data class Amount(
                 // Fallback to searching all available currencies
                 return runCatching {
                     JavaCurrency.getAvailableCurrencies()
+                        .map { fromCode(it.currencyCode) }
                         .filter { prefix.startsWith(it.symbol) }
-                        .map { Currency(it.currencyCode, it.symbol) }
                         .sortedByDescending { it.symbol.length }
                 }.getOrDefault(emptyList())
             }
