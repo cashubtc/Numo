@@ -139,7 +139,10 @@ data class Amount(
                                 }
                                 
                                 Currency(upperCode, symbol)
-                            }.getOrElse { USD }
+                            }.getOrElse { 
+                                // Provide a graceful fallback to a default custom currency structure if Java lacks support
+                                Currency(upperCode, upperCode) 
+                            }
                         }
                     }
                 }
@@ -157,7 +160,9 @@ data class Amount(
                 // Search through available currencies
                 return runCatching {
                     JavaCurrency.getAvailableCurrencies()
-                        .map { fromCode(it.currencyCode) }
+                        .mapNotNull { 
+                            runCatching { fromCode(it.currencyCode) }.getOrNull()
+                        }
                         .find { it.symbol == symbol }
                 }.getOrNull()
             }
@@ -176,7 +181,10 @@ data class Amount(
                 // Fallback to searching all available currencies
                 return runCatching {
                     JavaCurrency.getAvailableCurrencies()
-                        .map { fromCode(it.currencyCode) }
+                        .mapNotNull { 
+                            // Safely convert JavaCurrency back to our Currency class without crashing if invalid
+                            runCatching { fromCode(it.currencyCode) }.getOrNull()
+                        }
                         .filter { prefix.startsWith(it.symbol) }
                         .sortedByDescending { it.symbol.length }
                 }.getOrDefault(emptyList())
