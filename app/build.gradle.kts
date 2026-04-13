@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.electricdreams.numo"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.electricdreams.numo"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 5
         versionName = "1.4"
 
