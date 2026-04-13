@@ -119,7 +119,7 @@ data class Amount(
                             runCatching {
                                 val javaCurrency = JavaCurrency.getInstance(upperCode)
                                 // Try to find the shortest native symbol available across all locales
-                                val symbol = runCatching {
+                                var symbol = runCatching {
                                     val nativeLocales = Locale.getAvailableLocales().filter {
                                         runCatching { JavaCurrency.getInstance(it).currencyCode == upperCode }.getOrDefault(false)
                                     }
@@ -133,6 +133,10 @@ data class Amount(
                                         if (defaultSym != upperCode) defaultSym else upperCode
                                     }
                                 }.getOrDefault(upperCode)
+                                
+                                if (symbol == "$" && upperCode != "USD") {
+                                    symbol = "${upperCode.take(2)}$"
+                                }
                                 
                                 Currency(upperCode, symbol)
                             }.getOrElse { USD }
