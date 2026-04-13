@@ -17,7 +17,6 @@ import org.cashudevkit.ReceiveOptions
 import org.cashudevkit.SplitTarget
 import org.cashudevkit.Token as CdkToken
 import java.math.BigInteger
-import java.util.Optional
 
 /**
  * Helper class for Cashu payment-related operations.
@@ -165,10 +164,33 @@ object CashuPaymentHelper {
     @JvmStatic
     fun stripTransports(paymentRequest: String): String? {
         return try {
-            val decoded = PaymentRequest.decode(paymentRequest)
-            // Clear transports
-            decoded.transport = Optional.empty()
-            decoded.encode()
+            val decoded = org.cashudevkit.PaymentRequest.fromString(paymentRequest)
+            // Re-build CBOR without transports
+            val map = com.upokecenter.cbor.CBORObject.NewMap()
+            decoded.paymentId()?.let { map.Add("i", it) }
+            decoded.amount()?.let { map.Add("a", it.value) }
+            decoded.unit()?.let { u ->
+                val unitStr = when (u) {
+                    is CurrencyUnit.Sat -> "sat"
+                    is CurrencyUnit.Msat -> "msat"
+                    is CurrencyUnit.Eur -> "eur"
+                    is CurrencyUnit.Usd -> "usd"
+                    is CurrencyUnit.Custom -> u.unit
+                    else -> "sat"
+                }
+                map.Add("u", unitStr)
+            }
+            decoded.description()?.let { map.Add("d", it) }
+            decoded.singleUse()?.let { map.Add("s", it) }
+            val mints = decoded.mints()
+            if (mints.isNotEmpty()) {
+                val mintsArray = com.upokecenter.cbor.CBORObject.NewArray()
+                mints.forEach { mintsArray.Add(it) }
+                map.Add("m", mintsArray)
+            }
+            // Omit transports
+            val cborBytes = map.EncodeToBytes()
+            "creqA" + android.util.Base64.encodeToString(cborBytes, android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or android.util.Base64.NO_PADDING)
         } catch (e: Exception) {
             Log.e(TAG, "Error stripping transports from payment request: ${e.message}", e)
             null
@@ -181,13 +203,10 @@ object CashuPaymentHelper {
     @JvmStatic
     fun getPostUrl(paymentRequest: String): String? {
         return try {
-            val decoded = PaymentRequest.decode(paymentRequest)
-            if (decoded.transport.isPresent) {
-                val transports = decoded.transport.get()
-                for (t in transports) {
-                    if (t.type.equals("post", ignoreCase = true)) {
-                        return t.target
-                    }
+            val decoded = org.cashudevkit.PaymentRequest.fromString(paymentRequest)
+            for (t in decoded.transports()) {
+                if (t.transportType == org.cashudevkit.TransportType.HTTP_POST) {
+                    return t.target
                 }
             }
             null
@@ -203,12 +222,8 @@ object CashuPaymentHelper {
     @JvmStatic
     fun getId(paymentRequest: String): String? {
         return try {
-            val decoded = PaymentRequest.decode(paymentRequest)
-            if (decoded.id.isPresent) {
-                decoded.id.get()
-            } else {
-                null
-            }
+            val decoded = org.cashudevkit.PaymentRequest.fromString(paymentRequest)
+            decoded.paymentId()
         } catch (e: Exception) {
             Log.e(TAG, "Error getting ID from payment request: ${e.message}", e)
             null
