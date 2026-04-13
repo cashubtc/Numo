@@ -63,8 +63,13 @@ class BitcoinPriceWorker private constructor(context: Context) {
         // Set up a listener for currency changes
         currencyManager.setCurrencyChangeListener(object : CurrencyManager.CurrencyChangeListener {
             override fun onCurrencyChanged(newCurrency: String) {
-                // When currency changes, load its cached price (if any) and update
+                // When currency changes, load its cached price (if any) and update immediately
                 loadCachedPrice(newCurrency)
+                if (getCurrentPrice() > 0 && listener != null) {
+                    notifyListener()
+                }
+                
+                // Then fetch the fresh price in the background
                 fetchPrice()
             }
         })
