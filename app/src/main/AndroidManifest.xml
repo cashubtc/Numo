@@ -4,6 +4,7 @@
 
     <!-- Permissions for NFC client functionality -->
     <uses-permission android:name="android.permission.NFC" />
+    <uses-permission android:name="android.permission.NFC_PREFERRED_PAYMENT_INFO" />
     <uses-permission android:name="android.permission.HOST_CARD_EMULATION" />
     <uses-feature android:name="android.hardware.nfc" android:required="true" />
     <uses-feature android:name="android.hardware.nfc.hce" android:required="true" />
