@@ -1,17 +1,18 @@
 package com.electricdreams.numo.core.payment.impl
 
+import android.util.Base64
 import com.electricdreams.numo.core.payment.BTCPayConfig
 import com.electricdreams.numo.core.payment.PaymentState
 import com.electricdreams.numo.core.wallet.WalletResult
+import com.google.gson.JsonParser
+import com.upokecenter.cbor.CBORObject
 import kotlinx.coroutines.runBlocking
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
+import org.junit.Assert.*
+import org.junit.Assume.assumeFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,6 +30,7 @@ class BtcPayPaymentServiceIntegrationTest {
     private lateinit var service: BTCPayPaymentService
     private val httpClient = OkHttpClient()
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
+    private var cashuEnabled = false
 
     @Before
     fun setup() {
@@ -44,12 +46,14 @@ class BtcPayPaymentServiceIntegrationTest {
                 apiKey = props.getProperty("BTCPAY_API_KEY"),
                 storeId = props.getProperty("BTCPAY_STORE_ID"),
             )
+            cashuEnabled = props.getProperty("CASHU_ENABLED", "false").toBoolean()
         } else {
             config = BTCPayConfig(
                 serverUrl = System.getenv("BTCPAY_SERVER_URL") ?: "http://localhost:49392",
                 apiKey = System.getenv("BTCPAY_API_KEY") ?: "",
                 storeId = System.getenv("BTCPAY_STORE_ID") ?: "",
             )
+            cashuEnabled = System.getenv("CASHU_ENABLED")?.toBoolean() ?: false
         }
         service = BTCPayPaymentService(config)
     }
@@ -64,6 +68,120 @@ class BtcPayPaymentServiceIntegrationTest {
             return true
         }
         return false
+    }
+
+    private fun skipIfCashuNotEnabled() {
+        assumeFalse("BTCPay not configured — skipping", config.apiKey.isEmpty() || config.storeId.isEmpty())
+        assumeFalse("Cashu not enabled — skipping", !cashuEnabled)
+    }
+
+    private fun baseUrl(): String = config.serverUrl.trimEnd('/')
+
+    private fun cashuGet(path: String): Pair<Int, String> {
+        val url = "${baseUrl()}/api/v1/stores/${config.storeId}/cashu$path"
+        val request = Request.Builder()
+            .url(url).get()
+            .addHeader("Authorization", "token ${config.apiKey}")
+            .build()
+        return executeHttpRequest(request)
+    }
+
+    private fun cashuPut(path: String, body: String): Pair<Int, String> {
+        val url = "${baseUrl()}/api/v1/stores/${config.storeId}/cashu$path"
+        val request = Request.Builder()
+            .url(url).put(body.toRequestBody(jsonMediaType))
+            .addHeader("Authorization", "token ${config.apiKey}")
+            .build()
+        return executeHttpRequest(request)
+    }
+
+    private fun cashuPost(path: String, body: String = ""): Pair<Int, String> {
+        val url = "${baseUrl()}/api/v1/stores/${config.storeId}/cashu$path"
+        val request = Request.Builder()
+            .url(url).post(body.toRequestBody(jsonMediaType))
+            .addHeader("Authorization", "token ${config.apiKey}")
+            .build()
+        return executeHttpRequest(request)
+    }
+
+    private fun cashuDelete(path: String): Pair<Int, String> {
+        val url = "${baseUrl()}/api/v1/stores/${config.storeId}/cashu$path"
+        val request = Request.Builder()
+            .url(url).delete()
+            .addHeader("Authorization", "token ${config.apiKey}")
+            .build()
+        return executeHttpRequest(request)
+    }
+
+    private fun publicPost(path: String, body: String): Pair<Int, String> {
+        val request = Request.Builder()
+            .url("${baseUrl()}$path")
+            .post(body.toRequestBody(jsonMediaType))
+            .build()
+        return executeHttpRequest(request)
+    }
+
+    private fun publicPostForm(url: String, queryParams: String): Pair<Int, String> {
+        val request = Request.Builder()
+            .url("$url?$queryParams")
+            .post("".toRequestBody(jsonMediaType))
+            .build()
+        return executeHttpRequest(request)
+    }
+
+    private fun executeHttpRequest(request: Request): Pair<Int, String> {
+        httpClient.newCall(request).execute().use { response ->
+            return Pair(response.code, response.body?.string() ?: "")
+        }
+    }
+
+    // --- CBOR-based cashuPR parsing (avoids CDK native lib dependency) ---
+
+    private fun decodeCashuPR(creq: String): CBORObject? {
+        if (!creq.startsWith("creqA")) return null
+        val bytes = Base64.decode(creq.removePrefix("creqA"), Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+        return CBORObject.DecodeFromBytes(bytes)
+    }
+
+    private fun getIdFromPR(creq: String): String? = decodeCashuPR(creq)?.get("i")?.AsString()
+
+    private fun getPostUrlFromPR(creq: String): String? {
+        val transports = decodeCashuPR(creq)?.get("t") ?: return null
+        for (i in 0 until transports.size()) {
+            val t = transports[i]
+            if (t["t"]?.AsString().equals("post", ignoreCase = true)) return t["a"]?.AsString()
+        }
+        return null
+    }
+
+    private fun stripTransportsFromPR(creq: String): String? {
+        val cbor = decodeCashuPR(creq) ?: return null
+        val map = CBORObject.NewMap()
+        for (key in cbor.keys) {
+            val k = key.AsString()
+            if (k != "t") map.Add(k, cbor[key])
+        }
+        return "creqA" + Base64.encodeToString(map.EncodeToBytes(), Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+    }
+
+    private fun createInvoiceAndGetCashuPR(amountSats: Long = 1000L): Pair<String, String?> {
+        val invoiceId = createInvoiceId(amountSats)
+        val url = "${baseUrl()}/api/v1/stores/${config.storeId}/invoices/$invoiceId/payment-methods"
+        val request = Request.Builder().url(url).get()
+            .addHeader("Authorization", "token ${config.apiKey}").build()
+        val (code, body) = executeHttpRequest(request)
+        assertEquals("Payment methods request should succeed", 200, code)
+
+        val array = JsonParser.parseString(body).asJsonArray
+        var cashuPR: String? = null
+        for (element in array) {
+            val obj = element.asJsonObject
+            val pm = obj.get("paymentMethodId")?.takeIf { !it.isJsonNull }?.asString ?: ""
+            if (pm.contains("Cashu", ignoreCase = true)) {
+                cashuPR = obj.get("destination")?.takeIf { !it.isJsonNull }?.asString
+            }
+        }
+        return Pair(invoiceId, cashuPR)
     }
 
     /**
@@ -336,5 +454,232 @@ class BtcPayPaymentServiceIntegrationTest {
         )
         // Settled invoice + invalid token = failure
         assertTrue("NUT-18 redeem on settled invoice with invalid token should fail", result is WalletResult.Failure)
+    }
+
+    // =========================================================================
+    // Cashu Greenfield API — Config
+    // =========================================================================
+
+    @Test
+    fun testGetCashuConfig_returnsEnabled() {
+        skipIfCashuNotEnabled()
+        val (code, body) = cashuGet("")
+        assertEquals("GET /cashu should return 200", 200, code)
+        val json = JsonParser.parseString(body).asJsonObject
+        assertTrue("Cashu should be enabled", json.get("enabled").asBoolean)
+        assertNotNull("paymentModel should be present", json.get("paymentModel"))
+        println("Cashu config: $body")
+    }
+
+    @Test
+    fun testUpdateCashuConfig_changePaymentModel() {
+        skipIfCashuNotEnabled()
+        val (code, body) = cashuPut("", """{"paymentModel": "AutoConvert"}""")
+        assertEquals("PUT /cashu should return 200", 200, code)
+        val json = JsonParser.parseString(body).asJsonObject
+        println("Payment model after update: ${json.get("paymentModel").asString}")
+        cashuPut("", """{"paymentModel": "TrustedMintsOnly"}""")
+    }
+
+    @Test
+    fun testUpdateCashuConfig_setTrustedMints() {
+        skipIfCashuNotEnabled()
+        val (code, body) = cashuPut("", """{"trustedMintsUrls": ["https://testnut.cashu.space"]}""")
+        assertEquals("PUT /cashu should return 200", 200, code)
+        val mints = JsonParser.parseString(body).asJsonObject.getAsJsonArray("trustedMintsUrls")
+        assertTrue("Should contain test mint", mints.any { it.asString.contains("testnut.cashu.space") })
+        cashuPut("", """{"trustedMintsUrls": []}""")
+    }
+
+    @Test
+    fun testUpdateCashuConfig_disableAndReEnable() {
+        skipIfCashuNotEnabled()
+        val (disableCode, disableBody) = cashuPut("", """{"enabled": false}""")
+        assertEquals(200, disableCode)
+        assertFalse(JsonParser.parseString(disableBody).asJsonObject.get("enabled").asBoolean)
+        val (enableCode, enableBody) = cashuPut("", """{"enabled": true}""")
+        assertEquals(200, enableCode)
+        assertTrue(JsonParser.parseString(enableBody).asJsonObject.get("enabled").asBoolean)
+    }
+
+    // =========================================================================
+    // Cashu Greenfield API — Wallet
+    // =========================================================================
+
+    @Test
+    fun testGetWalletBalances_emptyAfterCreation() {
+        skipIfCashuNotEnabled()
+        val (code, body) = cashuGet("/wallet/balances")
+        assertEquals("GET /wallet/balances should return 200", 200, code)
+        val balances = JsonParser.parseString(body).asJsonObject.getAsJsonArray("balances")
+        assertEquals("Fresh wallet should have no balances", 0, balances.size())
+    }
+
+    @Test
+    fun testCreateWallet_duplicateFails() {
+        skipIfCashuNotEnabled()
+        val (code, body) = cashuPost("/wallet")
+        assertNotEquals("Duplicate wallet creation should not return 200", 200, code)
+        println("Duplicate wallet response (HTTP $code): $body")
+    }
+
+    @Test
+    fun testDeleteWallet_thenRecreate() {
+        skipIfCashuNotEnabled()
+        val (deleteCode, _) = cashuDelete("/wallet")
+        assertEquals("DELETE /wallet should return 200", 200, deleteCode)
+
+        val (enableCode, enableBody) = cashuPut("", """{"enabled": true}""")
+        println("Enable without wallet (HTTP $enableCode): $enableBody")
+
+        val (createCode, createBody) = cashuPost("/wallet")
+        assertEquals("POST /wallet should return 200", 200, createCode)
+        val mnemonic = JsonParser.parseString(createBody).asJsonObject.get("mnemonic")?.asString
+        assertNotNull("New wallet should return mnemonic", mnemonic)
+        assertTrue("Mnemonic should have 12 words", mnemonic!!.split(" ").size == 12)
+
+        val (reEnableCode, _) = cashuPut("", """{"enabled": true, "paymentModel": "TrustedMintsOnly"}""")
+        assertEquals("Re-enabling Cashu should succeed", 200, reEnableCode)
+    }
+
+    // =========================================================================
+    // Cashu — Invoice + Payment Request
+    // =========================================================================
+
+    @Test
+    fun testCreateInvoice_hasCashuPaymentRequest() {
+        skipIfCashuNotEnabled()
+        val (invoiceId, cashuPR) = createInvoiceAndGetCashuPR(1000L)
+        assertNotNull("Invoice should have a Cashu payment request", cashuPR)
+        assertTrue("Cashu PR should start with 'creqA'", cashuPR!!.startsWith("creqA"))
+        println("Invoice $invoiceId cashuPR: ${cashuPR.take(50)}...")
+    }
+
+    @Test
+    fun testCashuPR_canBeParsedForId() {
+        skipIfCashuNotEnabled()
+        val (_, cashuPR) = createInvoiceAndGetCashuPR(500L)
+        assertNotNull("Cashu PR should not be null", cashuPR)
+        val id = getIdFromPR(cashuPR!!)
+        assertNotNull("Payment request should have an ID", id)
+        assertTrue("Payment request ID should not be blank", id!!.isNotBlank())
+        println("Cashu PR ID: $id")
+    }
+
+    @Test
+    fun testCashuPR_hasPostTransport() {
+        skipIfCashuNotEnabled()
+        val (_, cashuPR) = createInvoiceAndGetCashuPR(500L)
+        assertNotNull("Cashu PR should not be null", cashuPR)
+        val postUrl = getPostUrlFromPR(cashuPR!!)
+        assertNotNull("Payment request should have a POST transport URL", postUrl)
+        assertTrue("POST URL should point to pay-invoice-pr", postUrl!!.contains("cashu/pay-invoice-pr"))
+        println("Cashu PR POST URL: $postUrl")
+    }
+
+    @Test
+    fun testCashuPR_strippedTransports() {
+        skipIfCashuNotEnabled()
+        val (_, cashuPR) = createInvoiceAndGetCashuPR(500L)
+        assertNotNull("Cashu PR should not be null", cashuPR)
+        val stripped = stripTransportsFromPR(cashuPR!!)
+        assertNotNull("stripTransports() should return a valid string", stripped)
+        assertTrue("Stripped PR should still start with 'creqA'", stripped!!.startsWith("creqA"))
+        assertNull("Stripped PR should not have a POST transport", getPostUrlFromPR(stripped))
+        assertEquals("Stripped PR should preserve the payment ID", getIdFromPR(cashuPR), getIdFromPR(stripped))
+    }
+
+    @Test
+    fun testCashuPR_differentAmountsProduceDifferentRequests() {
+        skipIfCashuNotEnabled()
+        val (_, pr1) = createInvoiceAndGetCashuPR(100L)
+        val (_, pr2) = createInvoiceAndGetCashuPR(5000L)
+        assertNotNull(pr1)
+        assertNotNull(pr2)
+        assertNotEquals("Different amounts should produce different payment requests", pr1, pr2)
+        assertNotEquals("Different invoices should have different PR IDs", getIdFromPR(pr1!!), getIdFromPR(pr2!!))
+    }
+
+    // =========================================================================
+    // Cashu — Token & Transaction API
+    // =========================================================================
+
+    @Test
+    fun testGetExportedTokens_emptyInitially() {
+        skipIfCashuNotEnabled()
+        val (code, body) = cashuGet("/tokens")
+        assertEquals("GET /tokens should return 200", 200, code)
+        assertEquals("Fresh store should have no exported tokens", 0, JsonParser.parseString(body).asJsonArray.size())
+    }
+
+    @Test
+    fun testGetFailedTransactions_emptyInitially() {
+        skipIfCashuNotEnabled()
+        val (code, body) = cashuGet("/failed-transactions")
+        assertEquals("GET /failed-transactions should return 200", 200, code)
+        assertEquals("Fresh store should have no failed transactions", 0, JsonParser.parseString(body).asJsonArray.size())
+    }
+
+    // =========================================================================
+    // Cashu — Error handling
+    // =========================================================================
+
+    @Test
+    fun testCashuPayInvoice_invalidToken_returnsBadRequest() {
+        skipIfCashuNotEnabled()
+        val invoiceId = createInvoiceId(1000L)
+        val (code, body) = publicPostForm("${baseUrl()}/cashu/pay-invoice", "token=cashuAinvalidgarbage&invoiceId=$invoiceId")
+        assertEquals("Invalid token should return 400", 400, code)
+        println("pay-invoice error (HTTP $code): $body")
+    }
+
+    @Test
+    fun testCashuPayInvoicePr_invalidPayload_returnsBadRequest() {
+        skipIfCashuNotEnabled()
+        val (code, body) = publicPost("/cashu/pay-invoice-pr", """{"id": "fake-id", "mint": "http://fake-mint", "unit": "sat", "proofs": []}""")
+        assertTrue("Invalid NUT-19 payload should return 4xx", code in 400..499)
+        println("pay-invoice-pr error (HTTP $code): $body")
+    }
+
+    @Test
+    fun testCashuPayInvoice_emptyToken_returnsBadRequest() {
+        skipIfCashuNotEnabled()
+        val invoiceId = createInvoiceId(1000L)
+        val (code, _) = publicPostForm("${baseUrl()}/cashu/pay-invoice", "token=&invoiceId=$invoiceId")
+        assertEquals("Empty token should return 400", 400, code)
+    }
+
+    @Test
+    fun testCashuRedeemToken_viaService_invalidToken_returnsFailure() = runBlocking {
+        skipIfCashuNotEnabled()
+        val invoiceId = createInvoiceId(1000L)
+        val result = service.redeemToken("cashuBinvalidtoken", invoiceId)
+        assertTrue("redeemToken with invalid token should fail", result is WalletResult.Failure)
+    }
+
+    // =========================================================================
+    // Cashu — BTCPayPaymentService integration
+    // =========================================================================
+
+    @Test
+    fun testCashuCreatePayment_returnsCashuPR() = runBlocking {
+        skipIfCashuNotEnabled()
+        val result = service.createPayment(1000L, "Cashu service test")
+        assertTrue("createPayment should succeed", result is WalletResult.Success)
+        val data = result.getOrThrow()
+        assertNotNull("PaymentData should have cashuPR", data.cashuPR)
+        assertTrue("cashuPR should start with creqA", data.cashuPR!!.startsWith("creqA"))
+        println("Service cashuPR: ${data.cashuPR.take(50)}...")
+    }
+
+    @Test
+    fun testCashuFetchExistingPaymentData_returnsCashuPR() = runBlocking {
+        skipIfCashuNotEnabled()
+        val invoiceId = createInvoiceId(500L)
+        val result = service.fetchExistingPaymentData(invoiceId)
+        assertTrue("fetchExistingPaymentData should succeed", result is WalletResult.Success)
+        val data = result.getOrThrow()
+        assertEquals("Should return same invoice ID", invoiceId, data.paymentId)
+        assertNotNull("Should include cashuPR", data.cashuPR)
     }
 }
