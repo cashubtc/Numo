@@ -97,6 +97,27 @@ data class Amount(
             val KRW = Currency("KRW", "₩")
             
             private val cache = java.util.concurrent.ConcurrentHashMap<String, Currency>()
+            
+            private val nativeSymbolCache by lazy {
+                val map = mutableMapOf<String, String>()
+                // Build a cache of shortest native symbols by iterating locales exactly once
+                Locale.getAvailableLocales().forEach { locale ->
+                    if (locale.country.isNotEmpty()) {
+                        runCatching {
+                            val javaCurrency = JavaCurrency.getInstance(locale)
+                            val code = javaCurrency.currencyCode
+                            val symbol = javaCurrency.getSymbol(locale)
+                            if (symbol != code) {
+                                val existing = map[code]
+                                if (existing == null || symbol.length < existing.length) {
+                                    map[code] = symbol
+                                }
+                            }
+                        }
+                    }
+                }
+                map
+            }
 
             @JvmStatic
             fun fromCode(code: String): Currency = when {
@@ -118,21 +139,11 @@ data class Amount(
                         else -> cache.getOrPut(upperCode) {
                             runCatching {
                                 val javaCurrency = JavaCurrency.getInstance(upperCode)
-                                // Try to find the shortest native symbol available across all locales
-                                var symbol = runCatching {
-                                    val nativeLocales = Locale.getAvailableLocales().filter {
-                                        runCatching { JavaCurrency.getInstance(it).currencyCode == upperCode }.getOrDefault(false)
-                                    }
-                                    val symbols = nativeLocales.map { javaCurrency.getSymbol(it) }
-                                    val distinctSymbols = symbols.filter { it != upperCode }
-                                    
-                                    if (distinctSymbols.isNotEmpty()) {
-                                        distinctSymbols.minByOrNull { it.length } ?: upperCode
-                                    } else {
-                                        val defaultSym = javaCurrency.getSymbol(Locale.getDefault())
-                                        if (defaultSym != upperCode) defaultSym else upperCode
-                                    }
-                                }.getOrDefault(upperCode)
+                                // Try to find the shortest native symbol from our precomputed cache
+                                var symbol = nativeSymbolCache[upperCode] ?: run {
+                                    val defaultSym = javaCurrency.getSymbol(Locale.getDefault())
+                                    if (defaultSym != upperCode) defaultSym else upperCode
+                                }
                                 
                                 if (symbol == "$" && upperCode != "USD") {
                                     symbol = "${upperCode.take(2)}$"
