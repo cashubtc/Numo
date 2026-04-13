@@ -12,6 +12,8 @@ import com.electricdreams.numo.feature.pin.PinEntryActivity
 import com.electricdreams.numo.feature.pin.PinManager
 import com.electricdreams.numo.feature.pin.PinSetupActivity
 import com.electricdreams.numo.ui.util.DialogHelper
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 class SecuritySettingsActivity : AppCompatActivity() {
 
@@ -33,6 +35,12 @@ class SecuritySettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_security_settings)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, insets.top, 0, insets.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
 
         pinManager = PinManager.getInstance(this)
 

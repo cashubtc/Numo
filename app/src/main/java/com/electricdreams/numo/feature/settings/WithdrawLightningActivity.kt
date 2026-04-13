@@ -44,6 +44,8 @@ import org.cashudevkit.MintUrl
 import org.cashudevkit.SendKind
 import org.cashudevkit.SendOptions
 import org.cashudevkit.SplitTarget
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 /**
  * Premium Apple-like activity for withdrawing balance from a mint via Lightning.
@@ -116,6 +118,12 @@ class WithdrawLightningActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_withdraw_lightning)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, insets.top, 0, insets.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
 
         mintUrl = intent.getStringExtra("mint_url") ?: ""
         balance = intent.getLongExtra("balance", 0)

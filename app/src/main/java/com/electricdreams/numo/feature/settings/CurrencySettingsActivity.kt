@@ -7,6 +7,8 @@ import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.util.CurrencyManager
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 class CurrencySettingsActivity : AppCompatActivity() {
 
@@ -24,6 +26,12 @@ class CurrencySettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_currency_settings)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, insets.top, 0, insets.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
 
         findViewById<View?>(R.id.back_button)?.setOnClickListener { finish() }
 

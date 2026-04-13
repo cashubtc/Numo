@@ -35,6 +35,8 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.Collections
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 class ItemListActivity : AppCompatActivity() {
 
@@ -95,6 +97,12 @@ class ItemListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_item_list)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, insets.top, 0, insets.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
 
         // Set up back button
         findViewById<View?>(R.id.back_button)?.setOnClickListener {

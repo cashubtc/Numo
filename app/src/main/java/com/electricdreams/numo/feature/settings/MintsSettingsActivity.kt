@@ -121,6 +121,14 @@ class MintsSettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mints_settings)
 
+        // Apply window insets to handle edge-to-edge correctly (especially for API 35+)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, insets.top, 0, 0)
+            windowInsets
+        }
+
+
         MintIconCache.initialize(this)
         mintManager = MintManager.getInstance(this)
         mintProfileService = MintProfileService.getInstance(this)

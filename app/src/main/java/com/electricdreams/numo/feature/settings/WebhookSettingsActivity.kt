@@ -34,6 +34,8 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import android.widget.ImageView
 import java.util.concurrent.TimeUnit
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 /**
  * Settings screen for configuring payment-received webhooks.
@@ -57,6 +59,12 @@ class WebhookSettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_webhook_settings)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, insets.top, 0, insets.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
 
         webhookSettingsManager = WebhookSettingsManager.getInstance(this)
 
