@@ -14,6 +14,7 @@ import org.cashudevkit.Wallet as CdkWallet
 import org.cashudevkit.WalletConfig
 import org.cashudevkit.WalletRepository
 import org.cashudevkit.WalletSqliteDatabase
+import org.cashudevkit.WalletStore
 import org.cashudevkit.generateMnemonic
 
 /**
@@ -351,13 +352,14 @@ class CdkWalletProvider(
         return try {
             val tempMnemonic = generateMnemonic()
             val tempDb = WalletSqliteDatabase.newInMemory()
+            val tempDbStore = WalletStore.Custom(tempDb)
             val config = WalletConfig(targetProofCount = 10u)
 
             val cdkWallet = CdkWallet(
                 mintUrl,
                 CurrencyUnit.Sat,
                 tempMnemonic,
-                tempDb,
+                tempDbStore,
                 config
             )
 
