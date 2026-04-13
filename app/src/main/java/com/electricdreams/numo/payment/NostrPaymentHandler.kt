@@ -172,11 +172,6 @@ class NostrPaymentHandler(
             relayList,
             { token -> callback.onTokenReceived(token) },
             object : NostrPaymentListener.ErrorHandler {
-                override fun onError(message: String, t: Throwable?) {
-                    Log.e(TAG, "NostrPaymentListener error: $message", t)
-                    callback.onError(message ?: t?.message ?: "Unknown Nostr payment error")
-                }
-
                 override fun onPaymentFailure(message: String, t: Throwable?) {
                     Log.e(TAG, "NostrPaymentListener payment failure: $message", t)
                     callback.onPaymentFailure(message ?: t?.message ?: "Unknown Nostr payment failure")

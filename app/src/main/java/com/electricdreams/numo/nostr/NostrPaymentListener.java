@@ -45,7 +45,6 @@ public final class NostrPaymentListener {
     }
 
     public interface ErrorHandler {
-        void onError(String message, Throwable t);
         void onPaymentFailure(String message, Throwable t);
     }
 
@@ -77,13 +76,6 @@ public final class NostrPaymentListener {
             @Override
             public void onEvent(String relayUrl, NostrEvent event) {
                 handleEvent(relayUrl, event);
-            }
-
-            @Override
-            public void onError(String relayUrl, String message, Throwable t) {
-                if (errorHandler != null) {
-                    errorHandler.onError(message, t);
-                }
             }
         });
         client.start();
