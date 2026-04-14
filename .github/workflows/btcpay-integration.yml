@@ -22,9 +22,34 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
-      - name: Start BTCPay Server
+      - name: Start BTCPay + CDK mint stack
         working-directory: integration-tests/btcpay
         run: docker compose up -d
+
+      - name: Wait for Lightning channel setup
+        working-directory: integration-tests/btcpay
+        run: |
+          echo "Waiting for channel-setup to complete (up to 300 s)..."
+          if ! timeout 300 docker compose wait channel-setup; then
+            echo "channel-setup failed or timed out"
+            docker compose logs channel-setup
+            docker compose logs mint_lnd
+            docker compose logs lnd_bitcoin
+            exit 1
+          fi
+          echo "Channel setup complete."
+
+      - name: Wait for CDK mint to be ready
+        run: |
+          echo "Waiting for CDK mint at localhost:3338..."
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3338/v1/info >/dev/null 2>&1; then
+              echo "CDK mint ready."
+              curl -sf http://localhost:3338/v1/info | python3 -m json.tool
+              break
+            fi
+            sleep 3
+          done
 
       - name: Provision BTCPay Server
         working-directory: integration-tests/btcpay
@@ -33,10 +58,27 @@ jobs:
           ./provision.sh
           cp btcpay_env.properties ../../btcpay_env.properties
 
-      - name: Run Integration Tests
+      - name: Run BTCPay integration tests
         run: |
           chmod +x gradlew
-          ./gradlew testDebugUnitTest --tests "com.electricdreams.numo.core.payment.impl.BtcPayPaymentServiceIntegrationTest.*"
+          ./gradlew testDebugUnitTest \
+            --tests "com.electricdreams.numo.core.payment.impl.BtcPayPaymentServiceIntegrationTest.*" \
+            --no-daemon --console=plain
+
+      - name: Dump logs on failure
+        if: failure()
+        working-directory: integration-tests/btcpay
+        run: |
+          echo "=== cdk-mint ==="
+          docker compose logs cdk-mint | tail -100
+          echo "=== mint_lnd ==="
+          docker compose logs mint_lnd | tail -50
+          echo "=== customer_lnd ==="
+          docker compose logs customer_lnd | tail -50
+          echo "=== channel-setup ==="
+          docker compose logs channel-setup
+          echo "=== btcpayserver ==="
+          docker compose logs btcpayserver | tail -100
 
       - name: Cleanup
         if: always()

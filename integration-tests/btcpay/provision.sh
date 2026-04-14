@@ -126,17 +126,19 @@ else
     echo "  (Cashu plugin may not be installed)"
 fi
 
-# Enable Cashu payment method
-echo "Enabling Cashu payment method..."
+# Enable Cashu payment method and trust the local CDK mint
+# BTCPay reaches cdk-mint via Docker hostname; tests reach it on localhost:3338
+CDK_MINT_DOCKER_URL="http://cdk-mint:3338"
+echo "Enabling Cashu payment method (trusting $CDK_MINT_DOCKER_URL)..."
 RESPONSE=$(curl -s -w "\n%{http_code}" -X PUT \
     "$BASE_URL/api/v1/stores/$STORE_ID/cashu" \
     -H "Authorization: token $API_KEY" \
     -H "Content-Type: application/json" \
-    -d '{
-        "enabled": true,
-        "paymentModel": "TrustedMintsOnly",
-        "trustedMintsUrls": []
-    }')
+    -d "{
+        \"enabled\": true,
+        \"paymentModel\": \"TrustedMintsOnly\",
+        \"trustedMintsUrls\": [\"$CDK_MINT_DOCKER_URL\"]
+    }")
 HTTP_CODE=$(echo "$RESPONSE" | tail -1)
 BODY=$(echo "$RESPONSE" | sed '$d')
 
@@ -194,6 +196,8 @@ BTCPAY_SERVER_URL=$BASE_URL
 BTCPAY_API_KEY=$API_KEY
 BTCPAY_STORE_ID=$STORE_ID
 CASHU_ENABLED=$CASHU_ENABLED
+CDK_MINT_URL=http://localhost:3338
+CUSTOMER_LND_URL=http://localhost:35532
 EOF
 
 echo ""

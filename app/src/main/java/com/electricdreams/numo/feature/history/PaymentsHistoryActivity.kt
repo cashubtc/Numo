@@ -24,6 +24,7 @@ import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.data.model.HistoryEntry
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.databinding.ActivityHistoryBinding
@@ -381,15 +382,30 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Expire pending entries that can no longer be resolved:
+     * - Orphaned entries with no resume data
+     * - Entries older than [STALE_PENDING_THRESHOLD_MS]
+     * - BTCPay entries when BTCPay is disabled (they store the BTCPay invoice ID
+     *   in [PaymentHistoryEntry.lightningQuoteId] but have no lightningMintUrl/nostrNprofile;
+     *   without an active BTCPay connection these can never settle)
+     */
     private fun expireStaleBtcPayEntries() {
         val history = getPaymentHistory(this).toMutableList()
         val cutoff = System.currentTimeMillis() - STALE_PENDING_THRESHOLD_MS
+        val btcPayEnabled = PreferenceStore.app(this).getBoolean("btcpay_enabled", false)
+
         val stale = history.filter { entry ->
             entry.isPending() && (
                 // No resume data at all — always orphaned
                 (entry.lightningQuoteId == null && entry.nostrNprofile == null && entry.btcPayInvoiceId == null) ||
                 // Has resume data but payment is too old to still be valid
-                entry.date.time < cutoff
+                entry.date.time < cutoff ||
+                // BTCPay is disabled — pending BTCPay entries can never be resolved.
+                // BTCPay entries have lightningQuoteId (set to invoice ID) but no
+                // lightningMintUrl (local Lightning) or nostrNprofile (Nostr).
+                (!btcPayEnabled && entry.lightningQuoteId != null
+                    && entry.lightningMintUrl == null && entry.nostrNprofile == null)
             )
         }
         stale.forEach { markPaymentExpired(this, it.id) }
