@@ -86,10 +86,9 @@ class CurrencySettingsActivity : AppCompatActivity() {
         // Show cached or default immediately
         allCurrencies = Currency.getAvailableCurrencies()
             .filter { initialSupportedCodes.contains(it.currencyCode) }
-            .sortedBy { it.currencyCode }
             
-        adapter.submitList(allCurrencies, currencyManager.getCurrentCurrency())
-        scrollToSelectedCurrency(allCurrencies)
+        adapter.submitList(getFilteredCurrencies(searchInput.text.toString()), currencyManager.getCurrentCurrency())
+        // Remove scroll since it will be at index 0
 
         // Fetch latest supported currencies from Coinbase API
         lifecycleScope.launch(Dispatchers.IO) {
@@ -119,13 +118,9 @@ class CurrencySettingsActivity : AppCompatActivity() {
                         
                         allCurrencies = Currency.getAvailableCurrencies()
                             .filter { supported.contains(it.currencyCode) }
-                            .sortedBy { it.currencyCode }
                             
                         val currentList = getFilteredCurrencies(searchInput.text.toString())
                         adapter.submitList(currentList, currencyManager.getCurrentCurrency())
-                        if (searchInput.text.isEmpty()) {
-                            scrollToSelectedCurrency(currentList)
-                        }
                     }
                 }
                 connection.disconnect()
@@ -162,21 +157,26 @@ class CurrencySettingsActivity : AppCompatActivity() {
         }
     }
     
-    private fun scrollToSelectedCurrency(currencies: List<Currency>) {
-        val currentCode = currencyManager.getCurrentCurrency()
-        val index = currencies.indexOfFirst { it.currencyCode == currentCode }
-        if (index != -1) {
-            recyclerView.scrollToPosition(index)
-        }
-    }
-
     private fun getFilteredCurrencies(query: String): List<Currency> {
-        if (query.isEmpty()) return allCurrencies
+        val currentCode = currencyManager.getCurrentCurrency()
         
-        val lowerQuery = query.lowercase()
-        return allCurrencies.filter {
-            it.currencyCode.lowercase().contains(lowerQuery) ||
-            it.getDisplayName(java.util.Locale.getDefault()).lowercase().contains(lowerQuery)
+        val filtered = if (query.isEmpty()) {
+            allCurrencies
+        } else {
+            val lowerQuery = query.lowercase()
+            allCurrencies.filter {
+                it.currencyCode.lowercase().contains(lowerQuery) ||
+                it.getDisplayName(java.util.Locale.getDefault()).lowercase().contains(lowerQuery)
+            }
+        }
+        
+        // Sort alphabetically, but always pin the selected currency to the very top
+        return filtered.sortedWith { c1, c2 ->
+            when {
+                c1.currencyCode == currentCode && c2.currencyCode != currentCode -> -1
+                c2.currencyCode == currentCode && c1.currencyCode != currentCode -> 1
+                else -> c1.currencyCode.compareTo(c2.currencyCode)
+            }
         }
     }
 }
