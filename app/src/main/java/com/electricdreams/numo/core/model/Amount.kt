@@ -44,26 +44,8 @@ data class Amount(
          * This determines decimal separator conventions.
          */
         fun getLocale(): Locale {
-            if (isBtc) return Locale.US
-            
-            // Fast paths for common currencies to match old behavior perfectly
-            return when (name) {
-                "USD" -> Locale.US          // Period decimal: $4.20
-                "EUR" -> Locale.GERMANY     // Comma decimal: €4,20
-                "GBP" -> Locale.UK          // Period decimal: £4.20
-                "JPY" -> Locale.JAPAN       // No decimals: ¥420
-                "DKK" -> Locale("da", "DK") // Comma decimal: DKK 100,00
-                "SEK" -> Locale("sv", "SE") // Comma decimal: SEK 100,00
-                "NOK" -> Locale("nb", "NO") // Comma decimal: NOK 100,00
-                "KRW" -> Locale.KOREA       // No decimals: ₩101,816,000
-                else -> localeCache.getOrPut(name) {
-                    // Try to find a matching locale for this currency
-                    val availableLocales = Locale.getAvailableLocales()
-                    availableLocales.firstOrNull { locale ->
-                        runCatching { JavaCurrency.getInstance(locale).currencyCode == name }.getOrDefault(false)
-                    } ?: Locale.US // Fallback to US format
-                }
-            }
+            if (isBtc) return Locale.US // BTC formatting remains consistent (comma thousands, period decimals)
+            return Locale.getDefault() // Format fiat according to the user's system preferences
         }
 
         override fun equals(other: Any?): Boolean {
@@ -97,7 +79,6 @@ data class Amount(
             val KRW = Currency("KRW", "₩")
             
             private val cache = java.util.concurrent.ConcurrentHashMap<String, Currency>()
-            private val localeCache = java.util.concurrent.ConcurrentHashMap<String, Locale>()
             
             private val nativeSymbolCache by lazy {
                 val map = mutableMapOf<String, String>()
