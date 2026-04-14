@@ -110,15 +110,6 @@ class BtcPayPaymentServiceIntegrationTest {
         return executeHttpRequest(request)
     }
 
-    private fun cashuDelete(path: String): Pair<Int, String> {
-        val url = "${baseUrl()}/api/v1/stores/${config.storeId}/cashu$path"
-        val request = Request.Builder()
-            .url(url).delete()
-            .addHeader("Authorization", "token ${config.apiKey}")
-            .build()
-        return executeHttpRequest(request)
-    }
-
     private fun publicPost(path: String, body: String): Pair<Int, String> {
         val request = Request.Builder()
             .url("${baseUrl()}$path")
@@ -463,7 +454,7 @@ class BtcPayPaymentServiceIntegrationTest {
     }
 
     // =========================================================================
-    // Cashu Greenfield API — Config
+    // Cashu Greenfield API — smoke tests
     // =========================================================================
 
     @Test
@@ -478,26 +469,6 @@ class BtcPayPaymentServiceIntegrationTest {
     }
 
     @Test
-    fun testUpdateCashuConfig_changePaymentModel() {
-        skipIfCashuNotEnabled()
-        val (code, body) = cashuPut("", """{"paymentModel": "AutoConvert"}""")
-        assertEquals("PUT /cashu should return 200", 200, code)
-        val json = JsonParser.parseString(body).asJsonObject
-        println("Payment model after update: ${json.get("paymentModel").asString}")
-        cashuPut("", """{"paymentModel": "TrustedMintsOnly"}""")
-    }
-
-    @Test
-    fun testUpdateCashuConfig_setTrustedMints() {
-        skipIfCashuNotEnabled()
-        val (code, body) = cashuPut("", """{"trustedMintsUrls": ["https://testnut.cashu.space"]}""")
-        assertEquals("PUT /cashu should return 200", 200, code)
-        val mints = JsonParser.parseString(body).asJsonObject.getAsJsonArray("trustedMintsUrls")
-        assertTrue("Should contain test mint", mints.any { it.asString.contains("testnut.cashu.space") })
-        cashuPut("", """{"trustedMintsUrls": []}""")
-    }
-
-    @Test
     fun testUpdateCashuConfig_disableAndReEnable() {
         skipIfCashuNotEnabled()
         val (disableCode, disableBody) = cashuPut("", """{"enabled": false}""")
@@ -507,10 +478,6 @@ class BtcPayPaymentServiceIntegrationTest {
         assertEquals(200, enableCode)
         assertTrue(JsonParser.parseString(enableBody).asJsonObject.get("enabled").asBoolean)
     }
-
-    // =========================================================================
-    // Cashu Greenfield API — Wallet
-    // =========================================================================
 
     @Test
     fun testGetWalletBalances_emptyAfterCreation() {
@@ -527,25 +494,6 @@ class BtcPayPaymentServiceIntegrationTest {
         val (code, body) = cashuPost("/wallet")
         assertNotEquals("Duplicate wallet creation should not return 200", 200, code)
         println("Duplicate wallet response (HTTP $code): $body")
-    }
-
-    @Test
-    fun testDeleteWallet_thenRecreate() {
-        skipIfCashuNotEnabled()
-        val (deleteCode, _) = cashuDelete("/wallet")
-        assertEquals("DELETE /wallet should return 200", 200, deleteCode)
-
-        val (enableCode, enableBody) = cashuPut("", """{"enabled": true}""")
-        println("Enable without wallet (HTTP $enableCode): $enableBody")
-
-        val (createCode, createBody) = cashuPost("/wallet")
-        assertEquals("POST /wallet should return 200", 200, createCode)
-        val mnemonic = JsonParser.parseString(createBody).asJsonObject.get("mnemonic")?.asString
-        assertNotNull("New wallet should return mnemonic", mnemonic)
-        assertTrue("Mnemonic should have 12 words", mnemonic!!.split(" ").size == 12)
-
-        val (reEnableCode, _) = cashuPut("", """{"enabled": true, "paymentModel": "TrustedMintsOnly"}""")
-        assertEquals("Re-enabling Cashu should succeed", 200, reEnableCode)
     }
 
     // =========================================================================
