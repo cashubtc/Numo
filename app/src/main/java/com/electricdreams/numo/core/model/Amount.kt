@@ -56,7 +56,7 @@ data class Amount(
                 "SEK" -> Locale("sv", "SE") // Comma decimal: SEK 100,00
                 "NOK" -> Locale("nb", "NO") // Comma decimal: NOK 100,00
                 "KRW" -> Locale.KOREA       // No decimals: ₩101,816,000
-                else -> {
+                else -> localeCache.getOrPut(name) {
                     // Try to find a matching locale for this currency
                     val availableLocales = Locale.getAvailableLocales()
                     availableLocales.firstOrNull { locale ->
@@ -97,6 +97,7 @@ data class Amount(
             val KRW = Currency("KRW", "₩")
             
             private val cache = java.util.concurrent.ConcurrentHashMap<String, Currency>()
+            private val localeCache = java.util.concurrent.ConcurrentHashMap<String, Locale>()
             
             private val nativeSymbolCache by lazy {
                 val map = mutableMapOf<String, String>()
