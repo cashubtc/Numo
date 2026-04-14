@@ -35,7 +35,6 @@ public final class NostrWebSocketClient {
 
     public interface EventHandler {
         void onEvent(String relayUrl, NostrEvent event);
-        void onError(String relayUrl, String message, Throwable t);
     }
 
     private static final String TAG = "NostrWebSocketClient";
@@ -148,9 +147,6 @@ public final class NostrWebSocketClient {
             public void onFailure(WebSocket webSocket, Throwable t, Response response) {
                 Log.e(TAG, "WebSocket failure: " + relayUrl + " error=" + t.getMessage(), t);
                 state.webSocket = null;
-                if (handler != null) {
-                    handler.onError(relayUrl, "websocket failure", t);
-                }
                 scheduleReconnect(relayUrl, state);
             }
         });
@@ -213,9 +209,6 @@ public final class NostrWebSocketClient {
             }
         } catch (Exception e) {
             Log.e(TAG, "Error parsing message from " + relayUrl + ": " + e.getMessage(), e);
-            if (handler != null) {
-                handler.onError(relayUrl, "parse error", e);
-            }
         }
     }
 

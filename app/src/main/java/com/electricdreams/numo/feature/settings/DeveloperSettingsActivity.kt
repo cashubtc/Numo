@@ -7,6 +7,8 @@ import com.electricdreams.numo.R
 import com.electricdreams.numo.databinding.ActivityDeveloperSettingsBinding
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.feature.onboarding.OnboardingActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 class DeveloperSettingsActivity : AppCompatActivity() {
 
@@ -16,6 +18,12 @@ class DeveloperSettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityDeveloperSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, insets.top, 0, insets.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
 
         binding.backButton?.setOnClickListener { finish() }
 

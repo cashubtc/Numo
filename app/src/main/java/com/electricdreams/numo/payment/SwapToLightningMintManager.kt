@@ -48,7 +48,6 @@ object SwapToLightningMintManager {
      */
     sealed class SwapResult {
         data class Success(
-            val finalToken: String,
             val lightningMintUrl: String?,
             val amountSats: Long
         ) : SwapResult()
@@ -74,7 +73,7 @@ object SwapToLightningMintManager {
      *
      * @param appContext Android application context for accessing MintManager
      *                   and updating payment history.
-     * @param cashuToken The encoded Cashu token string presented by the payer.
+     * @param proofs The Cashu proofs presented by the payer.
      * @param expectedAmount Amount in satoshis that the POS expects to receive
      *                       for this payment (excluding tip).
      * @param unknownMintUrl The mint URL extracted from the token which is not
@@ -83,7 +82,7 @@ object SwapToLightningMintManager {
      */
     suspend fun swapFromUnknownMint(
         appContext: android.content.Context,
-        cashuToken: String,
+        proofs: List<org.cashudevkit.Proof>,
         expectedAmount: Long,
         unknownMintUrl: String,
         paymentContext: PaymentContext
@@ -95,7 +94,7 @@ object SwapToLightningMintManager {
                 "expectedAmount=$expectedAmount, " +
                 "paymentContext.paymentId=${paymentContext.paymentId}, " +
                 "paymentContext.amountSats=${paymentContext.amountSats}, " +
-                "cashuTokenLength=${cashuToken.length}"
+                "proofsCount=${proofs.size}"
         )
 
         // 1) Create a temporary single-mint Wallet and receive the payer's
@@ -120,11 +119,6 @@ object SwapToLightningMintManager {
             }
 
         Log.d(TAG, "swapFromUnknownMint: main wallet for Lightning mint is available")
-
-        val cdkToken = org.cashudevkit.Token.decode(cashuToken)
-
-        val proofs = cdkToken.proofs(keysetsInfos)
-        Log.d(TAG, "swapFromUnknownMint: decoded Cashu token with ${proofs.size} proofs")
 
         // We request a mint quote, just to have the bolt11 request to feed to the melt quote request
         // Then, we take the fee estimate from the melt quote response and
@@ -206,6 +200,13 @@ object SwapToLightningMintManager {
             "swapFromUnknownMint: adjusted Lightning amount=$lightningAmount after applying " +
                 "minFeeOverheadCeil=$minOverhead and feeReserveEstimate=$feeReserveEstimate"
         )
+
+        if (lightningAmount <= 0L) {
+            val msg = "Adjusted lightning amount is non-positive after fees (overhead=$minOverhead, feeReserve=$feeReserveEstimate, received=${paymentContext.amountSats})"
+            Log.e(TAG, msg)
+            try { tempWallet.close() } catch (_: Throwable) {}
+            return@withContext SwapResult.Failure(msg)
+        }
 
         Log.d(
             TAG,
@@ -389,7 +390,6 @@ object SwapToLightningMintManager {
         )
 
         return@withContext SwapResult.Success(
-            finalToken = cashuToken,
             lightningMintUrl = lightningMintUrl,
             amountSats = expectedAmount
         )

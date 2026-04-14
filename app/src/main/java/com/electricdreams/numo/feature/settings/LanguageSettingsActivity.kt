@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import com.electricdreams.numo.R
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 class LanguageSettingsActivity : AppCompatActivity() {
 
@@ -22,6 +24,12 @@ class LanguageSettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_language_settings)
+
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, insets.top, 0, insets.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
 
         findViewById<View?>(R.id.back_button)?.setOnClickListener { finish() }
 

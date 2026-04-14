@@ -13,13 +13,12 @@ import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.MintUrl
 import org.cashudevkit.Wallet
 import org.cashudevkit.WalletConfig
-import org.cashudevkit.WalletDatabaseImpl
-import org.cashudevkit.NoPointer
-import org.cashudevkit.WalletSqliteDatabase
 import org.cashudevkit.WalletRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.cashudevkit.WalletSqliteDatabase
+import org.cashudevkit.WalletStore
 import org.cashudevkit.generateMnemonic
 
 /**
@@ -45,7 +44,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     @Volatile
-    private var database: WalletSqliteDatabase? = null
+    private var database: WalletStore? = null
 
     @Volatile
     private var wallet: WalletRepository? = null
@@ -67,6 +66,25 @@ object CashuWalletManager : MintManager.MintChangeListener {
         val initialMints = mintManager.getAllowedMints()
         scope.launch {
             rebuildWallet(initialMints)
+        }
+    }
+
+    /**
+     * Wipes the wallet database completely.
+     * Caution: This deletes all existing eCash proofs.
+     */
+    fun wipeDatabase(context: Context) {
+        closeResources()
+        val appCtx = context.applicationContext
+        val deleted = appCtx.deleteDatabase(DB_FILE_NAME)
+        if (deleted) {
+            Log.d(TAG, "Deleted existing wallet database via deleteDatabase")
+        } else {
+            val dbFile = appCtx.getDatabasePath(DB_FILE_NAME)
+            if (dbFile.exists()) {
+                dbFile.delete()
+                Log.d(TAG, "Deleted existing wallet database via file deletion")
+            }
         }
     }
 
@@ -114,21 +132,16 @@ object CashuWalletManager : MintManager.MintChangeListener {
             balancesBefore[mintUrl] = getBalanceForMint(mintUrl)
         }
 
-        // Close existing wallet
-        closeResources()
-
         // Delete existing database to start fresh
-        val dbFile = appContext.getDatabasePath(DB_FILE_NAME)
-        if (dbFile.exists()) {
-            dbFile.delete()
-            Log.d(TAG, "Deleted existing wallet database")
-        }
+        wipeDatabase(appContext)
+
         // Save new mnemonic
         val prefs = PreferenceStore.wallet(appContext)
         prefs.putString(KEY_MNEMONIC, newMnemonic)
         Log.i(TAG, "Saved new mnemonic for restore")
 
         // Recreate database
+        val dbFile = appContext.getDatabasePath(DB_FILE_NAME)
         dbFile.apply {
             parentFile?.let { parent ->
                 if (!parent.exists()) {
@@ -136,7 +149,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
                 }
             }
         }
-        val db = WalletSqliteDatabase(dbFile.absolutePath)
+        val db = WalletStore.Sqlite(dbFile.absolutePath)
 
         // Create new wallet with restored mnemonic
         val newWallet = WalletRepository(newMnemonic, db)
@@ -169,7 +182,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
             }
         }
 
-        database = db
+        //database = db
         wallet = newWallet
             _walletState.value = WalletState.READY
 
@@ -206,6 +219,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
         // Use an in-memory SQLite database for temporary operations so it does
         // not interfere with the persistent wallet database.
         val tempDb = WalletSqliteDatabase.newInMemory()
+        val tempDbStore = WalletStore.Custom(tempDb)
 
         val config = WalletConfig(targetProofCount = 10u)
 
@@ -213,7 +227,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
             unknownMintUrl,
             CurrencyUnit.Sat,
             tempMnemonic,
-            tempDb,
+            tempDbStore,
             config
         )
     }
@@ -230,7 +244,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
     fun getWallet(): WalletRepository? = wallet
 
     /** Current database instance, mostly for debugging or future use. */
-    fun getDatabase(): WalletSqliteDatabase? = database
+    fun getDatabase(): WalletStore? = database
 
     /**
      * Get the balance for a specific mint in satoshis.
@@ -426,7 +440,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
                     }
                 }
             }
-            val db = WalletSqliteDatabase(dbFile.absolutePath)
+            val db = WalletStore.Sqlite(dbFile.absolutePath)
 
             // 2) Load or create the mnemonic (seed phrase).
             val prefs = PreferenceStore.wallet(appContext)
@@ -476,7 +490,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
         }
 
         try {
-            database?.close()
+            database?.destroy()
         } catch (t: Throwable) {
             Log.w(TAG, "Error closing database", t)
         } finally {

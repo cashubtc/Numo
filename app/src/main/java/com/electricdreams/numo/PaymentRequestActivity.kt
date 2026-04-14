@@ -164,6 +164,13 @@ class PaymentRequestActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_request)
+        
+        // Apply window insets to handle edge-to-edge correctly (especially for API 35+)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(0, insets.top, 0, insets.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
 
         // Initialize views
         unifiedQrImageView = findViewById(R.id.unified_qr)
@@ -713,16 +720,20 @@ class PaymentRequestActivity : AppCompatActivity() {
                 }
             }
 
+            override fun onPaymentFailure(message: String) {
+                Log.e(TAG, "Nostr payment failure: $message")
+                // Atomically update Nostr identity ONLY on payment failure so retries won't hit the same event
+                nostrHandler?.rotateKeys(pendingPaymentId)
+                runOnUiThread {
+                    handlePaymentError("Nostr payment failed: $message")
+                }
+            }
+
             override fun onError(message: String) {
                 Log.e(TAG, "Nostr payment error: $message")
-
-                // Show inline status and delegate to unified failure handling
-                statusText.text = getString(R.string.payment_request_status_error_generic, message)
-
-                // Treat this as a terminal failure for this payment request
-                // and show the global payment failure screen so the user can
-                // explicitly retry the latest pending payment.
-                handlePaymentError("Nostr payment failed: $message")
+                runOnUiThread {
+                    handlePaymentError("Nostr payment error: $message")
+                }
             }
         }
 
@@ -969,7 +980,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Extract mint URL from token
         val mintUrl = try {
-            com.cashujdk.nut00.Token.decode(token).mint
+            org.cashudevkit.Token.decode(token).mintUrl().url
         } catch (e: Exception) {
             null
         }
