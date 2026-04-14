@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_bg_light">
+    android:background="@color/numo_navy">
 
     <!-- ======================== -->
     <!-- STEP 1: WELCOME SCREEN   -->
@@ -23,19 +23,17 @@
             android:layout_height="match_parent"
             android:background="@android:color/white" />
 
-        <!-- Navy curve - hidden in new design, kept for ID compatibility -->
-        <ImageView
-            android:id="@+id/welcome_navy_curve"
+        <!-- Navy overlay for circular reveal transition -->
+        <View
+            android:id="@+id/welcome_circular_reveal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/bg_welcome_curve"
-            android:scaleType="fitXY"
-            android:visibility="gone"
-            android:alpha="0" />
+            android:background="@color/numo_navy"
+            android:visibility="invisible" />
 
-        <!-- Emoji container (BEFORE content so emojis render behind text) -->
+        <!-- Scrolling Items container (rendered behind text) -->
         <FrameLayout
-            android:id="@+id/emoji_burst_container"
+            android:id="@+id/scrolling_items_container"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:clipChildren="false"
@@ -54,14 +52,77 @@
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
-            <!-- Numo Wordmark (white vector, tinted navy by animator initially) -->
-            <ImageView
-                android:id="@+id/welcome_wordmark"
+            <!-- Numo Wordmark (per-letter white + green overlay for color fill animation) -->
+            <FrameLayout
                 android:layout_width="200dp"
                 android:layout_height="88dp"
-                android:src="@drawable/ic_numo_wordmark_white"
-                android:contentDescription="@string/app_name"
-                android:alpha="0" />
+                android:clipChildren="false"
+                android:clipToPadding="false">
+
+                <!-- Per-letter wordmark views (stagger-animated individually) -->
+                <LinearLayout
+                    android:id="@+id/welcome_wordmark_letters"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
+
+                    <ImageView
+                        android:id="@+id/welcome_letter_n"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="41.4"
+                        android:src="@drawable/ic_numo_letter_n"
+                        android:scaleType="fitCenter"
+                        android:contentDescription="@string/app_name"
+                        android:alpha="0" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="6.93" />
+
+                    <ImageView
+                        android:id="@+id/welcome_letter_u"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="39.36"
+                        android:src="@drawable/ic_numo_letter_u"
+                        android:scaleType="fitCenter"
+                        android:alpha="0" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="7.0" />
+
+                    <ImageView
+                        android:id="@+id/welcome_letter_m"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="54.72"
+                        android:src="@drawable/ic_numo_letter_m"
+                        android:scaleType="fitCenter"
+                        android:alpha="0" />
+
+                    <Space
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="6.49" />
+
+                    <ImageView
+                        android:id="@+id/welcome_letter_o"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="40.08"
+                        android:src="@drawable/ic_numo_letter_o"
+                        android:scaleType="fitCenter"
+                        android:alpha="0" />
+
+                </LinearLayout>
+
+            </FrameLayout>
 
             <!-- Tagline (color set by animator: starts navy, transitions to white) -->
             <TextView
@@ -125,171 +186,288 @@
         android:id="@+id/choose_path_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/numo_navy"
         android:visibility="gone">
 
-        <LinearLayout
+        <!-- Scrollable content + teaser -->
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:paddingHorizontal="24dp">
+            android:fillViewport="true"
+            android:scrollbars="none">
 
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.15" />
-
-            <!-- Title -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/onboarding_setup_title"
-                android:textSize="28sp"
-                android:textColor="@color/color_text_primary"
-                android:fontFamily="sans-serif-medium"
-                android:gravity="center" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="@string/onboarding_setup_subtitle"
-                android:textSize="16sp"
-                android:textColor="@color/color_text_secondary"
-                android:gravity="center" />
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.15" />
-
-            <!-- Create New Wallet Card -->
             <LinearLayout
-                android:id="@+id/create_wallet_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_onboarding_option_card"
-                android:padding="24dp"
-                android:clickable="true"
-                android:focusable="true">
+                android:orientation="vertical">
 
+                <!-- Setup content -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:orientation="vertical"
+                    android:paddingHorizontal="24dp"
+                    android:paddingTop="48dp">
 
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_add_circle"
-                        android:contentDescription="@string/onboarding_create_wallet_title"
-                        app:tint="@color/color_success_green" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <!-- Title -->
+                    <TextView
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="16dp">
+                        android:text="@string/onboarding_setup_title"
+                        android:textSize="32sp"
+                        android:textColor="#FFFFFF"
+                        android:fontFamily="sans-serif-black"
+                        android:textAllCaps="true"
+                        android:letterSpacing="-0.03"
+                        android:gravity="center"
+                        android:lineSpacingMultiplier="1.05" />
+
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp" />
+
+                    <!-- Create New Wallet (primary CTA) -->
+                    <LinearLayout
+                        android:id="@+id/create_wallet_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="@drawable/bg_button_white">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/onboarding_create_wallet_title"
-                            android:textSize="17sp"
-                            android:textColor="@color/color_text_primary"
+                            android:textSize="16sp"
+                            android:textColor="#0A2540"
                             android:fontFamily="sans-serif-medium" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="@string/onboarding_create_wallet_subtitle"
-                            android:textSize="14sp"
-                            android:textColor="@color/color_text_secondary" />
 
                     </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="@color/color_text_tertiary" />
+                    <Space
+                        android:layout_width="match_parent"
+                        android:layout_height="24dp" />
 
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="16dp" />
-
-            <!-- Restore Wallet Card -->
-            <LinearLayout
-                android:id="@+id/restore_wallet_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_onboarding_option_card"
-                android:padding="24dp"
-                android:clickable="true"
-                android:focusable="true">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_restore"
-                        android:contentDescription="@string/onboarding_restore_wallet_title"
-                        app:tint="@color/color_accent_blue" />
-
+                    <!-- Restore from Backup (secondary action) -->
                     <LinearLayout
-                        android:layout_width="0dp"
+                        android:id="@+id/restore_wallet_button"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:layout_marginStart="16dp">
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:paddingVertical="12dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/onboarding_restore_wallet_title"
-                            android:textSize="17sp"
-                            android:textColor="@color/color_text_primary"
-                            android:fontFamily="sans-serif-medium" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="@string/onboarding_restore_wallet_subtitle"
                             android:textSize="14sp"
-                            android:textColor="@color/color_text_secondary" />
+                            android:textColor="#80FFFFFF"
+                            android:fontFamily="sans-serif" />
 
                     </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_chevron_right"
-                        app:tint="@color/color_text_tertiary" />
-
                 </LinearLayout>
+
+                <!-- Flexible spacer pushes teaser to bottom on large screens -->
+                <Space
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <!-- Teaser card -->
+                <FrameLayout
+                    android:id="@+id/teaser_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="16dp"
+                    android:paddingBottom="34dp"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/numo_fluorescent_green">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:paddingTop="20dp"
+                                android:paddingHorizontal="24dp"
+                                android:paddingBottom="12dp">
+
+                                <!-- Teaser tagline -->
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/explainer_teaser_title"
+                                    android:textSize="24sp"
+                                    android:fontFamily="sans-serif-black"
+                                    android:textColor="@color/numo_navy"
+                                    android:textAllCaps="true"
+                                    android:letterSpacing="-0.03"
+                                    android:lineSpacingMultiplier="1.05" />
+
+                            </LinearLayout>
+
+                            <ImageView
+                                android:id="@+id/teaser_illustration"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:adjustViewBounds="true"
+                                android:src="@drawable/img_tap_to_pay"
+                                android:scaleType="fitCenter"
+                                android:contentDescription="@string/explainer_image_placeholder" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                </FrameLayout>
 
             </LinearLayout>
 
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.7" />
+        </ScrollView>
 
-        </LinearLayout>
+        <!-- Explainer overlay -->
+        <FrameLayout
+            android:id="@+id/explainer_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone">
+
+            <!-- Backdrop -->
+            <View
+                android:id="@+id/explainer_backdrop"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#80000000"
+                android:alpha="0" />
+
+            <!-- Sheet -->
+            <LinearLayout
+                android:id="@+id/explainer_sheet"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:background="@color/numo_navy"
+                android:translationY="2000dp">
+
+                <!-- Close button -->
+                <FrameLayout
+                    android:id="@+id/explainer_close_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="20dp">
+
+                    <ImageView
+                        android:id="@+id/explainer_close_btn"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_close"
+                        app:tint="#FFFFFF"
+                        android:alpha="0.7"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:contentDescription="@string/navigation_drawer_close" />
+
+                </FrameLayout>
+
+                <!-- Slides ViewPager -->
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/explainer_view_pager"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical" />
+
+                <!-- Swipe hint chevrons and Create Wallet Button -->
+                <FrameLayout
+                    android:id="@+id/explainer_bottom_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <!-- Swipe hint chevrons -->
+                    <LinearLayout
+                        android:id="@+id/chevron_hint_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal">
+
+                        <ImageView
+                            android:id="@+id/chevron_hint_1"
+                            android:layout_width="24dp"
+                            android:layout_height="14dp"
+                            android:layout_marginTop="16dp"
+                            android:src="@drawable/ic_chevron_down_hint"
+                            android:alpha="0.12"
+                            android:contentDescription="@null" />
+
+                        <ImageView
+                            android:id="@+id/chevron_hint_2"
+                            android:layout_width="24dp"
+                            android:layout_height="14dp"
+                            android:layout_marginTop="-6dp"
+                            android:src="@drawable/ic_chevron_down_hint"
+                            android:alpha="0.12"
+                            android:contentDescription="@null" />
+
+                        <ImageView
+                            android:id="@+id/chevron_hint_3"
+                            android:layout_width="24dp"
+                            android:layout_height="14dp"
+                            android:layout_marginTop="-6dp"
+                            android:layout_marginBottom="16dp"
+                            android:src="@drawable/ic_chevron_down_hint"
+                            android:alpha="0.12"
+                            android:contentDescription="@null" />
+
+                    </LinearLayout>
+
+                    <!-- Create Wallet Button (Explainer) -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/explainer_create_wallet_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_gravity="center"
+                        android:layout_marginHorizontal="24dp"
+                        android:text="@string/onboarding_create_wallet_title"
+                        android:textSize="17sp"
+                        android:textColor="@color/button_text_onboarding"
+                        android:textAllCaps="false"
+                        android:background="@drawable/bg_button_white"
+                        android:stateListAnimator="@null"
+                        app:backgroundTint="@null"
+                        app:cornerRadius="28dp"
+                        app:elevation="0dp"
+                        android:alpha="0"
+                        android:visibility="invisible" />
+
+                </FrameLayout>
+
+            </LinearLayout>
+
+        </FrameLayout>
+
     </FrameLayout>
 
     <!-- ======================== -->
@@ -306,39 +484,32 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <!-- Top Bar -->
-            <LinearLayout
+            <!-- Back button -->
+            <ImageView
+                android:id="@+id/seed_back_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:padding="12dp"
+                android:src="@drawable/ic_chevron_back"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="#99FFFFFF"
+                android:contentDescription="@string/onboarding_seed_toolbar_back" />
+
+            <!-- Title -->
+            <TextView
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="8dp">
-
-                <ImageView
-                    android:id="@+id/seed_back_button"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:padding="12dp"
-                    android:src="@drawable/ic_arrow_back"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    app:tint="@color/color_text_primary"
-                    android:contentDescription="@string/onboarding_seed_toolbar_back" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/onboarding_seed_toolbar_title"
-                    android:textSize="17sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium"
-                    android:gravity="center" />
-
-                <Space
-                    android:layout_width="48dp"
-                    android:layout_height="48dp" />
-
-            </LinearLayout>
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="8dp"
+                android:text="@string/onboarding_seed_toolbar_title"
+                android:textSize="32sp"
+                android:textColor="#FFFFFF"
+                android:fontFamily="sans-serif-black"
+                android:textAllCaps="true"
+                android:letterSpacing="-0.03"
+                android:lineSpacingMultiplier="1.05" />
 
             <ScrollView
                 android:layout_width="match_parent"
@@ -348,10 +519,10 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:orientation="vertical"
                     android:paddingHorizontal="20dp"
-                    android:paddingBottom="24dp">
+                    android:paddingBottom="32dp">
 
                     <!-- Instructions -->
                     <TextView
@@ -360,17 +531,8 @@
                         android:layout_marginTop="16dp"
                         android:text="@string/onboarding_seed_instruction_title"
                         android:textSize="24sp"
-                        android:textColor="@color/color_text_primary"
+                        android:textColor="#FFFFFF"
                         android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/onboarding_seed_instruction_body"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_secondary"
-                        android:lineHeight="20sp" />
 
                     <!-- Seed Input Grid -->
                     <androidx.gridlayout.widget.GridLayout
@@ -381,77 +543,48 @@
                         app:columnCount="2"
                         app:rowCount="6" />
 
-                    <!-- Paste Button -->
+                    <!-- Spacer pushes buttons to bottom when space allows -->
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <!-- Paste Button (tertiary) -->
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/paste_button"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="44dp"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="16dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="24dp"
                         android:text="@string/onboarding_seed_paste_button"
-                        android:textSize="14sp"
+                        android:textSize="17sp"
+                        android:textColor="#FFFFFF"
                         android:textAllCaps="false"
-                        app:strokeColor="@color/color_divider"
-                        app:strokeWidth="1dp"
-                        app:cornerRadius="22dp" />
+                        android:background="@drawable/bg_button_tertiary_dark"
+                        android:stateListAnimator="@null"
+                        app:backgroundTint="@null"
+                        app:cornerRadius="28dp"
+                        app:elevation="0dp" />
 
-                    <!-- Validation Status -->
-                    <LinearLayout
-                        android:id="@+id/seed_validation_status"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginTop="16dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:visibility="gone">
-
-                        <ImageView
-                            android:id="@+id/seed_validation_icon"
-                            android:layout_width="18dp"
-                            android:layout_height="18dp"
-                            android:src="@drawable/ic_check"
-                            app:tint="@color/color_success_green" />
-
-                        <TextView
-                            android:id="@+id/seed_validation_text"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:text="@string/onboarding_seed_validation_ready"
-                            android:textSize="14sp"
-                            android:textColor="@color/color_success_green" />
-
-                    </LinearLayout>
+                    <!-- Continue Button (primary) -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/seed_continue_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/onboarding_seed_continue"
+                        android:textSize="17sp"
+                        android:textColor="@color/button_text_onboarding"
+                        android:textAllCaps="false"
+                        android:enabled="false"
+                        android:alpha="0.5"
+                        android:background="@drawable/bg_button_white"
+                        android:stateListAnimator="@null"
+                        app:backgroundTint="@null"
+                        app:cornerRadius="28dp"
+                        app:elevation="0dp" />
 
                 </LinearLayout>
             </ScrollView>
-
-            <!-- Continue Button - Fixed at bottom -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="32dp"
-                android:background="@color/color_bg_light">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/seed_continue_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:text="@string/onboarding_seed_continue"
-                    android:textSize="17sp"
-                    android:textColor="#FFFFFF"
-                    android:textAllCaps="false"
-                    android:enabled="false"
-                    android:alpha="0.5"
-                    app:cornerRadius="28dp"
-                    app:backgroundTint="#000000" />
-
-            </LinearLayout>
         </LinearLayout>
     </FrameLayout>
 
@@ -475,7 +608,7 @@
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:indeterminate="true"
-                android:indeterminateTint="@color/color_text_primary" />
+                android:indeterminateTint="@color/numo_fluorescent_green" />
 
             <TextView
                 android:id="@+id/generating_status"
@@ -484,16 +617,7 @@
                 android:layout_marginTop="24dp"
                 android:text="@string/onboarding_status_creating_wallet"
                 android:textSize="17sp"
-                android:textColor="@color/color_text_primary"
-                android:gravity="center" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/onboarding_generating_hint"
-                android:textSize="14sp"
-                android:textColor="@color/color_text_secondary"
+                android:textColor="#FFFFFF"
                 android:gravity="center" />
 
         </LinearLayout>
@@ -519,25 +643,16 @@
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:indeterminate="true"
-                android:indeterminateTint="@color/color_text_primary" />
+                android:indeterminateTint="@color/numo_fluorescent_green" />
 
             <TextView
                 android:id="@+id/fetching_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="@string/onboarding_fetching_searching_backup"
+                android:text="@string/onboarding_status_restoring_wallet"
                 android:textSize="17sp"
-                android:textColor="@color/color_text_primary"
-                android:gravity="center" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/onboarding_fetching_checking_relays"
-                android:textSize="14sp"
-                android:textColor="@color/color_text_secondary"
+                android:textColor="#FFFFFF"
                 android:gravity="center" />
 
         </LinearLayout>
@@ -557,177 +672,117 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <!-- Top Bar -->
-            <LinearLayout
+            <!-- Back button -->
+            <ImageView
+                android:id="@+id/mints_back_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:padding="12dp"
+                android:src="@drawable/ic_chevron_back"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="#99FFFFFF"
+                android:contentDescription="@string/onboarding_mints_toolbar_back" />
+
+            <!-- Title -->
+            <TextView
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="24dp"
+                android:paddingTop="8dp"
+                android:text="@string/onboarding_mints_toolbar_title"
+                android:textSize="32sp"
+                android:textColor="#FFFFFF"
+                android:fontFamily="sans-serif-black"
+                android:textAllCaps="true"
+                android:letterSpacing="-0.03"
+                android:lineSpacingMultiplier="1.05" />
+
+            <!-- Backup Status Card -->
+            <LinearLayout
+                android:id="@+id/backup_status_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:background="@color/numo_navy"
+                android:padding="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginHorizontal="20dp"
                 android:gravity="center_vertical"
-                android:paddingHorizontal="8dp">
+                android:visibility="gone">
 
                 <ImageView
-                    android:id="@+id/mints_back_button"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:padding="12dp"
-                    android:src="@drawable/ic_arrow_back"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    app:tint="@color/color_text_primary"
-                    android:contentDescription="@string/onboarding_mints_toolbar_back" />
+                    android:id="@+id/backup_status_icon"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_cloud_done"
+                    app:tint="@color/numo_fluorescent_green" />
 
-                <TextView
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/onboarding_mints_toolbar_title"
-                    android:textSize="17sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium"
-                    android:gravity="center" />
-
-                <Space
-                    android:layout_width="48dp"
-                    android:layout_height="48dp" />
-
-            </LinearLayout>
-
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:fillViewport="true">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingHorizontal="20dp"
-                    android:paddingBottom="24dp">
+                    android:layout_marginStart="14dp">
 
-                    <!-- Backup Status Card -->
-                    <LinearLayout
-                        android:id="@+id/backup_status_card"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:background="@drawable/bg_success_card"
-                        android:padding="16dp"
-                        android:layout_marginTop="8dp"
-                        android:gravity="center_vertical"
-                        android:visibility="gone">
-
-                        <ImageView
-                            android:id="@+id/backup_status_icon"
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
-                            android:src="@drawable/ic_cloud_done"
-                            app:tint="@color/color_success_green" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical"
-                            android:layout_marginStart="14dp">
-
-                            <TextView
-                                android:id="@+id/backup_status_title"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/onboarding_backup_found_title"
-                                android:textSize="15sp"
-                                android:textColor="@color/color_success_green"
-                                android:fontFamily="sans-serif-medium" />
-
-                            <TextView
-                                android:id="@+id/backup_status_subtitle"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="@string/onboarding_backup_found_subtitle"
-                                android:textSize="13sp"
-                                android:textColor="@color/color_text_secondary" />
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                    <!-- Title -->
                     <TextView
-                        android:layout_width="match_parent"
+                        android:id="@+id/backup_status_title"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:text="@string/onboarding_mints_title"
-                        android:textSize="22sp"
-                        android:textColor="@color/color_text_primary"
+                        android:text="@string/onboarding_backup_found_title"
+                        android:textSize="15sp"
+                        android:textColor="@color/numo_fluorescent_green"
                         android:fontFamily="sans-serif-medium" />
 
                     <TextView
-                        android:id="@+id/mints_subtitle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/onboarding_mints_subtitle_description"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary" />
-
-                    <!-- Mints List -->
-                    <LinearLayout
-                        android:id="@+id/mints_list_container"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginTop="16dp" />
-
-                    <!-- Mints Count -->
-                    <TextView
-                        android:id="@+id/mints_count_text"
+                        android:id="@+id/backup_status_subtitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="@string/onboarding_mints_count"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/onboarding_backup_found_subtitle"
                         android:textSize="13sp"
-                        android:textColor="@color/color_text_tertiary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp"
-                        android:text="@string/mints_add_section"
-                        android:textSize="12sp"
-                        android:letterSpacing="0.08"
-                        android:fontFamily="sans-serif-medium"
-                        android:textColor="@color/color_text_tertiary" />
-
-                    <com.electricdreams.numo.ui.components.AddMintInputCard
-                        android:id="@+id/add_different_mint_card"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp" />
+                        android:textColor="#99FFFFFF" />
 
                 </LinearLayout>
-            </ScrollView>
 
-            <!-- Continue Button - Fixed at bottom -->
+            </LinearLayout>
+
+            <!-- Mints RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/mints_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="8dp"
+                android:clipToPadding="false" />
+
+            <!-- Fixed Bottom Buttons -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingHorizontal="20dp"
-                android:paddingTop="16dp"
+                android:paddingTop="12dp"
                 android:paddingBottom="32dp"
-                android:background="@color/color_bg_light">
+                android:background="@color/numo_navy">
 
+                <!-- Continue - primary button (matches seed_continue_button style) -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/mints_continue_button"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:text="@string/onboarding_mints_continue_new_wallet"
                     android:textSize="17sp"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/button_text_onboarding"
                     android:textAllCaps="false"
+                    android:background="@drawable/bg_button_white"
+                    android:stateListAnimator="@null"
+                    app:backgroundTint="@null"
                     app:cornerRadius="28dp"
-                    app:backgroundTint="#000000" />
+                    app:elevation="0dp" />
 
             </LinearLayout>
         </LinearLayout>
@@ -760,7 +815,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/onboarding_restoring_title"
                     android:textSize="17sp"
-                    android:textColor="@color/color_text_primary"
+                    android:textColor="#FFFFFF"
                     android:fontFamily="sans-serif-medium"
                     android:gravity="center" />
 
@@ -785,7 +840,7 @@
                         android:layout_width="48dp"
                         android:layout_height="48dp"
                         android:indeterminate="true"
-                        android:indeterminateTint="@color/color_text_primary" />
+                        android:indeterminateTint="@color/numo_fluorescent_green" />
 
                     <TextView
                         android:id="@+id/restoring_status"
@@ -794,7 +849,7 @@
                         android:layout_marginTop="16dp"
                         android:text="@string/onboarding_restoring_initializing"
                         android:textSize="15sp"
-                        android:textColor="@color/color_text_secondary"
+                        android:textColor="#99FFFFFF"
                         android:gravity="center" />
 
                     <!-- Mint Progress Items -->
@@ -830,21 +885,13 @@
                 android:layout_height="0dp"
                 android:layout_weight="0.2" />
 
-            <!-- Success Checkmark -->
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center">
-
-                <ImageView
-                    android:id="@+id/success_checkmark"
-                    android:layout_width="88dp"
-                    android:layout_height="88dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_success_checkmark"
-                    android:contentDescription="@string/payment_received_success_icon_description" />
-
-            </FrameLayout>
+            <!-- Success Checkmark (animated, matches payment success style) -->
+            <com.electricdreams.numo.ui.animation.CheckmarkAnimationView
+                android:id="@+id/success_checkmark"
+                android:layout_width="88dp"
+                android:layout_height="88dp"
+                android:layout_gravity="center_horizontal"
+                android:contentDescription="@string/payment_received_success_icon_description" />
 
             <!-- Success Text -->
             <TextView
@@ -854,7 +901,7 @@
                 android:layout_marginTop="32dp"
                 android:text="@string/onboarding_success_created_title"
                 android:textSize="28sp"
-                android:textColor="@color/color_text_primary"
+                android:textColor="#FFFFFF"
                 android:fontFamily="sans-serif-medium"
                 android:gravity="center" />
 
@@ -865,7 +912,7 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/onboarding_success_created_subtitle"
                 android:textSize="16sp"
-                android:textColor="@color/color_text_secondary"
+                android:textColor="#99FFFFFF"
                 android:gravity="center" />
 
             <Space
@@ -886,7 +933,7 @@
                     android:layout_height="wrap_content"
                     android:text="@string/onboarding_success_balance_by_mint"
                     android:textSize="12sp"
-                    android:textColor="@color/color_text_tertiary"
+                    android:textColor="#73FFFFFF"
                     android:letterSpacing="0.1"
                     android:layout_marginBottom="12dp" />
 
@@ -910,10 +957,13 @@
                 android:layout_height="56dp"
                 android:text="@string/onboarding_enter_wallet_button"
                 android:textSize="17sp"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/button_text_onboarding"
                 android:textAllCaps="false"
+                android:background="@drawable/bg_button_white"
+                android:stateListAnimator="@null"
+                app:backgroundTint="@null"
                 app:cornerRadius="28dp"
-                app:backgroundTint="#000000" />
+                app:elevation="0dp" />
 
             <Space
                 android:layout_width="match_parent"

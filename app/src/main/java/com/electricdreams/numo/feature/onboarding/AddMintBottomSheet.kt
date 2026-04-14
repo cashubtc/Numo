@@ -12,11 +12,13 @@ import android.widget.EditText
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import androidx.core.content.ContextCompat
 import com.electricdreams.numo.R
-
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.shape.MaterialShapeDrawable
+import com.google.android.material.shape.ShapeAppearanceModel
 
 class AddMintBottomSheet : BottomSheetDialogFragment() {
 
@@ -35,8 +37,6 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
         }
     }
 
-    override fun getTheme(): Int = R.style.Theme_Numo_BottomSheet
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState)
         dialog.window?.apply {
@@ -44,6 +44,8 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE or
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
             )
+            navigationBarColor = ContextCompat.getColor(requireContext(), R.color.numo_navy)
+            setDimAmount(0.6f)
         }
         return dialog
     }
@@ -113,9 +115,22 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
                 com.google.android.material.R.id.design_bottom_sheet
             )
             bottomSheet?.let { sheet ->
-                // Let the theme (Widget.Numo.BottomSheet) handle background + corners
+                // Apply background + rounded corners that were previously in the theme
+                val density = resources.displayMetrics.density
+                val shapeDrawable = MaterialShapeDrawable(
+                    ShapeAppearanceModel.builder()
+                        .setTopLeftCornerSize(20f * density)
+                        .setTopRightCornerSize(20f * density)
+                        .build()
+                ).apply {
+                    fillColor = android.content.res.ColorStateList.valueOf(
+                        ContextCompat.getColor(requireContext(), R.color.numo_navy)
+                    )
+                }
+                sheet.background = shapeDrawable
+
                 val behavior = BottomSheetBehavior.from(sheet)
-                behavior.isFitToContents = true
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
                 behavior.skipCollapsed = true
                 behavior.isDraggable = true
             }

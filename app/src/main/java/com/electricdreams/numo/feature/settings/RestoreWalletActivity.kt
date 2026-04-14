@@ -14,8 +14,8 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.electricdreams.numo.ui.util.DialogHelper
 import androidx.core.content.ContextCompat
 import androidx.gridlayout.widget.GridLayout
 import androidx.lifecycle.lifecycleScope
@@ -23,6 +23,7 @@ import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.nostr.NostrMintBackup
+import com.electricdreams.numo.ui.seed.Bip39Wordlist
 import com.electricdreams.numo.ui.seed.SeedWordEditText
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.Dispatchers
@@ -206,12 +207,11 @@ class RestoreWalletActivity : AppCompatActivity() {
             setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
             setHintTextColor(ContextCompat.getColor(context, R.color.color_text_tertiary))
             textSize = 15f
-            typeface = android.graphics.Typeface.MONOSPACE
             background = null
             isSingleLine = true
             inputType = android.text.InputType.TYPE_CLASS_TEXT or
-                    android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or
-                    android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                    android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
             imeOptions = if (index == 12) EditorInfo.IME_ACTION_DONE else EditorInfo.IME_ACTION_NEXT
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
                 marginStart = 8.dpToPx()
@@ -383,7 +383,7 @@ class RestoreWalletActivity : AppCompatActivity() {
         val words = seedInputs.map { it.text.toString().trim().lowercase() }
         val filledCount = words.count { it.isNotBlank() }
         val allFilled = filledCount == 12
-        val allValid = words.all { it.isBlank() || it.matches(Regex("^[a-z]+$")) }
+        val allValid = words.all { it.isBlank() || Bip39Wordlist.isValid(it) }
 
         // Update validation status
         when {
@@ -432,7 +432,7 @@ class RestoreWalletActivity : AppCompatActivity() {
 
         // Show fetching overlay
         updateUIForStep(RestoreStep.FETCHING_BACKUP)
-        fetchingStatus.text = getString(R.string.onboarding_fetching_searching_backup)
+        fetchingStatus.text = getString(R.string.onboarding_status_restoring_wallet)
 
         lifecycleScope.launch {
             // Fetch backup from Nostr
@@ -623,14 +623,16 @@ class RestoreWalletActivity : AppCompatActivity() {
 
         val message = getString(R.string.restore_confirm_dialog_message, mintCount, currentSeedNote)
 
-        AlertDialog.Builder(this)
-            .setTitle(R.string.restore_confirm_dialog_title)
-            .setMessage(message)
-            .setPositiveButton(R.string.restore_confirm_dialog_positive) { _, _ ->
+        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
+            title = getString(R.string.restore_confirm_dialog_title),
+            message = message,
+            confirmText = getString(R.string.restore_confirm_dialog_positive),
+            cancelText = getString(R.string.common_cancel),
+            isDestructive = true,
+            onConfirm = {
                 performRestore()
             }
-            .setNegativeButton(R.string.common_cancel, null)
-            .show()
+        ))
     }
 
     private fun performRestore() {
