@@ -31,6 +31,8 @@ class BtcPayPaymentServiceIntegrationTest {
     private val httpClient = OkHttpClient()
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
     private var cashuEnabled = false
+    private var cdkMintUrl: String = "http://localhost:3338"
+    private var customerLndUrl: String = "http://localhost:35532"
 
     @Before
     fun setup() {
@@ -47,6 +49,8 @@ class BtcPayPaymentServiceIntegrationTest {
                 storeId = props.getProperty("BTCPAY_STORE_ID"),
             )
             cashuEnabled = props.getProperty("CASHU_ENABLED", "false").toBoolean()
+            cdkMintUrl = props.getProperty("CDK_MINT_URL", "http://localhost:3338")
+            customerLndUrl = props.getProperty("CUSTOMER_LND_URL", "http://localhost:35532")
         } else {
             config = BTCPayConfig(
                 serverUrl = System.getenv("BTCPAY_SERVER_URL") ?: "http://localhost:49392",
@@ -54,6 +58,8 @@ class BtcPayPaymentServiceIntegrationTest {
                 storeId = System.getenv("BTCPAY_STORE_ID") ?: "",
             )
             cashuEnabled = System.getenv("CASHU_ENABLED")?.toBoolean() ?: false
+            cdkMintUrl = System.getenv("CDK_MINT_URL") ?: "http://localhost:3338"
+            customerLndUrl = System.getenv("CUSTOMER_LND_URL") ?: "http://localhost:35532"
         }
         service = BTCPayPaymentService(config)
     }
@@ -681,5 +687,176 @@ class BtcPayPaymentServiceIntegrationTest {
         val data = result.getOrThrow()
         assertEquals("Should return same invoice ID", invoiceId, data.paymentId)
         assertNotNull("Should include cashuPR", data.cashuPR)
+    }
+
+    // =========================================================================
+    // Lightning e2e
+    // =========================================================================
+
+    /**
+     * Full e2e: create BTCPay Lightning invoice → pay bolt11 via customer_lnd
+     * → poll until invoice is PAID.
+     *
+     * Requires the channel customer_lnd → lnd_bitcoin set up by channel-setup.sh.
+     */
+    @Test
+    fun testE2E_lightningInvoicePaidViaCustomerLnd() = runBlocking {
+        if (skipIfNotConfigured()) return@runBlocking
+        assumeFalse(
+            "customer_lnd not reachable at $customerLndUrl — skipping e2e test",
+            !isCustomerLndReachable()
+        )
+
+        // 1. Create BTCPay invoice and fetch bolt11
+        val data = service.createPayment(1000L, "LN e2e test").getOrThrow()
+        val bolt11 = data.bolt11
+        assertNotNull("Invoice should have a bolt11", bolt11)
+        println("BTCPay invoice: ${data.paymentId}")
+        println("Paying: ${bolt11!!.take(60)}...")
+
+        // 2. Pay via customer_lnd
+        val payReq = Request.Builder()
+            .url("$customerLndUrl/v1/channels/transactions")
+            .post("""{"payment_request": "$bolt11"}""".toRequestBody(jsonMediaType))
+            .build()
+        val (payCode, payResp) = executeHttpRequest(payReq)
+        println("customer_lnd pay (HTTP $payCode): ${payResp.take(200)}")
+        assertTrue("customer_lnd should accept payment (HTTP $payCode)", payCode in 200..299)
+
+        // 3. Poll BTCPay until invoice is PAID (up to 30 s)
+        val isPaid = pollBtcPayInvoicePaid(data.paymentId, timeoutMs = 30_000)
+        assertTrue("BTCPay invoice should become PAID after LN payment", isPaid)
+        println("BTCPay invoice PAID — Lightning e2e passed!")
+    }
+
+    private suspend fun pollBtcPayInvoicePaid(invoiceId: String, timeoutMs: Long): Boolean {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            val status = service.checkPaymentStatus(invoiceId).getOrNull()
+            println("  BTCPay invoice status: $status")
+            if (status == PaymentState.PAID) return true
+            kotlinx.coroutines.delay(2_000)
+        }
+        return false
+    }
+
+    // =========================================================================
+    // CDK Mint + BTCPay — combined e2e
+    // =========================================================================
+
+    private fun isCdkMintReachable(): Boolean = try {
+        val req = Request.Builder().url("$cdkMintUrl/v1/info").get().build()
+        httpClient.newCall(req).execute().use { it.code == 200 }
+    } catch (_: Exception) { false }
+
+    private fun skipIfCdkMintNotReachable() {
+        assumeFalse("CDK mint not reachable at $cdkMintUrl — skipping", !isCdkMintReachable())
+    }
+
+    /**
+     * Verifies that BTCPay's Cashu config lists the local CDK mint as a trusted mint.
+     * This is set up by provision.sh using the Docker-internal URL (http://cdk-mint:3338).
+     * BTCPay resolves it internally; the display URL may differ from cdkMintUrl.
+     */
+    @Test
+    fun testBtcPayTrustsCdkMint() {
+        skipIfCashuNotEnabled()
+        skipIfCdkMintNotReachable()
+        val (code, body) = cashuGet("")
+        assertEquals("GET /cashu should return 200", 200, code)
+        val trustedMints = JsonParser.parseString(body).asJsonObject
+            .getAsJsonArray("trustedMintsUrls")
+        val hasCdkMint = trustedMints.any { url ->
+            // provision.sh sets "http://cdk-mint:3338" (Docker hostname)
+            url.asString.contains("cdk-mint") || url.asString.contains("3338")
+        }
+        assertTrue(
+            "BTCPay should trust the CDK mint (trustedMintsUrls=$trustedMints)",
+            hasCdkMint
+        )
+        println("BTCPay trusted mints: $trustedMints")
+    }
+
+    /**
+     * Creates a BTCPay invoice, creates a CDK mint quote for the same amount,
+     * pays the CDK mint invoice via customer_lnd, and verifies the CDK quote
+     * becomes PAID — confirming the Lightning topology works end-to-end.
+     *
+     * Note: completing the payment to BTCPay (redeeming the minted token via
+     * NUT-18/19) requires Cashu token blinding which is not available in JVM
+     * tests without CDK native libs. This test validates the infrastructure layer.
+     */
+    @Test
+    fun testE2E_cdkMintQuotePaidViaCustomerLnd() = runBlocking {
+        skipIfCashuNotEnabled()
+        skipIfCdkMintNotReachable()
+        assumeFalse(
+            "customer_lnd not reachable at $customerLndUrl — skipping e2e test",
+            !isCustomerLndReachable()
+        )
+
+        val amountSats = 100L
+
+        // Create a BTCPay invoice (proves BTCPay + CDK mint are wired together)
+        val btcpayInvoiceId = createInvoiceId(amountSats, "CDK e2e test")
+        assertFalse("BTCPay invoice ID should not be blank", btcpayInvoiceId.isBlank())
+        println("BTCPay invoice: $btcpayInvoiceId")
+
+        // Create a CDK mint quote (get bolt11 from CDK mint)
+        val mintQuoteReq = Request.Builder()
+            .url("$cdkMintUrl/v1/mint/quote/bolt11")
+            .post("""{"amount": $amountSats, "unit": "sat"}""".toRequestBody(jsonMediaType))
+            .build()
+        val (quoteCode, quoteBody) = httpClient.newCall(mintQuoteReq).execute().use {
+            it.code to (it.body?.string() ?: "")
+        }
+        assertEquals("CDK mint quote should succeed", 200, quoteCode)
+        val quoteJson = JsonParser.parseString(quoteBody).asJsonObject
+        val quoteId = quoteJson.get("quote").asString
+        val bolt11 = quoteJson.get("request").asString
+        println("CDK mint quote: $quoteId")
+        println("Paying: ${bolt11.take(60)}...")
+
+        // Pay via customer_lnd
+        val payReq = Request.Builder()
+            .url("$customerLndUrl/v1/channels/transactions")
+            .post("""{"payment_request": "$bolt11"}""".toRequestBody(jsonMediaType))
+            .build()
+        val (payCode, payResp) = httpClient.newCall(payReq).execute().use {
+            it.code to (it.body?.string() ?: "")
+        }
+        println("LND pay (HTTP $payCode): ${payResp.take(200)}")
+        assertTrue("customer_lnd should accept payment (HTTP $payCode)", payCode in 200..299)
+
+        // Poll CDK mint until quote is PAID (up to 30 s)
+        val isPaid = pollCdkQuotePaid(quoteId, timeoutMs = 30_000)
+        assertTrue("CDK mint quote should be PAID after LN payment", isPaid)
+        println("CDK mint quote PAID — e2e infrastructure test passed!")
+    }
+
+    private fun isCustomerLndReachable(): Boolean = try {
+        val req = Request.Builder().url("$customerLndUrl/v1/getinfo").get().build()
+        httpClient.newCall(req).execute().use { it.code == 200 }
+    } catch (_: Exception) { false }
+
+    private suspend fun pollCdkQuotePaid(quoteId: String, timeoutMs: Long): Boolean {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (System.currentTimeMillis() < deadline) {
+            try {
+                val req = Request.Builder()
+                    .url("$cdkMintUrl/v1/mint/quote/bolt11/$quoteId")
+                    .get().build()
+                httpClient.newCall(req).execute().use { resp ->
+                    if (resp.code == 200) {
+                        val state = JsonParser.parseString(resp.body?.string() ?: "{}")
+                            .asJsonObject.get("state")?.asString
+                        println("  CDK quote state: $state")
+                        if (state == "PAID") return true
+                    }
+                }
+            } catch (_: Exception) { /* retry */ }
+            kotlinx.coroutines.delay(2_000)
+        }
+        return false
     }
 }

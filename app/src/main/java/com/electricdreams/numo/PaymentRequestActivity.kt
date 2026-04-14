@@ -370,7 +370,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             val currentTab = tabManager.getCurrentTab()
             val toShare = when (currentTab) {
                 PaymentTabManager.PaymentTab.LIGHTNING -> lightningHandler?.currentInvoice ?: lightningInvoice
-                PaymentTabManager.PaymentTab.CASHU -> nostrHandler?.paymentRequest
+                PaymentTabManager.PaymentTab.CASHU -> nostrHandler?.paymentRequest ?: btcPayCashuPR ?: hcePaymentRequest
                 PaymentTabManager.PaymentTab.UNIFIED -> {
                     val creq = nostrHandler?.paymentRequestBech32
                     val lnbc = lightningHandler?.currentInvoice ?: lightningInvoice

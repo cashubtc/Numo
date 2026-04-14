@@ -60,6 +60,10 @@ services:
         no-macaroons=1
         no-rest-tls=1
         noseedbackup=1
+        listen=lnd_bitcoin:9735
+        externalip=lnd_bitcoin:9735
+    expose:
+      - "9735"
     volumes:
       - lnd-bitcoin-data:/data
       - bitcoind-data:/deps/.bitcoin
@@ -122,6 +126,129 @@ services:
     volumes:
       - bitcoind-data:/data
 
+  # dedicated lnd for cdk-mint — macaroons ON, no TLS
+  # shares the same bitcoind + nbxplorer as BTCPay but lives in its own container
+  mint_lnd:
+    image: btcpayserver/lnd:v0.19.3-beta
+    restart: unless-stopped
+    environment:
+      LND_CHAIN: "btc"
+      LND_ENVIRONMENT: "regtest"
+      LND_EXPLORERURL: "http://nbxplorer:32838/"
+      LND_REST_LISTEN_HOST: http://mint_lnd:8080
+      LND_EXTRA_ARGS: |
+        restlisten=mint_lnd:8080
+        rpclisten=127.0.0.1:10008
+        rpclisten=mint_lnd:10009
+        bitcoin.node=bitcoind
+        bitcoind.rpchost=bitcoind:18443
+        bitcoind.rpcuser=btcpay
+        bitcoind.rpcpass=btcpay
+        bitcoind.zmqpubrawblock=tcp://bitcoind:28332
+        bitcoind.zmqpubrawtx=tcp://bitcoind:28333
+        externalip=mint_lnd:9735
+        bitcoin.defaultchanconfs=1
+        no-rest-tls=1
+        tlsextradomain=mint_lnd
+    expose:
+      - "8080"
+      - "9735"
+      - "10009"
+    volumes:
+      - mint-lnd-data:/data
+      - bitcoind-data:/deps/.bitcoin
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /data/data/chain/bitcoin/regtest/admin.macaroon"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 10s
+    depends_on:
+      - bitcoind
+      - nbxplorer
+
+  # simulates a customer that pays CDK mint invoices to receive Cashu tokens
+  customer_lnd:
+    image: btcpayserver/lnd:v0.19.3-beta
+    restart: unless-stopped
+    environment:
+      LND_CHAIN: "btc"
+      LND_ENVIRONMENT: "regtest"
+      LND_EXPLORERURL: "http://nbxplorer:32838/"
+      LND_REST_LISTEN_HOST: http://customer_lnd:8080
+      LND_EXTRA_ARGS: |
+        restlisten=customer_lnd:8080
+        rpclisten=127.0.0.1:10008
+        rpclisten=customer_lnd:10009
+        bitcoin.node=bitcoind
+        bitcoind.rpchost=bitcoind:18443
+        bitcoind.rpcuser=btcpay
+        bitcoind.rpcpass=btcpay
+        bitcoind.zmqpubrawblock=tcp://bitcoind:28332
+        bitcoind.zmqpubrawtx=tcp://bitcoind:28333
+        externalip=customer_lnd:9735
+        bitcoin.defaultchanconfs=1
+        no-macaroons=1
+        no-rest-tls=1
+    ports:
+      - "35532:8080"
+    expose:
+      - "8080"
+      - "9735"
+    volumes:
+      - customer-lnd-data:/root/.lnd
+      - bitcoind-data:/deps/.bitcoin
+    depends_on:
+      - bitcoind
+      - nbxplorer
+
+  # cdk mint backed by mint_lnd; used by CDK integration tests and trusted by BTCPay
+  cdk-mint:
+    platform: linux/amd64
+    image: cashubtc/mintd:latest
+    restart: unless-stopped
+    ports:
+      - "3338:3338"
+    expose:
+      - "3338"
+    environment:
+      CDK_MINTD_LN_BACKEND: lnd
+      CDK_MINTD_LND_ADDRESS: https://mint_lnd:10009
+      CDK_MINTD_LND_MACAROON_FILE: /lnd/data/chain/bitcoin/regtest/admin.macaroon
+      CDK_MINTD_LND_CERT_FILE: /lnd/tls.cert
+      CDK_MINTD_LISTEN_HOST: 0.0.0.0
+      CDK_MINTD_LISTEN_PORT: 3338
+      CDK_MINTD_MNEMONIC: "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+      CDK_MINTD_DATABASE: sqlite
+      CDK_MINTD_INPUT_FEE_PPK: 0
+    volumes:
+      - mint-lnd-data:/lnd
+    depends_on:
+      mint_lnd:
+        condition: service_healthy
+
+  # sets up Lightning channels: customer_lnd --> mint_lnd
+  # must complete before tests run (btcpayserver does NOT depend on it — channels are for CDK only)
+  channel-setup:
+    image: alpine:3.20
+    command: ["/bin/sh", "-c", "apk add --no-cache curl jq xxd >/dev/null 2>&1 && /scripts/channel-setup.sh"]
+    environment:
+      CUSTOMER_LND_URL: "http://customer_lnd:8080"
+      MINT_LND_URL: "http://mint_lnd:8080"
+      BTCPAY_LND_URL: "http://lnd_bitcoin:8080"
+      MINT_MACAROON_PATH: "/mint_lnd_data/data/chain/bitcoin/regtest/admin.macaroon"
+      BTC_RPC_URL: "http://bitcoind:18443"
+      BTC_RPC_USER: "btcpay"
+      BTC_RPC_PASS: "btcpay"
+    volumes:
+      - "./channel-setup.sh:/scripts/channel-setup.sh:ro"
+      - "mint-lnd-data:/mint_lnd_data:ro"
+    depends_on:
+      mint_lnd:
+        condition: service_healthy
+      customer_lnd:
+        condition: service_started
+
 volumes:
   btcpay-data:
   postgres-data:
@@ -129,3 +256,5 @@ volumes:
   plugin-data:
   bitcoind-data:
   lnd-bitcoin-data:
+  mint-lnd-data:
+  customer-lnd-data:
