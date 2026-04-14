@@ -47,13 +47,7 @@ class CurrencyAdapter(
             
             val isSelected = currency.currencyCode == selectedCurrencyCode
             checkIcon.visibility = if (isSelected) View.VISIBLE else View.INVISIBLE
-            
-            // For custom checked state if using radio button asset
-            if (isSelected) {
-                checkIcon.setImageResource(android.R.drawable.radiobutton_on_background)
-            } else {
-                checkIcon.setImageResource(android.R.drawable.radiobutton_off_background)
-            }
+            checkIcon.setImageResource(R.drawable.ic_check)
 
             itemView.setOnClickListener {
                 onCurrencySelected(currency)

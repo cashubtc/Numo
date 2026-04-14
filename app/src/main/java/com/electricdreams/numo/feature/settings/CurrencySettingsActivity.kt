@@ -89,6 +89,7 @@ class CurrencySettingsActivity : AppCompatActivity() {
             .sortedBy { it.currencyCode }
             
         adapter.submitList(allCurrencies, currencyManager.getCurrentCurrency())
+        scrollToSelectedCurrency(allCurrencies)
 
         // Fetch latest supported currencies from Coinbase API
         lifecycleScope.launch(Dispatchers.IO) {
@@ -120,7 +121,11 @@ class CurrencySettingsActivity : AppCompatActivity() {
                             .filter { supported.contains(it.currencyCode) }
                             .sortedBy { it.currencyCode }
                             
-                        adapter.submitList(getFilteredCurrencies(searchInput.text.toString()), currencyManager.getCurrentCurrency())
+                        val currentList = getFilteredCurrencies(searchInput.text.toString())
+                        adapter.submitList(currentList, currencyManager.getCurrentCurrency())
+                        if (searchInput.text.isEmpty()) {
+                            scrollToSelectedCurrency(currentList)
+                        }
                     }
                 }
                 connection.disconnect()
@@ -157,6 +162,14 @@ class CurrencySettingsActivity : AppCompatActivity() {
         }
     }
     
+    private fun scrollToSelectedCurrency(currencies: List<Currency>) {
+        val currentCode = currencyManager.getCurrentCurrency()
+        val index = currencies.indexOfFirst { it.currencyCode == currentCode }
+        if (index != -1) {
+            recyclerView.scrollToPosition(index)
+        }
+    }
+
     private fun getFilteredCurrencies(query: String): List<Currency> {
         if (query.isEmpty()) return allCurrencies
         
