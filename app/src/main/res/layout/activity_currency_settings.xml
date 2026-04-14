@@ -120,7 +120,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:gravity="center"
-        android:text="No currencies found"
+        android:text="@string/currency_settings_no_results"
         android:textAppearance="@style/Text.Body"
         android:textColor="@color/color_text_secondary"
         android:visibility="gone"
