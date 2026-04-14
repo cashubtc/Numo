@@ -60,10 +60,6 @@ services:
         no-macaroons=1
         no-rest-tls=1
         noseedbackup=1
-        listen=lnd_bitcoin:9735
-        externalip=lnd_bitcoin:9735
-    expose:
-      - "9735"
     volumes:
       - lnd-bitcoin-data:/data
       - bitcoind-data:/deps/.bitcoin
