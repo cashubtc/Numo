@@ -5,16 +5,17 @@
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:background="@drawable/bg_seed_word"
-    android:paddingVertical="@dimen/row_padding_vertical"
-    android:paddingHorizontal="@dimen/space_m"
-    android:layout_margin="@dimen/space_xs">
+    android:paddingVertical="14dp"
+    android:paddingHorizontal="12dp"
+    android:layout_margin="4dp">
 
     <TextView
         android:id="@+id/word_index"
         android:layout_width="24dp"
         android:layout_height="wrap_content"
         android:text="1"
-        android:textAppearance="@style/Text.Caption"
+        android:textSize="13sp"
+        android:textColor="@color/color_text_tertiary"
         android:fontFamily="sans-serif-medium"
         android:gravity="center" />
 
@@ -24,8 +25,9 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="word"
-        android:textAppearance="@style/Text.Mono"
         android:textSize="15sp"
-        android:layout_marginStart="@dimen/space_s" />
+        android:textColor="@color/color_text_primary"
+        android:fontFamily="monospace"
+        android:layout_marginStart="8dp" />
 
 </LinearLayout>

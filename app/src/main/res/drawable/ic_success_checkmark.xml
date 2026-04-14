@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="88dp"
+    android:height="88dp"
+    android:viewportWidth="88"
+    android:viewportHeight="88">
+    <!-- Circle background -->
+    <path
+        android:fillColor="#E8F5E9"
+        android:pathData="M44,44m-44,0a44,44 0,1 1,88 0a44,44 0,1 1,-88 0"/>
+    <!-- Inner circle -->
+    <path
+        android:fillColor="#00C244"
+        android:pathData="M44,44m-32,0a32,32 0,1 1,64 0a32,32 0,1 1,-64 0"/>
+    <!-- Checkmark -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38.5,55.5L28,45l3.5,-3.5 7,7 15,-15 3.5,3.5z"/>
+</vector>
