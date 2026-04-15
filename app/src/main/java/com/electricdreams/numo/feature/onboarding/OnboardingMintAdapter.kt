@@ -38,6 +38,7 @@ class OnboardingMintAdapter(
         private const val VIEW_TYPE_DEFAULT_HERO = 2
         private const val VIEW_TYPE_ADD_MINT = 4
         private const val PAYLOAD_NAME_ONLY = "name_only"
+        const val PAYLOAD_PROFILE_UPDATED = "profile_updated"
 
         // Animation timing constants
         private const val CROSSFADE_DELAY = 150L
@@ -54,6 +55,11 @@ class OnboardingMintAdapter(
     /** Refresh display names without re-binding icons. */
     fun refreshNames() {
         notifyItemRangeChanged(0, itemCount, PAYLOAD_NAME_ONLY)
+    }
+
+    /** Refresh both names and icons without a full rebind to avoid flickering. */
+    fun refreshProfiles() {
+        notifyItemRangeChanged(0, itemCount, PAYLOAD_PROFILE_UPDATED)
     }
 
     private val items = mutableListOf<ListItem>()
@@ -335,10 +341,22 @@ class OnboardingMintAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int, payloads: MutableList<Any>) {
-        if (payloads.contains(PAYLOAD_NAME_ONLY)) {
+        if (payloads.contains(PAYLOAD_PROFILE_UPDATED) || payloads.contains(PAYLOAD_NAME_ONLY)) {
             when (val item = items[position]) {
-                is ListItem.DefaultHero -> (holder as DefaultHeroViewHolder).mintName.text = listener.onResolveMintName(item.url)
-                is ListItem.Mint -> (holder as MintViewHolder).name.text = listener.onResolveMintName(item.url)
+                is ListItem.DefaultHero -> {
+                    val h = holder as DefaultHeroViewHolder
+                    h.mintName.text = listener.onResolveMintName(item.url)
+                    if (payloads.contains(PAYLOAD_PROFILE_UPDATED)) {
+                        listener.onLoadMintIcon(item.url, h.mintIcon)
+                    }
+                }
+                is ListItem.Mint -> {
+                    val h = holder as MintViewHolder
+                    h.name.text = listener.onResolveMintName(item.url)
+                    if (payloads.contains(PAYLOAD_PROFILE_UPDATED)) {
+                        listener.onLoadMintIcon(item.url, h.icon)
+                    }
+                }
                 else -> {}
             }
             return
