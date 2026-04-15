@@ -2,6 +2,7 @@ package com.electricdreams.numo
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -53,6 +54,10 @@ class PaymentFailureActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = android.graphics.Color.TRANSPARENT
         window.navigationBarColor = android.graphics.Color.TRANSPARENT
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+            window.isStatusBarContrastEnforced = false
+        }
 
         val backgroundColor = ContextCompat.getColor(this, R.color.color_error)
         window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(backgroundColor))

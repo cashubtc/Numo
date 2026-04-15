@@ -8,6 +8,7 @@ import android.content.Intent
 import android.content.ComponentName
 import android.nfc.NfcAdapter
 import android.nfc.cardemulation.CardEmulation
+import android.os.Build
 import android.os.Bundle
 import com.electricdreams.numo.util.getVibrator
 import com.electricdreams.numo.util.vibrateCompat
@@ -19,6 +20,7 @@ import android.util.TypedValue
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -165,11 +167,38 @@ class PaymentRequestActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_request)
         
-        // Apply window insets to handle edge-to-edge correctly (especially for API 35+)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+            window.isStatusBarContrastEnforced = false
+        }
+        
+        // Apply window insets to handle edge-to-edge correctly without squishing the NFC overlay
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.payment_request_root)) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
-            WindowInsetsCompat.CONSUMED
+            
+            val density = resources.displayMetrics.density
+            val topMarginPx = (16 * density).toInt()
+            val bottomMarginPx = (24 * density).toInt()
+
+            findViewById<View>(R.id.close_button).layoutParams = 
+                (findViewById<View>(R.id.close_button).layoutParams as MarginLayoutParams).apply {
+                    topMargin = insets.top + topMarginPx
+                }
+                
+            findViewById<View>(R.id.share_button).layoutParams = 
+                (findViewById<View>(R.id.share_button).layoutParams as MarginLayoutParams).apply {
+                    topMargin = insets.top + topMarginPx
+                }
+
+            val switchContainer = findViewById<View>(R.id.lightning_cashu_switch_container)
+            if (switchContainer != null) {
+                switchContainer.layoutParams = 
+                    (switchContainer.layoutParams as MarginLayoutParams).apply {
+                        bottomMargin = insets.bottom + bottomMarginPx
+                    }
+            }
+            
+            windowInsets
         }
 
         // Initialize views
