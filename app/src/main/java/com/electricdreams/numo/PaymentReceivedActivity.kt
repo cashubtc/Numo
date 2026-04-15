@@ -17,7 +17,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import org.cashudevkit.Token
 import org.cashudevkit.CurrencyUnit
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
@@ -67,9 +69,9 @@ class PaymentReceivedActivity : AppCompatActivity() {
         windowInsetsController.isAppearanceLightStatusBars = useDarkIcons
         windowInsetsController.isAppearanceLightNavigationBars = useDarkIcons
         
-        // Adjust padding for system bars
-        findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { v, windowInsets ->
-            val insets = windowInsets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+        // Adjust padding for system bars on the root view
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, insets.top, 0, insets.bottom)
             windowInsets
         }

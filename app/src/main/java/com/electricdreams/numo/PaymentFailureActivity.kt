@@ -14,7 +14,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.payment.PaymentIntentFactory
@@ -60,9 +62,9 @@ class PaymentFailureActivity : AppCompatActivity() {
         windowInsetsController.isAppearanceLightStatusBars = useDarkIcons
         windowInsetsController.isAppearanceLightNavigationBars = useDarkIcons
 
-        // Adjust padding for system bars
-        findViewById<View>(android.R.id.content).setOnApplyWindowInsetsListener { v, windowInsets ->
-            val insets = windowInsets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+        // Adjust padding for system bars on the root view
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, windowInsets ->
+            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(0, insets.top, 0, insets.bottom)
             windowInsets
         }
