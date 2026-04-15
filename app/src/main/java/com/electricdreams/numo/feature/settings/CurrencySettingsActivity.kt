@@ -36,6 +36,7 @@ class CurrencySettingsActivity : AppCompatActivity() {
     private lateinit var emptyStateText: TextView
     
     private var allCurrencies: List<Currency> = emptyList()
+    private var hasScrolledToSelection = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -87,8 +88,9 @@ class CurrencySettingsActivity : AppCompatActivity() {
         allCurrencies = Currency.getAvailableCurrencies()
             .filter { initialSupportedCodes.contains(it.currencyCode) }
             
-        adapter.submitList(getFilteredCurrencies(searchInput.text.toString()), currencyManager.getCurrentCurrency())
-        // Remove scroll since it will be at index 0
+        val currentList = getFilteredCurrencies(searchInput.text.toString())
+        adapter.submitList(currentList, currencyManager.getCurrentCurrency())
+        scrollToSelectedCurrencyOnce(currentList)
 
         // Fetch latest supported currencies from Coinbase API
         lifecycleScope.launch(Dispatchers.IO) {
@@ -121,6 +123,7 @@ class CurrencySettingsActivity : AppCompatActivity() {
                             
                         val currentList = getFilteredCurrencies(searchInput.text.toString())
                         adapter.submitList(currentList, currencyManager.getCurrentCurrency())
+                        scrollToSelectedCurrencyOnce(currentList)
                     }
                 }
                 connection.disconnect()
@@ -170,12 +173,23 @@ class CurrencySettingsActivity : AppCompatActivity() {
             }
         }
         
-        // Sort alphabetically, but always pin the selected currency to the very top
+        // Sort alphabetically
         return filtered.sortedWith { c1, c2 ->
-            when {
-                c1.currencyCode == currentCode && c2.currencyCode != currentCode -> -1
-                c2.currencyCode == currentCode && c1.currencyCode != currentCode -> 1
-                else -> c1.currencyCode.compareTo(c2.currencyCode)
+            c1.currencyCode.compareTo(c2.currencyCode)
+        }
+    }
+
+    private fun scrollToSelectedCurrencyOnce(list: List<Currency>) {
+        if (hasScrolledToSelection || searchInput.text.toString().isNotEmpty()) return
+        
+        val currentCode = currencyManager.getCurrentCurrency()
+        val index = list.indexOfFirst { it.currencyCode == currentCode }
+        if (index != -1) {
+            hasScrolledToSelection = true
+            recyclerView.post {
+                val layoutManager = recyclerView.layoutManager as? LinearLayoutManager
+                // Use a small offset so it's not completely flush with the top edge
+                layoutManager?.scrollToPositionWithOffset(index, 100)
             }
         }
     }
