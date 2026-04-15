@@ -34,6 +34,16 @@
         android:localeConfig="@xml/locales_config"
         android:name=".NumoApplication"
         tools:targetApi="33">
+
+        <service
+            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data
+                android:name="autoStoreLocales"
+                android:value="true" />
+        </service>
+
         <!-- Onboarding Activity - First Launch -->
         <activity
             android:name="com.electricdreams.numo.feature.onboarding.OnboardingActivity"
