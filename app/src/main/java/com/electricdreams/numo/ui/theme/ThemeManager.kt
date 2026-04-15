@@ -82,6 +82,7 @@ class ThemeManager(
         // bitcoin orange, white). This also fixes older 3-button devices
         // where a transparent nav bar could get tinted by the OEM skin.
         val window = activity.window
+        window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(backgroundColor))
         window.statusBarColor = backgroundColor
         window.navigationBarColor = backgroundColor
 
