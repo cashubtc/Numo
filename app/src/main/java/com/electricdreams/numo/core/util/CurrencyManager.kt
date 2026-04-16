@@ -37,13 +37,18 @@ class CurrencyManager private constructor(context: Context) {
         private const val DEFAULT_CURRENCY = CURRENCY_USD
 
         private const val COINBASE_BASE_URL = "https://api.coinbase.com/v2/prices/BTC-"
+        private const val YADIO_BASE_URL = "https://api.yadio.io/rate/BTC/"
 
         private val COINBASE_PARSER: (String) -> Double = { response ->
             JSONObject(response).getJSONObject("data").getDouble("amount")
         }
 
-        /** Add entries here for currencies not on Coinbase (or where we prefer a different source). */
-        private val CUSTOM_APIS = mapOf(
+        private val YADIO_PARSER: (String) -> Double = { response ->
+            1.0 / JSONObject(response).getDouble("rate")
+        }
+
+        /** Currencies that need special API sources (not Yadio or Coinbase). */
+        private val SPECIAL_APIS = mapOf(
             CURRENCY_JPY to PriceApiConfig(
                 url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=jpy",
                 parsePrice = { response ->
@@ -55,19 +60,21 @@ class CurrencyManager private constructor(context: Context) {
                 parsePrice = { response ->
                     JSONArray(response).getJSONObject(0).getDouble("trade_price")
                 }
-            ),
-            CURRENCY_CUP to PriceApiConfig(
-                url = "https://api.yadio.io/rate/BTC/CUP",
-                parsePrice = { response ->
-                    1.0 / JSONObject(response).getDouble("rate")
-                }
-            ),
-            CURRENCY_MLC to PriceApiConfig(
-                url = "https://api.yadio.io/rate/BTC/MLC",
-                parsePrice = { response ->
-                    1.0 / JSONObject(response).getDouble("rate")
-                }
-            ),
+            )
+        )
+
+        /** Currencies supported by Yadio.io */
+        private val YADIO_CURRENCIES = setOf(
+            "AED", "ALL", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN", "BAM", "BBD", "BDT", "BGN", "BHD",
+            "BIF", "BMD", "BOB", "BRL", "BSD", "BTC", "BTN", "BWP", "BYN", "BZD", "CAD", "CDF", "CHF",
+            "CLP", "CNY", "COP", "CRC", "CUP", "CVE", "CZK", "DJF", "DKK", "DOP", "DZD", "EGP", "ERN",
+            "ETB", "EUR", "FKP", "GBP", "GEL", "GHS", "GIP", "GMD", "GNF", "GTQ", "HKD", "HNL", "HUF",
+            "IDR", "ILS", "INR", "IRR", "IRT", "ISK", "JEP", "JMD", "JOD", "JPY", "KES",             "KGS", "KMF",
+            "KRW", "KYD", "KZT", "LBP", "LKR", "LSL", "MAD", "MGA", "MLC", "MOP", "MRU", "MWK", "MXN", "MYR",
+            "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "OMR", "PAB", "PEN", "PHP", "PKR", "PLN", "PYG",
+            "QAR", "RON", "RSD", "RUB", "RWF", "SAR", "SEK", "SGD", "SHP", "SYP", "SZL", "THB", "TMT",
+            "TND", "TRY", "TTD", "TWD", "TZS", "UAH", "UGX", "USD", "UYU", "UZS", "VES", "VND", "XAF",
+            "XAG", "XAU", "XCD", "XOF", "XPT", "ZAR", "ZMW"
         )
 
         @Volatile
@@ -106,7 +113,11 @@ class CurrencyManager private constructor(context: Context) {
 
     /** Get the currency symbol for the current currency. */
     fun getCurrentSymbol(): String {
-        return Amount.Currency.fromCode(currentCurrency).symbol
+        return if (YADIO_CURRENCIES.contains(currentCurrency)) {
+            currentCurrency
+        } else {
+            Amount.Currency.fromCode(currentCurrency).symbol
+        }
     }
 
     /** Set the preferred currency and save to preferences. */
@@ -131,22 +142,35 @@ class CurrencyManager private constructor(context: Context) {
     /** Check if a currency code is valid and supported. */
     fun isValidCurrency(currencyCode: String?): Boolean {
         if (currencyCode.isNullOrEmpty()) return false
+        val upperCode = currencyCode.uppercase()
+        if (YADIO_CURRENCIES.contains(upperCode)) return true
         return runCatching {
-            java.util.Currency.getInstance(currencyCode.uppercase())
+            java.util.Currency.getInstance(upperCode)
             true
         }.getOrDefault(false)
     }
 
-    /** Get the API URL for the current currency. Falls back to Coinbase. */
+    /** Get the API URL for the current currency. Uses Yadio.io as primary source. */
     fun getPriceApiUrl(): String {
-        return CUSTOM_APIS[currentCurrency]?.url
-            ?: "${COINBASE_BASE_URL}$currentCurrency/spot"
+        return SPECIAL_APIS[currentCurrency]?.url
+            ?: if (YADIO_CURRENCIES.contains(currentCurrency)) {
+                "${YADIO_BASE_URL}$currentCurrency"
+            } else {
+                "${COINBASE_BASE_URL}$currentCurrency/spot"
+            }
     }
 
     /** Parse a price API response for the current currency. */
     fun parsePriceResponse(response: String): Double {
-        val parser = CUSTOM_APIS[currentCurrency]?.parsePrice ?: COINBASE_PARSER
-        return parser(response)
+        val specialConfig = SPECIAL_APIS[currentCurrency]
+        if (specialConfig != null) {
+            return specialConfig.parsePrice(response)
+        }
+        return if (YADIO_CURRENCIES.contains(currentCurrency)) {
+            YADIO_PARSER(response)
+        } else {
+            COINBASE_PARSER(response)
+        }
     }
 
     /**
