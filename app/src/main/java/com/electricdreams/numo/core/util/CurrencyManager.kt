@@ -63,18 +63,16 @@ class CurrencyManager private constructor(context: Context) {
             )
         )
 
-        /** Currencies supported by Yadio.io */
-        private val YADIO_CURRENCIES = setOf(
-            "AED", "ALL", "ANG", "AOA", "ARS", "AUD", "AWG", "AZN", "BAM", "BBD", "BDT", "BGN", "BHD",
-            "BIF", "BMD", "BOB", "BRL", "BSD", "BTC", "BTN", "BWP", "BYN", "BZD", "CAD", "CDF", "CHF",
-            "CLP", "CNY", "COP", "CRC", "CUP", "CVE", "CZK", "DJF", "DKK", "DOP", "DZD", "EGP", "ERN",
-            "ETB", "EUR", "FKP", "GBP", "GEL", "GHS", "GIP", "GMD", "GNF", "GTQ", "HKD", "HNL", "HUF",
-            "IDR", "ILS", "INR", "IRR", "IRT", "ISK", "JEP", "JMD", "JOD", "JPY", "KES",             "KGS", "KMF",
-            "KRW", "KYD", "KZT", "LBP", "LKR", "LSL", "MAD", "MGA", "MLC", "MOP", "MRU", "MWK", "MXN", "MYR",
-            "NAD", "NGN", "NIO", "NOK", "NPR", "NZD", "OMR", "PAB", "PEN", "PHP", "PKR", "PLN", "PYG",
-            "QAR", "RON", "RSD", "RUB", "RWF", "SAR", "SEK", "SGD", "SHP", "SYP", "SZL", "THB", "TMT",
-            "TND", "TRY", "TTD", "TWD", "TZS", "UAH", "UGX", "USD", "UYU", "UZS", "VES", "VND", "XAF",
-            "XAG", "XAU", "XCD", "XOF", "XPT", "ZAR", "ZMW"
+        /** Currencies that use Yadio.io API (Latin American currencies) */
+        private val YADIO_LATAM_CURRENCIES = setOf(
+            "CUP", "MLC", "ARS", "BOB", "BRL", "CLP", "COP", "CRC", "DOP", "GTQ",
+            "HNL", "MXN", "NIO", "PAB", "PEN", "PYG", "UYU", "VES"
+        )
+
+        /** Currencies that display their code instead of symbol */
+        private val USE_CODE_INSTEAD_OF_SYMBOL = setOf(
+            "DKK", "SEK", "NOK", "COP", "CLP", "ARS", "VES", "IDR", "VND", "KRW",
+            "CUP", "MLC", "JPY", "ISK"
         )
 
         @Volatile
@@ -113,10 +111,11 @@ class CurrencyManager private constructor(context: Context) {
 
     /** Get the currency symbol for the current currency. */
     fun getCurrentSymbol(): String {
-        return if (YADIO_CURRENCIES.contains(currentCurrency)) {
+        val symbol = Amount.Currency.fromCode(currentCurrency).symbol
+        return if (USE_CODE_INSTEAD_OF_SYMBOL.contains(currentCurrency)) {
             currentCurrency
         } else {
-            Amount.Currency.fromCode(currentCurrency).symbol
+            symbol
         }
     }
 
@@ -143,30 +142,39 @@ class CurrencyManager private constructor(context: Context) {
     fun isValidCurrency(currencyCode: String?): Boolean {
         if (currencyCode.isNullOrEmpty()) return false
         val upperCode = currencyCode.uppercase()
-        if (YADIO_CURRENCIES.contains(upperCode)) return true
+        if (YADIO_LATAM_CURRENCIES.contains(upperCode)) return true
         return runCatching {
             java.util.Currency.getInstance(upperCode)
             true
         }.getOrDefault(false)
     }
 
-    /** Get the API URL for the current currency. Uses Yadio.io as primary source. */
+    /** Get the API URL for the current currency. Uses Yadio.io for Latin American currencies. */
     fun getPriceApiUrl(): String {
         return SPECIAL_APIS[currentCurrency]?.url
-            ?: if (YADIO_CURRENCIES.contains(currentCurrency)) {
+            ?: if (YADIO_LATAM_CURRENCIES.contains(currentCurrency)) {
                 "${YADIO_BASE_URL}$currentCurrency"
             } else {
                 "${COINBASE_BASE_URL}$currentCurrency/spot"
             }
     }
 
+    /** Get fallback API URL (Yadio.io) for when primary API fails. */
+    fun getFallbackApiUrl(): String {
+        return "${YADIO_BASE_URL}$currentCurrency"
+    }
+
     /** Parse a price API response for the current currency. */
-    fun parsePriceResponse(response: String): Double {
+    fun parsePriceResponse(response: String, forceYadio: Boolean = false): Double {
         val specialConfig = SPECIAL_APIS[currentCurrency]
         if (specialConfig != null) {
             return specialConfig.parsePrice(response)
         }
-        return if (YADIO_CURRENCIES.contains(currentCurrency)) {
+        
+        // Use Yadio parser for fallback or for Latin American currencies
+        val useYadio = forceYadio || YADIO_LATAM_CURRENCIES.contains(currentCurrency)
+        
+        return if (useYadio) {
             YADIO_PARSER(response)
         } else {
             COINBASE_PARSER(response)

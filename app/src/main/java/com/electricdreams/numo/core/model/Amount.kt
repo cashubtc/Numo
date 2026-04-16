@@ -228,39 +228,31 @@ data class Amount(
     }
 
     /**
-     * Currencies that should display their code instead of symbol (e.g., DKK, SEK, NOK).
+     * Currencies that should display their code instead of symbol (e.g., JPY, KRW).
      */
     private object CurrencyDisplay {
         val USE_CODE_INSTEAD_OF_SYMBOL = setOf(
-            "DKK", "SEK", "NOK", "COP", "CLP", "ARS", "VES", "IDR", "VND", "KRW", 
-            "CUP", "MLC", "JPY", "ISK"
+            "JPY", "KRW", "VND", "IDR", "ISK", "CLP", "COP", "ARS", "VES", "LBP", 
+            "UGX", "GNF", "PYG", "CUP", "MLC"
         )
     }
 
     /**
-     * Get the display prefix for the currency (code or symbol).
-     */
-    private fun getCurrencyPrefix(): String {
-        return if (currency.name in CurrencyDisplay.USE_CODE_INSTEAD_OF_SYMBOL) {
-            currency.name
-        } else {
-            currency.symbol
-        }
-    }
-
-    /**
-     * Format the amount as a string with the currency symbol or code.
+     * Format the amount as a string with the currency symbol.
      * Uses currency-appropriate decimal separator:
      * - USD: $10.50
      * - EUR: €10.50
-     * - DKK: DKK 10.50
+     * - DKK: kr.10.50
+     * - SEK: kr10.00
      * - JPY: JPY 105
      * - BTC: ₿1,000
      */
     override fun toString(): String {
-        val useCode = currency.name in CurrencyDisplay.USE_CODE_INSTEAD_OF_SYMBOL
-        val prefix = if (useCode) currency.name else currency.symbol
-        val separator = if (useCode) " " else ""
+        val prefix = if (currency.name in CurrencyDisplay.USE_CODE_INSTEAD_OF_SYMBOL) {
+            currency.name
+        } else {
+            currency.symbol
+        }
         
         return when {
             currency.isBtc -> {
@@ -270,13 +262,13 @@ data class Amount(
             currency.isZeroDecimal() -> {
                 val major = value / 100.0
                 val formatter = NumberFormat.getIntegerInstance(currency.getLocale())
-                "$prefix$separator${formatter.format(major.toLong())}"
+                "${prefix}${formatter.format(major.toLong())}"
             }
             else -> {
                 val major = value / 100.0
                 val symbols = DecimalFormatSymbols(currency.getLocale())
                 val formatter = DecimalFormat("#,##0.00", symbols)
-                "$prefix$separator${formatter.format(major)}"
+                "${prefix}${formatter.format(major)}"
             }
         }
     }

@@ -115,12 +115,12 @@ class CurrencyManagerTest {
     
     @Test
     fun `getPriceApiUrl returns correct URL`() {
-        // Yadio.io is now the primary API for most currencies
+        // Most currencies use Coinbase
         currencyManager.setPreferredCurrency("EUR")
-        assertEquals("https://api.yadio.io/rate/BTC/EUR", currencyManager.getPriceApiUrl())
+        assertEquals("https://api.coinbase.com/v2/prices/BTC-EUR/spot", currencyManager.getPriceApiUrl())
 
         currencyManager.setPreferredCurrency("USD")
-        assertEquals("https://api.yadio.io/rate/BTC/USD", currencyManager.getPriceApiUrl())
+        assertEquals("https://api.coinbase.com/v2/prices/BTC-USD/spot", currencyManager.getPriceApiUrl())
 
         // Special APIs still used for JPY and KRW
         currencyManager.setPreferredCurrency("JPY")
@@ -131,6 +131,22 @@ class CurrencyManagerTest {
     }
 
     @Test
+    fun `getPriceApiUrl returns Yadio URL for Latin American currencies`() {
+        // Latin American currencies use Yadio.io
+        currencyManager.setPreferredCurrency("CUP")
+        assertEquals("https://api.yadio.io/rate/BTC/CUP", currencyManager.getPriceApiUrl())
+
+        currencyManager.setPreferredCurrency("ARS")
+        assertEquals("https://api.yadio.io/rate/BTC/ARS", currencyManager.getPriceApiUrl())
+
+        currencyManager.setPreferredCurrency("COP")
+        assertEquals("https://api.yadio.io/rate/BTC/COP", currencyManager.getPriceApiUrl())
+
+        currencyManager.setPreferredCurrency("MXN")
+        assertEquals("https://api.yadio.io/rate/BTC/MXN", currencyManager.getPriceApiUrl())
+    }
+
+    @Test
     fun `isValidCurrency supports Nordic currencies`() {
         assertTrue(currencyManager.isValidCurrency("DKK"))
         assertTrue(currencyManager.isValidCurrency("SEK"))
@@ -138,28 +154,28 @@ class CurrencyManagerTest {
     }
 
     @Test
-    fun `getCurrentSymbol returns correct symbols for Nordic currencies`() {
+    fun `getCurrentSymbol returns symbol for Nordic currencies`() {
         currencyManager.setPreferredCurrency("DKK")
-        assertEquals("DKK", currencyManager.getCurrentSymbol())
+        assertEquals("kr.", currencyManager.getCurrentSymbol())
 
         currencyManager.setPreferredCurrency("SEK")
-        assertEquals("SEK", currencyManager.getCurrentSymbol())
+        assertEquals("kr", currencyManager.getCurrentSymbol())
 
         currencyManager.setPreferredCurrency("NOK")
-        assertEquals("NOK", currencyManager.getCurrentSymbol())
+        assertEquals("kr", currencyManager.getCurrentSymbol())
     }
 
     @Test
-    fun `getPriceApiUrl returns correct URL for Nordic currencies`() {
-        // Nordic currencies now use Yadio.io
+    fun `getPriceApiUrl returns Coinbase URL for Nordic currencies`() {
+        // Nordic currencies use Coinbase
         currencyManager.setPreferredCurrency("DKK")
-        assertEquals("https://api.yadio.io/rate/BTC/DKK", currencyManager.getPriceApiUrl())
+        assertEquals("https://api.coinbase.com/v2/prices/BTC-DKK/spot", currencyManager.getPriceApiUrl())
 
         currencyManager.setPreferredCurrency("SEK")
-        assertEquals("https://api.yadio.io/rate/BTC/SEK", currencyManager.getPriceApiUrl())
+        assertEquals("https://api.coinbase.com/v2/prices/BTC-SEK/spot", currencyManager.getPriceApiUrl())
 
         currencyManager.setPreferredCurrency("NOK")
-        assertEquals("https://api.yadio.io/rate/BTC/NOK", currencyManager.getPriceApiUrl())
+        assertEquals("https://api.coinbase.com/v2/prices/BTC-NOK/spot", currencyManager.getPriceApiUrl())
     }
 
     @Test

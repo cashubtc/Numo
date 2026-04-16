@@ -127,17 +127,17 @@ class AmountTest {
     }
 
     @Test
-    fun `toString formats Nordic currencies with code`() {
+    fun `toString formats Nordic currencies with symbol`() {
         Locale.setDefault(Locale.US)
         
         val dkk = Amount(9950, Amount.Currency.DKK) // 99.50 DKK
-        assertEquals("DKK 99.50", dkk.toString())
+        assertEquals("kr.99.50", dkk.toString())
         
         val sek = Amount(5000, Amount.Currency.SEK) // 50.00 SEK
-        assertEquals("SEK 50.00", sek.toString())
+        assertEquals("kr50.00", sek.toString())
         
         val nok = Amount(7500, Amount.Currency.NOK) // 75.00 NOK
-        assertEquals("NOK 75.00", nok.toString())
+        assertEquals("kr75.00", nok.toString())
     }
 
     @Test
