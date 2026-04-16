@@ -95,6 +95,14 @@ class CurrencyManagerTest {
     }
 
     @Test
+    fun `isValidCurrency supports CUP and MLC`() {
+        assertTrue(currencyManager.isValidCurrency("CUP"))
+        assertTrue(currencyManager.isValidCurrency("MLC"))
+        assertTrue(currencyManager.isValidCurrency("cup"))
+        assertTrue(currencyManager.isValidCurrency("mlc"))
+    }
+
+    @Test
     fun `formatCurrencyAmount formats correctly for locale`() {
         currencyManager.setPreferredCurrency("USD")
         assertEquals("\$10.50", currencyManager.formatCurrencyAmount(10.50))

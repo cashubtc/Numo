@@ -111,4 +111,57 @@ class AmountTest {
             Locale.setDefault(originalLocale)
         }
     }
+
+    @Test
+    fun `toString formats CUP currency with code`() {
+        Locale.setDefault(Locale.US)
+        val cup = Amount(2500, Amount.Currency.CUP) // 25.00 CUP
+        assertEquals("CUP 25.00", cup.toString())
+    }
+
+    @Test
+    fun `toString formats MLC currency with code`() {
+        Locale.setDefault(Locale.US)
+        val mlc = Amount(1500, Amount.Currency.MLC) // 15.00 MLC
+        assertEquals("MLC 15.00", mlc.toString())
+    }
+
+    @Test
+    fun `toString formats Nordic currencies with code`() {
+        Locale.setDefault(Locale.US)
+        
+        val dkk = Amount(9950, Amount.Currency.DKK) // 99.50 DKK
+        assertEquals("DKK 99.50", dkk.toString())
+        
+        val sek = Amount(5000, Amount.Currency.SEK) // 50.00 SEK
+        assertEquals("SEK 50.00", sek.toString())
+        
+        val nok = Amount(7500, Amount.Currency.NOK) // 75.00 NOK
+        assertEquals("NOK 75.00", nok.toString())
+    }
+
+    @Test
+    fun `toStringWithoutSymbol formats correctly`() {
+        Locale.setDefault(Locale.US)
+        
+        val usd = Amount(1050, Amount.Currency.USD)
+        assertEquals("10.50", usd.toStringWithoutSymbol())
+        
+        val jpy = Amount(10500, Amount.Currency.JPY)
+        assertEquals("105", jpy.toStringWithoutSymbol())
+    }
+
+    @Test
+    fun `parse CUP currency`() {
+        val cup = Amount.parse("CUP 25.00")
+        assertEquals(Amount.Currency.CUP, cup?.currency)
+        assertEquals(2500L, cup?.value)
+    }
+
+    @Test
+    fun `parse MLC currency`() {
+        val mlc = Amount.parse("MLC 15.00")
+        assertEquals(Amount.Currency.MLC, mlc?.currency)
+        assertEquals(1500L, mlc?.value)
+    }
 }
