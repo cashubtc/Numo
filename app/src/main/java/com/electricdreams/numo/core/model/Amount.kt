@@ -248,11 +248,9 @@ data class Amount(
      * - BTC: ₿1,000
      */
     override fun toString(): String {
-        val prefix = if (currency.name in CurrencyDisplay.USE_CODE_INSTEAD_OF_SYMBOL) {
-            currency.name
-        } else {
-            currency.symbol
-        }
+        val useCode = currency.name in CurrencyDisplay.USE_CODE_INSTEAD_OF_SYMBOL
+        val prefix = if (useCode) currency.name else currency.symbol
+        val separator = if (useCode) " " else ""
         
         return when {
             currency.isBtc -> {
@@ -262,13 +260,13 @@ data class Amount(
             currency.isZeroDecimal() -> {
                 val major = value / 100.0
                 val formatter = NumberFormat.getIntegerInstance(currency.getLocale())
-                "${prefix}${formatter.format(major.toLong())}"
+                "$prefix$separator${formatter.format(major.toLong())}"
             }
             else -> {
                 val major = value / 100.0
                 val symbols = DecimalFormatSymbols(currency.getLocale())
                 val formatter = DecimalFormat("#,##0.00", symbols)
-                "${prefix}${formatter.format(major)}"
+                "$prefix$separator${formatter.format(major)}"
             }
         }
     }

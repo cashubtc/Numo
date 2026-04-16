@@ -50,7 +50,7 @@ class CurrencyManagerTest {
         currencyManager = CurrencyManager.getInstance(context)
 
         assertEquals("USD", currencyManager.getCurrentCurrency())
-        assertEquals("USD", currencyManager.getCurrentSymbol())
+        assertEquals("$", currencyManager.getCurrentSymbol())
     }
 
     @Test
@@ -68,7 +68,7 @@ class CurrencyManagerTest {
         assertTrue(success)
         assertTrue(callbackCalled)
         assertEquals("EUR", currencyManager.getCurrentCurrency())
-        assertEquals("EUR", currencyManager.getCurrentSymbol())
+        assertEquals("€", currencyManager.getCurrentSymbol())
     }
 
     @Test
@@ -154,15 +154,15 @@ class CurrencyManagerTest {
     }
 
     @Test
-    fun `getCurrentSymbol returns symbol for Nordic currencies`() {
+    fun `getCurrentSymbol returns code for Nordic currencies`() {
         currencyManager.setPreferredCurrency("DKK")
-        assertEquals("kr.", currencyManager.getCurrentSymbol())
+        assertEquals("DKK", currencyManager.getCurrentSymbol())
 
         currencyManager.setPreferredCurrency("SEK")
-        assertEquals("kr", currencyManager.getCurrentSymbol())
+        assertEquals("SEK", currencyManager.getCurrentSymbol())
 
         currencyManager.setPreferredCurrency("NOK")
-        assertEquals("kr", currencyManager.getCurrentSymbol())
+        assertEquals("NOK", currencyManager.getCurrentSymbol())
     }
 
     @Test
@@ -197,12 +197,12 @@ class CurrencyManagerTest {
     }
 
     @Test
-    fun `parsePriceResponse parses Yadio response for USD`() {
+    fun `parsePriceResponse parses Yadio response for USD with forceYadio`() {
         currencyManager.setPreferredCurrency("USD")
         // Yadio response format: rate = BTC per 1 USD, so we invert it
         // 1 / 97500.50 = 1.025635765970e-5
         val yadioResponse = """{"rate":1.025635765970e-5,"timestamp":1776302704254}"""
-        assertEquals(97500.50, currencyManager.parsePriceResponse(yadioResponse), 0.01)
+        assertEquals(97500.50, currencyManager.parsePriceResponse(yadioResponse, forceYadio = true), 0.01)
     }
 
     @Test
