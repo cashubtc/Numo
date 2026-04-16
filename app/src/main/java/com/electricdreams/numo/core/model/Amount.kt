@@ -251,14 +251,17 @@ data class Amount(
     /**
      * Format the amount as a string with the currency symbol or code.
      * Uses currency-appropriate decimal separator:
-     * - USD: $4.20
-     * - EUR: €4,20
-     * - DKK: DKK 4.20
-     * - JPY: JPY 420
+     * - USD: $10.50
+     * - EUR: €10.50
+     * - DKK: DKK 10.50
+     * - JPY: JPY 105
      * - BTC: ₿1,000
      */
     override fun toString(): String {
-        val prefix = getCurrencyPrefix()
+        val useCode = currency.name in CurrencyDisplay.USE_CODE_INSTEAD_OF_SYMBOL
+        val prefix = if (useCode) currency.name else currency.symbol
+        val separator = if (useCode) " " else ""
+        
         return when {
             currency.isBtc -> {
                 val formatter = NumberFormat.getNumberInstance(currency.getLocale())
@@ -267,13 +270,13 @@ data class Amount(
             currency.isZeroDecimal() -> {
                 val major = value / 100.0
                 val formatter = NumberFormat.getIntegerInstance(currency.getLocale())
-                "$prefix ${formatter.format(major.toLong())}"
+                "$prefix$separator${formatter.format(major.toLong())}"
             }
             else -> {
                 val major = value / 100.0
                 val symbols = DecimalFormatSymbols(currency.getLocale())
                 val formatter = DecimalFormat("#,##0.00", symbols)
-                "$prefix ${formatter.format(major)}"
+                "$prefix$separator${formatter.format(major)}"
             }
         }
     }

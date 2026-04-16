@@ -103,9 +103,9 @@ class AmountTest {
             val usdDe = Amount(1050, Amount.Currency.USD)
             assertEquals("$10,50", usdDe.toString())
             
-            // Test zero-decimal behavior (regardless of locale, JPY has no decimals)
+            // Test zero-decimal behavior (JPY uses code instead of symbol)
             val jpy = Amount(10500, Amount.Currency.JPY) // 10500 cents = 105 JPY
-            assertEquals("¥105", jpy.toString())
+            assertEquals("JPY 105", jpy.toString())
 
         } finally {
             Locale.setDefault(originalLocale)

@@ -50,7 +50,7 @@ class CurrencyManagerTest {
         currencyManager = CurrencyManager.getInstance(context)
 
         assertEquals("USD", currencyManager.getCurrentCurrency())
-        assertEquals("$", currencyManager.getCurrentSymbol())
+        assertEquals("USD", currencyManager.getCurrentSymbol())
     }
 
     @Test
@@ -68,7 +68,7 @@ class CurrencyManagerTest {
         assertTrue(success)
         assertTrue(callbackCalled)
         assertEquals("EUR", currencyManager.getCurrentCurrency())
-        assertEquals("€", currencyManager.getCurrentSymbol())
+        assertEquals("EUR", currencyManager.getCurrentSymbol())
     }
 
     @Test
@@ -97,22 +97,24 @@ class CurrencyManagerTest {
     @Test
     fun `formatCurrencyAmount formats correctly for locale`() {
         currencyManager.setPreferredCurrency("USD")
-        assertEquals("$10.50", currencyManager.formatCurrencyAmount(10.50))
+        assertEquals("USD 10.50", currencyManager.formatCurrencyAmount(10.50))
         
         currencyManager.setPreferredCurrency("EUR")
-        // Amount class formatting might depend on locale, but let's check basic symbol
+        // Amount class formatting might depend on locale, but let's check basic code
         val formatted = currencyManager.formatCurrencyAmount(10.50)
-        assertTrue(formatted.contains("€"))
+        assertTrue(formatted.contains("EUR"))
     }
     
     @Test
     fun `getPriceApiUrl returns correct URL`() {
+        // Yadio.io is now the primary API for most currencies
         currencyManager.setPreferredCurrency("EUR")
-        assertEquals("https://api.coinbase.com/v2/prices/BTC-EUR/spot", currencyManager.getPriceApiUrl())
+        assertEquals("https://api.yadio.io/rate/BTC/EUR", currencyManager.getPriceApiUrl())
 
         currencyManager.setPreferredCurrency("USD")
-        assertEquals("https://api.coinbase.com/v2/prices/BTC-USD/spot", currencyManager.getPriceApiUrl())
+        assertEquals("https://api.yadio.io/rate/BTC/USD", currencyManager.getPriceApiUrl())
 
+        // Special APIs still used for JPY and KRW
         currencyManager.setPreferredCurrency("JPY")
         assertEquals("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=jpy", currencyManager.getPriceApiUrl())
 
@@ -130,25 +132,26 @@ class CurrencyManagerTest {
     @Test
     fun `getCurrentSymbol returns correct symbols for Nordic currencies`() {
         currencyManager.setPreferredCurrency("DKK")
-        assertEquals("kr.", currencyManager.getCurrentSymbol())
+        assertEquals("DKK", currencyManager.getCurrentSymbol())
 
         currencyManager.setPreferredCurrency("SEK")
-        assertEquals("kr", currencyManager.getCurrentSymbol())
+        assertEquals("SEK", currencyManager.getCurrentSymbol())
 
         currencyManager.setPreferredCurrency("NOK")
-        assertEquals("kr", currencyManager.getCurrentSymbol())
+        assertEquals("NOK", currencyManager.getCurrentSymbol())
     }
 
     @Test
     fun `getPriceApiUrl returns correct URL for Nordic currencies`() {
+        // Nordic currencies now use Yadio.io
         currencyManager.setPreferredCurrency("DKK")
-        assertEquals("https://api.coinbase.com/v2/prices/BTC-DKK/spot", currencyManager.getPriceApiUrl())
+        assertEquals("https://api.yadio.io/rate/BTC/DKK", currencyManager.getPriceApiUrl())
 
         currencyManager.setPreferredCurrency("SEK")
-        assertEquals("https://api.coinbase.com/v2/prices/BTC-SEK/spot", currencyManager.getPriceApiUrl())
+        assertEquals("https://api.yadio.io/rate/BTC/SEK", currencyManager.getPriceApiUrl())
 
         currencyManager.setPreferredCurrency("NOK")
-        assertEquals("https://api.coinbase.com/v2/prices/BTC-NOK/spot", currencyManager.getPriceApiUrl())
+        assertEquals("https://api.yadio.io/rate/BTC/NOK", currencyManager.getPriceApiUrl())
     }
 
     @Test
@@ -159,7 +162,7 @@ class CurrencyManagerTest {
     @Test
     fun `getCurrentSymbol returns correct symbol for KRW`() {
         currencyManager.setPreferredCurrency("KRW")
-        assertEquals("₩", currencyManager.getCurrentSymbol())
+        assertEquals("KRW", currencyManager.getCurrentSymbol())
     }
 
     @Test
@@ -170,10 +173,11 @@ class CurrencyManagerTest {
     }
 
     @Test
-    fun `parsePriceResponse parses Coinbase response for USD`() {
+    fun `parsePriceResponse parses Yadio response for USD`() {
         currencyManager.setPreferredCurrency("USD")
-        val coinbaseResponse = """{"data":{"amount":97500.50}}"""
-        assertEquals(97500.50, currencyManager.parsePriceResponse(coinbaseResponse), 0.01)
+        // Yadio response format: rate = BTC per 1 USD, so we invert it
+        val yadioResponse = """{"rate":1.025641e-5,"timestamp":1776302704254}"""
+        assertEquals(97500.50, currencyManager.parsePriceResponse(yadioResponse), 0.01)
     }
 
     @Test
