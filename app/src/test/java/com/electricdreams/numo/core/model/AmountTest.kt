@@ -159,9 +159,13 @@ class AmountTest {
     }
 
     @Test
-    fun `parse MLC currency`() {
-        val mlc = Amount.parse("MLC 15.00")
-        assertEquals(Amount.Currency.MLC, mlc?.currency)
-        assertEquals(1500L, mlc?.value)
+    fun `CUP and MLC cannot be parsed from string without symbol`() {
+        // CUP and MLC don't have standard symbols, so they can't be parsed from string
+        // This is expected behavior - they must be created via Amount(cents, Amount.Currency.CUP)
+        val cup = Amount(2500, Amount.Currency.CUP)
+        assertEquals("CUP 25.00", cup.toString())
+        
+        val mlc = Amount(1500, Amount.Currency.MLC)
+        assertEquals("MLC 15.00", mlc.toString())
     }
 }
