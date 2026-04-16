@@ -77,6 +77,10 @@ data class Amount(
             val NOK = Currency("NOK", "kr")
             @JvmField
             val KRW = Currency("KRW", "₩")
+            @JvmField
+            val CUP = Currency("CUP", "₱")
+            @JvmField
+            val MLC = Currency("MLC", "MLC$")
             
             private val cache = java.util.concurrent.ConcurrentHashMap<String, Currency>()
             
@@ -118,6 +122,8 @@ data class Amount(
                         "SEK" -> SEK
                         "NOK" -> NOK
                         "KRW" -> KRW
+                        "CUP" -> CUP
+                        "MLC" -> MLC
                         else -> cache.getOrPut(upperCode) {
                             runCatching {
                                 val javaCurrency = JavaCurrency.getInstance(upperCode)

@@ -30,6 +30,8 @@ class CurrencyManager private constructor(context: Context) {
         const val CURRENCY_SEK = "SEK"
         const val CURRENCY_NOK = "NOK"
         const val CURRENCY_KRW = "KRW"
+        const val CURRENCY_CUP = "CUP"
+        const val CURRENCY_MLC = "MLC"
 
         // Default currency is USD
         private const val DEFAULT_CURRENCY = CURRENCY_USD
@@ -52,6 +54,18 @@ class CurrencyManager private constructor(context: Context) {
                 url = "https://api.upbit.com/v1/ticker?markets=KRW-BTC",
                 parsePrice = { response ->
                     JSONArray(response).getJSONObject(0).getDouble("trade_price")
+                }
+            ),
+            CURRENCY_CUP to PriceApiConfig(
+                url = "https://api.yadio.io/rate/BTC/CUP",
+                parsePrice = { response ->
+                    1.0 / JSONObject(response).getDouble("rate")
+                }
+            ),
+            CURRENCY_MLC to PriceApiConfig(
+                url = "https://api.yadio.io/rate/BTC/MLC",
+                parsePrice = { response ->
+                    1.0 / JSONObject(response).getDouble("rate")
                 }
             ),
         )
