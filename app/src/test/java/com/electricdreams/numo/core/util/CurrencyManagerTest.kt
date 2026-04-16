@@ -97,12 +97,12 @@ class CurrencyManagerTest {
     @Test
     fun `formatCurrencyAmount formats correctly for locale`() {
         currencyManager.setPreferredCurrency("USD")
-        assertEquals("USD 10.50", currencyManager.formatCurrencyAmount(10.50))
+        assertEquals("\$10.50", currencyManager.formatCurrencyAmount(10.50))
         
         currencyManager.setPreferredCurrency("EUR")
-        // Amount class formatting might depend on locale, but let's check basic code
+        // Amount class formatting might depend on locale, but let's check basic symbol
         val formatted = currencyManager.formatCurrencyAmount(10.50)
-        assertTrue(formatted.contains("EUR"))
+        assertTrue(formatted.contains("€"))
     }
     
     @Test
@@ -176,7 +176,8 @@ class CurrencyManagerTest {
     fun `parsePriceResponse parses Yadio response for USD`() {
         currencyManager.setPreferredCurrency("USD")
         // Yadio response format: rate = BTC per 1 USD, so we invert it
-        val yadioResponse = """{"rate":1.025641e-5,"timestamp":1776302704254}"""
+        // 1 / 97500.50 = 1.02564e-5
+        val yadioResponse = """{"rate":1.02564e-5,"timestamp":1776302704254}"""
         assertEquals(97500.50, currencyManager.parsePriceResponse(yadioResponse), 0.01)
     }
 
