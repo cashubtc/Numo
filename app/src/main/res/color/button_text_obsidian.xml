@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Text color for the POS submit button when the Obsidian theme is active.
+    Background (bg_button_white) auto-inverts between light and night modes,
+    so we use color_text_primary — a theme-aware token that matches.
+-->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Disabled state - white text -->
-    <item android:state_enabled="false" android:color="#FFFFFF" />
-    <!-- Enabled state - black text -->
-    <item android:color="#000000" />
+    <item android:state_enabled="false" android:color="#4DFFFFFF" />
+    <item android:color="@color/color_text_primary" />
 </selector>
-

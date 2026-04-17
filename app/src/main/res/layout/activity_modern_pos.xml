@@ -188,19 +188,12 @@
         <!-- Single Charge Button -->
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/submit_button"
+            style="@style/Widget.Numo.Button.Charge"
             android:layout_width="match_parent"
             android:layout_height="@dimen/button_height"
             android:layout_marginHorizontal="@dimen/space_xl"
             android:layout_marginBottom="@dimen/space_xl"
-            android:background="@drawable/bg_button_charge"
             android:text="@string/pos_charge_button"
-            android:textAllCaps="false"
-            android:textColor="@color/color_text_on_dark"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:elevation="0dp"
-            android:stateListAnimator="@null"
-            android:backgroundTint="@null"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />

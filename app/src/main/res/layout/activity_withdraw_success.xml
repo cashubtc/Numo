@@ -82,15 +82,12 @@
     <!-- Close button at bottom (full width, grey background) -->
     <Button
         android:id="@+id/close_button"
+        style="@style/Widget.Numo.Button.Secondary.Gray"
         android:layout_width="match_parent"
         android:layout_height="@dimen/button_height"
         android:layout_marginHorizontal="@dimen/space_xl"
         android:layout_marginBottom="@dimen/space_xl"
-        android:background="@drawable/bg_button_secondary_gray"
         android:text="@string/withdraw_success_close"
-        android:textAllCaps="false"
-        android:textAppearance="@style/Text.Subtitle"
-        android:textColor="@color/color_bg_white"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

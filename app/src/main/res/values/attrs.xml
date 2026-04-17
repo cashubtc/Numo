@@ -6,4 +6,13 @@
         <attr name="keypadButtonPressedColor" format="color"/>
         <attr name="inputBoxStrokeColor" format="color"/>
     </declare-styleable>
+
+    <declare-styleable name="NumoTopBar">
+        <attr name="topBarTitle" format="string|reference" />
+        <attr name="topBarNavIcon" format="reference" />
+        <attr name="topBarNavContentDescription" format="string|reference" />
+        <attr name="topBarActionIcon" format="reference" />
+        <attr name="topBarActionContentDescription" format="string|reference" />
+        <attr name="topBarActionTint" format="color|reference" />
+    </declare-styleable>
 </resources>

@@ -119,30 +119,24 @@
     <!-- Try Again button (primary action) -->
     <Button
         android:id="@+id/try_again_button"
+        style="@style/Widget.Numo.Button.Primary.Black"
         android:layout_width="match_parent"
         android:layout_height="@dimen/button_height"
         android:layout_marginHorizontal="@dimen/space_xl"
         android:layout_marginBottom="@dimen/space_s"
-        android:background="@drawable/bg_button_primary_black"
         android:text="@string/payment_failure_button_try_again"
-        android:textAllCaps="false"
-        android:textColor="@color/color_bg_white"
-        android:textSize="16sp"
-        android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/close_button" />
 
     <!-- Close button at bottom (secondary) -->
     <Button
         android:id="@+id/close_button"
+        style="@style/Widget.Numo.Button.Tertiary"
         android:layout_width="match_parent"
         android:layout_height="@dimen/button_height"
         android:layout_marginHorizontal="@dimen/space_xl"
         android:layout_marginBottom="@dimen/space_xl"
-        android:background="?attr/selectableItemBackground"
         android:text="@string/payment_failure_button_close"
-        android:textAllCaps="false"
         android:textColor="@color/color_text_secondary"
-        android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent" />
 

@@ -117,16 +117,13 @@
     <!-- Close button at bottom (full width, grey background) -->
     <Button
         android:id="@+id/close_button"
+        style="@style/Widget.Numo.Button.Secondary.Gray"
         android:layout_width="match_parent"
         android:layout_height="@dimen/button_height"
         android:layout_marginHorizontal="@dimen/space_xl"
         android:layout_marginBottom="@dimen/space_xl"
-        android:background="@drawable/bg_button_secondary_gray"
         android:text="@string/payment_received_button_close"
-        android:textAllCaps="false"
-        android:textColor="@color/color_bg_white"
         android:textSize="18sp"
-        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

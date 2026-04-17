@@ -188,15 +188,12 @@
                     android:layout_height="48dp"
                     android:layout_marginTop="@dimen/row_icon_gap">
 
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatButton
                         android:id="@+id/add_button"
+                        style="@style/Widget.Button.Primary.Green"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="@drawable/bg_button_primary_green"
-                        android:gravity="center"
                         android:text="@string/mints_add_button"
-                        android:textAppearance="@style/Text.BodyBold"
-                        android:textColor="@color/color_bg_white"
                         android:enabled="false"
                         android:alpha="0.5" />
 

@@ -270,6 +270,93 @@
         <item name="rippleColor">@color/color_white_10</item>
     </style>
 
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Primary action variants                                   -->
+    <!-- Use these instead of inlining android:background=@drawable -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <!-- Onboarding primary CTA: white pill on dark brand backdrop; text auto-inverts in dark mode -->
+    <style name="Widget.Numo.Button.Onboarding.Primary" parent="Widget.Numo.Button">
+        <item name="android:background">@drawable/bg_button_white</item>
+        <item name="android:textColor">@color/button_text_onboarding</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- Onboarding secondary/tertiary: transparent fill with white text on dark backdrop -->
+    <style name="Widget.Numo.Button.Onboarding.Tertiary" parent="Widget.Numo.Button">
+        <item name="android:background">@drawable/bg_button_tertiary_dark</item>
+        <item name="android:textColor">@color/color_text_on_dark</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- Secondary gray: tertiary-dark-style pill used as dismiss action on success/failure screens -->
+    <style name="Widget.Numo.Button.Secondary.Gray" parent="Widget.Numo.Button">
+        <item name="android:background">@drawable/bg_button_secondary_gray</item>
+        <item name="android:textColor">@color/color_bg_white</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">@dimen/text_button</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- Primary black: strong CTA for failure / retry screens -->
+    <style name="Widget.Numo.Button.Primary.Black" parent="Widget.Numo.Button">
+        <item name="android:background">@drawable/bg_button_primary_black</item>
+        <item name="android:textColor">@color/color_bg_white</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">@dimen/text_button</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- Charge: POS primary action; theme-aware via bg_button_charge drawable -->
+    <style name="Widget.Numo.Button.Charge" parent="Widget.Numo.Button">
+        <item name="android:background">@drawable/bg_button_charge</item>
+        <item name="android:textColor">@color/color_text_on_dark</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- Empty state primary: inline CTA shown in zero-state layouts -->
+    <style name="Widget.Numo.Button.EmptyState.Primary" parent="Widget.Numo.Button">
+        <item name="android:background">@drawable/bg_button_empty_state_primary</item>
+        <item name="android:textColor">@color/empty_state_button_primary_text</item>
+        <item name="android:textAppearance">@style/Text.Button</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="elevation">0dp</item>
+    </style>
+
     <!-- TextInputLayout: Outlined input (standard across all screens) -->
     <style name="Widget.Numo.TextInputLayout.OutlinedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="boxCornerRadiusTopStart">@dimen/radius_input</item>

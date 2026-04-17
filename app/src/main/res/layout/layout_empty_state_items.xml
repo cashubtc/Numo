@@ -95,15 +95,11 @@
             <!-- Primary Button - Add Item -->
             <Button
                 android:id="@+id/empty_state_add_button"
+                style="@style/Widget.Numo.Button.EmptyState.Primary"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/button_height"
                 android:layout_marginTop="@dimen/space_xl"
-                android:background="@drawable/bg_button_empty_state_primary"
-                android:text="@string/empty_state_items_add_button"
-                android:textAppearance="@style/Text.Button"
-                android:textColor="@color/empty_state_button_primary_text"
-                android:textAllCaps="false"
-                android:stateListAnimator="@null" />
+                android:text="@string/empty_state_items_add_button" />
 
             <!-- Secondary Button - Import from CSV -->
             <TextView

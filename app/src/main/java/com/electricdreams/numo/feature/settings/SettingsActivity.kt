@@ -65,7 +65,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        findViewById<View?>(R.id.back_button)?.setOnClickListener { finish() }
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
 
         // === Terminal Section ===
         
