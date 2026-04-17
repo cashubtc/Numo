@@ -40,98 +40,26 @@
                 android:text="@string/settings_section_terminal"
                 android:textAppearance="@style/Text.SectionHeader" />
 
-            <!-- Items -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/items_settings_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
+                app:rowIcon="@drawable/ic_catalog"
+                app:rowTitle="@string/settings_item_items_title" />
 
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_catalog"
-                    app:tint="@color/color_icon_secondary" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/settings_item_items_title"
-                    android:textAppearance="@style/Text.RowTitle" />
-
-
-            </LinearLayout>
-
-            <!-- Tips -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/tips_settings_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
+                app:rowIcon="@drawable/ic_tip"
+                app:rowTitle="@string/settings_item_tips_title" />
 
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_tip"
-                    app:tint="@color/color_icon_secondary" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/settings_item_tips_title"
-                    android:textAppearance="@style/Text.RowTitle" />
-
-
-            </LinearLayout>
-
-            <!-- Basket Names -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/basket_names_settings_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_shopping_bag"
-                    app:tint="@color/color_icon_secondary" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/settings_item_basket_names_title"
-                    android:textAppearance="@style/Text.RowTitle" />
-
-
-            </LinearLayout>
+                app:rowIcon="@drawable/ic_shopping_bag"
+                app:rowTitle="@string/settings_item_basket_names_title" />
 
             <!-- ================= -->
             <!-- PAYMENTS SECTION -->
@@ -146,129 +74,33 @@
                 android:text="@string/settings_section_payments"
                 android:textAppearance="@style/Text.SectionHeader" />
 
-            <!-- Fiat Currency -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/currency_settings_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
+                app:rowIcon="@drawable/ic_switch_currency"
+                app:rowTitle="@string/settings_item_currency_title" />
 
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_switch_currency"
-                    app:tint="@color/color_icon_secondary" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/settings_item_currency_title"
-                    android:textAppearance="@style/Text.RowTitle" />
-
-
-            </LinearLayout>
-
-            <!-- Mints -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/mints_settings_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
+                app:rowIcon="@drawable/ic_bank"
+                app:rowTitle="@string/settings_item_mints_title" />
 
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_bank"
-                    app:tint="@color/color_icon_secondary" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/settings_item_mints_title"
-                    android:textAppearance="@style/Text.RowTitle" />
-
-
-            </LinearLayout>
-
-            <!-- Webhooks -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/webhooks_settings_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
+                app:rowIcon="@drawable/ic_link"
+                app:rowTitle="@string/settings_item_webhooks_title" />
 
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_link"
-                    app:tint="@color/color_icon_secondary" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/settings_item_webhooks_title"
-                    android:textAppearance="@style/Text.RowTitle" />
-
-
-            </LinearLayout>
-
-            <!-- Withdrawals -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/withdrawals_settings_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_lightning_bolt"
-                    app:tint="@color/color_icon_secondary" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/settings_item_withdrawals_title"
-                    android:textAppearance="@style/Text.RowTitle" />
-
-
-            </LinearLayout>
+                app:rowIcon="@drawable/ic_lightning_bolt"
+                app:rowTitle="@string/settings_item_withdrawals_title" />
 
             <!-- =========================== -->
             <!-- SECURITY & PRIVACY SECTION -->
@@ -283,36 +115,12 @@
                 android:text="@string/settings_section_security"
                 android:textAppearance="@style/Text.SectionHeader" />
 
-            <!-- Security -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/security_settings_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_shield"
-                    app:tint="@color/color_icon_secondary" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/settings_item_security_title"
-                    android:textAppearance="@style/Text.RowTitle" />
-
-
-            </LinearLayout>
+                app:rowIcon="@drawable/ic_shield"
+                app:rowTitle="@string/settings_item_security_title" />
 
             <!-- =============== -->
             <!-- GENERAL SECTION -->
@@ -327,98 +135,26 @@
                 android:text="@string/settings_section_general"
                 android:textAppearance="@style/Text.SectionHeader" />
 
-            <!-- Language -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/language_settings_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
+                app:rowIcon="@drawable/ic_language"
+                app:rowTitle="@string/settings_item_language_title" />
 
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_language"
-                    app:tint="@color/color_icon_secondary" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/settings_item_language_title"
-                    android:textAppearance="@style/Text.RowTitle" />
-
-
-            </LinearLayout>
-
-            <!-- Theme -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/theme_settings_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
+                app:rowIcon="@drawable/ic_dark_mode"
+                app:rowTitle="@string/settings_item_theme_title" />
 
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_dark_mode"
-                    app:tint="@color/color_icon_secondary" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/settings_item_theme_title"
-                    android:textAppearance="@style/Text.RowTitle" />
-
-
-            </LinearLayout>
-
-            <!-- About -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/about_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_info"
-                    app:tint="@color/color_icon_secondary" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/settings_item_about_title"
-                    android:textAppearance="@style/Text.RowTitle" />
-
-
-            </LinearLayout>
+                app:rowIcon="@drawable/ic_info"
+                app:rowTitle="@string/settings_item_about_title" />
 
             <!-- ==================== -->
             <!-- DEVELOPER SECTION (hidden by default) -->
@@ -440,36 +176,12 @@
                     android:text="@string/settings_section_developer"
                     android:textAppearance="@style/Text.SectionHeader" />
 
-                <LinearLayout
+                <com.electricdreams.numo.ui.components.SettingsRowView
                     android:id="@+id/developer_settings_item"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_row_ripple"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingVertical="@dimen/row_padding_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal">
-
-                    <ImageView
-                        android:importantForAccessibility="no"
-                        android:layout_width="@dimen/icon_size_small"
-                        android:layout_height="@dimen/icon_size_small"
-                        android:layout_marginEnd="@dimen/row_icon_gap"
-                        android:src="@drawable/ic_settings"
-                        app:tint="@color/color_icon_secondary" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/settings_item_developer_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-
-
-                </LinearLayout>
+                    app:rowIcon="@drawable/ic_settings"
+                    app:rowTitle="@string/settings_item_developer_title" />
 
             </LinearLayout>
 

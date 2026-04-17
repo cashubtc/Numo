@@ -81,54 +81,14 @@
 
             </LinearLayout>
 
-            <!-- Backup Mnemonic Item -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/backup_mnemonic_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_key"
-                    app:tint="@color/color_icon_secondary" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_backup_mnemonic_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_backup_mnemonic_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
-            </LinearLayout>
+                app:rowIcon="@drawable/ic_key"
+                app:rowTitle="@string/security_settings_backup_mnemonic_title"
+                app:rowSubtitle="@string/security_settings_backup_mnemonic_subtitle"
+                app:rowShowChevron="true" />
 
             <!-- ===================== -->
             <!-- PIN PROTECTION SECTION -->
@@ -187,156 +147,36 @@
             </LinearLayout>
 
             <!-- Set PIN Item -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/setup_pin_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
+                app:rowIcon="@drawable/ic_lock"
+                app:rowTitle="@string/security_settings_setup_pin_title"
+                app:rowSubtitle="@string/security_settings_setup_pin_subtitle"
+                app:rowShowChevron="true" />
 
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_lock"
-                    app:tint="@color/color_icon_secondary" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/pin_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_setup_pin_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:id="@+id/pin_subtitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_setup_pin_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
-            </LinearLayout>
-
-            <!-- Change PIN Item (shown when PIN is set) -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/change_pin_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:visibility="gone">
+                android:visibility="gone"
+                app:rowIcon="@drawable/ic_edit"
+                app:rowTitle="@string/security_settings_change_pin_title"
+                app:rowSubtitle="@string/security_settings_change_pin_subtitle"
+                app:rowShowChevron="true" />
 
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_edit"
-                    app:tint="@color/color_icon_secondary" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_change_pin_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_change_pin_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
-            </LinearLayout>
-
-            <!-- Remove PIN Item (shown when PIN is set) -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/remove_pin_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:visibility="gone">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_close"
-                    app:tint="@color/color_warning_red" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_remove_pin_title"
-                        android:textAppearance="@style/Text.RowTitle"
-                        android:textColor="@color/color_warning_red" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_remove_pin_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
-            </LinearLayout>
+                android:visibility="gone"
+                app:rowIcon="@drawable/ic_close"
+                app:rowIconTint="@color/color_warning_red"
+                app:rowTitle="@string/security_settings_remove_pin_title"
+                app:rowTitleColor="@color/color_warning_red"
+                app:rowSubtitle="@string/security_settings_remove_pin_subtitle"
+                app:rowShowChevron="true" />
 
             <!-- ======================== -->
             <!-- WALLET RECOVERY SECTION -->
@@ -352,54 +192,14 @@
                 android:text="@string/security_settings_section_recovery"
                 android:textAppearance="@style/Text.SectionHeader" />
 
-            <!-- Restore Wallet Item -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/restore_wallet_item"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_restore"
-                    app:tint="@color/color_icon_secondary" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_restore_wallet_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_restore_wallet_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_text_tertiary" />
-            </LinearLayout>
+                app:rowIcon="@drawable/ic_restore"
+                app:rowTitle="@string/security_settings_restore_wallet_title"
+                app:rowSubtitle="@string/security_settings_restore_wallet_subtitle"
+                app:rowShowChevron="true" />
 
         </LinearLayout>
     </ScrollView>

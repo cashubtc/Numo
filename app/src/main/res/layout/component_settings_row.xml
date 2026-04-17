@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.LinearLayout">
+
+    <ImageView
+        android:id="@+id/row_icon"
+        android:layout_width="@dimen/icon_size_small"
+        android:layout_height="@dimen/icon_size_small"
+        android:layout_marginEnd="@dimen/row_icon_gap"
+        android:importantForAccessibility="no"
+        android:visibility="gone"
+        app:tint="@color/color_icon_secondary"
+        tools:ignore="UseAppTint"
+        tools:src="@drawable/ic_tip"
+        tools:visibility="visible" />
+
+    <LinearLayout
+        android:id="@+id/row_text_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/row_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/Text.RowTitle"
+            tools:text="Title" />
+
+        <TextView
+            android:id="@+id/row_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/row_subtitle_gap"
+            android:textAppearance="@style/Text.RowSubtitle"
+            android:visibility="gone"
+            tools:text="Subtitle"
+            tools:visibility="visible" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/row_trailing_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_m"
+        android:textAppearance="@style/Text.RowSubtitle"
+        android:visibility="gone"
+        tools:text="Value"
+        tools:visibility="visible" />
+
+    <ImageView
+        android:id="@+id/row_trailing_icon"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="@dimen/space_s"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_chevron_forward"
+        android:visibility="gone"
+        app:tint="@color/color_text_tertiary"
+        tools:visibility="visible" />
+
+</merge>
