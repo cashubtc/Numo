@@ -57,6 +57,7 @@ class TipSelectionActivity : AppCompatActivity() {
 
     // Custom tip input state
     private var customInputIsBtc: Boolean = false
+    private var customInputCurrency: Currency = Currency.USD
     private var customInputValue: String = ""
 
     // Views
@@ -154,6 +155,7 @@ class TipSelectionActivity : AppCompatActivity() {
 
         // Set default for custom input based on entry currency
         customInputIsBtc = (entryCurrency == Currency.BTC)
+        customInputCurrency = entryCurrency
 
         // Get Bitcoin price
         bitcoinPriceWorker = BitcoinPriceWorker.getInstance(this)
@@ -395,7 +397,14 @@ class TipSelectionActivity : AppCompatActivity() {
                 decimalKeyButton = keyButton
             }
 
-            customKeypad.addView(keyButton)
+            val params = GridLayout.LayoutParams().apply {
+                width = 0
+                height = 0
+                columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                setMargins(dpToPx(4), dpToPx(2), dpToPx(4), dpToPx(2))
+            }
+            customKeypad.addView(keyButton, params)
         }
         
         // Update decimal key visibility based on initial currency mode
@@ -477,9 +486,10 @@ class TipSelectionActivity : AppCompatActivity() {
     private fun updateCustomCurrencyDisplay() {
         if (customInputIsBtc) {
             customCurrencyPrefix.text = "₿"
-            customCurrencyToggle.text = getString(R.string.tip_selection_custom_currency_switch_to_fiat, entryCurrency.symbol)
+            val fiatCurrency = if (entryCurrency == Currency.BTC) getCurrentFiatCurrency() else entryCurrency
+            customCurrencyToggle.text = getString(R.string.tip_selection_custom_currency_switch_to_fiat, fiatCurrency.symbol)
         } else {
-            customCurrencyPrefix.text = entryCurrency.symbol
+            customCurrencyPrefix.text = customInputCurrency.symbol
             customCurrencyToggle.text = getString(R.string.tip_selection_custom_currency_switch_to_btc)
         }
     }
@@ -560,6 +570,9 @@ class TipSelectionActivity : AppCompatActivity() {
 
     private fun toggleCustomCurrency() {
         customInputIsBtc = !customInputIsBtc
+        customInputCurrency = if (customInputIsBtc) Currency.BTC else {
+            if (entryCurrency == Currency.BTC) getCurrentFiatCurrency() else entryCurrency
+        }
         customInputValue = ""
         updateCustomAmountDisplay()
         updateCustomCurrencyDisplay()
@@ -918,6 +931,12 @@ class TipSelectionActivity : AppCompatActivity() {
 
     private fun dpToPx(dp: Int): Int {
         return (dp * resources.displayMetrics.density).toInt()
+    }
+
+    private fun getCurrentFiatCurrency(): Currency {
+        val currencyManager = com.electricdreams.numo.core.util.CurrencyManager.getInstance(this)
+        val currencyCode = currencyManager.getCurrentCurrency()
+        return Amount.Currency.fromCode(currencyCode)
     }
 
     companion object {

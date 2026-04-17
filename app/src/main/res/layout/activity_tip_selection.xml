@@ -213,7 +213,7 @@
         <GridLayout
             android:id="@+id/custom_keypad"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="300dp"
             android:layout_marginHorizontal="16dp"
             android:columnCount="3"
             android:rowCount="4" />
