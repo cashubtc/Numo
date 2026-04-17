@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import androidx.gridlayout.widget.GridLayout
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.google.android.material.button.MaterialButton
 
@@ -45,6 +46,7 @@ class PinResetActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdgeWithPill(this)
         setContentView(R.layout.activity_pin_reset)
 
         pinManager = PinManager.getInstance(this)

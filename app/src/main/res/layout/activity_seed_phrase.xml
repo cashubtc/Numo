@@ -111,19 +111,15 @@
             <!-- Copy Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/copy_button"
+                style="@style/Widget.Numo.Button.Dialog.Confirm"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="32dp"
+                android:layout_height="@dimen/button_height"
+                android:layout_marginTop="@dimen/space_2xl"
                 android:text="@string/seed_phrase_copy_button"
-                android:textSize="16sp"
-                android:textColor="@color/color_bg_white"
-                android:fontFamily="sans-serif-medium"
-                android:backgroundTint="@color/color_text_primary"
-                app:cornerRadius="28dp"
                 app:icon="@drawable/ic_content_copy"
                 app:iconTint="@color/color_bg_white"
                 app:iconGravity="textStart"
-                app:iconPadding="8dp" />
+                app:iconPadding="@dimen/space_s" />
 
             <!-- Copy Disclaimer -->
             <TextView

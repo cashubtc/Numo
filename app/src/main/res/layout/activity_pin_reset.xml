@@ -159,17 +159,13 @@
             <!-- Reset Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/reset_button"
+                style="@style/Widget.Numo.Button.Dialog.Destructive"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="24dp"
+                android:layout_height="@dimen/button_height"
+                android:layout_marginTop="@dimen/space_xl"
                 android:text="@string/pin_reset_button"
-                android:textSize="17sp"
-                android:textColor="@color/color_bg_white"
-                android:fontFamily="sans-serif-medium"
-                android:backgroundTint="@color/color_warning_red"
                 android:enabled="false"
-                android:alpha="0.5"
-                app:cornerRadius="28dp" />
+                android:alpha="0.5" />
 
         </LinearLayout>
     </ScrollView>

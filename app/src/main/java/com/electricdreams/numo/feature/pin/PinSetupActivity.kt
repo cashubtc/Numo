@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.electricdreams.numo.R
+import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.google.android.material.button.MaterialButton
 
 /**
@@ -53,6 +54,7 @@ class PinSetupActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdgeWithPill(this)
         setContentView(R.layout.activity_pin_setup)
 
         pinManager = PinManager.getInstance(this)

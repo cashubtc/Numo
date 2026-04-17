@@ -65,7 +65,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     private lateinit var statusText: TextView
 
     // Toggle icon
-    private lateinit var toggleIcon: ImageView
 
     // Settings controls
     private lateinit var enableSwitch: SwitchCompat
@@ -126,7 +125,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         statusText = findViewById(R.id.status_text)
 
         // Toggle icon
-        toggleIcon = findViewById(R.id.toggle_icon)
 
         // Main toggle
         enableSwitch = findViewById(R.id.enable_switch)
@@ -336,8 +334,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         heroBolt.setColorFilter(ContextCompat.getColor(this, boltColor))
         heroBoltFade.setBackgroundResource(fadeRes)
 
-        // Toggle row icon
-        toggleIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_icon_secondary))
     }
 
     private fun playLightningStrike() {

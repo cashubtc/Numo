@@ -155,8 +155,10 @@
                 android:textAllCaps="false"
                 android:alpha="0"
                 android:paddingVertical="4dp"
+                android:stateListAnimator="@null"
                 app:cornerRadius="32dp"
-                app:backgroundTint="@color/color_text_on_dark" />
+                app:backgroundTint="@color/color_text_on_dark"
+                app:elevation="0dp" />
 
             <!-- Terms Text (below button) -->
             <TextView
