@@ -65,6 +65,14 @@
         <item name="android:windowLightNavigationBar">false</item>
     </style>
     
+    <!-- Bottom Sheet Theme (Dark Mode - only override nav bar) -->
+    <style name="Theme.Numo.BottomSheet" parent="Theme.MaterialComponents.DayNight.BottomSheetDialog">
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="enableEdgeToEdge">true</item>
+        <item name="bottomSheetStyle">@style/Widget.Numo.BottomSheet</item>
+    </style>
+
     <!-- Splash Screen Theme (Dark Mode) -->
     <style name="Theme.Numo.Splash" parent="Theme.Numo">
         <!-- Splash screen background: Navy -->

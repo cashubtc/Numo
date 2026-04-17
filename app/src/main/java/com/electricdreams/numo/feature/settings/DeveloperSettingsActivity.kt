@@ -25,7 +25,7 @@ class DeveloperSettingsActivity : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
 
-        binding.backButton?.setOnClickListener { finish() }
+        binding.topBar.onNavClick { finish() }
 
         binding.restartOnboardingItem.setOnClickListener {
             showRestartOnboardingDialog()
@@ -54,7 +54,6 @@ class DeveloperSettingsActivity : AppCompatActivity() {
                 title = getString(R.string.developer_settings_restart_dialog_title),
                 message = getString(R.string.developer_settings_restart_dialog_message),
                 confirmText = getString(R.string.developer_settings_restart_dialog_positive),
-                cancelText = getString(R.string.common_cancel),
                 isDestructive = false,
                 onConfirm = {
                     // Clear onboarding completion status

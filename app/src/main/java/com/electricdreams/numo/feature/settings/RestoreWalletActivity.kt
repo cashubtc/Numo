@@ -62,8 +62,7 @@ class RestoreWalletActivity : AppCompatActivity() {
 
     // === Views ===
     // Top bar
-    private lateinit var titleText: TextView
-    private lateinit var backButton: ImageView
+    private lateinit var topBar: com.electricdreams.numo.ui.components.NumoTopBar
 
     // Step 1: Seed entry
     private lateinit var seedEntryContainer: View
@@ -127,8 +126,7 @@ class RestoreWalletActivity : AppCompatActivity() {
 
     private fun initViews() {
         // Top bar
-        titleText = findViewById(R.id.title_text)
-        backButton = findViewById(R.id.back_button)
+        topBar = findViewById(R.id.top_bar)
 
         // Step 1: Seed entry
         seedEntryContainer = findViewById(R.id.seed_entry_container)
@@ -249,9 +247,7 @@ class RestoreWalletActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        backButton.setOnClickListener {
-            handleBackPress()
-        }
+        topBar.onNavClick { handleBackPress() }
 
         pasteButton.setOnClickListener {
             pasteFromClipboard()
@@ -302,30 +298,30 @@ class RestoreWalletActivity : AppCompatActivity() {
 
         when (step) {
             RestoreStep.ENTER_SEED -> {
-                titleText.text = getString(R.string.restore_progress_title)
+                topBar.setTitle(getString(R.string.restore_progress_title))
                 seedEntryContainer.visibility = View.VISIBLE
-                backButton.isEnabled = true
+                topBar.setNavEnabled(true)
             }
             RestoreStep.FETCHING_BACKUP -> {
-                titleText.text = getString(R.string.restore_fetching_title)
+                topBar.setTitle(getString(R.string.restore_fetching_title))
                 fetchingOverlay.visibility = View.VISIBLE
-                backButton.isEnabled = false
+                topBar.setNavEnabled(false)
             }
             RestoreStep.REVIEW_MINTS -> {
-                titleText.text = getString(R.string.restore_mints_title)
+                topBar.setTitle(getString(R.string.restore_mints_title))
                 reviewMintsContainer.visibility = View.VISIBLE
-                backButton.isEnabled = true
+                topBar.setNavEnabled(true)
                 updateMintsUI()
             }
             RestoreStep.RESTORING -> {
-                titleText.text = getString(R.string.restore_progress_title)
+                topBar.setTitle(getString(R.string.restore_progress_title))
                 progressOverlay.visibility = View.VISIBLE
-                backButton.isEnabled = false
+                topBar.setNavEnabled(false)
             }
             RestoreStep.SUCCESS -> {
-                titleText.text = getString(R.string.restore_success_title)
+                topBar.setTitle(getString(R.string.restore_success_title))
                 successOverlay.visibility = View.VISIBLE
-                backButton.isEnabled = false
+                topBar.setNavEnabled(false)
             }
         }
     }
@@ -627,7 +623,6 @@ class RestoreWalletActivity : AppCompatActivity() {
             title = getString(R.string.restore_confirm_dialog_title),
             message = message,
             confirmText = getString(R.string.restore_confirm_dialog_positive),
-            cancelText = getString(R.string.common_cancel),
             isDestructive = true,
             onConfirm = {
                 performRestore()

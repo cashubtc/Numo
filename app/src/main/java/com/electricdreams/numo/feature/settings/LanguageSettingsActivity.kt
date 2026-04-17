@@ -31,7 +31,7 @@ class LanguageSettingsActivity : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
 
-        findViewById<View?>(R.id.back_button)?.setOnClickListener { finish() }
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
 
         languageRadioGroup = findViewById(R.id.language_radio_group)
         radioEnglish = findViewById(R.id.radio_english)
@@ -73,6 +73,7 @@ class LanguageSettingsActivity : AppCompatActivity() {
             applyLanguage(newCode)
             updateSummary(newCode)
         }
+
     }
 
     private fun applyLanguage(langCode: String) {

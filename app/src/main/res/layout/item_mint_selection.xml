@@ -6,29 +6,11 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingHorizontal="24dp"
-    android:paddingVertical="16dp"
+    android:paddingHorizontal="@dimen/space_xl"
+    android:paddingVertical="@dimen/space_l"
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true">
-
-    <!-- Mint Icon Container -->
-    <FrameLayout
-        android:id="@+id/icon_container"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="@drawable/bg_circle_accent_light">
-
-        <ImageView
-            android:id="@+id/mint_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_lightning_bolt"
-            android:tint="@color/color_primary"
-            android:contentDescription="@string/mint_selection_icon_description" />
-
-    </FrameLayout>
 
     <!-- Text Content -->
     <LinearLayout
@@ -36,18 +18,14 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="12dp">
+        android:layout_marginEnd="@dimen/space_m">
 
         <TextView
             android:id="@+id/mint_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Mint Name"
-            android:textAppearance="@style/Text.Body"
-            android:textColor="@color/color_text_primary"
-            android:textSize="16sp"
-            android:textStyle="bold"
+            android:textAppearance="@style/Text.RowTitle"
             android:maxLines="1"
             android:ellipsize="end" />
 
@@ -55,11 +33,10 @@
             android:id="@+id/mint_url"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="@dimen/space_xs"
             android:text="mint.example.com"
-            android:textAppearance="@style/Text.Caption"
-            android:textColor="@color/color_text_tertiary"
-            android:textSize="12sp"
+            android:textAppearance="@style/Text.RowSubtitle"
+            android:textColor="@color/color_text_secondary"
             android:maxLines="1"
             android:ellipsize="end" />
 
@@ -71,11 +48,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="₿1,234"
-        android:textAppearance="@style/Text.Body"
+        android:textAppearance="@style/Text.BodyBold"
         android:textColor="@color/color_success_green"
-        android:textSize="15sp"
-        android:textStyle="bold"
-        android:layout_marginEnd="8dp" />
+        android:layout_marginEnd="@dimen/space_s" />
 
     <!-- Chevron -->
     <ImageView

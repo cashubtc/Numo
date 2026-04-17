@@ -8,7 +8,7 @@ import com.electricdreams.numo.core.model.CheckoutBasketItem
 import com.electricdreams.numo.core.util.WebhookSettingsManager
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
@@ -41,7 +41,7 @@ class PaymentWebhookDispatcherTest {
     }
 
     @Test
-    fun `dispatch posts payment payload to endpoint`() = runTest {
+    fun `dispatch posts payment payload to endpoint`() = runBlocking {
         server.enqueue(MockResponse().setResponseCode(200))
 
         val endpoint = server.url("/webhook").toString()
@@ -85,7 +85,7 @@ class PaymentWebhookDispatcherTest {
     }
 
     @Test
-    fun `dispatch retries on failure and succeeds on later attempt`() = runTest {
+    fun `dispatch retries on failure and succeeds on later attempt`() = runBlocking {
         server.enqueue(MockResponse().setResponseCode(500))
         server.enqueue(MockResponse().setResponseCode(200))
 
@@ -105,7 +105,7 @@ class PaymentWebhookDispatcherTest {
     }
 
     @Test
-    fun `dispatch with no endpoints does nothing`() = runTest {
+    fun `dispatch with no endpoints does nothing`() = runBlocking {
         val dispatcher = PaymentWebhookDispatcher(
             context = context,
             endpointProvider = { emptyList() },
@@ -121,7 +121,7 @@ class PaymentWebhookDispatcherTest {
     }
 
     @Test
-    fun `dispatch includes null checkout when basket absent`() = runTest {
+    fun `dispatch includes null checkout when basket absent`() = runBlocking {
         server.enqueue(MockResponse().setResponseCode(200))
 
         val endpoint = server.url("/no-checkout").toString()

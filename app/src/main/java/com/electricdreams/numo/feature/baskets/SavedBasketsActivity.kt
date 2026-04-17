@@ -10,6 +10,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.electricdreams.numo.ui.util.DialogHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
@@ -159,15 +160,16 @@ class SavedBasketsActivity : AppCompatActivity() {
         val index = savedBasketManager.getBasketIndex(basket.id)
         val displayName = basket.getDisplayName(index)
 
-        AlertDialog.Builder(this)
-            .setTitle(R.string.saved_baskets_delete_title)
-            .setMessage(getString(R.string.saved_baskets_delete_message, displayName))
-            .setPositiveButton(R.string.common_delete) { _, _ ->
+        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
+            title = getString(R.string.saved_baskets_delete_title),
+            message = getString(R.string.saved_baskets_delete_message, displayName),
+            confirmText = getString(R.string.common_delete),
+            isDestructive = true,
+            onConfirm = {
                 savedBasketManager.deleteBasket(basket.id)
                 loadBaskets()
             }
-            .setNegativeButton(R.string.common_cancel, null)
-            .show()
+        ))
     }
     
     private fun updateArchiveButtonVisibility() {

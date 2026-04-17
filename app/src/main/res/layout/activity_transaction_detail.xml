@@ -8,53 +8,15 @@
     android:background="@color/color_bg_white">
 
     <!-- Top App Bar -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.electricdreams.numo.ui.components.NumoTopBar
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/color_bg_white"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_chevron_back"
-            android:contentDescription="@string/transaction_detail_toolbar_back"
-            android:padding="12dp"
-            app:tint="@color/color_text_primary"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
-        <TextView
-            android:id="@+id/title"
-            style="@style/Text.Title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/transaction_detail_toolbar_title"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
-        <ImageButton
-            android:id="@+id/overflow_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_more_vert"
-            android:contentDescription="@string/transaction_detail_overflow_menu"
-            android:padding="12dp"
-            app:tint="@color/color_text_primary"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="@dimen/top_bar_height"
+        app:topBarTitle="@string/transaction_detail_toolbar_title"
+        app:topBarNavContentDescription="@string/transaction_detail_toolbar_back"
+        app:topBarActionIcon="@drawable/ic_more_vert"
+        app:topBarActionContentDescription="@string/transaction_detail_overflow_menu"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Scrollable Content -->
     <ScrollView
@@ -68,8 +30,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="32dp"
-            android:paddingBottom="32dp">
+            android:paddingTop="@dimen/space_2xl"
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- Large Fiat Amount Display -->
             <TextView
@@ -84,25 +46,19 @@
             <!-- Secondary amount (sat equivalent for fiat entries, or fiat equivalent for sat entries) -->
             <TextView
                 android:id="@+id/detail_amount_subtitle"
+                style="@style/Text.AmountSubtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:gravity="center"
-                android:textSize="17sp"
-                android:fontFamily="sans-serif-medium"
-                android:textColor="@color/color_text_secondary"
+                android:layout_marginTop="@dimen/space_xs"
                 tools:text="₿27,849" />
 
             <!-- Fiat equivalent (shown below sat amount on sat-entry transactions) -->
             <TextView
                 android:id="@+id/detail_fiat_equivalent"
+                style="@style/Text.AmountSubtitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:gravity="center"
-                android:textSize="17sp"
-                android:fontFamily="sans-serif-medium"
-                android:textColor="@color/color_text_secondary"
+                android:layout_marginTop="@dimen/space_xs"
                 android:visibility="gone"
                 tools:text="$0.01" />
 
@@ -112,7 +68,7 @@
                 style="@style/Text.Caption"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/space_l"
                 android:gravity="center"
                 tools:text="March 15, 2026 at 11:31 AM" />
 
@@ -121,9 +77,9 @@
                 style="@style/Text.SectionHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginStart="@dimen/space_xl"
+                android:layout_marginEnd="@dimen/space_xl"
+                android:layout_marginTop="@dimen/space_2xl"
                 android:text="@string/transaction_detail_section_transaction_details" />
 
             <!-- Transaction Type Row -->
@@ -133,14 +89,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp">
+                android:paddingStart="@dimen/space_xl"
+                android:paddingEnd="@dimen/space_xl"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_l">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_card"
                     app:tint="@color/color_text_secondary"
                     android:contentDescription="@null" />
@@ -150,7 +106,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginStart="16dp">
+                    android:layout_marginStart="@dimen/space_l">
 
                     <TextView
                         style="@style/Text.BodyBold"
@@ -163,7 +119,7 @@
                         style="@style/Text.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/row_subtitle_gap"
                         tools:text="Cashu" />
 
                 </LinearLayout>
@@ -177,15 +133,15 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
+                android:paddingStart="@dimen/space_xl"
+                android:paddingEnd="@dimen/space_xl"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_l"
                 android:visibility="gone">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_switch_currency"
                     app:tint="@color/color_text_secondary"
                     android:contentDescription="@null" />
@@ -195,7 +151,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginStart="16dp">
+                    android:layout_marginStart="@dimen/space_l">
 
                     <TextView
                         style="@style/Text.BodyBold"
@@ -208,7 +164,7 @@
                         style="@style/Text.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/row_subtitle_gap"
                         tools:text="$71,833.46" />
 
                 </LinearLayout>
@@ -222,14 +178,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp">
+                android:paddingStart="@dimen/space_xl"
+                android:paddingEnd="@dimen/space_xl"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_l">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_bank"
                     app:tint="@color/color_text_secondary"
                     android:contentDescription="@null" />
@@ -239,7 +195,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginStart="16dp">
+                    android:layout_marginStart="@dimen/space_l">
 
                     <TextView
                         style="@style/Text.BodyBold"
@@ -252,7 +208,7 @@
                         style="@style/Text.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/row_subtitle_gap"
                         android:maxLines="2"
                         android:ellipsize="end"
                         tools:text="https://mint.minibits.cash/Bitcoin" />
@@ -268,15 +224,15 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
+                android:paddingStart="@dimen/space_xl"
+                android:paddingEnd="@dimen/space_xl"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_l"
                 android:visibility="gone">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_arrow_up_send"
                     app:tint="@color/color_text_secondary"
                     android:contentDescription="@null" />
@@ -286,7 +242,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginStart="16dp">
+                    android:layout_marginStart="@dimen/space_l">
 
                     <TextView
                         style="@style/Text.BodyBold"
@@ -299,7 +255,7 @@
                         style="@style/Text.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/row_subtitle_gap"
                         android:maxLines="2"
                         android:ellipsize="end"
                         tools:text="erik@primal.net" />
@@ -308,11 +264,11 @@
 
                 <ImageButton
                     android:id="@+id/btn_copy_destination"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_copy"
-                    android:padding="4dp"
+                    android:padding="@dimen/space_xs"
                     app:tint="@color/color_text_quaternary"
                     android:contentDescription="@string/transaction_detail_sent_to_label" />
 
@@ -325,14 +281,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp">
+                android:paddingStart="@dimen/space_xl"
+                android:paddingEnd="@dimen/space_xl"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_l">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_document"
                     app:tint="@color/color_text_secondary"
                     android:contentDescription="@null" />
@@ -342,7 +298,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginStart="16dp">
+                    android:layout_marginStart="@dimen/space_l">
 
                     <TextView
                         android:id="@+id/detail_invoice_label"
@@ -356,7 +312,7 @@
                         style="@style/Text.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/row_subtitle_gap"
                         android:maxLines="1"
                         android:ellipsize="middle"
                         tools:text="lnbc1pvjluezpp5qqqsyq..." />
@@ -365,11 +321,11 @@
 
                 <ImageButton
                     android:id="@+id/btn_copy_invoice"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:src="@drawable/ic_copy"
-                    android:padding="4dp"
+                    android:padding="@dimen/space_xs"
                     app:tint="@color/color_text_quaternary"
                     android:contentDescription="@string/transaction_detail_copy_invoice_hint" />
 
@@ -382,15 +338,15 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="24dp"
-                android:paddingEnd="24dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
+                android:paddingStart="@dimen/space_xl"
+                android:paddingEnd="@dimen/space_xl"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_l"
                 android:visibility="gone">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_label"
                     app:tint="@color/color_text_secondary"
                     android:contentDescription="@null" />
@@ -400,7 +356,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:layout_marginStart="16dp">
+                    android:layout_marginStart="@dimen/space_l">
 
                     <TextView
                         style="@style/Text.BodyBold"
@@ -413,7 +369,7 @@
                         style="@style/Text.Body"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
+                        android:layout_marginTop="@dimen/row_subtitle_gap"
                         android:maxLines="2"
                         android:ellipsize="end"
                         tools:text="Coffee order" />
@@ -423,18 +379,15 @@
             </LinearLayout>
 
             <!-- Print Receipt Button -->
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_print_receipt"
-                style="@style/Widget.Button.Secondary.Outlined"
+                style="@style/Widget.Numo.Button.Dialog.Confirm"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginTop="24dp"
-                android:gravity="center"
-                android:text="@string/transaction_detail_print_receipt"
-                android:textAllCaps="false"
-                app:backgroundTint="@null" />
+                android:layout_height="@dimen/button_height"
+                android:layout_marginStart="@dimen/space_xl"
+                android:layout_marginEnd="@dimen/space_xl"
+                android:layout_marginTop="@dimen/space_xl"
+                android:text="@string/transaction_detail_print_receipt" />
 
         </LinearLayout>
 

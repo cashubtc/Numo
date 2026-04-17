@@ -16,8 +16,8 @@
     <string name="item_list_toast_camera_permission">Camera permission is required to take pictures</string>
     <string name="item_list_toast_error_creating_image">Error creating image file: %1$s</string>
     <string name="item_list_toast_failed_load_image">Failed to load image</string>
-    <string name="item_list_toast_sku_not_unique">Please use a unique SKU</string>
-    <string name="item_list_toast_gtin_not_unique">Please use a unique GTIN</string>
-    <string name="item_list_toast_failed_save_item">Failed to save item</string>
-    <string name="item_list_toast_saved_without_image">Item saved but image could not be saved</string>
+    <string name="item_list_toast_sku_not_unique">This SKU is already used by another item</string>
+    <string name="item_list_toast_gtin_not_unique">This barcode is already used by another item</string>
+    <string name="item_list_toast_failed_save_item">Couldn\'t save — please check the form and try again</string>
+    <string name="item_list_toast_saved_without_image">Saved without photo — the image couldn\'t be stored</string>
 </resources>

@@ -171,33 +171,35 @@ class PaymentRequestActivity : AppCompatActivity() {
             window.isNavigationBarContrastEnforced = false
             window.isStatusBarContrastEnforced = false
         }
-        
-        // Apply window insets to handle edge-to-edge correctly without squishing the NFC overlay
+
+        // Apply window insets to handle edge-to-edge correctly without squishing the NFC overlay.
+        // The root itself is not padded — individual chrome views have their margins adjusted
+        // so the NFC animation container stays full-bleed edge-to-edge.
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.payment_request_root)) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            
+
             val density = resources.displayMetrics.density
             val topMarginPx = (16 * density).toInt()
             val bottomMarginPx = (24 * density).toInt()
 
-            findViewById<View>(R.id.close_button).layoutParams = 
+            findViewById<View>(R.id.close_button).layoutParams =
                 (findViewById<View>(R.id.close_button).layoutParams as MarginLayoutParams).apply {
                     topMargin = insets.top + topMarginPx
                 }
-                
-            findViewById<View>(R.id.share_button).layoutParams = 
+
+            findViewById<View>(R.id.share_button).layoutParams =
                 (findViewById<View>(R.id.share_button).layoutParams as MarginLayoutParams).apply {
                     topMargin = insets.top + topMarginPx
                 }
 
             val switchContainer = findViewById<View>(R.id.lightning_cashu_switch_container)
             if (switchContainer != null) {
-                switchContainer.layoutParams = 
+                switchContainer.layoutParams =
                     (switchContainer.layoutParams as MarginLayoutParams).apply {
                         bottomMargin = insets.bottom + bottomMarginPx
                     }
             }
-            
+
             windowInsets
         }
 

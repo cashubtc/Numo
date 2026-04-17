@@ -8,53 +8,15 @@
     android:background="@color/color_bg_white">
 
     <!-- Top App Bar -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.electricdreams.numo.ui.components.NumoTopBar
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/color_bg_white"
-        android:paddingHorizontal="16dp"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/common_back"
-            android:src="@drawable/ic_close"
-            android:tint="@color/color_text_primary"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/history_toolbar_title"
-            android:textAppearance="@style/Text.Title"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageButton
-            android:id="@+id/overflow_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/transaction_detail_overflow_menu"
-            android:src="@drawable/ic_more_vert"
-            app:tint="@color/color_text_primary"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="@dimen/top_bar_height"
+        app:topBarTitle="@string/history_toolbar_title"
+        app:topBarNavIcon="@drawable/ic_close"
+        app:topBarActionIcon="@drawable/ic_more_vert"
+        app:topBarActionContentDescription="@string/transaction_detail_overflow_menu"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Balance Summary (centered) -->
     <LinearLayout
@@ -63,8 +25,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_horizontal"
-        android:paddingTop="16dp"
-        android:paddingBottom="24dp"
+        android:paddingTop="@dimen/space_l"
+        android:paddingBottom="@dimen/space_xl"
         app:layout_constraintTop_toBottomOf="@id/top_bar">
 
         <!-- "Total Balance" label -->
@@ -81,7 +43,7 @@
             style="@style/Text.DisplayAmount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="@dimen/space_xs"
             android:textColor="@color/color_text_primary"
             tools:text="$15.29" />
 
@@ -91,9 +53,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:fontFamily="sans-serif"
+            android:textAppearance="@style/Text.Body"
             android:textColor="@color/color_text_tertiary"
-            android:textSize="16sp"
             tools:text="₿21,305" />
 
     </LinearLayout>
@@ -105,17 +66,16 @@
         android:layout_height="0dp"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:paddingBottom="16dp"
+        android:paddingBottom="@dimen/space_l"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/balance_section" />
 
     <!-- Empty View -->
-    <TextView
+    <include
         android:id="@+id/empty_view"
-        style="@style/Text.Body"
+        layout="@layout/component_empty_state"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/history_empty"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

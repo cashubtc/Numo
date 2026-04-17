@@ -9,7 +9,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/nfc_dialog_waiting_message"
-        android:textSize="20sp"
+        android:textAppearance="@style/Text.DialogTitle"
         android:layout_gravity="center_horizontal"/>
 
     <EditText
@@ -19,6 +19,6 @@
         android:layout_marginTop="16dp"
         android:enabled="false"
         android:gravity="center"
-        android:textSize="24sp" />
+        android:textAppearance="@style/Text.Heading1" />
 
 </LinearLayout>

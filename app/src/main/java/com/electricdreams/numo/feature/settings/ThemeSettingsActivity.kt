@@ -40,7 +40,7 @@ class ThemeSettingsActivity : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
 
-        findViewById<View?>(R.id.back_button)?.setOnClickListener { finish() }
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
 
         // Initialize dark mode switch
         darkModeSwitch = findViewById(R.id.dark_mode_switch)
@@ -68,6 +68,7 @@ class ThemeSettingsActivity : AppCompatActivity() {
             val selectedTheme = getSelectedTheme()
             saveTheme(selectedTheme)
         }
+
     }
 
     private fun getCurrentTheme(): String {
@@ -99,4 +100,3 @@ class ThemeSettingsActivity : AppCompatActivity() {
         PreferenceStore.app(this).putString(PREF_THEME, theme)
     }
 }
-

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout 
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,41 +8,12 @@
     android:background="@color/color_bg_white">
 
     <!-- Top Bar -->
-    <LinearLayout
+    <com.electricdreams.numo.ui.components.NumoTopBar
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="8dp"
-        android:elevation="1dp"
-        android:background="@color/color_bg_white"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_chevron_back"
-            android:contentDescription="@string/common_back"
-            app:tint="@color/color_text_primary" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/basket_names_settings_title"
-            android:textSize="20sp"
-            android:textColor="@color/color_text_primary"
-            android:fontFamily="sans-serif-medium"
-            android:textAlignment="center" />
-
-        <!-- Spacer to balance layout -->
-        <View
-            android:layout_width="48dp"
-            android:layout_height="48dp" />
-    </LinearLayout>
+        android:layout_height="@dimen/top_bar_height"
+        app:topBarTitle="@string/basket_names_settings_title"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -55,42 +26,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- Hero Section -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:gravity="center_horizontal"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="24dp"
-                android:paddingBottom="20dp">
-
-                <!-- Icon -->
-                <FrameLayout
-                    android:layout_width="64dp"
-                    android:layout_height="64dp"
-                    android:background="@drawable/bg_circle_accent_light">
-
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_shopping_bag"
-                        app:tint="@color/color_accent_blue" />
-
-                </FrameLayout>
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/margin_screen_horizontal"
+                android:paddingBottom="@dimen/margin_screen_horizontal">
 
                 <!-- Description -->
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
                     android:text="@string/basket_names_settings_description"
-                    android:textSize="15sp"
-                    android:textColor="@color/color_text_secondary"
-                    android:gravity="center"
+                    android:textAppearance="@style/Text.RowSubtitle"
                     android:lineSpacingMultiplier="1.3" />
 
             </LinearLayout>
@@ -107,30 +59,23 @@
                     android:id="@+id/names_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="24dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                    android:paddingTop="@dimen/section_gap"
+                    android:paddingBottom="@dimen/row_padding_vertical"
                     android:text="@string/basket_names_settings_presets_header"
-                    android:textSize="13sp"
-                    android:textColor="@color/color_text_secondary"
-                    android:fontFamily="sans-serif-medium"
-                    android:textAllCaps="true"
-                    android:letterSpacing="0.05"
+                    android:textAppearance="@style/Text.SectionHeader"
                     android:visibility="gone"
                     tools:visibility="visible" />
 
-                <!-- Card Container for Names -->
+                <!-- Names List -->
                 <LinearLayout
                     android:id="@+id/names_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
                     android:orientation="vertical"
-                    android:background="@drawable/bg_rounded_card_large"
                     android:visibility="gone"
                     tools:visibility="visible">
 
-                    <!-- Names List -->
                     <LinearLayout
                         android:id="@+id/names_list"
                         android:layout_width="match_parent"
@@ -140,84 +85,32 @@
                 </LinearLayout>
 
                 <!-- Empty State -->
-                <LinearLayout
+                <include
                     android:id="@+id/empty_state"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:gravity="center_horizontal"
-                    android:layout_marginHorizontal="16dp"
-                    android:paddingVertical="32dp"
-                    android:background="@drawable/bg_rounded_card_large"
-                    tools:visibility="gone">
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@drawable/ic_add_circle"
-                        app:tint="@color/color_icon_tertiary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="@string/basket_names_settings_empty_title"
-                        android:textSize="16sp"
-                        android:textColor="@color/color_text_secondary"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/basket_names_settings_empty_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_tertiary"
-                        android:gravity="center" />
-
-                </LinearLayout>
+                    layout="@layout/component_empty_state" />
 
             </LinearLayout>
 
             <!-- Add Name Button -->
-            <LinearLayout
+            <Button
                 android:id="@+id/add_name_button"
+                style="@style/Widget.Button.Secondary.Outlined"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="12dp"
-                android:layout_marginHorizontal="16dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="16dp"
-                android:background="@drawable/bg_rounded_card_large"
-                android:clickable="true"
-                android:focusable="true">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_add"
-                    app:tint="@color/color_accent_blue" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/basket_names_settings_add_name"
-                    android:textSize="16sp"
-                    android:textColor="@color/color_accent_blue"
-                    android:fontFamily="sans-serif-medium" />
-            </LinearLayout>
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_m"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:text="@string/basket_names_settings_add_name"
+                android:drawableStart="@drawable/ic_add"
+                android:drawablePadding="@dimen/space_s" />
 
             <!-- Example suggestions -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:paddingHorizontal="24dp"
+                android:layout_marginTop="@dimen/space_xl"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:text="@string/basket_names_settings_examples"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_tertiary"
+                android:textAppearance="@style/Text.Caption"
                 android:lineSpacingMultiplier="1.4" />
 
             <!-- Clear All Button (only shown when items exist) -->
@@ -225,7 +118,7 @@
                 android:id="@+id/clear_all_button"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="@dimen/space_2xl"
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:clickable="true"
@@ -238,7 +131,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/basket_names_settings_clear_all"
-                    android:textSize="16sp"
+                    android:textAppearance="@style/Text.Link"
                     android:textColor="@color/color_warning_red" />
             </LinearLayout>
 

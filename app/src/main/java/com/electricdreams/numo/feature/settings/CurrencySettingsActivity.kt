@@ -48,9 +48,9 @@ class CurrencySettingsActivity : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
 
-        currencyManager = CurrencyManager.getInstance(this)
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
 
-        findViewById<View?>(R.id.back_button)?.setOnClickListener { finish() }
+        currencyManager = CurrencyManager.getInstance(this)
 
         recyclerView = findViewById(R.id.currency_recycler_view)
         searchInput = findViewById(R.id.currency_search_input)
@@ -131,6 +131,7 @@ class CurrencySettingsActivity : AppCompatActivity() {
                 Log.e("CurrencySettings", "Error fetching supported currencies", e)
             }
         }
+
     }
 
     private fun setupSearch() {

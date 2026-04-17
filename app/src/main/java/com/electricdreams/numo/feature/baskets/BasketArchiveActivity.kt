@@ -60,7 +60,7 @@ class BasketArchiveActivity : AppCompatActivity() {
     }
 
     private fun initializeViews() {
-        findViewById<View>(R.id.back_button).setOnClickListener { finish() }
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
 
         archiveRecyclerView = findViewById(R.id.archive_recycler_view)
         emptyView = findViewById(R.id.empty_view)
@@ -128,7 +128,6 @@ class BasketArchiveActivity : AppCompatActivity() {
                 title = getString(R.string.basket_archive_delete_title),
                 message = getString(R.string.basket_archive_delete_message, displayName),
                 confirmText = getString(R.string.common_delete),
-                cancelText = getString(R.string.common_cancel),
                 isDestructive = true,
                 onConfirm = {
                     savedBasketManager.deleteArchivedBasket(basket.id)

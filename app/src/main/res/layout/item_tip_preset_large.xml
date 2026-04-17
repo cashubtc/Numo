@@ -5,8 +5,8 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center"
-    android:paddingVertical="20dp"
-    android:paddingHorizontal="16dp"
+    android:paddingVertical="@dimen/margin_screen_horizontal"
+    android:paddingHorizontal="@dimen/space_l"
     android:background="@drawable/bg_tip_button_large"
     android:clickable="true"
     android:focusable="true"
@@ -18,9 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="15%"
-        android:textColor="@color/color_text_primary"
-        android:textSize="28sp"
-        android:textStyle="bold"
+        android:textAppearance="@style/Text.DisplayLarge"
         android:includeFontPadding="false" />
 
     <!-- Total Amount Text (in grey) -->
@@ -28,10 +26,9 @@
         android:id="@+id/total_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="@dimen/space_xs"
         android:text="$28.75"
-        android:textColor="@color/color_text_secondary"
-        android:textSize="15sp"
+        android:textAppearance="@style/Text.Body"
         android:visibility="gone" />
 
 </LinearLayout>

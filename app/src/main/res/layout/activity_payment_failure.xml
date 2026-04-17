@@ -5,23 +5,23 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_error"
+    android:background="@color/color_bg_white"
     android:clipChildren="false"
     tools:context=".PaymentFailureActivity">
 
     <!-- Close Icon Button (X) at top left -->
     <ImageButton
         android:id="@+id/close_icon_button"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_width="@dimen/icon_size_large"
+        android:layout_height="@dimen/icon_size_large"
+        android:layout_marginStart="@dimen/space_s"
+        android:layout_marginTop="@dimen/space_s"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/payment_failure_close_content_description"
         android:src="@drawable/ic_close"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/color_bg_white" />
+        app:tint="@color/color_text_primary" />
 
     <!-- Center content container -->
     <FrameLayout
@@ -29,10 +29,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:clipChildren="false"
-        app:layout_constraintBottom_toTopOf="@+id/close_button"
+        app:layout_constraintBottom_toTopOf="@+id/reassurance_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -41,36 +42,11 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <!-- Failure title text -->
-            <TextView
-                android:id="@+id/payment_failure_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:gravity="center"
-                android:text="@string/payment_failure_title"
-                android:textColor="@color/color_bg_white"
-                android:textSize="30sp"
-                android:textStyle="bold" />
-
-            <!-- Optional failure message text -->
-            <TextView
-                android:id="@+id/payment_failure_message"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="32dp"
-                android:layout_marginEnd="32dp"
-                android:layout_marginBottom="32dp"
-                android:gravity="center"
-                android:text="@string/payment_failure_message"
-                android:textAlignment="center"
-                android:textColor="@color/color_bg_white"
-                android:textSize="18sp" />
-
-            <!-- Animated error icon container with clipChildren disabled -->
+            <!-- Animated error icon container -->
             <FrameLayout
                 android:layout_width="120dp"
                 android:layout_height="120dp"
+                android:layout_marginBottom="@dimen/space_2xl"
                 android:clipChildren="false">
 
                 <!-- Red circle background -->
@@ -80,8 +56,7 @@
                     android:layout_height="match_parent"
                     android:contentDescription="@string/payment_failure_error_background_description"
                     android:src="@drawable/ic_circle_solid_red"
-                    android:visibility="invisible"
-                    app:tint="@color/color_bg_white" />
+                    android:visibility="invisible" />
 
                 <!-- White close/cross icon -->
                 <ImageView
@@ -92,41 +67,77 @@
                     android:contentDescription="@string/payment_failure_error_icon_description"
                     android:src="@drawable/ic_close"
                     android:visibility="invisible"
-                    app:tint="@color/color_error" />
+                    app:tint="@color/color_bg_white" />
 
             </FrameLayout>
+
+            <!-- Failure title text -->
+            <TextView
+                android:id="@+id/payment_failure_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/payment_failure_title"
+                android:textColor="@color/color_text_primary"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:letterSpacing="-0.02" />
+
+            <!-- Failure message text -->
+            <TextView
+                android:id="@+id/payment_failure_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_3xl"
+                android:layout_marginTop="@dimen/space_m"
+                android:layout_marginEnd="@dimen/space_3xl"
+                android:gravity="center"
+                android:text="@string/payment_failure_message"
+                android:textAlignment="center"
+                android:textColor="@color/color_text_secondary"
+                android:textSize="16sp"
+                android:lineSpacingMultiplier="1.4" />
 
         </LinearLayout>
 
     </FrameLayout>
 
-    <!-- Try Again button (text button, primary color) -->
+    <!-- Reassurance text -->
+    <TextView
+        android:id="@+id/reassurance_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/space_3xl"
+        android:layout_marginTop="@dimen/space_xl"
+        android:gravity="center"
+        android:text="@string/payment_failure_reassurance"
+        android:textColor="@color/color_failure_reassurance"
+        android:textSize="13sp"
+        android:lineSpacingMultiplier="1.4"
+        app:layout_constraintBottom_toTopOf="@+id/try_again_button"
+        app:layout_constraintTop_toBottomOf="@+id/center_content" />
+
+    <!-- Try Again button (primary action) -->
     <Button
         android:id="@+id/try_again_button"
+        style="@style/Widget.Numo.Button.Primary.Black"
         android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginBottom="8dp"
-        android:background="?attr/selectableItemBackground"
+        android:layout_height="@dimen/button_height"
+        android:layout_marginHorizontal="@dimen/space_xl"
+        android:layout_marginBottom="@dimen/space_s"
         android:text="@string/payment_failure_button_try_again"
-        android:textAllCaps="false"
-        android:textColor="@color/color_bg_white"
-        android:textSize="16sp"
-        android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/close_button" />
 
-    <!-- Close button at bottom -->
+    <!-- Close button at bottom (secondary) -->
     <Button
         android:id="@+id/close_button"
+        style="@style/Widget.Numo.Button.Tertiary"
         android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginBottom="24dp"
-        android:background="@drawable/bg_button_black"
+        android:layout_height="@dimen/button_height"
+        android:layout_marginHorizontal="@dimen/space_xl"
+        android:layout_marginBottom="@dimen/space_xl"
         android:text="@string/payment_failure_button_close"
-        android:textAllCaps="false"
-        android:textColor="@color/color_bg_white"
-        android:textSize="18sp"
+        android:textColor="@color/color_text_secondary"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent" />
 

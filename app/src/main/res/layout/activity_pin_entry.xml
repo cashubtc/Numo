@@ -19,17 +19,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Lock Icon -->
+    <!-- Lock Icon — start of vertical chain that fills space above the keypad -->
     <ImageView
         android:id="@+id/lock_icon"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:layout_marginTop="80dp"
         android:src="@drawable/ic_lock"
         app:tint="@color/color_text_primary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/back_button"
+        app:layout_constraintBottom_toTopOf="@id/title"
+        app:layout_constraintVertical_chainStyle="packed"
+        app:layout_constraintVertical_bias="0.3" />
 
     <!-- Title -->
     <TextView
@@ -68,7 +70,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/subtitle" />
 
-    <!-- Error Message -->
+    <!-- Error Message — closes the chain to the keypad top -->
     <TextView
         android:id="@+id/error_message"
         android:layout_width="wrap_content"
@@ -80,7 +82,8 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/pin_dots" />
+        app:layout_constraintTop_toBottomOf="@id/pin_dots"
+        app:layout_constraintBottom_toTopOf="@id/pin_keypad" />
 
     <!-- Keypad - fixed 320dp height like POS -->
     <com.electricdreams.numo.feature.pin.PinKeypadView

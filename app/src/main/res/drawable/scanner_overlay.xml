@@ -3,7 +3,7 @@
     <!-- Semi-transparent overlay -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#80000000" />
+            <solid android:color="@color/color_overlay_dark" />
         </shape>
     </item>
 
@@ -16,7 +16,7 @@
             <solid android:color="@android:color/transparent" />
             <stroke
                 android:width="2dp"
-                android:color="#FFFFFF" />
+                android:color="@color/white" />
             <corners android:radius="12dp" />
         </shape>
     </item>

@@ -5,7 +5,7 @@
     android:layout_height="64dp"
     android:layout_columnWeight="1"
     android:layout_rowWeight="1"
-    android:layout_margin="4dp"
+    android:layout_margin="@dimen/space_xs"
     android:background="@drawable/bg_keypad_button_tip"
     android:clickable="true"
     android:focusable="true"
@@ -17,9 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="1"
-        android:textColor="@color/color_text_primary"
-        android:textSize="28sp"
-        android:textStyle="bold"
+        android:textAppearance="@style/Text.DisplayLarge"
         android:includeFontPadding="false" />
 
 </FrameLayout>

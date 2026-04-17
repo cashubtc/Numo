@@ -59,7 +59,7 @@ class PaymentFailureActivity : AppCompatActivity() {
             window.isStatusBarContrastEnforced = false
         }
 
-        val backgroundColor = ContextCompat.getColor(this, R.color.color_error)
+        val backgroundColor = ContextCompat.getColor(this, R.color.color_bg_white)
         window.setBackgroundDrawable(android.graphics.drawable.ColorDrawable(backgroundColor))
 
         val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)

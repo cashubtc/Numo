@@ -96,13 +96,14 @@
     <string name="payment_received_error_no_details">Transaction details not available</string>
 
     
-    <string name="payment_failure_title">Payment failed</string>
-    <string name="payment_failure_message">Something went wrong while processing this payment.</string>
+    <string name="payment_failure_title">Payment not received</string>
+    <string name="payment_failure_message">This payment could not be completed. You can try again or start a new charge.</string>
+    <string name="payment_failure_reassurance">No funds were transferred — it\'s safe to retry.</string>
     <string name="payment_failure_button_try_again">Try again</string>
     <string name="payment_failure_button_close">Close</string>
     <string name="payment_failure_close_content_description">Close</string>
-    <string name="payment_failure_error_background_description">Error background</string>
-    <string name="payment_failure_error_icon_description">Error</string>
+    <string name="payment_failure_error_background_description">Error indicator</string>
+    <string name="payment_failure_error_icon_description">Payment not received</string>
     <string name="payment_failure_error_no_pending">No pending payment to retry</string>
 
     
@@ -258,8 +259,8 @@
     <string name="common_close">Close</string>
 
     
-    <string name="empty_state_items_title">Create your catalog</string>
-    <string name="empty_state_items_subtitle">Add products to start accepting payments with your POS.</string>
+    <string name="empty_state_items_title">Add your first item</string>
+    <string name="empty_state_items_subtitle">Create menu items or products so you can charge with a single tap instead of typing amounts.</string>
     <string name="empty_state_items_add_button">Add item</string>
     <string name="empty_state_items_import_button">Import from CSV</string>
 
@@ -302,15 +303,15 @@
     <string name="dialog_pin_hint">PIN</string>
 
     
-    <string name="nfc_payment_error_enter_amount_first">Please enter an amount first</string>
-    <string name="nfc_payment_error_rescan_not_supported">PIN-based rescan not supported in this build</string>
-    <string name="nfc_payment_error_insufficient_funds">Insufficient funds on card</string>
-    <string name="nfc_payment_error_pin_flow_not_implemented">PIN-required flow not implemented in this build</string>
-    <string name="nfc_payment_error_card_sw">Card Error: (SW: 0x%04X)</string>
-    <string name="nfc_payment_error_generic">Payment failed: %1$s</string>
-    <string name="nfc_payment_error_nfc_comm">NFC Communication Error: %1$s</string>
-    <string name="nfc_payment_error_satocash">Satocash Card Error: %1$s (SW: 0x%2$04X)</string>
-    <string name="nfc_payment_error_unexpected">An unexpected error occurred: %1$s</string>
+    <string name="nfc_payment_error_enter_amount_first">Enter an amount to charge</string>
+    <string name="nfc_payment_error_rescan_not_supported">This card type isn\'t supported yet</string>
+    <string name="nfc_payment_error_insufficient_funds">Not enough funds on this card — ask the customer to top up or use another payment method</string>
+    <string name="nfc_payment_error_pin_flow_not_implemented">This card requires a PIN, which isn\'t supported yet</string>
+    <string name="nfc_payment_error_card_sw">The card couldn\'t be read. Try tapping again. (Code: 0x%04X)</string>
+    <string name="nfc_payment_error_generic">Payment not completed: %1$s</string>
+    <string name="nfc_payment_error_nfc_comm">Tap lost — hold the card steady and try again</string>
+    <string name="nfc_payment_error_satocash">Card couldn\'t be read: %1$s (Code: 0x%2$04X)</string>
+    <string name="nfc_payment_error_unexpected">Something went wrong. Try again — no funds were transferred.</string>
     <string name="nfc_payment_hint_keep_close">Keep phone close</string>
     <string name="nfc_payment_hint_processing">Processing payment...\nYou can lift your phone</string>
 
@@ -330,7 +331,7 @@
     <string name="withdraw_lightning_option_address">📧 Lightning Address</string>
     <string name="withdraw_lightning_address_hint_label">Enter a Lightning address</string>
     <string name="withdraw_lightning_address_hint_value">user@domain.com</string>
-    <string name="withdraw_lightning_amount_label">Amount (sats)</string>
+    <string name="withdraw_lightning_amount_label">Amount</string>
     <string name="withdraw_lightning_amount_hint">1000</string>
     <string name="withdraw_lightning_button_continue">Continue</string>
 
@@ -352,7 +353,7 @@
     <string name="withdraw_melt_amount_label">Amount</string>
     <string name="withdraw_melt_fee_label">Fee Reserve</string>
     <string name="withdraw_melt_total_label">Total</string>
-    <string name="withdraw_melt_fee_note">The fee reserve will be returned if the actual Lightning fee is lower.</string>
+    <string name="withdraw_melt_fee_note">The fee reserve will be returned if the Lightning fee is lower.</string>
     <string name="withdraw_melt_loading">Processing withdrawal...</string>
 
     
@@ -388,7 +389,8 @@
     
     <string name="history_toolbar_title">Activity</string>
     <string name="history_section_payment_history">PAYMENT HISTORY</string>
-    <string name="history_empty">No payment history</string>
+    <string name="history_empty">Your payments will appear here</string>
+    <string name="history_empty_subtitle">After your first charge, you\'ll see a record of every payment received.</string>
 
     <string name="transaction_row_copy">Copy</string>
     <string name="transaction_row_open">Open</string>
@@ -474,28 +476,29 @@
     
     <string name="item_entry_toolbar_back">Back</string>
     <string name="item_entry_title_add">Add Item</string>
+    <string name="item_entry_title_edit">Edit Item</string>
     <string name="item_entry_button_save">Save</string>
     <string name="item_entry_image_description">Item image</string>
     <string name="item_entry_image_placeholder">No image</string>
     <string name="item_entry_button_add_photo">Add Photo</string>
     <string name="item_entry_button_remove_photo">Remove Photo</string>
 
-    <string name="item_entry_section_basic_information">BASIC INFORMATION</string>
+    <string name="item_entry_section_basic_information">DETAILS</string>
     <string name="item_entry_label_name">Name</string>
-    <string name="item_entry_hint_name">Item Name</string>
+    <string name="item_entry_hint_name">e.g. Cappuccino</string>
     <string name="item_entry_label_variation">Variation</string>
     <string name="item_entry_hint_variation">e.g. Small, Large</string>
     <string name="item_entry_label_description">Description</string>
-    <string name="item_entry_hint_description">Optional</string>
+    <string name="item_entry_hint_description">Notes about this item</string>
 
     <string name="item_entry_section_category">CATEGORY</string>
-    <string name="item_entry_hint_new_category">New category name</string>
+    <string name="item_entry_hint_new_category">Category name</string>
     <string name="item_entry_category_confirm">Confirm</string>
     <string name="item_entry_category_cancel">Cancel</string>
-    <string name="item_entry_category_helper">Select an existing category or create a new one.</string>
+    <string name="item_entry_category_helper">Select a category or create a new one.</string>
 
     <string name="item_entry_section_pricing">PRICING</string>
-    <string name="item_entry_price_type_fiat">Fiat</string>
+    <string name="item_entry_price_type_fiat">Local Currency</string>
     <string name="item_entry_price_type_bitcoin">Bitcoin</string>
     <string name="item_entry_currency_symbol_default">$</string>
     <string name="item_entry_hint_price_fiat">0.00</string>
@@ -504,40 +507,56 @@
     <string name="item_entry_hint_price_sats">0</string>
     <string name="item_entry_label_sats">sats</string>
 
-    <string name="item_entry_label_apply_vat">Apply VAT</string>
-    <string name="item_entry_label_price_includes_vat">Price includes VAT</string>
-    <string name="item_entry_label_vat_rate">VAT Rate</string>
+    <string name="item_entry_label_apply_vat">Apply Tax (VAT)</string>
+    <string name="item_entry_label_price_includes_vat">Price includes tax</string>
+    <string name="item_entry_label_vat_rate">Tax Rate</string>
     <string name="item_entry_hint_vat_rate">20</string>
 
     <string name="item_entry_price_breakdown_title">Price Breakdown</string>
-    <string name="item_entry_price_breakdown_net_label">Net Price (excl. VAT)</string>
+    <string name="item_entry_price_breakdown_net_label">Price before tax</string>
     <string name="item_entry_price_breakdown_net_value_default">$0.00</string>
-    <string name="item_entry_price_breakdown_vat_label">VAT (20%)</string>
+    <string name="item_entry_price_breakdown_vat_label">Tax (20%)</string>
     <string name="item_entry_price_breakdown_vat_value_default">$0.00</string>
-    <string name="item_entry_price_breakdown_total_label">Total (incl. VAT)</string>
+    <string name="item_entry_price_breakdown_total_label">Customer pays</string>
     <string name="item_entry_price_breakdown_total_value_default">$0.00</string>
 
     <string name="item_entry_price_helper">Set a fixed price in your preferred currency. Bitcoin prices are in satoshis (sats).</string>
 
-    <string name="item_entry_section_identification">IDENTIFICATION</string>
-    <string name="item_entry_label_gtin">GTIN</string>
-    <string name="item_entry_hint_gtin">Scan or enter barcode</string>
+    <string name="item_entry_section_identification">BARCODE &amp; SKU</string>
+    <string name="item_entry_label_gtin">Barcode</string>
+    <string name="item_entry_hint_gtin">Scan or type barcode number</string>
     <string name="item_entry_scan_barcode">Scan barcode</string>
     <string name="item_entry_label_sku">SKU</string>
-    <string name="item_entry_hint_sku">Internal stock code</string>
-    <string name="item_entry_error_gtin_exists">This GTIN already exists</string>
-    <string name="item_entry_error_sku_exists">This SKU already exists</string>
+    <string name="item_entry_hint_sku">Your internal product code</string>
+    <string name="item_entry_error_gtin_exists">Another item already uses this barcode</string>
+    <string name="item_entry_error_sku_exists">Another item already uses this SKU</string>
+    <string name="item_entry_error_name_required">Give your item a name</string>
+    <string name="item_entry_error_price_required">Enter a price</string>
+    <string name="item_entry_error_price_positive">Price can\'t be negative</string>
+    <string name="item_entry_error_price_decimals">Use up to 2 decimal places</string>
+    <string name="item_entry_error_sats_required">Enter a price in sats</string>
+    <string name="item_entry_error_sats_positive">Sats can\'t be negative</string>
+    <string name="item_entry_error_sats_whole_number">Sats must be a whole number</string>
+    <string name="item_entry_error_quantity_positive">Stock can\'t be negative</string>
+    <string name="item_entry_error_threshold_positive">Threshold can\'t be negative</string>
 
-    <string name="item_entry_section_inventory">INVENTORY</string>
-    <string name="item_entry_label_track_quantity">Track Quantity</string>
-    <string name="item_entry_label_current_stock">Current Stock</string>
+    <string name="item_entry_section_inventory">STOCK</string>
+    <string name="item_entry_label_track_quantity">Track Stock</string>
+    <string name="item_entry_label_current_stock">In Stock</string>
     <string name="item_entry_hint_current_stock">0</string>
     <string name="item_entry_label_low_stock_alert">Low Stock Alert</string>
     <string name="item_entry_label_alert_when_below">Alert When Below</string>
     <string name="item_entry_hint_alert_threshold">5</string>
-    <string name="item_entry_inventory_helper">Enable inventory tracking to monitor stock levels and receive low stock alerts.</string>
+    <string name="item_entry_inventory_helper">Get notified when stock is running low.</string>
 
     <string name="item_entry_button_cancel">Cancel</string>
+    <string name="item_entry_button_delete">Delete Item</string>
+    <string name="item_entry_delete_confirmation_message">This item will be permanently removed from your catalog.</string>
+    <string name="item_entry_more_details">Additional Options</string>
+    <string name="item_entry_more_details_expand">Show additional options</string>
+    <string name="item_entry_identification_helper">Optional — for items with barcodes or internal tracking codes.</string>
+    <string name="item_entry_toast_item_saved">Item saved</string>
+    <string name="item_entry_toast_item_updated">Item updated</string>
 
     
     <string name="item_product_drag_handle_description">Drag to reorder</string>
@@ -580,7 +599,7 @@
     <string name="item_selection_basket_items_count">%1$d items</string>
     <string name="item_selection_charge_button">Charge</string>
     <string name="item_selection_charge_button_default">Charge</string>
-    <string name="pos_error_no_mints_configured">Add at least one mint in Settings → Mints before charging customers.</string>
+    <string name="pos_error_no_mints_configured">To accept payments, add a mint first. Go to Settings → Mints to get started.</string>
 
     <string name="item_selection_save_button">Save</string>
     <string name="item_selection_saved_baskets_button">Saved</string>
@@ -680,8 +699,10 @@
 
     
     <string name="auto_withdraw_title">Withdrawals</string>
+    <string name="auto_withdraw_hero_label">AUTO-WITHDRAW</string>
     <string name="auto_withdraw_hero_title">Auto-Withdraw</string>
     <string name="auto_withdraw_hero_subtitle">Automatically send funds to your Lightning wallet when balance exceeds a threshold</string>
+    <string name="auto_withdraw_hero_helper">Set a payout threshold and lightning address to automatically withdraw when your balance reaches the limit.</string>
     <string name="auto_withdraw_status_active">Active</string>
     <string name="auto_withdraw_status_inactive">Inactive</string>
     
@@ -708,9 +729,9 @@
     
     <string name="auto_withdraw_section_history">Recent Activity</string>
     <string name="auto_withdraw_see_all">See All</string>
-    <string name="auto_withdraw_history_empty">No automatic withdrawals yet</string>
-    <string name="auto_withdraw_history_empty_title">No Activity Yet</string>
-    <string name="auto_withdraw_history_empty_subtitle">Withdrawals will appear here</string>
+    <string name="auto_withdraw_history_empty">No withdrawals yet</string>
+    <string name="auto_withdraw_history_empty_title">No withdrawals yet</string>
+    <string name="auto_withdraw_history_empty_subtitle">When auto-withdraw is enabled, your payments are sent to your wallet automatically. Activity will show here.</string>
     
     <string name="auto_withdraw_status_completed">Sent</string>
     <string name="auto_withdraw_status_pending">Pending</string>
@@ -722,7 +743,7 @@
     <string name="auto_withdraw_progress_completed">Sent successfully!</string>
     <string name="auto_withdraw_progress_failed">Withdrawal failed</string>
     
-    <string name="auto_withdraw_settings_title">Auto-Withdraw</string>
+    <string name="auto_withdraw_settings_title">Withdraw</string>
     <string name="auto_withdraw_error_title">Error Details</string>
 
     
@@ -754,6 +775,9 @@
     <string name="withdraw_amount_placeholder">Enter amount in sats</string>
     <string name="withdraw_continue_button">Continue</string>
     <string name="withdraw_scan_qr">Scan QR</string>
+    <string name="withdraw_scan_invoice_button">Scan Invoice</string>
+    <string name="withdraw_invoice_helper">Enter a BOLT11 lightning invoice</string>
+    <string name="withdraw_address_helper">Send to an email-like lightning address</string>
     <string name="withdraw_section_send_to">Send To</string>
     <string name="withdraw_balance_available">Available: %1$s</string>
 
@@ -825,6 +849,12 @@
     
     <string name="cd_mint_icon">Mint icon</string>
     <string name="cd_mint_selected">Selected as Lightning mint</string>
+    <string name="cd_edit">Edit</string>
+    <string name="cd_delete">Delete</string>
+    <string name="cd_restore_success">Wallet restored successfully</string>
+    <string name="cd_scan_qr">Scan QR code</string>
+    <string name="cd_qr_code">QR code</string>
+    <string name="cd_transaction_status">Transaction status</string>
 
     
     <string name="mint_action_info">Info</string>
@@ -896,4 +926,32 @@
     <string name="payment_request_tab_unified">Unified</string>
     <string name="payment_request_default_description">Payment of %1$d sats</string>
     <string name="payment_request_lightning_description">Numo POS payment of %1$d sats</string>
+
+    <!-- Extracted from layout hardcoded strings -->
+    <string name="basket_receipt_items_header_default">ITEMS</string>
+    <string name="action_add_new_mint">+ Add New Mint</string>
+    <string name="action_add_endpoint">+ Add Endpoint</string>
+    <string name="action_sync_all_endpoints">Sync All Endpoints</string>
+    <string name="dialog_confirm_message_default">Are you sure you want to proceed?</string>
+    <string name="dialog_ndef_payment_title">NFC Payment</string>
+    <string name="dialog_ndef_payment_status">Tap a device to your phone to receive payment</string>
+    <string name="dialog_sync_progress_message">Syncing…</string>
+    <string name="dialog_input_title_default">Enter Value</string>
+    <string name="dialog_input_description_default">Enter a value below</string>
+    <string name="hint_enter_value">Enter value</string>
+    <string name="dialog_input_helper_default">Min: 1,000 - Max: 1,000,000</string>
+    <string name="label_auto">AUTO</string>
+    <string name="about_website_url" translatable="false">numopay.org</string>
+    <string name="about_contact_email" translatable="false">numopay@proton.me</string>
+    <string name="desc_back">Back</string>
+    <string name="desc_app_icon">App Icon</string>
+    <string name="desc_item_image">Item image</string>
+    <string name="desc_decrease_quantity">Decrease quantity</string>
+    <string name="desc_increase_quantity">Increase quantity</string>
+    <string name="desc_remove_item">Remove item</string>
+    <string name="desc_select_lightning_mint">Select as Lightning mint</string>
+    <string name="desc_remove_preset">Remove preset</string>
+    <string name="label_percent_symbol" translatable="false">%</string>
+    <string name="auto_withdraw_percentage_min" translatable="false">50%</string>
+    <string name="auto_withdraw_percentage_max" translatable="false">98%</string>
 </resources>

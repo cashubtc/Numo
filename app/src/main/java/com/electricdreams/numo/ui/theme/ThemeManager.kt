@@ -4,6 +4,7 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.prefs.PreferenceStore
@@ -40,11 +41,11 @@ class ThemeManager(
 
         // Resolve the primary background color for the current theme so that
         // both the POS activity root and the window background can share it.
-        val backgroundColor = resolveBackgroundColor(theme)
+        val backgroundColor = resolveBackgroundColor(activity, theme)
         
         // Text color: black ONLY for white theme, white for all other themes
         val textColor = if (isWhiteTheme) {
-            android.graphics.Color.parseColor("#0B1215")
+            ContextCompat.getColor(activity, R.color.color_theme_text_dark)
         } else {
             android.graphics.Color.WHITE
         }
@@ -119,16 +120,16 @@ class ThemeManager(
         fun resolveBackgroundColor(activity: AppCompatActivity): Int {
             val prefs = PreferenceStore.app(activity)
             val theme = prefs.getString("app_theme", "green") ?: "green"
-            return resolveBackgroundColor(theme)
+            return resolveBackgroundColor(activity, theme)
         }
 
-        private fun resolveBackgroundColor(theme: String): Int {
+        private fun resolveBackgroundColor(context: android.content.Context, theme: String): Int {
             return when (theme) {
-                "obsidian" -> android.graphics.Color.parseColor("#0B1215")
-                "bitcoin_orange" -> android.graphics.Color.parseColor("#F7931A")
-                "green" -> android.graphics.Color.parseColor("#00C244")
-                "white" -> android.graphics.Color.parseColor("#FFFFFF")
-                else -> android.graphics.Color.parseColor("#0B1215")
+                "obsidian" -> ContextCompat.getColor(context, R.color.color_theme_obsidian)
+                "bitcoin_orange" -> ContextCompat.getColor(context, R.color.color_theme_bitcoin_orange)
+                "green" -> ContextCompat.getColor(context, R.color.color_theme_green)
+                "white" -> ContextCompat.getColor(context, R.color.color_theme_white)
+                else -> ContextCompat.getColor(context, R.color.color_theme_obsidian)
             }
         }
     }

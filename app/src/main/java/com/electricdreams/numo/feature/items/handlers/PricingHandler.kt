@@ -14,6 +14,7 @@ import com.electricdreams.numo.core.util.CurrencyManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.textfield.TextInputLayout
 
 /**
  * Handles all pricing-related UI and logic including:
@@ -26,12 +27,10 @@ class PricingHandler(
     private val priceTypeToggle: MaterialButtonToggleGroup,
     private val btnPriceFiat: MaterialButton,
     private val btnPriceBitcoin: MaterialButton,
-    private val fiatPriceContainer: LinearLayout,
-    private val satsPriceContainer: LinearLayout,
+    private val fiatPriceLayout: TextInputLayout,
+    private val satsPriceLayout: TextInputLayout,
     private val priceInput: EditText,
     private val satsInput: EditText,
-    private val currencySymbol: TextView,
-    private val currencyCode: TextView,
     private val vatSectionCard: View,
     private val switchVatEnabled: SwitchMaterial,
     private val vatFieldsContainer: LinearLayout,
@@ -70,13 +69,13 @@ class PricingHandler(
         when (priceType) {
             PriceType.FIAT -> {
                 priceTypeToggle.check(R.id.btn_price_fiat)
-                fiatPriceContainer.visibility = View.VISIBLE
-                satsPriceContainer.visibility = View.GONE
+                fiatPriceLayout.visibility = View.VISIBLE
+                satsPriceLayout.visibility = View.GONE
             }
             PriceType.SATS -> {
                 priceTypeToggle.check(R.id.btn_price_bitcoin)
-                fiatPriceContainer.visibility = View.GONE
-                satsPriceContainer.visibility = View.VISIBLE
+                fiatPriceLayout.visibility = View.GONE
+                satsPriceLayout.visibility = View.VISIBLE
             }
         }
         updateVatSectionVisibility()
@@ -145,8 +144,8 @@ class PricingHandler(
      * Updates the currency display based on current settings.
      */
     fun updateCurrencyDisplay() {
-        currencySymbol.text = currencyManager.getCurrentSymbol()
-        currencyCode.text = currencyManager.getCurrentCurrency()
+        fiatPriceLayout.prefixText = currencyManager.getCurrentSymbol()
+        fiatPriceLayout.suffixText = currencyManager.getCurrentCurrency()
     }
 
     /**
@@ -176,14 +175,14 @@ class PricingHandler(
                 when (checkedId) {
                     R.id.btn_price_fiat -> {
                         currentPriceType = PriceType.FIAT
-                        fiatPriceContainer.visibility = View.VISIBLE
-                        satsPriceContainer.visibility = View.GONE
+                        fiatPriceLayout.visibility = View.VISIBLE
+                        satsPriceLayout.visibility = View.GONE
                         updateVatSectionVisibility()
                     }
                     R.id.btn_price_bitcoin -> {
                         currentPriceType = PriceType.SATS
-                        fiatPriceContainer.visibility = View.GONE
-                        satsPriceContainer.visibility = View.VISIBLE
+                        fiatPriceLayout.visibility = View.GONE
+                        satsPriceLayout.visibility = View.VISIBLE
                         updateVatSectionVisibility()
                     }
                 }

@@ -5,7 +5,7 @@
     android:minHeight="@dimen/keypad_button_min_height"
     android:layout_margin="@dimen/space_xs"
     android:background="?attr/selectableItemBackgroundBorderless"
-    android:textSize="28sp"
+    android:textAppearance="@style/Text.DisplayLarge"
     android:textColor="@color/color_text_secondary"
     android:fontFamily="sans-serif-light"
     android:stateListAnimator="@null"

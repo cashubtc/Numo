@@ -2,7 +2,6 @@ package com.electricdreams.numo.feature.autowithdraw
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.animation.ValueAnimator
 import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
@@ -33,6 +32,8 @@ import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.feature.settings.WithdrawLightningActivity
+import com.electricdreams.numo.ui.components.EmptyStateHelper
+import com.electricdreams.numo.ui.components.LightningStrikeView
 import com.electricdreams.numo.ui.components.MintSelectionBottomSheet
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.google.android.material.slider.Slider
@@ -56,11 +57,14 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     private lateinit var autoWithdrawManager: AutoWithdrawManager
 
     // Hero section
-    private lateinit var heroIcon: ImageView
-    private lateinit var heroIconContainer: FrameLayout
+    private lateinit var heroBg: FrameLayout
+    private lateinit var heroBolt: ImageView
+    private lateinit var heroBoltFade: View
     private lateinit var statusContainer: LinearLayout
     private lateinit var statusDot: View
     private lateinit var statusText: TextView
+
+    // Toggle icon
 
     // Settings controls
     private lateinit var enableSwitch: SwitchCompat
@@ -72,9 +76,12 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
 
     // History section
     private lateinit var historyCard: CardView
-    private lateinit var historyEmptyContainer: LinearLayout
+    private lateinit var historyEmptyContainer: View
     private lateinit var historyRecyclerView: RecyclerView
     private lateinit var seeAllButton: TextView
+
+    // Auto-withdraw config container (Destination + Trigger Settings)
+    private lateinit var configContainer: LinearLayout
 
     // Manual withdraw
     private lateinit var manualWithdrawRow: LinearLayout
@@ -83,7 +90,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     private lateinit var mintManager: MintManager
 
     private var isUpdatingUI = false
-    private var iconAnimator: ObjectAnimator? = null
     
     // Current threshold value (in sats)
     private var currentThreshold: Long = AutoWithdrawSettingsManager.DEFAULT_THRESHOLD_SATS
@@ -103,23 +109,22 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         setupListeners()
         loadSettings()
         loadHistory()
-        
-        // Start entrance animations
-        startEntranceAnimations()
     }
 
     private fun initViews() {
-        // Back button - use standard chevron pattern for consistency
-        findViewById<ImageButton>(R.id.back_button).setOnClickListener {
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick {
             onBackPressedDispatcher.onBackPressed()
         }
 
         // Hero section
-        heroIcon = findViewById(R.id.hero_icon)
-        heroIconContainer = findViewById(R.id.icon_container)
+        heroBg = findViewById(R.id.hero_bg)
+        heroBolt = findViewById(R.id.hero_bolt)
+        heroBoltFade = findViewById(R.id.hero_bolt_fade)
         statusContainer = findViewById(R.id.status_container)
         statusDot = findViewById(R.id.status_dot)
         statusText = findViewById(R.id.status_text)
+
+        // Toggle icon
 
         // Main toggle
         enableSwitch = findViewById(R.id.enable_switch)
@@ -137,6 +142,9 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         historyRecyclerView = findViewById(R.id.history_recycler_view)
         seeAllButton = findViewById(R.id.see_all_button)
         
+        // Config container (Destination + Trigger Settings)
+        configContainer = findViewById(R.id.auto_withdraw_config_container)
+
         // Manual withdraw
         manualWithdrawRow = findViewById(R.id.manual_withdraw_row)
 
@@ -154,8 +162,12 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             if (!isUpdatingUI) {
                 settingsManager.setGloballyEnabled(isChecked)
                 updateStatusIndicator(isChecked)
-                updateConfigFieldsEnabled(isChecked)
+                updateHeroGradient(isChecked, animate = true)
+                animateConfigContainer(isChecked)
                 animateStatusChange(isChecked)
+                if (isChecked) {
+                    playLightningStrike()
+                }
             }
         }
 
@@ -284,7 +296,8 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         val enabled = settingsManager.isGloballyEnabled()
         enableSwitch.isChecked = enabled
         updateStatusIndicator(enabled)
-        updateConfigFieldsEnabled(enabled)
+        updateHeroGradient(enabled, animate = false)
+        configContainer.visibility = if (enabled) View.VISIBLE else View.GONE
 
         lightningAddressInput.setText(settingsManager.getDefaultLightningAddress())
         
@@ -308,8 +321,29 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             statusDot.backgroundTintList = ContextCompat.getColorStateList(this, R.color.color_text_tertiary)
             statusText.text = getString(R.string.auto_withdraw_status_inactive)
             statusText.setTextColor(ContextCompat.getColor(this, R.color.color_text_tertiary))
-            statusContainer.background = ContextCompat.getDrawable(this, R.drawable.bg_input_pill)
+            statusContainer.background = ContextCompat.getDrawable(this, R.drawable.bg_pill_badge)
         }
+    }
+
+    private fun updateHeroGradient(enabled: Boolean, animate: Boolean) {
+        val gradientRes = if (enabled) R.drawable.bg_hero_gradient_active else R.drawable.bg_hero_gradient_green
+        val fadeRes = if (enabled) R.drawable.bg_hero_bolt_fade_active else R.drawable.bg_hero_bolt_fade_green
+
+        heroBg.setBackgroundResource(gradientRes)
+        val boltColor = if (enabled) R.color.color_bitcoin_orange else R.color.color_success_green
+        heroBolt.setColorFilter(ContextCompat.getColor(this, boltColor))
+        heroBoltFade.setBackgroundResource(fadeRes)
+
+    }
+
+    private fun playLightningStrike() {
+        val root = findViewById<ViewGroup>(R.id.root_layout)
+        val strike = LightningStrikeView(this)
+        root.addView(strike, ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        ))
+        strike.strike()
     }
 
     private fun animateStatusChange(enabled: Boolean) {
@@ -324,43 +358,30 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             start()
         }
 
-        // Icon pulse
-        if (enabled) {
-            startIconPulseAnimation()
+    }
+
+    private fun animateConfigContainer(show: Boolean) {
+        if (show) {
+            configContainer.visibility = View.VISIBLE
+            configContainer.alpha = 0f
+            configContainer.translationY = -20f
+            configContainer.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .setDuration(250)
+                .setInterpolator(AccelerateDecelerateInterpolator())
+                .start()
         } else {
-            stopIconPulseAnimation()
+            configContainer.animate()
+                .alpha(0f)
+                .translationY(-20f)
+                .setDuration(200)
+                .setInterpolator(AccelerateDecelerateInterpolator())
+                .withEndAction {
+                    configContainer.visibility = View.GONE
+                }
+                .start()
         }
-    }
-
-    private fun startIconPulseAnimation() {
-        iconAnimator?.cancel()
-        
-        iconAnimator = ObjectAnimator.ofFloat(heroIconContainer, "alpha", 1f, 0.6f, 1f).apply {
-            duration = 1500
-            repeatCount = ValueAnimator.INFINITE
-            interpolator = AccelerateDecelerateInterpolator()
-            start()
-        }
-    }
-
-    private fun stopIconPulseAnimation() {
-        iconAnimator?.cancel()
-        heroIconContainer.alpha = 1f
-    }
-
-    private fun updateConfigFieldsEnabled(enabled: Boolean) {
-        val alpha = if (enabled) 1f else 0.5f
-        
-        // Animate alpha change
-        lightningAddressInput.animate().alpha(alpha).setDuration(200).start()
-        thresholdDisplay.animate().alpha(alpha).setDuration(200).start()
-        percentageSlider.animate().alpha(alpha).setDuration(200).start()
-        percentageBadge.animate().alpha(alpha).setDuration(200).start()
-        
-        lightningAddressInput.isEnabled = enabled
-        thresholdDisplay.isEnabled = enabled
-        thresholdDisplay.isClickable = enabled
-        percentageSlider.isEnabled = enabled
     }
 
     private fun loadHistory() {
@@ -368,6 +389,12 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
 
         if (history.isEmpty()) {
             historyEmptyContainer.visibility = View.VISIBLE
+            EmptyStateHelper.bind(
+                historyEmptyContainer,
+                R.drawable.ic_history,
+                getString(R.string.auto_withdraw_history_empty_title),
+                getString(R.string.auto_withdraw_history_empty_subtitle)
+            )
             historyRecyclerView.visibility = View.GONE
             seeAllButton.visibility = View.GONE
         } else {
@@ -381,62 +408,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun startEntranceAnimations() {
-        // Hero card slide in
-        val heroCard: CardView = findViewById(R.id.hero_card)
-        heroCard.alpha = 0f
-        heroCard.translationY = -50f
-        heroCard.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setDuration(400)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .start()
-
-        // Icon bounce
-        heroIconContainer.scaleX = 0f
-        heroIconContainer.scaleY = 0f
-        heroIconContainer.animate()
-            .scaleX(1f)
-            .scaleY(1f)
-            .setStartDelay(200)
-            .setDuration(500)
-            .setInterpolator(OvershootInterpolator(2f))
-            .start()
-
-        // Status pill fade
-        statusContainer.alpha = 0f
-        statusContainer.animate()
-            .alpha(1f)
-            .setStartDelay(400)
-            .setDuration(300)
-            .start()
-
-        // Cards stagger in
-        val toggleCard: CardView = findViewById(R.id.toggle_card)
-        animateCardEntrance(toggleCard, 100)
-        
-        val manualWithdrawCard: CardView = findViewById(R.id.manual_withdraw_card)
-        animateCardEntrance(manualWithdrawCard, 200)
-        
-        // If auto-withdraw is enabled, start icon animation
-        if (settingsManager.isGloballyEnabled()) {
-            heroIconContainer.postDelayed({ startIconPulseAnimation() }, 800)
-        }
-    }
-
-    private fun animateCardEntrance(card: View, delay: Long) {
-        card.alpha = 0f
-        card.translationY = 30f
-        card.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setStartDelay(delay)
-            .setDuration(350)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .start()
-    }
-
     override fun onResume() {
         super.onResume()
         // Refresh history when returning to activity (e.g., after completing a withdrawal)
@@ -445,7 +416,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        iconAnimator?.cancel()
     }
 
     /**
@@ -461,6 +431,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val iconContainer: FrameLayout = view.findViewById(R.id.icon_container)
             val statusIcon: ImageView = view.findViewById(R.id.status_icon)
+            val statusBadgeIcon: FrameLayout = view.findViewById(R.id.status_badge_icon_container)
             val amountText: TextView = view.findViewById(R.id.amount_text)
             val addressText: TextView = view.findViewById(R.id.address_text)
             val mintText: TextView = view.findViewById(R.id.mint_text)
@@ -504,19 +475,18 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             // Status styling
             when (entry.status) {
                 WithdrawHistoryEntry.STATUS_COMPLETED -> {
-                    holder.statusIcon.setImageResource(R.drawable.ic_check)
-                    holder.statusIcon.setColorFilter(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_success_green))
-                    holder.iconContainer.backgroundTintList = ContextCompat.getColorStateList(this@AutoWithdrawSettingsActivity, R.color.color_bg_secondary)
-                    holder.statusBadge.text = getString(R.string.auto_withdraw_status_completed)
-                    holder.statusBadge.setTextColor(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_success_green))
-                    holder.statusBadge.background = ContextCompat.getDrawable(this@AutoWithdrawSettingsActivity, R.drawable.bg_status_pill_success)
+                    holder.statusIcon.setImageResource(R.drawable.ic_arrow_up_send)
+                    holder.statusIcon.setColorFilter(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_text_primary))
+                    holder.statusBadgeIcon.visibility = View.VISIBLE
+                    holder.statusBadge.visibility = View.GONE
                     holder.expandIndicator.visibility = View.GONE
                     holder.errorContainer.visibility = View.GONE
                 }
                 WithdrawHistoryEntry.STATUS_PENDING -> {
                     holder.statusIcon.setImageResource(R.drawable.ic_pending)
                     holder.statusIcon.setColorFilter(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_warning))
-                    holder.iconContainer.backgroundTintList = ContextCompat.getColorStateList(this@AutoWithdrawSettingsActivity, R.color.color_bg_secondary)
+                    holder.statusBadgeIcon.visibility = View.GONE
+                    holder.statusBadge.visibility = View.VISIBLE
                     holder.statusBadge.text = getString(R.string.auto_withdraw_status_pending)
                     holder.statusBadge.setTextColor(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_warning))
                     holder.statusBadge.background = ContextCompat.getDrawable(this@AutoWithdrawSettingsActivity, R.drawable.bg_status_pill_pending)
@@ -526,7 +496,8 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
                 WithdrawHistoryEntry.STATUS_FAILED -> {
                     holder.statusIcon.setImageResource(R.drawable.ic_close)
                     holder.statusIcon.setColorFilter(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_error))
-                    holder.iconContainer.backgroundTintList = ContextCompat.getColorStateList(this@AutoWithdrawSettingsActivity, R.color.color_bg_secondary)
+                    holder.statusBadgeIcon.visibility = View.GONE
+                    holder.statusBadge.visibility = View.VISIBLE
                     holder.statusBadge.text = getString(R.string.auto_withdraw_status_failed)
                     holder.statusBadge.setTextColor(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_error))
                     holder.statusBadge.background = ContextCompat.getDrawable(this@AutoWithdrawSettingsActivity, R.drawable.bg_status_pill_error)
@@ -589,13 +560,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
                 holder.expandIndicator.setImageResource(R.drawable.ic_chevron_down)
             }
 
-            // Animate item appearance
-            holder.itemView.alpha = 0f
-            holder.itemView.animate()
-                .alpha(1f)
-                .setStartDelay((position * 50).toLong())
-                .setDuration(200)
-                .start()
         }
         
         private fun toggleExpand(entryId: String, holder: ViewHolder) {

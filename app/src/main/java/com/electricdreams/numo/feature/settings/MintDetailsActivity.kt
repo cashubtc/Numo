@@ -9,7 +9,6 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
@@ -54,7 +53,7 @@ class MintDetailsActivity : AppCompatActivity() {
     }
 
     // Header views
-    private lateinit var backButton: ImageButton
+    private lateinit var topBar: com.electricdreams.numo.ui.components.NumoTopBar
     private lateinit var errorBanner: LinearLayout
     private lateinit var errorText: TextView
     private lateinit var errorRetryButton: ImageButton
@@ -75,10 +74,8 @@ class MintDetailsActivity : AppCompatActivity() {
     private lateinit var detailsSection: LinearLayout
     private lateinit var urlRow: View
     private lateinit var urlValue: TextView
-    private lateinit var urlDivider: View
     private lateinit var softwareRow: View
     private lateinit var softwareValue: TextView
-    private lateinit var softwareDivider: View
     private lateinit var versionRow: View
     private lateinit var versionValue: TextView
     private lateinit var contactSection: LinearLayout
@@ -86,7 +83,6 @@ class MintDetailsActivity : AppCompatActivity() {
     
     // Actions
     private lateinit var setLightningButton: LinearLayout
-    private lateinit var actionDivider1: View
     private lateinit var copyUrlButton: LinearLayout
     private lateinit var deleteButton: LinearLayout
 
@@ -129,7 +125,6 @@ class MintDetailsActivity : AppCompatActivity() {
         initViews()
         setupListeners()
         loadMintDetails()
-        startEntranceAnimations()
     }
     
     override fun onStart() {
@@ -151,7 +146,7 @@ class MintDetailsActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        backButton = findViewById(R.id.back_button)
+        topBar = findViewById(R.id.top_bar)
         errorBanner = findViewById(R.id.error_banner)
         errorText = findViewById(R.id.error_text)
         errorRetryButton = findViewById(R.id.error_retry_button)
@@ -170,25 +165,20 @@ class MintDetailsActivity : AppCompatActivity() {
         detailsSection = findViewById(R.id.details_section)
         urlRow = findViewById(R.id.url_row)
         urlValue = findViewById(R.id.url_value)
-        urlDivider = findViewById(R.id.url_divider)
         softwareRow = findViewById(R.id.software_row)
         softwareValue = findViewById(R.id.software_value)
-        softwareDivider = findViewById(R.id.software_divider)
         versionRow = findViewById(R.id.version_row)
         versionValue = findViewById(R.id.version_value)
         contactSection = findViewById(R.id.contact_section)
         contactContainer = findViewById(R.id.contact_container)
         
         setLightningButton = findViewById(R.id.set_lightning_button)
-        actionDivider1 = findViewById(R.id.action_divider_1)
         copyUrlButton = findViewById(R.id.copy_url_button)
         deleteButton = findViewById(R.id.delete_button)
     }
 
     private fun setupListeners() {
-        backButton.setOnClickListener {
-            finish()
-        }
+        topBar.onNavClick { finish() }
         
         errorRetryButton.setOnClickListener {
             animateButtonTap(it) {
@@ -248,11 +238,9 @@ class MintDetailsActivity : AppCompatActivity() {
         if (isLightningMint) {
             lightningBadge.visibility = View.VISIBLE
             setLightningButton.visibility = View.GONE
-            actionDivider1.visibility = View.GONE
         } else {
             lightningBadge.visibility = View.GONE
             setLightningButton.visibility = View.VISIBLE
-            actionDivider1.visibility = View.VISIBLE
         }
     }
 
@@ -306,7 +294,6 @@ class MintDetailsActivity : AppCompatActivity() {
         descriptionSection.visibility = View.GONE
         motdSection.visibility = View.GONE
         softwareRow.visibility = View.GONE
-        softwareDivider.visibility = View.GONE
         versionRow.visibility = View.GONE
         contactSection.visibility = View.GONE
         contactContainer.removeAllViews()
@@ -331,18 +318,14 @@ class MintDetailsActivity : AppCompatActivity() {
         
         if (hasSoftware) {
             softwareRow.visibility = View.VISIBLE
-            softwareDivider.visibility = View.VISIBLE
             softwareValue.text = versionInfo?.name
         } else {
             softwareRow.visibility = View.GONE
-            softwareDivider.visibility = View.GONE
         }
-        
+
         if (hasVersion) {
             versionRow.visibility = View.VISIBLE
             versionValue.text = versionInfo?.version
-            // Only show URL divider if no software row above
-            urlDivider.visibility = if (hasSoftware) View.VISIBLE else View.VISIBLE
         } else {
             versionRow.visibility = View.GONE
         }
@@ -378,8 +361,8 @@ class MintDetailsActivity : AppCompatActivity() {
             }
             iconView.setImageResource(iconRes)
             
-            // Set method label
-            methodView.text = contact.method.uppercase()
+            // Set method label (title case, matching Details row labels)
+            methodView.text = contact.method.replaceFirstChar { it.uppercase() }
             
             // Set info text
             infoView.text = contact.info
@@ -390,20 +373,6 @@ class MintDetailsActivity : AppCompatActivity() {
             }
             
             contactContainer.addView(contactView)
-            
-            // Add divider if not last item
-            if (index < contacts.size - 1) {
-                val divider = View(this).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        resources.getDimensionPixelSize(R.dimen.divider_height)
-                    ).apply {
-                        marginStart = resources.getDimensionPixelSize(R.dimen.contact_divider_margin)
-                    }
-                    setBackgroundColor(getColor(R.color.color_divider))
-                }
-                contactContainer.addView(divider)
-            }
         }
     }
 
@@ -500,7 +469,6 @@ class MintDetailsActivity : AppCompatActivity() {
                 title = getString(R.string.mints_remove_title),
                 message = getString(R.string.mints_remove_message, displayName),
                 confirmText = getString(R.string.mints_remove_confirm),
-                cancelText = getString(R.string.common_cancel),
                 isDestructive = true,
                 onConfirm = { deleteMint() }
             )
@@ -536,51 +504,6 @@ class MintDetailsActivity : AppCompatActivity() {
                     .withEndAction { onComplete() }
                     .start()
             }
-            .start()
-    }
-
-    private fun startEntranceAnimations() {
-        // Icon bounce
-        iconContainer.scaleX = 0f
-        iconContainer.scaleY = 0f
-        iconContainer.animate()
-            .scaleX(1f)
-            .scaleY(1f)
-            .setDuration(400)
-            .setInterpolator(OvershootInterpolator(2f))
-            .start()
-        
-        // Name fade in
-        mintName.alpha = 0f
-        mintName.translationY = 20f
-        mintName.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setStartDelay(100)
-            .setDuration(300)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .start()
-        
-        // Balance pill slide up
-        balanceText.alpha = 0f
-        balanceText.translationY = 20f
-        balanceText.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setStartDelay(150)
-            .setDuration(300)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .start()
-        
-        // Details card slide up
-        detailsSection.alpha = 0f
-        detailsSection.translationY = 30f
-        detailsSection.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setStartDelay(200)
-            .setDuration(350)
-            .setInterpolator(AccelerateDecelerateInterpolator())
             .start()
     }
 }

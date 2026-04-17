@@ -6,8 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="top|center_horizontal"
-    android:paddingHorizontal="16dp"
-    android:paddingTop="6dp"
+    android:paddingHorizontal="@dimen/space_l"
+    android:paddingTop="@dimen/space_s"
     android:visibility="gone">
 
     <!-- Dynamic Island Container -->
@@ -17,8 +17,8 @@
         android:layout_height="wrap_content"
         android:background="@drawable/bg_dynamic_island"
         android:minHeight="44dp"
-        android:paddingHorizontal="14dp"
-        android:paddingVertical="10dp">
+        android:paddingHorizontal="@dimen/row_padding_vertical"
+        android:paddingVertical="@dimen/space_m">
 
         <!-- Leading Icon / Spinner -->
         <FrameLayout
@@ -36,27 +36,29 @@
                 android:layout_height="20dp"
                 android:layout_gravity="center"
                 android:indeterminate="true"
-                android:indeterminateTint="#FFFFFF" />
+                android:indeterminateTint="@color/color_text_on_dark" />
 
             <!-- Success Icon (hidden by default) -->
             <ImageView
+                android:importantForAccessibility="no"
                 android:id="@+id/success_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="@dimen/icon_size_small"
+                android:layout_height="@dimen/icon_size_small"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_check"
                 android:visibility="gone"
-                app:tint="#4CAF50" />
+                app:tint="@color/color_auto_withdraw_success" />
 
             <!-- Error Icon (hidden by default) -->
             <ImageView
+                android:importantForAccessibility="no"
                 android:id="@+id/error_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="@dimen/icon_size_small"
+                android:layout_height="@dimen/icon_size_small"
                 android:layout_gravity="center"
                 android:src="@drawable/ic_close"
                 android:visibility="gone"
-                app:tint="#FF5252" />
+                app:tint="@color/color_auto_withdraw_error" />
 
         </FrameLayout>
 
@@ -65,8 +67,8 @@
             android:id="@+id/content_container"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginStart="@dimen/space_m"
+            android:layout_marginEnd="@dimen/space_m"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/trailing_container"
@@ -78,10 +80,10 @@
                 android:id="@+id/progress_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textAppearance="@style/Text.Caption"
                 android:fontFamily="sans-serif-medium"
                 android:text="@string/auto_withdraw_progress_sending"
-                android:textColor="#FFFFFF"
-                android:textSize="13sp" />
+                android:textColor="@color/color_text_on_dark" />
 
             <!-- Subtitle -->
             <TextView
@@ -89,10 +91,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="1dp"
+                android:textAppearance="@style/Text.Badge"
                 android:alpha="0.7"
                 android:fontFamily="sans-serif"
-                android:textColor="#FFFFFF"
-                android:textSize="11sp"
+                android:textColor="@color/color_text_on_dark"
                 tools:text="Sending to wallet..." />
 
         </LinearLayout>
@@ -112,19 +114,18 @@
                 android:id="@+id/progress_amount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-medium"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp"
+                android:textAppearance="@style/Text.Chip"
+                android:textColor="@color/color_text_on_dark"
                 tools:text="10,000" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textAppearance="@style/Text.Badge"
                 android:alpha="0.7"
                 android:fontFamily="sans-serif"
-                android:text="sats"
-                android:textColor="#FFFFFF"
-                android:textSize="10sp" />
+                android:text="@string/item_entry_label_sats"
+                android:textColor="@color/color_text_on_dark" />
 
         </LinearLayout>
 

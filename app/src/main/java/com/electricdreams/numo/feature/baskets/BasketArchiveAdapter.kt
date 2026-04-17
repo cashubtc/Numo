@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.SavedBasket
@@ -84,7 +85,23 @@ class BasketArchiveAdapter(
     override fun getItemCount(): Int = baskets.size
 
     fun updateBaskets(newBaskets: List<SavedBasket>) {
+        val oldBaskets = baskets
+        val diffResult = DiffUtil.calculateDiff(BasketDiffCallback(oldBaskets, newBaskets))
         baskets = newBaskets
-        notifyDataSetChanged()
+        diffResult.dispatchUpdatesTo(this)
+    }
+
+    private class BasketDiffCallback(
+        private val oldList: List<SavedBasket>,
+        private val newList: List<SavedBasket>
+    ) : DiffUtil.Callback() {
+        override fun getOldListSize(): Int = oldList.size
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldPos: Int, newPos: Int): Boolean =
+            oldList[oldPos].id == newList[newPos].id
+
+        override fun areContentsTheSame(oldPos: Int, newPos: Int): Boolean =
+            oldList[oldPos] == newList[newPos]
     }
 }

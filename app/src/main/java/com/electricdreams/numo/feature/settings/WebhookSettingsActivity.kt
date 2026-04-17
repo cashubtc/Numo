@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -17,6 +16,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.R
+import com.electricdreams.numo.ui.components.EmptyStateHelper
 import com.electricdreams.numo.core.util.WebhookSettingsManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
@@ -44,9 +44,9 @@ class WebhookSettingsActivity : AppCompatActivity() {
 
     private lateinit var webhookSettingsManager: WebhookSettingsManager
     private lateinit var endpointsList: LinearLayout
-    private lateinit var emptyStateText: TextView
+    private lateinit var emptyStateText: View
     private lateinit var qrScannerLauncher: ActivityResultLauncher<Intent>
-    private var currentDialog: AlertDialog? = null
+    private var currentInputSheet: com.electricdreams.numo.ui.components.InputBottomSheet? = null
     private var isSyncing: Boolean = false
     private var syncJob: Job? = null
 
@@ -79,7 +79,7 @@ class WebhookSettingsActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<ImageButton>(R.id.back_button).setOnClickListener { finish() }
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
         findViewById<View>(R.id.add_endpoint_button).setOnClickListener { showAddEndpointDialog() }
         findViewById<View>(R.id.sync_all_button).setOnClickListener { syncAllTransactions() }
 
@@ -93,7 +93,18 @@ class WebhookSettingsActivity : AppCompatActivity() {
         endpointsList.removeAllViews()
 
         val endpoints = webhookSettingsManager.getEndpoints()
-        emptyStateText.visibility = if (endpoints.isEmpty()) View.VISIBLE else View.GONE
+        val isEmpty = endpoints.isEmpty()
+        emptyStateText.visibility = if (isEmpty) View.VISIBLE else View.GONE
+        findViewById<View>(R.id.add_endpoint_button).visibility = if (isEmpty) View.GONE else View.VISIBLE
+        if (isEmpty) {
+            EmptyStateHelper.bind(
+                emptyStateText,
+                R.drawable.ic_link,
+                "No Endpoints",
+                "Add a webhook endpoint to feed sales data to external dashboards",
+                "+ Add Endpoint"
+            ) { showAddEndpointDialog() }
+        }
 
         val inflater = LayoutInflater.from(this)
         endpoints.forEachIndexed { index, endpoint ->
@@ -111,7 +122,8 @@ class WebhookSettingsActivity : AppCompatActivity() {
                 getString(R.string.webhook_settings_auth_not_set)
             }
 
-            statusDot.setImageResource(R.drawable.bg_status_dot_gray)
+            statusDot.setImageResource(R.drawable.bg_status_dot)
+            statusDot.imageTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.GRAY)
             lifecycleScope.launch(Dispatchers.IO) {
                 var isReachable = false
                 try {
@@ -131,11 +143,12 @@ class WebhookSettingsActivity : AppCompatActivity() {
                 }
 
                 withContext(Dispatchers.Main) {
-                    if (isReachable) {
-                        statusDot.setImageResource(R.drawable.bg_status_dot_green)
+                    val tintColor = if (isReachable) {
+                        androidx.core.content.ContextCompat.getColor(this@WebhookSettingsActivity, R.color.color_success_green)
                     } else {
-                        statusDot.setImageResource(R.drawable.bg_status_dot_red)
+                        androidx.core.content.ContextCompat.getColor(this@WebhookSettingsActivity, R.color.color_error)
                     }
+                    statusDot.imageTintList = android.content.res.ColorStateList.valueOf(tintColor)
                 }
             }
 
@@ -275,7 +288,7 @@ class WebhookSettingsActivity : AppCompatActivity() {
                             getString(R.string.webhook_settings_add_success),
                             Toast.LENGTH_SHORT,
                         ).show()
-                        currentDialog?.dismiss()
+                        currentInputSheet?.dismiss()
                     }
                     WebhookSettingsManager.SaveResult.DUPLICATE -> {
                         Toast.makeText(
@@ -302,14 +315,11 @@ class WebhookSettingsActivity : AppCompatActivity() {
 
     private fun populateDialogInput(value: String?) {
         if (value.isNullOrBlank()) return
-        currentDialog?.findViewById<EditText>(R.id.dialog_input)?.let { editText ->
-            editText.setText(value)
-            editText.setSelection(editText.text.length)
-        }
+        currentInputSheet?.populateInput(value)
     }
 
     private fun showAddEndpointDialog() {
-        currentDialog = DialogHelper.showInput(
+        currentInputSheet = DialogHelper.showInput(
             context = this,
             config = DialogHelper.InputConfig(
                 title = getString(R.string.webhook_settings_add_dialog_title),
@@ -492,7 +502,6 @@ class WebhookSettingsActivity : AppCompatActivity() {
                 title = getString(R.string.webhook_settings_delete_dialog_title),
                 message = getString(R.string.webhook_settings_delete_dialog_message, endpoint.url),
                 confirmText = getString(R.string.webhook_settings_delete_dialog_confirm),
-                cancelText = getString(R.string.common_cancel),
                 isDestructive = true,
                 onConfirm = {
                     if (webhookSettingsManager.removeEndpoint(endpoint.url)) {

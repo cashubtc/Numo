@@ -12,7 +12,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.R
+import com.electricdreams.numo.ui.components.EmptyStateHelper
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
@@ -33,7 +35,7 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
     private lateinit var namesHeader: TextView
     private lateinit var namesCard: LinearLayout
     private lateinit var namesList: LinearLayout
-    private lateinit var emptyState: LinearLayout
+    private lateinit var emptyState: View
     private lateinit var addNameButton: View
     private lateinit var clearAllButton: View
     
@@ -54,8 +56,7 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
     }
     
     private fun initViews() {
-        // Back button
-        findViewById<ImageButton>(R.id.back_button).setOnClickListener { finish() }
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
         
         // Container views
         namesContainer = findViewById(R.id.names_container)
@@ -83,7 +84,15 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
             namesHeader.visibility = View.GONE
             namesCard.visibility = View.GONE
             emptyState.visibility = View.VISIBLE
+            EmptyStateHelper.bind(
+                emptyState,
+                R.drawable.ic_label,
+                getString(R.string.basket_names_settings_empty_title),
+                getString(R.string.basket_names_settings_empty_subtitle),
+                "+ Add Name"
+            ) { showAddNameDialog() }
             clearAllButton.visibility = View.GONE
+            addNameButton.visibility = View.GONE
         } else {
             // Show names list
             namesHeader.visibility = View.VISIBLE
@@ -95,7 +104,7 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
             
             names.forEachIndexed { index, name ->
                 val itemView = inflater.inflate(R.layout.item_basket_name_preset, namesList, false)
-                bindNameItem(itemView, index, name, names.size)
+                bindNameItem(itemView, index, name)
                 namesList.addView(itemView)
                 
                 // Add divider between items (not after last)
@@ -103,13 +112,13 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
                     addDivider()
                 }
             }
+
+            // Show add button only when items exist and can add more
+            addNameButton.visibility = if (basketNamesManager.canAddMore()) View.VISIBLE else View.GONE
         }
-        
-        // Update add button visibility
-        addNameButton.visibility = if (basketNamesManager.canAddMore()) View.VISIBLE else View.GONE
     }
     
-    private fun bindNameItem(view: View, index: Int, name: String, totalCount: Int) {
+    private fun bindNameItem(view: View, index: Int, name: String) {
         val nameText = view.findViewById<TextView>(R.id.preset_name)
         val deleteButton = view.findViewById<ImageButton>(R.id.delete_button)
         
@@ -239,26 +248,28 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
     }
     
     private fun showDeleteConfirmation(name: String) {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.basket_names_dialog_delete_title)
-            .setMessage(getString(R.string.basket_names_dialog_delete_message, name))
-            .setPositiveButton(R.string.common_delete) { _, _ ->
+        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
+            title = getString(R.string.basket_names_dialog_delete_title),
+            message = getString(R.string.basket_names_dialog_delete_message, name),
+            confirmText = getString(R.string.common_delete),
+            isDestructive = true,
+            onConfirm = {
                 basketNamesManager.removePresetName(name)
                 refreshNamesList()
             }
-            .setNegativeButton(R.string.common_cancel, null)
-            .show()
+        ))
     }
     
     private fun showClearAllConfirmation() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.basket_names_dialog_clear_all_title)
-            .setMessage(R.string.basket_names_dialog_clear_all_message)
-            .setPositiveButton(R.string.basket_names_dialog_clear_all_confirm) { _, _ ->
+        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
+            title = getString(R.string.basket_names_dialog_clear_all_title),
+            message = getString(R.string.basket_names_dialog_clear_all_message),
+            confirmText = getString(R.string.basket_names_dialog_clear_all_confirm),
+            isDestructive = true,
+            onConfirm = {
                 basketNamesManager.clearAll()
                 refreshNamesList()
             }
-            .setNegativeButton(R.string.common_cancel, null)
-            .show()
+        ))
     }
 }

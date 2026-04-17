@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="#B71C1C" />
+    <solid android:color="@color/color_dynamic_island_error" />
     <corners android:radius="28dp" />
 </shape>

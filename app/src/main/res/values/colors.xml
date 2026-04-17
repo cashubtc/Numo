@@ -1,15 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Numo Brand Colors -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Primitive Colors (raw values — use semantic tokens below) -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Numo Brand -->
     <color name="numo_fluorescent_green">#5EFFC2</color>
     <color name="numo_navy">#0A2540</color>
+    <color name="numo_green">#00C244</color>
+    <color name="numo_green_pressed">#00A03A</color>
+    <color name="numo_dark">#0B1215</color>
+    <color name="numo_bitcoin_orange">#F7931A</color>
+    <color name="numo_purple">#8420F4</color>
+    <color name="numo_cyan">#83E8FC</color>
+    <color name="numo_red">#FF4B4B</color>
+    <color name="numo_accent_blue">#007AFF</color>
+    <color name="numo_warning_orange">#FF9500</color>
 
-    <!-- Cash App Brand Colors -->
-    <color name="color_primary_green">#0B1215</color>
-    <color name="color_primary_green_light">#0B1215</color>
-    <color name="color_primary_purple">#8420F4</color>
-    <color name="color_primary_blue">#83E8FC</color>
-    <color name="color_primary_red">#FF4B4B</color>
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Semantic Tokens (use these in layouts and styles)         -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <!-- Brand Aliases -->
+    <color name="color_primary">@color/numo_green</color>
+
+    <!-- Primary brand foreground: dark-on-light, light-on-dark.
+         Named "green" for historical reasons — actually numo_dark/white.
+         Prefer color_brand_foreground in new code. -->
+    <color name="color_brand_foreground">@color/numo_dark</color>
+    <color name="color_primary_green">@color/color_brand_foreground</color>
+    <color name="color_primary_green_light">@color/color_brand_foreground</color>
+    <color name="color_primary_green_pressed">@color/numo_green_pressed</color>
+    <color name="color_primary_purple">@color/numo_purple</color>
+    <color name="color_primary_blue">@color/numo_cyan</color>
+    <color name="color_primary_red">@color/numo_red</color>
 
     <!-- Background Colors -->
     <color name="color_bg_white">#FFFFFF</color>
@@ -17,9 +43,9 @@
     <color name="color_bg_secondary">#F1F2F6</color>
     <color name="color_bg_tertiary">#E8E9ED</color>
     <color name="color_bg_surface">#F2F2F7</color>
-    <color name="color_bg_card">#FFFFFF</color>
-    <color name="color_bg_elevated">#FFFFFF</color>
-    <color name="color_search_bg">#F1F2F6</color>
+    <color name="color_bg_card">@color/color_bg_white</color>
+    <color name="color_bg_elevated">@color/color_bg_white</color>
+    <color name="color_search_bg">@color/color_bg_secondary</color>
     <color name="color_divider">#E5E5EA</color>
 
     <!-- Text Colors -->
@@ -28,23 +54,21 @@
     <color name="color_text_tertiary">#9B9B9F</color>
     <color name="color_text_quaternary">#C7C7CC</color>
     <color name="color_icon_inactive">#C5C5CC</color>
-    <color name="color_icon_secondary">#9B9B9F</color>
-    <color name="color_icon_tertiary">#C7C7CC</color>
+    <color name="color_icon_secondary">@color/color_text_tertiary</color>
+    <color name="color_icon_tertiary">@color/color_text_quaternary</color>
 
     <!-- Chip & Border Colors -->
     <color name="color_chip_border">#E1E1E5</color>
 
     <!-- Status & Semantic Colors -->
-    <color name="color_primary">#00C244</color>
-    <color name="color_success_green">#00C244</color>
-    <color name="color_primary_green_pressed">#00A03A</color>
-    <color name="color_warning">#FF9500</color>
-    <color name="color_warning_red">#FF4B4B</color>
-    <color name="color_error">#FF4B4B</color>
+    <color name="color_success_green">@color/numo_green</color>
+    <color name="color_warning">@color/numo_warning_orange</color>
+    <color name="color_warning_red">@color/numo_red</color>
+    <color name="color_error">@color/numo_red</color>
     <color name="color_error_bg">#14FF4B4B</color>
-    <color name="color_info_blue">#83E8FC</color>
-    <color name="color_bitcoin_orange">#F7931A</color>
-    <color name="color_accent_blue">#007AFF</color>
+    <color name="color_info_blue">@color/numo_cyan</color>
+    <color name="color_bitcoin_orange">@color/numo_bitcoin_orange</color>
+    <color name="color_accent_blue">@color/numo_accent_blue</color>
     <color name="color_accent_blue_light">#E5F2FF</color>
     <color name="color_accent_blue_pressed">#0062CC</color>
 
@@ -52,7 +76,7 @@
     <color name="color_scrim">#66000000</color>
     <color name="color_ripple">#1A000000</color>
 
-    <!-- Legacy Compatibility (mapped to new colors) -->
+    <!-- Legacy Compatibility (mapped to semantic tokens) -->
     <color name="colorPrimary">@color/color_primary_green_light</color>
     <color name="colorPrimaryDark">@color/color_primary_green</color>
     <color name="colorAccent">@color/color_primary_green_light</color>
@@ -67,42 +91,89 @@
     <color name="inputBoxStrokeColor">@color/color_divider</color>
     <color name="buttonBackground">@color/color_primary_green_light</color>
     <color name="buttonText">@color/color_bg_white</color>
-    <color name="color_button_primary_text">#FFFFFF</color>
     <color name="navigationBarBackground">#F8F9FA</color>
     <color name="navigationBarDivider">@color/color_divider</color>
     <color name="navigationIconTint">#757575</color>
 
-    <!-- Default Colors -->
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-
     <!-- Icon Colors -->
     <color name="iconTint">@color/navigationIconTint</color>
 
+    <!-- Button Colors -->
+    <color name="color_button_primary_text">@color/white</color>
+    <color name="color_button_primary_pressed">#1A2529</color>
+    <color name="color_button_primary_disabled">@color/color_bg_tertiary</color>
+
     <!-- Chip Ribbon Colors (for Empty State Animation) -->
     <color name="chip_ribbon_lime">#BEFF3D</color>
-    <color name="chip_ribbon_green">#00C244</color>
-    <color name="chip_ribbon_cyan">#83E8FC</color>
-    <color name="chip_ribbon_purple">#8420F4</color>
-    <color name="chip_ribbon_orange">#F7931A</color>
+    <color name="chip_ribbon_green">@color/numo_green</color>
+    <color name="chip_ribbon_cyan">@color/numo_cyan</color>
+    <color name="chip_ribbon_purple">@color/numo_purple</color>
+    <color name="chip_ribbon_orange">@color/numo_bitcoin_orange</color>
     <color name="chip_ribbon_pink">#FF6B9D</color>
     <color name="chip_ribbon_yellow">#FFDD00</color>
-    <color name="chip_ribbon_white">#FFFFFF</color>
+    <color name="chip_ribbon_white">@color/white</color>
 
     <!-- Info/Warning Card Backgrounds -->
     <color name="color_warning_card_bg">#FFF3E0</color>
     <color name="color_pin_info_card_bg">#E8F5E9</color>
+    <color name="color_info_card_bg">#F5F5F5</color>
+    <color name="color_error_card_bg">#FCECE8</color>
 
-    <!-- Empty State Theme Colors (Light Mode - white background) -->
-    <color name="empty_state_background">#FFFFFF</color>
-    <color name="empty_state_title">#000000</color>
-    <color name="empty_state_subtitle">#6F6F73</color>
-    <color name="empty_state_button_primary_bg">#000000</color>
-    <color name="empty_state_button_primary_text">#FFFFFF</color>
+    <!-- Status Pill Backgrounds -->
+    <color name="color_status_success_bg">#E8F5E9</color>
+    <color name="color_status_pending_bg">#FFF3E0</color>
+    <color name="color_status_error_bg">#FFEBEE</color>
+
+    <!-- Dynamic Island -->
+    <color name="color_dynamic_island_success">#1B5E20</color>
+    <color name="color_dynamic_island_error">#B71C1C</color>
+
+    <!-- Badge Backgrounds -->
+    <color name="color_badge_lightning_bg">#14FF9500</color>
+
+    <!-- Hero Gradient Tints -->
+    <color name="color_hero_gradient_end">#FFFCF9</color>
+    <color name="color_hero_gradient_active_end">#F9FCFA</color>
+    <color name="color_hero_gradient_green_end">#F2FBF5</color>
+
+    <!-- Opacity Scale (white) -->
+    <color name="color_white_10">#1AFFFFFF</color>
+    <color name="color_white_15">#26FFFFFF</color>
+    <color name="color_white_30">#4DFFFFFF</color>
+    <color name="color_white_34">#56FFFFFF</color>
+    <color name="color_white_50">@color/color_overlay_white_50</color>
+    <color name="color_white_80">#CCFFFFFF</color>
+    <color name="color_white_90">#E6FFFFFF</color>
+
+    <!-- Opacity Scale (black) -->
+    <color name="color_black_20">#33000000</color>
+    <color name="color_black_30">#4D000000</color>
+    <color name="color_black_40">@color/color_scrim</color>
+    <color name="color_black_50">@color/color_overlay_dark</color>
+    <color name="color_black_80">#CC000000</color>
+
+    <!-- Chip Pressed State -->
+    <color name="color_chip_pressed">#E8E9EC</color>
+
+    <!-- Brand Accent Tokens (for secondary screen warmth) -->
+    <color name="color_section_header">@color/numo_navy</color>
+    <color name="color_brand_surface_tint">#080F1A</color>
+    <color name="color_balance_bg">#F4F7F9</color>
+
+    <!-- Payment Failure (calm, neutral) -->
+    <color name="color_failure_icon_bg">@color/numo_red</color>
+    <color name="color_failure_reassurance">@color/color_text_secondary</color>
+
+    <!-- Empty State Theme Colors -->
+    <color name="empty_state_background">@color/color_bg_white</color>
+    <color name="empty_state_title">@color/color_text_primary</color>
+    <color name="empty_state_subtitle">@color/color_text_secondary</color>
+    <color name="empty_state_button_primary_bg">@color/color_text_primary</color>
+    <color name="empty_state_button_primary_text">@color/color_bg_white</color>
     <color name="empty_state_button_secondary_bg">@android:color/transparent</color>
-    <color name="empty_state_button_secondary_text">#6F6F73</color>
+    <color name="empty_state_button_secondary_text">@color/color_text_secondary</color>
     <color name="empty_state_button_secondary_border">#4D6F6F73</color>
-    <color name="empty_state_close_icon">#000000</color>
+    <color name="empty_state_close_icon">@color/black</color>
 
     <!-- Onboarding Dark Theme (white-on-navy text hierarchy) -->
     <color name="color_onboarding_text_muted">#73FFFFFF</color>
@@ -121,7 +192,38 @@
     <color name="color_hero_green_tint">#1400C244</color>
     <color name="color_default_pill_bg">#1A00C244</color>
 
-    <!-- Button Colors (extracted from bg_button_primary_green.xml) -->
-    <color name="color_button_primary_pressed">#1A2529</color>
-    <color name="color_button_primary_disabled">@color/color_bg_tertiary</color>
+    <!-- Overlay & Semi-transparent Colors -->
+    <color name="color_overlay_dark">#80000000</color>
+    <color name="color_overlay_white_50">#80FFFFFF</color>
+    <color name="color_ripple_on_dark">#33FFFFFF</color>
+    <color name="color_stroke_on_dark">#26FFFFFF</color>
+    <color name="color_text_on_dark">@color/white</color>
+    <color name="color_text_on_dark_high">#CCFFFFFF</color>
+    <color name="color_text_on_dark_medium">#B3FFFFFF</color>
+    <color name="color_text_on_dark_subtle">#99FFFFFF</color>
+    <color name="color_text_on_dark_faint">#73FFFFFF</color>
+    <color name="color_scrim_on_dark">#80FFFFFF</color>
+    <color name="color_scrim_on_light">#80000000</color>
+    <color name="color_bg_scanner">@color/black</color>
+    <color name="color_icon_security_green">#388E3C</color>
+    <color name="color_auto_withdraw_success">#4CAF50</color>
+    <color name="color_auto_withdraw_error">#FF5252</color>
+
+    <!-- Lightning Strike Animation Colors -->
+    <color name="color_lightning_bolt_core">@color/numo_bitcoin_orange</color>
+    <color name="color_lightning_bolt_inner_glow">#FFBB5C</color>
+    <color name="color_lightning_bolt_outer_glow">#FFCC80</color>
+
+    <!-- NFC Payment Animation Colors -->
+    <color name="color_nfc_idle">#0A0A0A</color>
+    <color name="color_nfc_success">@color/numo_green</color>
+    <color name="color_nfc_success_gradient_start">@color/numo_green</color>
+    <color name="color_nfc_success_gradient_end">@color/numo_green</color>
+
+    <!-- Theme Background Colors (for ThemeManager) -->
+    <color name="color_theme_obsidian">@color/numo_dark</color>
+    <color name="color_theme_bitcoin_orange">@color/numo_bitcoin_orange</color>
+    <color name="color_theme_green">@color/numo_green</color>
+    <color name="color_theme_white">@color/white</color>
+    <color name="color_theme_text_dark">@color/numo_dark</color>
 </resources>

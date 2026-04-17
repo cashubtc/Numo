@@ -24,6 +24,6 @@
     <string name="barcode_format_unknown">Unknown</string>
 
     <!-- Barcode scanner: toasts -->
-    <string name="barcode_scanner_toast_gtin_not_unique">This GTIN is already used by another item</string>
-    <string name="barcode_scanner_toast_gtin_scanned">GTIN scanned successfully</string>
+    <string name="barcode_scanner_toast_gtin_not_unique">This barcode is already used by another item</string>
+    <string name="barcode_scanner_toast_gtin_scanned">Barcode scanned</string>
 </resources>

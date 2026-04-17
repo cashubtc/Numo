@@ -16,8 +16,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="20dp"
-        android:paddingVertical="14dp"
+        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+        android:paddingVertical="@dimen/row_padding_vertical"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true">
@@ -49,17 +49,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="14dp"
-            android:layout_marginEnd="12dp">
+            android:layout_marginStart="@dimen/row_icon_gap"
+            android:layout_marginEnd="@dimen/space_m">
 
             <TextView
                 android:id="@+id/mint_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Mint Name"
-                android:textSize="16sp"
-                android:textColor="@color/color_text_primary"
-                android:fontFamily="sans-serif-medium"
+                android:textAppearance="@style/Text.RowTitle"
                 android:maxLines="1"
                 android:ellipsize="end" />
 
@@ -69,8 +67,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="mint.example.com"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_tertiary"
+                style="@style/Text.RowSubtitle"
                 android:maxLines="1"
                 android:ellipsize="end" />
 
@@ -82,10 +79,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="₿0"
-            android:textSize="15sp"
+            android:textAppearance="@style/Text.BodyBold"
             android:textColor="@color/color_text_secondary"
-            android:fontFamily="sans-serif-medium"
-            android:layout_marginEnd="8dp" />
+            android:layout_marginEnd="@dimen/space_s" />
 
         <!-- Chevron -->
         <ImageView

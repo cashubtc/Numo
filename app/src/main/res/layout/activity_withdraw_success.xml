@@ -32,23 +32,21 @@
                 android:id="@+id/amount_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
+                android:layout_marginBottom="@dimen/space_s"
                 android:gravity="center"
                 android:text="@string/withdraw_success_amount"
-                android:textColor="@color/color_text_primary"
-                android:textSize="28sp"
-                android:textStyle="bold" />
+                android:textAppearance="@style/Text.DisplayLarge" />
 
             <!-- Destination text -->
             <TextView
                 android:id="@+id/destination_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="32dp"
+                android:layout_marginBottom="@dimen/space_2xl"
                 android:gravity="center"
                 android:text="@string/withdraw_success_destination"
-                android:textColor="@color/color_text_secondary"
-                android:textSize="16sp" />
+                android:textAppearance="@style/Text.Body"
+                android:textColor="@color/color_text_secondary" />
 
             <!-- Animated checkmark container with clipChildren disabled -->
             <FrameLayout
@@ -85,16 +83,12 @@
     <!-- Close button at bottom (full width, grey background) -->
     <Button
         android:id="@+id/close_button"
+        style="@style/Widget.Numo.Button.Secondary.Gray"
         android:layout_width="match_parent"
-        android:layout_height="52dp"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginBottom="24dp"
-        android:background="@drawable/bg_button_secondary_gray"
+        android:layout_height="@dimen/button_height"
+        android:layout_marginHorizontal="@dimen/space_xl"
+        android:layout_marginBottom="@dimen/space_xl"
         android:text="@string/withdraw_success_close"
-        android:textAllCaps="false"
-        android:textColor="@color/color_bg_white"
-        android:textSize="18sp"
-        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

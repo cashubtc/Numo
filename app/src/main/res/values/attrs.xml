@@ -6,4 +6,24 @@
         <attr name="keypadButtonPressedColor" format="color"/>
         <attr name="inputBoxStrokeColor" format="color"/>
     </declare-styleable>
+
+    <declare-styleable name="NumoTopBar">
+        <attr name="topBarTitle" format="string|reference" />
+        <attr name="topBarNavIcon" format="reference" />
+        <attr name="topBarNavContentDescription" format="string|reference" />
+        <attr name="topBarActionIcon" format="reference" />
+        <attr name="topBarActionContentDescription" format="string|reference" />
+        <attr name="topBarActionTint" format="color|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="SettingsRowView">
+        <attr name="rowIcon" format="reference" />
+        <attr name="rowIconTint" format="color|reference" />
+        <attr name="rowTitle" format="string|reference" />
+        <attr name="rowTitleColor" format="color|reference" />
+        <attr name="rowSubtitle" format="string|reference" />
+        <attr name="rowTrailingIcon" format="reference" />
+        <attr name="rowTrailingText" format="string|reference" />
+        <attr name="rowShowChevron" format="boolean" />
+    </declare-styleable>
 </resources>

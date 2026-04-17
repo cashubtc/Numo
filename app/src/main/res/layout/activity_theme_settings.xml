@@ -6,40 +6,12 @@
     android:background="@color/color_bg_white">
 
     <!-- Top App Bar -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.electricdreams.numo.ui.components.NumoTopBar
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/color_bg_white"
-        android:paddingHorizontal="16dp"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/common_back"
-            android:src="@drawable/ic_chevron_back"
-            android:tint="@color/color_text_primary"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/settings_theme_title"
-            android:textAppearance="@style/Text.Title"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="@dimen/top_bar_height"
+        app:topBarTitle="@string/settings_theme_title"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -48,52 +20,56 @@
         app:layout_constraintTop_toBottomOf="@id/top_bar">
 
         <LinearLayout
+            android:id="@+id/theme_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- Mode Section Header -->
             <TextView
                 android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="4dp"
-            android:text="@string/theme_settings_section_mode"
-            android:textAppearance="@style/Text.SectionHeader" />
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/row_padding_vertical"
+                android:text="@string/theme_settings_section_mode"
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Dark Mode Toggle -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp"
-                android:layout_marginBottom="16dp">
+                android:paddingVertical="@dimen/row_padding_vertical"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:background="@drawable/bg_row_ripple">
 
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/theme_settings_dark_mode_label"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/dark_mode_switch"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    app:thumbTint="@color/selector_switch_thumb"
+                    app:trackTint="@color/selector_switch_track" />
             </LinearLayout>
 
             <!-- App Theme Section Header -->
             <TextView
                 android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="4dp"
-            android:text="@string/theme_settings_section_app_theme"
-            android:textAppearance="@style/Text.SectionHeader" />
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/section_gap"
+                android:paddingBottom="@dimen/row_padding_vertical"
+                android:text="@string/theme_settings_section_app_theme"
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Theme Radio Group -->
             <RadioGroup
@@ -104,58 +80,53 @@
                 <RadioButton
                     android:id="@+id/radio_obsidian"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="@dimen/settings_item_height"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_radio_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:text="@string/theme_settings_option_obsidian"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_bitcoin_orange"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="@dimen/settings_item_height"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_radio_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:text="@string/theme_settings_option_bitcoin_orange"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_green"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="@dimen/settings_item_height"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_radio_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:text="@string/theme_settings_option_green"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <RadioButton
                     android:id="@+id/radio_white"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="@dimen/settings_item_height"
                     android:background="?attr/selectableItemBackground"
                     android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
+                    android:drawableEnd="@drawable/selector_radio_custom"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
                     android:text="@string/theme_settings_option_white"
-                    android:textAppearance="@style/Text.BodyBold" />
+                    android:textAppearance="@style/Text.RowTitle" />
             </RadioGroup>
 
         </LinearLayout>
     </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

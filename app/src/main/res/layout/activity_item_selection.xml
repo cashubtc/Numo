@@ -29,21 +29,21 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="@color/color_bg_white"
-                android:paddingTop="8dp">
+                android:paddingTop="@dimen/space_s">
 
                 <!-- Header Row -->
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:paddingHorizontal="8dp">
+                    android:layout_height="@dimen/top_bar_height"
+                    android:paddingHorizontal="@dimen/space_l">
 
                     <ImageButton
                         android:id="@+id/back_button"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
+                        android:layout_width="@dimen/icon_size_large"
+                        android:layout_height="@dimen/icon_size_large"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:contentDescription="@string/item_selection_toolbar_back"
-                        android:padding="10dp"
+                        android:padding="@dimen/space_m"
                         android:src="@drawable/ic_chevron_back"
                         app:tint="@color/color_text_primary"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -55,9 +55,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/item_selection_toolbar_title"
-                        android:textColor="@color/color_text_primary"
-                        android:textSize="17sp"
-                        android:fontFamily="sans-serif-medium"
+                        android:textAppearance="@style/Text.Title"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -69,11 +67,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="36dp"
                         android:gravity="center"
-                        android:paddingHorizontal="12dp"
+                        android:paddingHorizontal="@dimen/space_m"
                         android:text="@string/item_selection_saved_baskets_button"
+                        android:textAppearance="@style/Text.Link"
                         android:textColor="@color/color_accent_blue"
-                        android:textSize="15sp"
-                        android:fontFamily="sans-serif-medium"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -86,13 +83,13 @@
                     android:id="@+id/search_bar_container"
                     android:layout_width="match_parent"
                     android:layout_height="44dp"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginHorizontal="@dimen/space_l"
+                    android:layout_marginTop="@dimen/space_s"
                     android:background="@drawable/bg_search_field"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="4dp">
+                    android:paddingStart="@dimen/space_m"
+                    android:paddingEnd="@dimen/space_xs">
 
                     <ImageView
                         android:id="@+id/search_icon"
@@ -107,13 +104,13 @@
                         android:id="@+id/category_badge"
                         android:layout_width="wrap_content"
                         android:layout_height="24dp"
-                        android:layout_marginStart="8dp"
+                        android:layout_marginStart="@dimen/space_s"
                         android:background="@drawable/bg_category_badge"
                         android:gravity="center"
-                        android:paddingHorizontal="8dp"
-                        android:textColor="@color/color_bg_white"
-                        android:textSize="13sp"
+                        android:paddingHorizontal="@dimen/space_s"
+                        android:textAppearance="@style/Text.Caption"
                         android:fontFamily="sans-serif-medium"
+                        android:textColor="@color/color_bg_white"
                         android:maxLines="1"
                         android:ellipsize="end"
                         android:visibility="gone"
@@ -125,35 +122,35 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:layout_marginStart="10dp"
+                        android:layout_marginStart="@dimen/space_s"
                         android:background="@null"
                         android:hint="@string/item_selection_search_hint"
                         android:imeOptions="actionSearch"
                         android:inputType="text"
                         android:maxLines="1"
+                        android:textAppearance="@style/Text.Body"
                         android:textColor="@color/color_text_primary"
-                        android:textColorHint="@color/color_text_tertiary"
-                        android:textSize="16sp" />
+                        android:textColorHint="@color/color_text_tertiary" />
 
                     <!-- Scan Button (default) -->
                     <ImageButton
                         android:id="@+id/scan_button"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="@dimen/icon_size_medium"
+                        android:layout_height="@dimen/icon_size_medium"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:contentDescription="@string/item_selection_scan_barcode"
-                        android:padding="8dp"
+                        android:padding="@dimen/space_s"
                         android:src="@drawable/ic_barcode_scan"
                         app:tint="@color/color_text_secondary" />
 
                     <!-- Clear Filters Button (shown when filters active) -->
                     <ImageButton
                         android:id="@+id/clear_filters_button"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="@dimen/icon_size_medium"
+                        android:layout_height="@dimen/icon_size_medium"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:contentDescription="@string/item_selection_clear_filters"
-                        android:padding="10dp"
+                        android:padding="@dimen/space_m"
                         android:src="@drawable/ic_close_circle"
                         app:tint="@color/color_text_secondary"
                         android:visibility="gone" />
@@ -165,9 +162,9 @@
                     android:id="@+id/category_chips_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="4dp"
-                    android:paddingHorizontal="16dp"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:layout_marginBottom="@dimen/space_xs"
+                    android:paddingHorizontal="@dimen/space_l"
                     android:visibility="gone"
                     app:flexWrap="wrap"
                     app:alignItems="flex_start"
@@ -207,7 +204,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:clipToPadding="false"
-                            android:paddingTop="8dp"
+                            android:paddingTop="@dimen/space_s"
                             android:nestedScrollingEnabled="false"
                             tools:listitem="@layout/item_product_selection" />
 
@@ -218,7 +215,7 @@
                             android:layout_height="match_parent"
                             android:gravity="center"
                             android:orientation="vertical"
-                            android:padding="32dp"
+                            android:padding="@dimen/space_2xl"
                             android:visibility="gone">
 
                             <ImageView
@@ -232,20 +229,19 @@
                                 android:id="@+id/empty_title"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="16dp"
+                                android:layout_marginTop="@dimen/space_l"
                                 android:text="@string/item_selection_empty_title"
-                                android:textColor="@color/color_text_secondary"
-                                android:textSize="17sp"
-                                android:fontFamily="sans-serif-medium" />
+                                android:textAppearance="@style/Text.RowTitle"
+                                android:textColor="@color/color_text_secondary" />
 
                             <TextView
                                 android:id="@+id/empty_subtitle"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
+                                android:layout_marginTop="@dimen/space_xs"
                                 android:text="@string/item_selection_empty_subtitle"
+                                android:textAppearance="@style/Text.Body"
                                 android:textColor="@color/color_text_tertiary"
-                                android:textSize="15sp"
                                 android:gravity="center" />
 
                         </LinearLayout>
@@ -257,7 +253,7 @@
                             android:layout_height="match_parent"
                             android:gravity="center"
                             android:orientation="vertical"
-                            android:padding="32dp"
+                            android:padding="@dimen/space_2xl"
                             android:visibility="gone">
 
                             <ImageView
@@ -270,20 +266,19 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="16dp"
+                                android:layout_marginTop="@dimen/space_l"
                                 android:text="@string/item_selection_no_results_title"
-                                android:textColor="@color/color_text_secondary"
-                                android:textSize="17sp"
-                                android:fontFamily="sans-serif-medium" />
+                                android:textAppearance="@style/Text.RowTitle"
+                                android:textColor="@color/color_text_secondary" />
 
                             <TextView
                                 android:id="@+id/no_results_subtitle"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="4dp"
+                                android:layout_marginTop="@dimen/space_xs"
                                 android:text="@string/item_selection_no_results_subtitle"
-                                android:textColor="@color/color_text_tertiary"
-                                android:textSize="15sp" />
+                                android:textAppearance="@style/Text.Body"
+                                android:textColor="@color/color_text_tertiary" />
 
                         </LinearLayout>
 
@@ -308,9 +303,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:orientation="vertical"
-            android:paddingHorizontal="16dp"
-            android:paddingBottom="24dp"
-            android:paddingTop="8dp"
+            android:paddingHorizontal="@dimen/space_l"
+            android:paddingBottom="@dimen/space_xl"
+            android:paddingTop="@dimen/space_s"
             android:clipToPadding="false"
             android:clipChildren="false">
 
@@ -319,7 +314,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:cardBackgroundColor="@color/color_bg_elevated"
-                app:cardCornerRadius="16dp"
+                app:cardCornerRadius="@dimen/radius_card"
                 app:cardElevation="4dp"
                 android:visibility="gone"
                 android:clipChildren="true"
@@ -336,8 +331,8 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/basket_header"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:paddingHorizontal="16dp"
+                        android:layout_height="@dimen/top_bar_height"
+                        android:paddingHorizontal="@dimen/space_l"
                         android:background="?attr/selectableItemBackground">
 
                         <ImageView
@@ -355,10 +350,8 @@
                             android:id="@+id/basket_item_count"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="10dp"
-                            android:textColor="@color/color_text_secondary"
-                            android:textSize="15sp"
-                            android:fontFamily="sans-serif"
+                            android:layout_marginStart="@dimen/space_s"
+                            android:textAppearance="@style/Text.Body"
                             tools:text="3 items"
                             app:layout_constraintStart_toEndOf="@id/basket_icon"
                             app:layout_constraintTop_toTopOf="parent"
@@ -368,10 +361,8 @@
                             android:id="@+id/basket_total"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="8dp"
-                            android:textColor="@color/color_text_primary"
-                            android:textSize="18sp"
-                            android:fontFamily="sans-serif-medium"
+                            android:layout_marginEnd="@dimen/space_s"
+                            android:textAppearance="@style/Text.Subtitle"
                             tools:text="$74.97"
                             app:layout_constraintEnd_toStartOf="@id/basket_chevron"
                             app:layout_constraintTop_toTopOf="parent"
@@ -401,7 +392,7 @@
                         <View
                             android:layout_width="match_parent"
                             android:layout_height="1dp"
-                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginHorizontal="@dimen/space_l"
                             android:background="@color/color_divider" />
 
                         <LinearLayout
@@ -409,29 +400,23 @@
                             android:layout_height="40dp"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="16dp">
+                            android:paddingHorizontal="@dimen/space_l">
 
                             <TextView
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="@string/item_selection_basket_title"
-                                android:textColor="@color/color_text_secondary"
-                                android:textSize="13sp"
-                                android:fontFamily="sans-serif-medium"
-                                android:textAllCaps="true"
-                                android:letterSpacing="0.05" />
+                                style="@style/Text.SectionHeader" />
 
                             <TextView
                                 android:id="@+id/basket_undo_button"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:padding="4dp"
+                                android:padding="@dimen/space_xs"
                                 android:gravity="center_vertical"
                                 android:text="@string/item_selection_undo_button_short"
-                                android:textColor="@color/color_text_secondary"
-                                android:textSize="14sp"
-                                android:fontFamily="sans-serif-medium"
+                                android:textAppearance="@style/Text.SecondaryButton"
                                 android:background="?attr/selectableItemBackgroundBorderless"
                                 android:alpha="0.35" />
 
@@ -439,13 +424,11 @@
                                 android:id="@+id/basket_redo_button"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="8dp"
-                                android:padding="4dp"
+                                android:layout_marginStart="@dimen/space_s"
+                                android:padding="@dimen/space_xs"
                                 android:gravity="center_vertical"
                                 android:text="@string/item_selection_redo_button_short"
-                                android:textColor="@color/color_text_secondary"
-                                android:textSize="14sp"
-                                android:fontFamily="sans-serif-medium"
+                                android:textAppearance="@style/Text.SecondaryButton"
                                 android:background="?attr/selectableItemBackgroundBorderless"
                                 android:alpha="0.35" />
 
@@ -453,12 +436,11 @@
                                 android:id="@+id/clear_basket_button"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="12dp"
-                                android:padding="4dp"
+                                android:layout_marginStart="@dimen/space_m"
+                                android:padding="@dimen/space_xs"
                                 android:text="@string/item_selection_basket_clear"
+                                android:textAppearance="@style/Text.SecondaryButton"
                                 android:textColor="@color/color_warning_red"
-                                android:textSize="14sp"
-                                android:fontFamily="sans-serif-medium"
                                 android:background="?attr/selectableItemBackgroundBorderless" />
 
                         </LinearLayout>
@@ -468,8 +450,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:clipToPadding="false"
-                            android:paddingVertical="4dp"
-                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="@dimen/space_xs"
+                            android:paddingHorizontal="@dimen/space_s"
                             android:nestedScrollingEnabled="false"
                             android:overScrollMode="never"
                             tools:listitem="@layout/item_basket_compact"
@@ -485,7 +467,7 @@
                 android:id="@+id/checkout_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="@dimen/space_m"
                 android:orientation="horizontal"
                 android:visibility="gone"
                 tools:visibility="visible">
@@ -495,9 +477,9 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginEnd="@dimen/space_s"
                     app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="16dp"
+                    app:cardCornerRadius="@dimen/radius_card"
                     app:cardElevation="4dp"
                     android:visibility="gone"
                     tools:visibility="visible">
@@ -505,13 +487,12 @@
                     <Button
                         android:id="@+id/save_button"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
+                        android:layout_height="@dimen/top_bar_height"
                         android:background="@drawable/bg_save_button"
                         android:text="@string/item_selection_save_button"
                         android:textAllCaps="false"
-                        android:textColor="@color/color_bg_white"
-                        android:textSize="18sp"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.Button"
+                        android:textColor="@color/color_bg_white" />
 
                 </androidx.cardview.widget.CardView>
 
@@ -521,19 +502,18 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="16dp"
+                    app:cardCornerRadius="@dimen/radius_card"
                     app:cardElevation="8dp">
 
                     <Button
                         android:id="@+id/checkout_button"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
+                        android:layout_height="@dimen/top_bar_height"
                         android:background="@drawable/bg_checkout_button"
                         android:text="@string/item_selection_charge_button_default"
                         android:textAllCaps="false"
+                        android:textAppearance="@style/Text.Button"
                         android:textColor="@color/color_bg_white"
-                        android:textSize="18sp"
-                        android:fontFamily="sans-serif-medium"
                         tools:text="Charge" />
 
                 </androidx.cardview.widget.CardView>

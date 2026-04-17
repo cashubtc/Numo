@@ -103,7 +103,14 @@ class TipSelectionActivity : AppCompatActivity() {
         setupPresetButtons()
         setupCustomKeypad()
         setupClickListeners()
-        animateEntrance()
+
+        // Make all views visible immediately (no entrance animation)
+        val orderLabel = findViewById<View>(R.id.order_label)
+        orderLabel.alpha = 1f
+        amountDisplay.alpha = 1f
+        questionText.alpha = 1f
+        tipOptionsContainer.alpha = 1f
+        confirmButton.alpha = 0.4f // Start disabled
     }
 
     private fun setupWindowSettings() {

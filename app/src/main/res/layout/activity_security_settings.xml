@@ -6,41 +6,12 @@
     android:background="@color/color_bg_white">
 
     <!-- Top App Bar -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.electricdreams.numo.ui.components.NumoTopBar
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/color_bg_white"
-        android:paddingHorizontal="16dp"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/common_back"
-            android:src="@drawable/ic_chevron_back"
-            android:tint="@color/color_text_primary"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/toolbar_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/settings_security_title"
-            android:textAppearance="@style/Text.Title"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="@dimen/top_bar_height"
+        app:topBarTitle="@string/settings_security_title"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -49,10 +20,11 @@
         app:layout_constraintTop_toBottomOf="@id/top_bar">
 
         <LinearLayout
+            android:id="@+id/security_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- ==================== -->
             <!-- WALLET BACKUP SECTION -->
@@ -61,24 +33,20 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="8dp"
-                android:text="Wallet Backup"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_secondary"
-                android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/row_padding_vertical"
+                android:text="@string/security_settings_section_backup"
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Security Info Card -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginBottom="8dp"
-                android:padding="20dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_s"
+                android:padding="@dimen/margin_screen_horizontal"
                 android:background="@drawable/bg_warning_card">
 
                 <LinearLayout
@@ -88,143 +56,39 @@
                     android:gravity="center_vertical">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginEnd="12dp"
+                        android:importantForAccessibility="no"
+                        android:layout_width="@dimen/icon_size_small"
+                        android:layout_height="@dimen/icon_size_small"
+                        android:layout_marginEnd="@dimen/space_m"
                         android:src="@drawable/ic_shield"
-                        app:tint="#FF9500" />
+                        app:tint="@color/color_warning" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/security_settings_card_title"
-                        android:textSize="16sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.RowTitle" />
                 </LinearLayout>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/space_s"
                     android:text="@string/security_settings_card_body"
-                    android:textSize="14sp"
+                    android:textAppearance="@style/Text.Body"
                     android:textColor="@color/color_text_secondary"
                     android:lineSpacingMultiplier="1.3" />
 
             </LinearLayout>
 
-            <!-- Backup Mnemonic Item -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/backup_mnemonic_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_key"
-                    app:tint="@color/color_icon_secondary" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_backup_mnemonic_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_backup_mnemonic_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
-            </LinearLayout>
-
-            <!-- Wallet Recovery Section -->
-            <TextView
-                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="24dp"
-                android:paddingBottom="8dp"
-                android:text="@string/security_settings_section_recovery"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_secondary"
-                android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
-
-            <!-- Restore Wallet Item -->
-            <LinearLayout
-                android:id="@+id/restore_wallet_item"
-                android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_restore"
-                    app:tint="@color/color_icon_secondary" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_restore_wallet_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_restore_wallet_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
-            </LinearLayout>
+                app:rowIcon="@drawable/ic_key"
+                app:rowTitle="@string/security_settings_backup_mnemonic_title"
+                app:rowSubtitle="@string/security_settings_backup_mnemonic_subtitle"
+                app:rowShowChevron="true" />
 
             <!-- ===================== -->
             <!-- PIN PROTECTION SECTION -->
@@ -233,24 +97,20 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="32dp"
-                android:paddingBottom="8dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/section_gap"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/security_settings_section_pin_protection"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_secondary"
-                android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- PIN Info Card -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginBottom="8dp"
-                android:padding="16dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_s"
+                android:padding="@dimen/space_l"
                 android:background="@drawable/bg_pin_info_card">
 
                 <LinearLayout
@@ -260,182 +120,86 @@
                     android:gravity="center_vertical">
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
-                        android:layout_marginEnd="10dp"
+                        android:layout_marginEnd="@dimen/space_m"
                         android:src="@drawable/ic_lock"
-                        app:tint="#388E3C" />
+                        app:tint="@color/color_icon_security_green" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/security_settings_pin_info_title"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_success_green"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.Chip"
+                        android:textColor="@color/color_success_green" />
                 </LinearLayout>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/space_s"
                     android:text="@string/security_settings_pin_info_body"
-                    android:textSize="13sp"
+                    android:textAppearance="@style/Text.Caption"
                     android:textColor="@color/color_text_secondary"
                     android:lineSpacingMultiplier="1.3" />
 
             </LinearLayout>
 
             <!-- Set PIN Item -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/setup_pin_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:layout_height="wrap_content"
+                app:rowIcon="@drawable/ic_lock"
+                app:rowTitle="@string/security_settings_setup_pin_title"
+                app:rowSubtitle="@string/security_settings_setup_pin_subtitle"
+                app:rowShowChevron="true" />
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_lock"
-                    app:tint="@color/color_icon_secondary" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/pin_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_setup_pin_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:id="@+id/pin_subtitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_setup_pin_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
-            </LinearLayout>
-
-            <!-- Change PIN Item (shown when PIN is set) -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/change_pin_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="24dp"
-                android:visibility="gone">
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:rowIcon="@drawable/ic_edit"
+                app:rowTitle="@string/security_settings_change_pin_title"
+                app:rowSubtitle="@string/security_settings_change_pin_subtitle"
+                app:rowShowChevron="true" />
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_edit"
-                    app:tint="@color/color_icon_secondary" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_change_pin_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_change_pin_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
-            </LinearLayout>
-
-            <!-- Remove PIN Item (shown when PIN is set) -->
-            <LinearLayout
+            <com.electricdreams.numo.ui.components.SettingsRowView
                 android:id="@+id/remove_pin_item"
                 android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="24dp"
-                android:visibility="gone">
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:rowIcon="@drawable/ic_close"
+                app:rowIconTint="@color/color_warning_red"
+                app:rowTitle="@string/security_settings_remove_pin_title"
+                app:rowTitleColor="@color/color_warning_red"
+                app:rowSubtitle="@string/security_settings_remove_pin_subtitle"
+                app:rowShowChevron="true" />
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_close"
-                    app:tint="@color/color_warning_red" />
+            <!-- ======================== -->
+            <!-- WALLET RECOVERY SECTION -->
+            <!-- ======================== -->
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+            <!-- Wallet Recovery Section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/section_gap"
+                android:paddingBottom="@dimen/row_padding_vertical"
+                android:text="@string/security_settings_section_recovery"
+                android:textAppearance="@style/Text.SectionHeader" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_remove_pin_title"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_warning_red"
-                        android:fontFamily="sans-serif-medium" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/security_settings_remove_pin_subtitle"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
-            </LinearLayout>
+            <com.electricdreams.numo.ui.components.SettingsRowView
+                android:id="@+id/restore_wallet_item"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:rowIcon="@drawable/ic_restore"
+                app:rowTitle="@string/security_settings_restore_wallet_title"
+                app:rowSubtitle="@string/security_settings_restore_wallet_subtitle"
+                app:rowShowChevron="true" />
 
         </LinearLayout>
     </ScrollView>

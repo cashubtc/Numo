@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingVertical="@dimen/space_3xl"
+    android:paddingHorizontal="@dimen/space_xl">
+
+    <!-- Rounded square icon container -->
+    <FrameLayout
+        android:layout_width="@dimen/icon_size_hero"
+        android:layout_height="@dimen/top_bar_height"
+        android:background="@drawable/bg_empty_state_icon">
+
+        <ImageView
+            android:id="@+id/empty_state_icon"
+            android:importantForAccessibility="no"
+            android:layout_width="@dimen/icon_size_small"
+            android:layout_height="@dimen/icon_size_small"
+            android:layout_gravity="center"
+            app:tint="@color/color_text_tertiary" />
+
+    </FrameLayout>
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/empty_state_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_l"
+        style="@style/Text.RowTitle"
+        android:gravity="center"
+        android:letterSpacing="-0.012" />
+
+    <!-- Description -->
+    <TextView
+        android:id="@+id/empty_state_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_xs"
+        style="@style/Text.RowSubtitle"
+        android:gravity="center"
+        android:lineSpacingMultiplier="1.5"
+        android:maxWidth="260dp" />
+
+    <!-- Optional action button (hidden by default) -->
+    <TextView
+        android:id="@+id/empty_state_action"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_screen_horizontal"
+        android:background="@drawable/bg_empty_state_action_button"
+        android:drawablePadding="@dimen/space_s"
+        android:textAppearance="@style/Text.Caption"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+        android:paddingVertical="@dimen/space_m"
+        android:textColor="@color/color_text_secondary"
+        android:visibility="gone" />
+
+</LinearLayout>

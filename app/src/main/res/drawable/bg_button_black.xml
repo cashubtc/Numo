@@ -4,21 +4,21 @@
     <item android:state_enabled="false">
         <shape android:shape="rectangle">
             <corners android:radius="26dp" />
-            <solid android:color="#33000000" />
+            <solid android:color="@color/color_black_20" />
         </shape>
     </item>
     <!-- Pressed state - slightly lighter black -->
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
             <corners android:radius="26dp" />
-            <solid android:color="#1A2529" />
+            <solid android:color="@color/color_button_primary_pressed" />
         </shape>
     </item>
     <!-- Enabled state - 100% black -->
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="26dp" />
-            <solid android:color="#000000" />
+            <solid android:color="@color/black" />
         </shape>
     </item>
 </selector>

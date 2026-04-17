@@ -3,59 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_bg_secondary"
+    android:background="@color/color_bg_white"
     android:orientation="vertical">
 
     <!-- Top App Bar -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.electricdreams.numo.ui.components.NumoTopBar
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/color_bg_white"
-        android:elevation="1dp"
-        android:paddingHorizontal="4dp">
-
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/item_entry_toolbar_back"
-            android:src="@drawable/ic_chevron_back"
-            app:tint="@color/color_text_primary"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/toolbar_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/item_entry_title_add"
-            android:textAppearance="@style/Text.Title"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <Button
-            android:id="@+id/item_save_button"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/item_entry_button_save"
-            android:textAppearance="@style/Text.Button"
-            android:textColor="@color/color_primary_green"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="@dimen/top_bar_height"
+        app:topBarTitle="@string/item_entry_title_add"
+        app:topBarNavContentDescription="@string/item_entry_toolbar_back" />
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:fillViewport="true"
         android:clipToPadding="false">
 
@@ -63,28 +25,29 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingVertical="24dp">
+            android:paddingVertical="@dimen/space_xl">
 
             <!-- ==================== IMAGE SECTION ==================== -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="@dimen/space_l"
                 android:gravity="center_horizontal"
                 android:orientation="vertical">
 
                 <androidx.cardview.widget.CardView
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_marginBottom="12dp"
-                    app:cardCornerRadius="50dp"
-                    app:cardElevation="0dp">
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_marginBottom="@dimen/space_m"
+                    app:cardCornerRadius="60dp"
+                    app:cardElevation="0dp"
+                    app:cardBackgroundColor="@android:color/transparent">
 
                     <ImageView
                         android:id="@+id/item_image_view"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="@color/color_bg_white"
+                        android:background="@android:color/transparent"
                         android:contentDescription="@string/item_entry_image_description"
                         android:scaleType="centerCrop" />
 
@@ -94,13 +57,13 @@
                         android:layout_height="36dp"
                         android:layout_gravity="center"
                         android:contentDescription="@string/item_entry_image_placeholder"
-                        android:src="@android:drawable/ic_menu_camera"
+                        android:src="@drawable/ic_camera"
                         app:tint="@color/color_icon_secondary" />
                 </androidx.cardview.widget.CardView>
 
                 <Button
                     android:id="@+id/item_add_image_button"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    style="@style/Widget.Numo.Button.Tertiary"
                     android:layout_width="wrap_content"
                     android:layout_height="36dp"
                     android:text="@string/item_entry_button_add_photo"
@@ -110,7 +73,7 @@
 
                 <Button
                     android:id="@+id/item_remove_image_button"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    style="@style/Widget.Numo.Button.Tertiary"
                     android:layout_width="wrap_content"
                     android:layout_height="32dp"
                     android:text="@string/item_entry_button_remove_photo"
@@ -125,19 +88,20 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="8dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/item_entry_section_basic_information"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="24dp"
-                app:cardCornerRadius="12dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_xl"
+                app:cardCornerRadius="@dimen/radius_m"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/color_bg_white">
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -152,7 +116,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
                         android:minHeight="50dp">
 
                         <TextView
@@ -160,8 +124,7 @@
                             android:minWidth="100dp"
                             android:layout_height="wrap_content"
                             android:text="@string/item_entry_label_name"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_primary" />
+                            android:textAppearance="@style/Text.RowTitle" />
 
                         <EditText
                             android:id="@+id/item_name_input"
@@ -181,7 +144,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
                         android:minHeight="50dp">
 
                         <TextView
@@ -189,8 +152,7 @@
                             android:minWidth="100dp"
                             android:layout_height="wrap_content"
                             android:text="@string/item_entry_label_variation"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_primary" />
+                            android:textAppearance="@style/Text.RowTitle" />
 
                         <EditText
                             android:id="@+id/item_variation_input"
@@ -210,8 +172,8 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="top"
-                        android:paddingHorizontal="16dp"
-                        android:paddingVertical="12dp"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:paddingVertical="@dimen/space_m"
                         android:minHeight="80dp">
 
                         <TextView
@@ -219,8 +181,7 @@
                             android:minWidth="100dp"
                             android:layout_height="wrap_content"
                             android:text="@string/item_entry_label_description"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_primary" />
+                            android:textAppearance="@style/Text.RowTitle" />
 
                         <EditText
                             android:id="@+id/item_description_input"
@@ -242,25 +203,26 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="8dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/space_s"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/item_entry_section_category"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="12dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_s"
+                app:cardCornerRadius="@dimen/radius_m"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/color_bg_white">
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="0dp">
 
                     <!-- Category Tags Flow Layout -->
                     <com.google.android.flexbox.FlexboxLayout
@@ -282,26 +244,31 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="@dimen/space_m"
                         android:visibility="gone">
 
-                        <EditText
-                            android:id="@+id/new_category_input"
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
                             android:layout_width="0dp"
-                            android:layout_height="44dp"
-                            android:layout_weight="1"
-                            android:background="@drawable/bg_input_field_rounded"
-                            android:hint="@string/item_entry_hint_new_category"
-                            android:inputType="textCapWords"
-                            android:paddingHorizontal="12dp"
-                            android:textSize="15sp"
-                            android:textColorHint="@color/color_text_tertiary" />
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/new_category_input"
+                                android:layout_width="match_parent"
+                                android:layout_height="44dp"
+                                android:hint="@string/item_entry_hint_new_category"
+                                android:inputType="textCapWords"
+                                android:textSize="15sp"
+                                android:textColorHint="@color/color_text_tertiary" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
 
                         <ImageButton
                             android:id="@+id/btn_confirm_category"
                             android:layout_width="44dp"
                             android:layout_height="44dp"
-                            android:layout_marginStart="8dp"
+                            android:layout_marginStart="@dimen/space_s"
                             android:background="@drawable/bg_circle_green"
                             android:contentDescription="@string/item_entry_category_confirm"
                             android:src="@drawable/ic_check"
@@ -311,7 +278,7 @@
                             android:id="@+id/btn_cancel_category"
                             android:layout_width="44dp"
                             android:layout_height="44dp"
-                            android:layout_marginStart="8dp"
+                            android:layout_marginStart="@dimen/space_s"
                             android:background="?attr/selectableItemBackgroundBorderless"
                             android:contentDescription="@string/item_entry_category_cancel"
                             android:src="@drawable/ic_close"
@@ -322,18 +289,19 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Hidden category input for compatibility -->
+            <!-- Hidden category input for handler compatibility -->
             <EditText
                 android:id="@+id/item_category_input"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:visibility="gone" />
+                android:visibility="gone"
+                android:importantForAccessibility="no" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_xl"
                 android:text="@string/item_entry_category_helper"
                 android:textAppearance="@style/Text.Caption" />
 
@@ -341,32 +309,33 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="8dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/space_s"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/item_entry_section_pricing"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="12dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_s"
+                app:cardCornerRadius="@dimen/radius_m"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/color_bg_white">
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="0dp">
 
                     <!-- Price Type Toggle -->
                     <com.google.android.material.button.MaterialButtonToggleGroup
                         android:id="@+id/price_type_toggle"
                         android:layout_width="match_parent"
                         android:layout_height="44dp"
-                        android:layout_marginBottom="16dp"
+                        android:layout_marginBottom="@dimen/space_l"
                         app:singleSelection="true"
                         app:selectionRequired="true">
 
@@ -393,88 +362,50 @@
                     </com.google.android.material.button.MaterialButtonToggleGroup>
 
                     <!-- Fiat Price Input -->
-                    <LinearLayout
-                        android:id="@+id/fiat_price_container"
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/fiat_price_layout"
+                        style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:visibility="visible">
+                        android:visibility="visible"
+                        app:prefixText="@string/item_entry_currency_symbol_default"
+                        app:suffixText="@string/item_entry_currency_code_default">
 
-                        <TextView
-                            android:id="@+id/currency_symbol"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/item_entry_currency_symbol_default"
-                            android:textSize="24sp"
-                            android:textColor="@color/color_text_primary"
-                            android:fontFamily="sans-serif-medium"
-                            android:layout_marginEnd="8dp" />
-
-                        <EditText
+                        <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/item_price_input"
-                            android:layout_width="0dp"
-                            android:layout_height="56dp"
-                            android:layout_weight="1"
-                            android:background="@drawable/bg_input_field_rounded"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:hint="@string/item_entry_hint_price_fiat"
                             android:inputType="numberDecimal"
-                            android:paddingHorizontal="16dp"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textColor="@color/color_text_primary"
                             android:textColorHint="@color/color_text_tertiary"
                             android:fontFamily="sans-serif-medium" />
 
-                        <TextView
-                            android:id="@+id/currency_code"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/item_entry_currency_code_default"
-                            android:textSize="15sp"
-                            android:textColor="@color/color_text_secondary"
-                            android:layout_marginStart="8dp" />
-                    </LinearLayout>
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Bitcoin (Sats) Price Input -->
-                    <LinearLayout
-                        android:id="@+id/sats_price_container"
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/sats_price_layout"
+                        style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:visibility="gone">
+                        android:visibility="gone"
+                        app:prefixText="@string/item_entry_bitcoin_symbol"
+                        app:suffixText="@string/item_entry_label_sats">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/item_entry_bitcoin_symbol"
-                            android:textSize="24sp"
-                            android:textColor="@color/color_bitcoin_orange"
-                            android:fontFamily="sans-serif-medium"
-                            android:layout_marginEnd="8dp" />
-
-                        <EditText
+                        <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/item_sats_input"
-                            android:layout_width="0dp"
-                            android:layout_height="56dp"
-                            android:layout_weight="1"
-                            android:background="@drawable/bg_input_field_rounded"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:hint="@string/item_entry_hint_price_sats"
                             android:inputType="number"
-                            android:paddingHorizontal="16dp"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textColor="@color/color_text_primary"
                             android:textColorHint="@color/color_text_tertiary"
                             android:fontFamily="sans-serif-medium" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/item_entry_label_sats"
-                            android:textSize="15sp"
-                            android:textColor="@color/color_text_secondary"
-                            android:layout_marginStart="8dp" />
-                    </LinearLayout>
+                    </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
@@ -484,12 +415,12 @@
                 android:id="@+id/vat_section_card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_s"
                 android:visibility="visible"
-                app:cardCornerRadius="12dp"
+                app:cardCornerRadius="@dimen/radius_m"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/color_bg_white">
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -504,7 +435,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
                         android:minHeight="50dp">
 
                         <TextView
@@ -512,8 +443,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/item_entry_label_apply_vat"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_primary" />
+                            android:textAppearance="@style/Text.RowTitle" />
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switch_vat_enabled"
@@ -538,7 +468,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="16dp"
+                            android:paddingHorizontal="@dimen/margin_screen_horizontal"
                             android:minHeight="50dp">
 
                             <TextView
@@ -546,8 +476,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="@string/item_entry_label_price_includes_vat"
-                                android:textAppearance="@style/Text.Body"
-                                android:textColor="@color/color_text_primary" />
+                                android:textAppearance="@style/Text.RowTitle" />
 
                             <com.google.android.material.switchmaterial.SwitchMaterial
                                 android:id="@+id/switch_price_includes_vat"
@@ -563,7 +492,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="16dp"
+                            android:paddingHorizontal="@dimen/margin_screen_horizontal"
                             android:minHeight="50dp">
 
                             <TextView
@@ -571,20 +500,19 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="@string/item_entry_label_vat_rate"
-                                android:textAppearance="@style/Text.Body"
-                                android:textColor="@color/color_text_primary" />
+                                android:textAppearance="@style/Text.RowTitle" />
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:gravity="center_vertical"
-                                android:background="@drawable/bg_vat_input">
+                                android:background="@drawable/bg_outlined_input">
 
                                 <EditText
                                     android:id="@+id/vat_rate_input"
-                                    android:layout_width="48dp"
-                                    android:layout_height="36dp"
+                                    android:layout_width="40dp"
+                                    android:layout_height="32dp"
                                     android:background="@null"
                                     android:gravity="center"
                                     android:hint="@string/item_entry_hint_vat_rate"
@@ -598,10 +526,9 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="%"
-                                    android:textSize="16sp"
-                                    android:textColor="@color/color_text_secondary"
-                                    android:layout_marginEnd="4dp" />
+                                    android:text="@string/label_percent_symbol"
+                                    android:textAppearance="@style/Text.Body"
+                                    android:layout_marginEnd="@dimen/space_xs" />
 
                             </LinearLayout>
 
@@ -612,34 +539,26 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Hidden spinner for compatibility -->
-            <Spinner
-                android:id="@+id/spinner_vat_rate"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:visibility="gone" />
-
             <!-- Price Breakdown (shown when VAT enabled) -->
             <LinearLayout
                 android:id="@+id/price_breakdown_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="8dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_s"
                 android:orientation="vertical"
                 android:visibility="gone"
                 android:background="@drawable/bg_price_breakdown"
-                android:padding="16dp">
+                android:padding="@dimen/space_l">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/item_entry_price_breakdown_title"
-                    android:textSize="12sp"
+                    android:textAppearance="@style/Text.Overline"
                     android:textColor="@color/color_text_secondary"
-                    android:textAllCaps="true"
-                    android:letterSpacing="0.05"
-                    android:layout_marginBottom="12dp" />
+                    android:letterSpacing="0.06"
+                    android:layout_marginBottom="@dimen/space_m" />
 
                 <!-- Net Price Row -->
                 <LinearLayout
@@ -647,24 +566,21 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                    android:layout_marginBottom="@dimen/space_s">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/item_entry_price_breakdown_net_label"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_secondary" />
+                        android:textAppearance="@style/Text.Body" />
 
                     <TextView
                         android:id="@+id/text_net_price"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/item_entry_price_breakdown_net_value_default"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.BodyBold" />
 
                 </LinearLayout>
 
@@ -674,7 +590,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="@dimen/space_m">
 
                     <TextView
                         android:id="@+id/text_vat_label"
@@ -682,17 +598,14 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/item_entry_price_breakdown_vat_label"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_secondary" />
+                        android:textAppearance="@style/Text.Body" />
 
                     <TextView
                         android:id="@+id/text_vat_amount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/item_entry_price_breakdown_vat_value_default"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.BodyBold" />
 
                 </LinearLayout>
 
@@ -701,7 +614,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/color_divider"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginBottom="@dimen/space_m" />
 
                 <!-- Gross Price Row (Total) -->
                 <LinearLayout
@@ -715,18 +628,15 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/item_entry_price_breakdown_total_label"
-                        android:textSize="16sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.RowTitle" />
 
                     <TextView
                         android:id="@+id/text_gross_price"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/item_entry_price_breakdown_total_value_default"
-                        android:textSize="18sp"
-                        android:textColor="@color/color_primary_green"
-                        android:fontFamily="sans-serif-bold" />
+                        android:textAppearance="@style/Text.Subtitle"
+                        android:textColor="@color/color_primary_green" />
 
                 </LinearLayout>
 
@@ -735,28 +645,76 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_xl"
                 android:text="@string/item_entry_price_helper"
                 android:textAppearance="@style/Text.Caption" />
+
+            <!-- Divider before optional sections -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/divider_height"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginTop="@dimen/space_l"
+                android:background="@color/color_divider" />
+
+            <!-- ==================== MORE DETAILS TOGGLE ==================== -->
+            <LinearLayout
+                android:id="@+id/more_details_toggle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingVertical="@dimen/space_l"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/item_entry_more_details"
+                    android:textAppearance="@style/Text.RowTitle"
+                    android:textColor="@color/color_primary_green" />
+
+                <ImageView
+                    android:id="@+id/more_details_chevron"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:src="@drawable/ic_chevron_down"
+                    android:contentDescription="@string/item_entry_more_details_expand"
+                    app:tint="@color/color_primary_green" />
+
+            </LinearLayout>
+
+            <!-- ==================== MORE DETAILS CONTAINER (collapsed) ==================== -->
+            <LinearLayout
+                android:id="@+id/more_details_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
 
             <!-- ==================== IDENTIFICATION SECTION ==================== -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="8dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/item_entry_section_identification"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="12dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_s"
+                app:cardCornerRadius="@dimen/radius_m"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/color_bg_white">
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -772,17 +730,16 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="8dp"
+                        android:paddingStart="@dimen/margin_screen_horizontal"
+                        android:paddingEnd="@dimen/space_s"
                         android:minHeight="50dp">
 
                         <TextView
                             android:layout_width="wrap_content"
-                            android:minWidth="60dp"
+                            android:minWidth="100dp"
                             android:layout_height="wrap_content"
                             android:text="@string/item_entry_label_gtin"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_primary" />
+                            android:textAppearance="@style/Text.RowTitle" />
 
                         <EditText
                             android:id="@+id/item_gtin_input"
@@ -813,17 +770,16 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
+                        android:paddingStart="@dimen/margin_screen_horizontal"
+                        android:paddingEnd="@dimen/margin_screen_horizontal"
                         android:minHeight="50dp">
 
                         <TextView
                             android:layout_width="wrap_content"
-                            android:minWidth="60dp"
+                            android:minWidth="100dp"
                             android:layout_height="wrap_content"
                             android:text="@string/item_entry_label_sku"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_primary" />
+                            android:textAppearance="@style/Text.RowTitle" />
 
                         <EditText
                             android:id="@+id/item_sku_input"
@@ -846,10 +802,10 @@
                 android:id="@+id/gtin_error_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_l"
                 android:text="@string/item_entry_error_gtin_exists"
-                android:textSize="13sp"
+                android:textAppearance="@style/Text.Caption"
                 android:textColor="@color/color_warning_red"
                 android:visibility="gone" />
 
@@ -858,30 +814,39 @@
                 android:id="@+id/sku_error_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_s"
                 android:text="@string/item_entry_error_sku_exists"
-                android:textSize="13sp"
+                android:textAppearance="@style/Text.Caption"
                 android:textColor="@color/color_warning_red"
                 android:visibility="gone" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_xl"
+                android:text="@string/item_entry_identification_helper"
+                android:textAppearance="@style/Text.Caption" />
 
             <!-- ==================== INVENTORY SECTION ==================== -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="8dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/section_gap"
+                android:paddingBottom="@dimen/row_padding_vertical"
                 android:text="@string/item_entry_section_inventory"
                 android:textAppearance="@style/Text.SectionHeader" />
 
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="12dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_s"
+                app:cardCornerRadius="@dimen/radius_m"
                 app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/color_bg_white">
+                app:cardBackgroundColor="@android:color/transparent">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -896,7 +861,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingHorizontal="16dp"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
                         android:minHeight="50dp">
 
                         <TextView
@@ -904,8 +869,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/item_entry_label_track_quantity"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_primary" />
+                            android:textAppearance="@style/Text.RowTitle" />
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switch_track_inventory"
@@ -930,16 +894,15 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="16dp"
+                            android:paddingHorizontal="@dimen/margin_screen_horizontal"
                             android:minHeight="50dp">
 
                             <TextView
                                 android:layout_width="wrap_content"
-                            android:minWidth="120dp"
+                                android:minWidth="100dp"
                                 android:layout_height="wrap_content"
                                 android:text="@string/item_entry_label_current_stock"
-                                android:textAppearance="@style/Text.Body"
-                                android:textColor="@color/color_text_primary" />
+                                android:textAppearance="@style/Text.RowTitle" />
 
                             <EditText
                                 android:id="@+id/item_quantity_input"
@@ -960,7 +923,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="16dp"
+                            android:paddingHorizontal="@dimen/margin_screen_horizontal"
                             android:minHeight="50dp">
 
                             <TextView
@@ -968,8 +931,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:text="@string/item_entry_label_low_stock_alert"
-                                android:textAppearance="@style/Text.Body"
-                                android:textColor="@color/color_text_primary" />
+                                android:textAppearance="@style/Text.RowTitle" />
 
                             <com.google.android.material.switchmaterial.SwitchMaterial
                                 android:id="@+id/item_alert_checkbox"
@@ -985,17 +947,16 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="16dp"
+                            android:paddingHorizontal="@dimen/margin_screen_horizontal"
                             android:minHeight="50dp"
                             android:visibility="gone">
 
                             <TextView
                                 android:layout_width="wrap_content"
-                            android:minWidth="120dp"
+                                android:minWidth="100dp"
                                 android:layout_height="wrap_content"
                                 android:text="@string/item_entry_label_alert_when_below"
-                                android:textAppearance="@style/Text.Body"
-                                android:textColor="@color/color_text_primary" />
+                                android:textAppearance="@style/Text.RowTitle" />
 
                             <EditText
                                 android:id="@+id/item_alert_threshold_input"
@@ -1018,23 +979,54 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="20dp"
-                android:layout_marginBottom="32dp"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginBottom="@dimen/space_xl"
                 android:text="@string/item_entry_inventory_helper"
                 android:textAppearance="@style/Text.Caption" />
+
+            </LinearLayout>
+            <!-- end more_details_container -->
 
             <!-- ==================== DELETE BUTTON (Edit mode only) ==================== -->
             <Button
                 android:id="@+id/item_cancel_button"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
+                style="@style/Widget.Numo.Button.Tertiary"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginBottom="32dp"
-                android:text="@string/item_entry_button_cancel"
+                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginTop="@dimen/space_xl"
+                android:layout_marginBottom="@dimen/space_2xl"
+                android:text="@string/item_entry_button_delete"
                 android:textAppearance="@style/Text.Button"
-                android:textColor="@color/color_text_secondary" />
+                android:textColor="@color/color_warning_red"
+                android:visibility="gone" />
 
         </LinearLayout>
     </ScrollView>
+
+    <!-- ==================== FIXED BOTTOM BAR ==================== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@color/color_bg_white">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/divider_height"
+            android:background="@color/color_divider" />
+
+        <Button
+            android:id="@+id/item_save_button"
+            style="@style/Widget.Button.Primary.Green"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+            android:layout_marginTop="@dimen/space_m"
+            android:layout_marginBottom="@dimen/space_xl"
+            android:text="@string/item_entry_button_save"
+            android:textAllCaps="false" />
+
+    </LinearLayout>
+
 </LinearLayout>

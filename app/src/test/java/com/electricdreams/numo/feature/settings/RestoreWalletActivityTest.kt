@@ -23,8 +23,8 @@ class RestoreWalletActivityTest {
         ActivityScenario.launch(RestoreWalletActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
                 val seedEntryContainer = activity.findViewById<View>(R.id.seed_entry_container)
-                val titleText = activity.findViewById<TextView>(R.id.title_text)
-                
+                val titleText = activity.findViewById<TextView>(R.id.top_bar_title)
+
                 assertEquals("Seed entry should be visible", View.VISIBLE, seedEntryContainer.visibility)
                 assertEquals("Title should be correct", activity.getString(R.string.restore_progress_title), titleText.text)
                 
@@ -98,7 +98,7 @@ class RestoreWalletActivityTest {
                 continueButton.performClick()
                 
                 val fetchingOverlay = activity.findViewById<View>(R.id.fetching_overlay)
-                val titleText = activity.findViewById<TextView>(R.id.title_text)
+                val titleText = activity.findViewById<TextView>(R.id.top_bar_title)
                 
                 assertEquals("Fetching overlay should be visible", View.VISIBLE, fetchingOverlay.visibility)
                 assertEquals("Title should update", activity.getString(R.string.restore_fetching_title), titleText.text)

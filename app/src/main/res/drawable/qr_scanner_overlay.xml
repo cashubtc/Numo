@@ -3,7 +3,7 @@
     <!-- Semi-transparent dark overlay -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#99000000" />
+            <solid android:color="@color/color_scrim" />
         </shape>
     </item>
     

@@ -5,6 +5,16 @@
     <string name="basket_receipt_bitcoin_items_label">Bitcoin Items</string>
     <string name="basket_receipt_total_label">Total</string>
     <string name="basket_receipt_paid_label">Paid</string>
+    <string name="basket_receipt_subtotal_amount_label">Amount</string>
+    <string name="basket_receipt_amount_received_label">Amount received</string>
+    <string name="basket_receipt_details_header">Details</string>
+    <string name="basket_receipt_payment_type_label">Payment type</string>
+    <string name="basket_receipt_mint_label">Mint</string>
+    <string name="basket_receipt_transaction_id_label">Transaction ID</string>
+    <string name="basket_receipt_print_button">Print Receipt</string>
+    <string name="basket_receipt_type_lightning">Lightning</string>
+    <string name="basket_receipt_type_cashu">Cashu</string>
+    <string name="basket_receipt_type_payment">Payment</string>
 
     <!-- Basket receipt hero VAT subtitle -->
     <string name="basket_receipt_total_subtitle_with_vat">%1$s • incl. %2$s VAT</string>

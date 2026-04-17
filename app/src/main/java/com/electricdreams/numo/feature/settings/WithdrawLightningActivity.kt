@@ -11,8 +11,6 @@ import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.OvershootInterpolator
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
@@ -28,6 +26,7 @@ import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.LightningAddressManager
 import com.electricdreams.numo.core.util.MintManager
@@ -71,10 +70,11 @@ class WithdrawLightningActivity : AppCompatActivity() {
     private lateinit var lightningAddressManager: LightningAddressManager
 
     // Views
-    private lateinit var backButton: ImageButton
+    private lateinit var topBar: com.electricdreams.numo.ui.components.NumoTopBar
     private lateinit var balanceCard: MaterialCardView
     private lateinit var mintNameText: TextView
     private lateinit var balanceText: TextView
+    private lateinit var fiatBalanceText: TextView
     private lateinit var invoiceCard: WithdrawInvoiceCard
     private lateinit var addressCard: WithdrawAddressCard
     private lateinit var loadingOverlay: FrameLayout
@@ -144,14 +144,14 @@ class WithdrawLightningActivity : AppCompatActivity() {
         setupListeners()
         displayMintInfo()
         prefillFields()
-        startEntranceAnimations()
     }
 
     private fun initViews() {
-        backButton = findViewById(R.id.back_button)
+        topBar = findViewById(R.id.top_bar)
         balanceCard = findViewById(R.id.balance_card)
         mintNameText = findViewById(R.id.mint_name_text)
         balanceText = findViewById(R.id.balance_text)
+        fiatBalanceText = findViewById(R.id.fiat_balance_text)
         invoiceCard = findViewById(R.id.invoice_card)
         addressCard = findViewById(R.id.address_card)
         loadingOverlay = findViewById(R.id.loading_overlay)
@@ -172,9 +172,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        backButton.setOnClickListener { 
-            finish() 
-        }
+        topBar.onNavClick { finish() }
 
         // Invoice card continue listener
         invoiceCard.setOnContinueListener(object : WithdrawInvoiceCard.OnContinueListener {
@@ -225,7 +223,6 @@ class WithdrawLightningActivity : AppCompatActivity() {
             override fun afterTextChanged(s: android.text.Editable?) {
                 val amount = s?.toString()?.toLongOrNull() ?: 0L
                 createTokenButton.isEnabled = amount > 0
-                createTokenButton.alpha = if (amount > 0) 1f else 0.5f
             }
         })
 
@@ -242,21 +239,21 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
     private fun switchTab(isLightning: Boolean) {
         if (isLightning) {
-            tabLightning.setBackgroundResource(R.drawable.bg_segment_tab_selected)
-            tabLightning.setTextColor(getColor(R.color.color_text_primary))
-            
-            tabCashu.background = null
-            tabCashu.setTextColor(getColor(R.color.color_text_tertiary))
-            
+            tabLightning.setBackgroundResource(R.drawable.bg_button_primary_green)
+            tabLightning.setTextColor(getColor(R.color.color_bg_white))
+
+            tabCashu.setBackgroundResource(android.R.color.transparent)
+            tabCashu.setTextColor(getColor(R.color.color_text_secondary))
+
             lightningOptionsContainer.visibility = View.VISIBLE
             cashuTokenOptionsContainer.visibility = View.GONE
         } else {
-            tabCashu.setBackgroundResource(R.drawable.bg_segment_tab_selected)
-            tabCashu.setTextColor(getColor(R.color.color_text_primary))
-            
-            tabLightning.background = null
-            tabLightning.setTextColor(getColor(R.color.color_text_tertiary))
-            
+            tabCashu.setBackgroundResource(R.drawable.bg_button_primary_green)
+            tabCashu.setTextColor(getColor(R.color.color_bg_white))
+
+            tabLightning.setBackgroundResource(android.R.color.transparent)
+            tabLightning.setTextColor(getColor(R.color.color_text_secondary))
+
             lightningOptionsContainer.visibility = View.GONE
             cashuTokenOptionsContainer.visibility = View.VISIBLE
         }
@@ -374,6 +371,18 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
         val balanceAmount = Amount(balance, Amount.Currency.BTC)
         balanceText.text = balanceAmount.toString()
+        updateFiatDisplay(balance)
+    }
+
+    private fun updateFiatDisplay(sats: Long) {
+        val priceWorker = BitcoinPriceWorker.getInstance(this)
+        val fiatAmount = priceWorker.satoshisToFiat(sats)
+        if (fiatAmount > 0) {
+            fiatBalanceText.text = priceWorker.formatFiatAmount(fiatAmount)
+            fiatBalanceText.visibility = android.view.View.VISIBLE
+        } else {
+            fiatBalanceText.visibility = android.view.View.GONE
+        }
     }
 
     private fun prefillFields() {
@@ -389,33 +398,6 @@ class WithdrawLightningActivity : AppCompatActivity() {
         if (suggestedAmount > 0) {
             addressCard.setSuggestedAmount(suggestedAmount)
         }
-    }
-
-    private fun startEntranceAnimations() {
-        // Balance card slide in from top
-        balanceCard.alpha = 0f
-        balanceCard.translationY = -40f
-        balanceCard.animate()
-            .alpha(1f)
-            .translationY(0f)
-            .setDuration(400)
-            .setInterpolator(AccelerateDecelerateInterpolator())
-            .start()
-
-        // Balance text scale
-        balanceText.scaleX = 0.8f
-        balanceText.scaleY = 0.8f
-        balanceText.animate()
-            .scaleX(1f)
-            .scaleY(1f)
-            .setStartDelay(200)
-            .setDuration(350)
-            .setInterpolator(OvershootInterpolator(2f))
-            .start()
-
-        // Cards stagger entrance
-        invoiceCard.animateEntrance(300)
-        addressCard.animateEntrance(450)
     }
 
     private fun processInvoice(invoice: String) {
@@ -630,7 +612,8 @@ class WithdrawLightningActivity : AppCompatActivity() {
                         balance = newBalance
                         val balanceAmount = Amount(balance, Amount.Currency.BTC)
                         balanceText.text = balanceAmount.toString()
-                        
+                        updateFiatDisplay(balance)
+
                         // Update suggested amount in address card
                         val suggestedAmount = (balance * (1 - FEE_BUFFER_PERCENT)).toLong()
                         if (suggestedAmount > 0) {

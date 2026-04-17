@@ -1,21 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Dark mode color overrides -->
-    <!-- When dark mode is enabled, these colors replace the default light mode colors -->
-    
-    <!-- Numo Brand Colors (same in dark mode) -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Dark Mode Color Overrides                                 -->
+    <!-- Only colors that differ from light mode need to be here   -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <!-- Numo Brand (same in dark mode) -->
     <color name="numo_fluorescent_green">#5EFFC2</color>
     <color name="numo_navy">#0A2540</color>
-    
-    <!-- Primary Colors - WHITE for UI elements in dark mode -->
-    <color name="color_primary_green">#FFFFFF</color>
-    <color name="color_primary_green_light">#FFFFFF</color>
-    
+
+    <!-- Primary brand foreground: inverted for dark mode -->
+    <color name="color_brand_foreground">#FFFFFF</color>
+    <color name="color_primary_green">@color/color_brand_foreground</color>
+    <color name="color_primary_green_light">@color/color_brand_foreground</color>
+
     <!-- Background Colors -->
     <color name="color_bg_white">#0B1215</color>
     <color name="color_bg_light">#1A1F23</color>
     <color name="color_bg_secondary">#262D32</color>
+    <color name="color_bg_tertiary">#262D32</color>
+    <color name="color_bg_surface">#1A1F23</color>
     <color name="color_bg_card">#1A1F23</color>
+    <color name="color_bg_elevated">#1A1F23</color>
     <color name="color_search_bg">#1A1F23</color>
     <color name="color_divider">#2D3439</color>
 
@@ -23,43 +29,164 @@
     <color name="color_text_primary">#FFFFFF</color>
     <color name="color_text_secondary">#B0B0B3</color>
     <color name="color_text_tertiary">#808084</color>
+    <color name="color_text_quaternary">#505054</color>
     <color name="color_icon_inactive">#505054</color>
     <color name="color_icon_secondary">#B0B0B3</color>
     <color name="color_icon_tertiary">#656569</color>
 
     <!-- Chip & Border Colors -->
     <color name="color_chip_border">#3A3F44</color>
-    
-    <!-- Accent Colors for dark mode -->
-    <color name="color_accent_blue">#409CFF</color>
-    
-    <!-- Surface & Card mappings -->
-    <color name="color_bg_surface">@color/dark_surfaceColor</color>
-    <color name="color_bg_tertiary">@color/dark_color_bg_secondary</color>
-    <color name="color_bg_elevated">@color/dark_surfaceColor</color>
 
-    <!-- Info/Warning Card Backgrounds (dark variants) -->
+    <!-- Accent Colors -->
+    <color name="color_accent_blue">#409CFF</color>
+    <color name="color_accent_blue_light">#1A409CFF</color>
+    <color name="color_accent_blue_pressed">#66B3FF</color>
+
+    <!-- Status Colors (adjusted for dark bg readability) -->
+    <color name="color_error_bg">#33FF4B4B</color>
+
+    <!-- Overlays -->
+    <color name="color_scrim">#99000000</color>
+    <color name="color_ripple">#1AFFFFFF</color>
+
+    <!-- Legacy Compatibility -->
+    <color name="colorPrimary">@color/color_primary_green_light</color>
+    <color name="colorPrimaryDark">@color/color_primary_green</color>
+    <color name="colorAccent">@color/color_primary_green_light</color>
+    <color name="textColorPrimary">@color/color_text_primary</color>
+    <color name="textColorSecondary">@color/color_text_secondary</color>
+    <color name="windowBackground">@color/color_bg_white</color>
+    <color name="surfaceColor">@color/color_bg_white</color>
+    <color name="keypadButtonColor">#2C2C2C</color>
+    <color name="keypadButtonPressedColor">#3A3A3A</color>
+    <color name="keypadButtonTextColor">@color/color_text_primary</color>
+    <color name="keypadButtonBorder">@color/color_divider</color>
+    <color name="inputBoxStrokeColor">@color/color_divider</color>
+    <color name="buttonBackground">@color/color_primary_green_light</color>
+    <color name="buttonText">@color/color_bg_white</color>
+    <color name="navigationBarBackground">#0B1215</color>
+    <color name="navigationBarDivider">@color/color_divider</color>
+    <color name="navigationIconTint">#B0B0B3</color>
+
+    <!-- Icon Colors -->
+    <color name="iconTint">@color/navigationIconTint</color>
+
+    <!-- Button Colors -->
+    <color name="color_button_primary_text">@color/black</color>
+    <color name="color_button_primary_pressed">#E0E0E0</color>
+    <color name="color_button_primary_disabled">@color/color_bg_tertiary</color>
+
+    <!-- Info/Warning Card Backgrounds -->
     <color name="color_warning_card_bg">#3A2810</color>
     <color name="color_pin_info_card_bg">#103321</color>
+    <color name="color_info_card_bg">#1A1F23</color>
+    <color name="color_error_card_bg">#3A1510</color>
 
-    <!-- Empty State Theme Colors (Dark Mode - black background) -->
-    <color name="empty_state_background">#000000</color>
-    <color name="empty_state_title">#FFFFFF</color>
+    <!-- Status Pill Backgrounds -->
+    <color name="color_status_success_bg">#103321</color>
+    <color name="color_status_pending_bg">#3A2810</color>
+    <color name="color_status_error_bg">#3A1510</color>
+
+    <!-- Dynamic Island (same in dark — always on dark bg) -->
+    <color name="color_dynamic_island_success">#1B5E20</color>
+    <color name="color_dynamic_island_error">#B71C1C</color>
+
+    <!-- Badge Backgrounds -->
+    <color name="color_badge_lightning_bg">#26FF9500</color>
+
+    <!-- Hero Gradient Tints -->
+    <color name="color_hero_gradient_end">@color/color_bg_white</color>
+    <color name="color_hero_gradient_active_end">@color/color_bg_white</color>
+    <color name="color_hero_gradient_green_end">#0D1A14</color>
+
+    <!-- Opacity Scale (white — same values work on dark) -->
+    <color name="color_white_10">#1AFFFFFF</color>
+    <color name="color_white_15">#26FFFFFF</color>
+    <color name="color_white_30">#4DFFFFFF</color>
+    <color name="color_white_34">#56FFFFFF</color>
+    <color name="color_white_50">@color/color_overlay_white_50</color>
+    <color name="color_white_80">#CCFFFFFF</color>
+    <color name="color_white_90">#E6FFFFFF</color>
+
+    <!-- Opacity Scale (black) -->
+    <color name="color_black_20">#33000000</color>
+    <color name="color_black_30">#4D000000</color>
+    <color name="color_black_40">@color/color_scrim</color>
+    <color name="color_black_50">@color/color_overlay_dark</color>
+    <color name="color_black_80">#CC000000</color>
+
+    <!-- Chip Pressed State -->
+    <color name="color_chip_pressed">#3A3F44</color>
+
+    <!-- Brand Accent Tokens (for secondary screen warmth) -->
+    <color name="color_section_header">#8FABC4</color>
+    <color name="color_brand_surface_tint">#B0C4D8</color>
+    <color name="color_balance_bg">#111920</color>
+
+    <!-- Payment Failure (calm, neutral) -->
+    <color name="color_failure_icon_bg">@color/numo_red</color>
+    <color name="color_failure_reassurance">@color/color_text_secondary</color>
+
+    <!-- Empty State Theme Colors -->
+    <color name="empty_state_background">@color/color_bg_white</color>
+    <color name="empty_state_title">@color/color_text_primary</color>
     <color name="empty_state_subtitle">#9B9B9F</color>
-    <color name="empty_state_button_primary_bg">#FFFFFF</color>
-    <color name="empty_state_button_primary_text">#000000</color>
+    <color name="empty_state_button_primary_bg">@color/color_text_primary</color>
+    <color name="empty_state_button_primary_text">@color/color_bg_white</color>
     <color name="empty_state_button_secondary_bg">@android:color/transparent</color>
     <color name="empty_state_button_secondary_text">#9B9B9F</color>
     <color name="empty_state_button_secondary_border">#4D9B9B9F</color>
     <color name="empty_state_close_icon">#FFFFFF</color>
 
-    <!-- Hero Green Tints (for mint selection hero card) -->
+    <!-- Onboarding (same values work on dark bg) -->
+    <color name="color_onboarding_text_muted">#73FFFFFF</color>
+    <color name="color_onboarding_text_subtle">#99FFFFFF</color>
+    <color name="color_onboarding_text_disabled">#4DFFFFFF</color>
+    <color name="color_onboarding_icon_bg">#1AFFFFFF</color>
+    <color name="color_seed_word_invalid">#FF6B6B</color>
+
+    <!-- Auto-Custody -->
+    <color name="color_auto_custody_pending_bg">#3A2810</color>
+    <color name="color_auto_custody_success_bg">#103321</color>
+    <color name="color_card_shadow">#40000000</color>
+
+    <!-- Hero Green Tints -->
     <color name="color_hero_green_border">#3300C244</color>
     <color name="color_hero_green_tint">#1400C244</color>
     <color name="color_default_pill_bg">#2600C244</color>
 
-    <!-- Button Colors (Dark Mode) -->
-    <color name="color_button_primary_pressed">#E0E0E0</color>
-    <color name="color_button_primary_disabled">@color/color_bg_tertiary</color>
-    <color name="color_button_primary_text">#000000</color>
+    <!-- Overlay & Semi-transparent Colors -->
+    <color name="color_overlay_dark">#80000000</color>
+    <color name="color_overlay_white_50">#80FFFFFF</color>
+    <color name="color_ripple_on_dark">#33FFFFFF</color>
+    <color name="color_stroke_on_dark">#26FFFFFF</color>
+    <color name="color_text_on_dark">#FFFFFF</color>
+    <color name="color_text_on_dark_high">#CCFFFFFF</color>
+    <color name="color_text_on_dark_medium">#B3FFFFFF</color>
+    <color name="color_text_on_dark_subtle">#99FFFFFF</color>
+    <color name="color_text_on_dark_faint">#73FFFFFF</color>
+    <color name="color_scrim_on_dark">#80FFFFFF</color>
+    <color name="color_scrim_on_light">#80000000</color>
+    <color name="color_bg_scanner">#000000</color>
+    <color name="color_icon_security_green">#4CAF50</color>
+    <color name="color_auto_withdraw_success">#4CAF50</color>
+    <color name="color_auto_withdraw_error">#FF5252</color>
+
+    <!-- Lightning Strike Animation Colors (same — bolt is always orange) -->
+    <color name="color_lightning_bolt_core">@color/numo_bitcoin_orange</color>
+    <color name="color_lightning_bolt_inner_glow">#FFBB5C</color>
+    <color name="color_lightning_bolt_outer_glow">#FFCC80</color>
+
+    <!-- NFC Payment Animation Colors (same in dark mode) -->
+    <color name="color_nfc_idle">#0A0A0A</color>
+    <color name="color_nfc_success">@color/numo_green</color>
+    <color name="color_nfc_success_gradient_start">@color/numo_green</color>
+    <color name="color_nfc_success_gradient_end">@color/numo_green</color>
+
+    <!-- Theme Background Colors (same — ThemeManager handles these directly) -->
+    <color name="color_theme_obsidian">@color/numo_dark</color>
+    <color name="color_theme_bitcoin_orange">@color/numo_bitcoin_orange</color>
+    <color name="color_theme_green">@color/numo_green</color>
+    <color name="color_theme_white">#FFFFFF</color>
+    <color name="color_theme_text_dark">@color/numo_dark</color>
 </resources>

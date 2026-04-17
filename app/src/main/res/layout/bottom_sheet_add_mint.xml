@@ -9,66 +9,61 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/bg_bottom_sheet_dark"
-        android:paddingBottom="32dp">
+        android:paddingBottom="@dimen/space_2xl">
 
         <!-- Drag Handle -->
         <View
             android:layout_width="36dp"
             android:layout_height="4dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="12dp"
-            android:background="#26FFFFFF" />
+            android:layout_marginTop="@dimen/space_m"
+            android:background="@color/color_divider" />
 
         <!-- Title -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:paddingHorizontal="24dp"
+            android:layout_marginTop="@dimen/margin_screen_horizontal"
+            android:paddingHorizontal="@dimen/space_xl"
             android:text="@string/onboarding_add_mint_sheet_title"
-            android:textSize="20sp"
-            android:textColor="#FFFFFF"
-            android:fontFamily="sans-serif-medium" />
+            android:textAppearance="@style/Text.DialogTitle" />
 
         <!-- URL Input -->
-        <EditText
-            android:id="@+id/mint_url_input"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="20dp"
-            android:layout_marginHorizontal="24dp"
-            android:hint="@string/onboarding_add_mint_url_hint"
-            android:textSize="15sp"
-            android:textColor="#FFFFFF"
-            android:textColorHint="#4DFFFFFF"
-            android:background="@drawable/bg_seed_input_dark"
-            android:paddingHorizontal="16dp"
-            android:inputType="textUri"
-            android:singleLine="true"
-            android:imeOptions="actionDone"
-            android:importantForAutofill="no" />
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_screen_horizontal"
+            android:layout_marginHorizontal="@dimen/space_xl">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/mint_url_input"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:hint="@string/onboarding_add_mint_url_hint"
+                android:textSize="15sp"
+                android:textColor="@color/color_text_primary"
+                android:textColorHint="@color/color_text_tertiary"
+                android:inputType="textUri"
+                android:singleLine="true"
+                android:imeOptions="actionDone"
+                android:importantForAutofill="no" />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Add Button / Loading Container -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginHorizontal="24dp">
+            android:layout_height="@dimen/button_height"
+            android:layout_marginTop="@dimen/space_m"
+            android:layout_marginHorizontal="@dimen/space_xl">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/add_mint_button"
+                style="@style/Widget.Numo.Button.Dialog.Confirm"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="@string/onboarding_add_mint_button"
-                android:textColor="@color/button_text_onboarding"
-                android:textAllCaps="false"
-                android:textSize="17sp"
-                android:background="@drawable/bg_button_white"
-                android:stateListAnimator="@null"
-                app:backgroundTint="@null"
-                app:cornerRadius="28dp"
-                app:elevation="0dp"
                 android:enabled="false" />
 
             <LinearLayout
@@ -88,10 +83,9 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
+                    android:layout_marginStart="@dimen/space_m"
                     android:text="@string/onboarding_add_mint_loading"
-                    android:textSize="15sp"
-                    android:textColor="#FFFFFF" />
+                    android:textAppearance="@style/Text.Body" />
 
             </LinearLayout>
 
@@ -100,28 +94,19 @@
         <!-- Scan QR Code Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/scan_qr_button"
+            style="@style/Widget.Button.Secondary.Outlined"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginHorizontal="24dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginTop="@dimen/space_m"
+            android:layout_marginHorizontal="@dimen/space_xl"
             android:text="@string/onboarding_add_mint_scan_qr"
-            android:textAllCaps="false"
             android:textSize="17sp"
-            android:textColor="#FFFFFF"
-            android:fontFamily="sans-serif-medium"
-            android:stateListAnimator="@null"
-            app:elevation="0dp"
-            app:backgroundTint="@android:color/transparent"
-            app:strokeColor="#26FFFFFF"
-            app:strokeWidth="1dp"
-            app:cornerRadius="26dp"
+            android:textColor="@color/color_text_primary"
+            app:cornerRadius="@dimen/radius_pill"
             app:icon="@drawable/ic_qr_scan"
             app:iconGravity="textStart"
-            app:iconPadding="8dp"
-            app:iconTint="#FFFFFF"
-            app:rippleColor="#1AFFFFFF" />
+            app:iconPadding="@dimen/space_s"
+            app:iconTint="@color/color_text_primary" />
 
     </LinearLayout>
 

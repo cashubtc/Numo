@@ -6,15 +6,59 @@
         <item name="android:textColor">@color/color_text_primary</item>
     </style>
 
-    <!-- Typography Styles -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Typography Scale                                          -->
+    <!--                                                            -->
+    <!-- 10 sizes on a ~1.33x ratio:                                -->
+    <!--   11sp  Badge/Overline                                     -->
+    <!--   13sp  Caption/Small                                      -->
+    <!--   14sp  Chip/SecondaryButton                               -->
+    <!--   15sp  Body/RowTitle                                      -->
+    <!--   16sp  Button                                             -->
+    <!--   17sp  Title                                              -->
+    <!--   18sp  Subtitle                                           -->
+    <!--   24sp  Heading                                            -->
+    <!--   48sp  Display                                            -->
+    <!--   64sp  Display Hero                                       -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <!-- Display: Large hero numbers (POS main amount) -->
+    <style name="Text.DisplayHero">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">64sp</item>
+        <item name="android:lineHeight">72sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+        <item name="android:gravity">center</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <!-- Display: Payment amounts, confirmation screens -->
     <style name="Text.DisplayAmount">
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">48sp</item>
+        <item name="android:lineHeight">56sp</item>
         <item name="android:textColor">@color/color_text_primary</item>
         <item name="android:gravity">center</item>
-        <item name="android:letterSpacing">0</item>
+        <item name="android:letterSpacing">-0.02</item>
     </style>
 
+    <!-- DisplayXL: Onboarding hero numbers, large secondary displays -->
+    <style name="Text.DisplayXL">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:lineHeight">38sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+    </style>
+
+    <!-- DisplayLarge: Secondary amount displays -->
+    <style name="Text.DisplayLarge">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">28sp</item>
+        <item name="android:lineHeight">34sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+    </style>
+
+    <!-- Heading: Page titles, major sections -->
     <style name="Text.Heading1">
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">24sp</item>
@@ -22,6 +66,15 @@
         <item name="android:textColor">@color/color_text_primary</item>
     </style>
 
+    <!-- Subtitle: Large section labels, tab text, prominent buttons -->
+    <style name="Text.Subtitle">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:lineHeight">24sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+    </style>
+
+    <!-- Title: Toolbar titles, dialog headers -->
     <style name="Text.Title">
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">17sp</item>
@@ -31,14 +84,25 @@
         <item name="android:letterSpacing">-0.012</item>
     </style>
 
-    <style name="Text.SectionHeader">
+    <!-- Button: Primary/secondary action labels -->
+    <style name="Text.Button">
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textSize">13sp</item>
-        <item name="android:textColor">@color/color_text_tertiary</item>
-        <item name="android:letterSpacing">0.05</item>
-        <item name="android:textAllCaps">true</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:lineHeight">22sp</item>
+        <item name="android:letterSpacing">-0.012</item>
+        <item name="android:gravity">center</item>
     </style>
 
+    <!-- RowTitle: List item primary text, field labels -->
+    <style name="Text.RowTitle">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+        <item name="android:letterSpacing">-0.007</item>
+    </style>
+
+    <!-- Body: Paragraph text, descriptions -->
     <style name="Text.Body">
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">15sp</item>
@@ -46,6 +110,7 @@
         <item name="android:textColor">@color/color_text_secondary</item>
     </style>
 
+    <!-- BodyBold: Emphasized body text -->
     <style name="Text.BodyBold">
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:textSize">15sp</item>
@@ -53,6 +118,50 @@
         <item name="android:textColor">@color/color_text_primary</item>
     </style>
 
+    <!-- Link: Tappable text links -->
+    <style name="Text.Link">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:textColor">@color/color_primary_purple</item>
+    </style>
+
+    <!-- Chip: Tag labels, filter pills -->
+    <style name="Text.Chip">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">18sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+    </style>
+
+    <!-- SecondaryButton: Tertiary action labels -->
+    <style name="Text.SecondaryButton">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">18sp</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
+    </style>
+
+    <!-- SectionHeader: ALL-CAPS group dividers (brand-tinted navy) -->
+    <style name="Text.SectionHeader">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:lineHeight">18sp</item>
+        <item name="android:textColor">@color/color_section_header</item>
+        <item name="android:letterSpacing">0.06</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <!-- AmountSubtitle: Secondary currency display below primary amount -->
+    <style name="Text.AmountSubtitle">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:lineHeight">22sp</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <!-- Caption: Timestamps, metadata, hints -->
     <style name="Text.Caption">
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">13sp</item>
@@ -60,23 +169,46 @@
         <item name="android:textColor">@color/color_text_tertiary</item>
     </style>
 
-    <style name="Text.Button">
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:letterSpacing">-0.012</item>
-        <item name="android:gravity">center</item>
+    <!-- RowSubtitle: List item secondary text -->
+    <style name="Text.RowSubtitle">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:lineHeight">18sp</item>
+        <item name="android:textColor">@color/color_text_tertiary</item>
     </style>
 
-    <style name="Text.Chip">
+    <!-- Helper: Form hints, contextual help -->
+    <style name="Text.Helper">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:lineHeight">18sp</item>
+        <item name="android:textColor">@color/color_text_tertiary</item>
+    </style>
+
+    <!-- Badge: Status indicators, counters -->
+    <style name="Text.Badge">
         <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:lineHeight">14sp</item>
+        <item name="android:letterSpacing">0.03</item>
+    </style>
+
+    <!-- Overline: Small labels above content -->
+    <style name="Text.Overline">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:lineHeight">14sp</item>
+        <item name="android:textColor">@color/color_text_tertiary</item>
+        <item name="android:letterSpacing">0.06</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+
+    <!-- Monospace: Seed words, addresses, technical data -->
+    <style name="Text.Mono">
+        <item name="android:fontFamily">monospace</item>
         <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">20sp</item>
         <item name="android:textColor">@color/color_text_primary</item>
-    </style>
-
-    <style name="Text.Link">
-        <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:textSize">15sp</item>
-        <item name="android:textColor">@color/color_primary_purple</item>
     </style>
 
     <!-- Base Widget Styles -->
@@ -108,18 +240,25 @@
 
     <style name="Widget.Button.Secondary" parent="Widget.MaterialComponents.Button.OutlinedButton"/>
 
-    <style name="Widget.Button.Secondary.Outlined">
-        <item name="android:background">@drawable/bg_button_secondary_outlined</item>
-        <item name="android:textColor">@color/color_text_primary</item>
+    <style name="Widget.Button.Secondary.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:textSize">17sp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
-        <item name="android:minHeight">52dp</item>
+        <item name="android:minHeight">48dp</item>
         <item name="android:paddingStart">24dp</item>
         <item name="android:paddingEnd">24dp</item>
         <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="strokeColor">@color/color_chip_border</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="rippleColor">@color/color_ripple</item>
+        <item name="elevation">0dp</item>
     </style>
-    
+
     <!-- Tertiary: borderless text button with consistent sizing -->
     <style name="Widget.Numo.Button.Tertiary" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:insetTop">0dp</item>
@@ -128,7 +267,115 @@
         <item name="android:fontFamily">sans-serif-medium</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="backgroundTint">@android:color/transparent</item>
-        <item name="rippleColor">#1AFFFFFF</item>
+        <item name="rippleColor">@color/color_white_10</item>
+    </style>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Primary action variants                                   -->
+    <!-- Use these instead of inlining android:background=@drawable -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <!-- Onboarding primary CTA: white pill on dark brand backdrop; text auto-inverts in dark mode -->
+    <style name="Widget.Numo.Button.Onboarding.Primary" parent="Widget.Numo.Button">
+        <item name="android:background">@drawable/bg_button_white</item>
+        <item name="android:textColor">@color/button_text_onboarding</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- Onboarding secondary/tertiary: transparent fill with white text on dark backdrop -->
+    <style name="Widget.Numo.Button.Onboarding.Tertiary" parent="Widget.Numo.Button">
+        <item name="android:background">@drawable/bg_button_tertiary_dark</item>
+        <item name="android:textColor">@color/color_text_on_dark</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- Secondary gray: tertiary-dark-style pill used as dismiss action on success/failure screens -->
+    <style name="Widget.Numo.Button.Secondary.Gray" parent="Widget.Numo.Button">
+        <item name="android:background">@drawable/bg_button_secondary_gray</item>
+        <item name="android:textColor">@color/color_bg_white</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">@dimen/text_button</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- Primary black: strong CTA for failure / retry screens -->
+    <style name="Widget.Numo.Button.Primary.Black" parent="Widget.Numo.Button">
+        <item name="android:background">@drawable/bg_button_primary_black</item>
+        <item name="android:textColor">@color/color_bg_white</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">@dimen/text_button</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- Charge: POS primary action; theme-aware via bg_button_charge drawable -->
+    <style name="Widget.Numo.Button.Charge" parent="Widget.Numo.Button">
+        <item name="android:background">@drawable/bg_button_charge</item>
+        <item name="android:textColor">@color/color_text_on_dark</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- Empty state primary: inline CTA shown in zero-state layouts -->
+    <style name="Widget.Numo.Button.EmptyState.Primary" parent="Widget.Numo.Button">
+        <item name="android:background">@drawable/bg_button_empty_state_primary</item>
+        <item name="android:textColor">@color/empty_state_button_primary_text</item>
+        <item name="android:textAppearance">@style/Text.Button</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@null</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- TextInputLayout: Outlined input (standard across all screens) -->
+    <style name="Widget.Numo.TextInputLayout.OutlinedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">@dimen/radius_input</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/radius_input</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/radius_input</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/radius_input</item>
+        <item name="boxStrokeColor">@color/text_input_box_stroke</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="boxStrokeWidthFocused">2dp</item>
+        <item name="boxBackgroundColor">@color/color_bg_white</item>
+        <item name="hintEnabled">false</item>
+        <item name="expandedHintEnabled">false</item>
+    </style>
+
+    <!-- TextInputLayout prefix/suffix text appearance -->
+    <style name="Text.InputAffix" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
     </style>
 
     <style name="Widget.App.TopBar">
@@ -153,6 +400,78 @@
     <style name="ShapeAppearance.Numo.Snackbar" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">10dp</item>
+    </style>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Dialog Buttons                                            -->
+    <!-- Reusable button styles for confirmation/input dialogs     -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <!-- Dialog: Primary action (dark fill) -->
+    <style name="Widget.Numo.Button.Dialog.Confirm" parent="Widget.MaterialComponents.Button">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textColor">@color/color_bg_white</item>
+        <item name="android:textSize">@dimen/text_button</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@color/color_text_primary</item>
+        <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="rippleColor">@color/color_ripple_on_dark</item>
+        <item name="strokeWidth">0dp</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- Dialog: Cancel action (outlined) -->
+    <style name="Widget.Numo.Button.Dialog.Cancel" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+        <item name="android:textSize">@dimen/text_button</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@color/color_bg_white</item>
+        <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="rippleColor">@color/color_ripple</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="strokeColor">@color/color_chip_border</item>
+    </style>
+
+    <!-- Dialog: Destructive action (red fill) -->
+    <style name="Widget.Numo.Button.Dialog.Destructive" parent="Widget.MaterialComponents.Button">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textColor">@color/color_bg_white</item>
+        <item name="android:textSize">@dimen/text_button</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@color/color_error</item>
+        <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="rippleColor">@color/color_ripple_on_dark</item>
+        <item name="strokeWidth">0dp</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Dialog Typography                                         -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+
+    <!-- Dialog title (22sp, left-aligned, tight) -->
+    <style name="Text.DialogTitle">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">22sp</item>
+        <item name="android:textColor">@color/color_text_primary</item>
+        <item name="android:letterSpacing">-0.02</item>
+    </style>
+
+    <!-- Dialog subtitle (15sp, secondary) -->
+    <style name="Text.DialogSubtitle">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/color_text_tertiary</item>
     </style>
 
     <!-- Shape Appearances -->

@@ -9,7 +9,6 @@ import android.widget.LinearLayout
 import androidx.appcompat.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.R
@@ -23,6 +22,7 @@ import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.core.util.MintProfileService
 import com.electricdreams.numo.core.util.SavedBasketManager
+import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -48,6 +48,7 @@ class TransactionDetailActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdgeWithPill(this)
         setContentView(R.layout.activity_transaction_detail)
 
         // Get transaction data from intent
@@ -99,11 +100,9 @@ class TransactionDetailActivity : AppCompatActivity() {
         get() = entry.amount < 0
 
     private fun setupViews() {
-        // Back button
-        findViewById<ImageButton>(R.id.back_button).setOnClickListener { finish() }
-
-        // Overflow menu button
-        findViewById<ImageButton>(R.id.overflow_button).setOnClickListener { showOverflowMenu(it) }
+        val topBar = findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar)
+        topBar.onNavClick { finish() }
+        topBar.onActionClick { showOverflowMenu(topBar.actionView) }
 
         // Display transaction details
         displayTransactionDetails()
@@ -400,27 +399,6 @@ class TransactionDetailActivity : AppCompatActivity() {
         ).show()
     }
 
-    private fun openWithApp() {
-        val cashuUri = "cashu:${entry.token}"
-        val uriIntent = Intent(Intent.ACTION_VIEW, Uri.parse(cashuUri)).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, cashuUri)
-        }
-
-        val chooserIntent = Intent.createChooser(uriIntent, "Open payment with...").apply {
-            putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(shareIntent))
-        }
-
-        try {
-            startActivity(chooserIntent)
-        } catch (e: Exception) {
-            Toast.makeText(this, R.string.history_toast_no_app, Toast.LENGTH_SHORT).show()
-        }
-    }
 
     private fun copyDestination(destination: String) {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
@@ -476,12 +454,13 @@ class TransactionDetailActivity : AppCompatActivity() {
     }
 
     private fun showDeleteConfirmation() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.history_dialog_delete_title)
-            .setMessage(R.string.history_dialog_delete_message)
-            .setPositiveButton(R.string.history_dialog_delete_positive) { _, _ -> deleteTransaction() }
-            .setNegativeButton(R.string.history_dialog_delete_negative, null)
-            .show()
+        DialogHelper.showConfirmation(this, DialogHelper.ConfirmationConfig(
+            title = getString(R.string.history_dialog_delete_title),
+            message = getString(R.string.history_dialog_delete_message),
+            confirmText = getString(R.string.history_dialog_delete_positive),
+            isDestructive = true,
+            onConfirm = { deleteTransaction() }
+        ))
     }
 
     private fun deleteTransaction() {

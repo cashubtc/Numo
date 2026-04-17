@@ -23,41 +23,49 @@
 
     <!-- Border Radii -->
     <dimen name="radius_pill">26dp</dimen>
+    <dimen name="radius_button">28dp</dimen>
     <dimen name="radius_chip">18dp</dimen>
     <dimen name="radius_card">16dp</dimen>
     <dimen name="radius_search">20dp</dimen>
     <dimen name="radius_small">8dp</dimen>
+    <dimen name="radius_input">12dp</dimen>
     <dimen name="radius_m">12dp</dimen>
-    <dimen name="radius_l">16dp</dimen>
+    <dimen name="radius_l">@dimen/radius_card</dimen>
 
     <!-- Icon Sizes -->
+    <dimen name="icon_size_xs">28dp</dimen>
     <dimen name="icon_size_small">24dp</dimen>
     <dimen name="icon_size_medium">40dp</dimen>
     <dimen name="icon_size_large">48dp</dimen>
     <dimen name="icon_size_hero">56dp</dimen>
 
-    <!-- Typography Sizes -->
-    <dimen name="text_display_amount">52sp</dimen>
+    <!-- Typography Sizes (matches styles.xml type scale) -->
+    <dimen name="text_display_hero">64sp</dimen>
+    <dimen name="text_display_amount">48sp</dimen>
     <dimen name="text_heading1">24sp</dimen>
+    <dimen name="text_subtitle">18sp</dimen>
     <dimen name="text_title">17sp</dimen>
+    <dimen name="text_button">16sp</dimen>
     <dimen name="text_body">15sp</dimen>
-    <dimen name="text_caption">13sp</dimen>
-    <dimen name="text_button">17sp</dimen>
     <dimen name="text_chip">14sp</dimen>
+    <dimen name="text_caption">13sp</dimen>
     <dimen name="text_section_header">13sp</dimen>
+    <dimen name="text_badge">11sp</dimen>
 
     <!-- Margins -->
-    <dimen name="margin_screen_horizontal">24dp</dimen>
+    <dimen name="margin_screen_horizontal">20dp</dimen>
     <dimen name="margin_screen_vertical">16dp</dimen>
     <dimen name="margin_content_horizontal">16dp</dimen>
 
-    <!-- Elevation -->
+    <!-- Elevation Scale -->
     <dimen name="elevation_card">2dp</dimen>
+    <dimen name="elevation_raised">4dp</dimen>
     <dimen name="elevation_dialog">8dp</dimen>
-    <dimen name="card_elevation_small">2dp</dimen>
-    
-    <!-- Card Corner Radius -->
-    <dimen name="card_corner_radius">16dp</dimen>
+    <dimen name="elevation_sheet">12dp</dimen>
+    <dimen name="elevation_modal">16dp</dimen>
+
+    <!-- Card Corner Radius (alias — prefer radius_card in new code) -->
+    <dimen name="card_corner_radius">@dimen/radius_card</dimen>
 
     <!-- Divider -->
     <dimen name="divider_height">0.5dp</dimen>
@@ -68,13 +76,28 @@
     <dimen name="bottom_sheet_handle_width">36dp</dimen>
     <dimen name="bottom_sheet_handle_height">4dp</dimen>
 
-    <!-- Settings -->
+    <!-- Settings / Row Layout -->
     <dimen name="settings_item_height">56dp</dimen>
     <dimen name="settings_horizontal_padding">24dp</dimen>
     <dimen name="icon_button_size">44dp</dimen>
+    <dimen name="row_padding_vertical">14dp</dimen>
+    <dimen name="row_padding_horizontal">16dp</dimen>
+    <dimen name="row_icon_size">40dp</dimen>
+    <dimen name="row_icon_gap">14dp</dimen>
+    <dimen name="row_subtitle_gap">2dp</dimen>
+    <dimen name="section_header_margin_bottom">14dp</dimen>
+    <dimen name="section_gap">28dp</dimen>
+    <dimen name="nav_back_size">36dp</dimen>
+    <dimen name="radius_button_pill">100dp</dimen>
 
     <!-- QR Scanner -->
     <dimen name="qr_viewfinder_size">280dp</dimen>
+
+    <!-- NFC Payment Animation -->
+    <dimen name="nfc_spinner_radius">38dp</dimen>
+    <dimen name="nfc_spinner_stroke_width">5dp</dimen>
+    <dimen name="nfc_result_circle_radius">72dp</dimen>
+    <dimen name="nfc_result_icon_stroke_width">6dp</dimen>
 
     <!-- 3D Card Effects -->
     <dimen name="card_elevation_3d_max">12dp</dimen>

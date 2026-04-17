@@ -9,9 +9,8 @@
         android:id="@+id/dialog_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="NFC Payment"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:text="@string/dialog_ndef_payment_title"
+        android:textAppearance="@style/Text.DialogTitle"
         android:textAlignment="center"
         android:layout_marginBottom="16dp" />
 
@@ -20,8 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="₿ 0"
-        android:textSize="24sp"
-        android:textStyle="bold"
+        android:textAppearance="@style/Text.Heading1"
         android:textAlignment="center"
         android:layout_marginBottom="24dp" />
 
@@ -29,8 +27,8 @@
         android:id="@+id/nfc_status_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Tap a device to your phone to receive payment"
-        android:textSize="16sp"
+        android:text="@string/dialog_ndef_payment_status"
+        android:textAppearance="@style/Text.Body"
         android:textAlignment="center"
         android:layout_marginBottom="16dp" />
 
@@ -43,9 +41,10 @@
 
     <Button
         android:id="@+id/nfc_cancel_button"
+        style="@style/Widget.Button.Secondary.Outlined"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Cancel"
+        android:text="@string/common_cancel"
         android:layout_marginTop="16dp" />
 
 </LinearLayout>

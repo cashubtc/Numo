@@ -6,40 +6,13 @@
     android:background="@color/color_bg_white">
 
     <!-- Top App Bar -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.electricdreams.numo.ui.components.NumoTopBar
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/color_bg_white"
-        android:paddingHorizontal="16dp"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Back"
-            android:src="@drawable/ic_chevron_back"
-            android:tint="@color/color_text_primary"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/about_title"
-            android:textAppearance="@style/Text.Title"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_height="@dimen/top_bar_height"
+        app:topBarTitle="@string/about_title"
+        app:topBarNavContentDescription="@string/desc_back"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -51,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- App Logo and Name -->
             <LinearLayout
@@ -59,32 +32,30 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-                android:paddingVertical="32dp">
+                android:paddingVertical="@dimen/space_2xl">
 
                 <ImageView
                     android:layout_width="80dp"
                     android:layout_height="80dp"
                     android:src="@mipmap/ic_launcher"
-                    android:contentDescription="App Icon" />
+                    android:contentDescription="@string/desc_app_icon" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="Numo"
-                    android:textSize="24sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium" />
+                    android:layout_marginTop="@dimen/space_l"
+                    android:text="@string/app_name"
+                    style="@style/Text.Heading1" />
 
                 <TextView
                     android:id="@+id/version_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
+                    android:layout_marginTop="@dimen/space_xs"
                     android:text="Version 1.0.0"
-                    android:textSize="14sp"
+                    android:textAppearance="@style/Text.SecondaryButton"
                     android:textColor="@color/color_text_secondary"
-                    android:padding="8dp"
+                    android:padding="@dimen/space_s"
                     android:background="?attr/selectableItemBackgroundBorderless" />
 
             </LinearLayout>
@@ -96,22 +67,18 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp"
+                android:paddingHorizontal="@dimen/settings_horizontal_padding"
+                android:paddingTop="@dimen/space_s"
+                android:paddingBottom="@dimen/space_s"
                 android:text="@string/about_device_info"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_secondary"
-                android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
+                style="@style/Text.SectionHeader" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginHorizontal="24dp"
-                android:padding="16dp"
+                android:layout_marginHorizontal="@dimen/space_xl"
+                android:padding="@dimen/space_l"
                 android:background="@drawable/bg_card_rounded">
 
                 <!-- Version -->
@@ -119,24 +86,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingVertical="8dp">
+                    android:paddingVertical="@dimen/space_s">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/about_app_version"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_secondary" />
+                        style="@style/Text.Body" />
 
                     <TextView
                         android:id="@+id/info_app_version"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="1.0.0"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        style="@style/Text.RowTitle" />
                 </LinearLayout>
 
                 <!-- Build Number -->
@@ -144,24 +108,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingVertical="8dp">
+                    android:paddingVertical="@dimen/space_s">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/about_build_number"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_secondary" />
+                        style="@style/Text.Body" />
 
                     <TextView
                         android:id="@+id/info_build_number"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="1"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        style="@style/Text.RowTitle" />
                 </LinearLayout>
 
                 <!-- Device Model -->
@@ -169,24 +130,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingVertical="8dp">
+                    android:paddingVertical="@dimen/space_s">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/about_device"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_secondary" />
+                        style="@style/Text.Body" />
 
                     <TextView
                         android:id="@+id/info_device"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Unknown"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        style="@style/Text.RowTitle" />
                 </LinearLayout>
 
                 <!-- Android Version -->
@@ -194,24 +152,21 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingVertical="8dp">
+                    android:paddingVertical="@dimen/space_s">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/about_android_version"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_secondary" />
+                        style="@style/Text.Body" />
 
                     <TextView
                         android:id="@+id/info_android_version"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Unknown"
-                        android:textSize="15sp"
-                        android:textColor="@color/color_text_primary"
-                        android:fontFamily="sans-serif-medium" />
+                        style="@style/Text.RowTitle" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -223,32 +178,29 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="24dp"
-                android:paddingBottom="8dp"
+                android:paddingHorizontal="@dimen/settings_horizontal_padding"
+                android:paddingTop="@dimen/space_xl"
+                android:paddingBottom="@dimen/space_s"
                 android:text="@string/about_about_us"
-                android:textSize="13sp"
-                android:textColor="@color/color_text_secondary"
-                android:fontFamily="sans-serif-medium"
-                android:textAllCaps="true"
-                android:letterSpacing="0.05" />
+                style="@style/Text.SectionHeader" />
 
             <!-- Terms of Service -->
             <LinearLayout
                 android:id="@+id/terms_item"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="@dimen/settings_item_height"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingHorizontal="@dimen/settings_horizontal_padding">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:importantForAccessibility="no"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/space_l"
                     android:src="@drawable/ic_document"
                     app:tint="@color/color_icon_secondary" />
 
@@ -257,12 +209,12 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/about_terms_of_service"
-                    android:textSize="17sp"
-                    android:textColor="@color/color_text_primary" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:importantForAccessibility="no"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_chevron_forward"
                     app:tint="@color/color_icon_secondary" />
             </LinearLayout>
@@ -271,18 +223,19 @@
             <LinearLayout
                 android:id="@+id/privacy_item"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="@dimen/settings_item_height"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingHorizontal="@dimen/settings_horizontal_padding">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:importantForAccessibility="no"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/space_l"
                     android:src="@drawable/ic_shield"
                     app:tint="@color/color_icon_secondary" />
 
@@ -291,12 +244,12 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/about_privacy_policy"
-                    android:textSize="17sp"
-                    android:textColor="@color/color_text_primary" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:importantForAccessibility="no"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_chevron_forward"
                     app:tint="@color/color_icon_secondary" />
             </LinearLayout>
@@ -305,18 +258,19 @@
             <LinearLayout
                 android:id="@+id/website_item"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="@dimen/settings_item_height"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingHorizontal="@dimen/settings_horizontal_padding">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:importantForAccessibility="no"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/space_l"
                     android:src="@drawable/ic_link"
                     app:tint="@color/color_icon_secondary" />
 
@@ -330,20 +284,19 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/about_website"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary" />
+                        android:textAppearance="@style/Text.RowTitle" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="numopay.org"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary" />
+                        android:text="@string/about_website_url"
+                        android:textAppearance="@style/Text.RowSubtitle" />
                 </LinearLayout>
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:importantForAccessibility="no"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_open_external"
                     app:tint="@color/color_icon_secondary" />
             </LinearLayout>
@@ -352,18 +305,19 @@
             <LinearLayout
                 android:id="@+id/contact_item"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="@dimen/settings_item_height"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp">
+                android:paddingHorizontal="@dimen/settings_horizontal_padding">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:importantForAccessibility="no"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/space_l"
                     android:src="@drawable/ic_email"
                     app:tint="@color/color_icon_secondary" />
 
@@ -377,20 +331,19 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/about_contact_us"
-                        android:textSize="17sp"
-                        android:textColor="@color/color_text_primary" />
+                        android:textAppearance="@style/Text.RowTitle" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="numopay@proton.me"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary" />
+                        android:text="@string/about_contact_email"
+                        android:textAppearance="@style/Text.RowSubtitle" />
                 </LinearLayout>
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
+                    android:importantForAccessibility="no"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
                     android:src="@drawable/ic_open_external"
                     app:tint="@color/color_icon_secondary" />
             </LinearLayout>
@@ -401,10 +354,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="@dimen/space_2xl"
                 android:text=""
-                android:textSize="13sp"
-                android:textColor="@color/color_text_tertiary"
+                android:textAppearance="@style/Text.Caption"
                 android:visibility="gone" />
 
         </LinearLayout>

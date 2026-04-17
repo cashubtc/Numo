@@ -95,13 +95,14 @@
     <string name="payment_received_error_no_details">Los detalles de la transacción no están disponibles</string>
 
     <!-- Payment failure -->
-    <string name="payment_failure_title">Pago fallido</string>
-    <string name="payment_failure_message">Se produjo un error al procesar este pago.</string>
+    <string name="payment_failure_title">Pago no recibido</string>
+    <string name="payment_failure_message">No se pudo completar este pago. Puedes intentar de nuevo o iniciar un nuevo cobro.</string>
+    <string name="payment_failure_reassurance">No se transfirieron fondos — es seguro reintentar.</string>
     <string name="payment_failure_button_try_again">Intentar de nuevo</string>
     <string name="payment_failure_button_close">Cerrar</string>
     <string name="payment_failure_close_content_description">Cerrar</string>
-    <string name="payment_failure_error_background_description">Fondo de error</string>
-    <string name="payment_failure_error_icon_description">Error</string>
+    <string name="payment_failure_error_background_description">Indicador de error</string>
+    <string name="payment_failure_error_icon_description">Pago no recibido</string>
     <string name="payment_failure_error_no_pending">No hay ningún pago pendiente para reintentar</string>
 
     <!-- Onboarding / Welcome -->
@@ -308,7 +309,7 @@
     <string name="withdraw_lightning_option_address">📧 Dirección Lightning</string>
     <string name="withdraw_lightning_address_hint_label">Introduce una dirección Lightning</string>
     <string name="withdraw_lightning_address_hint_value">usuario@dominio.com</string>
-    <string name="withdraw_lightning_amount_label">Cantidad (sats)</string>
+    <string name="withdraw_lightning_amount_label">Cantidad</string>
     <string name="withdraw_lightning_amount_hint">1000</string>
     <string name="withdraw_lightning_button_continue">Continuar</string>
 
@@ -330,7 +331,7 @@
     <string name="withdraw_melt_amount_label">Cantidad</string>
     <string name="withdraw_melt_fee_label">Reserva de comisión</string>
     <string name="withdraw_melt_total_label">Total</string>
-    <string name="withdraw_melt_fee_note">La reserva de comisión se devolverá si la comisión real de Lightning es menor.</string>
+    <string name="withdraw_melt_fee_note">La reserva de comisión se devolverá si la comisión de Lightning es menor.</string>
     <string name="withdraw_melt_loading">Procesando retiro...</string>
 
     <!-- Withdraw - melt errors and states -->
@@ -448,28 +449,29 @@
     <!-- Item entry / edit -->
     <string name="item_entry_toolbar_back">Atrás</string>
     <string name="item_entry_title_add">Añadir artículo</string>
+    <string name="item_entry_title_edit">Editar artículo</string>
     <string name="item_entry_button_save">Guardar</string>
     <string name="item_entry_image_description">Imagen del artículo</string>
     <string name="item_entry_image_placeholder">Sin imagen</string>
     <string name="item_entry_button_add_photo">Añadir foto</string>
     <string name="item_entry_button_remove_photo">Eliminar foto</string>
 
-    <string name="item_entry_section_basic_information">INFORMACIÓN BÁSICA</string>
+    <string name="item_entry_section_basic_information">DETALLES</string>
     <string name="item_entry_label_name">Nombre</string>
-    <string name="item_entry_hint_name">Nombre del artículo</string>
+    <string name="item_entry_hint_name">Ej.: Cappuccino</string>
     <string name="item_entry_label_variation">Variante</string>
     <string name="item_entry_hint_variation">Ej.: Pequeño, Grande</string>
     <string name="item_entry_label_description">Descripción</string>
-    <string name="item_entry_hint_description">Opcional</string>
+    <string name="item_entry_hint_description">Notas sobre este artículo</string>
 
     <string name="item_entry_section_category">CATEGORÍA</string>
-    <string name="item_entry_hint_new_category">Nombre de la nueva categoría</string>
+    <string name="item_entry_hint_new_category">Nombre de categoría</string>
     <string name="item_entry_category_confirm">Confirmar</string>
     <string name="item_entry_category_cancel">Cancelar</string>
-    <string name="item_entry_category_helper">Selecciona una categoría existente o crea una nueva.</string>
+    <string name="item_entry_category_helper">Selecciona una categoría o crea una nueva.</string>
 
     <string name="item_entry_section_pricing">PRECIO</string>
-    <string name="item_entry_price_type_fiat">Fiat</string>
+    <string name="item_entry_price_type_fiat">Moneda local</string>
     <string name="item_entry_price_type_bitcoin">Bitcoin</string>
     <string name="item_entry_currency_symbol_default">$</string>
     <string name="item_entry_hint_price_fiat">0.00</string>
@@ -478,40 +480,51 @@
     <string name="item_entry_hint_price_sats">0</string>
     <string name="item_entry_label_sats">sats</string>
 
-    <string name="item_entry_label_apply_vat">Aplicar IVA</string>
-    <string name="item_entry_label_price_includes_vat">El precio incluye IVA</string>
-    <string name="item_entry_label_vat_rate">Tasa de IVA</string>
+    <string name="item_entry_label_apply_vat">Aplicar impuesto (IVA)</string>
+    <string name="item_entry_label_price_includes_vat">El precio incluye impuesto</string>
+    <string name="item_entry_label_vat_rate">Tasa de impuesto</string>
     <string name="item_entry_hint_vat_rate">20</string>
 
     <string name="item_entry_price_breakdown_title">Desglose de precio</string>
-    <string name="item_entry_price_breakdown_net_label">Precio neto (sin IVA)</string>
+    <string name="item_entry_price_breakdown_net_label">Precio sin impuesto</string>
     <string name="item_entry_price_breakdown_net_value_default">$0.00</string>
-    <string name="item_entry_price_breakdown_vat_label">IVA (20%)</string>
+    <string name="item_entry_price_breakdown_vat_label">Impuesto (20%)</string>
     <string name="item_entry_price_breakdown_vat_value_default">$0.00</string>
-    <string name="item_entry_price_breakdown_total_label">Total (con IVA)</string>
+    <string name="item_entry_price_breakdown_total_label">El cliente paga</string>
     <string name="item_entry_price_breakdown_total_value_default">$0.00</string>
 
     <string name="item_entry_price_helper">Establece un precio fijo en tu moneda preferida. Los precios en Bitcoin son en satoshis (sats).</string>
 
-    <string name="item_entry_section_identification">IDENTIFICACIÓN</string>
-    <string name="item_entry_label_gtin">GTIN</string>
-    <string name="item_entry_hint_gtin">Escanea o introduce el código de barras</string>
+    <string name="item_entry_section_identification">CÓDIGO DE BARRAS Y SKU</string>
+    <string name="item_entry_label_gtin">Código de barras</string>
+    <string name="item_entry_hint_gtin">Escanea o escribe el código</string>
     <string name="item_entry_scan_barcode">Escanear código de barras</string>
     <string name="item_entry_label_sku">SKU</string>
-    <string name="item_entry_hint_sku">Código de inventario interno</string>
-    <string name="item_entry_error_gtin_exists">Este GTIN ya existe</string>
-    <string name="item_entry_error_sku_exists">Este SKU ya existe</string>
+    <string name="item_entry_hint_sku">Tu código interno de producto</string>
+    <string name="item_entry_error_gtin_exists">Otro artículo ya usa este código de barras</string>
+    <string name="item_entry_error_sku_exists">Otro artículo ya usa este SKU</string>
+    <string name="item_entry_error_name_required">Dale un nombre a tu artículo</string>
+    <string name="item_entry_error_price_required">Ingresa un precio</string>
+    <string name="item_entry_error_price_positive">El precio no puede ser negativo</string>
+    <string name="item_entry_error_price_decimals">Usa hasta 2 decimales</string>
+    <string name="item_entry_error_sats_required">Ingresa un precio en sats</string>
+    <string name="item_entry_error_sats_positive">Los sats no pueden ser negativos</string>
+    <string name="item_entry_error_sats_whole_number">Los sats deben ser un número entero</string>
+    <string name="item_entry_error_quantity_positive">El stock no puede ser negativo</string>
+    <string name="item_entry_error_threshold_positive">El umbral no puede ser negativo</string>
 
-    <string name="item_entry_section_inventory">INVENTARIO</string>
-    <string name="item_entry_label_track_quantity">Seguimiento de cantidad</string>
-    <string name="item_entry_label_current_stock">Stock actual</string>
+    <string name="item_entry_section_inventory">STOCK</string>
+    <string name="item_entry_label_track_quantity">Controlar stock</string>
+    <string name="item_entry_label_current_stock">En stock</string>
     <string name="item_entry_hint_current_stock">0</string>
     <string name="item_entry_label_low_stock_alert">Alerta de stock bajo</string>
     <string name="item_entry_label_alert_when_below">Alertar cuando sea inferior a</string>
     <string name="item_entry_hint_alert_threshold">5</string>
-    <string name="item_entry_inventory_helper">Activa el seguimiento de inventario para controlar los niveles de stock y recibir alertas de stock bajo.</string>
+    <string name="item_entry_inventory_helper">Recibe avisos cuando el stock esté bajo.</string>
 
     <string name="item_entry_button_cancel">Cancelar</string>
+    <string name="item_entry_button_delete">Eliminar artículo</string>
+    <string name="item_entry_delete_confirmation_message">Este artículo se eliminará permanentemente de tu catálogo.</string>
 
     <!-- Item product row -->
     <string name="item_product_drag_handle_description">Arrastra para reordenar</string>
@@ -653,8 +666,10 @@
 
     <!-- Auto-Withdraw Settings -->
     <string name="auto_withdraw_title">Retiros</string>
+    <string name="auto_withdraw_hero_label">RETIRO AUTOMÁTICO</string>
     <string name="auto_withdraw_hero_title">Retiro automático</string>
     <string name="auto_withdraw_hero_subtitle">Envía fondos automáticamente a tu cartera Lightning cuando el saldo supere un umbral</string>
+    <string name="auto_withdraw_hero_helper">Establece un umbral de pago y una dirección Lightning para retirar automáticamente cuando tu saldo alcance el límite.</string>
     <string name="auto_withdraw_status_active">Activo</string>
     <string name="auto_withdraw_status_inactive">Inactivo</string>
 
@@ -695,7 +710,7 @@
     <string name="auto_withdraw_progress_completed">Enviado correctamente</string>
     <string name="auto_withdraw_progress_failed">El retiro ha fallado</string>
 
-    <string name="auto_withdraw_settings_title">Retiro automático</string>
+    <string name="auto_withdraw_settings_title">Retiro</string>
     <string name="auto_withdraw_error_title">Detalles del error</string>
 
     <!-- Settings - Withdrawals menu item -->
@@ -727,6 +742,9 @@
     <string name="withdraw_amount_placeholder">Introduce la cantidad en sats</string>
     <string name="withdraw_continue_button">Continuar</string>
     <string name="withdraw_scan_qr">Escanear QR</string>
+    <string name="withdraw_scan_invoice_button">Escanear factura</string>
+    <string name="withdraw_invoice_helper">Ingrese una factura Lightning BOLT11</string>
+    <string name="withdraw_address_helper">Enviar a una dirección tipo email Lightning</string>
     <string name="withdraw_section_send_to">Enviar a</string>
     <string name="withdraw_balance_available">Disponible: %1$s</string>
 
@@ -870,4 +888,35 @@
     <string name="payment_request_tab_unified">Unificado</string>
     <string name="payment_request_default_description">Pago de %1$d sats</string>
     <string name="payment_request_lightning_description">Pago Numo POS de %1$d sats</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_edit">Editar</string>
+    <string name="cd_delete">Eliminar</string>
+    <string name="cd_restore_success">Billetera restaurada exitosamente</string>
+    <string name="cd_scan_qr">Escanear código QR</string>
+    <string name="cd_qr_code">Código QR</string>
+    <string name="cd_transaction_status">Estado de la transacción</string>
+
+    <!-- Extracted UI strings -->
+    <string name="basket_receipt_items_header_default">ARTÍCULOS</string>
+    <string name="action_add_new_mint">+ Agregar Nuevo Mint</string>
+    <string name="action_add_endpoint">+ Agregar Endpoint</string>
+    <string name="action_sync_all_endpoints">Sincronizar Todos los Endpoints</string>
+    <string name="dialog_confirm_message_default">¿Estás seguro de que deseas continuar?</string>
+    <string name="dialog_ndef_payment_title">Pago NFC</string>
+    <string name="dialog_ndef_payment_status">Acerca un dispositivo a tu teléfono para recibir el pago</string>
+    <string name="dialog_sync_progress_message">Sincronizando…</string>
+    <string name="dialog_input_title_default">Ingresar Valor</string>
+    <string name="dialog_input_description_default">Ingresa un valor a continuación</string>
+    <string name="hint_enter_value">Ingresar valor</string>
+    <string name="dialog_input_helper_default">Mín: 1,000 - Máx: 1,000,000</string>
+    <string name="label_auto">AUTO</string>
+    <string name="desc_back">Atrás</string>
+    <string name="desc_app_icon">Ícono de la aplicación</string>
+    <string name="desc_item_image">Imagen del artículo</string>
+    <string name="desc_decrease_quantity">Disminuir cantidad</string>
+    <string name="desc_increase_quantity">Aumentar cantidad</string>
+    <string name="desc_remove_item">Eliminar artículo</string>
+    <string name="desc_select_lightning_mint">Seleccionar como mint Lightning</string>
+    <string name="desc_remove_preset">Eliminar preajuste</string>
 </resources>

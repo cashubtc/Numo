@@ -7,41 +7,13 @@
     android:background="@color/color_bg_white">
 
     <!-- Top Bar -->
-    <LinearLayout
+    <com.electricdreams.numo.ui.components.NumoTopBar
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="8dp"
-        android:elevation="1dp"
-        android:background="@color/color_bg_white"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_chevron_back"
-            android:contentDescription="@string/tips_settings_toolbar_back"
-            app:tint="@color/color_text_primary" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/tips_settings_title"
-            android:textSize="20sp"
-            android:textColor="@color/color_text_primary"
-            android:fontFamily="sans-serif-medium"
-            android:textAlignment="center" />
-
-        <!-- Spacer to balance layout -->
-        <View
-            android:layout_width="48dp"
-            android:layout_height="48dp" />
-    </LinearLayout>
+        android:layout_height="@dimen/top_bar_height"
+        app:topBarTitle="@string/tips_settings_title"
+        app:topBarNavContentDescription="@string/tips_settings_toolbar_back"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -54,17 +26,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:paddingBottom="@dimen/space_2xl">
 
             <!-- Description -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="24dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="8dp"
+                android:paddingHorizontal="@dimen/settings_horizontal_padding"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_s"
                 android:text="@string/tips_settings_description"
-                android:textSize="14sp"
+                android:textAppearance="@style/Text.Body"
                 android:textColor="@color/color_text_secondary"
                 android:lineSpacingExtra="2dp" />
 
@@ -74,13 +46,14 @@
                 android:layout_height="72dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingHorizontal="24dp"
+                android:paddingHorizontal="@dimen/settings_horizontal_padding"
                 android:background="?attr/selectableItemBackground">
 
                 <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="16dp"
+                    android:importantForAccessibility="no"
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/space_l"
                     android:src="@drawable/ic_tip"
                     app:tint="@color/color_primary_green" />
 
@@ -89,14 +62,14 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/tips_settings_enable_label"
-                    android:textSize="17sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/tips_enabled_switch"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    app:thumbTint="@color/selector_switch_thumb"
+                    app:trackTint="@color/selector_switch_track" />
             </LinearLayout>
 
             <!-- Presets Section -->
@@ -111,30 +84,25 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="24dp"
-                    android:paddingTop="24dp"
-                    android:paddingBottom="8dp"
+                    android:paddingHorizontal="@dimen/settings_horizontal_padding"
+                    android:paddingTop="@dimen/space_xl"
+                    android:paddingBottom="@dimen/space_s"
                     android:text="@string/tips_settings_presets_header"
-                    android:textSize="13sp"
-                    android:textColor="@color/color_text_secondary"
-                    android:fontFamily="sans-serif-medium"
-                    android:textAllCaps="true"
-                    android:letterSpacing="0.05" />
+                    style="@style/Text.SectionHeader" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="24dp"
-                    android:paddingBottom="12dp"
+                    android:paddingHorizontal="@dimen/settings_horizontal_padding"
+                    android:paddingBottom="@dimen/space_m"
                     android:text="@string/tips_settings_presets_description"
-                    android:textSize="13sp"
-                    android:textColor="@color/color_text_tertiary" />
+                    android:textAppearance="@style/Text.Caption" />
 
                 <!-- Card Container for Presets -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginHorizontal="@dimen/space_l"
                     android:orientation="vertical"
                     android:background="@drawable/bg_rounded_card_large">
 
@@ -151,20 +119,21 @@
                 <LinearLayout
                     android:id="@+id/add_preset_button"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginHorizontal="16dp"
+                    android:layout_height="@dimen/settings_item_height"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:layout_marginHorizontal="@dimen/space_l"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="16dp"
+                    android:paddingHorizontal="@dimen/space_l"
                     android:background="@drawable/bg_rounded_card_large"
                     android:clickable="true"
                     android:focusable="true">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginEnd="16dp"
+                        android:importantForAccessibility="no"
+                        android:layout_width="@dimen/icon_size_small"
+                        android:layout_height="@dimen/icon_size_small"
+                        android:layout_marginEnd="@dimen/space_l"
                         android:src="@drawable/ic_add"
                         app:tint="@color/color_primary_green" />
 
@@ -172,17 +141,16 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/tips_settings_add_preset"
-                        android:textSize="16sp"
-                        android:textColor="@color/color_primary_green"
-                        android:fontFamily="sans-serif-medium" />
+                        android:textAppearance="@style/Text.Button"
+                        android:textColor="@color/color_primary_green" />
                 </LinearLayout>
 
                 <!-- Reset to Defaults -->
                 <LinearLayout
                     android:id="@+id/reset_defaults_button"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="24dp"
+                    android:layout_height="@dimen/settings_item_height"
+                    android:layout_marginTop="@dimen/space_xl"
                     android:orientation="horizontal"
                     android:gravity="center"
                     android:clickable="true"
@@ -193,7 +161,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/tips_settings_reset_defaults"
-                        android:textSize="16sp"
+                        android:textAppearance="@style/Text.Body"
                         android:textColor="@color/color_text_secondary" />
                 </LinearLayout>
             </LinearLayout>

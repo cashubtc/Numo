@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="24dp"
+    android:padding="@dimen/space_xl"
     android:background="@drawable/bg_bottom_sheet">
 
     <View
@@ -11,7 +11,7 @@
         android:layout_height="4dp"
         android:layout_gravity="center_horizontal"
         android:background="@drawable/bg_bottom_sheet_handle"
-        android:layout_marginBottom="24dp"/>
+        android:layout_marginBottom="@dimen/space_xl"/>
 
     <TextView
         android:id="@+id/detail_amount"
@@ -27,7 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/space_s"
         android:text="@string/transaction_details_date_label" />
 
     <TextView
@@ -35,9 +35,9 @@
         style="@style/Text.Body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="@dimen/space_xl"
         android:background="@color/color_bg_light"
-        android:padding="16dp"
+        android:padding="@dimen/space_l"
         android:fontFamily="monospace"
         android:maxLines="3"
         android:ellipsize="end"
@@ -47,7 +47,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginTop="32dp">
+        android:layout_marginTop="@dimen/space_2xl">
 
         <Button
             android:id="@+id/btn_copy"
@@ -55,7 +55,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/transaction_details_copy_token"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="@dimen/space_m"/>
 
         <Button
             android:id="@+id/btn_open_with"
@@ -63,7 +63,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/transaction_details_open_with"
-            android:layout_marginBottom="12dp"/>
+            android:layout_marginBottom="@dimen/space_m"/>
 
         <Button
             android:id="@+id/btn_delete"

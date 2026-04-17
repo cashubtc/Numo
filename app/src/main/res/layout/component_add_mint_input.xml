@@ -7,7 +7,7 @@
         android:id="@+id/add_mint_inner_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="16dp"
+        app:cardCornerRadius="@dimen/radius_card"
         app:cardElevation="0dp"
         app:cardBackgroundColor="@color/color_bg_white"
         app:strokeWidth="0dp">
@@ -21,20 +21,21 @@
             <LinearLayout
                 android:id="@+id/header_container"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
+                android:layout_height="@dimen/settings_item_height"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingHorizontal="20dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:background="?attr/selectableItemBackground">
 
                 <!-- Plus Icon -->
                 <FrameLayout
                     android:id="@+id/header_icon"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="@dimen/icon_size_medium"
+                    android:layout_height="@dimen/icon_size_medium"
                     android:background="@drawable/bg_circle_accent_light">
 
                     <ImageView
+                        android:importantForAccessibility="no"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:layout_gravity="center"
@@ -48,13 +49,12 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="16dp"
+                    android:layout_marginStart="@dimen/space_l"
                     android:text="@string/mints_add_new_mint"
-                    android:textSize="16sp"
-                    android:textColor="@color/color_text_primary"
-                    android:fontFamily="sans-serif-medium" />
+                    android:textAppearance="@style/Text.RowTitle" />
 
                 <ImageView
+                    android:importantForAccessibility="no"
                     android:id="@+id/header_chevron"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
@@ -69,24 +69,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="20dp"
-                android:paddingBottom="20dp"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingBottom="@dimen/margin_screen_horizontal"
                 android:visibility="gone">
 
                 <!-- Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="@dimen/space_l"
                     android:background="@color/color_divider" />
 
                 <TextView
                     android:id="@+id/helper_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
+                    android:layout_marginBottom="@dimen/space_s"
                     android:text="@string/mints_enter_url"
-                    android:textSize="13sp"
+                    android:textAppearance="@style/Text.Caption"
                     android:textColor="@color/color_text_secondary" />
 
                 <!-- Input Row -->
@@ -97,28 +97,33 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
-                    <EditText
-                        android:id="@+id/url_input"
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
                         android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/bg_input_field"
-                        android:paddingHorizontal="14dp"
-                        android:hint="@string/mints_url_hint"
-                        android:inputType="textUri"
-                        android:textSize="14sp"
-                        android:fontFamily="monospace"
-                        android:maxLines="1"
-                        android:imeOptions="actionDone" />
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/url_input"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/icon_size_large"
+                            android:hint="@string/mints_url_hint"
+                            android:inputType="textUri"
+                            android:textSize="14sp"
+                            android:fontFamily="monospace"
+                            android:maxLines="1"
+                            android:imeOptions="actionDone" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <ImageButton
                         android:id="@+id/scan_button"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_marginStart="10dp"
+                        android:layout_width="@dimen/icon_size_large"
+                        android:layout_height="@dimen/icon_size_large"
+                        android:layout_marginStart="@dimen/space_s"
                         android:background="@drawable/bg_button_icon"
                         android:src="@drawable/ic_qr_scan"
-                        android:padding="12dp"
+                        android:padding="@dimen/space_m"
                         app:tint="@color/color_text_primary"
                         android:contentDescription="@string/mints_scan_qr" />
 
@@ -129,18 +134,18 @@
                     android:id="@+id/scan_row_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="@dimen/space_s"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingVertical="8dp"
+                    android:paddingVertical="@dimen/space_s"
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"
                     android:focusable="true"
                     android:visibility="gone">
 
                     <FrameLayout
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
+                        android:layout_width="@dimen/icon_size_medium"
+                        android:layout_height="@dimen/icon_size_medium"
                         android:background="@drawable/bg_button_icon">
 
                         <ImageView
@@ -156,7 +161,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:layout_marginStart="12dp"
+                        android:layout_marginStart="@dimen/space_m"
                         android:orientation="vertical">
 
                         <TextView
@@ -164,9 +169,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/onboarding_mints_scan_row_title"
-                            android:textSize="15sp"
-                            android:textColor="@color/color_text_secondary"
-                            android:fontFamily="sans-serif-medium" />
+                            android:textAppearance="@style/Text.BodyBold"
+                            android:textColor="@color/color_text_secondary" />
 
                         <TextView
                             android:id="@+id/scan_row_subtitle"
@@ -174,8 +178,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="1dp"
                             android:text="@string/onboarding_mints_scan_row_subtitle"
-                            android:textSize="13sp"
-                            android:textColor="@color/color_text_tertiary" />
+                            style="@style/Text.RowSubtitle" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -183,18 +186,14 @@
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
-                    android:layout_marginTop="14dp">
+                    android:layout_marginTop="@dimen/row_icon_gap">
 
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatButton
                         android:id="@+id/add_button"
+                        style="@style/Widget.Button.Primary.Green"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="@drawable/bg_button_primary_green"
-                        android:gravity="center"
                         android:text="@string/mints_add_button"
-                        android:textColor="@color/color_bg_white"
-                        android:textSize="15sp"
-                        android:fontFamily="sans-serif-medium"
                         android:enabled="false"
                         android:alpha="0.5" />
 
