@@ -64,14 +64,9 @@ class MintsSettingsActivity : AppCompatActivity() {
     private lateinit var lightningMintBalance: TextView
     private lateinit var swapUnknownMintsSwitch: SwitchCompat
     private lateinit var allMintsHeader: TextView
-    private lateinit var mintsCard: CardView
-    private lateinit var totalBalanceHeader: LinearLayout
-    private lateinit var totalBalanceValue: TextView
-    private lateinit var totalBalanceDivider: View
     private lateinit var mintsContainer: LinearLayout
     private lateinit var addMintHeader: TextView
     private lateinit var emptyState: View
-    private lateinit var heroBolt: ImageView
     private lateinit var mintsScroll: ScrollView
 
     // State
@@ -142,7 +137,6 @@ class MintsSettingsActivity : AppCompatActivity() {
         initViews()
         setupInsetHandling()
         swapUnknownMintsSwitch.isChecked = mintManager.isSwapFromUnknownMintsEnabled()
-        updateHeroBoltColor(mintManager.isSwapFromUnknownMintsEnabled())
 
         setupListeners()
         loadMintsAndBalances()
@@ -177,14 +171,9 @@ class MintsSettingsActivity : AppCompatActivity() {
         lightningMintBalance = findViewById(R.id.lightning_mint_balance)
         swapUnknownMintsSwitch = findViewById(R.id.swap_unknown_mints_switch)
         allMintsHeader = findViewById(R.id.all_mints_header)
-        mintsCard = findViewById(R.id.mints_card)
-        totalBalanceHeader = findViewById(R.id.total_balance_header)
-        totalBalanceValue = findViewById(R.id.total_balance_value)
-        totalBalanceDivider = findViewById(R.id.total_balance_divider)
         mintsContainer = findViewById(R.id.mints_container)
         addMintHeader = findViewById(R.id.add_mint_header)
         emptyState = findViewById(R.id.empty_state)
-        heroBolt = findViewById(R.id.hero_bolt)
     }
 
     /**
@@ -214,7 +203,6 @@ class MintsSettingsActivity : AppCompatActivity() {
 
         swapUnknownMintsSwitch.setOnCheckedChangeListener { _, isChecked ->
             mintManager.setSwapFromUnknownMintsEnabled(isChecked)
-            updateHeroBoltColor(isChecked)
         }
 
         val addMintButton = findViewById<Button>(R.id.add_mint_button)
@@ -265,8 +253,7 @@ class MintsSettingsActivity : AppCompatActivity() {
             // Build UI
             buildMintList(mints)
             updateLightningMintCard()
-            updateTotalBalance()
-            
+
             // Refresh stale mint info
             refreshStaleMintInfo()
         }
@@ -279,12 +266,11 @@ class MintsSettingsActivity : AppCompatActivity() {
             }
             mintBalances.clear()
             mintBalances.putAll(balances)
-            
+
             // Update UI
             val mints = mintManager.getAllowedMints()
             buildMintList(mints)
             updateLightningMintCard()
-            updateTotalBalance()
         }
     }
 
@@ -298,9 +284,17 @@ class MintsSettingsActivity : AppCompatActivity() {
         }
 
         hideEmptyState()
-        
+
+        // Hide the active Lightning mint from this list — it's already the hero above.
+        val listMints = mints.filter { it != selectedLightningMint }
+        if (listMints.isEmpty()) {
+            allMintsHeader.visibility = View.GONE
+            mintsContainer.visibility = View.GONE
+            return
+        }
+
         // Sort by balance (highest first)
-        val sortedMints = mints.sortedByDescending { mintBalances[it] ?: 0L }
+        val sortedMints = listMints.sortedByDescending { mintBalances[it] ?: 0L }
         
         sortedMints.forEachIndexed { index, mintUrl ->
             val item = MintListItem(this)
@@ -320,36 +314,19 @@ class MintsSettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateTotalBalance() {
-        val totalBalance = mintBalances.values.sum()
-        
-        if (totalBalance > 0 && mintBalances.size > 1) {
-            totalBalanceHeader.visibility = View.VISIBLE
-            totalBalanceDivider.visibility = View.VISIBLE
-            totalBalanceValue.text = Amount(totalBalance, Amount.Currency.BTC).toString()
-            
-            // Animate in
-            totalBalanceHeader.alpha = 0f
-            totalBalanceHeader.animate()
-                .alpha(1f)
-                .setDuration(200)
-                .start()
-        } else {
-            totalBalanceHeader.visibility = View.GONE
-            totalBalanceDivider.visibility = View.GONE
-        }
-    }
-
     private fun setLightningMint(mintUrl: String, animate: Boolean) {
         selectedLightningMint = mintUrl
 
         // Persist preference via MintManager so that payment flows (PaymentRequestActivity)
         // pick up the same Lightning mint when creating invoices.
         mintManager.setPreferredLightningMint(mintUrl)
-        
-        // Update hero card
+
+        // Update hero card and rebuild the list so the newly-active mint is hidden
+        // from "All Mints" while the previously-active one reappears.
         updateLightningMintCard()
-        
+        buildMintList(mintManager.getAllowedMints())
+
+
         if (animate) {
             // Animate lightning card update
             lightningMintCard.animate()
@@ -391,12 +368,7 @@ class MintsSettingsActivity : AppCompatActivity() {
         loadLightningMintIcon(url)
     }
 
-    private fun updateHeroBoltColor(enabled: Boolean) {
-        val boltColor = if (enabled) R.color.color_bitcoin_orange else R.color.color_success_green
-        heroBolt.setColorFilter(ContextCompat.getColor(this, boltColor))
-    }
-
-    private fun loadLightningMintIcon(url: String) {
+private fun loadLightningMintIcon(url: String) {
         val cachedFile = MintIconCache.getCachedIconFile(url)
         if (cachedFile != null) {
             try {
@@ -534,14 +506,14 @@ class MintsSettingsActivity : AppCompatActivity() {
 
     private fun showEmptyState() {
         emptyState.visibility = View.VISIBLE
-        mintsCard.visibility = View.GONE
+        mintsContainer.visibility = View.GONE
         lightningMintSection.visibility = View.GONE
         allMintsHeader.visibility = View.GONE
     }
 
     private fun hideEmptyState() {
         emptyState.visibility = View.GONE
-        mintsCard.visibility = View.VISIBLE
+        mintsContainer.visibility = View.VISIBLE
         allMintsHeader.visibility = View.VISIBLE
     }
 

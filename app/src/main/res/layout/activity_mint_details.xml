@@ -72,25 +72,13 @@
             <!-- ==================== -->
             <!-- HEADER SECTION (Hero Card) -->
             <!-- ==================== -->
-            <androidx.cardview.widget.CardView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                app:cardCornerRadius="@dimen/radius_card"
-                app:cardBackgroundColor="@android:color/transparent"
-                app:cardElevation="0dp">
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_hero_gradient_green">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:gravity="center_horizontal"
-                        android:padding="@dimen/space_xl">
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingVertical="@dimen/space_xl">
 
                         <!-- Icon -->
                         <FrameLayout
@@ -134,15 +122,12 @@
                             style="@style/Text.RowSubtitle"
                             android:textAlignment="center" />
 
-                        <!-- Balance Badge -->
+                        <!-- Balance -->
                         <TextView
                             android:id="@+id/balance_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/space_l"
-                            android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                            android:paddingVertical="@dimen/space_m"
-                            android:background="@drawable/bg_pill_badge"
                             android:text="₿0"
                             android:textAppearance="@style/Text.Subtitle" />
 
@@ -176,11 +161,7 @@
 
                         </LinearLayout>
 
-                    </LinearLayout>
-
-                </FrameLayout>
-
-            </androidx.cardview.widget.CardView>
+            </LinearLayout>
 
             <!-- ==================== -->
             <!-- DESCRIPTION SECTION -->

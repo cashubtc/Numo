@@ -465,14 +465,6 @@
                     android:paddingVertical="@dimen/row_padding_vertical"
                     android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
-                    <ImageView
-                        android:importantForAccessibility="no"
-                        android:layout_width="@dimen/icon_size_small"
-                        android:layout_height="@dimen/icon_size_small"
-                        android:layout_marginEnd="@dimen/row_icon_gap"
-                        android:src="@drawable/ic_arrow_down_receive"
-                        app:tint="@color/color_icon_secondary" />
-
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
