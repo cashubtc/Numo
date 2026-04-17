@@ -40,7 +40,7 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
     private var request: String = ""
     private lateinit var mintManager: MintManager
 
-    private lateinit var backButton: ImageButton
+    private lateinit var topBar: com.electricdreams.numo.ui.components.NumoTopBar
     private lateinit var summaryText: TextView
     private lateinit var destinationText: TextView
     private lateinit var amountText: TextView
@@ -94,7 +94,7 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        backButton = findViewById(R.id.back_button)
+        topBar = findViewById(R.id.top_bar)
         summaryText = findViewById(R.id.summary_text)
         destinationText = findViewById(R.id.destination_text)
         amountText = findViewById(R.id.amount_text)
@@ -115,7 +115,7 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        backButton.setOnClickListener { finish() }
+        topBar.onNavClick { finish() }
         confirmButton.setOnClickListener { confirmWithdrawal() }
     }
 
@@ -390,7 +390,7 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
             }
         }
         confirmButton.isEnabled = !loading
-        backButton.isEnabled = !loading
+        topBar.setNavEnabled(!loading)
     }
 
     private enum class ProcessingStep {

@@ -47,7 +47,7 @@ class ErrorLogsActivity : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
 
-        findViewById<View?>(R.id.back_button)?.setOnClickListener { finish() }
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
 
         dateFilterValue = findViewById(R.id.date_filter_value)
         emptyView = findViewById(R.id.empty_view)

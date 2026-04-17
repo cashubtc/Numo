@@ -100,11 +100,9 @@ class TransactionDetailActivity : AppCompatActivity() {
         get() = entry.amount < 0
 
     private fun setupViews() {
-        // Back button
-        findViewById<ImageButton>(R.id.back_button).setOnClickListener { finish() }
-
-        // Overflow menu button
-        findViewById<ImageButton>(R.id.overflow_button).setOnClickListener { showOverflowMenu(it) }
+        val topBar = findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar)
+        topBar.onNavClick { finish() }
+        topBar.onActionClick { showOverflowMenu(topBar.actionView) }
 
         // Display transaction details
         displayTransactionDetails()

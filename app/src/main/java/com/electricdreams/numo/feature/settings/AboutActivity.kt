@@ -40,7 +40,7 @@ class AboutActivity : AppCompatActivity() {
     }
 
     private fun setupViews() {
-        findViewById<View>(R.id.back_button).setOnClickListener { finish() }
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
 
         // Set version text
         val versionText = findViewById<TextView>(R.id.version_text)

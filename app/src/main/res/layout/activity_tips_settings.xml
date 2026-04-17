@@ -7,39 +7,13 @@
     android:background="@color/color_bg_white">
 
     <!-- Top Bar -->
-    <LinearLayout
+    <com.electricdreams.numo.ui.components.NumoTopBar
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_bar_height"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="@dimen/space_l"
-        android:elevation="0dp"
-        android:background="@color/color_bg_white"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="@dimen/icon_size_large"
-            android:layout_height="@dimen/icon_size_large"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_chevron_back"
-            android:contentDescription="@string/tips_settings_toolbar_back"
-            app:tint="@color/color_text_primary" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/tips_settings_title"
-            android:textAppearance="@style/Text.DialogTitle"
-            android:textAlignment="center" />
-
-        <!-- Spacer to balance layout -->
-        <View
-            android:layout_width="48dp"
-            android:layout_height="48dp" />
-    </LinearLayout>
+        app:topBarTitle="@string/tips_settings_title"
+        app:topBarNavContentDescription="@string/tips_settings_toolbar_back"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:layout_width="match_parent"

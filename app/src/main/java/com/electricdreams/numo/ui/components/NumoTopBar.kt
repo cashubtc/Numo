@@ -96,6 +96,10 @@ class NumoTopBar @JvmOverloads constructor(
         backButton.setOnClickListener { block() }
     }
 
+    fun setNavEnabled(enabled: Boolean) {
+        backButton.isEnabled = enabled
+    }
+
     fun setActionIcon(@DrawableRes res: Int) {
         actionButton.setImageResource(res)
         actionButton.visibility = View.VISIBLE
@@ -108,6 +112,9 @@ class NumoTopBar @JvmOverloads constructor(
     fun onActionClick(block: () -> Unit) {
         actionButton.setOnClickListener { block() }
     }
+
+    /** Exposed so callers can anchor PopupMenu / tooltip against the action icon. */
+    val actionView: View get() = actionButton
 
     fun hideAction() {
         actionButton.visibility = View.GONE

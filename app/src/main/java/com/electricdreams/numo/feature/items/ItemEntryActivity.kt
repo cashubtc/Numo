@@ -226,7 +226,7 @@ class ItemEntryActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
-        findViewById<View>(R.id.back_button)?.setOnClickListener { finish() }
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
         findViewById<Button>(R.id.item_save_button).setOnClickListener { saveItem() }
         findViewById<Button>(R.id.item_cancel_button).setOnClickListener {
             showDeleteConfirmationDialog()
@@ -267,7 +267,7 @@ class ItemEntryActivity : AppCompatActivity() {
     }
 
     private fun setupEditMode() {
-        findViewById<TextView>(R.id.toolbar_title)?.text = getString(R.string.item_entry_title_edit)
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).setTitle(getString(R.string.item_entry_title_edit))
         // Show the dedicated delete button
         findViewById<Button>(R.id.item_cancel_button).visibility = View.VISIBLE
         // Auto-expand more details in edit mode so all fields are visible

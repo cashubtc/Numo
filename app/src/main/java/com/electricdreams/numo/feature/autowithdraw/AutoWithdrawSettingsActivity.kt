@@ -113,8 +113,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        // Back button - use standard chevron pattern for consistency
-        findViewById<ImageButton>(R.id.back_button).setOnClickListener {
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick {
             onBackPressedDispatcher.onBackPressed()
         }
 

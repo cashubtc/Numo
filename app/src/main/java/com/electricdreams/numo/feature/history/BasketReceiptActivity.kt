@@ -83,7 +83,7 @@ class BasketReceiptActivity : AppCompatActivity() {
 
     private fun initializeViews() {
         // Back button
-        findViewById<View>(R.id.back_button).setOnClickListener { finish() }
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
 
         // Print button (bottom action)
         printButton = findViewById(R.id.print_button)

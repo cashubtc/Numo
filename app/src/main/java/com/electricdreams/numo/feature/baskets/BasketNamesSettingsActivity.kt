@@ -56,8 +56,7 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
     }
     
     private fun initViews() {
-        // Back button
-        findViewById<ImageButton>(R.id.back_button).setOnClickListener { finish() }
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
         
         // Container views
         namesContainer = findViewById(R.id.names_container)

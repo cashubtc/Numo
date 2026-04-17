@@ -48,13 +48,7 @@ class SecuritySettingsActivity : AppCompatActivity() {
         changePinItem = findViewById(R.id.change_pin_item)
         removePinItem = findViewById(R.id.remove_pin_item)
 
-        // Back button
-        findViewById<View>(R.id.back_button).setOnClickListener {
-            finish()
-        }
-
-        // Title
-        findViewById<TextView>(R.id.toolbar_title).text = getString(R.string.settings_security_title)
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
 
         // Static text is now set directly in XML for cleaner layout; no explicit binding needed here
 

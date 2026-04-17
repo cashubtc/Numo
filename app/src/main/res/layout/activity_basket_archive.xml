@@ -8,45 +8,12 @@
     android:background="@color/color_bg_white">
 
     <!-- Top Bar -->
-    <LinearLayout
+    <com.electricdreams.numo.ui.components.NumoTopBar
+        android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@color/color_bg_white"
-        android:elevation="0dp">
-
-        <!-- Header Row -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/top_bar_height"
-            android:paddingHorizontal="@dimen/space_l">
-
-            <ImageButton
-                android:id="@+id/back_button"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/basket_archive_back"
-                android:padding="@dimen/space_m"
-                android:src="@drawable/ic_chevron_back"
-                app:tint="@color/color_text_primary"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/basket_archive_title"
-                android:textAppearance="@style/Text.Title"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </LinearLayout>
+        android:layout_height="@dimen/top_bar_height"
+        app:topBarTitle="@string/basket_archive_title"
+        app:topBarNavContentDescription="@string/basket_archive_back" />
 
     <!-- Content -->
     <FrameLayout

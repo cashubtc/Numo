@@ -49,8 +49,7 @@ class TipsSettingsActivity : AppCompatActivity() {
     }
     
     private fun initViews() {
-        // Back button
-        findViewById<ImageButton>(R.id.back_button).setOnClickListener { finish() }
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
         
         // Tips enabled switch
         tipsEnabledSwitch = findViewById(R.id.tips_enabled_switch)

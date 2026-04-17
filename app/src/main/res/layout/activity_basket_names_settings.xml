@@ -8,40 +8,12 @@
     android:background="@color/color_bg_white">
 
     <!-- Top Bar -->
-    <LinearLayout
+    <com.electricdreams.numo.ui.components.NumoTopBar
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_bar_height"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="@dimen/space_l"
-        android:elevation="0dp"
-        android:background="@color/color_bg_white"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="@dimen/icon_size_large"
-            android:layout_height="@dimen/icon_size_large"
-            android:padding="@dimen/space_m"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_chevron_back"
-            android:contentDescription="@string/common_back"
-            app:tint="@color/color_text_primary" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/basket_names_settings_title"
-            android:textAppearance="@style/Text.Title"
-            android:textAlignment="center" />
-
-        <!-- Spacer to balance layout -->
-        <View
-            android:layout_width="@dimen/icon_size_large"
-            android:layout_height="@dimen/icon_size_large" />
-    </LinearLayout>
+        app:topBarTitle="@string/basket_names_settings_title"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ScrollView
         android:layout_width="match_parent"

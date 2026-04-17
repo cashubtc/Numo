@@ -79,7 +79,7 @@ class WebhookSettingsActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<ImageButton>(R.id.back_button).setOnClickListener { finish() }
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
         findViewById<View>(R.id.add_endpoint_button).setOnClickListener { showAddEndpointDialog() }
         findViewById<View>(R.id.sync_all_button).setOnClickListener { syncAllTransactions() }
 

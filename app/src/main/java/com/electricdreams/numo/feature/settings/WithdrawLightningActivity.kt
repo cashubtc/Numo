@@ -70,7 +70,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
     private lateinit var lightningAddressManager: LightningAddressManager
 
     // Views
-    private lateinit var backButton: ImageButton
+    private lateinit var topBar: com.electricdreams.numo.ui.components.NumoTopBar
     private lateinit var balanceCard: MaterialCardView
     private lateinit var mintNameText: TextView
     private lateinit var balanceText: TextView
@@ -147,7 +147,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        backButton = findViewById(R.id.back_button)
+        topBar = findViewById(R.id.top_bar)
         balanceCard = findViewById(R.id.balance_card)
         mintNameText = findViewById(R.id.mint_name_text)
         balanceText = findViewById(R.id.balance_text)
@@ -172,9 +172,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        backButton.setOnClickListener { 
-            finish() 
-        }
+        topBar.onNavClick { finish() }
 
         // Invoice card continue listener
         invoiceCard.setOnContinueListener(object : WithdrawInvoiceCard.OnContinueListener {

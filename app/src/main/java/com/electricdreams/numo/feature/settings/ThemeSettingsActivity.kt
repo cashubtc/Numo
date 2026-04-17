@@ -40,7 +40,7 @@ class ThemeSettingsActivity : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
 
-        findViewById<View?>(R.id.back_button)?.setOnClickListener { finish() }
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
 
         // Initialize dark mode switch
         darkModeSwitch = findViewById(R.id.dark_mode_switch)

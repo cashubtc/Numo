@@ -7,39 +7,12 @@
     android:orientation="vertical">
 
     <!-- Top App Bar -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.electricdreams.numo.ui.components.NumoTopBar
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_bar_height"
-        android:background="@color/color_bg_white"
-        android:elevation="0dp"
-        android:paddingHorizontal="@dimen/space_l">
-
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="@dimen/icon_size_large"
-            android:layout_height="@dimen/icon_size_large"
-            android:padding="@dimen/space_m"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/item_entry_toolbar_back"
-            android:src="@drawable/ic_chevron_back"
-            app:tint="@color/color_text_primary"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/toolbar_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/item_entry_title_add"
-            android:textAppearance="@style/Text.Title"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:topBarTitle="@string/item_entry_title_add"
+        app:topBarNavContentDescription="@string/item_entry_toolbar_back" />
 
     <ScrollView
         android:layout_width="match_parent"

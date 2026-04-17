@@ -73,11 +73,8 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         // Let history content run behind the gesture nav pill for a modern look
         enableEdgeToEdgeWithPill(this, lightNavIcons = true)
 
-        // Setup Back Button
-        binding.backButton?.setOnClickListener { finish() }
-
-        // Setup overflow menu button
-        binding.overflowButton?.setOnClickListener { showOverflowMenu(it) }
+        binding.topBar.onNavClick { finish() }
+        binding.topBar.onActionClick { showOverflowMenu(binding.topBar.actionView) }
 
         // Setup RecyclerView
         adapter = PaymentsHistoryAdapter().apply {

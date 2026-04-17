@@ -43,9 +43,7 @@ class SeedPhraseActivity : AppCompatActivity() {
         copyButton = findViewById(R.id.copy_button)
         toggleVisibilityButton = findViewById(R.id.toggle_visibility_button)
 
-        findViewById<View>(R.id.back_button).setOnClickListener {
-            finish()
-        }
+        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
 
         // Load the mnemonic but keep it hidden initially
         loadMnemonic()

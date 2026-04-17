@@ -54,8 +54,7 @@ class MintsSettingsActivity : AppCompatActivity() {
     }
 
     // Views
-    private lateinit var backButton: ImageButton
-    private lateinit var resetButton: ImageButton
+    private lateinit var topBar: com.electricdreams.numo.ui.components.NumoTopBar
     private lateinit var lightningMintSection: View
     private lateinit var lightningMintCard: View
     private lateinit var lightningIconContainer: FrameLayout
@@ -167,8 +166,7 @@ class MintsSettingsActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        backButton = findViewById(R.id.back_button)
-        resetButton = findViewById(R.id.reset_button)
+        topBar = findViewById(R.id.top_bar)
         mintsScroll = findViewById(R.id.mints_scroll)
         lightningMintSection = findViewById(R.id.lightning_mint_section)
         lightningMintCard = findViewById(R.id.lightning_mint_card)
@@ -211,17 +209,12 @@ class MintsSettingsActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        backButton.setOnClickListener { 
-            finish() 
-        }
+        topBar.onNavClick { finish() }
+        topBar.onActionClick { showResetConfirmation() }
 
         swapUnknownMintsSwitch.setOnCheckedChangeListener { _, isChecked ->
             mintManager.setSwapFromUnknownMintsEnabled(isChecked)
             updateHeroBoltColor(isChecked)
-        }
-
-        resetButton.setOnClickListener {
-            showResetConfirmation()
         }
 
         val addMintButton = findViewById<Button>(R.id.add_mint_button)

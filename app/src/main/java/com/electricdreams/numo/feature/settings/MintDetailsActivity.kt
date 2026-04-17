@@ -53,7 +53,7 @@ class MintDetailsActivity : AppCompatActivity() {
     }
 
     // Header views
-    private lateinit var backButton: ImageButton
+    private lateinit var topBar: com.electricdreams.numo.ui.components.NumoTopBar
     private lateinit var errorBanner: LinearLayout
     private lateinit var errorText: TextView
     private lateinit var errorRetryButton: ImageButton
@@ -146,7 +146,7 @@ class MintDetailsActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        backButton = findViewById(R.id.back_button)
+        topBar = findViewById(R.id.top_bar)
         errorBanner = findViewById(R.id.error_banner)
         errorText = findViewById(R.id.error_text)
         errorRetryButton = findViewById(R.id.error_retry_button)
@@ -178,9 +178,7 @@ class MintDetailsActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        backButton.setOnClickListener {
-            finish()
-        }
+        topBar.onNavClick { finish() }
         
         errorRetryButton.setOnClickListener {
             animateButtonTap(it) {

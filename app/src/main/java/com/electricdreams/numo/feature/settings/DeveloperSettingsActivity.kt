@@ -25,7 +25,7 @@ class DeveloperSettingsActivity : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
 
-        binding.backButton?.setOnClickListener { finish() }
+        binding.topBar.onNavClick { finish() }
 
         binding.restartOnboardingItem.setOnClickListener {
             showRestartOnboardingDialog()
