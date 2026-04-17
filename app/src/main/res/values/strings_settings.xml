@@ -20,6 +20,8 @@
 
     <!-- Currency settings screen -->
     <string name="currency_settings_section_preferred_currency">PREFERRED CURRENCY</string>
+    <string name="currency_settings_search_hint">Search currencies</string>
+    <string name="currency_settings_no_results">No currencies found</string>
     <string name="currency_settings_option_usd">US Dollar (USD)</string>
     <string name="currency_settings_option_eur">Euro (EUR)</string>
     <string name="currency_settings_option_gbp">British Pound (GBP)</string>

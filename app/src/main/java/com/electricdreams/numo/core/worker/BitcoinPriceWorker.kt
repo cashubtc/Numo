@@ -63,7 +63,13 @@ class BitcoinPriceWorker private constructor(context: Context) {
         // Set up a listener for currency changes
         currencyManager.setCurrencyChangeListener(object : CurrencyManager.CurrencyChangeListener {
             override fun onCurrencyChanged(newCurrency: String) {
-                // When currency changes, update the price
+                // When currency changes, load its cached price (if any) and update immediately
+                loadCachedPrice(newCurrency)
+                if (getCurrentPrice() > 0 && listener != null) {
+                    notifyListener()
+                }
+                
+                // Then fetch the fresh price in the background
                 fetchPrice()
             }
         })
@@ -89,30 +95,25 @@ class BitcoinPriceWorker private constructor(context: Context) {
     }
 
     /**
-     * Load all cached prices from preferences.
+     * Load cached price for current currency
      */
     private fun loadCachedPrices() {
+        val currentCurrency = currencyManager.getCurrentCurrency()
+        loadCachedPrice(currentCurrency)
+        
+        // Always load USD as fallback
+        if (currentCurrency != CurrencyManager.CURRENCY_USD) {
+            loadCachedPrice(CurrencyManager.CURRENCY_USD)
+        }
+    }
+    
+    private fun loadCachedPrice(currency: String) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-
-        // Load prices for all supported currencies
-        val supportedCurrencies = arrayOf(
-            CurrencyManager.CURRENCY_USD,
-            CurrencyManager.CURRENCY_EUR,
-            CurrencyManager.CURRENCY_GBP,
-            CurrencyManager.CURRENCY_JPY,
-            CurrencyManager.CURRENCY_DKK,
-            CurrencyManager.CURRENCY_SEK,
-            CurrencyManager.CURRENCY_NOK,
-            CurrencyManager.CURRENCY_KRW,
-        )
-
-        for (currency in supportedCurrencies) {
-            val key = KEY_PRICE_PREFIX + currency
-            val price = prefs.getFloat(key, 0.0f)
-            if (price > 0f) {
-                priceByCurrency[currency] = price.toDouble()
-                Log.d(TAG, "Loaded cached price for $currency: $price")
-            }
+        val key = KEY_PRICE_PREFIX + currency
+        val price = prefs.getFloat(key, 0.0f)
+        if (price > 0f) {
+            priceByCurrency[currency] = price.toDouble()
+            Log.d(TAG, "Loaded cached price for $currency: $price")
         }
     }
 

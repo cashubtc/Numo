@@ -1406,8 +1406,8 @@ class OnboardingActivity : AppCompatActivity() {
                 onboardingMintDisplayNames[mintUrl] = displayName
 
                 if (currentStep == OnboardingStep.REVIEW_MINTS) {
-                    // Refresh names only — avoids full rebind that flickers icons
-                    mintAdapter.refreshNames()
+                    // Refresh names and icons without full rebind
+                    mintAdapter.refreshProfiles()
                 }
             }
         }

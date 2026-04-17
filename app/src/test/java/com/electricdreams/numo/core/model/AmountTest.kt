@@ -79,25 +79,36 @@ class AmountTest {
     }
     
     @Test
-    fun `toString formats correctly`() {
-        // Force US locale for consistent testing of USD
-        val usd = Amount(1050, Amount.Currency.USD)
-        // Locale.US uses period
-        assertEquals("$10.50", usd.toString())
+    fun `toString formats according to system locale`() {
+        val originalLocale = Locale.getDefault()
+        try {
+            // Test US Locale behavior
+            Locale.setDefault(Locale.US)
+            
+            val usd = Amount(1050, Amount.Currency.USD)
+            assertEquals("$10.50", usd.toString())
+            
+            // In US locale, EUR will still use periods for decimals
+            val eurUs = Amount(1050, Amount.Currency.EUR)
+            assertEquals("€10.50", eurUs.toString())
 
-        // DKK uses comma
-        val dkk = Amount(1050, Amount.Currency.DKK)
-        // Locale("da", "DK") uses comma for decimal and period for thousands
-        // We expect "kr.10,50" or "kr. 10,50" depending on NumberFormat implementation
-        // Broad check for prefix and suffix
-        val dkkStr = dkk.toString()
-        assert(dkkStr.startsWith("kr."))
-        assert(dkkStr.contains("10,50"))
-        
-        // SEK uses comma
-        val sek = Amount(1050, Amount.Currency.SEK)
-        val sekStr = sek.toString()
-        assert(sekStr.startsWith("kr"))
-        assert(sekStr.contains("10,50"))
+            // Test German Locale behavior
+            Locale.setDefault(Locale.GERMANY)
+            
+            // In German locale, EUR uses commas
+            val eurDe = Amount(1050, Amount.Currency.EUR)
+            assertEquals("€10,50", eurDe.toString())
+            
+            // In German locale, USD will also use commas
+            val usdDe = Amount(1050, Amount.Currency.USD)
+            assertEquals("$10,50", usdDe.toString())
+            
+            // Test zero-decimal behavior (regardless of locale, JPY has no decimals)
+            val jpy = Amount(10500, Amount.Currency.JPY) // 10500 cents = 105 JPY
+            assertEquals("¥105", jpy.toString())
+
+        } finally {
+            Locale.setDefault(originalLocale)
+        }
     }
 }

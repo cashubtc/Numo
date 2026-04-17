@@ -1,27 +1,42 @@
 package com.electricdreams.numo.feature.settings
 
+import android.content.Context
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
 import android.view.View
-import android.widget.RadioButton
-import android.widget.RadioGroup
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.util.CurrencyManager
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.Currency
 
 class CurrencySettingsActivity : AppCompatActivity() {
 
-    private lateinit var currencyRadioGroup: RadioGroup
-    private lateinit var radioUsd: RadioButton
-    private lateinit var radioEur: RadioButton
-    private lateinit var radioGbp: RadioButton
-    private lateinit var radioJpy: RadioButton
-    private lateinit var radioDkk: RadioButton
-    private lateinit var radioSek: RadioButton
-    private lateinit var radioNok: RadioButton
-    private lateinit var radioKrw: RadioButton
     private lateinit var currencyManager: CurrencyManager
+    private lateinit var adapter: CurrencyAdapter
+    
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var searchInput: EditText
+    private lateinit var clearButton: ImageButton
+    private lateinit var emptyStateText: TextView
+    
+    private var allCurrencies: List<Currency> = emptyList()
+    private var hasScrolledToSelection = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,50 +52,146 @@ class CurrencySettingsActivity : AppCompatActivity() {
 
         currencyManager = CurrencyManager.getInstance(this)
 
-        currencyRadioGroup = findViewById(R.id.currency_radio_group)
-        radioUsd = findViewById(R.id.radio_usd)
-        radioEur = findViewById(R.id.radio_eur)
-        radioGbp = findViewById(R.id.radio_gbp)
-        radioJpy = findViewById(R.id.radio_jpy)
-        radioDkk = findViewById(R.id.radio_dkk)
-        radioSek = findViewById(R.id.radio_sek)
-        radioNok = findViewById(R.id.radio_nok)
-        radioKrw = findViewById(R.id.radio_krw)
+        recyclerView = findViewById(R.id.currency_recycler_view)
+        searchInput = findViewById(R.id.currency_search_input)
+        clearButton = findViewById(R.id.clear_search_button)
+        emptyStateText = findViewById(R.id.empty_state_text)
 
-        setSelectedCurrency(currencyManager.getCurrentCurrency())
+        setupRecyclerView()
+        loadCurrencies()
+        setupSearch()
+    }
 
-        currencyRadioGroup.setOnCheckedChangeListener { _, _ ->
-            val selectedCurrency = getSelectedCurrency()
-            currencyManager.setPreferredCurrency(selectedCurrency)
+    private fun setupRecyclerView() {
+        adapter = CurrencyAdapter { currency ->
+            currencyManager.setPreferredCurrency(currency.currencyCode)
+            // Update UI to show selection
+            adapter.submitList(getFilteredCurrencies(searchInput.text.toString()), currency.currencyCode)
+        }
+        
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
+    }
+
+    private fun loadCurrencies() {
+        val prefs = getSharedPreferences("CurrencySettings", Context.MODE_PRIVATE)
+        val cachedCurrencies = prefs.getStringSet("cached_supported_currencies", null)
+        
+        val initialSupportedCodes = cachedCurrencies ?: setOf(
+            CurrencyManager.CURRENCY_USD, CurrencyManager.CURRENCY_EUR, 
+            CurrencyManager.CURRENCY_GBP, CurrencyManager.CURRENCY_JPY, 
+            CurrencyManager.CURRENCY_DKK, CurrencyManager.CURRENCY_SEK, 
+            CurrencyManager.CURRENCY_NOK, CurrencyManager.CURRENCY_KRW
+        )
+        
+        // Show cached or default immediately
+        allCurrencies = Currency.getAvailableCurrencies()
+            .filter { initialSupportedCodes.contains(it.currencyCode) }
+            
+        val currentList = getFilteredCurrencies(searchInput.text.toString())
+        adapter.submitList(currentList, currencyManager.getCurrentCurrency())
+        scrollToSelectedCurrencyOnce(currentList)
+
+        // Fetch latest supported currencies from Coinbase API
+        lifecycleScope.launch(Dispatchers.IO) {
+            val supported = mutableSetOf<String>()
+            try {
+                val url = URL("https://api.coinbase.com/v2/currencies")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+                connection.connectTimeout = 5000
+                connection.readTimeout = 5000
+
+                if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                    val response = connection.inputStream.bufferedReader().use { it.readText() }
+                    val jsonObject = JSONObject(response)
+                    val dataArray = jsonObject.getJSONArray("data")
+                    for (i in 0 until dataArray.length()) {
+                        val currencyObj = dataArray.getJSONObject(i)
+                        supported.add(currencyObj.getString("id"))
+                    }
+                    
+                    // Always ensure our custom API fallback currencies are included
+                    supported.add(CurrencyManager.CURRENCY_KRW)
+                    supported.add(CurrencyManager.CURRENCY_JPY)
+                    
+                    withContext(Dispatchers.Main) {
+                        prefs.edit().putStringSet("cached_supported_currencies", supported).apply()
+                        
+                        allCurrencies = Currency.getAvailableCurrencies()
+                            .filter { supported.contains(it.currencyCode) }
+                            
+                        val currentList = getFilteredCurrencies(searchInput.text.toString())
+                        adapter.submitList(currentList, currencyManager.getCurrentCurrency())
+                        scrollToSelectedCurrencyOnce(currentList)
+                    }
+                }
+                connection.disconnect()
+            } catch (e: Exception) {
+                Log.e("CurrencySettings", "Error fetching supported currencies", e)
+            }
         }
 
     }
 
-    private fun setSelectedCurrency(currencyCode: String) {
-        when (currencyCode) {
-            CurrencyManager.CURRENCY_EUR -> radioEur.isChecked = true
-            CurrencyManager.CURRENCY_GBP -> radioGbp.isChecked = true
-            CurrencyManager.CURRENCY_JPY -> radioJpy.isChecked = true
-            CurrencyManager.CURRENCY_USD -> radioUsd.isChecked = true
-            CurrencyManager.CURRENCY_DKK -> radioDkk.isChecked = true
-            CurrencyManager.CURRENCY_SEK -> radioSek.isChecked = true
-            CurrencyManager.CURRENCY_NOK -> radioNok.isChecked = true
-            CurrencyManager.CURRENCY_KRW -> radioKrw.isChecked = true
-            else -> radioUsd.isChecked = true
+    private fun setupSearch() {
+        searchInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            
+            override fun afterTextChanged(s: Editable?) {
+                val query = s?.toString() ?: ""
+                clearButton.visibility = if (query.isNotEmpty()) View.VISIBLE else View.GONE
+                
+                val filtered = getFilteredCurrencies(query)
+                adapter.submitList(filtered, currencyManager.getCurrentCurrency())
+                
+                if (filtered.isEmpty()) {
+                    recyclerView.visibility = View.GONE
+                    emptyStateText.visibility = View.VISIBLE
+                } else {
+                    recyclerView.visibility = View.VISIBLE
+                    emptyStateText.visibility = View.GONE
+                }
+            }
+        })
+
+        clearButton.setOnClickListener {
+            searchInput.text = null
+        }
+    }
+    
+    private fun getFilteredCurrencies(query: String): List<Currency> {
+        val currentCode = currencyManager.getCurrentCurrency()
+        
+        val filtered = if (query.isEmpty()) {
+            allCurrencies
+        } else {
+            val lowerQuery = query.lowercase()
+            allCurrencies.filter {
+                it.currencyCode.lowercase().contains(lowerQuery) ||
+                it.getDisplayName(java.util.Locale.getDefault()).lowercase().contains(lowerQuery)
+            }
+        }
+        
+        // Sort alphabetically
+        return filtered.sortedWith { c1, c2 ->
+            c1.currencyCode.compareTo(c2.currencyCode)
         }
     }
 
-    private fun getSelectedCurrency(): String {
-        val selectedId = currencyRadioGroup.checkedRadioButtonId
-        return when (selectedId) {
-            R.id.radio_eur -> CurrencyManager.CURRENCY_EUR
-            R.id.radio_gbp -> CurrencyManager.CURRENCY_GBP
-            R.id.radio_jpy -> CurrencyManager.CURRENCY_JPY
-            R.id.radio_dkk -> CurrencyManager.CURRENCY_DKK
-            R.id.radio_sek -> CurrencyManager.CURRENCY_SEK
-            R.id.radio_nok -> CurrencyManager.CURRENCY_NOK
-            R.id.radio_krw -> CurrencyManager.CURRENCY_KRW
-            else -> CurrencyManager.CURRENCY_USD
+    private fun scrollToSelectedCurrencyOnce(list: List<Currency>) {
+        if (hasScrolledToSelection || searchInput.text.toString().isNotEmpty()) return
+        
+        val currentCode = currencyManager.getCurrentCurrency()
+        val index = list.indexOfFirst { it.currencyCode == currentCode }
+        if (index != -1) {
+            hasScrolledToSelection = true
+            recyclerView.post {
+                val layoutManager = recyclerView.layoutManager as? LinearLayoutManager
+                // Use a small offset so it's not completely flush with the top edge
+                layoutManager?.scrollToPositionWithOffset(index, 100)
+            }
         }
     }
 }

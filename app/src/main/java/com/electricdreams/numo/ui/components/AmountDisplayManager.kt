@@ -63,7 +63,6 @@ class AmountDisplayManager(
                 if (isUsdInputMode) {
                     // Currently in fiat mode, converting to satoshi mode
                     val rawInput = currentInputStr.toLong()
-                    // JPY/KRW input is already whole units, others are cents
                     val fiatAmount = if (currency.isZeroDecimal()) {
                         rawInput.toDouble()
                     } else {
@@ -76,7 +75,6 @@ class AmountDisplayManager(
                     // Currently in satoshi mode, converting to fiat mode
                     val satoshis = currentInputStr.toLong()
                     val fiatAmount = bitcoinPriceWorker?.satoshisToFiat(satoshis) ?: 0.0
-                    // JPY/KRW stored as whole units, others as cents
                     val storedValue = if (currency.isZeroDecimal()) {
                         fiatAmount.toLong()
                     } else {
@@ -118,8 +116,6 @@ class AmountDisplayManager(
             
             val rawInput = if (currentInputStr.isEmpty()) 0L else currentInputStr.toLong()
             
-            // For JPY/KRW, input is whole units, but Amount expects cents (value * 100)
-            // For others, input is cents
             val fiatCents = if (currency.isZeroDecimal()) {
                 rawInput * 100
             } else {
@@ -127,21 +123,25 @@ class AmountDisplayManager(
             }
             
             amountDisplayText = Amount(fiatCents, currency).toString()
+            amountDisplayText = if (amountDisplayText.length > 9) Amount(fiatCents, currency).toShortString() else amountDisplayText
             
             // Convert fiat to satoshis for secondary display and requestedAmount
             val fiatAmount = fiatCents / 100.0
             satsValue = fiatToSatoshis(fiatAmount)
-            secondaryDisplayText = Amount(satsValue, Amount.Currency.BTC).toString()
+            secondaryDisplayText = Amount(satsValue, Amount.Currency.BTC).toShortString()
         } else {
             // Input mode: satoshi, display sats as primary, fiat as secondary
             satsValue = if (currentInputStr.isEmpty()) 0L else currentInputStr.toLong()
             amountDisplayText = formatAmount(currentInputStr)
+            amountDisplayText = if (amountDisplayText.length > 9) Amount(satsValue, Amount.Currency.BTC).toShortString() else amountDisplayText
             
             if (hasBitcoinPrice) {
                 // Show fiat conversion with swap icon
                 val fiatValue = bitcoinPriceWorker?.satoshisToFiat(satsValue) ?: 0.0
-                secondaryDisplayText = bitcoinPriceWorker?.formatFiatAmount(fiatValue)
-                    ?: CurrencyManager.getInstance(context).formatCurrencyAmount(0.0)
+                val currencyCode = CurrencyManager.getInstance(context).getCurrentCurrency()
+                val currency = Amount.Currency.fromCode(currencyCode)
+                
+                secondaryDisplayText = Amount.fromMajorUnits(fiatValue, currency).toShortString()
                 switchCurrencyButton.visibility = View.VISIBLE
             } else {
                 // No price data - just show "BTC" without swap icon
