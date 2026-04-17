@@ -163,6 +163,10 @@
     <color name="color_text_on_dark">#FFFFFF</color>
     <color name="color_text_on_dark_high">#CCFFFFFF</color>
     <color name="color_text_on_dark_medium">#B3FFFFFF</color>
+    <color name="color_text_on_dark_subtle">#99FFFFFF</color>
+    <color name="color_text_on_dark_faint">#73FFFFFF</color>
+    <color name="color_scrim_on_dark">#80FFFFFF</color>
+    <color name="color_scrim_on_light">#80000000</color>
     <color name="color_bg_scanner">#000000</color>
     <color name="color_icon_security_green">#4CAF50</color>
     <color name="color_auto_withdraw_success">#4CAF50</color>

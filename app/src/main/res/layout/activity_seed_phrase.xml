@@ -41,11 +41,11 @@
                     android:gravity="center_vertical">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginEnd="12dp"
+                        android:layout_width="@dimen/icon_size_small"
+                        android:layout_height="@dimen/icon_size_small"
+                        android:layout_marginEnd="@dimen/space_m"
                         android:src="@drawable/ic_warning"
-                        app:tint="#FF9500" />
+                        app:tint="@color/color_warning" />
 
                     <TextView
                         android:layout_width="wrap_content"
