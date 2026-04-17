@@ -205,4 +205,64 @@ class TipSelectionActivityTest {
 
         assertEquals("", customInputValue)
     }
+
+    @Test
+    fun `toggleCustomCurrency from BTC restores entryCurrency if it was fiat`() {
+        // Set entry currency to EUR
+        activity.javaClass.getDeclaredField("entryCurrency").let { field ->
+            field.isAccessible = true
+            field.set(activity, Currency.EUR)
+        }
+        
+        // Setup current state to BTC mode
+        activity.javaClass.getDeclaredField("customInputIsBtc").let { field ->
+            field.isAccessible = true
+            field.set(activity, true)
+        }
+
+        // Toggle back to fiat
+        val toggleMethod = activity.javaClass.getDeclaredMethod("toggleCustomCurrency")
+        toggleMethod.isAccessible = true
+        toggleMethod.invoke(activity)
+
+        val customInputIsBtc = activity.javaClass.getDeclaredField("customInputIsBtc").let { field ->
+            field.isAccessible = true
+            field.get(activity) as Boolean
+        }
+        val customInputCurrency = activity.javaClass.getDeclaredField("customInputCurrency").let { field ->
+            field.isAccessible = true
+            field.get(activity) as Currency
+        }
+
+        assertFalse(customInputIsBtc)
+        // Should restore to EUR, not system default fiat currency
+        assertEquals(Currency.EUR, customInputCurrency)
+    }
+
+    @Test
+    fun `updateCustomCurrencyDisplay shows correct fiat symbol on toggle button when in BTC mode`() {
+        // Set entry currency to EUR
+        activity.javaClass.getDeclaredField("entryCurrency").let { field ->
+            field.isAccessible = true
+            field.set(activity, Currency.EUR)
+        }
+        
+        // Setup current state to BTC mode
+        activity.javaClass.getDeclaredField("customInputIsBtc").let { field ->
+            field.isAccessible = true
+            field.set(activity, true)
+        }
+
+        val updateDisplay = activity.javaClass.getDeclaredMethod("updateCustomCurrencyDisplay")
+        updateDisplay.isAccessible = true
+        updateDisplay.invoke(activity)
+
+        val customCurrencyToggle = activity.javaClass.getDeclaredField("customCurrencyToggle").let { field ->
+            field.isAccessible = true
+            field.get(activity) as android.widget.TextView
+        }
+
+        val toggleText = customCurrencyToggle.text.toString()
+        assertTrue("Toggle text should contain EUR symbol. Was: $toggleText", toggleText.contains("€"))
+    }
 }

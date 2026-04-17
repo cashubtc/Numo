@@ -486,7 +486,8 @@ class TipSelectionActivity : AppCompatActivity() {
     private fun updateCustomCurrencyDisplay() {
         if (customInputIsBtc) {
             customCurrencyPrefix.text = "₿"
-            customCurrencyToggle.text = getString(R.string.tip_selection_custom_currency_switch_to_fiat, customInputCurrency.symbol)
+            val fiatCurrency = if (entryCurrency == Currency.BTC) getCurrentFiatCurrency() else entryCurrency
+            customCurrencyToggle.text = getString(R.string.tip_selection_custom_currency_switch_to_fiat, fiatCurrency.symbol)
         } else {
             customCurrencyPrefix.text = customInputCurrency.symbol
             customCurrencyToggle.text = getString(R.string.tip_selection_custom_currency_switch_to_btc)
@@ -569,7 +570,9 @@ class TipSelectionActivity : AppCompatActivity() {
 
     private fun toggleCustomCurrency() {
         customInputIsBtc = !customInputIsBtc
-        customInputCurrency = if (customInputIsBtc) Currency.BTC else getCurrentFiatCurrency()
+        customInputCurrency = if (customInputIsBtc) Currency.BTC else {
+            if (entryCurrency == Currency.BTC) getCurrentFiatCurrency() else entryCurrency
+        }
         customInputValue = ""
         updateCustomAmountDisplay()
         updateCustomCurrencyDisplay()
