@@ -34,9 +34,9 @@ class TipSelectionActivityTest {
 
     @Test
     fun `customInputCurrency is initialized from entryCurrency when order is in fiat`() {
-        val entryCurrency = activity.javaClass.getDeclaredMethod("getEntryCurrency").let { method ->
-            method.isAccessible = true
-            method.invoke(activity) as Currency
+        val entryCurrency = activity.javaClass.getDeclaredField("entryCurrency").let { field ->
+            field.isAccessible = true
+            field.get(activity) as Currency
         }
         
         val customInputCurrency = activity.javaClass.getDeclaredField("customInputCurrency").let { field ->
@@ -57,9 +57,9 @@ class TipSelectionActivityTest {
             .create()
             .get()
 
-        val entryCurrency = satActivity.javaClass.getDeclaredMethod("getEntryCurrency").let { method ->
-            method.isAccessible = true
-            method.invoke(satActivity) as Currency
+        val entryCurrency = satActivity.javaClass.getDeclaredField("entryCurrency").let { field ->
+            field.isAccessible = true
+            field.get(satActivity) as Currency
         }
         
         val customInputCurrency = satActivity.javaClass.getDeclaredField("customInputCurrency").let { field ->
