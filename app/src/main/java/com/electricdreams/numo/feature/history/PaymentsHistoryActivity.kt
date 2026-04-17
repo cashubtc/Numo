@@ -312,7 +312,6 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             title = getString(R.string.history_dialog_clear_title),
             message = getString(R.string.history_dialog_clear_message),
             confirmText = getString(R.string.history_dialog_clear_positive),
-            cancelText = getString(R.string.history_dialog_clear_negative),
             isDestructive = true,
             onConfirm = { clearAllHistory() }
         ))

@@ -165,10 +165,16 @@ class PaymentRequestActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment_request)
         
-        // Apply window insets to handle edge-to-edge correctly (especially for API 35+)
+        // Apply window insets to handle edge-to-edge correctly (especially for API 35+).
+        // When the NFC result overlay is visible we skip bar padding so the full-screen
+        // green/red fills behind the status and nav bars instead of revealing the window bg.
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
+            val overlayVisible = ::nfcAnimationContainer.isInitialized &&
+                nfcAnimationContainer.visibility == View.VISIBLE
+            val top = if (overlayVisible) 0 else insets.top
+            val bottom = if (overlayVisible) 0 else insets.bottom
+            v.setPadding(0, top, 0, bottom)
             WindowInsetsCompat.CONSUMED
         }
 

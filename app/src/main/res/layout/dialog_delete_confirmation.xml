@@ -78,33 +78,20 @@
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <!-- ACTION BUTTONS                                                           -->
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:paddingHorizontal="@dimen/margin_screen_horizontal"
         android:paddingBottom="@dimen/margin_screen_horizontal">
 
-        <!-- Cancel Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/dialog_cancel_button"
-            style="@style/Widget.Numo.Button.Dialog.Cancel"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/button_height"
-            android:layout_weight="1"
-            android:layout_marginEnd="@dimen/space_s"
-            android:text="@string/common_cancel" />
-
-        <!-- Delete Button (Destructive) -->
+        <!-- Delete Button (Destructive, full width) -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/dialog_confirm_button"
             style="@style/Widget.Numo.Button.Dialog.Destructive"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="@dimen/button_height"
-            android:layout_weight="1"
-            android:layout_marginStart="@dimen/space_s"
             android:text="@string/common_delete" />
 
-    </LinearLayout>
+    </FrameLayout>
 
 </LinearLayout>

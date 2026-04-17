@@ -271,7 +271,6 @@ class ItemListActivity : AppCompatActivity() {
                 title = getString(R.string.item_list_dialog_clear_all_title),
                 message = getString(R.string.item_list_dialog_clear_all_message),
                 confirmText = getString(R.string.item_list_dialog_clear_all_positive),
-                cancelText = getString(R.string.common_cancel),
                 isDestructive = true,
                 onConfirm = {
                     itemManager.clearItems()

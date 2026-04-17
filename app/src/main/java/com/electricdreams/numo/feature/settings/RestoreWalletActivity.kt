@@ -627,7 +627,6 @@ class RestoreWalletActivity : AppCompatActivity() {
             title = getString(R.string.restore_confirm_dialog_title),
             message = message,
             confirmText = getString(R.string.restore_confirm_dialog_positive),
-            cancelText = getString(R.string.common_cancel),
             isDestructive = true,
             onConfirm = {
                 performRestore()

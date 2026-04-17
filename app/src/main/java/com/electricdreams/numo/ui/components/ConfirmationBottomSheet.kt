@@ -71,7 +71,6 @@ class ConfirmationBottomSheet : BottomSheetDialogFragment() {
 
         binding.dialogTitle.text = cfg.title
         binding.dialogMessage.text = cfg.message
-        binding.cancelButton.text = cfg.cancelText
         binding.confirmButton.text = cfg.confirmText
 
         // Optional icon
@@ -88,21 +87,10 @@ class ConfirmationBottomSheet : BottomSheetDialogFragment() {
         }
 
         if (cfg.isDestructive) {
-            binding.confirmButton.background =
-                ContextCompat.getDrawable(requireContext(), R.drawable.bg_button_destructive)
-        }
-
-        if (!cfg.showCancelButton) {
-            binding.cancelButton.visibility = View.GONE
-            (binding.confirmButton.layoutParams as LinearLayout.LayoutParams).marginStart = 0
+            binding.confirmButton.setBackgroundResource(R.drawable.bg_button_destructive)
         }
 
         binding.closeButton.setOnClickListener {
-            dismiss()
-            cfg.onCancel?.invoke()
-        }
-
-        binding.cancelButton.setOnClickListener {
             dismiss()
             cfg.onCancel?.invoke()
         }

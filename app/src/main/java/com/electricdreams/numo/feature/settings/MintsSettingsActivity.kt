@@ -521,7 +521,6 @@ class MintsSettingsActivity : AppCompatActivity() {
                 title = getString(R.string.mints_reset_title),
                 message = getString(R.string.mints_reset_message),
                 confirmText = getString(R.string.mints_reset_confirm),
-                cancelText = getString(R.string.common_cancel),
                 isDestructive = true,
                 onConfirm = { resetToDefaults() }
             )

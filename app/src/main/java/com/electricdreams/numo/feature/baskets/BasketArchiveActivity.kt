@@ -128,7 +128,6 @@ class BasketArchiveActivity : AppCompatActivity() {
                 title = getString(R.string.basket_archive_delete_title),
                 message = getString(R.string.basket_archive_delete_message, displayName),
                 confirmText = getString(R.string.common_delete),
-                cancelText = getString(R.string.common_cancel),
                 isDestructive = true,
                 onConfirm = {
                     savedBasketManager.deleteArchivedBasket(basket.id)

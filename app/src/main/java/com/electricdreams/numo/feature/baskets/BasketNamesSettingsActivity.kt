@@ -253,7 +253,6 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
             title = getString(R.string.basket_names_dialog_delete_title),
             message = getString(R.string.basket_names_dialog_delete_message, name),
             confirmText = getString(R.string.common_delete),
-            cancelText = getString(R.string.common_cancel),
             isDestructive = true,
             onConfirm = {
                 basketNamesManager.removePresetName(name)
@@ -267,7 +266,6 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
             title = getString(R.string.basket_names_dialog_clear_all_title),
             message = getString(R.string.basket_names_dialog_clear_all_message),
             confirmText = getString(R.string.basket_names_dialog_clear_all_confirm),
-            cancelText = getString(R.string.common_cancel),
             isDestructive = true,
             onConfirm = {
                 basketNamesManager.clearAll()

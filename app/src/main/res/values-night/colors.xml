@@ -175,9 +175,9 @@
 
     <!-- NFC Payment Animation Colors (same in dark mode) -->
     <color name="color_nfc_idle">#0A0A0A</color>
-    <color name="color_nfc_success">#34C759</color>
-    <color name="color_nfc_success_gradient_start">#22C55E</color>
-    <color name="color_nfc_success_gradient_end">#4ADE80</color>
+    <color name="color_nfc_success">@color/numo_green</color>
+    <color name="color_nfc_success_gradient_start">@color/numo_green</color>
+    <color name="color_nfc_success_gradient_end">@color/numo_green</color>
 
     <!-- Theme Background Colors (same — ThemeManager handles these directly) -->
     <color name="color_theme_obsidian">@color/numo_dark</color>

@@ -417,18 +417,15 @@
             </LinearLayout>
 
             <!-- Print Receipt Button -->
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_print_receipt"
-                style="@style/Widget.Button.Secondary.Outlined"
+                style="@style/Widget.Numo.Button.Dialog.Confirm"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/button_height"
                 android:layout_marginStart="@dimen/space_xl"
                 android:layout_marginEnd="@dimen/space_xl"
                 android:layout_marginTop="@dimen/space_xl"
-                android:gravity="center"
-                android:text="@string/transaction_detail_print_receipt"
-                android:textAllCaps="false"
-                app:backgroundTint="@null" />
+                android:text="@string/transaction_detail_print_receipt" />
 
         </LinearLayout>
 

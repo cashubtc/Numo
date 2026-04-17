@@ -22,6 +22,7 @@ import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.core.util.MintProfileService
 import com.electricdreams.numo.core.util.SavedBasketManager
+import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -47,6 +48,7 @@ class TransactionDetailActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdgeWithPill(this)
         setContentView(R.layout.activity_transaction_detail)
 
         // Get transaction data from intent
@@ -458,7 +460,6 @@ class TransactionDetailActivity : AppCompatActivity() {
             title = getString(R.string.history_dialog_delete_title),
             message = getString(R.string.history_dialog_delete_message),
             confirmText = getString(R.string.history_dialog_delete_positive),
-            cancelText = getString(R.string.history_dialog_delete_negative),
             isDestructive = true,
             onConfirm = { deleteTransaction() }
         ))

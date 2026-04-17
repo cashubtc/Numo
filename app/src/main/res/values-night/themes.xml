@@ -67,8 +67,9 @@
     
     <!-- Bottom Sheet Theme (Dark Mode - only override nav bar) -->
     <style name="Theme.Numo.BottomSheet" parent="Theme.MaterialComponents.DayNight.BottomSheetDialog">
-        <item name="android:navigationBarColor">@color/dark_windowBackground</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightNavigationBar">false</item>
+        <item name="enableEdgeToEdge">true</item>
         <item name="bottomSheetStyle">@style/Widget.Numo.BottomSheet</item>
     </style>
 

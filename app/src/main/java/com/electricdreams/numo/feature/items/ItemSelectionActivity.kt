@@ -701,7 +701,6 @@ class ItemSelectionActivity : AppCompatActivity() {
             title = getString(R.string.item_selection_dialog_clear_basket_title),
             message = getString(R.string.item_selection_dialog_clear_basket_message),
             confirmText = getString(R.string.item_selection_dialog_clear_basket_positive),
-            cancelText = getString(R.string.common_cancel),
             isDestructive = true,
             onConfirm = {
                 // Reset to collapsed state before clearing (for next time basket appears)

@@ -37,7 +37,6 @@ class TokenHistoryActivity : AppCompatActivity() {
                     title = getString(R.string.token_history_dialog_delete_title),
                     message = getString(R.string.token_history_dialog_delete_message),
                     confirmText = getString(R.string.token_history_dialog_delete_positive),
-                    cancelText = getString(R.string.common_cancel),
                     isDestructive = true,
                     onConfirm = { deleteTokenFromHistory(position) }
                 ))
@@ -78,7 +77,6 @@ class TokenHistoryActivity : AppCompatActivity() {
             title = getString(R.string.token_history_dialog_clear_title),
             message = getString(R.string.token_history_dialog_clear_message),
             confirmText = getString(R.string.token_history_dialog_clear_positive),
-            cancelText = getString(R.string.common_cancel),
             isDestructive = true,
             onConfirm = { clearAllHistory() }
         ))

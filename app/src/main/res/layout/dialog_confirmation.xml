@@ -101,33 +101,20 @@
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
     <!-- ACTION BUTTONS                                                           -->
     <!-- ═══════════════════════════════════════════════════════════════════════ -->
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:paddingHorizontal="@dimen/margin_screen_horizontal"
         android:paddingBottom="@dimen/margin_screen_horizontal">
 
-        <!-- Cancel Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/cancel_button"
-            style="@style/Widget.Numo.Button.Dialog.Cancel"
-            android:layout_width="0dp"
-            android:layout_height="@dimen/button_height"
-            android:layout_weight="1"
-            android:layout_marginEnd="@dimen/space_s"
-            android:text="@string/common_cancel" />
-
-        <!-- Confirm Button -->
+        <!-- Confirm Button (full width) -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/confirm_button"
             style="@style/Widget.Numo.Button.Dialog.Confirm"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="@dimen/button_height"
-            android:layout_weight="1"
-            android:layout_marginStart="@dimen/space_s"
             android:text="@string/common_confirm" />
 
-    </LinearLayout>
+    </FrameLayout>
 
 </LinearLayout>

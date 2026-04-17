@@ -471,7 +471,6 @@ class MintDetailsActivity : AppCompatActivity() {
                 title = getString(R.string.mints_remove_title),
                 message = getString(R.string.mints_remove_message, displayName),
                 confirmText = getString(R.string.mints_remove_confirm),
-                cancelText = getString(R.string.common_cancel),
                 isDestructive = true,
                 onConfirm = { deleteMint() }
             )

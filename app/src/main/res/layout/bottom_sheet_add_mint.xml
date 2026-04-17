@@ -60,17 +60,10 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/add_mint_button"
+                style="@style/Widget.Numo.Button.Dialog.Confirm"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="@string/onboarding_add_mint_button"
-                android:textColor="@color/button_text_onboarding"
-                android:textAllCaps="false"
-                android:textSize="17sp"
-                android:background="@drawable/bg_button_white"
-                android:stateListAnimator="@null"
-                app:backgroundTint="@null"
-                app:cornerRadius="@dimen/radius_button"
-                app:elevation="0dp"
                 android:enabled="false" />
 
             <LinearLayout

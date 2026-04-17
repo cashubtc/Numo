@@ -8,12 +8,12 @@
     <!-- Header -->
     <ImageButton
         android:id="@+id/back_button"
-        android:layout_width="@dimen/icon_size_large"
-        android:layout_height="@dimen/icon_size_large"
-        android:layout_marginStart="@dimen/space_l"
-        android:layout_marginTop="@dimen/space_s"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/desc_back"
+        android:contentDescription="Back"
         android:src="@drawable/ic_chevron_back"
         app:tint="@color/color_text_primary"
         app:layout_constraintStart_toStartOf="parent"
@@ -21,10 +21,9 @@
 
     <!-- Lock Icon -->
     <ImageView
-        android:importantForAccessibility="no"
         android:id="@+id/lock_icon"
-        android:layout_width="@dimen/icon_size_hero"
-        android:layout_height="@dimen/top_bar_height"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_marginTop="80dp"
         android:src="@drawable/ic_lock"
         app:tint="@color/color_text_primary"
@@ -37,9 +36,11 @@
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_xl"
+        android:layout_marginTop="24dp"
         android:text="@string/pin_entry_title"
-        style="@style/Text.Heading1"
+        android:textSize="24sp"
+        android:textColor="@color/color_text_primary"
+        android:fontFamily="sans-serif-medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/lock_icon" />
@@ -49,9 +50,10 @@
         android:id="@+id/subtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_s"
+        android:layout_marginTop="8dp"
         android:text="@string/pin_entry_subtitle"
-        android:textAppearance="@style/Text.Body"
+        android:textSize="15sp"
+        android:textColor="@color/color_text_secondary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/title" />
@@ -61,7 +63,7 @@
         android:id="@+id/pin_dots"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_3xl"
+        android:layout_marginTop="40dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/subtitle" />
@@ -71,9 +73,9 @@
         android:id="@+id/error_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_l"
+        android:layout_marginTop="16dp"
         android:text=""
-        android:textAppearance="@style/Text.Chip"
+        android:textSize="14sp"
         android:textColor="@color/color_warning_red"
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
@@ -85,8 +87,8 @@
         android:id="@+id/pin_keypad"
         android:layout_width="0dp"
         android:layout_height="320dp"
-        android:layout_marginHorizontal="@dimen/space_2xl"
-        android:layout_marginBottom="@dimen/space_s"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@id/forgot_pin_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -96,11 +98,12 @@
         android:id="@+id/forgot_pin_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/space_2xl"
-        android:padding="@dimen/space_m"
+        android:layout_marginBottom="32dp"
+        android:padding="12dp"
         android:text="@string/pin_entry_forgot"
-        android:textAppearance="@style/Text.Link"
+        android:textSize="15sp"
         android:textColor="@color/color_accent_blue"
+        android:fontFamily="sans-serif-medium"
         android:background="?attr/selectableItemBackgroundBorderless"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -120,10 +123,9 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:orientation="vertical"
-            android:padding="@dimen/space_2xl">
+            android:padding="32dp">
 
             <ImageView
-                android:importantForAccessibility="no"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
                 android:src="@drawable/ic_lock"
@@ -132,28 +134,32 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_xl"
+                android:layout_marginTop="24dp"
                 android:text="@string/pin_entry_too_many_attempts"
-                android:textAppearance="@style/Text.DialogTitle" />
+                android:textSize="22sp"
+                android:textColor="@color/color_text_primary"
+                android:fontFamily="sans-serif-medium" />
 
             <TextView
                 android:id="@+id/lockout_message"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_s"
+                android:layout_marginTop="8dp"
                 android:text="@string/pin_entry_try_again_minutes"
-                android:textAppearance="@style/Text.Body"
+                android:textSize="15sp"
+                android:textColor="@color/color_text_secondary"
                 android:gravity="center" />
 
             <TextView
                 android:id="@+id/lockout_reset_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_2xl"
-                android:padding="@dimen/space_m"
+                android:layout_marginTop="32dp"
+                android:padding="12dp"
                 android:text="@string/pin_entry_reset_recovery"
-                android:textAppearance="@style/Text.Link"
+                android:textSize="15sp"
                 android:textColor="@color/color_accent_blue"
+                android:fontFamily="sans-serif-medium"
                 android:background="?attr/selectableItemBackgroundBorderless" />
 
         </LinearLayout>

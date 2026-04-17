@@ -202,7 +202,6 @@ class TipsSettingsActivity : AppCompatActivity() {
                 title = getString(R.string.tips_dialog_remove_preset_title),
                 message = getString(R.string.tips_dialog_remove_preset_message, percentage),
                 confirmText = getString(R.string.tips_dialog_remove_preset_positive),
-                cancelText = getString(R.string.tips_dialog_add_preset_negative),
                 isDestructive = true,
                 onConfirm = {
                     tipsManager.removePreset(percentage)
@@ -219,7 +218,6 @@ class TipsSettingsActivity : AppCompatActivity() {
                 title = getString(R.string.tips_dialog_reset_defaults_title),
                 message = getString(R.string.tips_dialog_reset_defaults_message),
                 confirmText = getString(R.string.tips_dialog_reset_defaults_positive),
-                cancelText = getString(R.string.tips_dialog_add_preset_negative),
                 isDestructive = false,
                 onConfirm = {
                     tipsManager.resetToDefaults()

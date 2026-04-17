@@ -164,7 +164,6 @@ class SavedBasketsActivity : AppCompatActivity() {
             title = getString(R.string.saved_baskets_delete_title),
             message = getString(R.string.saved_baskets_delete_message, displayName),
             confirmText = getString(R.string.common_delete),
-            cancelText = getString(R.string.common_cancel),
             isDestructive = true,
             onConfirm = {
                 savedBasketManager.deleteBasket(basket.id)

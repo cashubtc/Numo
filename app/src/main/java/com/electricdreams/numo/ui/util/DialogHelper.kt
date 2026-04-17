@@ -19,9 +19,7 @@ object DialogHelper {
         val subtitle: String? = null,
         val icon: Int? = null,
         val confirmText: String = "Confirm",
-        val cancelText: String = "Cancel",
         val isDestructive: Boolean = false,
-        val showCancelButton: Boolean = true,
         val onConfirm: () -> Unit,
         val onCancel: (() -> Unit)? = null
     )

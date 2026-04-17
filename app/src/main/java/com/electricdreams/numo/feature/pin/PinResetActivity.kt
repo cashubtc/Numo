@@ -20,7 +20,6 @@ import androidx.core.content.ContextCompat
 import androidx.gridlayout.widget.GridLayout
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
-import com.electricdreams.numo.ui.seed.Bip39Wordlist
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.google.android.material.button.MaterialButton
 
@@ -108,11 +107,12 @@ class PinResetActivity : AppCompatActivity() {
             setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
             setHintTextColor(ContextCompat.getColor(context, R.color.color_text_tertiary))
             textSize = 15f
+            typeface = android.graphics.Typeface.MONOSPACE
             background = null
             isSingleLine = true
             inputType = android.text.InputType.TYPE_CLASS_TEXT or
-                    android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
-            typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+                    android.text.InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS or
+                    android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
             imeOptions = if (index == 12) EditorInfo.IME_ACTION_DONE else EditorInfo.IME_ACTION_NEXT
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
                 marginStart = dpToPx(8)
@@ -184,7 +184,7 @@ class PinResetActivity : AppCompatActivity() {
         val words = seedInputs.map { it.text.toString().trim().lowercase() }
         val filledCount = words.count { it.isNotBlank() }
         val allFilled = filledCount == 12
-        val allValid = words.all { it.isBlank() || Bip39Wordlist.isValid(it) }
+        val allValid = words.all { it.isBlank() || it.matches(Regex("^[a-z]+$")) }
 
         // Check if matches stored mnemonic
         val storedMnemonic = CashuWalletManager.getMnemonic()
@@ -241,7 +241,6 @@ class PinResetActivity : AppCompatActivity() {
                 title = "Reset PIN?",
                 message = "This will remove your current PIN. You can set a new one afterwards.",
                 confirmText = "Reset",
-                cancelText = "Cancel",
                 isDestructive = true,
                 onConfirm = { performReset() }
             )
@@ -262,7 +261,6 @@ class PinResetActivity : AppCompatActivity() {
                 title = "Set New PIN?",
                 message = "Would you like to set a new PIN now?",
                 confirmText = "Set PIN",
-                cancelText = "Not Now",
                 isDestructive = false,
                 onConfirm = {
                     val intent = Intent(this, PinSetupActivity::class.java)

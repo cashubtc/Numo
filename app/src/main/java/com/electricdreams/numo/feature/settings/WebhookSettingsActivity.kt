@@ -502,7 +502,6 @@ class WebhookSettingsActivity : AppCompatActivity() {
                 title = getString(R.string.webhook_settings_delete_dialog_title),
                 message = getString(R.string.webhook_settings_delete_dialog_message, endpoint.url),
                 confirmText = getString(R.string.webhook_settings_delete_dialog_confirm),
-                cancelText = getString(R.string.common_cancel),
                 isDestructive = true,
                 onConfirm = {
                     if (webhookSettingsManager.removeEndpoint(endpoint.url)) {

@@ -156,7 +156,6 @@ class SecuritySettingsActivity : AppCompatActivity() {
                 title = getString(R.string.security_settings_remove_pin_dialog_title),
                 message = getString(R.string.security_settings_remove_pin_dialog_message),
                 confirmText = getString(R.string.security_settings_remove_pin_confirm),
-                cancelText = getString(R.string.common_cancel),
                 isDestructive = true,
                 onConfirm = {
                     pinManager.removePin()

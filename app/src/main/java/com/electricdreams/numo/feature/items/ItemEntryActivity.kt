@@ -348,8 +348,8 @@ class ItemEntryActivity : AppCompatActivity() {
         val dialogView = layoutInflater.inflate(R.layout.dialog_delete_confirmation, null)
         val dialog = AlertDialog.Builder(this).setView(dialogView).create()
 
-        dialogView.findViewById<Button>(R.id.dialog_cancel_button).setOnClickListener { 
-            dialog.dismiss() 
+        dialogView.findViewById<View>(R.id.close_button).setOnClickListener {
+            dialog.dismiss()
         }
         dialogView.findViewById<Button>(R.id.dialog_confirm_button).setOnClickListener {
             currentItem?.let { item ->
