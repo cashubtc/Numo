@@ -97,7 +97,8 @@ class PosUiCoordinator(
     private fun loadMintLimits() {
         val preferredMint = mintManager.getPreferredLightningMint()
         if (preferredMint != null) {
-            val limits = mintManager.getMintLimits(preferredMint, activity)
+            // Force refresh on initial load to get fresh limits
+            val limits = mintManager.getMintLimits(preferredMint, activity, forceRefresh = true)
             amountDisplayManager.setMintLimits(limits)
             
             // After loading limits, trigger an update to apply the limits to the current amount
@@ -114,6 +115,10 @@ class PosUiCoordinator(
     fun reloadMintLimits() {
         val preferredMint = mintManager.getPreferredLightningMint()
         if (preferredMint != null) {
+            // Show loading state while refreshing
+            submitButton.isEnabled = false
+            submitButton.text = activity.getString(R.string.pos_charge_button_loading)
+            
             // Force refresh to get fresh limits from the mint
             val limits = mintManager.getMintLimits(preferredMint, activity, forceRefresh = true)
             amountDisplayManager.setMintLimits(limits)
@@ -123,6 +128,12 @@ class PosUiCoordinator(
                 val currentAmount = satoshiInput.toString().toLongOrNull() ?: 0
                 if (currentAmount > 0) {
                     amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
+                }
+            } else {
+                // Reset button state if no amount entered
+                val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
+                if (isReady) {
+                    submitButton.text = activity.getString(R.string.pos_charge_button)
                 }
             }
         }
