@@ -101,12 +101,9 @@ class PosUiCoordinator(
 
     private fun loadMintLimits() {
         val preferredMint = mintManager.getPreferredLightningMint()
-        Log.d(TAG, "loadMintLimits called, preferredMint=$preferredMint")
         if (preferredMint != null) {
             val limits = mintManager.getMintLimits(preferredMint, activity)
-            Log.d(TAG, "loadMintLimits got limits: $limits")
             amountDisplayManager.setMintLimits(limits)
-            Log.d(TAG, "Loaded mint limits from $preferredMint: $limits")
             
             // After loading limits, trigger an update to apply the limits to the current amount
             if (satoshiInput.isNotEmpty()) {
@@ -115,8 +112,6 @@ class PosUiCoordinator(
                     amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
                 }
             }
-        } else {
-            Log.d(TAG, "No preferred Lightning mint found")
         }
     }
 
