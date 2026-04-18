@@ -44,16 +44,16 @@ class MintLimitCheckerTest {
                 CashuWalletManager.MintMethodSettings(
                     method = "bolt11",
                     unit = "sat",
-                    minAmount = 100,
-                    maxAmount = 10000
+                    minAmount = 100L,
+                    maxAmount = 10000L
                 )
             ),
             meltMethods = emptyList()
         )
         val result = MintLimitChecker.checkMintLimits(50, mintLimits)
         assertFalse(result.isValid)
-        assertEquals(100, result.minAmount)
-        assertEquals(10000, result.maxAmount)
+        assertEquals(100L, result.minAmount)
+        assertEquals(10000L, result.maxAmount)
         assertEquals(MintLimitChecker.LimitType.MIN, result.limitType)
     }
 
@@ -64,16 +64,16 @@ class MintLimitCheckerTest {
                 CashuWalletManager.MintMethodSettings(
                     method = "bolt11",
                     unit = "sat",
-                    minAmount = 100,
-                    maxAmount = 10000
+                    minAmount = 100L,
+                    maxAmount = 10000L
                 )
             ),
             meltMethods = emptyList()
         )
         val result = MintLimitChecker.checkMintLimits(15000, mintLimits)
         assertFalse(result.isValid)
-        assertEquals(100, result.minAmount)
-        assertEquals(10000, result.maxAmount)
+        assertEquals(100L, result.minAmount)
+        assertEquals(10000L, result.maxAmount)
         assertEquals(MintLimitChecker.LimitType.MAX, result.limitType)
     }
 
@@ -84,16 +84,16 @@ class MintLimitCheckerTest {
                 CashuWalletManager.MintMethodSettings(
                     method = "bolt11",
                     unit = "sat",
-                    minAmount = 100,
-                    maxAmount = 10000
+                    minAmount = 100L,
+                    maxAmount = 10000L
                 )
             ),
             meltMethods = emptyList()
         )
         val result = MintLimitChecker.checkMintLimits(5000, mintLimits)
         assertTrue(result.isValid)
-        assertEquals(100, result.minAmount)
-        assertEquals(10000, result.maxAmount)
+        assertEquals(100L, result.minAmount)
+        assertEquals(10000L, result.maxAmount)
     }
 
     @Test
