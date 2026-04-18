@@ -192,6 +192,9 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
         
         // Refresh display to update currency formatting when returning from settings
         uiCoordinator.refreshDisplay()
+        
+        // Reload mint limits when returning (in case lightning mint changed)
+        uiCoordinator.reloadMintLimits()
     }
 
     override fun onPause() {

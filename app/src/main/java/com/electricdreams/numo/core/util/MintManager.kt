@@ -308,28 +308,25 @@ class MintManager private constructor(context: Context) {
      * First checks cache, then fetches fresh from network if cache doesn't have limits.
      * This enables offline mode after first sync.
      */
-    fun getMintLimits(mintUrl: String, context: android.content.Context): CashuWalletManager.MintLimits? {
-        Log.d(TAG, ">>> getMintLimits for $mintUrl")
-        
+    fun getMintLimits(mintUrl: String, context: android.content.Context, forceRefresh: Boolean = false): CashuWalletManager.MintLimits? {
         // First try cache (works offline)
-        val infoJson = getMintInfo(mintUrl)
-        if (infoJson != null) {
-            try {
-                val cachedInfo = CashuWalletManager.mintInfoFromJson(infoJson)
-                val cachedLimits = cachedInfo?.mintLimits
-                Log.d(TAG, "Cache check: limits from cache = $cachedLimits")
-                
-                if (cachedLimits != null && cachedLimits.mintMethods.isNotEmpty()) {
-                    Log.d(TAG, "Using cached limits (offline mode)")
-                    return cachedLimits
+        if (!forceRefresh) {
+            val infoJson = getMintInfo(mintUrl)
+            if (infoJson != null) {
+                try {
+                    val cachedInfo = CashuWalletManager.mintInfoFromJson(infoJson)
+                    val cachedLimits = cachedInfo?.mintLimits
+                    
+                    if (cachedLimits != null && cachedLimits.mintMethods.isNotEmpty()) {
+                        return cachedLimits
+                    }
+                } catch (e: Exception) {
+                    // Fall through to fetch fresh
                 }
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to parse cached limits: ${e.message}")
             }
         }
         
-        // Cache miss or no limits, fetch fresh from network
-        Log.d(TAG, "Cache miss, fetching fresh from network")
+        // Cache miss, stale, or force refresh - fetch fresh from network
         return fetchMintLimitsViaProfileService(mintUrl, context)
     }
     

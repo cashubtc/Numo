@@ -350,6 +350,9 @@ class MintsSettingsActivity : AppCompatActivity() {
         // pick up the same Lightning mint when creating invoices.
         mintManager.setPreferredLightningMint(mintUrl)
         
+        // Notify other activities (like POS) to reload mint info
+        BalanceRefreshBroadcast.send(this, BalanceRefreshBroadcast.REASON_LIGHTNING_MINT_CHANGED)
+        
         // Update hero card
         updateLightningMintCard()
         
