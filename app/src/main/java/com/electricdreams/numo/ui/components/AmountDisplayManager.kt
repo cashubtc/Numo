@@ -181,9 +181,7 @@ class AmountDisplayManager(
             requestedAmount = satsValue
             val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
             if (isReady) {
-                Log.d(TAG, "Checking limits for satsValue=$satsValue, currentMintLimits=$currentMintLimits")
                 val limitCheck = MintLimitChecker.checkMintLimits(satsValue, currentMintLimits)
-                Log.d(TAG, "Limit check result: isValid=${limitCheck.isValid}, limitType=${limitCheck.limitType}")
                 if (limitCheck.isValid) {
                     submitButton.text = context.getString(R.string.pos_charge_button)
                     submitButton.isEnabled = true
