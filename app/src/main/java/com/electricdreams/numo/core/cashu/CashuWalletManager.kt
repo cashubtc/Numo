@@ -334,6 +334,10 @@ object CashuWalletManager : MintManager.MintChangeListener {
             try {
                 val nutsObj = org.json.JSONObject()
                 info.nuts.nut04?.let { nut04 ->
+                    Log.d(TAG, "CDK nut04: disabled=${nut04.disabled}, methods count=${nut04.methods?.size ?: 0}")
+                    nut04.methods?.forEach { method ->
+                        Log.d(TAG, "CDK nut04 method: ${method.method}, unit=${method.unit}, minAmount=${method.minAmount}, maxAmount=${method.maxAmount}")
+                    }
                     val nut04Obj = org.json.JSONObject()
                     nut04Obj.put("disabled", nut04.disabled)
                     val methodsArray = org.json.JSONArray()
@@ -412,62 +416,71 @@ object CashuWalletManager : MintManager.MintChangeListener {
             } else emptyList()
 
             // Parse mint limits from nuts section (NUT-04 and NUT-05)
-            val mintLimits = if (json.has("nuts") && !json.isNull("nuts")) {
-                try {
-                    val nutsObj = json.getJSONObject("nuts")
-                    val mintMethods = mutableListOf<MintMethodSettings>()
-                    val meltMethods = mutableListOf<MintMethodSettings>()
+            val mintLimits: MintLimits? = try {
+                if (json.has("nuts") && !json.isNull("nuts")) {
+                    try {
+                        val nutsObj = json.getJSONObject("nuts")
+                        Log.d(TAG, "Parsing nuts: $nutsObj")
+                        val mintMethods = mutableListOf<MintMethodSettings>()
+                        val meltMethods = mutableListOf<MintMethodSettings>()
 
-                    // Parse NUT-04 (minting)
-                    if (nutsObj.has("4") && !nutsObj.isNull("4")) {
-                        val nut04 = nutsObj.getJSONObject("4")
-                        val disabled = nut04.optBoolean("disabled", false)
-                        if (nut04.has("methods") && !nut04.isNull("methods")) {
-                            val methodsArray = nut04.getJSONArray("methods")
-                            for (i in 0 until methodsArray.length()) {
-                                val methodObj = methodsArray.getJSONObject(i)
-                                mintMethods.add(
-                                    MintMethodSettings(
-                                        method = methodObj.optString("method", ""),
-                                        unit = methodObj.optString("unit", ""),
-                                        minAmount = if (methodObj.has("min_amount")) methodObj.getLong("min_amount") else null,
-                                        maxAmount = if (methodObj.has("max_amount")) methodObj.getLong("max_amount") else null,
-                                        disabled = disabled
+                        // Parse NUT-04 (minting)
+                        if (nutsObj.has("4") && !nutsObj.isNull("4")) {
+                            val nut04 = nutsObj.getJSONObject("4")
+                            val disabled = nut04.optBoolean("disabled", false)
+                            if (nut04.has("methods") && !nut04.isNull("methods")) {
+                                val methodsArray = nut04.getJSONArray("methods")
+                                for (i in 0 until methodsArray.length()) {
+                                    val methodObj = methodsArray.getJSONObject(i)
+                                    val minAmt = if (methodObj.has("min_amount")) methodObj.getLong("min_amount") else null
+                                    val maxAmt = if (methodObj.has("max_amount")) methodObj.getLong("max_amount") else null
+                                    Log.d(TAG, "Parsed method ${i}: method=${methodObj.optString("method")}, unit=${methodObj.optString("unit")}, min=$minAmt, max=$maxAmt")
+                                    mintMethods.add(
+                                        MintMethodSettings(
+                                            method = methodObj.optString("method", ""),
+                                            unit = methodObj.optString("unit", ""),
+                                            minAmount = minAmt,
+                                            maxAmount = maxAmt,
+                                            disabled = disabled
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
-                    }
 
-                    // Parse NUT-05 (melting)
-                    if (nutsObj.has("5") && !nutsObj.isNull("5")) {
-                        val nut05 = nutsObj.getJSONObject("5")
-                        val disabled = nut05.optBoolean("disabled", false)
-                        if (nut05.has("methods") && !nut05.isNull("methods")) {
-                            val methodsArray = nut05.getJSONArray("methods")
-                            for (i in 0 until methodsArray.length()) {
-                                val methodObj = methodsArray.getJSONObject(i)
-                                meltMethods.add(
-                                    MintMethodSettings(
-                                        method = methodObj.optString("method", ""),
-                                        unit = methodObj.optString("unit", ""),
-                                        minAmount = if (methodObj.has("min_amount")) methodObj.getLong("min_amount") else null,
-                                        maxAmount = if (methodObj.has("max_amount")) methodObj.getLong("max_amount") else null,
-                                        disabled = disabled
+                        // Parse NUT-05 (melting)
+                        if (nutsObj.has("5") && !nutsObj.isNull("5")) {
+                            val nut05 = nutsObj.getJSONObject("5")
+                            val disabled = nut05.optBoolean("disabled", false)
+                            if (nut05.has("methods") && !nut05.isNull("methods")) {
+                                val methodsArray = nut05.getJSONArray("methods")
+                                for (i in 0 until methodsArray.length()) {
+                                    val methodObj = methodsArray.getJSONObject(i)
+                                    meltMethods.add(
+                                        MintMethodSettings(
+                                            method = methodObj.optString("method", ""),
+                                            unit = methodObj.optString("unit", ""),
+                                            minAmount = if (methodObj.has("min_amount")) methodObj.getLong("min_amount") else null,
+                                            maxAmount = if (methodObj.has("max_amount")) methodObj.getLong("max_amount") else null,
+                                            disabled = disabled
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
-                    }
 
-                    if (mintMethods.isNotEmpty() || meltMethods.isNotEmpty()) {
-                        MintLimits(mintMethods, meltMethods)
-                    } else null
-                } catch (e: Exception) {
-                    Log.d(TAG, "Could not parse mint limits: ${e.message}")
-                    null
-                }
-            } else null
+                        if (mintMethods.isNotEmpty() || meltMethods.isNotEmpty()) {
+                            MintLimits(mintMethods, meltMethods)
+                        } else null
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error parsing nuts: ${e.message}")
+                        null
+                    }
+                } else null
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in mintLimits parsing: ${e.message}")
+                null
+            }
             
             CachedMintInfo(
                 name = if (json.has("name") && !json.isNull("name")) json.getString("name") else null,
