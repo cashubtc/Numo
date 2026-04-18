@@ -8,6 +8,7 @@ import com.electricdreams.numo.nostr.NostrMintBackup
 import org.json.JSONObject
 import java.net.URI
 import java.util.Locale
+import kotlinx.coroutines.runBlocking
 
 /**
  * Manages allowed mints for Cashu tokens.
@@ -304,19 +305,53 @@ class MintManager private constructor(context: Context) {
 
     /**
      * Get the mint limits for a mint URL.
-     * Returns MintLimits from the cached mint info, or null if not available.
+     * Always fetches fresh from the network for accurate limits.
+     * Note: This is a network call, so use carefully.
      */
-    fun getMintLimits(mintUrl: String): CashuWalletManager.MintLimits? {
-        val infoJson = getMintInfo(mintUrl)
-        if (infoJson != null) {
-            try {
-                val cachedInfo = CashuWalletManager.mintInfoFromJson(infoJson)
-                return cachedInfo?.mintLimits
-            } catch (e: Exception) {
-                Log.w(TAG, "Failed to parse mint info JSON for limits: $mintUrl", e)
+    fun getMintLimits(mintUrl: String, context: android.content.Context): CashuWalletManager.MintLimits? {
+        Log.d(TAG, ">>> getMintLimits START for $mintUrl")
+        
+        // Always fetch fresh from network for accurate limits
+        val limits = fetchMintLimitsViaProfileService(mintUrl, context)
+        
+        Log.d(TAG, "<<< getMintLimits END, got: $limits")
+        return limits
+    }
+    
+    /**
+     * Fetch mint limits via MintProfileService.
+     */
+    private fun fetchMintLimitsViaProfileService(mintUrl: String, context: android.content.Context): CashuWalletManager.MintLimits? {
+        return try {
+            Log.d(TAG, ">>> fetchMintLimitsViaProfileService START for $mintUrl")
+            val normalizedUrl = normalizeMintUrl(mintUrl)
+            
+            // Use runBlocking for coroutine
+            kotlinx.coroutines.runBlocking {
+                val profileService = MintProfileService.getInstance(context)
+                val result = profileService.fetchAndStoreMintProfile(normalizedUrl, validateEndpoint = false)
+                
+                Log.d(TAG, "ProfileService result: success=${result.success}")
+                
+                if (result.success) {
+                    // Now get from cache
+                    val infoJson = getMintInfo(normalizedUrl)
+                    Log.d(TAG, "Got infoJson from cache: ${infoJson != null}")
+                    
+                    if (infoJson != null) {
+                        val cachedInfo = CashuWalletManager.mintInfoFromJson(infoJson)
+                        val limits = cachedInfo?.mintLimits
+                        Log.d(TAG, "Parsed limits from infoJson: $limits")
+                        return@runBlocking limits
+                    }
+                }
+                Log.d(TAG, "Failed to fetch fresh mint info via profile service")
+                return@runBlocking null
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "Exception in fetchMintLimitsViaProfileService: ${e.message}")
+            return null
         }
-        return null
     }
 
     /**

@@ -248,6 +248,10 @@ class MintProfileService private constructor(context: Context) {
                     }
 
                     val parsed = JSONObject(body)
+                    Log.d(TAG, "Network mint info response has nuts: ${parsed.has("nuts")}")
+                    if (parsed.has("nuts")) {
+                        Log.d(TAG, "Network nuts: ${parsed.optJSONObject("nuts")}")
+                    }
                     NetworkMintInfoResult(infoJson = parsed, errorType = null)
                 }
             } catch (e: Exception) {
@@ -303,6 +307,12 @@ class MintProfileService private constructor(context: Context) {
         val contactObj = raw.opt("contact")
         if (contactObj is JSONArray) {
             result.put("contact", contactObj)
+        }
+
+        // Copy nuts section (NUT-04 and NUT-05 for mint limits)
+        val nutsObj = raw.opt("nuts")
+        if (nutsObj is JSONObject) {
+            result.put("nuts", nutsObj)
         }
 
         return result
