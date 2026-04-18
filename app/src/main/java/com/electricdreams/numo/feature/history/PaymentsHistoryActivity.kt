@@ -5,7 +5,6 @@ import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import com.electricdreams.numo.util.createProgressDialog
@@ -25,6 +24,7 @@ import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.data.model.HistoryEntry
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.databinding.ActivityHistoryBinding
@@ -185,16 +185,18 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     private fun handleEntryClick(entry: HistoryEntry, position: Int) {
         when (entry) {
             is PaymentHistoryEntry -> {
-                if (entry.isPending()) {
-                    // Check if this is a pending swap-to-lightning-mint flow
-                    if (entry.getSwapLightningQuoteId() != null) {
-                        checkAndFinalizeSwap(entry)
-                    } else {
-                        // Resume the pending payment normally
-                        resumePendingPayment(entry)
+                when {
+                    entry.isExpired() -> showTransactionDetails(entry, position)
+                    entry.isPending() -> {
+                        when {
+                            entry.getSwapLightningQuoteId() != null -> checkAndFinalizeSwap(entry)
+                            // BTCPay pending entries have no lightning/nostr resume data —
+                            // resuming would create a new invoice, so just show details.
+                            entry.lightningQuoteId == null && entry.nostrNprofile == null -> showTransactionDetails(entry, position)
+                            else -> resumePendingPayment(entry)
+                        }
                     }
-                } else {
-                    showTransactionDetails(entry, position)
+                    else -> showTransactionDetails(entry, position)
                 }
             }
             is WithdrawHistoryEntry -> showTransactionDetails(entry, position)
@@ -339,6 +341,10 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     }
 
     private fun loadHistory() {
+        // Stale BTCPay pending entries (no resume data) will never be resolved by polling
+        // if the app was killed mid-flow — expire them now so they don't sit as "Pending" forever.
+        expireStaleBtcPayEntries()
+
         val paymentHistory: List<HistoryEntry> = getPaymentHistory()
         val withdrawHistory: List<HistoryEntry> = AutoWithdrawManager.getInstance(this)
             .getHistory()
@@ -376,6 +382,35 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Expire pending entries that can no longer be resolved:
+     * - Orphaned entries with no resume data
+     * - Entries older than [STALE_PENDING_THRESHOLD_MS]
+     * - BTCPay entries when BTCPay is disabled (they store the BTCPay invoice ID
+     *   in [PaymentHistoryEntry.lightningQuoteId] but have no lightningMintUrl/nostrNprofile;
+     *   without an active BTCPay connection these can never settle)
+     */
+    private fun expireStaleBtcPayEntries() {
+        val history = getPaymentHistory(this).toMutableList()
+        val cutoff = System.currentTimeMillis() - STALE_PENDING_THRESHOLD_MS
+        val btcPayEnabled = PreferenceStore.app(this).getBoolean("btcpay_enabled", false)
+
+        val stale = history.filter { entry ->
+            entry.isPending() && (
+                // No resume data at all — always orphaned
+                (entry.lightningQuoteId == null && entry.nostrNprofile == null && entry.btcPayInvoiceId == null) ||
+                // Has resume data but payment is too old to still be valid
+                entry.date.time < cutoff ||
+                // BTCPay is disabled — pending BTCPay entries can never be resolved.
+                // BTCPay entries have lightningQuoteId (set to invoice ID) but no
+                // lightningMintUrl (local Lightning) or nostrNprofile (Nostr).
+                (!btcPayEnabled && entry.lightningQuoteId != null
+                    && entry.lightningMintUrl == null && entry.nostrNprofile == null)
+            )
+        }
+        stale.forEach { markPaymentExpired(this, it.id) }
+    }
+
     private fun getPaymentHistory(): List<PaymentHistoryEntry> = getPaymentHistory(this)
 
     companion object {
@@ -383,6 +418,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         private const val KEY_HISTORY = "history"
         private const val REQUEST_TRANSACTION_DETAIL = 1001
         private const val REQUEST_RESUME_PAYMENT = 1002
+        // Pending payments older than this are considered stale regardless of resume data.
+        // BTCPay invoices default to 15min; local Lightning quotes also expire. 2h is generous.
+        private const val STALE_PENDING_THRESHOLD_MS = 2 * 60 * 60 * 1000L
 
         @JvmStatic
         fun getPaymentHistory(context: Context): List<PaymentHistoryEntry> {
@@ -450,9 +488,11 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             lightningInvoice: String? = null,
             lightningQuoteId: String? = null,
             lightningMintUrl: String? = null,
+            btcPayInvoiceId: String? = null,
         ) {
             val history = getPaymentHistory(context).toMutableList()
-            val index = history.indexOfFirst { it.id == paymentId }
+            // Only complete entries that are still pending — never overwrite expired/cancelled status
+            val index = history.indexOfFirst { it.id == paymentId && it.isPending() }
 
             if (index >= 0) {
                 val existing = history[index]
@@ -475,11 +515,12 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     formattedAmount = existing.formattedAmount,
                     nostrNprofile = existing.nostrNprofile,
                     nostrSecretHex = existing.nostrSecretHex,
-                    checkoutBasketJson = existing.checkoutBasketJson, // Preserve basket data
-                    basketId = existing.basketId, // Preserve basket ID
-                    tipAmountSats = existing.tipAmountSats, // Preserve tip info
-                    tipPercentage = existing.tipPercentage, // Preserve tip info
-                    label = existing.label, // Preserve label
+                    checkoutBasketJson = existing.checkoutBasketJson,
+                    basketId = existing.basketId,
+                    tipAmountSats = existing.tipAmountSats,
+                    tipPercentage = existing.tipPercentage,
+                    label = existing.label,
+                    btcPayInvoiceId = btcPayInvoiceId ?: existing.btcPayInvoiceId,
                 )
                 history[index] = updated
 
@@ -629,6 +670,85 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 val prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
             }
+        }
+
+        /**
+         * Mark a pending payment as expired (BTCPay invoice expired before payment).
+         * Keeps the entry in history unlike [cancelPendingPayment].
+         */
+        @JvmStatic
+        fun markPaymentExpired(context: Context, paymentId: String) {
+            val history = getPaymentHistory(context).toMutableList()
+            val index = history.indexOfFirst { it.id == paymentId && it.isPending() }
+            if (index == -1) return
+
+            val existing = history[index]
+            val updated = PaymentHistoryEntry(
+                id = existing.id,
+                token = existing.token,
+                amount = existing.amount,
+                date = existing.date,
+                rawUnit = existing.getUnit(),
+                rawEntryUnit = existing.getEntryUnit(),
+                enteredAmount = existing.enteredAmount,
+                bitcoinPrice = existing.bitcoinPrice,
+                mintUrl = existing.mintUrl,
+                paymentRequest = existing.paymentRequest,
+                rawStatus = PaymentHistoryEntry.STATUS_EXPIRED,
+                paymentType = existing.paymentType,
+                lightningInvoice = existing.lightningInvoice,
+                lightningQuoteId = existing.lightningQuoteId,
+                lightningMintUrl = existing.lightningMintUrl,
+                formattedAmount = existing.formattedAmount,
+                nostrNprofile = existing.nostrNprofile,
+                nostrSecretHex = existing.nostrSecretHex,
+                checkoutBasketJson = existing.checkoutBasketJson,
+                basketId = existing.basketId,
+                tipAmountSats = existing.tipAmountSats,
+                tipPercentage = existing.tipPercentage,
+                swapToLightningMintJson = existing.swapToLightningMintJson,
+            )
+            history[index] = updated
+
+            val prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
+        }
+
+        fun markPaymentFailed(context: Context, paymentId: String) {
+            val history = getPaymentHistory(context).toMutableList()
+            val index = history.indexOfFirst { it.id == paymentId && it.isPending() }
+            if (index == -1) return
+
+            val existing = history[index]
+            val updated = PaymentHistoryEntry(
+                id = existing.id,
+                token = existing.token,
+                amount = existing.amount,
+                date = existing.date,
+                rawUnit = existing.getUnit(),
+                rawEntryUnit = existing.getEntryUnit(),
+                enteredAmount = existing.enteredAmount,
+                bitcoinPrice = existing.bitcoinPrice,
+                mintUrl = existing.mintUrl,
+                paymentRequest = existing.paymentRequest,
+                rawStatus = PaymentHistoryEntry.STATUS_FAILED,
+                paymentType = existing.paymentType,
+                lightningInvoice = existing.lightningInvoice,
+                lightningQuoteId = existing.lightningQuoteId,
+                lightningMintUrl = existing.lightningMintUrl,
+                formattedAmount = existing.formattedAmount,
+                nostrNprofile = existing.nostrNprofile,
+                nostrSecretHex = existing.nostrSecretHex,
+                checkoutBasketJson = existing.checkoutBasketJson,
+                basketId = existing.basketId,
+                tipAmountSats = existing.tipAmountSats,
+                tipPercentage = existing.tipPercentage,
+                swapToLightningMintJson = existing.swapToLightningMintJson,
+            )
+            history[index] = updated
+
+            val prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
         }
 
         /**

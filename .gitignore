@@ -15,3 +15,4 @@ release
 opencode.json
 .kotlin/
 .opencode/
+btcpay_env.properties

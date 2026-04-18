@@ -17,7 +17,6 @@ import org.cashudevkit.ReceiveOptions
 import org.cashudevkit.SplitTarget
 import org.cashudevkit.Token as CdkToken
 import java.math.BigInteger
-import java.util.Optional
 
 /**
  * Helper class for Cashu payment-related operations.
@@ -154,6 +153,79 @@ object CashuPaymentHelper {
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error creating Nostr payment request: ${e.message}", e)
+            null
+        }
+    }
+
+    /**
+     * Parse a NUT-18 Payment Request, remove any transport methods (making it suitable for NFC/HCE),
+     * and return the re-encoded string.
+     */
+    @JvmStatic
+    fun stripTransports(paymentRequest: String): String? {
+        return try {
+            val decoded = org.cashudevkit.PaymentRequest.fromString(paymentRequest)
+            // Re-build CBOR without transports
+            val map = com.upokecenter.cbor.CBORObject.NewMap()
+            decoded.paymentId()?.let { map.Add("i", it) }
+            decoded.amount()?.let { map.Add("a", it.value) }
+            decoded.unit()?.let { u ->
+                val unitStr = when (u) {
+                    is CurrencyUnit.Sat -> "sat"
+                    is CurrencyUnit.Msat -> "msat"
+                    is CurrencyUnit.Eur -> "eur"
+                    is CurrencyUnit.Usd -> "usd"
+                    is CurrencyUnit.Custom -> u.unit
+                    else -> "sat"
+                }
+                map.Add("u", unitStr)
+            }
+            decoded.description()?.let { map.Add("d", it) }
+            decoded.singleUse()?.let { map.Add("s", it) }
+            val mints = decoded.mints()
+            if (mints.isNotEmpty()) {
+                val mintsArray = com.upokecenter.cbor.CBORObject.NewArray()
+                mints.forEach { mintsArray.Add(it) }
+                map.Add("m", mintsArray)
+            }
+            // Omit transports
+            val cborBytes = map.EncodeToBytes()
+            "creqA" + android.util.Base64.encodeToString(cborBytes, android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or android.util.Base64.NO_PADDING)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error stripping transports from payment request: ${e.message}", e)
+            null
+        }
+    }
+
+    /**
+     * Parse a NUT-18 Payment Request and extract the 'post' transport URL if available.
+     */
+    @JvmStatic
+    fun getPostUrl(paymentRequest: String): String? {
+        return try {
+            val decoded = org.cashudevkit.PaymentRequest.fromString(paymentRequest)
+            for (t in decoded.transports()) {
+                if (t.transportType == org.cashudevkit.TransportType.HTTP_POST) {
+                    return t.target
+                }
+            }
+            null
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting POST URL from payment request: ${e.message}", e)
+            null
+        }
+    }
+
+    /**
+     * Parse a NUT-18 Payment Request and extract the ID.
+     */
+    @JvmStatic
+    fun getId(paymentRequest: String): String? {
+        return try {
+            val decoded = org.cashudevkit.PaymentRequest.fromString(paymentRequest)
+            decoded.paymentId()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting ID from payment request: ${e.message}", e)
             null
         }
     }

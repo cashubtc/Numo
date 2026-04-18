@@ -5,6 +5,9 @@ import android.util.Log
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.prefs.PreferenceStore
+import com.electricdreams.numo.core.wallet.TemporaryMintWalletFactory
+import com.electricdreams.numo.core.wallet.WalletProvider
+import com.electricdreams.numo.core.wallet.impl.CdkWalletProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -245,6 +248,26 @@ object CashuWalletManager : MintManager.MintChangeListener {
 
     /** Current database instance, mostly for debugging or future use. */
     fun getDatabase(): WalletStore? = database
+
+    // Lazy-initialized WalletProvider backed by this manager's wallet
+    private val walletProviderInstance: CdkWalletProvider by lazy {
+        CdkWalletProvider { wallet }
+    }
+
+    /**
+     * Get the WalletProvider interface for wallet operations.
+     * This provides a CDK-agnostic interface that can be swapped for
+     * alternative implementations (e.g., BTCPayServer + btcnutserver).
+     */
+    @JvmStatic
+    fun getWalletProvider(): WalletProvider = walletProviderInstance
+
+    /**
+     * Get the TemporaryMintWalletFactory for creating temporary wallets.
+     * Used for swap-to-Lightning-mint flows with unknown mints.
+     */
+    @JvmStatic
+    fun getTemporaryMintWalletFactory(): TemporaryMintWalletFactory = walletProviderInstance
 
     /**
      * Get the balance for a specific mint in satoshis.
