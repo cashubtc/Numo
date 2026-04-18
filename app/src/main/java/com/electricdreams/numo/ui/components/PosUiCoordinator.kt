@@ -14,13 +14,13 @@ import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
-import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.util.NetworkUtils
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.electricdreams.numo.R
+import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
@@ -72,6 +72,9 @@ class PosUiCoordinator(
         submitButton.isEnabled = false
         submitButton.alpha = 0.5f
         
+        // Load mint limits from preferred Lightning mint
+        loadMintLimits()
+
         if (true) {
             activity.lifecycleScope.launch {
                 CashuWalletManager.walletState.combine(NetworkUtils.observeNetworkState(activity)) { state, isNetworkAvailable ->
@@ -93,6 +96,15 @@ class PosUiCoordinator(
                     }
                 }
             }
+        }
+    }
+
+    private fun loadMintLimits() {
+        val preferredMint = mintManager.getPreferredLightningMint()
+        if (preferredMint != null) {
+            val limits = mintManager.getMintLimits(preferredMint)
+            amountDisplayManager.setMintLimits(limits)
+            Log.d(TAG, "Loaded mint limits from $preferredMint: $limits")
         }
     }
 
@@ -203,6 +215,7 @@ class PosUiCoordinator(
     fun getRequestedAmount(): Long = amountDisplayManager.requestedAmount
 
     companion object {
+        private const val TAG = "PosUiCoordinator"
         private val PATTERN_SUCCESS = longArrayOf(0, 50, 100, 50)
     }
 

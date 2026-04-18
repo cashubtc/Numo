@@ -303,7 +303,24 @@ class MintManager private constructor(context: Context) {
     }
 
     /**
-     * Set the last refresh timestamp for a mint.
+     * Get the mint limits for a mint URL.
+     * Returns MintLimits from the cached mint info, or null if not available.
+     */
+    fun getMintLimits(mintUrl: String): CashuWalletManager.MintLimits? {
+        val infoJson = getMintInfo(mintUrl)
+        if (infoJson != null) {
+            try {
+                val cachedInfo = CashuWalletManager.mintInfoFromJson(infoJson)
+                return cachedInfo?.mintLimits
+            } catch (e: Exception) {
+                Log.w(TAG, "Failed to parse mint info JSON for limits: $mintUrl", e)
+            }
+        }
+        return null
+    }
+
+    /**
+     * Get the primary mint URL used for Lightning payments.
      */
     fun setMintRefreshTimestamp(mintUrl: String, timestamp: Long = System.currentTimeMillis()) {
         val normalized = normalizeMintUrl(mintUrl)

@@ -14,6 +14,9 @@
     <!-- POS main screen - charge button -->
     <string name="pos_charge_button">Cobrar</string>
     <string name="pos_charge_button_with_amount">Cobrar %1$s</string>
+    <string name="pos_charge_button_min_limit">Mínimo: %1$d sats</string>
+    <string name="pos_charge_button_max_limit">Máximo: %1$d sats</string>
+    <string name="pos_charge_button_mint_disabled">Mint desabilitado</string>
 
     <!-- POS main screen - secondary BTC label when no fiat price -->
     <string name="pos_secondary_amount_btc_label">BTC</string>

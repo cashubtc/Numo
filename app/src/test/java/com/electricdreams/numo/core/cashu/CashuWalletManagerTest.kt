@@ -98,4 +98,107 @@ class CashuWalletManagerTest {
         
         assertEquals(mnemonic, CashuWalletManager.getMnemonic())
     }
+
+    @Test
+    fun testMintLimitsParsing_Nut04AndNut05() {
+        val jsonString = """
+            {
+                "name": "Test Mint",
+                "nuts": {
+                    "4": {
+                        "disabled": false,
+                        "methods": [
+                            { "method": "bolt11", "unit": "sat", "min_amount": 100, "max_amount": 10000 },
+                            { "method": "bolt11", "unit": "usd", "min_amount": 1, "max_amount": 500 }
+                        ]
+                    },
+                    "5": {
+                        "disabled": false,
+                        "methods": [
+                            { "method": "bolt11", "unit": "sat", "min_amount": 100, "max_amount": 5000 }
+                        ]
+                    }
+                }
+            }
+        """.trimIndent()
+
+        val cachedInfo = CashuWalletManager.mintInfoFromJson(jsonString)
+        assertNotNull(cachedInfo)
+        assertNotNull(cachedInfo?.mintLimits)
+        
+        val mintLimits = cachedInfo?.mintLimits
+        assertEquals(2, mintLimits?.mintMethods?.size)
+        assertEquals(1, mintLimits?.meltMethods?.size)
+        
+        val bolt11Mint = mintLimits?.mintMethods?.find { it.method == "bolt11" && it.unit == "sat" }
+        assertEquals(100L, bolt11Mint?.minAmount)
+        assertEquals(10000L, bolt11Mint?.maxAmount)
+        assertFalse(bolt11Mint?.disabled ?: true)
+        
+        val bolt11Melt = mintLimits?.meltMethods?.find { it.method == "bolt11" && it.unit == "sat" }
+        assertEquals(100L, bolt11Melt?.minAmount)
+        assertEquals(5000L, bolt11Melt?.maxAmount)
+    }
+
+    @Test
+    fun testMintLimitsParsing_DisabledMint() {
+        val jsonString = """
+            {
+                "name": "Disabled Mint",
+                "nuts": {
+                    "4": {
+                        "disabled": true,
+                        "methods": [
+                            { "method": "bolt11", "unit": "sat", "min_amount": 100, "max_amount": 10000 }
+                        ]
+                    }
+                }
+            }
+        """.trimIndent()
+
+        val cachedInfo = CashuWalletManager.mintInfoFromJson(jsonString)
+        assertNotNull(cachedInfo)
+        assertNotNull(cachedInfo?.mintLimits)
+        
+        val bolt11Method = cachedInfo?.mintLimits?.mintMethods?.find { it.method == "bolt11" }
+        assertTrue(bolt11Method?.disabled ?: false)
+    }
+
+    @Test
+    fun testMintLimitsParsing_NullLimits() {
+        val jsonString = """
+            {
+                "name": "No Limits Mint",
+                "nuts": {
+                    "4": {
+                        "disabled": false,
+                        "methods": [
+                            { "method": "bolt11", "unit": "sat" }
+                        ]
+                    }
+                }
+            }
+        """.trimIndent()
+
+        val cachedInfo = CashuWalletManager.mintInfoFromJson(jsonString)
+        assertNotNull(cachedInfo)
+        assertNotNull(cachedInfo?.mintLimits)
+        
+        val bolt11Method = cachedInfo?.mintLimits?.mintMethods?.find { it.method == "bolt11" }
+        assertNull(bolt11Method?.minAmount)
+        assertNull(bolt11Method?.maxAmount)
+    }
+
+    @Test
+    fun testMintInfoWithoutNuts_NoLimits() {
+        val jsonString = """
+            {
+                "name": "Old Mint"
+            }
+        """.trimIndent()
+
+        val cachedInfo = CashuWalletManager.mintInfoFromJson(jsonString)
+        assertNotNull(cachedInfo)
+        assertNull(cachedInfo?.mintLimits)
+    }
 }

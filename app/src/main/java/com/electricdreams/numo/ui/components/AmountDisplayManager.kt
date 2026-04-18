@@ -10,6 +10,7 @@ import android.widget.Toast
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.util.CurrencyManager
+import com.electricdreams.numo.core.util.MintLimitChecker
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.core.util.NetworkUtils
 
@@ -29,6 +30,12 @@ class AmountDisplayManager(
         private set
     var requestedAmount: Long = 0
         private set
+
+    private var currentMintLimits: CashuWalletManager.MintLimits? = null
+
+    fun setMintLimits(limits: CashuWalletManager.MintLimits?) {
+        currentMintLimits = limits
+    }
 
     enum class AnimationType { NONE, DIGIT_ENTRY, CURRENCY_SWITCH }
 
@@ -173,9 +180,22 @@ class AmountDisplayManager(
             val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
             val isNetworkAvailable = NetworkUtils.isNetworkAvailable(context)
             if (isReady) {
-                submitButton.text = context.getString(R.string.pos_charge_button)
-                submitButton.isEnabled = isNetworkAvailable
-                submitButton.alpha = if (isNetworkAvailable) 1.0f else 0.5f
+                val limitCheck = MintLimitChecker.checkMintLimits(satsValue, currentMintLimits)
+                if (limitCheck.isValid) {
+                    submitButton.text = context.getString(R.string.pos_charge_button)
+                    submitButton.isEnabled = isNetworkAvailable
+                    submitButton.alpha = if (isNetworkAvailable) 1.0f else 0.5f
+                } else {
+                    val buttonText = when (limitCheck.limitType) {
+                        MintLimitChecker.LimitType.MIN -> context.getString(R.string.pos_charge_button_min_limit, limitCheck.minAmount ?: 0)
+                        MintLimitChecker.LimitType.MAX -> context.getString(R.string.pos_charge_button_max_limit, limitCheck.maxAmount ?: 0)
+                        MintLimitChecker.LimitType.DISABLED -> context.getString(R.string.pos_charge_button_mint_disabled)
+                        else -> context.getString(R.string.pos_charge_button)
+                    }
+                    submitButton.text = buttonText
+                    submitButton.isEnabled = false
+                    submitButton.alpha = 0.5f
+                }
             } else {
                 submitButton.text = context.getString(R.string.pos_charge_button_loading)
                 submitButton.isEnabled = false
