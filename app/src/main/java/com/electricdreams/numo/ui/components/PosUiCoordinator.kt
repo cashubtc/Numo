@@ -114,6 +114,24 @@ class PosUiCoordinator(
             }
         }
     }
+    
+    /** Reload mint limits - called when returning to POS (e.g., after changing lightning mint) */
+    fun reloadMintLimits() {
+        val preferredMint = mintManager.getPreferredLightningMint()
+        if (preferredMint != null) {
+            // Force refresh to get fresh limits from the mint
+            val limits = mintManager.getMintLimits(preferredMint, activity, forceRefresh = true)
+            amountDisplayManager.setMintLimits(limits)
+            
+            // Update display with new limits
+            if (satoshiInput.isNotEmpty()) {
+                val currentAmount = satoshiInput.toString().toLongOrNull() ?: 0
+                if (currentAmount > 0) {
+                    amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
+                }
+            }
+        }
+    }
 
     /** Handle initial payment amount from basket */
     fun handleInitialPaymentAmount(paymentAmount: Long) {
