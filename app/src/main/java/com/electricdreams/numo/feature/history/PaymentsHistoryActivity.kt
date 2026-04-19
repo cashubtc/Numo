@@ -186,6 +186,10 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         when (entry) {
             is PaymentHistoryEntry -> {
                 if (entry.isPending()) {
+                    if (!com.electricdreams.numo.core.util.NetworkUtils.isNetworkAvailable(this)) {
+                        Toast.makeText(this, getString(R.string.pos_error_no_network_pending_payment), Toast.LENGTH_SHORT).show()
+                        return
+                    }
                     // Check if this is a pending swap-to-lightning-mint flow
                     if (entry.getSwapLightningQuoteId() != null) {
                         checkAndFinalizeSwap(entry)

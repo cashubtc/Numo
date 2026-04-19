@@ -15,6 +15,8 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.util.NetworkUtils
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -72,12 +74,15 @@ class PosUiCoordinator(
         
         if (true) {
             activity.lifecycleScope.launch {
-                CashuWalletManager.walletState.collect { state ->
+                CashuWalletManager.walletState.combine(NetworkUtils.observeNetworkState(activity)) { state, isNetworkAvailable ->
+                    Pair(state, isNetworkAvailable)
+                }.collect { (state, isNetworkAvailable) ->
                     val isReady = state == com.electricdreams.numo.core.cashu.WalletState.READY
+                    val canCharge = isReady && isNetworkAvailable
                     // Make sure we only enable it if we don't have a spinner shown
                     if (submitButtonSpinner.visibility != android.view.View.VISIBLE) {
-                        submitButton.isEnabled = isReady
-                        submitButton.alpha = if (isReady) 1.0f else 0.5f
+                        submitButton.isEnabled = canCharge
+                        submitButton.alpha = if (canCharge) 1.0f else 0.5f
                         
                         // Rely on AmountDisplayManager to set correct text/state based on amount and wallet readiness
                         amountDisplayManager.updateDisplay(
@@ -328,9 +333,11 @@ class PosUiCoordinator(
     fun hideChargeButtonSpinner() {
         submitButtonSpinner.visibility = View.GONE
         submitButton.text = activity.getString(R.string.pos_charge_button) // Restore button text
-        // Only re-enable if the wallet is ready
+        // Only re-enable if the wallet is ready and network is available
         val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
-        submitButton.isEnabled = isReady
-        submitButton.alpha = if (isReady) 1.0f else 0.5f
+        val isNetworkAvailable = NetworkUtils.isNetworkAvailable(activity)
+        val canCharge = isReady && isNetworkAvailable
+        submitButton.isEnabled = canCharge
+        submitButton.alpha = if (canCharge) 1.0f else 0.5f
     }
 }
