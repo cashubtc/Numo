@@ -369,6 +369,10 @@ class ItemSelectionActivity : AppCompatActivity() {
         }
 
         checkoutButton.setOnClickListener {
+            if (!com.electricdreams.numo.core.util.NetworkUtils.isNetworkAvailable(this)) {
+                Toast.makeText(this, getString(R.string.pos_error_no_network_charge), Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             // Save basket before checkout if not already saved, or update existing
             val basketId = ensureBasketSaved()
             if (basketId != null) {

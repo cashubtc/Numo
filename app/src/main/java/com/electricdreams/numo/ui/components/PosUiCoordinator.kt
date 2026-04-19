@@ -292,6 +292,14 @@ class PosUiCoordinator(
 
         // Submit button
         submitButton.setOnClickListener {
+            if (!NetworkUtils.isNetworkAvailable(activity)) {
+                android.widget.Toast.makeText(
+                    activity,
+                    activity.getString(R.string.pos_error_no_network_charge),
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
             // Do not allow charging if no mints are configured
             if (!mintManager.hasAnyMints()) {
                 // Optional: show a gentle message guiding user to configure mints

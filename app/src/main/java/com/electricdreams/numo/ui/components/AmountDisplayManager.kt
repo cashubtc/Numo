@@ -11,6 +11,7 @@ import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
+import com.electricdreams.numo.core.util.NetworkUtils
 
 /**
  * Manages amount display, formatting, and currency animations for the POS interface.
@@ -170,22 +171,27 @@ class AmountDisplayManager(
         if (satsValue > 0) {
             requestedAmount = satsValue
             val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
+            val isNetworkAvailable = NetworkUtils.isNetworkAvailable(context)
             if (isReady) {
                 submitButton.text = context.getString(R.string.pos_charge_button)
-                submitButton.isEnabled = true
+                submitButton.isEnabled = isNetworkAvailable
+                submitButton.alpha = if (isNetworkAvailable) 1.0f else 0.5f
             } else {
                 submitButton.text = context.getString(R.string.pos_charge_button_loading)
                 submitButton.isEnabled = false
+                submitButton.alpha = 0.5f
             }
         } else {
             requestedAmount = 0
             val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
+            val isNetworkAvailable = NetworkUtils.isNetworkAvailable(context)
             if (isReady) {
                 submitButton.text = context.getString(R.string.pos_charge_button)
             } else {
                 submitButton.text = context.getString(R.string.pos_charge_button_loading)
             }
             submitButton.isEnabled = false
+            submitButton.alpha = 0.5f
         }
     }
 
