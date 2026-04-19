@@ -553,6 +553,8 @@
     <string name="item_selection_charge_button">Cobrar</string>
     <string name="item_selection_charge_button_default">Cobrar</string>
     <string name="pos_error_no_mints_configured">Adicione pelo menos um mint em Configurações → Mints antes de cobrar dos clientes.</string>
+    <string name="pos_error_no_network_pending_payment">É necessária uma conexão de rede para abrir pagamentos pendentes.</string>
+    <string name="pos_error_no_network_charge">É necessária uma conexão de rede para criar uma cobrança.</string>
 
     <string name="item_selection_save_button">Salvar</string>
     <string name="item_selection_saved_baskets_button">Salvas</string>
