@@ -145,6 +145,7 @@ class MintProfileService private constructor(context: Context) {
     suspend fun fetchAndStoreMintProfile(
         rawUrl: String,
         validateEndpoint: Boolean = false,
+        storeInCache: Boolean = true,
     ): ProfileSyncResult = withContext(Dispatchers.IO) {
         val normalizedUrl = normalizeUrl(rawUrl)
 
@@ -204,8 +205,14 @@ class MintProfileService private constructor(context: Context) {
             iconUrl = canonicalInfo.optString("iconUrl", "").trim().ifEmpty { null }
         }
 
-        mintManager.setMintInfo(normalizedUrl, infoJson)
-        mintManager.setMintRefreshTimestamp(normalizedUrl)
+        // Only store in cache if storeInCache is true
+        if (storeInCache) {
+            mintManager.setMintInfo(normalizedUrl, infoJson)
+            Log.d("MintProfileService", "setMintInfo called for $normalizedUrl, length=${infoJson.length}")
+            mintManager.setMintRefreshTimestamp(normalizedUrl)
+        } else {
+            Log.d("MintProfileService", "Skipped storing mint info in cache for $normalizedUrl (storeInCache=false)")
+        }
 
         var iconCached = false
         if (!iconUrl.isNullOrBlank()) {

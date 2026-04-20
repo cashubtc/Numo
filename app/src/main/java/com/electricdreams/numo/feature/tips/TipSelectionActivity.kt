@@ -30,9 +30,14 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.electricdreams.numo.PaymentRequestActivity
 import com.electricdreams.numo.R
+import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.Amount.Currency
+import com.electricdreams.numo.core.util.MintLimitChecker
+import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
+import android.widget.Toast
+import android.util.Log
 import kotlin.math.roundToLong
 
 /**
@@ -857,6 +862,43 @@ class TipSelectionActivity : AppCompatActivity() {
     private fun proceedToPayment() {
         val totalAmountSats = paymentAmountSats + selectedTipSats
         
+        // Validate total against mint limits (base + tip)
+        val mintManager = MintManager.getInstance(this)
+        val preferredMint = mintManager.getPreferredLightningMint()
+        
+        if (preferredMint != null) {
+            // Get raw mint info and parse limits directly
+            val mintInfoJson = mintManager.getMintInfo(preferredMint)
+            var limits: CashuWalletManager.MintLimits? = null
+            
+            if (mintInfoJson != null) {
+                // Try parsing from stored JSON
+                try {
+                    limits = CashuWalletManager.extractMintLimitsFromJson(mintInfoJson)
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to parse limits from cache: ${e.message}")
+                }
+            }
+            
+            // If still null, try force refresh (not first fetch - preserve cache)
+            if (limits == null) {
+                limits = mintManager.getMintLimits(preferredMint, this, forceRefresh = true, isFirstFetch = false)
+            }
+            
+            if (limits != null) {
+                val limitCheck = MintLimitChecker.checkMintLimitsWithTip(paymentAmountSats, selectedTipSats, limits)
+                if (!limitCheck.isValid) {
+                    val errorMsg = when (limitCheck.limitType) {
+                        MintLimitChecker.LimitType.MAX -> getString(R.string.pos_charge_button_max_limit, limitCheck.maxAmount ?: 0)
+                        MintLimitChecker.LimitType.MIN -> getString(R.string.pos_charge_button_min_limit, limitCheck.minAmount ?: 0)
+                        else -> getString(R.string.pos_charge_button_mint_disabled)
+                    }
+                    Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show()
+                    return
+                }
+            }
+        }
+        
         // Calculate new formatted amount (total)
         val newFormattedAmount = if (entryCurrency == Currency.BTC) {
             Amount(totalAmountSats, Currency.BTC).toString()
@@ -940,6 +982,7 @@ class TipSelectionActivity : AppCompatActivity() {
     }
 
     companion object {
+        private const val TAG = "TipSelectionActivity"
         const val EXTRA_PAYMENT_AMOUNT = "payment_amount"
         const val EXTRA_FORMATTED_AMOUNT = "formatted_amount"
         const val EXTRA_CHECKOUT_BASKET_JSON = "checkout_basket_json"
