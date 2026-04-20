@@ -190,6 +190,8 @@ class ItemSelectionActivity : AppCompatActivity() {
         searchHandler.loadItems()
         refreshBasket()
 
+        bitcoinPriceWorker.start()
+
         lifecycleScope.launch {
             NetworkUtils.observeNetworkState(this@ItemSelectionActivity).collectLatest {
                 basketUIHandler.updateCheckoutButton()
