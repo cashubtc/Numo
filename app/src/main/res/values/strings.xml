@@ -581,6 +581,8 @@
     <string name="item_selection_charge_button">Charge</string>
     <string name="item_selection_charge_button_default">Charge</string>
     <string name="pos_error_no_mints_configured">Add at least one mint in Settings → Mints before charging customers.</string>
+    <string name="pos_error_no_network_pending_payment">Network connection is required to open pending payments.</string>
+    <string name="pos_error_no_network_charge">Network connection is required to create a charge.</string>
 
     <string name="item_selection_save_button">Save</string>
     <string name="item_selection_saved_baskets_button">Saved</string>

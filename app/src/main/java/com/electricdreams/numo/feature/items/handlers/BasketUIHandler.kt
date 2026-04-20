@@ -12,6 +12,8 @@ import com.electricdreams.numo.core.util.MintManager
  * Handles basket UI updates including total display and checkout button text.
  * Works with the unified basket card layout that animates height on expand/collapse.
  */
+import com.electricdreams.numo.core.util.NetworkUtils
+
 class BasketUIHandler(
     private val basketManager: BasketManager,
     private val currencyManager: CurrencyManager,
@@ -120,9 +122,12 @@ class BasketUIHandler(
     fun updateCheckoutButton() {
         val context = checkoutButton.context
         val mintManager = MintManager.getInstance(context)
+        val isNetworkAvailable = NetworkUtils.isNetworkAvailable(context)
 
         checkoutButton.text = context.getString(R.string.item_selection_charge_button)
-        checkoutButton.isEnabled = mintManager.hasAnyMints()
+        val canCharge = mintManager.hasAnyMints() && isNetworkAvailable
+        checkoutButton.isEnabled = canCharge
+        checkoutButton.alpha = if (canCharge) 1.0f else 0.5f
     }
 
     /**
