@@ -14,13 +14,13 @@ import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
-import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.util.NetworkUtils
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.electricdreams.numo.R
+import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
@@ -72,6 +72,9 @@ class PosUiCoordinator(
         submitButton.isEnabled = false
         submitButton.alpha = 0.5f
         
+        // Load mint limits from preferred Lightning mint
+        loadMintLimits()
+
         if (true) {
             activity.lifecycleScope.launch {
                 CashuWalletManager.walletState.combine(NetworkUtils.observeNetworkState(activity)) { state, isNetworkAvailable ->
@@ -90,6 +93,77 @@ class PosUiCoordinator(
                             fiatInput,
                             AmountDisplayManager.AnimationType.NONE
                         )
+                    }
+                }
+            }
+        }
+    }
+
+    private fun loadMintLimits() {
+        val preferredMint = mintManager.getPreferredLightningMint()
+        if (preferredMint != null) {
+            activity.lifecycleScope.launch {
+                // Pre-load cache for ALL allowed mints when app opens
+                // This ensures every mint has valid cached data, preventing issues when switching mints
+                Log.d(TAG, "Pre-loading cache for all allowed mints...")
+                for (mintUrl in mintManager.getAllowedMints()) {
+                    try {
+                        // Use isFirstFetch=true to store valid cache, skip if already cached
+                        mintManager.getMintLimits(mintUrl, activity, forceRefresh = false, isFirstFetch = true)
+                        Log.d(TAG, "Pre-loaded cache for: $mintUrl")
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to pre-load cache for: $mintUrl", e)
+                    }
+                }
+                
+                // Now get limits for the preferred mint
+                val limits = mintManager.getMintLimits(preferredMint, activity, forceRefresh = true, isFirstFetch = false)
+                amountDisplayManager.setMintLimits(limits)
+                
+                // After loading limits, trigger an update to apply the limits to the current amount
+                if (satoshiInput.isNotEmpty()) {
+                    val currentAmount = satoshiInput.toString().toLongOrNull() ?: 0
+                    if (currentAmount > 0) {
+                        amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
+                    }
+                }
+            }
+        }
+    }
+    
+    /** Reload mint limits - called when returning to POS (e.g., after changing lightning mint) */
+    fun reloadMintLimits() {
+        Log.d(TAG, "reloadMintLimits() called")
+        val preferredMint = mintManager.getPreferredLightningMint()
+        Log.d(TAG, "Preferred mint: $preferredMint")
+        if (preferredMint != null) {
+            // Show loading state while refreshing
+            submitButton.isEnabled = false
+            submitButton.text = activity.getString(R.string.pos_charge_button_loading)
+            
+            activity.lifecycleScope.launch {
+                // Force refresh but NOT first fetch - preserve existing cache
+                // This prevents inconsistent mint responses from overwriting valid limits
+                Log.d(TAG, "Fetching mint limits with forceRefresh=true (NOT first fetch)")
+                val limits = mintManager.getMintLimits(preferredMint, activity, forceRefresh = true, isFirstFetch = false)
+                Log.d(TAG, "Got limits: $limits")
+                
+                // Same behavior as onCreate - always set limits
+                amountDisplayManager.setMintLimits(limits)
+                
+                // Same behavior as onCreate - update display if there's input
+                if (satoshiInput.isNotEmpty()) {
+                    val currentAmount = satoshiInput.toString().toLongOrNull() ?: 0
+                    if (currentAmount > 0) {
+                        amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
+                    }
+                } else {
+                    // Reset button state
+                    val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
+                    if (isReady) {
+                        submitButton.text = activity.getString(R.string.pos_charge_button)
+                        submitButton.isEnabled = true
+                        submitButton.alpha = 1.0f
                     }
                 }
             }
@@ -203,6 +277,7 @@ class PosUiCoordinator(
     fun getRequestedAmount(): Long = amountDisplayManager.requestedAmount
 
     companion object {
+        private const val TAG = "PosUiCoordinator"
         private val PATTERN_SUCCESS = longArrayOf(0, 50, 100, 50)
     }
 
