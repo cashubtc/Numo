@@ -23,6 +23,8 @@ import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -882,23 +884,38 @@ class TipSelectionActivity : AppCompatActivity() {
             
             // If still null, try force refresh (not first fetch - preserve cache)
             if (limits == null) {
-                limits = mintManager.getMintLimits(preferredMint, this, forceRefresh = true, isFirstFetch = false)
-            }
-            
-            if (limits != null) {
-                val limitCheck = MintLimitChecker.checkMintLimitsWithTip(paymentAmountSats, selectedTipSats, limits)
-                if (!limitCheck.isValid) {
-                    val errorMsg = when (limitCheck.limitType) {
-                        MintLimitChecker.LimitType.MAX -> getString(R.string.pos_charge_button_max_limit, limitCheck.maxAmount ?: 0)
-                        MintLimitChecker.LimitType.MIN -> getString(R.string.pos_charge_button_min_limit, limitCheck.minAmount ?: 0)
-                        else -> getString(R.string.pos_charge_button_mint_disabled)
-                    }
-                    Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show()
-                    return
+                lifecycleScope.launch {
+                    limits = mintManager.getMintLimits(preferredMint, this@TipSelectionActivity, forceRefresh = true, isFirstFetch = false)
+                    handleLimitsCheckAndProceed(limits, totalAmountSats)
                 }
+                return
+            } else {
+                handleLimitsCheckAndProceed(limits, totalAmountSats)
+                return
             }
         }
         
+        continuePaymentWithAmount(totalAmountSats)
+    }
+
+    private fun handleLimitsCheckAndProceed(limits: CashuWalletManager.MintLimits?, totalAmountSats: Long) {
+        if (limits != null) {
+            val limitCheck = MintLimitChecker.checkMintLimitsWithTip(paymentAmountSats, selectedTipSats, limits)
+            if (!limitCheck.isValid) {
+                val errorMsg = when (limitCheck.limitType) {
+                    MintLimitChecker.LimitType.MAX -> getString(R.string.pos_charge_button_max_limit, limitCheck.maxAmount ?: 0)
+                    MintLimitChecker.LimitType.MIN -> getString(R.string.pos_charge_button_min_limit, limitCheck.minAmount ?: 0)
+                    else -> getString(R.string.pos_charge_button_mint_disabled)
+                }
+                Toast.makeText(this@TipSelectionActivity, errorMsg, Toast.LENGTH_LONG).show()
+                return
+            }
+        }
+        
+        continuePaymentWithAmount(totalAmountSats)
+    }
+
+    private fun continuePaymentWithAmount(totalAmountSats: Long) {
         // Calculate new formatted amount (total)
         val newFormattedAmount = if (entryCurrency == Currency.BTC) {
             Amount(totalAmountSats, Currency.BTC).toString()
