@@ -12,16 +12,16 @@ import org.robolectric.RobolectricTestRunner
 class MintLimitCheckerTest {
 
     @Test
-    fun `given null mintLimits, when checkMintLimits called, then allow amount`() {
+    fun `given null mintLimits, when checkMintLimits called, then reject with DISABLED`() {
         val result = MintLimitChecker.checkMintLimits(1000, null)
-        assertTrue(result.isValid)
+        assertFalse(result.isValid)
         assertEquals(null, result.minAmount)
         assertEquals(null, result.maxAmount)
-        assertEquals(MintLimitChecker.LimitType.NONE, result.limitType)
+        assertEquals(MintLimitChecker.LimitType.DISABLED, result.limitType)
     }
 
     @Test
-    fun `given mintLimits without bolt11 method, when checkMintLimits called, then allow amount`() {
+    fun `given mintLimits without bolt11 method, when checkMintLimits called, then reject with DISABLED`() {
         val mintLimits = CashuWalletManager.MintLimits(
             mintMethods = listOf(
                 CashuWalletManager.MintMethodSettings(
@@ -34,7 +34,8 @@ class MintLimitCheckerTest {
             meltMethods = emptyList()
         )
         val result = MintLimitChecker.checkMintLimits(1000, mintLimits)
-        assertTrue(result.isValid)
+        assertFalse(result.isValid)
+        assertEquals(MintLimitChecker.LimitType.DISABLED, result.limitType)
     }
 
     @Test
