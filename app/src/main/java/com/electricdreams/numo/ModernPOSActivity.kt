@@ -187,6 +187,12 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
             Log.e(TAG, "Failed to set preferred HCE service: ${e.message}", e)
         }
         
+        // Reapply theme when returning from settings
+        uiCoordinator.applyTheme()
+        
+        // Refresh display to update currency formatting when returning from settings
+        uiCoordinator.refreshDisplay()
+        
         // Reload mint limits every time we return to POS to ensure fresh data
         uiCoordinator.reloadMintLimits()
     }
