@@ -59,6 +59,7 @@ class AmountDisplayManagerTest {
         `when`(mockContext.getString(eq(R.string.pos_charge_button))).thenReturn("Charge")
         `when`(mockContext.getString(any())).thenReturn("String")
         `when`(mockContext.resources).thenReturn(realContext.resources)
+        `when`(mockContext.getSystemService(Context.CONNECTIVITY_SERVICE)).thenReturn(realContext.getSystemService(Context.CONNECTIVITY_SERVICE))
 
         // Reset CurrencyManager singleton
         resetCurrencyManager()
