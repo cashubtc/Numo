@@ -22,6 +22,18 @@ object MintLimitChecker {
     )
 
     fun checkMintLimits(amount: Long, mintLimits: CashuWalletManager.MintLimits?): LimitCheckResult {
+        return checkMintLimitsWithTip(amount, 0, mintLimits)
+    }
+    
+    /**
+     * Check if amount + tip is within mint limits.
+     * @param amount The base payment amount in sats
+     * @param tipAmount The tip amount in sats
+     * @param mintLimits The mint limits from the mint info
+     */
+    fun checkMintLimitsWithTip(amount: Long, tipAmount: Long, mintLimits: CashuWalletManager.MintLimits?): LimitCheckResult {
+        val totalAmount = amount + tipAmount
+        
         if (mintLimits == null) {
             return LimitCheckResult(
                 isValid = true,
@@ -52,11 +64,9 @@ object MintLimitChecker {
             )
         }
 
-        // Handle invalid limits (0 or null for both means no limits)
         val minLimit = bolt11Method.minAmount
         val maxLimit = bolt11Method.maxAmount
         
-        // If both are 0 or null, treat as no limits
         if ((minLimit == null || minLimit == 0L) && (maxLimit == null || maxLimit == 0L)) {
             return LimitCheckResult(
                 isValid = true,
@@ -66,8 +76,7 @@ object MintLimitChecker {
         }
 
         minLimit?.let { min ->
-            // Only enforce min if it's > 0 (0 means no minimum)
-            if (min > 0 && amount < min) {
+            if (min > 0 && totalAmount < min) {
                 return LimitCheckResult(
                     isValid = false,
                     minAmount = min,
@@ -78,8 +87,7 @@ object MintLimitChecker {
         }
 
         maxLimit?.let { max ->
-            // Only enforce max if it's > 0 (0 means no maximum)
-            if (max > 0 && amount > max) {
+            if (max > 0 && totalAmount > max) {
                 return LimitCheckResult(
                     isValid = false,
                     minAmount = bolt11Method.minAmount,

@@ -36,7 +36,12 @@ class AmountDisplayManager(
     private var currentMintLimits: CashuWalletManager.MintLimits? = null
 
     fun setMintLimits(limits: CashuWalletManager.MintLimits?) {
+        Log.d("AmountDisplayManager", "setMintLimits called with: $limits")
         currentMintLimits = limits
+    }
+    
+    fun getCurrentMintLimits(): CashuWalletManager.MintLimits? {
+        return currentMintLimits
     }
 
     enum class AnimationType { NONE, DIGIT_ENTRY, CURRENCY_SWITCH }
