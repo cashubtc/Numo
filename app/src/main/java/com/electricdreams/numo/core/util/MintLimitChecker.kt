@@ -36,9 +36,10 @@ object MintLimitChecker {
         
         if (mintLimits == null) {
             return LimitCheckResult(
-                isValid = true,
+                isValid = false,
                 minAmount = null,
-                maxAmount = null
+                maxAmount = null,
+                limitType = LimitType.DISABLED
             )
         }
 
@@ -49,9 +50,10 @@ object MintLimitChecker {
 
         if (bolt11Method == null) {
             return LimitCheckResult(
-                isValid = true,
+                isValid = false,
                 minAmount = null,
-                maxAmount = null
+                maxAmount = null,
+                limitType = LimitType.DISABLED
             )
         }
 
