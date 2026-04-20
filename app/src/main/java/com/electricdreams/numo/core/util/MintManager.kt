@@ -378,6 +378,15 @@ class MintManager private constructor(context: Context) {
                 if (shouldStore) {
                     val result = profileService.fetchAndStoreMintProfile(normalizedUrl, validateEndpoint = false, storeInCache = true)
                     Log.d(TAG, "fetchMintLimitsSimple result: success=${result.success}, stored=$shouldStore")
+                    
+                    if (result.success) {
+                        // If the fetch succeeded, strictly use the new limits (even if null/empty).
+                        // Do NOT restore the old cache.
+                        val infoJson = getMintInfo(normalizedUrl)
+                        val cachedInfo = infoJson?.let { CashuWalletManager.mintInfoFromJson(it) }
+                        Log.d(TAG, "Fetch succeeded, returning limits: ${cachedInfo?.mintLimits}")
+                        return@runBlocking cachedInfo?.mintLimits
+                    }
                 } else {
                     // Skip fetch, use existing cache
                     Log.d(TAG, "Skipping fetch - using existing cache (not first fetch)")
@@ -388,22 +397,12 @@ class MintManager private constructor(context: Context) {
                 if (infoJson != null) {
                     val cachedInfo = CashuWalletManager.mintInfoFromJson(infoJson)
                     val limits = cachedInfo?.mintLimits
-                    Log.d(TAG, "Fetch returned: $limits")
+                    Log.d(TAG, "Cache returned: $limits")
                     
                     // If we have valid limits, use them
                     if (limits != null && limits.mintMethods.isNotEmpty()) {
-                        Log.d(TAG, "Using fetch result (has valid mint methods)")
+                        Log.d(TAG, "Using cached limits (has valid mint methods)")
                         return@runBlocking limits
-                    }
-                    
-                    // Fetch returned null but we have valid cached limits - use cache
-                    if (limits == null && hasCachedLimitsBefore) {
-                        Log.d(TAG, "Fetch returned null, using cached limits as fallback")
-                        // Restore the old cache
-                        cachedInfoBefore?.let {
-                            preferences.edit().putString(KEY_MINT_INFO_PREFIX + normalizedUrl, it).apply()
-                        }
-                        return@runBlocking cachedLimitsBefore
                     }
                 }
                 
