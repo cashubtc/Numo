@@ -31,11 +31,11 @@ object NetworkUtils {
 
         val networkCallback = object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
-                trySend(true)
+                trySend(isNetworkAvailable(context))
             }
 
             override fun onLost(network: Network) {
-                trySend(false)
+                trySend(isNetworkAvailable(context))
             }
             
             override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
