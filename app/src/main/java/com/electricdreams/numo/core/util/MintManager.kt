@@ -345,7 +345,7 @@ class MintManager private constructor(context: Context) {
         
         // Cache miss, stale, or force refresh - fetch from network
         // Pass isFirstFetch to control whether to store the result in cache
-        return fetchMintLimitsSimple(mintUrl, context, isFirstFetch)
+        return fetchMintLimitsSimple(mintUrl, context, isFirstFetch, forceRefresh)
     }
     
     /**
@@ -353,7 +353,7 @@ class MintManager private constructor(context: Context) {
      * Only updates cache on first call (when app opens), then uses existing cache.
      * This prevents inconsistent responses from mints like Minibits from overwriting valid limits.
      */
-    private fun fetchMintLimitsSimple(mintUrl: String, context: android.content.Context, isFirstFetch: Boolean = false): CashuWalletManager.MintLimits? {
+    private fun fetchMintLimitsSimple(mintUrl: String, context: android.content.Context, isFirstFetch: Boolean = false, forceRefresh: Boolean = false): CashuWalletManager.MintLimits? {
         return try {
             val normalizedUrl = normalizeMintUrl(mintUrl)
             Log.d(TAG, "fetchMintLimitsSimple: normalizedUrl=$normalizedUrl, isFirstFetch=$isFirstFetch")
@@ -372,8 +372,8 @@ class MintManager private constructor(context: Context) {
             kotlinx.coroutines.runBlocking {
                 val profileService = MintProfileService.getInstance(context)
                 
-                // Only fetch and store if this is the first fetch (app opened) or no cache exists
-                val shouldStore = isFirstFetch || !hasCachedLimitsBefore
+                // Fetch if it's the first fetch, if there's no cache, OR if a force refresh is explicitly requested
+                val shouldStore = isFirstFetch || !hasCachedLimitsBefore || forceRefresh
                 
                 if (shouldStore) {
                     val result = profileService.fetchAndStoreMintProfile(normalizedUrl, validateEndpoint = false, storeInCache = true)
