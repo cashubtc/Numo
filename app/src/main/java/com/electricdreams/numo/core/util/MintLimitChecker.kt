@@ -43,9 +43,14 @@ object MintLimitChecker {
             )
         }
 
-        val bolt11Method = mintLimits.mintMethods.find { 
-            it.method.equals("bolt11", ignoreCase = true) && 
-            it.unit.equals("sat", ignoreCase = true)
+        val bolt11Method = mintLimits.mintMethods.find { method ->
+            val methodStr = method.method
+            val unitStr = method.unit
+            val methodMatch = methodStr.equals("bolt11", ignoreCase = true) ||
+                methodStr.contains("Bolt11") || methodStr.contains("bolt11")
+            val unitMatch = unitStr.equals("sat", ignoreCase = true) ||
+                unitStr.equals("SAT", ignoreCase = true) || unitStr.contains("Sat")
+            methodMatch && unitMatch
         }
 
         if (bolt11Method == null) {

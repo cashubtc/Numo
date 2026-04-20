@@ -380,12 +380,27 @@ class MintManager private constructor(context: Context) {
                     Log.d(TAG, "fetchMintLimitsSimple result: success=${result.success}, stored=$shouldStore")
                     
                     if (result.success) {
-                        // If the fetch succeeded, strictly use the new limits (even if null/empty).
-                        // Do NOT restore the old cache.
+                        // If the fetch succeeded, get the limits from the response
                         val infoJson = getMintInfo(normalizedUrl)
                         val cachedInfo = infoJson?.let { CashuWalletManager.mintInfoFromJson(it) }
-                        Log.d(TAG, "Fetch succeeded, returning limits: ${cachedInfo?.mintLimits}")
-                        return@runBlocking cachedInfo?.mintLimits
+                        val newLimits = cachedInfo?.mintLimits
+                        
+                        // If new limits are valid (not null and has methods), use them
+                        // Otherwise, fallback to cached limits (for mints like Minibits that sometimes return empty nuts)
+                        if (newLimits != null && newLimits.mintMethods.isNotEmpty()) {
+                            Log.d(TAG, "Fetch succeeded with valid limits: $newLimits")
+                            return@runBlocking newLimits
+                        } else if (cachedLimitsBefore != null && cachedLimitsBefore.mintMethods.isNotEmpty()) {
+                            Log.d(TAG, "Fetch returned empty limits, using cached fallback: $cachedLimitsBefore")
+                            // Restore the cache to previous valid state
+                            cachedInfoBefore?.let {
+                                preferences.edit().putString(KEY_MINT_INFO_PREFIX + normalizedUrl, it).apply()
+                            }
+                            return@runBlocking cachedLimitsBefore
+                        }
+                        // No limits at all - return null
+                        Log.d(TAG, "Fetch succeeded but no limits (null), no cache to fallback")
+                        return@runBlocking null
                     }
                 } else {
                     // Skip fetch, use existing cache
