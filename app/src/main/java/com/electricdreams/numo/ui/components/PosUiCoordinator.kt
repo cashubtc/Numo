@@ -120,13 +120,8 @@ class PosUiCoordinator(
                 val limits = mintManager.getMintLimits(preferredMint, activity, forceRefresh = true, isFirstFetch = false)
                 amountDisplayManager.setMintLimits(limits)
                 
-                // After loading limits, trigger an update to apply the limits to the current amount
-                if (satoshiInput.isNotEmpty()) {
-                    val currentAmount = satoshiInput.toString().toLongOrNull() ?: 0
-                    if (currentAmount > 0) {
-                        amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
-                    }
-                }
+                // Update display to re-evaluate button state based on new limits
+                amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
             }
         }
     }
@@ -137,9 +132,8 @@ class PosUiCoordinator(
         val preferredMint = mintManager.getPreferredLightningMint()
         Log.d(TAG, "Preferred mint: $preferredMint")
         if (preferredMint != null) {
-            // Show loading state while refreshing
+            // Disable button while refreshing, but let AmountDisplayManager handle the text based on wallet state
             submitButton.isEnabled = false
-            submitButton.text = activity.getString(R.string.pos_charge_button_loading)
             
             activity.lifecycleScope.launch {
                 // Force refresh but NOT first fetch - preserve existing cache
@@ -151,21 +145,8 @@ class PosUiCoordinator(
                 // Same behavior as onCreate - always set limits
                 amountDisplayManager.setMintLimits(limits)
                 
-                // Same behavior as onCreate - update display if there's input
-                if (satoshiInput.isNotEmpty()) {
-                    val currentAmount = satoshiInput.toString().toLongOrNull() ?: 0
-                    if (currentAmount > 0) {
-                        amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
-                    }
-                } else {
-                    // Reset button state
-                    val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
-                    if (isReady) {
-                        submitButton.text = activity.getString(R.string.pos_charge_button)
-                        submitButton.isEnabled = true
-                        submitButton.alpha = 1.0f
-                    }
-                }
+                // Update display to re-evaluate button state based on new limits
+                amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
             }
         }
     }
