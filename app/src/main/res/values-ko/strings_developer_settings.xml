@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="developer_settings_restart_dialog_message">
+ 온보딩 완료 상태가 지워지고 환영 화면으로 돌아갑니다. 계속하시겠습니까?
+ </string>
+    <string name="developer_settings_restart_dialog_title">온보딩 다시 시작</string>
+    <string name="developer_settings_restart_dialog_positive">다시 시작</string>
+</resources>

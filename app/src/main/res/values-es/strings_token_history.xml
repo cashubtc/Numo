@@ -1,12 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <!-- Token history: toolbar title & dialogs -->
     <string name="token_history_toolbar_title">Historial de tokens</string>
-
     <string name="token_history_dialog_delete_title">Eliminar token</string>
     <string name="token_history_dialog_delete_message">¿Seguro que quieres eliminar este token del historial?</string>
     <string name="token_history_dialog_delete_positive">Eliminar</string>
-
     <string name="token_history_dialog_clear_title">Borrar historial</string>
     <string name="token_history_dialog_clear_message">¿Seguro que quieres borrar todo el historial de tokens? Esta acción no se puede deshacer.</string>
     <string name="token_history_dialog_clear_positive">Borrar todo</string>
+    <string name="token_history_toast_no_app">No hay aplicaciones disponibles para manejar este token</string>
+    <string name="token_history_toast_copied">Token copiado al portapapeles</string>
 </resources>

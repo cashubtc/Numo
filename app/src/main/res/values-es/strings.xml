@@ -1,17 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">Numo</string>
     <string name="navigation_drawer_open">Abrir menú de navegación</string>
     <string name="navigation_drawer_close">Cerrar menú de navegación</string>
     <string name="item_list_title">Gestionar artículos del catálogo</string>
-
-    <!-- Host Card Emulation strings -->
     <string name="service_description">Servicio de pago Cashu</string>
     <string name="ndef_aid_description">NDEF Tag tipo 4</string>
-
-    <!-- QR-based PaymentRequest -->
     <string name="payment_request_qr_description">Código QR de solicitud de pago Cashu</string>
-
-    <!-- Tips settings -->
     <string name="tips_settings_toolbar_back">Atrás</string>
     <string name="tips_settings_title">Propinas</string>
     <string name="tips_settings_description">Permite a los clientes añadir una propina al pagar. Las propinas predefinidas aparecerán como botones de selección rápida en la pantalla de pago.</string>
@@ -20,8 +15,6 @@
     <string name="tips_settings_presets_description">Configura porcentajes de propina de selección rápida. Los clientes también pueden introducir un importe personalizado.</string>
     <string name="tips_settings_add_preset">Añadir propina</string>
     <string name="tips_settings_reset_defaults">Restablecer valores predeterminados</string>
-
-    <!-- Tips dialogs & toasts -->
     <string name="tip_percentage_format">%1$d%%</string>
     <string name="tips_dialog_add_preset_title">Añadir propina predefinida</string>
     <string name="tips_dialog_add_preset_hint">Introduce un porcentaje (1-100)</string>
@@ -29,20 +22,15 @@
     <string name="tips_dialog_add_preset_negative">Cancelar</string>
     <string name="tips_error_invalid_percentage">Introduce un porcentaje válido (1-100)</string>
     <string name="tips_error_could_not_add_preset">No se pudo añadir la propina (puede que ya exista o que se haya alcanzado el máximo)</string>
-
     <string name="tips_dialog_edit_preset_title">Editar propina predefinida</string>
     <string name="tips_dialog_edit_preset_positive">Guardar</string>
-
     <string name="tips_dialog_remove_preset_title">Eliminar propina predefinida</string>
     <string name="tips_dialog_remove_preset_message">¿Eliminar la propina del %1$d%% de las opciones predefinidas?</string>
     <string name="tips_dialog_remove_preset_positive">Eliminar</string>
-
     <string name="tips_dialog_reset_defaults_title">Restablecer valores predeterminados</string>
     <string name="tips_dialog_reset_defaults_message" formatted="false">¿Restablecer las propinas predefinidas a los valores por defecto (5 %, 10 %, 15 %, 20 %)?</string>
     <string name="tips_dialog_reset_defaults_positive">Restablecer</string>
     <string name="tips_toast_reset_to_defaults">Propinas restablecidas a los valores por defecto</string>
-
-    <!-- Tip selection screen -->
     <string name="tip_selection_close_content_description">Cerrar</string>
     <string name="tip_selection_order_total_label">Total del pedido</string>
     <string name="tip_selection_question_add_tip">¿Quieres añadir una propina?</string>
@@ -54,19 +42,15 @@
     <string name="tip_selection_custom_question">Introduce el importe de la propina</string>
     <string name="tip_selection_main_back">Atrás</string>
     <string name="tip_selection_main_confirm">Confirmar</string>
-
-    <!-- Payment request -->
     <string name="payment_request_close_content_description">Cerrar</string>
     <string name="payment_request_share_content_description">Compartir</string>
     <string name="payment_request_pay_label">Pagar</string>
     <string name="payment_request_instruction_scan_or_tap">Escanea o acerca para pagar</string>
     <string name="payment_request_nfc_reading">Leyendo desde NFC...</string>
     <string name="payment_request_animation_close">Listo</string>
-
     <string name="payment_request_error_invalid_amount">Importe de pago no válido</string>
     <string name="payment_request_error_ndef_prepare">No se pudo preparar los datos de pago NDEF</string>
     <string name="payment_request_error_nothing_to_share">Nada que compartir todavía</string>
-
     <string name="payment_request_status_preparing">Preparando la solicitud de pago...</string>
     <string name="payment_request_status_waiting_for_payment">Esperando el pago...</string>
     <string name="payment_request_status_error_qr">Error al generar el código QR</string>
@@ -74,13 +58,9 @@
     <string name="payment_request_status_success">Pago completado correctamente</string>
     <string name="payment_request_status_failed">El pago ha fallado: %1$s</string>
     <string name="payment_request_lightning_error_failed">El pago Lightning ha fallado: %1$s</string>
-
     <string name="payment_request_tip_info_with_percentage">incluye una propina de %1$s (%2$d%%)</string>
     <string name="payment_request_tip_info_no_percentage">incluye una propina de %1$s</string>
-
     <string name="payment_request_share_chooser_title">Compartir solicitud de pago</string>
-
-    <!-- Payment received -->
     <string name="payment_received_amount">Has recibido %1$s.</string>
     <string name="payment_received_button_view_details">Ver detalles</string>
     <string name="payment_received_button_close">Cerrar</string>
@@ -88,13 +68,10 @@
     <string name="payment_received_share_content_description">Compartir</string>
     <string name="payment_received_success_background_description">Fondo de éxito</string>
     <string name="payment_received_success_icon_description">Éxito</string>
-
     <string name="payment_received_error_no_token">No hay ningún token para compartir</string>
     <string name="payment_received_share_chooser_title">Compartir token</string>
     <string name="payment_received_error_no_share_app">No hay aplicaciones disponibles para compartir este token</string>
     <string name="payment_received_error_no_details">Los detalles de la transacción no están disponibles</string>
-
-    <!-- Payment failure -->
     <string name="payment_failure_title">Pago fallido</string>
     <string name="payment_failure_message">Se produjo un error al procesar este pago.</string>
     <string name="payment_failure_button_try_again">Intentar de nuevo</string>
@@ -103,22 +80,17 @@
     <string name="payment_failure_error_background_description">Fondo de error</string>
     <string name="payment_failure_error_icon_description">Error</string>
     <string name="payment_failure_error_no_pending">No hay ningún pago pendiente para reintentar</string>
-
-    <!-- Onboarding / Welcome -->
     <string name="onboarding_welcome_tagline">Acepta pagos en Bitcoin al instante y sin comisiones.</string>
     <string name="onboarding_welcome_message">Acepta pagos en Bitcoin al instante y sin comisiones usando la tecnología Cashu ecash.</string>
-    <string name="onboarding_terms_text">Al continuar, aceptas nuestros <annotation id="terms">Términos de servicio</annotation> y <annotation id="privacy">Política de privacidad</annotation></string>
+    <string name="onboarding_terms_text">Al continuar, aceptas nuestros <annotation id="terms">Términos de servicio</annotation> y <annotation id="privacy">Política de privacidad</annotation>
+    </string>
     <string name="onboarding_get_started">Comenzar</string>
-
-    <!-- Onboarding / Choose Path -->
     <string name="onboarding_setup_title">Configura tu cartera</string>
     <string name="onboarding_setup_subtitle">Elige cómo quieres empezar</string>
     <string name="onboarding_create_wallet_title">Crear cartera nueva</string>
     <string name="onboarding_create_wallet_subtitle">Empieza desde cero con una nueva frase semilla</string>
     <string name="onboarding_restore_wallet_title">Restaurar desde copia de seguridad</string>
     <string name="onboarding_restore_wallet_subtitle">Usa tu frase semilla existente</string>
-
-    <!-- Explainer -->
     <string name="explainer_teaser_title">Toca para aprender cómo funciona Numo.</string>
     <string name="explainer_slide1_title">Toca para cobrar</string>
     <string name="explainer_slide1_body">Ingresa un monto, toca cobrar y tu cliente acerca su telfono al tuyo. El pago llega al instante por NFC.</string>
@@ -127,8 +99,6 @@
     <string name="explainer_slide3_title">Cero comisiones</string>
     <string name="explainer_slide3_body">Numo es completamente de cdigo abierto y no cobra comisiones. Sin suscripciones, sin recortes, sin costos ocultos. Cada sat que recibes es tuyo.</string>
     <string name="explainer_image_placeholder">Imagen de ejemplo</string>
-
-    <!-- Onboarding / Restore Seed Entry -->
     <string name="onboarding_seed_toolbar_back">Atrás</string>
     <string name="onboarding_seed_toolbar_title">Restaurar cartera</string>
     <string name="onboarding_seed_instruction_title">Introduce tu frase semilla de 12 palabras</string>
@@ -141,8 +111,6 @@
     <string name="onboarding_clipboard_empty">El portapapeles está vacío</string>
     <string name="onboarding_seed_paste_invalid">Pega una frase semilla válida de 12 palabras</string>
     <string name="onboarding_seed_paste_success">Frase semilla pegada</string>
-
-    <!-- Onboarding / Generating Wallet -->
     <string name="onboarding_status_creating_wallet">Creando tu cartera...</string>
     <string name="onboarding_status_generating_seed">Generando frase semilla...</string>
     <string name="onboarding_status_setting_up_mints">Configurando mints por defecto...</string>
@@ -150,12 +118,8 @@
     <string name="onboarding_status_connecting_mints">Conectando con los mints...</string>
     <string name="onboarding_status_fetching_mints">Obteniendo información de los mints...</string>
     <string name="onboarding_generating_hint">Esto solo tomará un momento</string>
-
-    <!-- Onboarding / Fetching Backup -->
     <string name="onboarding_fetching_searching_backup">Buscando copia de seguridad...</string>
     <string name="onboarding_fetching_checking_relays">Comprobando relés Nostr para tu configuración de mints</string>
-
-    <!-- Onboarding / Review Mints -->
     <string name="onboarding_mints_toolbar_back">Atrás</string>
     <string name="onboarding_mints_toolbar_title">Tus mints</string>
     <string name="onboarding_backup_found_title">Copia de seguridad encontrada</string>
@@ -175,12 +139,8 @@
     <string name="onboarding_mints_popular_header">MINTS POPULARES</string>
     <string name="onboarding_mints_tap_hint">Toca para cambiar el mint predeterminado</string>
     <string name="onboarding_mints_add_new_button">+ Agregar Nuevo Mint</string>
-
-    <!-- Onboarding / Restoring -->
     <string name="onboarding_restoring_title">Restaurando cartera</string>
     <string name="onboarding_restoring_initializing">Iniciando restauración...</string>
-
-    <!-- Onboarding / Success -->
     <string name="onboarding_success_restored_title">Cartera restaurada</string>
     <string name="onboarding_success_restored_recovered">Se han recuperado %1$d sats</string>
     <string name="onboarding_success_restored_total_balance">Saldo total: %1$d sats</string>
@@ -188,46 +148,34 @@
     <string name="onboarding_success_created_subtitle">Tu cartera está lista para usar</string>
     <string name="onboarding_success_balance_by_mint">SALDO POR MINT</string>
     <string name="onboarding_enter_wallet_button">Acceder a cartera</string>
-
-    <!-- Onboarding / Errors -->
     <string name="onboarding_error_creating_wallet">Error al crear la cartera: %1$s</string>
     <string name="onboarding_error_initializing_wallet">Error al inicializar la cartera: %1$s</string>
-
-    <!-- Restore Wallet (standalone screen) -->
     <string name="restore_warning_title">Advertencia importante</string>
     <string name="restore_warning_body">Restaurar con una frase semilla reemplazará tu cartera actual. Asegúrate de haber guardado la frase semilla actual antes de continuar.</string>
     <string name="restore_seed_instruction_title">Introduce tu frase semilla de 12 palabras</string>
     <string name="restore_seed_paste_button">Pegar desde el portapapeles</string>
     <string name="restore_seed_continue">Continuar</string>
-
     <string name="restore_fetching_title">Comprobando si hay copia de seguridad</string>
     <string name="restore_fetching_status">Buscando en los relés Nostr...</string>
-
     <string name="restore_backup_found_title">Copia de seguridad encontrada</string>
     <string name="restore_backup_found_subtitle">Última copia de seguridad: 1 ene 2024</string>
     <string name="restore_backup_unknown_date">Fecha desconocida</string>
-
     <string name="restore_mints_title">Selecciona los mints que quieres restaurar</string>
     <string name="restore_mints_count">0 mints seleccionados</string>
     <string name="restore_mints_start_button">Iniciar restauración</string>
     <string name="restore_confirm_dialog_message">Esto restaurará tu cartera a partir de la frase semilla introducida.\n\n⚠️ IMPORTANTE:\n• Asegúrate de haber hecho una copia de seguridad de tu frase semilla actual\n• Esta acción no se puede deshacer\n• Se intentará restaurar en %1$d mint(s) seleccionado(s)\n\n%2$s</string>
     <string name="restore_confirm_current_seed_note">Tu frase semilla actual comienza con: \"%1$s...\"</string>
-
     <string name="restore_progress_title">Restaurando cartera</string>
     <string name="restore_progress_status">Conectando con los mints...</string>
     <string name="restore_progress_status_waiting">Esperando...</string>
     <string name="restore_progress_balance_increase">+%1$d sats</string>
     <string name="restore_progress_balance_decrease">%1$d sats</string>
-
     <string name="restore_success_title">Cartera restaurada</string>
     <string name="restore_success_subtitle">Tu cartera se ha restaurado correctamente</string>
     <string name="restore_success_balance_line">%1$d sats</string>
     <string name="restore_success_done_button">Listo</string>
-
     <string name="restore_error_failed">La restauración ha fallado: %1$s</string>
     <string name="restore_error_no_mints_selected">Selecciona al menos un mint para restaurar.</string>
-
-    <!-- Seed Phrase screen -->
     <string name="seed_phrase_toolbar_back">Atrás</string>
     <string name="seed_phrase_toolbar_title">Frase semilla</string>
     <string name="seed_phrase_warning_title">¡Mantén esto en secreto!</string>
@@ -236,13 +184,35 @@
     <string name="seed_phrase_show_button">Mostrar</string>
     <string name="seed_phrase_copy_button">Copiar al portapapeles</string>
     <string name="seed_phrase_clipboard_disclaimer">Asegúrate de borrar el portapapeles después de pegar</string>
-
-    <!-- Terms dialog / common -->
     <string name="dialog_terms_title">Términos de servicio</string>
-    <string name="dialog_terms_body">NUMO WALLET - TÉRMINOS DE SERVICIO&#x0A;&#x0A;1. ACEPTACIÓN&#x0A;Al usar esta aplicación de cartera, aceptas estos términos.&#x0A;&#x0A;2. NATURALEZA DEL SERVICIO&#x0A;Esta es una cartera Bitcoin autocustodiada que utiliza tecnología Cashu ecash. Eres el único responsable de tus fondos y tu frase semilla.&#x0A;&#x0A;3. FRASE SEMILLA&#x0A;Tu frase semilla de 12 palabras es la ÚNICA forma de recuperar tu cartera. Nunca la compartas. Guárdala de forma segura sin conexión. No podemos recuperar frases semilla perdidas.&#x0A;&#x0A;4. SIN GARANTÍA&#x0A;Este software se proporciona \"tal cual\" sin garantía de ningún tipo. Úsalo bajo tu propia responsabilidad.&#x0A;&#x0A;5. LIMITACIÓN DE RESPONSABILIDAD&#x0A;No somos responsables de ninguna pérdida de fondos, ya sea por errores, fallos del usuario o fallos de mints de terceros.&#x0A;&#x0A;6. MINTS DE ECASH&#x0A;Los tokens ecash están custodiados por mints de terceros. Estos mints pueden fallar o dejar de estar disponibles. Diversifica entre varios mints.&#x0A;&#x0A;7. PRIVACIDAD&#x0A;Esta cartera no recopila datos personales. Las transacciones se procesan a través de mints ecash que pueden tener sus propias políticas de privacidad.&#x0A;&#x0A;8. ACTUALIZACIONES&#x0A;Estos términos pueden actualizarse. El uso continuado implica la aceptación.&#x0A;&#x0A;Última actualización: noviembre 2024</string>
-    <string name="common_close">Cerrar</string>
+    <string name="dialog_terms_body">NUMO WALLET - TÉRMINOS DE SERVICIO
 
-    <!-- Developer settings -->
+1. ACEPTACIÓN
+Al usar esta aplicación de cartera, aceptas estos términos.
+
+2. NATURALEZA DEL SERVICIO
+Esta es una cartera Bitcoin autocustodiada que utiliza tecnología Cashu ecash. Eres el único responsable de tus fondos y tu frase semilla.
+
+3. FRASE SEMILLA
+Tu frase semilla de 12 palabras es la ÚNICA forma de recuperar tu cartera. Nunca la compartas. Guárdala de forma segura sin conexión. No podemos recuperar frases semilla perdidas.
+
+4. SIN GARANTÍA
+Este software se proporciona \"tal cual\" sin garantía de ningún tipo. Úsalo bajo tu propia responsabilidad.
+
+5. LIMITACIÓN DE RESPONSABILIDAD
+No somos responsables de ninguna pérdida de fondos, ya sea por errores, fallos del usuario o fallos de mints de terceros.
+
+6. MINTS DE ECASH
+Los tokens ecash están custodiados por mints de terceros. Estos mints pueden fallar o dejar de estar disponibles. Diversifica entre varios mints.
+
+7. PRIVACIDAD
+Esta cartera no recopila datos personales. Las transacciones se procesan a través de mints ecash que pueden tener sus propias políticas de privacidad.
+
+8. ACTUALIZACIONES
+Estos términos pueden actualizarse. El uso continuado implica la aceptación.
+
+Última actualización: noviembre 2024</string>
+    <string name="common_close">Cerrar</string>
     <string name="common_back">Atrás</string>
     <string name="developer_settings_title">Opciones de desarrollo</string>
     <string name="developer_settings_section_debugging">Depuración</string>
@@ -251,8 +221,6 @@
     <string name="developer_settings_lightning_invoice_title">Retrasar factura Lightning</string>
     <string name="developer_settings_lightning_invoice_subtitle">Solo obtener la factura cuando se selecciona la pestaña Lightning</string>
     <string name="developer_settings_warning">⚠️ Las opciones de desarrollo son solo para pruebas y depuración. Usar con precaución.</string>
-
-    <!-- Developer - Error Logs -->
     <string name="developer_error_logs_title">Registros de errores</string>
     <string name="developer_error_logs_subtitle">Ver y exportar registros de errores recientes</string>
     <string name="developer_error_logs_section_title">REGISTROS DE ERRORES</string>
@@ -263,8 +231,6 @@
     <string name="developer_error_logs_empty">No hay registros de errores disponibles.</string>
     <string name="developer_error_logs_copied">Registros de errores copiados al portapapeles</string>
     <string name="developer_error_logs_share_title">Compartir registros de errores</string>
-
-    <!-- NFC dialogs -->
     <string name="nfc_dialog_title_scan_to_pay">Escanea para pagar</string>
     <string name="nfc_dialog_content_description_contactless">Pago sin contacto</string>
     <string name="nfc_dialog_content_description_cashu">Cashu</string>
@@ -274,12 +240,8 @@
     <string name="nfc_enable_message">Se necesita NFC para el pago por acercamiento. Actívalo en los ajustes.</string>
     <string name="nfc_enable_button">Ajustes</string>
     <string name="common_cancel">Cancelar</string>
-
-    <!-- Common PIN dialog -->
     <string name="dialog_title_enter_pin">Introduce el PIN</string>
     <string name="dialog_pin_hint">PIN</string>
-
-    <!-- NFC payment errors -->
     <string name="nfc_payment_error_enter_amount_first">Introduce un importe primero</string>
     <string name="nfc_payment_error_rescan_not_supported">El reescaneo con PIN no está disponible en esta versión</string>
     <string name="nfc_payment_error_insufficient_funds">Fondos insuficientes en la tarjeta</string>
@@ -291,12 +253,8 @@
     <string name="nfc_payment_error_unexpected">Se produjo un error inesperado: %1$s</string>
     <string name="nfc_payment_hint_keep_close">Mantén el teléfono cerca</string>
     <string name="nfc_payment_hint_processing">Procesando pago...\nPuedes levantar tu teléfono</string>
-
-    <!-- Common buttons -->
     <string name="common_ok">Aceptar</string>
     <string name="common_or">o</string>
-
-    <!-- Withdraw - Lightning selection screen -->
     <string name="withdraw_lightning_toolbar_back">Atrás</string>
     <string name="withdraw_lightning_title">Retirar</string>
     <string name="withdraw_lightning_balance_label">Saldo disponible</string>
@@ -311,8 +269,6 @@
     <string name="withdraw_lightning_amount_label">Cantidad (sats)</string>
     <string name="withdraw_lightning_amount_hint">1000</string>
     <string name="withdraw_lightning_button_continue">Continuar</string>
-
-    <!-- Withdraw - errors and toasts -->
     <string name="withdraw_lightning_error_invalid_mint_url">URL del mint no válida</string>
     <string name="withdraw_lightning_error_enter_invoice">Introduce una factura Lightning</string>
     <string name="withdraw_lightning_error_wallet_not_initialized">La cartera no está inicializada</string>
@@ -320,8 +276,6 @@
     <string name="withdraw_lightning_error_enter_address">Introduce una dirección Lightning</string>
     <string name="withdraw_lightning_error_enter_valid_amount">Introduce una cantidad válida</string>
     <string name="withdraw_lightning_error_generic">Error: %1$s</string>
-
-    <!-- Withdraw - melt quote screen -->
     <string name="withdraw_melt_toolbar_back">Atrás</string>
     <string name="withdraw_melt_title">Confirmar retiro</string>
     <string name="withdraw_melt_summary">Retirar de %1$s</string>
@@ -332,8 +286,6 @@
     <string name="withdraw_melt_total_label">Total</string>
     <string name="withdraw_melt_fee_note">La reserva de comisión se devolverá si la comisión real de Lightning es menor.</string>
     <string name="withdraw_melt_loading">Procesando retiro...</string>
-
-    <!-- Withdraw - melt errors and states -->
     <string name="withdraw_melt_error_invalid_data">Datos de melt quote no válidos</string>
     <string name="withdraw_melt_error_wallet_not_initialized">La cartera no está inicializada</string>
     <string name="withdraw_melt_error_invoice_not_paid">El pago ha fallado: factura no pagada</string>
@@ -352,49 +304,37 @@
     <string name="withdraw_processing_step_contacting">Contactando con el mint</string>
     <string name="withdraw_processing_step_settling">Liquidación Lightning</string>
     <string name="withdraw_processing_hint">Esto suele tardar menos de 10 segundos. Puedes salir de esta pantalla cuando haya terminado.</string>
-
     <string name="withdraw_melt_destination_invoice_fallback">Factura Lightning</string>
-
-    <!-- Withdraw - success screen -->
     <string name="withdraw_success_amount">%1$s enviados.</string>
     <string name="withdraw_success_destination">A %1$s</string>
     <string name="withdraw_success_destination_fallback">Lightning</string>
     <string name="withdraw_success_close">Cerrar</string>
     <string name="withdraw_success_background_description">Fondo de éxito</string>
     <string name="withdraw_success_icon_description">Éxito</string>
-
-    <!-- History & transaction rows/dialogs -->
     <string name="history_toolbar_title">Actividad</string>
     <string name="history_section_payment_history">HISTORIAL DE PAGOS</string>
     <string name="history_empty">No hay historial de pagos</string>
-
     <string name="transaction_row_copy">Copiar</string>
     <string name="transaction_row_open">Abrir</string>
     <string name="transaction_row_delete">Eliminar</string>
-
     <string name="token_history_copy">Copiar token</string>
     <string name="token_history_open_with">Abrir token con...</string>
     <string name="token_history_delete">Eliminar token</string>
-
     <string name="transaction_details_amount_placeholder">$0</string>
     <string name="transaction_details_date_label">Fecha</string>
     <string name="transaction_details_token_placeholder">Token...</string>
     <string name="transaction_details_copy_token">Copiar Token</string>
     <string name="transaction_details_open_with">Abrir con...</string>
     <string name="transaction_details_delete_transaction">Eliminar transacción</string>
-
     <string name="payment_history_title">Pago</string>
     <string name="payment_history_status_pending">Pendiente</string>
-
     <string name="transaction_detail_toolbar_back">Atrás</string>
     <string name="transaction_detail_toolbar_title">Detalles de la transacción</string>
     <string name="transaction_detail_toolbar_share">Compartir</string>
-
     <string name="transaction_detail_type_payment_received">Pago recibido</string>
     <string name="transaction_detail_mint_label">Desde el mint</string>
     <string name="transaction_detail_view_receipt">Ver recibo</string>
     <string name="transaction_detail_section_transaction_details">DETALLES DE LA TRANSACCIÓN</string>
-
     <string name="transaction_detail_payment_type_label">Tipo de pago</string>
     <string name="transaction_detail_payment_type_cashu">Cashu</string>
     <string name="transaction_detail_amount_label">Cantidad</string>
@@ -406,34 +346,25 @@
     <string name="transaction_detail_tip_equivalent_label">  (equivalente)</string>
     <string name="transaction_detail_total_paid_label">Total pagado</string>
     <string name="transaction_detail_mint_label_short">Mint</string>
-
     <string name="transaction_detail_lightning_invoice_header">FACTURA LIGHTNING</string>
     <string name="transaction_detail_lightning_invoice_placeholder">lnbc...</string>
     <string name="transaction_detail_copy_invoice_hint">Toca para copiar la factura</string>
-
     <string name="transaction_detail_token_header">TOKEN CASHU</string>
     <string name="transaction_detail_token_placeholder">cashuA...</string>
-
     <string name="transaction_detail_payment_request_header">SOLICITUD DE PAGO</string>
     <string name="transaction_detail_payment_request_placeholder">...</string>
-
     <string name="transaction_detail_button_copy_token">Copiar Token</string>
     <string name="transaction_detail_button_open_with">Abrir con...</string>
     <string name="transaction_detail_button_delete">Eliminar transacción</string>
-
     <string name="mint_restore_name_placeholder">Nombre del mint</string>
     <string name="mint_restore_status_restoring">Restaurando...</string>
     <string name="mint_restore_balance_change_placeholder">+0 sats</string>
-
-    <!-- Items & catalog / settings section -->
     <string name="items_settings_section_title">CATÁLOGO DE ARTÍCULOS</string>
     <string name="items_settings_status_empty">No hay artículos en el catálogo</string>
     <string name="items_settings_description">Gestiona tu catálogo de productos para un cobro rápido.</string>
     <string name="items_settings_import_csv">Importar CSV</string>
     <string name="items_settings_manage">Gestionar</string>
     <string name="items_settings_clear_all">Eliminar todos los artículos</string>
-
-    <!-- Item list screen -->
     <string name="item_list_toolbar_back">Atrás</string>
     <string name="item_list_toolbar_title">Artículos</string>
     <string name="item_list_add_item">Añadir artículo</string>
@@ -444,8 +375,6 @@
     <string name="item_list_import_from_csv">Importar desde CSV</string>
     <string name="item_list_export_to_csv">Exportar a CSV</string>
     <string name="item_list_clear_all">Eliminar todos los artículos</string>
-
-    <!-- Item entry / edit -->
     <string name="item_entry_toolbar_back">Atrás</string>
     <string name="item_entry_title_add">Añadir artículo</string>
     <string name="item_entry_button_save">Guardar</string>
@@ -453,7 +382,6 @@
     <string name="item_entry_image_placeholder">Sin imagen</string>
     <string name="item_entry_button_add_photo">Añadir foto</string>
     <string name="item_entry_button_remove_photo">Eliminar foto</string>
-
     <string name="item_entry_section_basic_information">INFORMACIÓN BÁSICA</string>
     <string name="item_entry_label_name">Nombre</string>
     <string name="item_entry_hint_name">Nombre del artículo</string>
@@ -461,13 +389,11 @@
     <string name="item_entry_hint_variation">Ej.: Pequeño, Grande</string>
     <string name="item_entry_label_description">Descripción</string>
     <string name="item_entry_hint_description">Opcional</string>
-
     <string name="item_entry_section_category">CATEGORÍA</string>
     <string name="item_entry_hint_new_category">Nombre de la nueva categoría</string>
     <string name="item_entry_category_confirm">Confirmar</string>
     <string name="item_entry_category_cancel">Cancelar</string>
     <string name="item_entry_category_helper">Selecciona una categoría existente o crea una nueva.</string>
-
     <string name="item_entry_section_pricing">PRECIO</string>
     <string name="item_entry_price_type_fiat">Fiat</string>
     <string name="item_entry_price_type_bitcoin">Bitcoin</string>
@@ -477,12 +403,10 @@
     <string name="item_entry_bitcoin_symbol">₿</string>
     <string name="item_entry_hint_price_sats">0</string>
     <string name="item_entry_label_sats">sats</string>
-
     <string name="item_entry_label_apply_vat">Aplicar IVA</string>
     <string name="item_entry_label_price_includes_vat">El precio incluye IVA</string>
     <string name="item_entry_label_vat_rate">Tasa de IVA</string>
     <string name="item_entry_hint_vat_rate">20</string>
-
     <string name="item_entry_price_breakdown_title">Desglose de precio</string>
     <string name="item_entry_price_breakdown_net_label">Precio neto (sin IVA)</string>
     <string name="item_entry_price_breakdown_net_value_default">$0.00</string>
@@ -490,9 +414,7 @@
     <string name="item_entry_price_breakdown_vat_value_default">$0.00</string>
     <string name="item_entry_price_breakdown_total_label">Total (con IVA)</string>
     <string name="item_entry_price_breakdown_total_value_default">$0.00</string>
-
     <string name="item_entry_price_helper">Establece un precio fijo en tu moneda preferida. Los precios en Bitcoin son en satoshis (sats).</string>
-
     <string name="item_entry_section_identification">IDENTIFICACIÓN</string>
     <string name="item_entry_label_gtin">GTIN</string>
     <string name="item_entry_hint_gtin">Escanea o introduce el código de barras</string>
@@ -501,7 +423,6 @@
     <string name="item_entry_hint_sku">Código de inventario interno</string>
     <string name="item_entry_error_gtin_exists">Este GTIN ya existe</string>
     <string name="item_entry_error_sku_exists">Este SKU ya existe</string>
-
     <string name="item_entry_section_inventory">INVENTARIO</string>
     <string name="item_entry_label_track_quantity">Seguimiento de cantidad</string>
     <string name="item_entry_label_current_stock">Stock actual</string>
@@ -510,16 +431,11 @@
     <string name="item_entry_label_alert_when_below">Alertar cuando sea inferior a</string>
     <string name="item_entry_hint_alert_threshold">5</string>
     <string name="item_entry_inventory_helper">Activa el seguimiento de inventario para controlar los niveles de stock y recibir alertas de stock bajo.</string>
-
     <string name="item_entry_button_cancel">Cancelar</string>
-
-    <!-- Item product row -->
     <string name="item_product_drag_handle_description">Arrastra para reordenar</string>
     <string name="item_product_image_description">Imagen del artículo</string>
     <string name="item_product_image_placeholder">Sin imagen</string>
     <string name="item_product_chevron_more">Más</string>
-
-    <!-- Item selection row -->
     <string name="item_selection_image_description">Imagen del artículo</string>
     <string name="item_selection_image_placeholder">Sin imagen</string>
     <string name="item_selection_decrease_quantity">Reducir cantidad</string>
@@ -527,23 +443,18 @@
     <string name="item_selection_variation_hint">Añadir variante personalizada...</string>
     <string name="item_selection_add_variation">Añadir</string>
     <string name="item_selection_variation_helper">Crea un nuevo artículo con esta variante</string>
-
-    <!-- Item selection screen -->
     <string name="item_selection_toolbar_back">Atrás</string>
     <string name="item_selection_toolbar_title">Cobro</string>
     <string name="item_selection_search_icon_description">Buscar</string>
     <string name="item_selection_search_hint">Buscar artículos...</string>
     <string name="item_selection_scan_barcode">Escanear código de barras</string>
     <string name="item_selection_clear_filters">Borrar filtros</string>
-
     <string name="item_selection_empty_icon_description">Sin artículos</string>
     <string name="item_selection_empty_title">No se encontraron artículos</string>
     <string name="item_selection_empty_subtitle">Añade artículos en Ajustes → Artículos</string>
-
     <string name="item_selection_no_results_icon_description">Sin resultados</string>
     <string name="item_selection_no_results_title">No hay artículos que coincidan</string>
     <string name="item_selection_no_results_subtitle">Prueba con otro término de búsqueda</string>
-
     <string name="item_selection_basket_icon_description">Cesta</string>
     <string name="item_selection_basket_title">Cesta</string>
     <string name="item_selection_basket_clear">Vaciar</string>
@@ -555,29 +466,21 @@
     <string name="item_selection_charge_button">Cobrar</string>
     <string name="item_selection_charge_button_default">Cobrar</string>
     <string name="pos_error_no_mints_configured">Añade al menos un mint en Ajustes → Mints antes de cobrar a los clientes.</string>
-    <string name="pos_error_no_network_pending_payment">Se requiere conexión a la red para abrir pagos pendientes.</string>
-    <string name="pos_error_no_network_charge">Se requiere conexión a la red para crear un cargo.</string>
 
     <string name="item_selection_save_button">Guardar</string>
     <string name="item_selection_saved_baskets_button">Guardadas</string>
     <string name="item_selection_save_basket">Guardar cesta</string>
     <string name="item_selection_save_basket_hint">Introduce un nombre (opcional)</string>
-
-    <!-- Save Basket Dialog -->
     <string name="dialog_save_basket_title">Guardar cesta</string>
     <string name="dialog_save_basket_subtitle">Dale un nombre a tu cesta para encontrarla fácilmente después.</string>
     <string name="dialog_save_basket_hint">Mesa 5, Pedido de Juan, etc.</string>
     <string name="dialog_save_basket_helper">Deja vacío para usar el nombre por defecto</string>
     <string name="dialog_save_basket_save">Guardar cesta</string>
-
-    <!-- Rename Basket Dialog -->
     <string name="dialog_rename_basket_title">Renombrar cesta</string>
     <string name="dialog_rename_basket_subtitle">Actualiza el nombre de esta cesta.</string>
     <string name="dialog_rename_basket_hint">Introduce el nuevo nombre</string>
     <string name="dialog_rename_basket_save">Guardar cambios</string>
     <string name="item_selection_editing_basket">Editando: %1$s</string>
-
-    <!-- Saved Baskets -->
     <string name="saved_baskets_back">Atrás</string>
     <string name="saved_baskets_title">Cestas guardadas</string>
     <string name="saved_baskets_empty_icon">Sin cestas guardadas</string>
@@ -590,8 +493,6 @@
     <string name="saved_baskets_rename_hint">Introduce el nombre de la cesta</string>
     <string name="saved_baskets_delete_title">Eliminar cesta</string>
     <string name="saved_baskets_delete_message">¿Eliminar \"%1$s\"? Esta acción no se puede deshacer.</string>
-
-    <!-- Basket Archive -->
     <string name="basket_archive_back">Atrás</string>
     <string name="basket_archive_title">Historial de pedidos</string>
     <string name="basket_archive_empty_icon">Sin pedidos archivados</string>
@@ -606,13 +507,9 @@
     <string name="basket_archive_detail_title">Detalles del pedido</string>
     <string name="saved_baskets_view_archive">Archivo</string>
     <string name="basket_archive_detail_view_payment">Ver pago</string>
-
-    <!-- Common -->
     <string name="common_save">Guardar</string>
     <string name="common_delete">Eliminar</string>
     <string name="common_confirm">Confirmar</string>
-
-    <!-- Basket Names Settings -->
     <string name="basket_names_settings_title">Nombres de cestas</string>
     <string name="basket_names_settings_description">Crea nombres predefinidos para guardar cestas rápidamente.\nIdeal para mesas de restaurante o pedidos de clientes.</string>
     <string name="basket_names_settings_presets_header">NOMBRES PREDEFINIDOS</string>
@@ -621,106 +518,76 @@
     <string name="basket_names_settings_add_name">Añadir nombre</string>
     <string name="basket_names_settings_examples">Ejemplos: Mesa 1, Mesa 2, VIP, Para llevar, Pedido de Juan</string>
     <string name="basket_names_settings_clear_all">Eliminar todos los nombres</string>
-
-    <!-- Basket Names Dialogs -->
     <string name="basket_names_dialog_add_title">Añadir nombre predefinido</string>
     <string name="basket_names_dialog_add_subtitle">Crea un nombre de selección rápida para cestas</string>
     <string name="basket_names_dialog_add_hint">Ej.: Mesa 1</string>
     <string name="basket_names_dialog_add_save">Añadir nombre</string>
-
     <string name="basket_names_dialog_edit_title">Editar nombre</string>
     <string name="basket_names_dialog_edit_subtitle">Actualiza el nombre predefinido</string>
     <string name="basket_names_dialog_edit_hint">Introduce el nombre</string>
     <string name="basket_names_dialog_edit_save">Guardar cambios</string>
-
     <string name="basket_names_dialog_add_button">Añadir nombre</string>
     <string name="basket_names_dialog_edit_button">Guardar cambios</string>
-
     <string name="basket_names_dialog_delete_title">Eliminar nombre</string>
     <string name="basket_names_dialog_delete_message">¿Eliminar \"%1$s\" de los nombres predefinidos?</string>
-
     <string name="basket_names_dialog_clear_all_title">Eliminar todos los nombres</string>
     <string name="basket_names_dialog_clear_all_message">¿Eliminar todos los nombres predefinidos? Esta acción no se puede deshacer.</string>
     <string name="basket_names_dialog_clear_all_confirm">Eliminar todo</string>
-
-    <!-- Basket Names Errors -->
     <string name="basket_names_error_empty">Introduce un nombre</string>
     <string name="basket_names_error_duplicate">Este nombre ya existe</string>
-
-    <!-- Plurals -->
     <plurals name="saved_baskets_item_count">
         <item quantity="one">%1$d artículo</item>
         <item quantity="other">%1$d artículos</item>
     </plurals>
-
-    <!-- Auto-Withdraw Settings -->
     <string name="auto_withdraw_title">Retiros</string>
     <string name="auto_withdraw_hero_title">Retiro automático</string>
     <string name="auto_withdraw_hero_subtitle">Envía fondos automáticamente a tu cartera Lightning cuando el saldo supere un umbral</string>
     <string name="auto_withdraw_status_active">Activo</string>
     <string name="auto_withdraw_status_inactive">Inactivo</string>
-
     <string name="auto_withdraw_enable_title">Retiro automático</string>
     <string name="auto_withdraw_enable_subtitle">Retirar automáticamente cuando el saldo supere el umbral</string>
-
     <string name="auto_withdraw_section_destination">Destino</string>
     <string name="auto_withdraw_section_trigger">Configuración del activador</string>
     <string name="auto_withdraw_section_config">CONFIGURACIÓN</string>
     <string name="auto_withdraw_lightning_address_label">Dirección Lightning</string>
     <string name="auto_withdraw_lightning_address_hint">tu@cartera.com</string>
     <string name="auto_withdraw_lightning_address_helper">Los fondos se enviarán a esta dirección automáticamente</string>
-
     <string name="auto_withdraw_threshold_title">Umbral de saldo</string>
     <string name="auto_withdraw_threshold_subtitle">Activar cuando el saldo supere</string>
     <string name="auto_withdraw_threshold_label">Umbral</string>
     <string name="auto_withdraw_threshold_hint">Activar retiro cuando el saldo alcance esta cantidad</string>
     <string name="auto_withdraw_threshold_helper">Mín: ₿1,000 • Máx: ₿1,000,000</string>
-
     <string name="auto_withdraw_percentage_title">Cantidad a retirar</string>
     <string name="auto_withdraw_percentage_subtitle">Porcentaje del saldo a enviar</string>
     <string name="auto_withdraw_percentage_label">Porcentaje de retiro</string>
     <string name="auto_withdraw_percentage_hint">Porcentaje del saldo a retirar (reserva algo para comisiones)</string>
-
     <string name="auto_withdraw_section_history">Actividad reciente</string>
     <string name="auto_withdraw_see_all">Ver todo</string>
     <string name="auto_withdraw_history_empty">No hay retiros automáticos todavía</string>
     <string name="auto_withdraw_history_empty_title">Sin actividad todavía</string>
     <string name="auto_withdraw_history_empty_subtitle">Los retiros aparecerán aquí</string>
-
     <string name="auto_withdraw_status_completed">Enviado</string>
     <string name="auto_withdraw_status_pending">Pendiente</string>
     <string name="auto_withdraw_status_failed">Fallido</string>
-
     <string name="auto_withdraw_progress_started">Retirando automáticamente...</string>
     <string name="auto_withdraw_progress_quote">Obteniendo presupuesto...</string>
     <string name="auto_withdraw_progress_sending">Enviando a la cartera...</string>
     <string name="auto_withdraw_progress_completed">Enviado correctamente</string>
     <string name="auto_withdraw_progress_failed">El retiro ha fallado</string>
-
     <string name="auto_withdraw_settings_title">Retiro automático</string>
     <string name="auto_withdraw_error_title">Detalles del error</string>
-
-    <!-- Settings - Withdrawals menu item -->
     <string name="settings_item_withdrawals_title">Retiros</string>
     <string name="settings_item_withdrawals_subtitle">Configuración de retiro automático e historial</string>
-
-    <!-- Manual Withdraw -->
     <string name="manual_withdraw_section_title">Retiro manual</string>
     <string name="manual_withdraw_title">Retirar ahora</string>
     <string name="manual_withdraw_subtitle">Enviar fondos a una factura o dirección Lightning</string>
     <string name="manual_withdraw_select_mint">Seleccionar mint</string>
     <string name="manual_withdraw_no_balance">No hay saldo disponible para retirar. Añade fondos a tu cartera primero.</string>
-
-    <!-- Mints Settings Additional -->
     <string name="mints_settings_balance_label">Saldo</string>
-
-    <!-- Mint Selection Bottom Sheet -->
     <string name="mint_selection_title">Seleccionar mint</string>
     <string name="mint_selection_subtitle">Elige de qué mint retirar</string>
     <string name="mint_selection_icon_description">Icono del mint</string>
     <string name="mint_selection_select_description">Seleccionar este mint</string>
-
-    <!-- Withdraw Lightning Redesign -->
     <string name="withdraw_invoice_card_title">Factura Lightning</string>
     <string name="withdraw_invoice_card_subtitle">Pega una factura para pagar al instante</string>
     <string name="withdraw_address_card_title">Dirección Lightning</string>
@@ -731,11 +598,8 @@
     <string name="withdraw_scan_qr">Escanear QR</string>
     <string name="withdraw_section_send_to">Enviar a</string>
     <string name="withdraw_balance_available">Disponible: %1$s</string>
-
-    <!-- Withdraw Lightning / Cashu -->
     <string name="withdraw_tab_lightning">Lightning</string>
     <string name="withdraw_tab_cashu">Token Cashu</string>
-
     <string name="withdraw_cashu_amount_card_title">Cantidad</string>
     <string name="withdraw_cashu_amount_card_subtitle">Introduce la cantidad para crear el token</string>
     <string name="withdraw_cashu_create_button">Crear Token</string>
@@ -744,13 +608,9 @@
     <string name="withdraw_cashu_copy_token">Copiar Token</string>
     <string name="withdraw_cashu_copied">Token copiado al portapapeles</string>
     <string name="withdraw_cashu_creating">Creando token...</string>
-
-    <!-- QR Scanner -->
     <string name="qr_scanner_title">Escanear código QR</string>
     <string name="qr_scanner_instruction">Apunta la cámara al código QR</string>
     <string name="qr_scanner_permission_required">Se necesita permiso de cámara para escanear códigos QR</string>
-
-    <!-- Mints Settings Redesign -->
     <string name="mints_explore_title">Mints</string>
     <string name="mints_total_balance">Saldo total</string>
     <string name="mints_your_mints">Tus mints</string>
@@ -778,34 +638,23 @@
     <string name="mint_icon_description">Icono del mint</string>
     <string name="mint_selected_description">Seleccionado</string>
     <string name="mint_remove_description">Eliminar mint</string>
-
     <plurals name="mints_count">
         <item quantity="one">%1$d mint</item>
         <item quantity="other">%1$d mints</item>
     </plurals>
-
-    <!-- Mints Lightning Section -->
     <string name="mints_lightning_mint">Mint Lightning</string>
     <string name="mints_all_mints">Todos los mints</string>
     <string name="mints_balance">Saldo</string>
     <string name="mints_lightning_description">Todos los pagos Lightning se recibirán en este mint. Toca cualquier mint de abajo para establecerlo como tu mint Lightning.</string>
     <string name="mints_set_as_lightning">Establecer como mint Lightning</string>
     <string name="mints_lightning_changed">Mint Lightning actualizado</string>
-
-    <!-- Swap-to-Lightning-mint option -->
     <string name="mints_swap_unknown_mints_title">Aceptar pagos de mints desconocidos</string>
     <string name="mints_swap_unknown_mints_subtitle">Cuando está activado, los tokens de mints desconocidos se intercambian automáticamente a tu mint Lightning.</string>
-
-    <!-- Content descriptions -->
     <string name="cd_mint_icon">Icono del mint</string>
     <string name="cd_mint_selected">Seleccionado como mint Lightning</string>
-
-    <!-- Mint Actions -->
     <string name="mint_action_info">Info</string>
     <string name="mint_action_delete">Eliminar</string>
     <string name="mints_add_section">Añadir mint</string>
-
-    <!-- Mint Details Screen -->
     <string name="mint_details_title">Detalles del mint</string>
     <string name="mint_details_about">Acerca de</string>
     <string name="mint_details_announcement">Anuncio</string>
@@ -822,25 +671,18 @@
     <string name="mint_details_copy">Copiar</string>
     <string name="mint_details_fetch_error">No se pudo obtener la información del mint</string>
     <string name="common_retry">Reintentar</string>
-
     <string name="mint_details_software_value">Software: %1$s</string>
     <string name="mint_details_version_value">Versión: %1$s</string>
     <string name="mint_details_software_unknown">Software: Desconocido</string>
     <string name="mint_details_version_unknown">Versión: Desconocida</string>
-
-    <!-- Empty State - Items -->
     <string name="empty_state_items_title">Crea tu catálogo</string>
     <string name="empty_state_items_subtitle">Añade productos para empezar a aceptar pagos.</string>
     <string name="empty_state_items_add_button">Añadir artículo</string>
     <string name="empty_state_items_import_button">Importar desde CSV</string>
-
-    <!-- Developer - Error Logs entry details -->
     <string name="developer_error_logs_entry_details_title">Detalles del error</string>
     <string name="developer_error_logs_entry_copy">Copiar entrada</string>
     <string name="developer_error_logs_clear_dialog_title">Borrar registros de errores</string>
     <string name="developer_error_logs_clear_dialog_message">¿Borrar todos los registros de errores almacenados? Esta acción no se puede deshacer.</string>
-
-    <!-- PIN Setup Screen -->
     <string name="pin_setup_create_title">Crear un PIN</string>
     <string name="pin_setup_new_pin_title">Nuevo PIN</string>
     <string name="pin_setup_create_subtitle">Elige un PIN de 4 a 16 dígitos para proteger ajustes sensibles</string>
@@ -852,8 +694,6 @@
     <string name="pin_setup_enter_at_least">Introduce al menos %d dígitos</string>
     <string name="pin_setup_more_needed">%1$d dígito%2$s · Faltan %3$d más</string>
     <string name="pin_setup_set_pin">Establecer PIN</string>
-
-    <!-- PIN Entry Screen -->
     <string name="pin_entry_title">Introduce el PIN</string>
     <string name="pin_entry_subtitle">Introduce tu PIN para continuar</string>
     <string name="pin_entry_forgot">¿Has olvidado el PIN?</string>
@@ -861,8 +701,6 @@
     <string name="pin_entry_try_again_minutes">Inténtalo de nuevo en %1$d minuto%2$s</string>
     <string name="pin_entry_try_again_seconds">Inténtalo de nuevo en %1$d segundo%2$s</string>
     <string name="pin_entry_reset_recovery">Restablecer con frase de recuperación</string>
-
-    <!-- PIN Reset Screen -->
     <string name="pin_reset_title">Restablecer PIN</string>
     <string name="pin_reset_warning_title">Restablecer tu PIN</string>
     <string name="pin_reset_warning_message">Introduce tu frase de recuperación de 12 palabras para restablecer tu PIN. Tu PIN actual se eliminará y podrás establecer uno nuevo.</string>
@@ -872,4 +710,29 @@
     <string name="payment_request_tab_unified">Unificado</string>
     <string name="payment_request_default_description">Pago de %1$d sats</string>
     <string name="payment_request_lightning_description">Pago Numo POS de %1$d sats</string>
+    <string name="onboarding_add_mint_url_hint">Introduzca la URL del mint</string>
+    <string name="onboarding_mints_popular_section_title">Mints populares</string>
+    <string name="history_dialog_dont_show_again">No volver a mostrar en el futuro</string>
+    <string name="onboarding_mints_set_default_toast">%1$s establecido como predeterminado</string>
+    <string name="onboarding_add_mint_loading">Añadiendo mint…</string>
+    <string name="onboarding_status_restoring_wallet">Restaurando billetera…</string>
+    <string name="onboarding_add_mint_button">Añadir</string>
+    <string name="onboarding_add_mint_sheet_title">Añadir un Mint</string>
+    <string name="onboarding_add_mint_or">o</string>
+    <string name="onboarding_mint_generic_name">Mint</string>
+    <string name="item_list_toast_exported">Catálogo exportado a CSV</string>
+    <string name="common_search">Buscar</string>
+    <string name="onboarding_mints_add_different">Añadir un mint diferente</string>
+    <string name="onboarding_add_mint_scan_qr">Escanear</string>
+    <string name="item_list_toast_error_exporting">Error al exportar el catálogo</string>
+    <string name="history_checking_payment_status">Comprobando estado del pago...</string>
+    <string name="onboarding_mints_scan_row_subtitle">Toque para escanear una dirección</string>
+    <string name="history_dialog_pending_delete_title">¿Eliminar pago pendiente?</string>
+    <string name="onboarding_mints_add_hint">Introduzca la dirección del mint</string>
+    <string name="history_dialog_pending_delete_message">No podrá recuperar los fondos enviados a esta solicitud si la elimina.</string>
+    <string name="items_settings_export_csv">Exportar CSV</string>
+    <string name="common_undo">Deshacer</string>
+    <string name="onboarding_mints_default_section_title">Mint predeterminado</string>
+    <string name="onboarding_mints_add_different_button">+ Nuevo Mint</string>
+    <string name="onboarding_mints_scan_row_title">Escanear código QR</string>
 </resources>

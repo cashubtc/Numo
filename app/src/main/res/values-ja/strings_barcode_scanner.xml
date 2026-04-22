@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="barcode_scanner_toast_gtin_not_unique">このGTINは他のアイテムですでに使用されています</string>
+    <string name="barcode_format_code_39">Code 39</string>
+    <string name="barcode_format_data_matrix">Data Matrix</string>
+    <string name="barcode_format_unknown">不明</string>
+    <string name="barcode_format_code_128">Code 128</string>
+    <string name="barcode_format_ean_8">EAN-8</string>
+    <string name="checkout_scanner_instruction_scan_to_add">バーコードをスキャンしてアイテムを追加</string>
+    <string name="barcode_format_ean_13">EAN-13</string>
+    <string name="barcode_scanner_toast_gtin_scanned">GTINが正常にスキャンされました</string>
+    <string name="barcode_format_upc_a">UPC-A</string>
+    <string name="barcode_format_itf">ITF</string>
+    <string name="checkout_scanner_done_button">完了</string>
+    <string name="checkout_scanner_title">スキャンして追加</string>
+    <string name="barcode_format_codabar">Codabar</string>
+    <string name="barcode_scanner_instruction_position_barcode">バーコードを枠内に配置してください</string>
+    <string name="barcode_scanner_title">バーコードをスキャン</string>
+    <string name="barcode_format_upc_e">UPC-E</string>
+    <string name="barcode_format_qr_code">QRコード</string>
+    <string name="barcode_scanner_error_camera_permission_required">バーコードをスキャンするにはカメラの権限が必要です</string>
+    <string name="barcode_format_code_93">Code 93</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="token_history_toolbar_title">토큰 내역</string>
+    <string name="token_history_toast_no_app">이 토큰을 처리할 수 있는 앱이 없습니다</string>
+    <string name="token_history_dialog_clear_title">내역 지우기</string>
+    <string name="token_history_dialog_clear_message">모든 토큰 내역을 지우시겠습니까? 이 작업은 되돌릴 수 없습니다.</string>
+    <string name="token_history_toast_copied">토큰이 클립보드에 복사되었습니다</string>
+    <string name="token_history_dialog_delete_title">토큰 삭제</string>
+    <string name="token_history_dialog_delete_positive">삭제</string>
+    <string name="token_history_dialog_clear_positive">모두 지우기</string>
+    <string name="token_history_dialog_delete_message">내역에서 이 토큰을 삭제하시겠습니까?</string>
+</resources>

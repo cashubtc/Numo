@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="payment_toast_error_payment">支払いエラー: %1$s</string>
+    <string name="payment_toast_hce_not_available">このデバイスではホストカードエミュレーションは利用できません</string>
+    <string name="payment_toast_error_ndef_setup">NDEF支払いのセットアップ中にエラーが発生しました: %1$s</string>
+    <string name="payment_toast_failed_create_request">支払いリクエストの作成に失敗しました</string>
+</resources>

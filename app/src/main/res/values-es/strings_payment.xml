@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="payment_toast_error_payment">Error de pago: %1$s</string>
+    <string name="payment_toast_hce_not_available">La emulación de tarjeta host no está disponible en este dispositivo</string>
+    <string name="payment_toast_error_ndef_setup">Error al configurar el pago NDEF: %1$s</string>
+    <string name="payment_toast_failed_create_request">Error al crear la solicitud de pago</string>
+</resources>

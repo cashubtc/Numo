@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="theme_settings_option_bitcoin_orange">비트코인 오렌지</string>
+    <string name="theme_settings_section_mode">모드</string>
+    <string name="theme_settings_dark_mode_label">다크 모드</string>
+    <string name="theme_settings_option_green">그린</string>
+    <string name="theme_settings_option_obsidian">옵시디언</string>
+    <string name="theme_settings_section_app_theme">앱 테마</string>
+    <string name="theme_settings_option_white">화이트</string>
+</resources>

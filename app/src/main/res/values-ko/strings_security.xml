@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="security_settings_pin_info_body">PIN을 설정하여 직원이 Numo를 안전하게 사용할 수 있도록 하세요. 결제를 수락하고 거래를 관리할 수 있지만 자금 인출, mint 액세스, 시드 문구 보기 또는 항목 가격 변경은 할 수 없습니다.</string>
+    <string name="security_toast_pin_must_be_digits">PIN은 4~16자리여야 합니다</string>
+    <string name="security_settings_section_pin_protection">PIN 보호</string>
+    <string name="security_settings_pin_info_title">직원 모드</string>
+    <string name="security_toast_copied">클립보드에 복사되었습니다</string>
+    <string name="security_settings_remove_pin_subtitle">PIN 보호 비활성화</string>
+    <string name="security_toast_pin_set_success">PIN이 성공적으로 설정되었습니다</string>
+    <string name="security_settings_section_backup">지갑 백업</string>
+    <string name="security_settings_remove_pin_title">PIN 제거</string>
+    <string name="security_toast_incorrect_pin">잘못된 PIN</string>
+    <string name="security_toast_pin_dont_match">PIN이 일치하지 않습니다</string>
+    <string name="security_settings_setup_pin_title">PIN 설정</string>
+    <string name="security_toast_seed_invalid">유효한 12단어 시드 문구를 붙여넣으세요</string>
+    <string name="security_settings_section_recovery">지갑 복구</string>
+    <string name="security_toast_wait_seconds">%.1f초 기다려주세요</string>
+    <string name="security_toast_wallet_not_initialized">지갑이 초기화되지 않았습니다</string>
+    <string name="security_settings_change_pin_title">PIN 변경</string>
+    <string name="security_toast_pin_removed">PIN이 제거되었습니다</string>
+    <string name="security_settings_card_title">지갑 보호하기</string>
+    <string name="security_settings_setup_pin_subtitle">중요한 기능 보호</string>
+    <string name="security_toast_clipboard_empty">클립보드가 비어 있습니다</string>
+    <string name="security_settings_enter_pin_title">PIN 입력</string>
+    <string name="security_settings_restore_wallet_subtitle">시드 문구에서 복구</string>
+    <string name="security_settings_change_pin_subtitle">보안 PIN 업데이트</string>
+    <string name="security_settings_backup_mnemonic_subtitle">12단어 시드 문구 보기</string>
+    <string name="security_settings_remove_pin_confirm">제거</string>
+    <string name="security_settings_remove_pin_dialog_title">PIN을 제거하시겠습니까?</string>
+    <string name="security_settings_backup_mnemonic_title">백업 니모닉</string>
+    <string name="security_settings_card_body">시드 문구는 이 기기에 대한 액세스 권한을 잃을 경우 지갑을 복구할 수 있는 유일한 방법입니다. 안전하게 보관하고 절대 다른 사람과 공유하지 마세요.</string>
+    <string name="security_settings_enter_pin_subtitle">계속하려면 본인 인증을 해주세요</string>
+    <string name="security_toast_seed_pasted">시드 문구가 붙여넣어졌습니다</string>
+    <string name="security_settings_restore_wallet_title">지갑 복원</string>
+    <string name="security_toast_pin_failed">PIN 설정 실패</string>
+    <string name="security_settings_remove_pin_dialog_message">그러면 PIN 보호가 비활성화됩니다. 이 기기에 액세스할 수 있는 사람은 누구나 자금 인출 및 시드 문구 보기와 같은 중요한 기능에 액세스할 수 있습니다.</string>
+</resources>

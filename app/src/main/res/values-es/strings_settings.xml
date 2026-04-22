@@ -1,24 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <!-- Settings main screen -->
     <string name="settings_title">Ajustes</string>
-
-    <!-- Settings sections -->
     <string name="settings_section_terminal">Terminal</string>
     <string name="settings_section_payments">Pagos</string>
     <string name="settings_section_security">Seguridad y privacidad</string>
     <string name="settings_section_appearance">Apariencia</string>
     <string name="settings_section_general">General</string>
     <string name="settings_section_developer">Desarrollador</string>
-
-    <!-- Settings items: language -->
     <string name="settings_item_language_title">Idioma</string>
     <string name="settings_item_language_subtitle">Elige el idioma de la aplicación</string>
-
-    <!-- Settings items: currency -->
     <string name="settings_item_currency_title">Moneda fiduciaria</string>
     <string name="settings_item_currency_subtitle">Elige tu moneda fiduciaria predeterminada</string>
-
-    <!-- Currency settings screen -->
     <string name="currency_settings_section_preferred_currency">MONEDA PREFERIDA</string>
     <string name="currency_settings_option_usd">Dólar estadounidense (USD)</string>
     <string name="currency_settings_option_eur">Euro (EUR)</string>
@@ -28,54 +20,30 @@
     <string name="currency_settings_option_sek">Corona sueca (SEK)</string>
     <string name="currency_settings_option_nok">Corona noruega (NOK)</string>
     <string name="currency_settings_option_krw">Won coreano (KRW)</string>
-
-    <!-- Settings items: mints -->
     <string name="settings_item_mints_title">Mints</string>
     <string name="settings_item_mints_subtitle">Gestiona los mints de Cashu y los ajustes de Lightning</string>
-
-    <!-- Settings items: webhooks -->
     <string name="settings_item_webhooks_title">Webhooks</string>
     <string name="settings_item_webhooks_subtitle">Enviar metadatos de pago a endpoints externos</string>
-
-    <!-- Settings items: items catalog -->
     <string name="settings_item_items_title">Artículos</string>
     <string name="settings_item_items_subtitle">Crea y gestiona artículos del catálogo</string>
-
-    <!-- Settings items: tips -->
     <string name="settings_item_tips_title">Propinas</string>
     <string name="settings_item_tips_subtitle">Configura las opciones de propina en el cobro</string>
-
-    <!-- Settings items: basket names -->
     <string name="settings_item_basket_names_title">Nombres de cestas</string>
     <string name="settings_item_basket_names_subtitle">Crea nombres predefinidos para guardar cestas rápidamente</string>
-
-    <!-- Settings items: theme -->
     <string name="settings_item_theme_title">Tema</string>
     <string name="settings_item_theme_subtitle">Cambiar entre modo claro y oscuro</string>
-
-    <!-- Settings items: security -->
     <string name="settings_item_security_title">Seguridad y privacidad</string>
     <string name="settings_item_security_subtitle">Copia de la frase semilla, restaurar cartera</string>
-
-    <!-- Settings items: developer -->
     <string name="settings_item_developer_title">Opciones de desarrollo</string>
     <string name="settings_item_developer_subtitle">Opciones avanzadas y herramientas de depuración</string>
-
-    <!-- Settings items: about -->
     <string name="settings_item_about_title">Acerca de</string>
     <string name="settings_item_about_subtitle">Versión, términos y contacto</string>
-
-    <!-- Settings sub-activity labels -->
     <string name="settings_theme_title">Tema</string>
     <string name="settings_currency_title">Moneda fiduciaria</string>
     <string name="settings_language_title">Idioma</string>
     <string name="settings_mints_title">Mints</string>
     <string name="settings_security_title">Seguridad y privacidad</string>
-
-    <!-- Settings PIN verification -->
     <string name="settings_verify_pin_subtitle">Verifica para acceder a la configuración</string>
-
-    <!-- Settings: About screen toasts & dialogs -->
     <string name="settings_about_toast_developer_already_enabled">El modo desarrollador ya está habilitado</string>
     <string name="settings_about_toast_developer_enabled">¡Modo desarrollador habilitado!</string>
     <string name="settings_about_toast_developer_taps_remaining">%1$d toques más para habilitar el modo desarrollador</string>
@@ -83,8 +51,6 @@
     <string name="settings_about_toast_no_email">No se encontró aplicación de correo</string>
     <string name="settings_about_dialog_terms_title">Términos de Servicio</string>
     <string name="settings_about_dialog_privacy_title">Política de Privacidad</string>
-
-    <!-- About Screen -->
     <string name="about_title">Acerca de</string>
     <string name="about_device_info">Información del dispositivo</string>
     <string name="about_app_version">Versión de la app</string>
@@ -96,10 +62,7 @@
     <string name="about_privacy_policy">Política de Privacidad</string>
     <string name="about_website">Sitio web</string>
     <string name="about_contact_us">Contacto</string>
-
-    <!-- Términos de Servicio -->
     <string name="terms_of_service_full">NUMO WALLET - TÉRMINOS DE SERVICIO\n\n1. ACEPTACIÓN\nAl usar esta aplicación de cartera, aceptas estos términos.\n\n2. NATURALEZA DEL SERVICIO\nEsta es una cartera de Bitcoin autocustodiada usando tecnología Cashu ecash. Eres el único responsable de tus fondos y frase semilla.\n\n3. FRASE SEMILLA\nTu frase semilla de 12 palabras es la ÚNICA forma de recuperar tu cartera. Nunca la compartas. Almacénala de forma segura sin conexión. No podemos recuperar frases semilla perdidas.\n\n4. SIN GARANTÍA\nEste software se proporciona "tal cual" sin garantía de ningún tipo. Úsalo bajo tu propio riesgo.\n\n5. LIMITACIÓN DE RESPONSABILIDAD\nNo somos responsables de ninguna pérdida de fondos, ya sea por errores de software, errores del usuario o fallos de mints de terceros.\n\n6. MINTS ECASH\nLos tokens ecash son mantenidos por mints de terceros. Estos mints pueden fallar o no estar disponibles. Diversifica entre varios mints.\n\n7. PRIVACIDAD\nEsta cartera no recopila datos personales. Las transacciones se procesan a través de mints ecash que pueden tener sus propias políticas de privacidad.\n\n8. ACTUALIZACIONES\nEstos términos pueden actualizarse. El uso continuo constituye la aceptación.\n\nÚltima actualización: Noviembre 2024</string>
-
-    <!-- Política de Privacidad -->
     <string name="privacy_policy_full">NUMO WALLET - POLÍTICA DE PRIVACIDAD\n\n1. RECOPILACIÓN DE DATOS\nNumo no recopila, almacena ni transmite ningún dato personal. La aplicación se ejecuta completamente en tu dispositivo.\n\n2. DATOS DE LA CARTERA\nTu frase semilla y los datos de tu cartera se almacenan localmente en tu dispositivo. No tenemos acceso a esta información.\n\n3. COMUNICACIONES DE RED\nLa aplicación se comunica con:\n• Mints de Cashu (para gestionar tokens ecash)\n• APIs de precios (para obtener tipos de cambio)\n• Relés de Nostr (para funciones opcionales de respaldo)\n\nEstos servicios pueden tener sus propias políticas de privacidad.\n\n4. ANALÍTICA\nNo usamos ningún servicio de análisis o seguimiento.\n\n5. MINTS DE TERCEROS\nAl usar mints ecash, el operador del mint puede ver los montos y tiempos de las transacciones. Elige mints de confianza.\n\n6. RESPALDO\nSi habilitas el respaldo de Nostr, los datos encriptados de la cartera se publican en relés de Nostr. Solo tú puedes desencriptar estos datos con tu frase semilla.\n\n7. CONTACTO\nPara preguntas de privacidad: numopay@proton.me\n\nÚltima actualización: Noviembre 2024</string>
+    <string name="about_email_subject">Soporte de Numo</string>
 </resources>

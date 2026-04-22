@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="basket_receipt_paid_equivalent_label">支払い済み</string>
+    <string name="basket_receipt_tip_label">チップ</string>
+    <string name="basket_receipt_paid_label">支払い済み</string>
+    <string name="basket_receipt_total_paid_label">合計支払い額</string>
+    <string name="basket_receipt_payment_item_label">支払い</string>
+    <string name="basket_receipt_total_label">合計</string>
+    <string name="basket_receipt_total_subtitle_vat_only">税込 %1$s</string>
+    <string name="basket_receipt_items_header_single">1 個のアイテム</string>
+    <string name="basket_receipt_tip_label_with_percentage">チップ (%1$d%%)</string>
+    <string name="basket_receipt_equivalent_label">相当</string>
+    <string name="basket_receipt_total_subtitle_with_vat">%1$s • 税込 %2$s</string>
+    <string name="basket_receipt_vat_row_label">VAT (%1$d%%)</string>
+    <string name="basket_receipt_subtotal_label">小計 (税抜)</string>
+    <string name="basket_receipt_items_header_multiple">%1$d 個のアイテム</string>
+    <string name="basket_receipt_vat_label">税込 %1$d%%</string>
+    <string name="basket_receipt_bitcoin_items_label">ビットコインアイテム</string>
+    <string name="basket_receipt_print_content_description">レシートを印刷</string>
+</resources>

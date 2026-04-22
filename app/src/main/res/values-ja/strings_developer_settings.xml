@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="developer_settings_restart_dialog_message">
+ これにより、オンボーディングの完了ステータスがクリアされ、ウェルカム画面に戻ります。続行してもよろしいですか？
+ </string>
+    <string name="developer_settings_restart_dialog_title">オンボーディングの再起動</string>
+    <string name="developer_settings_restart_dialog_positive">再起動</string>
+</resources>

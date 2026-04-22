@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="mints_settings_dialog_remove_positive">削除</string>
+    <string name="mints_settings_dialog_remove_title">Mintを削除</string>
+    <string name="mints_settings_dialog_remove_message">このMintを削除してもよろしいですか？
+
+%1$s</string>
+</resources>

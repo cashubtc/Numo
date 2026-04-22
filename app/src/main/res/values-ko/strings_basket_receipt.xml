@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="basket_receipt_paid_equivalent_label">결제됨</string>
+    <string name="basket_receipt_tip_label">팁</string>
+    <string name="basket_receipt_paid_label">결제됨</string>
+    <string name="basket_receipt_total_paid_label">총 결제액</string>
+    <string name="basket_receipt_payment_item_label">결제</string>
+    <string name="basket_receipt_total_label">총계</string>
+    <string name="basket_receipt_total_subtitle_vat_only">VAT %1$s 포함</string>
+    <string name="basket_receipt_items_header_single">1 항목</string>
+    <string name="basket_receipt_tip_label_with_percentage">팁 (%1$d%%)</string>
+    <string name="basket_receipt_equivalent_label">상당</string>
+    <string name="basket_receipt_total_subtitle_with_vat">%1$s • VAT %2$s 포함</string>
+    <string name="basket_receipt_vat_row_label">VAT (%1$d%%)</string>
+    <string name="basket_receipt_subtotal_label">소계 (VAT 제외)</string>
+    <string name="basket_receipt_items_header_multiple">%1$d 항목</string>
+    <string name="basket_receipt_vat_label">VAT %1$d%% 포함</string>
+    <string name="basket_receipt_bitcoin_items_label">비트코인 항목</string>
+    <string name="basket_receipt_print_content_description">영수증 인쇄</string>
+</resources>

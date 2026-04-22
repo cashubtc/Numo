@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="item_selection_dialog_clear_basket_positive">지우기</string>
+    <string name="item_selection_discard">버리기</string>
+    <string name="item_selection_toast_enter_variation">변형 이름을 입력하세요</string>
+    <string name="item_selection_save_basket_message">이 바구니에 변경 사항을 저장하시겠습니까?</string>
+    <string name="item_selection_dialog_clear_basket_message">바구니에서 모든 항목을 제거하시겠습니까?</string>
+    <string name="item_selection_dialog_clear_basket_title">바구니 지우기</string>
+    <string name="item_selection_save_basket">바구니 저장</string>
+    <string name="item_selection_toast_no_stock">재고가 없습니다</string>
+</resources>

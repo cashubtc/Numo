@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="theme_settings_option_bitcoin_orange">ビットコインオレンジ</string>
+    <string name="theme_settings_section_mode">モード</string>
+    <string name="theme_settings_dark_mode_label">ダークモード</string>
+    <string name="theme_settings_option_green">グリーン</string>
+    <string name="theme_settings_option_obsidian">オブシディアン</string>
+    <string name="theme_settings_section_app_theme">アプリのテーマ</string>
+    <string name="theme_settings_option_white">ホワイト</string>
+</resources>
