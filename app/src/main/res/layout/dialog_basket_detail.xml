@@ -191,7 +191,7 @@
         app:strokeWidth="0dp"
         app:elevation="0dp"
         app:icon="@drawable/ic_receipt"
-        app:iconTint="@android:color/white"
+        app:iconTint="@color/color_bg_white"
         app:iconPadding="8dp"
         app:iconGravity="textStart" />
 

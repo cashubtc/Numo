@@ -93,7 +93,7 @@
                         android:layout_height="32dp"
                         android:layout_gravity="center"
                         android:src="@drawable/ic_receipt"
-                        app:tint="@android:color/white" />
+                        app:tint="@color/color_bg_white" />
 
                 </FrameLayout>
 
