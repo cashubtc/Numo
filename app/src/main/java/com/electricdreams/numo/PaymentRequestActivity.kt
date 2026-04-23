@@ -154,6 +154,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var isProcessingNfcPayment = false
 
     private var hcePaymentCallback: NdefHostCardEmulationService.CashuPaymentCallback? = null
+    private var nfcSetupRunnable: Runnable? = null
+    private val nfcSetupHandler = Handler(Looper.getMainLooper())
 
     private val uiScope = CoroutineScope(Dispatchers.Main)
 
@@ -539,6 +541,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
+        nfcSetupRunnable?.let { nfcSetupHandler.removeCallbacks(it) }
         try {
             val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
             if (nfcAdapter != null) {
@@ -863,7 +866,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         val request = hcePaymentRequest ?: return
 
         // Match original behavior: slight delay before configuring service
-        Handler(Looper.getMainLooper()).postDelayed({
+        nfcSetupRunnable = Runnable {
             val hceService = NdefHostCardEmulationService.getInstance()
             if (hceService != null) {
                 Log.d(TAG, "Setting up NDEF payment with HCE service")
@@ -999,7 +1002,8 @@ class PaymentRequestActivity : AppCompatActivity() {
 
                 Log.d(TAG, "NDEF payment service ready")
             }
-        }, 1000)
+        }
+        nfcSetupRunnable?.let { nfcSetupHandler.postDelayed(it, 1000) }
     }
 
     private fun handlePaymentSuccess(token: String) {
@@ -1164,6 +1168,9 @@ class PaymentRequestActivity : AppCompatActivity() {
         // a safety net for any paths that might reach cleanup without having
         // called [beginTerminalOutcome] explicitly.
         hasTerminalOutcome = true
+
+        nfcSetupRunnable?.let { nfcSetupHandler.removeCallbacks(it) }
+
         cancelNfcSafetyTimeout()
 
         // Stop Nostr handler
@@ -1198,6 +1205,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        nfcSetupRunnable?.let { nfcSetupHandler.removeCallbacks(it) }
         cancelNfcSafetyTimeout()
         nostrHandler?.stop()
         nostrHandler = null
@@ -1206,8 +1214,8 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         try {
             val hceService = NdefHostCardEmulationService.getInstance()
-            if (hceService != null && hcePaymentCallback != null) {
-                if (hceService.paymentCallback === hcePaymentCallback) {
+            if (hceService != null) {
+                if (isFinishing || (hcePaymentCallback != null && hceService.paymentCallback === hcePaymentCallback)) {
                     hceService.clearPaymentRequest()
                     hceService.setPaymentCallback(null)
                 }
