@@ -100,8 +100,8 @@ class PosUiCoordinator(
     }
 
     private fun loadMintLimits() {
-        val preferredMint = mintManager.getPreferredLightningMint()
-        if (preferredMint != null) {
+        val lightningMint = mintManager.getPreferredLightningMint()
+        if (lightningMint != null) {
             activity.lifecycleScope.launch {
                 // Pre-load cache for ALL allowed mints when app opens
                 // This ensures every mint has valid cached data, preventing issues when switching mints
@@ -117,7 +117,8 @@ class PosUiCoordinator(
                 }
                 
                 // Now get limits for the preferred mint
-                val limits = mintManager.getMintLimits(preferredMint, activity, forceRefresh = true, isFirstFetch = false)
+                val isStale = mintManager.needsRefresh(lightningMint)
+                val limits = mintManager.getMintLimits(lightningMint, activity, forceRefresh = isStale, isFirstFetch = false)
                 amountDisplayManager.setMintLimits(limits)
                 
                 // Update display to re-evaluate button state based on new limits
@@ -129,17 +130,18 @@ class PosUiCoordinator(
     /** Reload mint limits - called when returning to POS (e.g., after changing lightning mint) */
     fun reloadMintLimits() {
         Log.d(TAG, "reloadMintLimits() called")
-        val preferredMint = mintManager.getPreferredLightningMint()
-        Log.d(TAG, "Preferred mint: $preferredMint")
-        if (preferredMint != null) {
+        val lightningMint = mintManager.getPreferredLightningMint()
+        Log.d(TAG, "Preferred mint: $lightningMint")
+        if (lightningMint != null) {
             // Disable button while refreshing, but let AmountDisplayManager handle the text based on wallet state
             submitButton.isEnabled = false
             
             activity.lifecycleScope.launch {
-                // Force refresh but NOT first fetch - preserve existing cache
+                // Force refresh if stale, NOT first fetch - preserve existing cache
                 // This prevents inconsistent mint responses from overwriting valid limits
-                Log.d(TAG, "Fetching mint limits with forceRefresh=true (NOT first fetch)")
-                val limits = mintManager.getMintLimits(preferredMint, activity, forceRefresh = true, isFirstFetch = false)
+                val isStale = mintManager.needsRefresh(lightningMint)
+                Log.d(TAG, "Fetching mint limits with forceRefresh=\$isStale (NOT first fetch)")
+                val limits = mintManager.getMintLimits(lightningMint, activity, forceRefresh = isStale, isFirstFetch = false)
                 Log.d(TAG, "Got limits: $limits")
                 
                 // Same behavior as onCreate - always set limits
