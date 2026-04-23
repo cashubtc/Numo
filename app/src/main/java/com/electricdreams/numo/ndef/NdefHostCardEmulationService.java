@@ -274,6 +274,13 @@ public class NdefHostCardEmulationService extends HostApduService {
     }
     
     /**
+     * Get the payment callback
+     */
+    public CashuPaymentCallback getPaymentCallback() {
+        return this.paymentCallback;
+    }
+    
+    /**
      * Check if a command is a SELECT AID command
      */
     private boolean isAidSelectCommand(byte[] command) {
