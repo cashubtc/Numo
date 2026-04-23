@@ -886,4 +886,14 @@
     <string name="payment_request_tab_unified">통합</string>
     <string name="payment_request_default_description">%1$d 토요일 결제</string>
     <string name="payment_request_lightning_description">%1$d sats의 Numo POS 결제</string>
+    <string name="onboarding_status_generating_seed">시드 구문 생성 중…</string>
+    <string name="onboarding_status_setting_up_mints">기본 민트 설정 중…</string>
+    <string name="onboarding_status_initializing_wallet">지갑 초기화 중…</string>
+    <string name="onboarding_status_connecting_mints">민트에 연결 중…</string>
+    <string name="onboarding_status_fetching_mints">민트 정보 가져오는 중…</string>
+    <string name="onboarding_generating_hint">잠시만 기다려 주세요</string>
+    <string name="onboarding_fetching_searching_backup">백업 검색 중…</string>
+    <string name="onboarding_fetching_checking_relays">민트 설정에 대한 Nostr 릴레이 확인 중</string>
+    <string name="pos_error_no_network_pending_payment">대기 중인 결제를 열려면 네트워크 연결이 필요합니다.</string>
+    <string name="pos_error_no_network_charge">결제를 생성하려면 네트워크 연결이 필요합니다.</string>
 </resources>

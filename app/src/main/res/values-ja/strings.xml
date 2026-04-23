@@ -886,4 +886,14 @@
     <string name="payment_request_tab_unified">統合された</string>
     <string name="payment_request_default_description">%1$d の支払い</string>
     <string name="payment_request_lightning_description">%1$d 衛星の Numo POS 支払い</string>
+    <string name="onboarding_status_generating_seed">シードフレーズを生成しています…</string>
+    <string name="onboarding_status_setting_up_mints">デフォルトのミントを設定しています…</string>
+    <string name="onboarding_status_initializing_wallet">ウォレットを初期化しています…</string>
+    <string name="onboarding_status_connecting_mints">ミントに接続しています…</string>
+    <string name="onboarding_status_fetching_mints">ミントの情報を取得しています…</string>
+    <string name="onboarding_generating_hint">少々お待ちください</string>
+    <string name="onboarding_fetching_searching_backup">バックアップを検索しています…</string>
+    <string name="onboarding_fetching_checking_relays">ミント設定のNostrリレーを確認しています</string>
+    <string name="pos_error_no_network_pending_payment">保留中の支払いを開くにはネットワーク接続が必要です。</string>
+    <string name="pos_error_no_network_charge">請求を作成するにはネットワーク接続が必要です。</string>
 </resources>
