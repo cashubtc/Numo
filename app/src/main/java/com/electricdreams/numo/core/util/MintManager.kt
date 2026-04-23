@@ -26,7 +26,7 @@ class MintManager private constructor(context: Context) {
         private const val KEY_ENABLE_SWAP_UNKNOWN_MINTS = "enableSwapUnknownMints"
         private const val KEY_MINT_INFO_PREFIX = "mintInfo_"
         private const val KEY_MINT_REFRESH_PREFIX = "mintRefresh_"
-        private const val REFRESH_INTERVAL_MS = 24 * 60 * 60 * 1000L // 24 hours
+        private const val REFRESH_INTERVAL_MS = 60 * 1000L // 1 minute
 
         // Default mints
         private val DEFAULT_MINTS: Set<String> = setOf(
@@ -454,7 +454,7 @@ class MintManager private constructor(context: Context) {
     }
 
     /**
-     * Check if a mint's info needs to be refreshed (older than 24 hours).
+     * Check if a mint's info needs to be refreshed (older than 1 minute).
      * @return true if the mint info should be refreshed, false otherwise.
      */
     fun needsRefresh(mintUrl: String): Boolean {
@@ -466,13 +466,13 @@ class MintManager private constructor(context: Context) {
         val now = System.currentTimeMillis()
         val needsUpdate = (now - lastRefresh) > REFRESH_INTERVAL_MS
         if (needsUpdate) {
-            Log.d(TAG, "Mint $mintUrl needs refresh (last: ${(now - lastRefresh) / (1000 * 60 * 60)}h ago)")
+            Log.d(TAG, "Mint $mintUrl needs refresh (last: ${(now - lastRefresh) / 1000}s ago)")
         }
         return needsUpdate
     }
 
     /**
-     * Get list of mints that need to be refreshed (info older than 24 hours).
+     * Get list of mints that need to be refreshed (info older than 1 minute).
      * @return List of mint URLs that need refreshing.
      */
     fun getMintsNeedingRefresh(): List<String> {
