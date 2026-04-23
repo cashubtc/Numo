@@ -170,6 +170,52 @@
 
             </LinearLayout>
 
+            <!-- Tip Row -->
+            <LinearLayout
+                android:id="@+id/row_tip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_tip"
+                    app:tint="@color/color_text_secondary"
+                    android:contentDescription="@null" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="16dp">
+
+                    <TextView
+                        android:id="@+id/detail_tip_label"
+                        style="@style/Text.BodyBold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/transaction_detail_tip_label" />
+
+                    <TextView
+                        android:id="@+id/detail_tip_value"
+                        style="@style/Text.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        tools:text="₿500" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
             <!-- Exchange Rate Row -->
             <LinearLayout
                 android:id="@+id/row_exchange_rate"

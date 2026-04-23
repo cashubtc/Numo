@@ -203,6 +203,38 @@ class TransactionDetailActivity : AppCompatActivity() {
             else -> getString(R.string.transaction_detail_type_payment_received)
         }
 
+        // Tip Row
+        val tipRow: View = findViewById(R.id.row_tip)
+        val tipLabel: TextView = findViewById(R.id.detail_tip_label)
+        val tipValueText: TextView = findViewById(R.id.detail_tip_value)
+
+        if (!isWithdrawal && entry.hasTip()) {
+            val tipAmountSats = entry.tipAmountSats
+            val tipSatAmount = Amount(tipAmountSats, Amount.Currency.BTC)
+            
+            // Check if there is an exchange rate to calculate fiat equivalent of the tip
+            val btcPriceForTip = entry.bitcoinPrice
+            if (btcPriceForTip != null && btcPriceForTip > 0 && entry.getEntryUnit() != "sat") {
+                val fiatValue = (tipAmountSats.toDouble() / 100_000_000.0) * btcPriceForTip
+                val currencyCode = Amount.Currency.fromCode(entry.getEntryUnit())
+                val fiatMinorUnits = kotlin.math.round(fiatValue * 100).toLong()
+                val fiatAmount = Amount(fiatMinorUnits, currencyCode)
+                
+                tipValueText.text = "$fiatAmount"
+            } else {
+                tipValueText.text = tipSatAmount.toString()
+            }
+            
+            if (entry.tipPercentage > 0) {
+                tipLabel.text = getString(R.string.transaction_detail_tip_added_with_percentage, entry.tipPercentage)
+            } else {
+                tipLabel.text = getString(R.string.transaction_detail_tip_added_label)
+            }
+            tipRow.visibility = View.VISIBLE
+        } else {
+            tipRow.visibility = View.GONE
+        }
+
         // Exchange Rate
         val exchangeRateRow: View = findViewById(R.id.row_exchange_rate)
         val exchangeRateText: TextView = findViewById(R.id.detail_exchange_rate)
