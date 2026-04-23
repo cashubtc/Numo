@@ -730,6 +730,14 @@
     
     <string name="settings_item_withdrawals_title">Withdrawals</string>
     <string name="settings_item_withdrawals_subtitle">Auto-withdraw settings and history</string>
+    <string name="settings_item_default_payment_method_title">Default Payment</string>
+    <string name="settings_item_default_payment_method_subtitle">Unified</string>
+    <string name="default_payment_method_explainer_title">Quick Settings</string>
+    <string name="default_payment_method_explainer_body">You can quickly change the default payment method directly from the payment screen by long-pressing on any of the Unified, Cashu, or Lightning tabs.</string>
+    <string name="default_payment_method_section_options">DEFAULT QR CODE</string>
+    <string name="default_payment_method_option_unified">Unified (Cashu + Lightning)</string>
+    <string name="default_payment_method_option_cashu">Cashu</string>
+    <string name="default_payment_method_option_lightning">Lightning</string>
 
     
     <string name="manual_withdraw_section_title">Manual Withdraw</string>
@@ -896,6 +904,7 @@
     <string name="pin_reset_paste_clipboard">Paste from Clipboard</string>
     <string name="pin_reset_button">Reset PIN</string>
     <string name="payment_request_tab_unified">Unified</string>
+    <string name="payment_request_default_method_set">%1$s set as default payment method</string>
     <string name="payment_request_default_description">Payment of %1$d sats</string>
     <string name="payment_request_lightning_description">Numo POS payment of %1$d sats</string>
 </resources>

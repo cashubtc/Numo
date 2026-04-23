@@ -735,4 +735,13 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="onboarding_mints_default_section_title">Mint predeterminado</string>
     <string name="onboarding_mints_add_different_button">+ Nuevo Mint</string>
     <string name="onboarding_mints_scan_row_title">Escanear código QR</string>
+    <string name="settings_item_default_payment_method_title">Pago predeterminado</string>
+    <string name="settings_item_default_payment_method_subtitle">Unificado</string>
+    <string name="default_payment_method_explainer_title">Ajustes rápidos</string>
+    <string name="default_payment_method_explainer_body">Puedes cambiar rápidamente el método de pago predeterminado directamente desde la pantalla de pago manteniendo presionada cualquiera de las pestañas Unificado, Cashu o Lightning.</string>
+    <string name="default_payment_method_section_options">CÓDIGO QR PREDETERMINADO</string>
+    <string name="default_payment_method_option_unified">Unificado (Cashu + Lightning)</string>
+    <string name="default_payment_method_option_cashu">Cashu</string>
+    <string name="default_payment_method_option_lightning">Lightning</string>
+    <string name="payment_request_default_method_set">%1$s establecido como método de pago predeterminado</string>
 </resources>

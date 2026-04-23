@@ -15,6 +15,8 @@ import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.feature.tips.TipsSettingsActivity
 import com.electricdreams.numo.feature.baskets.BasketNamesSettingsActivity
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawSettingsActivity
+import com.electricdreams.numo.payment.DefaultPaymentMethodManager
+import android.widget.TextView
 
 /**
  * Main Settings screen.
@@ -49,12 +51,21 @@ class SettingsActivity : AppCompatActivity() {
         super.onResume()
         // Update developer section visibility when returning from About
         updateDeveloperSectionVisibility()
+        updateDefaultPaymentMethodSubtitle()
     }
 
     private fun setupViews() {
         updateDeveloperSectionVisibility()
+        updateDefaultPaymentMethodSubtitle()
     }
-
+    
+    private fun updateDefaultPaymentMethodSubtitle() {
+        val manager = DefaultPaymentMethodManager.getInstance(this)
+        val defaultTab = manager.getDefaultPaymentMethod()
+        findViewById<TextView>(R.id.default_payment_method_subtitle)?.text = 
+            defaultTab.name.lowercase().replaceFirstChar { it.uppercase() }
+    }
+    
     private fun updateDeveloperSectionVisibility() {
         val developerSection = findViewById<View>(R.id.developer_section)
         developerSection.visibility = if (DeveloperPrefs.isDeveloperModeEnabled(this)) {
@@ -102,6 +113,10 @@ class SettingsActivity : AppCompatActivity() {
         // Withdrawals - protected (handles funds)
         findViewById<View>(R.id.withdrawals_settings_item).setOnClickListener {
             openProtectedActivity(AutoWithdrawSettingsActivity::class.java)
+        }
+
+        findViewById<View>(R.id.default_payment_method_settings_item).setOnClickListener {
+            startActivity(Intent(this, DefaultPaymentMethodSettingsActivity::class.java))
         }
 
         // === Security Section ===

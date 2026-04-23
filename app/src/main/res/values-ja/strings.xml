@@ -896,4 +896,13 @@
     <string name="onboarding_fetching_checking_relays">ミント設定のNostrリレーを確認しています</string>
     <string name="pos_error_no_network_pending_payment">保留中の支払いを開くにはネットワーク接続が必要です。</string>
     <string name="pos_error_no_network_charge">請求を作成するにはネットワーク接続が必要です。</string>
+    <string name="settings_item_default_payment_method_title">デフォルトの支払い</string>
+    <string name="settings_item_default_payment_method_subtitle">統合</string>
+    <string name="default_payment_method_explainer_title">クイック設定</string>
+    <string name="default_payment_method_explainer_body">支払い画面から直接、統合、Cashu、またはLightningタブのいずれかを長押しすることで、デフォルトの支払い方法をすばやく変更できます。</string>
+    <string name="default_payment_method_section_options">デフォルトのQRコード</string>
+    <string name="default_payment_method_option_unified">統合（Cashu + Lightning）</string>
+    <string name="default_payment_method_option_cashu">Cashu</string>
+    <string name="default_payment_method_option_lightning">Lightning</string>
+    <string name="payment_request_default_method_set">%1$sがデフォルトの支払い方法として設定されました</string>
 </resources>
