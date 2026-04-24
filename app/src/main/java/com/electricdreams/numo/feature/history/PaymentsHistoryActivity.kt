@@ -331,13 +331,12 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         popup.menuInflater.inflate(R.menu.menu_activity_history, popup.menu)
 
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val hidePending = prefs.getBoolean(KEY_HIDE_PENDING, true) // Hide by default
+        val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID) // Hide pending by default
 
-        val hidePendingItem = popup.menu.findItem(R.id.menu_hide_pending)
-        if (hidePending) {
-            hidePendingItem.title = getString(R.string.history_menu_show_pending)
-        } else {
-            hidePendingItem.title = getString(R.string.history_menu_hide_pending)
+        when (filterState) {
+            FILTER_PAID -> popup.menu.findItem(R.id.menu_filter_paid).isChecked = true
+            FILTER_PENDING -> popup.menu.findItem(R.id.menu_filter_pending).isChecked = true
+            FILTER_ALL -> popup.menu.findItem(R.id.menu_filter_all).isChecked = true
         }
 
         popup.setOnMenuItemClickListener { menuItem ->
@@ -347,9 +346,18 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     csvExportLauncher.launch("numo_activity_export_$dateStr.csv")
                     true
                 }
-                R.id.menu_hide_pending -> {
-                    val newHidePending = !hidePending
-                    prefs.edit().putBoolean(KEY_HIDE_PENDING, newHidePending).apply()
+                R.id.menu_filter_paid -> {
+                    prefs.edit().putInt(KEY_FILTER_STATE, FILTER_PAID).apply()
+                    loadHistory()
+                    true
+                }
+                R.id.menu_filter_pending -> {
+                    prefs.edit().putInt(KEY_FILTER_STATE, FILTER_PENDING).apply()
+                    loadHistory()
+                    true
+                }
+                R.id.menu_filter_all -> {
+                    prefs.edit().putInt(KEY_FILTER_STATE, FILTER_ALL).apply()
                     loadHistory()
                     true
                 }
@@ -361,7 +369,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
     private fun loadHistory() {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val hidePending = prefs.getBoolean(KEY_HIDE_PENDING, true) // Hide by default
+        val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID) // Hide pending by default
 
         val paymentHistory: List<HistoryEntry> = getPaymentHistory()
         val withdrawHistory: List<HistoryEntry> = AutoWithdrawManager.getInstance(this)
@@ -372,8 +380,10 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         var filteredList = (paymentHistory + withdrawHistory)
             .sortedByDescending { it.date.time }
 
-        if (hidePending) {
+        if (filterState == FILTER_PAID) {
             filteredList = filteredList.filterNot { it.isPending() }
+        } else if (filterState == FILTER_PENDING) {
+            filteredList = filteredList.filter { it.isPending() }
         }
         
         currentHistoryList = filteredList
@@ -410,7 +420,10 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     companion object {
         private const val PREFS_NAME = "PaymentHistory"
         private const val KEY_HISTORY = "history"
-        private const val KEY_HIDE_PENDING = "hide_pending"
+        private const val KEY_FILTER_STATE = "filter_state"
+        private const val FILTER_ALL = 0
+        private const val FILTER_PAID = 1
+        private const val FILTER_PENDING = 2
         private const val REQUEST_TRANSACTION_DETAIL = 1001
         private const val REQUEST_RESUME_PAYMENT = 1002
 
