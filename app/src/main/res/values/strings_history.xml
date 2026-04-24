@@ -75,6 +75,8 @@
     <!-- Activity screen -->
     <string name="history_total_balance_label">Total Balance</string>
     <string name="history_menu_export_activity">Export Activity</string>
+    <string name="history_menu_hide_pending">Hide Pending</string>
+    <string name="history_menu_show_pending">Show Pending</string>
     <string name="history_export_success">Activity exported to CSV</string>
     <string name="history_export_error">Error exporting activity</string>
 

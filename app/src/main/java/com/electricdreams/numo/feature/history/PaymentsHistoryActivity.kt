@@ -329,11 +329,28 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     private fun showOverflowMenu(anchor: View) {
         val popup = PopupMenu(this, anchor, android.view.Gravity.END)
         popup.menuInflater.inflate(R.menu.menu_activity_history, popup.menu)
+
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val hidePending = prefs.getBoolean(KEY_HIDE_PENDING, true) // Hide by default
+
+        val hidePendingItem = popup.menu.findItem(R.id.menu_hide_pending)
+        if (hidePending) {
+            hidePendingItem.title = getString(R.string.history_menu_show_pending)
+        } else {
+            hidePendingItem.title = getString(R.string.history_menu_hide_pending)
+        }
+
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_export_activity -> {
                     val dateStr = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
                     csvExportLauncher.launch("numo_activity_export_$dateStr.csv")
+                    true
+                }
+                R.id.menu_hide_pending -> {
+                    val newHidePending = !hidePending
+                    prefs.edit().putBoolean(KEY_HIDE_PENDING, newHidePending).apply()
+                    loadHistory()
                     true
                 }
                 else -> false
@@ -343,15 +360,23 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     }
 
     private fun loadHistory() {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val hidePending = prefs.getBoolean(KEY_HIDE_PENDING, true) // Hide by default
+
         val paymentHistory: List<HistoryEntry> = getPaymentHistory()
         val withdrawHistory: List<HistoryEntry> = AutoWithdrawManager.getInstance(this)
             .getHistory()
             .filter { it.status != WithdrawHistoryEntry.STATUS_FAILED }
 
         // Merge and sort by date descending (newest first)
-        currentHistoryList = (paymentHistory + withdrawHistory)
+        var filteredList = (paymentHistory + withdrawHistory)
             .sortedByDescending { it.date.time }
 
+        if (hidePending) {
+            filteredList = filteredList.filterNot { it.isPending() }
+        }
+        
+        currentHistoryList = filteredList
         adapter.setEntries(currentHistoryList)
 
         val isEmpty = currentHistoryList.isEmpty()
@@ -385,6 +410,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     companion object {
         private const val PREFS_NAME = "PaymentHistory"
         private const val KEY_HISTORY = "history"
+        private const val KEY_HIDE_PENDING = "hide_pending"
         private const val REQUEST_TRANSACTION_DETAIL = 1001
         private const val REQUEST_RESUME_PAYMENT = 1002
 
