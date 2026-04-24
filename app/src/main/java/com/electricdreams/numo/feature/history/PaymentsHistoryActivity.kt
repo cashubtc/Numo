@@ -66,6 +66,8 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             }
         }
 
+    private var isFiltersExpanded = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHistoryBinding.inflate(layoutInflater)
@@ -335,6 +337,10 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         updateFilterButtonTexts()
 
+        binding.filterHeader?.setOnClickListener {
+            toggleFilters()
+        }
+
         binding.btnFilterStatus?.setOnClickListener { view ->
             val popup = PopupMenu(this, view)
             popup.menuInflater.inflate(R.menu.menu_filter_status, popup.menu)
@@ -384,6 +390,18 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 }
             }
             popup.show()
+        }
+    }
+
+    private fun toggleFilters() {
+        isFiltersExpanded = !isFiltersExpanded
+        
+        if (isFiltersExpanded) {
+            binding.filtersContainer?.visibility = View.VISIBLE
+            binding.filterExpandIcon?.animate()?.rotation(180f)?.setDuration(200)?.start()
+        } else {
+            binding.filtersContainer?.visibility = View.GONE
+            binding.filterExpandIcon?.animate()?.rotation(0f)?.setDuration(200)?.start()
         }
     }
 
@@ -450,15 +468,34 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         val start = prefs.getLong(KEY_FILTER_DATE_START, 0L)
         val end = prefs.getLong(KEY_FILTER_DATE_END, 0L)
         
+        var dateText = ""
         if (start > 0 && end > 0) {
             val format = SimpleDateFormat("MMM d", Locale.getDefault())
             val startStr = format.format(Date(start))
             val endStr = format.format(Date(end))
-            val rangeStr = getString(R.string.history_filter_date_range_format, startStr, endStr)
-            binding.btnFilterDate?.text = getString(R.string.history_filter_date_format, rangeStr)
+            dateText = getString(R.string.history_filter_date_range_format, startStr, endStr)
+            binding.btnFilterDate?.text = getString(R.string.history_filter_date_format, dateText)
         } else {
-            val allTime = getString(R.string.history_filter_date_all)
-            binding.btnFilterDate?.text = getString(R.string.history_filter_date_format, allTime)
+            dateText = getString(R.string.history_filter_date_all)
+            binding.btnFilterDate?.text = getString(R.string.history_filter_date_format, dateText)
+        }
+
+        // Update the main header text to reflect active filters if any
+        if (filterState == FILTER_ALL && start == 0L && end == 0L) {
+            binding.filterHeaderText?.text = getString(R.string.history_menu_filter)
+            binding.filterHeaderText?.setTextColor(getColor(R.color.color_text_secondary))
+            binding.filterExpandIcon?.setColorFilter(getColor(R.color.color_text_secondary))
+        } else {
+            val activeFilters = mutableListOf<String>()
+            if (filterState != FILTER_ALL) activeFilters.add(statusText)
+            if (start > 0 || end > 0) activeFilters.add(dateText)
+            
+            val summary = activeFilters.joinToString(", ")
+            binding.filterHeaderText?.text = summary
+            
+            // Highlight the text to indicate active filters
+            binding.filterHeaderText?.setTextColor(getColor(R.color.color_text_primary))
+            binding.filterExpandIcon?.setColorFilter(getColor(R.color.color_text_primary))
         }
     }
 
