@@ -34,6 +34,8 @@ import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.ui.adapter.PaymentsHistoryAdapter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -390,8 +392,32 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         val currentStart = prefs.getLong(KEY_FILTER_DATE_START, 0L)
         val currentEnd = prefs.getLong(KEY_FILTER_DATE_END, 0L)
 
+        // Find the oldest transaction to constrain the picker's start date
+        val paymentHistory: List<HistoryEntry> = getPaymentHistory()
+        val withdrawHistory: List<HistoryEntry> = AutoWithdrawManager.getInstance(this)
+            .getHistory()
+            .filter { it.status != WithdrawHistoryEntry.STATUS_FAILED }
+        
+        val allHistory = paymentHistory + withdrawHistory
+        val oldestDate = allHistory.minByOrNull { it.date.time }?.date?.time
+        
+        val today = MaterialDatePicker.todayInUtcMilliseconds()
+        
+        // Give a 1-month buffer before the oldest transaction, or default to 2023 if empty
+        val startBounds = oldestDate?.let { it - (30L * 24 * 60 * 60 * 1000) } ?: run {
+            val calendar = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"))
+            calendar.set(2023, java.util.Calendar.JANUARY, 1)
+            calendar.timeInMillis
+        }
+
+        val constraintsBuilder = CalendarConstraints.Builder()
+            .setStart(startBounds)
+            .setEnd(today)
+            .setValidator(DateValidatorPointBackward.now())
+
         val builder = MaterialDatePicker.Builder.dateRangePicker()
             .setTitleText(R.string.history_filter_date_picker_title)
+            .setCalendarConstraints(constraintsBuilder.build())
 
         if (currentStart > 0 && currentEnd > 0) {
             builder.setSelection(androidx.core.util.Pair(currentStart, currentEnd))
