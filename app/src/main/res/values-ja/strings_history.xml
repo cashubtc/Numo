@@ -61,5 +61,9 @@
     <string name="history_menu_filter_paid">完了のみ</string>
     <string name="history_menu_filter_pending">保留中のみ</string>
     <string name="history_menu_filter_all">すべて表示</string>
+    <string name="history_filter_date_all">全期間</string>
+    <string name="history_filter_date_today">今日</string>
+    <string name="history_filter_date_week">週</string>
+    <string name="history_filter_date_month">月</string>
     <string name="transaction_detail_tip_added_with_percentage">チップ追加 (%1$d%%)</string>
 </resources>

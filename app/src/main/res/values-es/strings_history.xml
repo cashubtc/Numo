@@ -79,6 +79,10 @@
     <string name="history_menu_filter_paid">Completado</string>
     <string name="history_menu_filter_pending">Pendiente</string>
     <string name="history_menu_filter_all">Todas</string>
+    <string name="history_filter_date_all">Todo</string>
+    <string name="history_filter_date_today">Hoy</string>
+    <string name="history_filter_date_week">Semana</string>
+    <string name="history_filter_date_month">Mes</string>
     <string name="history_export_success">Actividad exportada a CSV</string>
     <string name="history_export_error">Error al exportar actividad</string>
 

@@ -331,6 +331,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     private fun setupFilterToggle() {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID)
+        val filterDateState = prefs.getInt(KEY_FILTER_DATE_STATE, FILTER_DATE_ALL)
 
         when (filterState) {
             FILTER_PAID -> binding.filterToggleGroup?.check(R.id.btn_filter_paid)
@@ -347,6 +348,27 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     else -> FILTER_PAID
                 }
                 prefs.edit().putInt(KEY_FILTER_STATE, newState).apply()
+                loadHistory()
+            }
+        }
+
+        when (filterDateState) {
+            FILTER_DATE_ALL -> binding.filterDateGroup?.check(R.id.btn_date_all)
+            FILTER_DATE_TODAY -> binding.filterDateGroup?.check(R.id.btn_date_today)
+            FILTER_DATE_WEEK -> binding.filterDateGroup?.check(R.id.btn_date_week)
+            FILTER_DATE_MONTH -> binding.filterDateGroup?.check(R.id.btn_date_month)
+        }
+
+        binding.filterDateGroup?.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                val newState = when (checkedId) {
+                    R.id.btn_date_all -> FILTER_DATE_ALL
+                    R.id.btn_date_today -> FILTER_DATE_TODAY
+                    R.id.btn_date_week -> FILTER_DATE_WEEK
+                    R.id.btn_date_month -> FILTER_DATE_MONTH
+                    else -> FILTER_DATE_ALL
+                }
+                prefs.edit().putInt(KEY_FILTER_DATE_STATE, newState).apply()
                 loadHistory()
             }
         }
@@ -372,6 +394,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     private fun loadHistory() {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID) // Hide pending by default
+        val filterDateState = prefs.getInt(KEY_FILTER_DATE_STATE, FILTER_DATE_ALL)
 
         val paymentHistory: List<HistoryEntry> = getPaymentHistory()
         val withdrawHistory: List<HistoryEntry> = AutoWithdrawManager.getInstance(this)
@@ -382,10 +405,35 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         var filteredList = (paymentHistory + withdrawHistory)
             .sortedByDescending { it.date.time }
 
+        // Apply Status Filter
         if (filterState == FILTER_PAID) {
             filteredList = filteredList.filterNot { it.isPending() }
         } else if (filterState == FILTER_PENDING) {
             filteredList = filteredList.filter { it.isPending() }
+        }
+
+        // Apply Date Filter
+        if (filterDateState != FILTER_DATE_ALL) {
+            val calendar = java.util.Calendar.getInstance()
+            calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
+            calendar.set(java.util.Calendar.MINUTE, 0)
+            calendar.set(java.util.Calendar.SECOND, 0)
+            calendar.set(java.util.Calendar.MILLISECOND, 0)
+
+            val thresholdDate = when (filterDateState) {
+                FILTER_DATE_TODAY -> calendar.time
+                FILTER_DATE_WEEK -> {
+                    calendar.add(java.util.Calendar.DAY_OF_YEAR, -7)
+                    calendar.time
+                }
+                FILTER_DATE_MONTH -> {
+                    calendar.add(java.util.Calendar.DAY_OF_YEAR, -30)
+                    calendar.time
+                }
+                else -> Date(0)
+            }
+
+            filteredList = filteredList.filter { it.date.after(thresholdDate) || it.date == thresholdDate }
         }
         
         currentHistoryList = filteredList
@@ -423,9 +471,14 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         private const val PREFS_NAME = "PaymentHistory"
         private const val KEY_HISTORY = "history"
         private const val KEY_FILTER_STATE = "filter_state"
+        private const val KEY_FILTER_DATE_STATE = "filter_date_state"
         private const val FILTER_ALL = 0
         private const val FILTER_PAID = 1
         private const val FILTER_PENDING = 2
+        private const val FILTER_DATE_ALL = 0
+        private const val FILTER_DATE_TODAY = 1
+        private const val FILTER_DATE_WEEK = 2
+        private const val FILTER_DATE_MONTH = 3
         private const val REQUEST_TRANSACTION_DETAIL = 1001
         private const val REQUEST_RESUME_PAYMENT = 1002
 

@@ -61,5 +61,9 @@
     <string name="history_menu_filter_paid">완료됨</string>
     <string name="history_menu_filter_pending">대기 중</string>
     <string name="history_menu_filter_all">전체</string>
+    <string name="history_filter_date_all">전체 기간</string>
+    <string name="history_filter_date_today">오늘</string>
+    <string name="history_filter_date_week">이번 주</string>
+    <string name="history_filter_date_month">이번 달</string>
     <string name="transaction_detail_tip_added_with_percentage">팁 추가됨 (%1$d%%)</string>
 </resources>

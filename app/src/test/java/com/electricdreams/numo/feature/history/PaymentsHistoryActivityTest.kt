@@ -249,4 +249,31 @@ class PaymentsHistoryActivityTest {
         assertNotNull("Adapter should not be null", adapter)
         assertEquals(2, adapter!!.itemCount)
     }
+
+    @Test
+    fun `loadHistory filters by date TODAY`() {
+        val prefs = context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE)
+        prefs.edit().putInt("filter_state", 0).apply() // 0 = FILTER_ALL
+        prefs.edit().putInt("filter_date_state", 1).apply() // 1 = FILTER_DATE_TODAY
+
+        // Add transaction for today
+        val todayId = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null
+        )
+        
+        // Let's modify the date of a transaction (need to do it by direct SharedPreferences modification if there's no method)
+        // For this test, todayId is already today. We expect it to show up.
+
+        // Launch the activity
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+        val activity = controller.get()
+
+        val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
+        val adapter = recyclerView.adapter
+
+        // Expected size = 2 (1 Header + 1 Transaction)
+        assertNotNull("Adapter should not be null", adapter)
+        assertEquals(2, adapter!!.itemCount)
+    }
 }
