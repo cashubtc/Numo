@@ -175,6 +175,18 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
         </activity>
+
+        <activity android:name="com.electricdreams.numo.feature.settings.DefaultPaymentMethodSettingsActivity"
+            android:exported="false"
+            android:label="@string/settings_item_default_payment_method_title"
+            android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.settings.SettingsActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.settings.SettingsActivity" />
+        </activity>
         
         <activity android:name="com.electricdreams.numo.feature.settings.CurrencySettingsActivity"
             android:exported="false"
