@@ -90,6 +90,8 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         binding.historyRecyclerView.adapter = adapter
         binding.historyRecyclerView.layoutManager = LinearLayoutManager(this)
 
+        setupFilterToggle()
+
         // Load and display history
         loadHistory()
 
@@ -326,39 +328,39 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             .show()
     }
 
+    private fun setupFilterToggle() {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID)
+
+        when (filterState) {
+            FILTER_PAID -> binding.filterToggleGroup?.check(R.id.btn_filter_paid)
+            FILTER_PENDING -> binding.filterToggleGroup?.check(R.id.btn_filter_pending)
+            FILTER_ALL -> binding.filterToggleGroup?.check(R.id.btn_filter_all)
+        }
+
+        binding.filterToggleGroup?.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                val newState = when (checkedId) {
+                    R.id.btn_filter_paid -> FILTER_PAID
+                    R.id.btn_filter_pending -> FILTER_PENDING
+                    R.id.btn_filter_all -> FILTER_ALL
+                    else -> FILTER_PAID
+                }
+                prefs.edit().putInt(KEY_FILTER_STATE, newState).apply()
+                loadHistory()
+            }
+        }
+    }
+
     private fun showOverflowMenu(anchor: View) {
         val popup = PopupMenu(this, anchor, android.view.Gravity.END)
         popup.menuInflater.inflate(R.menu.menu_activity_history, popup.menu)
-
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID) // Hide pending by default
-
-        when (filterState) {
-            FILTER_PAID -> popup.menu.findItem(R.id.menu_filter_paid).isChecked = true
-            FILTER_PENDING -> popup.menu.findItem(R.id.menu_filter_pending).isChecked = true
-            FILTER_ALL -> popup.menu.findItem(R.id.menu_filter_all).isChecked = true
-        }
 
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_export_activity -> {
                     val dateStr = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
                     csvExportLauncher.launch("numo_activity_export_$dateStr.csv")
-                    true
-                }
-                R.id.menu_filter_paid -> {
-                    prefs.edit().putInt(KEY_FILTER_STATE, FILTER_PAID).apply()
-                    loadHistory()
-                    true
-                }
-                R.id.menu_filter_pending -> {
-                    prefs.edit().putInt(KEY_FILTER_STATE, FILTER_PENDING).apply()
-                    loadHistory()
-                    true
-                }
-                R.id.menu_filter_all -> {
-                    prefs.edit().putInt(KEY_FILTER_STATE, FILTER_ALL).apply()
-                    loadHistory()
                     true
                 }
                 else -> false
