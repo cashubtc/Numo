@@ -437,8 +437,18 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             .setTitleText(R.string.history_filter_date_picker_title)
             .setCalendarConstraints(constraintsBuilder.build())
 
-        if (currentStart > 0 && currentEnd > 0) {
-            builder.setSelection(androidx.core.util.Pair(currentStart, currentEnd))
+        var validStart = currentStart
+        var validEnd = currentEnd
+
+        if (validStart > 0 && validStart < startBounds) {
+            validStart = startBounds
+        }
+        if (validEnd > today) {
+            validEnd = today
+        }
+
+        if (validStart > 0 && validEnd > 0 && validStart <= validEnd) {
+            builder.setSelection(androidx.core.util.Pair(validStart, validEnd))
         }
 
         val picker = builder.build()
