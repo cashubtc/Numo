@@ -34,6 +34,7 @@ import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.ui.adapter.PaymentsHistoryAdapter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -90,7 +91,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         binding.historyRecyclerView.adapter = adapter
         binding.historyRecyclerView.layoutManager = LinearLayoutManager(this)
 
-        setupFilterToggle()
+        setupFilterBar()
 
         // Load and display history
         loadHistory()
@@ -328,49 +329,110 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun setupFilterToggle() {
+    private fun setupFilterBar() {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID)
-        val filterDateState = prefs.getInt(KEY_FILTER_DATE_STATE, FILTER_DATE_ALL)
+        updateFilterButtonTexts()
 
-        when (filterState) {
-            FILTER_PAID -> binding.filterToggleGroup?.check(R.id.btn_filter_paid)
-            FILTER_PENDING -> binding.filterToggleGroup?.check(R.id.btn_filter_pending)
-            FILTER_ALL -> binding.filterToggleGroup?.check(R.id.btn_filter_all)
-        }
+        binding.btnFilterStatus?.setOnClickListener { view ->
+            val popup = PopupMenu(this, view)
+            popup.menuInflater.inflate(R.menu.menu_filter_status, popup.menu)
+            
+            val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID)
+            when (filterState) {
+                FILTER_PAID -> popup.menu.findItem(R.id.filter_status_paid)?.isChecked = true
+                FILTER_PENDING -> popup.menu.findItem(R.id.filter_status_pending)?.isChecked = true
+                FILTER_ALL -> popup.menu.findItem(R.id.filter_status_all)?.isChecked = true
+            }
 
-        binding.filterToggleGroup?.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (isChecked) {
-                val newState = when (checkedId) {
-                    R.id.btn_filter_paid -> FILTER_PAID
-                    R.id.btn_filter_pending -> FILTER_PENDING
-                    R.id.btn_filter_all -> FILTER_ALL
+            popup.setOnMenuItemClickListener { item ->
+                val newState = when (item.itemId) {
+                    R.id.filter_status_paid -> FILTER_PAID
+                    R.id.filter_status_pending -> FILTER_PENDING
+                    R.id.filter_status_all -> FILTER_ALL
                     else -> FILTER_PAID
                 }
                 prefs.edit().putInt(KEY_FILTER_STATE, newState).apply()
+                updateFilterButtonTexts()
                 loadHistory()
+                true
             }
+            popup.show()
         }
 
-        when (filterDateState) {
-            FILTER_DATE_ALL -> binding.filterDateGroup?.check(R.id.btn_date_all)
-            FILTER_DATE_TODAY -> binding.filterDateGroup?.check(R.id.btn_date_today)
-            FILTER_DATE_WEEK -> binding.filterDateGroup?.check(R.id.btn_date_week)
-            FILTER_DATE_MONTH -> binding.filterDateGroup?.check(R.id.btn_date_month)
-        }
-
-        binding.filterDateGroup?.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (isChecked) {
-                val newState = when (checkedId) {
-                    R.id.btn_date_all -> FILTER_DATE_ALL
-                    R.id.btn_date_today -> FILTER_DATE_TODAY
-                    R.id.btn_date_week -> FILTER_DATE_WEEK
-                    R.id.btn_date_month -> FILTER_DATE_MONTH
-                    else -> FILTER_DATE_ALL
+        binding.btnFilterDate?.setOnClickListener { view ->
+            val popup = PopupMenu(this, view)
+            popup.menuInflater.inflate(R.menu.menu_filter_date, popup.menu)
+            
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.filter_date_all -> {
+                        prefs.edit()
+                            .putLong(KEY_FILTER_DATE_START, 0L)
+                            .putLong(KEY_FILTER_DATE_END, 0L)
+                            .apply()
+                        updateFilterButtonTexts()
+                        loadHistory()
+                        true
+                    }
+                    R.id.filter_date_custom -> {
+                        showDateRangePicker()
+                        true
+                    }
+                    else -> false
                 }
-                prefs.edit().putInt(KEY_FILTER_DATE_STATE, newState).apply()
-                loadHistory()
             }
+            popup.show()
+        }
+    }
+
+    private fun showDateRangePicker() {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val currentStart = prefs.getLong(KEY_FILTER_DATE_START, 0L)
+        val currentEnd = prefs.getLong(KEY_FILTER_DATE_END, 0L)
+
+        val builder = MaterialDatePicker.Builder.dateRangePicker()
+            .setTitleText(R.string.history_filter_date_picker_title)
+
+        if (currentStart > 0 && currentEnd > 0) {
+            builder.setSelection(androidx.core.util.Pair(currentStart, currentEnd))
+        }
+
+        val picker = builder.build()
+        picker.addOnPositiveButtonClickListener { selection ->
+            prefs.edit()
+                .putLong(KEY_FILTER_DATE_START, selection.first)
+                .putLong(KEY_FILTER_DATE_END, selection.second)
+                .apply()
+            updateFilterButtonTexts()
+            loadHistory()
+        }
+        picker.show(supportFragmentManager, "DATE_RANGE_PICKER")
+    }
+
+    private fun updateFilterButtonTexts() {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        
+        val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID)
+        val statusText = when (filterState) {
+            FILTER_PAID -> getString(R.string.history_menu_filter_paid)
+            FILTER_PENDING -> getString(R.string.history_menu_filter_pending)
+            FILTER_ALL -> getString(R.string.history_menu_filter_all)
+            else -> getString(R.string.history_menu_filter_paid)
+        }
+        binding.btnFilterStatus?.text = getString(R.string.history_filter_status_format, statusText)
+
+        val start = prefs.getLong(KEY_FILTER_DATE_START, 0L)
+        val end = prefs.getLong(KEY_FILTER_DATE_END, 0L)
+        
+        if (start > 0 && end > 0) {
+            val format = SimpleDateFormat("MMM d", Locale.getDefault())
+            val startStr = format.format(Date(start))
+            val endStr = format.format(Date(end))
+            val rangeStr = getString(R.string.history_filter_date_range_format, startStr, endStr)
+            binding.btnFilterDate?.text = getString(R.string.history_filter_date_format, rangeStr)
+        } else {
+            val allTime = getString(R.string.history_filter_date_all)
+            binding.btnFilterDate?.text = getString(R.string.history_filter_date_format, allTime)
         }
     }
 
@@ -394,7 +456,8 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     private fun loadHistory() {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID) // Hide pending by default
-        val filterDateState = prefs.getInt(KEY_FILTER_DATE_STATE, FILTER_DATE_ALL)
+        val filterStart = prefs.getLong(KEY_FILTER_DATE_START, 0L)
+        val filterEnd = prefs.getLong(KEY_FILTER_DATE_END, 0L)
 
         val paymentHistory: List<HistoryEntry> = getPaymentHistory()
         val withdrawHistory: List<HistoryEntry> = AutoWithdrawManager.getInstance(this)
@@ -413,27 +476,10 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         }
 
         // Apply Date Filter
-        if (filterDateState != FILTER_DATE_ALL) {
-            val calendar = java.util.Calendar.getInstance()
-            calendar.set(java.util.Calendar.HOUR_OF_DAY, 0)
-            calendar.set(java.util.Calendar.MINUTE, 0)
-            calendar.set(java.util.Calendar.SECOND, 0)
-            calendar.set(java.util.Calendar.MILLISECOND, 0)
-
-            val thresholdDate = when (filterDateState) {
-                FILTER_DATE_TODAY -> calendar.time
-                FILTER_DATE_WEEK -> {
-                    calendar.add(java.util.Calendar.DAY_OF_YEAR, -7)
-                    calendar.time
-                }
-                FILTER_DATE_MONTH -> {
-                    calendar.add(java.util.Calendar.DAY_OF_YEAR, -30)
-                    calendar.time
-                }
-                else -> Date(0)
-            }
-
-            filteredList = filteredList.filter { it.date.after(thresholdDate) || it.date == thresholdDate }
+        if (filterStart > 0 && filterEnd > 0) {
+            // MaterialDatePicker returns UTC midnights. To include the full end day:
+            val endOfDay = filterEnd + 86400000L - 1L
+            filteredList = filteredList.filter { it.date.time in filterStart..endOfDay }
         }
         
         currentHistoryList = filteredList
@@ -471,14 +517,11 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         private const val PREFS_NAME = "PaymentHistory"
         private const val KEY_HISTORY = "history"
         private const val KEY_FILTER_STATE = "filter_state"
-        private const val KEY_FILTER_DATE_STATE = "filter_date_state"
+        private const val KEY_FILTER_DATE_START = "filter_date_start"
+        private const val KEY_FILTER_DATE_END = "filter_date_end"
         private const val FILTER_ALL = 0
         private const val FILTER_PAID = 1
         private const val FILTER_PENDING = 2
-        private const val FILTER_DATE_ALL = 0
-        private const val FILTER_DATE_TODAY = 1
-        private const val FILTER_DATE_WEEK = 2
-        private const val FILTER_DATE_MONTH = 3
         private const val REQUEST_TRANSACTION_DETAIL = 1001
         private const val REQUEST_RESUME_PAYMENT = 1002
 
