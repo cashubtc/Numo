@@ -1,11 +1,15 @@
 package com.electricdreams.numo.feature.history
 
 import android.content.Context
+import android.view.View
+import androidx.recyclerview.widget.RecyclerView
+import com.electricdreams.numo.R
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
@@ -147,5 +151,131 @@ class PaymentsHistoryActivityTest {
         assertEquals(1_200L, entry.amount)
         assertEquals(200L, entry.tipAmountSats)
         assertEquals(20, entry.tipPercentage)
+    }
+
+    @Test
+    fun `loadHistory hides pending transactions by default`() {
+        // Add one pending and one completed transaction
+        val pendingId = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null
+        )
+
+        val completedId = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 200L, entryUnit = "sat", enteredAmount = 200L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null
+        )
+        PaymentsHistoryActivity.completePendingPayment(
+            context = context, paymentId = completedId, token = "token",
+            paymentType = PaymentHistoryEntry.TYPE_CASHU, mintUrl = null
+        )
+
+        // Launch the activity
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+        val activity = controller.get()
+
+        val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
+        val adapter = recyclerView.adapter
+
+        // Since pending are hidden by default, adapter should only show the completed transaction (plus 1 for the month header)
+        // Expected size = 2 (1 Header + 1 Completed Transaction)
+        assertNotNull("Adapter should not be null", adapter)
+        assertEquals(2, adapter!!.itemCount)
+    }
+
+    @Test
+    fun `loadHistory shows all transactions when FILTER_ALL is set`() {
+        // Change preference to show all transactions
+        val prefs = context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE)
+        prefs.edit().putInt("filter_state", 0).apply() // 0 = FILTER_ALL
+
+        // Add one pending and one completed transaction
+        val pendingId = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null
+        )
+
+        val completedId = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 200L, entryUnit = "sat", enteredAmount = 200L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null
+        )
+        PaymentsHistoryActivity.completePendingPayment(
+            context = context, paymentId = completedId, token = "token",
+            paymentType = PaymentHistoryEntry.TYPE_CASHU, mintUrl = null
+        )
+
+        // Launch the activity
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+        val activity = controller.get()
+
+        val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
+        val adapter = recyclerView.adapter
+
+        // Now all are visible, so adapter should show both transactions (plus 1 for the month header)
+        // Expected size = 3 (1 Header + 2 Transactions)
+        assertNotNull("Adapter should not be null", adapter)
+        assertEquals(3, adapter!!.itemCount)
+    }
+
+    @Test
+    fun `loadHistory shows only pending transactions when FILTER_PENDING is set`() {
+        // Change preference to show only pending transactions
+        val prefs = context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE)
+        prefs.edit().putInt("filter_state", 2).apply() // 2 = FILTER_PENDING
+
+        // Add one pending and one completed transaction
+        val pendingId = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null
+        )
+
+        val completedId = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 200L, entryUnit = "sat", enteredAmount = 200L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null
+        )
+        PaymentsHistoryActivity.completePendingPayment(
+            context = context, paymentId = completedId, token = "token",
+            paymentType = PaymentHistoryEntry.TYPE_CASHU, mintUrl = null
+        )
+
+        // Launch the activity
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+        val activity = controller.get()
+
+        val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
+        val adapter = recyclerView.adapter
+
+        // Expected size = 2 (1 Header + 1 Pending Transaction)
+        assertNotNull("Adapter should not be null", adapter)
+        assertEquals(2, adapter!!.itemCount)
+    }
+
+    @Test
+    fun `loadHistory filters by date correctly`() {
+        // Change preference to show all statuses, and filter between start/end dates
+        val prefs = context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE)
+        prefs.edit().putInt("filter_state", 0).apply() // 0 = FILTER_ALL
+        
+        // Let's set the date filter to epoch (1970) to ensure we get no recent transactions
+        prefs.edit().putLong("filter_date_start", 1000L).apply()
+        prefs.edit().putLong("filter_date_end", 2000L).apply()
+
+        // Add transaction for today
+        val todayId = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null
+        )
+        
+        // Launch the activity
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+        val activity = controller.get()
+
+        val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
+        val adapter = recyclerView.adapter
+
+        // Expected size = 0 transactions matching (only the Header is left, or 0 if no header applies)
+        // Wait, adapter always groups. If empty, items.size == 0
+        assertNotNull("Adapter should not be null", adapter)
+        assertEquals(0, adapter!!.itemCount)
     }
 }

@@ -75,6 +75,16 @@
     <!-- Activity screen -->
     <string name="history_total_balance_label">Total Balance</string>
     <string name="history_menu_export_activity">Export Activity</string>
+    <string name="history_menu_filter">Filter Transactions</string>
+    <string name="history_menu_filter_paid">Completed</string>
+    <string name="history_menu_filter_pending">Pending</string>
+    <string name="history_menu_filter_all">All</string>
+    <string name="history_filter_date_all">All Time</string>
+    <string name="history_filter_date_custom">Custom Range...</string>
+    <string name="history_filter_status_format">Status: %1$s</string>
+    <string name="history_filter_date_format">Date: %1$s</string>
+    <string name="history_filter_date_range_format">%1$s - %2$s</string>
+    <string name="history_filter_date_picker_title">Select Date Range</string>
     <string name="history_export_success">Activity exported to CSV</string>
     <string name="history_export_error">Error exporting activity</string>
 

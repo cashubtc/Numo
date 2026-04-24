@@ -75,9 +75,22 @@
     <!-- Activity screen -->
     <string name="history_total_balance_label">Saldo total</string>
     <string name="history_menu_export_activity">Exportar actividad</string>
+    <string name="history_menu_filter">Filtrar transacciones</string>
+    <string name="history_menu_filter_paid">Completado</string>
+    <string name="history_menu_filter_pending">Pendiente</string>
+    <string name="history_menu_filter_all">Todas</string>
+    <string name="history_filter_date_all">Todo</string>
+    <string name="history_filter_date_today">Hoy</string>
+    <string name="history_filter_date_week">Semana</string>
+    <string name="history_filter_date_month">Mes</string>
     <string name="history_export_success">Actividad exportada a CSV</string>
     <string name="history_export_error">Error al exportar actividad</string>
 
     <!-- Basket receipt -->
     <string name="basket_receipt_title">Recibo</string>
+    <string name="history_filter_date_custom">Rango personalizado...</string>
+    <string name="history_filter_status_format">Estado: %1$s</string>
+    <string name="history_filter_date_format">Fecha: %1$s</string>
+    <string name="history_filter_date_range_format">%1$s - %2$s</string>
+    <string name="history_filter_date_picker_title">Seleccionar rango</string>
 </resources>

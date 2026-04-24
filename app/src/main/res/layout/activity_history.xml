@@ -64,7 +64,7 @@
         android:orientation="vertical"
         android:gravity="center_horizontal"
         android:paddingTop="16dp"
-        android:paddingBottom="24dp"
+        android:paddingBottom="16dp"
         app:layout_constraintTop_toBottomOf="@id/top_bar">
 
         <!-- "Total Balance" label -->
@@ -98,6 +98,102 @@
 
     </LinearLayout>
 
+    <!-- Expandable Filter Header -->
+    <LinearLayout
+        android:id="@+id/filter_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
+        android:paddingVertical="4dp"
+        android:paddingHorizontal="8dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintTop_toBottomOf="@id/balance_section"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/filter_header_text"
+            style="@style/Text.Body"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:textColor="@color/color_text_secondary"
+            android:text="@string/history_menu_filter" />
+
+        <ImageView
+            android:id="@+id/filter_expand_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="4dp"
+            android:src="@drawable/ic_chevron_down"
+            app:tint="@color/color_text_secondary" />
+
+    </LinearLayout>
+
+    <!-- Filters Container (Hidden by default) -->
+    <LinearLayout
+        android:id="@+id/filters_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="false"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="12dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/filter_header">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_filter_status"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:text="Status: All"
+            android:textAllCaps="false"
+            android:textSize="13sp"
+            android:lines="1"
+            android:ellipsize="end"
+            android:paddingHorizontal="12dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:textColor="@color/color_text_primary"
+            app:icon="@drawable/ic_chevron_down"
+            app:iconGravity="textEnd"
+            app:iconPadding="4dp"
+            app:iconTint="@color/color_text_primary"
+            app:strokeColor="@color/color_divider" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_filter_date"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:layout_weight="1"
+            android:layout_marginStart="6dp"
+            android:text="Date: All Time"
+            android:textAllCaps="false"
+            android:textSize="13sp"
+            android:lines="1"
+            android:ellipsize="end"
+            android:paddingHorizontal="12dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:textColor="@color/color_text_primary"
+            app:icon="@drawable/ic_chevron_down"
+            app:iconGravity="textEnd"
+            app:iconPadding="4dp"
+            app:iconTint="@color/color_text_primary"
+            app:strokeColor="@color/color_divider" />
+
+    </LinearLayout>
+
     <!-- List (month headers + transaction items) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/history_recycler_view"
@@ -107,7 +203,7 @@
         android:clipToPadding="false"
         android:paddingBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/balance_section" />
+        app:layout_constraintTop_toBottomOf="@id/filters_container" />
 
     <!-- Empty View -->
     <TextView
@@ -120,6 +216,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/balance_section" />
+        app:layout_constraintTop_toBottomOf="@id/filters_container" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

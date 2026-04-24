@@ -57,5 +57,18 @@
     <string name="transaction_detail_label_dialog_save">ラベルを保存</string>
     <string name="history_toast_token_copied">トークンがクリップボードにコピーされました</string>
     <string name="history_menu_export_activity">アクティビティをエクスポート</string>
+    <string name="history_menu_filter">トランザクションのフィルタリング</string>
+    <string name="history_menu_filter_paid">完了のみ</string>
+    <string name="history_menu_filter_pending">保留中のみ</string>
+    <string name="history_menu_filter_all">すべて表示</string>
+    <string name="history_filter_date_all">全期間</string>
+    <string name="history_filter_date_today">今日</string>
+    <string name="history_filter_date_week">週</string>
+    <string name="history_filter_date_month">月</string>
     <string name="transaction_detail_tip_added_with_percentage">チップ追加 (%1$d%%)</string>
+    <string name="history_filter_date_custom">カスタム範囲...</string>
+    <string name="history_filter_status_format">ステータス: %1$s</string>
+    <string name="history_filter_date_format">日付: %1$s</string>
+    <string name="history_filter_date_range_format">%1$s - %2$s</string>
+    <string name="history_filter_date_picker_title">日付範囲を選択</string>
 </resources>

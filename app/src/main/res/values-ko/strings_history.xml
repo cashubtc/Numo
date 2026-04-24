@@ -57,5 +57,18 @@
     <string name="transaction_detail_label_dialog_save">라벨 저장</string>
     <string name="history_toast_token_copied">토큰이 클립보드에 복사되었습니다</string>
     <string name="history_menu_export_activity">활동 내보내기</string>
+    <string name="history_menu_filter">거래 필터링</string>
+    <string name="history_menu_filter_paid">완료됨</string>
+    <string name="history_menu_filter_pending">대기 중</string>
+    <string name="history_menu_filter_all">전체</string>
+    <string name="history_filter_date_all">전체 기간</string>
+    <string name="history_filter_date_today">오늘</string>
+    <string name="history_filter_date_week">이번 주</string>
+    <string name="history_filter_date_month">이번 달</string>
     <string name="transaction_detail_tip_added_with_percentage">팁 추가됨 (%1$d%%)</string>
+    <string name="history_filter_date_custom">사용자 지정 범위...</string>
+    <string name="history_filter_status_format">상태: %1$s</string>
+    <string name="history_filter_date_format">날짜: %1$s</string>
+    <string name="history_filter_date_range_format">%1$s - %2$s</string>
+    <string name="history_filter_date_picker_title">날짜 범위 선택</string>
 </resources>

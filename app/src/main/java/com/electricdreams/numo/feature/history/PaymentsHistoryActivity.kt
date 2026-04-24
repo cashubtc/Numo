@@ -34,6 +34,9 @@ import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.ui.adapter.PaymentsHistoryAdapter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.google.android.material.datepicker.CalendarConstraints
+import com.google.android.material.datepicker.DateValidatorPointBackward
+import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -63,6 +66,8 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             }
         }
 
+    private var isFiltersExpanded = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHistoryBinding.inflate(layoutInflater)
@@ -89,6 +94,8 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
         binding.historyRecyclerView.adapter = adapter
         binding.historyRecyclerView.layoutManager = LinearLayoutManager(this)
+
+        setupFilterBar()
 
         // Load and display history
         loadHistory()
@@ -326,9 +333,186 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             .show()
     }
 
+    private fun setupFilterBar() {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        updateFilterButtonTexts()
+
+        binding.filterHeader?.setOnClickListener {
+            toggleFilters()
+        }
+
+        binding.btnFilterStatus?.setOnClickListener { view ->
+            val popup = PopupMenu(this, view)
+            popup.menuInflater.inflate(R.menu.menu_filter_status, popup.menu)
+            
+            val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID)
+            when (filterState) {
+                FILTER_PAID -> popup.menu.findItem(R.id.filter_status_paid)?.isChecked = true
+                FILTER_PENDING -> popup.menu.findItem(R.id.filter_status_pending)?.isChecked = true
+                FILTER_ALL -> popup.menu.findItem(R.id.filter_status_all)?.isChecked = true
+            }
+
+            popup.setOnMenuItemClickListener { item ->
+                val newState = when (item.itemId) {
+                    R.id.filter_status_paid -> FILTER_PAID
+                    R.id.filter_status_pending -> FILTER_PENDING
+                    R.id.filter_status_all -> FILTER_ALL
+                    else -> FILTER_PAID
+                }
+                prefs.edit().putInt(KEY_FILTER_STATE, newState).apply()
+                updateFilterButtonTexts()
+                loadHistory()
+                true
+            }
+            popup.show()
+        }
+
+        binding.btnFilterDate?.setOnClickListener { view ->
+            val popup = PopupMenu(this, view)
+            popup.menuInflater.inflate(R.menu.menu_filter_date, popup.menu)
+            
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.filter_date_all -> {
+                        prefs.edit()
+                            .putLong(KEY_FILTER_DATE_START, 0L)
+                            .putLong(KEY_FILTER_DATE_END, 0L)
+                            .apply()
+                        updateFilterButtonTexts()
+                        loadHistory()
+                        true
+                    }
+                    R.id.filter_date_custom -> {
+                        showDateRangePicker()
+                        true
+                    }
+                    else -> false
+                }
+            }
+            popup.show()
+        }
+    }
+
+    private fun toggleFilters() {
+        isFiltersExpanded = !isFiltersExpanded
+        
+        if (isFiltersExpanded) {
+            binding.filtersContainer?.visibility = View.VISIBLE
+            binding.filterExpandIcon?.animate()?.rotation(180f)?.setDuration(200)?.start()
+        } else {
+            binding.filtersContainer?.visibility = View.GONE
+            binding.filterExpandIcon?.animate()?.rotation(0f)?.setDuration(200)?.start()
+        }
+    }
+
+    private fun showDateRangePicker() {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val currentStart = prefs.getLong(KEY_FILTER_DATE_START, 0L)
+        val currentEnd = prefs.getLong(KEY_FILTER_DATE_END, 0L)
+
+        // Find the oldest transaction to constrain the picker's start date
+        val paymentHistory: List<HistoryEntry> = getPaymentHistory()
+        val withdrawHistory: List<HistoryEntry> = AutoWithdrawManager.getInstance(this)
+            .getHistory()
+            .filter { it.status != WithdrawHistoryEntry.STATUS_FAILED }
+        
+        val allHistory = paymentHistory + withdrawHistory
+        val oldestDate = allHistory.minByOrNull { it.date.time }?.date?.time
+        
+        val today = MaterialDatePicker.todayInUtcMilliseconds()
+        
+        // Give a 1-month buffer before the oldest transaction, or default to 2023 if empty
+        val startBounds = oldestDate?.let { it - (30L * 24 * 60 * 60 * 1000) } ?: run {
+            val calendar = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"))
+            calendar.set(2023, java.util.Calendar.JANUARY, 1)
+            calendar.timeInMillis
+        }
+
+        val constraintsBuilder = CalendarConstraints.Builder()
+            .setStart(startBounds)
+            .setEnd(today)
+            .setValidator(DateValidatorPointBackward.now())
+
+        val builder = MaterialDatePicker.Builder.dateRangePicker()
+            .setTitleText(R.string.history_filter_date_picker_title)
+            .setCalendarConstraints(constraintsBuilder.build())
+
+        var validStart = currentStart
+        var validEnd = currentEnd
+
+        if (validStart > 0 && validStart < startBounds) {
+            validStart = startBounds
+        }
+        if (validEnd > today) {
+            validEnd = today
+        }
+
+        if (validStart > 0 && validEnd > 0 && validStart <= validEnd) {
+            builder.setSelection(androidx.core.util.Pair(validStart, validEnd))
+        }
+
+        val picker = builder.build()
+        picker.addOnPositiveButtonClickListener { selection ->
+            prefs.edit()
+                .putLong(KEY_FILTER_DATE_START, selection.first)
+                .putLong(KEY_FILTER_DATE_END, selection.second)
+                .apply()
+            updateFilterButtonTexts()
+            loadHistory()
+        }
+        picker.show(supportFragmentManager, "DATE_RANGE_PICKER")
+    }
+
+    private fun updateFilterButtonTexts() {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        
+        val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID)
+        val statusText = when (filterState) {
+            FILTER_PAID -> getString(R.string.history_menu_filter_paid)
+            FILTER_PENDING -> getString(R.string.history_menu_filter_pending)
+            FILTER_ALL -> getString(R.string.history_menu_filter_all)
+            else -> getString(R.string.history_menu_filter_paid)
+        }
+        binding.btnFilterStatus?.text = getString(R.string.history_filter_status_format, statusText)
+
+        val start = prefs.getLong(KEY_FILTER_DATE_START, 0L)
+        val end = prefs.getLong(KEY_FILTER_DATE_END, 0L)
+        
+        var dateText = ""
+        if (start > 0 && end > 0) {
+            val format = SimpleDateFormat("MMM d", Locale.getDefault())
+            val startStr = format.format(Date(start))
+            val endStr = format.format(Date(end))
+            dateText = getString(R.string.history_filter_date_range_format, startStr, endStr)
+            binding.btnFilterDate?.text = getString(R.string.history_filter_date_format, dateText)
+        } else {
+            dateText = getString(R.string.history_filter_date_all)
+            binding.btnFilterDate?.text = getString(R.string.history_filter_date_format, dateText)
+        }
+
+        // Update the main header text to reflect active filters if any
+        if (filterState == FILTER_ALL && start == 0L && end == 0L) {
+            binding.filterHeaderText?.text = getString(R.string.history_menu_filter)
+            binding.filterHeaderText?.setTextColor(getColor(R.color.color_text_secondary))
+            binding.filterExpandIcon?.setColorFilter(getColor(R.color.color_text_secondary))
+        } else {
+            val activeFilters = mutableListOf<String>()
+            if (filterState != FILTER_ALL) activeFilters.add(statusText)
+            if (start > 0 || end > 0) activeFilters.add(dateText)
+            
+            val summary = activeFilters.joinToString(", ")
+            binding.filterHeaderText?.text = summary
+            
+            // Highlight the text to indicate active filters
+            binding.filterHeaderText?.setTextColor(getColor(R.color.color_text_primary))
+            binding.filterExpandIcon?.setColorFilter(getColor(R.color.color_text_primary))
+        }
+    }
+
     private fun showOverflowMenu(anchor: View) {
         val popup = PopupMenu(this, anchor, android.view.Gravity.END)
         popup.menuInflater.inflate(R.menu.menu_activity_history, popup.menu)
+
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.menu_export_activity -> {
@@ -343,15 +527,35 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     }
 
     private fun loadHistory() {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID) // Hide pending by default
+        val filterStart = prefs.getLong(KEY_FILTER_DATE_START, 0L)
+        val filterEnd = prefs.getLong(KEY_FILTER_DATE_END, 0L)
+
         val paymentHistory: List<HistoryEntry> = getPaymentHistory()
         val withdrawHistory: List<HistoryEntry> = AutoWithdrawManager.getInstance(this)
             .getHistory()
             .filter { it.status != WithdrawHistoryEntry.STATUS_FAILED }
 
         // Merge and sort by date descending (newest first)
-        currentHistoryList = (paymentHistory + withdrawHistory)
+        var filteredList = (paymentHistory + withdrawHistory)
             .sortedByDescending { it.date.time }
 
+        // Apply Status Filter
+        if (filterState == FILTER_PAID) {
+            filteredList = filteredList.filterNot { it.isPending() }
+        } else if (filterState == FILTER_PENDING) {
+            filteredList = filteredList.filter { it.isPending() }
+        }
+
+        // Apply Date Filter
+        if (filterStart > 0 && filterEnd > 0) {
+            // MaterialDatePicker returns UTC midnights. To include the full end day:
+            val endOfDay = filterEnd + 86400000L - 1L
+            filteredList = filteredList.filter { it.date.time in filterStart..endOfDay }
+        }
+        
+        currentHistoryList = filteredList
         adapter.setEntries(currentHistoryList)
 
         val isEmpty = currentHistoryList.isEmpty()
@@ -385,6 +589,12 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     companion object {
         private const val PREFS_NAME = "PaymentHistory"
         private const val KEY_HISTORY = "history"
+        private const val KEY_FILTER_STATE = "filter_state"
+        private const val KEY_FILTER_DATE_START = "filter_date_start"
+        private const val KEY_FILTER_DATE_END = "filter_date_end"
+        private const val FILTER_ALL = 0
+        private const val FILTER_PAID = 1
+        private const val FILTER_PENDING = 2
         private const val REQUEST_TRANSACTION_DETAIL = 1001
         private const val REQUEST_RESUME_PAYMENT = 1002
 
