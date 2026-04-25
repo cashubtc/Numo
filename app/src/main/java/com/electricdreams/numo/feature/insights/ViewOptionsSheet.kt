@@ -44,9 +44,8 @@ class ViewOptionsSheet : BottomSheetDialogFragment() {
         view.findViewById<View>(R.id.row_show_me_in).setOnClickListener {
             CurrencyOptionsSheet().apply {
                 configure(currentUnit) { newUnit ->
-                    currentUnit = newUnit
-                    unitValue.text = labelFor(newUnit)
                     onUnitChanged?.invoke(newUnit)
+                    this@ViewOptionsSheet.dismiss()
                 }
             }.show(parentFragmentManager, CurrencyOptionsSheet.TAG)
         }
@@ -69,7 +68,6 @@ class ViewOptionsSheet : BottomSheetDialogFragment() {
             CurrencyManager.getInstance(requireContext()).getCurrentCurrency()
         ).name
         DisplayUnit.SATS -> getString(R.string.insights_currency_sats)
-        DisplayUnit.BTC -> getString(R.string.insights_currency_btc)
     }
 
     private fun labelFor(range: InsightsRange): String = getString(

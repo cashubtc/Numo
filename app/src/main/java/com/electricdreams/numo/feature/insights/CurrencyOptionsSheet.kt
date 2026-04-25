@@ -39,7 +39,6 @@ class CurrencyOptionsSheet : BottomSheetDialogFragment() {
         val options = listOf(
             DisplayUnit.FIAT to fiatLabel,
             DisplayUnit.SATS to getString(R.string.insights_currency_sats),
-            DisplayUnit.BTC to getString(R.string.insights_currency_btc),
         )
 
         val recycler = view.findViewById<RecyclerView>(R.id.currency_recycler)

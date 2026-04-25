@@ -913,9 +913,6 @@
     <string name="insights_title">Sales</string>
     <string name="insights_back">Back</string>
     <string name="insights_view_options">View options</string>
-    <string name="insights_avg_daily">Avg daily</string>
-    <string name="insights_avg_weekly">Avg weekly</string>
-    <string name="insights_avg_monthly">Avg monthly</string>
     <string name="insights_this_week">This week</string>
     <string name="insights_last_7_weeks">Last 7 weeks</string>
     <string name="insights_last_7_months">Last 7 months</string>
@@ -934,8 +931,7 @@
     <string name="insights_empty_hint">Your sales will appear here.</string>
     <string name="insights_empty_day">No sales on %1$s</string>
     <string name="insights_show_me_in">Display in</string>
-    <string name="insights_currency_sats">Sats</string>
-    <string name="insights_currency_btc">BTC</string>
+    <string name="insights_currency_sats">₿</string>
     <string name="insights_close">Close</string>
     <string name="insights_day_label_mon">Mon</string>
     <string name="insights_day_label_tue">Tue</string>

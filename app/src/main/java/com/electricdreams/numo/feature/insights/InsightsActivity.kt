@@ -34,11 +34,8 @@ class InsightsActivity : AppCompatActivity() {
     private var balanceReceiver: BroadcastReceiver? = null
 
     private var primaryAnimator: ValueAnimator? = null
-    private var secondaryAnimator: ValueAnimator? = null
     private var lastPrimarySats: Long = 0L
     private var lastPrimaryFiatMinor: Long = 0L
-    private var lastSecondarySats: Long = 0L
-    private var lastSecondaryFiatMinor: Long = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,7 +60,6 @@ class InsightsActivity : AppCompatActivity() {
         }
 
         binding.statLabel.text = getString(periodLabelRes(range))
-        binding.statSecondaryLabel.text = getString(avgLabelRes(range))
 
         refresh(animate = false)
     }
@@ -112,10 +108,7 @@ class InsightsActivity : AppCompatActivity() {
         if (sel == null) {
             binding.statLabel.text = getString(periodLabelRes(d.range))
             updatePrimary(d.periodTotalSats, d.periodTotalFiatMinor, d.fiatCurrency, animate)
-            binding.statSecondary.visibility = View.VISIBLE
-            binding.statSecondaryLabel.visibility = View.VISIBLE
-            binding.statSecondaryLabel.text = getString(avgLabelRes(d.range))
-            updateSecondary(d.avgPerBucketSats, d.avgPerBucketFiatMinor, d.fiatCurrency, animate)
+            binding.statSecondary.visibility = View.GONE
             adapter.submit(d.transactions, unit, d.fiatCurrency)
         } else {
             val bucket = d.buckets[sel]
@@ -124,7 +117,6 @@ class InsightsActivity : AppCompatActivity() {
             updatePrimary(bucket.totalSats, bucket.totalFiatMinor, d.fiatCurrency, animate)
             binding.statSecondary.visibility = View.VISIBLE
             binding.statSecondaryLabel.visibility = View.GONE
-            secondaryAnimator?.cancel()
             binding.statSecondaryValue.text = if (bucket.transactionCount == 1) {
                 getString(R.string.insights_day_count_one)
             } else {
@@ -154,11 +146,8 @@ class InsightsActivity : AppCompatActivity() {
         binding.statValue.text = getString(R.string.insights_empty_headline)
         binding.statSecondary.visibility = View.GONE
         primaryAnimator?.cancel()
-        secondaryAnimator?.cancel()
         lastPrimarySats = 0L
         lastPrimaryFiatMinor = 0L
-        lastSecondarySats = 0L
-        lastSecondaryFiatMinor = 0L
     }
 
     private fun updatePrimary(sats: Long, fiatMinor: Long, fiat: Amount.Currency, animate: Boolean) {
@@ -173,20 +162,6 @@ class InsightsActivity : AppCompatActivity() {
         }
         lastPrimarySats = sats
         lastPrimaryFiatMinor = fiatMinor
-    }
-
-    private fun updateSecondary(sats: Long, fiatMinor: Long, fiat: Amount.Currency, animate: Boolean) {
-        if (animate && (sats != lastSecondarySats || fiatMinor != lastSecondaryFiatMinor)) {
-            secondaryAnimator?.cancel()
-            secondaryAnimator = animatePair(lastSecondarySats, sats, lastSecondaryFiatMinor, fiatMinor) { s, f ->
-                binding.statSecondaryValue.text = InsightsFormatter.format(unit, s, f, fiat)
-            }
-        } else {
-            secondaryAnimator?.cancel()
-            binding.statSecondaryValue.text = InsightsFormatter.format(unit, sats, fiatMinor, fiat)
-        }
-        lastSecondarySats = sats
-        lastSecondaryFiatMinor = fiatMinor
     }
 
     private fun animatePair(
@@ -231,12 +206,6 @@ class InsightsActivity : AppCompatActivity() {
         InsightsRange.DAY -> R.string.insights_this_week
         InsightsRange.WEEK -> R.string.insights_last_7_weeks
         InsightsRange.MONTH -> R.string.insights_last_7_months
-    }
-
-    private fun avgLabelRes(range: InsightsRange): Int = when (range) {
-        InsightsRange.DAY -> R.string.insights_avg_daily
-        InsightsRange.WEEK -> R.string.insights_avg_weekly
-        InsightsRange.MONTH -> R.string.insights_avg_monthly
     }
 
     private fun formatSelectedBucketLabel(range: InsightsRange, bucket: BucketTotal): String {

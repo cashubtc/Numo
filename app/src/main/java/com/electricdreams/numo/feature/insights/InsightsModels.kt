@@ -5,13 +5,11 @@ import java.util.Date
 
 enum class DisplayUnit {
     FIAT,
-    SATS,
-    BTC;
+    SATS;
 
     companion object {
         fun fromKey(key: String?): DisplayUnit = when (key) {
-            "sats" -> SATS
-            "btc" -> BTC
+            "sats", "btc" -> SATS
             else -> FIAT
         }
     }
@@ -19,7 +17,6 @@ enum class DisplayUnit {
     fun toKey(): String = when (this) {
         FIAT -> "fiat"
         SATS -> "sats"
-        BTC -> "btc"
     }
 }
 
@@ -82,7 +79,5 @@ data class InsightsData(
     val periodTotalSats: Long,
     val periodTotalFiatMinor: Long,
     val periodTxCount: Int,
-    val avgPerBucketSats: Long,
-    val avgPerBucketFiatMinor: Long,
     val fiatCurrency: Amount.Currency,
 )

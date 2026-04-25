@@ -1,8 +1,10 @@
 package com.electricdreams.numo.feature.insights
 
 import android.content.Context
+import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.CurrencyManager
+import com.electricdreams.numo.core.util.ItemManager
 import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import java.text.SimpleDateFormat
@@ -28,6 +30,13 @@ object InsightsRepository {
             .sortedByDescending { it.date.time }
 
         val basketManager = SavedBasketManager.getInstance(context)
+        val imagesByItemId = ItemManager.getInstance(context).getAllItems()
+            .mapNotNull { item ->
+                val id = item.id?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+                val path = item.imagePath?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+                id to path
+            }
+            .toMap()
 
         val perBucketSats = LongArray(7)
         val perBucketFiat = LongArray(7)
@@ -46,32 +55,12 @@ object InsightsRepository {
             perBucketFiat[idx] += fiatMinor
             periodTotalFiatMinor += fiatMinor
 
-            val basket = entry.basketId?.let { basketManager.getBasket(it) }
-            val basketSummary = basket?.takeIf { it.items.isNotEmpty() }?.let { b ->
-                val items = b.items
-                    .filter { it.item.name?.isNotBlank() == true }
-                    .groupBy { it.item.name!! }
-                    .map { (name, instances) ->
-                        BasketItemSummary(
-                            itemName = name,
-                            itemImagePath = instances.firstNotNullOfOrNull { it.item.imagePath?.takeIf { p -> p.isNotBlank() } },
-                            quantity = instances.sumOf { it.quantity },
-                        )
-                    }
-                    .sortedByDescending { it.quantity }
-                BasketSummary(
-                    items = items,
-                    totalQuantity = items.sumOf { it.quantity },
-                    distinctTypes = items.size,
-                )
-            }
-
             TxRow(
                 id = entry.id,
                 date = entry.date,
                 totalSats = entry.amount,
                 totalFiatMinor = fiatMinor,
-                basket = basketSummary,
+                basket = buildBasketSummary(entry, basketManager, imagesByItemId),
             )
         }
 
@@ -83,9 +72,6 @@ object InsightsRepository {
             )
         }
 
-        val avgPerBucketSats = filledBuckets.sumOf { it.totalSats } / 7
-        val avgPerBucketFiatMinor = filledBuckets.sumOf { it.totalFiatMinor } / 7
-
         return InsightsData(
             range = range,
             buckets = filledBuckets,
@@ -93,8 +79,6 @@ object InsightsRepository {
             periodTotalSats = periodTotalSats,
             periodTotalFiatMinor = periodTotalFiatMinor,
             periodTxCount = txRows.size,
-            avgPerBucketSats = avgPerBucketSats,
-            avgPerBucketFiatMinor = avgPerBucketFiatMinor,
             fiatCurrency = fiatCurrency,
         )
     }
@@ -153,6 +137,54 @@ object InsightsRepository {
                 label = label,
             )
         }
+    }
+
+    private fun buildBasketSummary(
+        entry: PaymentHistoryEntry,
+        basketManager: SavedBasketManager,
+        imagesByItemId: Map<String, String>,
+    ): BasketSummary? {
+        val saved = entry.basketId?.let { basketManager.getBasket(it) }
+        if (saved != null && saved.items.isNotEmpty()) {
+            val items = saved.items
+                .filter { it.item.name?.isNotBlank() == true }
+                .groupBy { it.item.name!! }
+                .map { (name, instances) ->
+                    BasketItemSummary(
+                        itemName = name,
+                        itemImagePath = instances.firstNotNullOfOrNull { it.item.imagePath?.takeIf { p -> p.isNotBlank() } },
+                        quantity = instances.sumOf { it.quantity },
+                    )
+                }
+                .sortedByDescending { it.quantity }
+            return BasketSummary(
+                items = items,
+                totalQuantity = items.sumOf { it.quantity },
+                distinctTypes = items.size,
+            )
+        }
+
+        val checkout = entry.getCheckoutBasket()
+        if (checkout != null && checkout.items.isNotEmpty()) {
+            val items = checkout.items
+                .filter { it.name.isNotBlank() }
+                .groupBy { it.name }
+                .map { (name, instances) ->
+                    BasketItemSummary(
+                        itemName = name,
+                        itemImagePath = instances.firstNotNullOfOrNull { imagesByItemId[it.itemId] },
+                        quantity = instances.sumOf { it.quantity },
+                    )
+                }
+                .sortedByDescending { it.quantity }
+            return BasketSummary(
+                items = items,
+                totalQuantity = items.sumOf { it.quantity },
+                distinctTypes = items.size,
+            )
+        }
+
+        return null
     }
 
     private fun List<BucketTotal>.indexOfBucket(timeMillis: Long): Int {
