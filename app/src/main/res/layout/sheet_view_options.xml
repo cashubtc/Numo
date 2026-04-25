@@ -54,4 +54,42 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/row_date_range"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="?attr/selectableItemBackground"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="18dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@color/color_text_primary"
+            android:textSize="16sp"
+            android:text="@string/insights_date_range" />
+
+        <TextView
+            android:id="@+id/row_date_range_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:textColor="@color/color_text_tertiary"
+            android:textSize="15sp"
+            tools:text="Last 7 days" />
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="8dp"
+            android:src="@drawable/ic_chevron_right"
+            android:tint="@color/color_text_tertiary"
+            xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+    </LinearLayout>
+
 </LinearLayout>

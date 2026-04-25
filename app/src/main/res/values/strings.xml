@@ -914,7 +914,15 @@
     <string name="insights_back">Back</string>
     <string name="insights_view_options">View options</string>
     <string name="insights_avg_daily">Avg daily</string>
+    <string name="insights_avg_weekly">Avg weekly</string>
+    <string name="insights_avg_monthly">Avg monthly</string>
     <string name="insights_this_week">This week</string>
+    <string name="insights_last_7_weeks">Last 7 weeks</string>
+    <string name="insights_last_7_months">Last 7 months</string>
+    <string name="insights_date_range">Date range</string>
+    <string name="insights_range_days">Last 7 days</string>
+    <string name="insights_range_weeks">Last 7 weeks</string>
+    <string name="insights_range_months">Last 7 months</string>
     <string name="insights_day_count_one">1 transaction</string>
     <string name="insights_day_count_other">%1$d transactions</string>
     <string name="insights_quick_charge">Quick charge</string>

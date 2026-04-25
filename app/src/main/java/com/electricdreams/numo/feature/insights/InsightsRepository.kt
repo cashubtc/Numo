@@ -1,24 +1,26 @@
 package com.electricdreams.numo.feature.insights
 
 import android.content.Context
-import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 
 object InsightsRepository {
 
-    fun computeLast7Days(context: Context): InsightsData {
+    fun compute(context: Context, range: InsightsRange): InsightsData {
         val fiatCurrency = Amount.Currency.fromCode(
             CurrencyManager.getInstance(context).getCurrentCurrency()
         )
 
-        val days = buildLast7Days()
-        val periodStart = days.first().dayStartMillis
-        val periodEnd = days.last().dayEndExclusiveMillis
+        val locale = Locale.getDefault()
+        val buckets = buildBuckets(range, locale)
+        val periodStart = buckets.first().startMillis
+        val periodEnd = buckets.last().endExclusiveMillis
 
         val payments = PaymentsHistoryActivity.getPaymentHistory(context)
             .filter { it.isCompleted() }
@@ -27,21 +29,21 @@ object InsightsRepository {
 
         val basketManager = SavedBasketManager.getInstance(context)
 
-        val perDayCounts = LongArray(7)
-        val perDayFiat = LongArray(7)
-        val perDayTxCount = IntArray(7)
+        val perBucketSats = LongArray(7)
+        val perBucketFiat = LongArray(7)
+        val perBucketTxCount = IntArray(7)
 
         var periodTotalSats = 0L
         var periodTotalFiatMinor = 0L
 
         val txRows = payments.map { entry ->
-            val (dayIdx, _) = days.indexOfDay(entry.date.time)
-            perDayCounts[dayIdx] += entry.amount
-            perDayTxCount[dayIdx] += 1
+            val idx = buckets.indexOfBucket(entry.date.time)
+            perBucketSats[idx] += entry.amount
+            perBucketTxCount[idx] += 1
             periodTotalSats += entry.amount
 
             val fiatMinor = satsToFiatMinor(entry.amount, entry.bitcoinPrice)
-            perDayFiat[dayIdx] += fiatMinor
+            perBucketFiat[idx] += fiatMinor
             periodTotalFiatMinor += fiatMinor
 
             val basket = entry.basketId?.let { basketManager.getBasket(it) }
@@ -73,60 +75,91 @@ object InsightsRepository {
             )
         }
 
-        val perDay = days.mapIndexed { idx, scaffold ->
+        val filledBuckets = buckets.mapIndexed { idx, scaffold ->
             scaffold.copy(
-                totalSats = perDayCounts[idx],
-                totalFiatMinor = perDayFiat[idx],
-                transactionCount = perDayTxCount[idx],
+                totalSats = perBucketSats[idx],
+                totalFiatMinor = perBucketFiat[idx],
+                transactionCount = perBucketTxCount[idx],
             )
         }
 
-        val avgDailySats = perDay.sumOf { it.totalSats } / 7
-        val avgDailyFiatMinor = perDay.sumOf { it.totalFiatMinor } / 7
+        val avgPerBucketSats = filledBuckets.sumOf { it.totalSats } / 7
+        val avgPerBucketFiatMinor = filledBuckets.sumOf { it.totalFiatMinor } / 7
 
         return InsightsData(
-            perDay = perDay,
+            range = range,
+            buckets = filledBuckets,
             transactions = txRows,
             periodTotalSats = periodTotalSats,
             periodTotalFiatMinor = periodTotalFiatMinor,
             periodTxCount = txRows.size,
-            avgDailySats = avgDailySats,
-            avgDailyFiatMinor = avgDailyFiatMinor,
+            avgPerBucketSats = avgPerBucketSats,
+            avgPerBucketFiatMinor = avgPerBucketFiatMinor,
             fiatCurrency = fiatCurrency,
         )
     }
 
-    private fun buildLast7Days(): List<DailyTotal> {
-        val cal = Calendar.getInstance().apply {
+    private fun buildBuckets(range: InsightsRange, locale: Locale): List<BucketTotal> {
+        val dayLabelFmt = SimpleDateFormat("EEE", locale)
+        val weekLabelFmt = SimpleDateFormat("MMM d", locale)
+        val monthLabelFmt = SimpleDateFormat("MMM", locale)
+
+        val cursor = Calendar.getInstance(locale).apply {
             set(Calendar.HOUR_OF_DAY, 0)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
         }
-        val todayStart = cal.timeInMillis
-        cal.add(Calendar.DAY_OF_MONTH, -6)
+        val nowStartOfDay = cursor.timeInMillis
+
+        when (range) {
+            InsightsRange.DAY -> cursor.add(Calendar.DAY_OF_MONTH, -6)
+            InsightsRange.WEEK -> {
+                val first = cursor.firstDayOfWeek
+                while (cursor.get(Calendar.DAY_OF_WEEK) != first) {
+                    cursor.add(Calendar.DAY_OF_MONTH, -1)
+                }
+                cursor.add(Calendar.WEEK_OF_YEAR, -6)
+            }
+            InsightsRange.MONTH -> {
+                cursor.set(Calendar.DAY_OF_MONTH, 1)
+                cursor.add(Calendar.MONTH, -6)
+            }
+        }
+
         return (0..6).map { i ->
-            val dayStart = cal.timeInMillis
-            cal.add(Calendar.DAY_OF_MONTH, 1)
-            val dayEnd = cal.timeInMillis
-            DailyTotal(
-                dayIndex = i,
-                date = Date(dayStart),
-                dayStartMillis = dayStart,
-                dayEndExclusiveMillis = dayEnd,
+            val start = cursor.timeInMillis
+            val startDate = Date(start)
+            when (range) {
+                InsightsRange.DAY -> cursor.add(Calendar.DAY_OF_MONTH, 1)
+                InsightsRange.WEEK -> cursor.add(Calendar.WEEK_OF_YEAR, 1)
+                InsightsRange.MONTH -> cursor.add(Calendar.MONTH, 1)
+            }
+            val end = cursor.timeInMillis
+            val label = when (range) {
+                InsightsRange.DAY -> dayLabelFmt.format(startDate)
+                InsightsRange.WEEK -> weekLabelFmt.format(startDate)
+                InsightsRange.MONTH -> monthLabelFmt.format(startDate)
+            }
+            BucketTotal(
+                bucketIndex = i,
+                date = startDate,
+                startMillis = start,
+                endExclusiveMillis = end,
                 totalSats = 0,
                 totalFiatMinor = 0,
                 transactionCount = 0,
-                isToday = dayStart == todayStart,
+                isCurrent = nowStartOfDay in start until end,
+                label = label,
             )
         }
     }
 
-    private fun List<DailyTotal>.indexOfDay(timeMillis: Long): Pair<Int, DailyTotal> {
-        for ((idx, day) in withIndex()) {
-            if (timeMillis in day.dayStartMillis until day.dayEndExclusiveMillis) return idx to day
+    private fun List<BucketTotal>.indexOfBucket(timeMillis: Long): Int {
+        for ((idx, bucket) in withIndex()) {
+            if (timeMillis in bucket.startMillis until bucket.endExclusiveMillis) return idx
         }
-        return (size - 1) to last()
+        return size - 1
     }
 
     private fun satsToFiatMinor(sats: Long, btcPrice: Double?): Long {

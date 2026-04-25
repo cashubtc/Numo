@@ -11,8 +11,6 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.electricdreams.numo.R
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class InsightsBarChartView @JvmOverloads constructor(
     context: Context,
@@ -40,21 +38,20 @@ class InsightsBarChartView @JvmOverloads constructor(
         typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
     }
 
-    private val labelFormatter = SimpleDateFormat("EEE", Locale.getDefault())
     private val rect = RectF()
 
-    private var days: List<DailyTotal> = emptyList()
-    private var selectedDayIndex: Int? = null
+    private var buckets: List<BucketTotal> = emptyList()
+    private var selectedIndex: Int? = null
     private var listener: ((Int?) -> Unit)? = null
 
-    fun setData(days: List<DailyTotal>) {
-        this.days = days
+    fun setData(buckets: List<BucketTotal>) {
+        this.buckets = buckets
         invalidate()
     }
 
-    fun setSelectedDay(index: Int?) {
-        if (selectedDayIndex == index) return
-        selectedDayIndex = index
+    fun setSelectedIndex(index: Int?) {
+        if (selectedIndex == index) return
+        selectedIndex = index
         invalidate()
     }
 
@@ -71,7 +68,7 @@ class InsightsBarChartView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (days.isEmpty()) return
+        if (buckets.isEmpty()) return
 
         val w = width.toFloat()
         val h = height.toFloat()
@@ -84,19 +81,19 @@ class InsightsBarChartView @JvmOverloads constructor(
         val slotWidth = usableWidth / 7f
         val barWidth = (slotWidth * 0.55f).coerceAtMost(dp(28f))
 
-        val maxSats = days.maxOf { it.totalSats }.coerceAtLeast(1L)
+        val maxSats = buckets.maxOf { it.totalSats }.coerceAtLeast(1L)
 
         for (i in 0 until 7) {
-            val day = days[i]
+            val bucket = buckets[i]
             val cx = sideInset + slotWidth * (i + 0.5f)
 
-            val isSelected = (i == selectedDayIndex)
-            val isTodayHighlight = day.isToday && selectedDayIndex == null
+            val isSelected = (i == selectedIndex)
+            val isCurrentHighlight = bucket.isCurrent && selectedIndex == null
 
-            val barHeight = if (day.totalSats <= 0L) {
+            val barHeight = if (bucket.totalSats <= 0L) {
                 emptyBarHeight
             } else {
-                val ratio = day.totalSats.toDouble() / maxSats.toDouble()
+                val ratio = bucket.totalSats.toDouble() / maxSats.toDouble()
                 (ratio * barAreaHeight).toFloat().coerceAtLeast(barMinHeightWithData)
             }
 
@@ -104,13 +101,12 @@ class InsightsBarChartView @JvmOverloads constructor(
             val barBottom = barAreaBottom
             rect.set(cx - barWidth / 2f, barTop, cx + barWidth / 2f, barBottom)
 
-            barPaint.color = if (isSelected || isTodayHighlight) colorBarAccent else colorBarMuted
+            barPaint.color = if (isSelected || isCurrentHighlight) colorBarAccent else colorBarMuted
             canvas.drawRoundRect(rect, barRadius, barRadius, barPaint)
 
-            labelPaint.color = if (isSelected || isTodayHighlight) colorLabelAccent else colorLabelMuted
-            val label = labelFormatter.format(day.date)
+            labelPaint.color = if (isSelected || isCurrentHighlight) colorLabelAccent else colorLabelMuted
             val labelY = h - labelPaint.fontMetrics.descent
-            canvas.drawText(label, cx, labelY, labelPaint)
+            canvas.drawText(bucket.label, cx, labelY, labelPaint)
         }
     }
 
@@ -127,8 +123,8 @@ class InsightsBarChartView @JvmOverloads constructor(
             return true
         }
         val tappedIdx = ((x - sideInset) / slotWidth).toInt().coerceIn(0, 6)
-        val newSelection = if (selectedDayIndex == tappedIdx) null else tappedIdx
-        selectedDayIndex = newSelection
+        val newSelection = if (selectedIndex == tappedIdx) null else tappedIdx
+        selectedIndex = newSelection
         invalidate()
         listener?.invoke(newSelection)
         performClick()

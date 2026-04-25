@@ -23,15 +23,36 @@ enum class DisplayUnit {
     }
 }
 
-data class DailyTotal(
-    val dayIndex: Int,
+enum class InsightsRange {
+    DAY,
+    WEEK,
+    MONTH;
+
+    companion object {
+        fun fromKey(key: String?): InsightsRange = when (key) {
+            "week" -> WEEK
+            "month" -> MONTH
+            else -> DAY
+        }
+    }
+
+    fun toKey(): String = when (this) {
+        DAY -> "day"
+        WEEK -> "week"
+        MONTH -> "month"
+    }
+}
+
+data class BucketTotal(
+    val bucketIndex: Int,
     val date: Date,
-    val dayStartMillis: Long,
-    val dayEndExclusiveMillis: Long,
+    val startMillis: Long,
+    val endExclusiveMillis: Long,
     val totalSats: Long,
     val totalFiatMinor: Long,
     val transactionCount: Int,
-    val isToday: Boolean,
+    val isCurrent: Boolean,
+    val label: String,
 )
 
 data class BasketItemSummary(
@@ -55,12 +76,13 @@ data class TxRow(
 )
 
 data class InsightsData(
-    val perDay: List<DailyTotal>,
+    val range: InsightsRange,
+    val buckets: List<BucketTotal>,
     val transactions: List<TxRow>,
     val periodTotalSats: Long,
     val periodTotalFiatMinor: Long,
     val periodTxCount: Int,
-    val avgDailySats: Long,
-    val avgDailyFiatMinor: Long,
+    val avgPerBucketSats: Long,
+    val avgPerBucketFiatMinor: Long,
     val fiatCurrency: Amount.Currency,
 )

@@ -9,16 +9,14 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
-import com.electricdreams.numo.core.model.Amount
-import com.electricdreams.numo.core.util.CurrencyManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
-class CurrencyOptionsSheet : BottomSheetDialogFragment() {
+class RangeOptionsSheet : BottomSheetDialogFragment() {
 
-    private var current: DisplayUnit = DisplayUnit.FIAT
-    private var onSelected: ((DisplayUnit) -> Unit)? = null
+    private var current: InsightsRange = InsightsRange.DAY
+    private var onSelected: ((InsightsRange) -> Unit)? = null
 
-    fun configure(current: DisplayUnit, onSelected: (DisplayUnit) -> Unit) {
+    fun configure(current: InsightsRange, onSelected: (InsightsRange) -> Unit) {
         this.current = current
         this.onSelected = onSelected
     }
@@ -27,22 +25,18 @@ class CurrencyOptionsSheet : BottomSheetDialogFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?,
-    ): View = inflater.inflate(R.layout.sheet_currency_options, container, false)
+    ): View = inflater.inflate(R.layout.sheet_range_options, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val fiatLabel = Amount.Currency.fromCode(
-            CurrencyManager.getInstance(requireContext()).getCurrentCurrency()
-        ).name
-
         val options = listOf(
-            DisplayUnit.FIAT to fiatLabel,
-            DisplayUnit.SATS to getString(R.string.insights_currency_sats),
-            DisplayUnit.BTC to getString(R.string.insights_currency_btc),
+            InsightsRange.DAY to getString(R.string.insights_range_days),
+            InsightsRange.WEEK to getString(R.string.insights_range_weeks),
+            InsightsRange.MONTH to getString(R.string.insights_range_months),
         )
 
-        val recycler = view.findViewById<RecyclerView>(R.id.currency_recycler)
+        val recycler = view.findViewById<RecyclerView>(R.id.range_recycler)
         recycler.layoutManager = LinearLayoutManager(requireContext())
         recycler.adapter = Adapter(options, current) { picked ->
             onSelected?.invoke(picked)
@@ -51,9 +45,9 @@ class CurrencyOptionsSheet : BottomSheetDialogFragment() {
     }
 
     private class Adapter(
-        private val options: List<Pair<DisplayUnit, String>>,
-        private val current: DisplayUnit,
-        private val onClick: (DisplayUnit) -> Unit,
+        private val options: List<Pair<InsightsRange, String>>,
+        private val current: InsightsRange,
+        private val onClick: (InsightsRange) -> Unit,
     ) : RecyclerView.Adapter<Adapter.VH>() {
 
         class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -70,14 +64,14 @@ class CurrencyOptionsSheet : BottomSheetDialogFragment() {
         override fun getItemCount() = options.size
 
         override fun onBindViewHolder(holder: VH, position: Int) {
-            val (unit, name) = options[position]
+            val (range, name) = options[position]
             holder.label.text = name
-            holder.check.visibility = if (unit == current) View.VISIBLE else View.INVISIBLE
-            holder.itemView.setOnClickListener { onClick(unit) }
+            holder.check.visibility = if (range == current) View.VISIBLE else View.INVISIBLE
+            holder.itemView.setOnClickListener { onClick(range) }
         }
     }
 
     companion object {
-        const val TAG = "CurrencyOptionsSheet"
+        const val TAG = "RangeOptionsSheet"
     }
 }

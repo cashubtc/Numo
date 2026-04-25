@@ -13,11 +13,20 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 class ViewOptionsSheet : BottomSheetDialogFragment() {
 
     private var onUnitChanged: ((DisplayUnit) -> Unit)? = null
+    private var onRangeChanged: ((InsightsRange) -> Unit)? = null
     private var currentUnit: DisplayUnit = DisplayUnit.FIAT
+    private var currentRange: InsightsRange = InsightsRange.DAY
 
-    fun configure(currentUnit: DisplayUnit, onUnitChanged: (DisplayUnit) -> Unit) {
+    fun configure(
+        currentUnit: DisplayUnit,
+        currentRange: InsightsRange,
+        onUnitChanged: (DisplayUnit) -> Unit,
+        onRangeChanged: (InsightsRange) -> Unit,
+    ) {
         this.currentUnit = currentUnit
+        this.currentRange = currentRange
         this.onUnitChanged = onUnitChanged
+        this.onRangeChanged = onRangeChanged
     }
 
     override fun onCreateView(
@@ -29,17 +38,30 @@ class ViewOptionsSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val valueView = view.findViewById<TextView>(R.id.row_show_me_in_value)
-        valueView.text = labelFor(currentUnit)
+        val unitValue = view.findViewById<TextView>(R.id.row_show_me_in_value)
+        unitValue.text = labelFor(currentUnit)
 
         view.findViewById<View>(R.id.row_show_me_in).setOnClickListener {
             CurrencyOptionsSheet().apply {
                 configure(currentUnit) { newUnit ->
                     currentUnit = newUnit
-                    valueView.text = labelFor(newUnit)
+                    unitValue.text = labelFor(newUnit)
                     onUnitChanged?.invoke(newUnit)
                 }
             }.show(parentFragmentManager, CurrencyOptionsSheet.TAG)
+        }
+
+        val rangeValue = view.findViewById<TextView>(R.id.row_date_range_value)
+        rangeValue.text = labelFor(currentRange)
+
+        view.findViewById<View>(R.id.row_date_range).setOnClickListener {
+            RangeOptionsSheet().apply {
+                configure(currentRange) { newRange ->
+                    currentRange = newRange
+                    rangeValue.text = labelFor(newRange)
+                    onRangeChanged?.invoke(newRange)
+                }
+            }.show(parentFragmentManager, RangeOptionsSheet.TAG)
         }
     }
 
@@ -50,6 +72,14 @@ class ViewOptionsSheet : BottomSheetDialogFragment() {
         DisplayUnit.SATS -> getString(R.string.insights_currency_sats)
         DisplayUnit.BTC -> getString(R.string.insights_currency_btc)
     }
+
+    private fun labelFor(range: InsightsRange): String = getString(
+        when (range) {
+            InsightsRange.DAY -> R.string.insights_range_days
+            InsightsRange.WEEK -> R.string.insights_range_weeks
+            InsightsRange.MONTH -> R.string.insights_range_months
+        }
+    )
 
     companion object {
         const val TAG = "ViewOptionsSheet"

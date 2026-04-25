@@ -17,6 +17,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 class InsightsActivity : AppCompatActivity() {
@@ -25,8 +27,9 @@ class InsightsActivity : AppCompatActivity() {
     private lateinit var adapter: InsightsTransactionAdapter
 
     private var unit: DisplayUnit = DisplayUnit.FIAT
+    private var range: InsightsRange = InsightsRange.DAY
     private var data: InsightsData? = null
-    private var selectedDayIndex: Int? = null
+    private var selectedIndex: Int? = null
 
     private var balanceReceiver: BroadcastReceiver? = null
 
@@ -45,6 +48,7 @@ class InsightsActivity : AppCompatActivity() {
         enableEdgeToEdgeWithPill(this, lightNavIcons = true)
 
         unit = DisplayUnit.fromKey(prefs().getString(KEY_UNIT, null))
+        range = InsightsRange.fromKey(prefs().getString(KEY_RANGE, null))
 
         binding.backButton.setOnClickListener { finish() }
         binding.viewOptionsButton.setOnClickListener { openViewOptions() }
@@ -54,12 +58,12 @@ class InsightsActivity : AppCompatActivity() {
         binding.transactionsRecycler.adapter = adapter
 
         binding.barChart.setOnSelectionChanged { idx ->
-            selectedDayIndex = idx
+            selectedIndex = idx
             renderForSelection(animate = true)
         }
 
-        binding.statLabel.text = getString(R.string.insights_this_week)
-        binding.statSecondaryLabel.text = getString(R.string.insights_avg_daily)
+        binding.statLabel.text = getString(periodLabelRes(range))
+        binding.statSecondaryLabel.text = getString(avgLabelRes(range))
 
         refresh(animate = false)
     }
@@ -82,11 +86,11 @@ class InsightsActivity : AppCompatActivity() {
     private fun refresh(animate: Boolean) {
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
-                InsightsRepository.computeLast7Days(this@InsightsActivity)
+                InsightsRepository.compute(this@InsightsActivity, range)
             }
             data = result
-            binding.barChart.setData(result.perDay)
-            binding.barChart.setSelectedDay(selectedDayIndex)
+            binding.barChart.setData(result.buckets)
+            binding.barChart.setSelectedIndex(selectedIndex)
             renderForSelection(animate)
         }
     }
@@ -95,7 +99,7 @@ class InsightsActivity : AppCompatActivity() {
         val d = data ?: return
         val isEmptyPeriod = d.periodTxCount == 0
 
-        if (isEmptyPeriod && selectedDayIndex == null) {
+        if (isEmptyPeriod && selectedIndex == null) {
             renderEmpty(d)
             return
         }
@@ -104,38 +108,38 @@ class InsightsActivity : AppCompatActivity() {
         binding.transactionsRecycler.visibility = View.VISIBLE
         binding.emptyText.visibility = View.GONE
 
-        val sel = selectedDayIndex
+        val sel = selectedIndex
         if (sel == null) {
-            binding.statLabel.text = getString(R.string.insights_this_week)
+            binding.statLabel.text = getString(periodLabelRes(d.range))
             updatePrimary(d.periodTotalSats, d.periodTotalFiatMinor, d.fiatCurrency, animate)
             binding.statSecondary.visibility = View.VISIBLE
             binding.statSecondaryLabel.visibility = View.VISIBLE
-            binding.statSecondaryLabel.text = getString(R.string.insights_avg_daily)
-            updateSecondary(d.avgDailySats, d.avgDailyFiatMinor, d.fiatCurrency, animate)
+            binding.statSecondaryLabel.text = getString(avgLabelRes(d.range))
+            updateSecondary(d.avgPerBucketSats, d.avgPerBucketFiatMinor, d.fiatCurrency, animate)
             adapter.submit(d.transactions, unit, d.fiatCurrency)
         } else {
-            val day = d.perDay[sel]
-            val dayName = SimpleDateFormat("EEEE", Locale.getDefault()).format(day.date)
-            binding.statLabel.text = dayName
-            updatePrimary(day.totalSats, day.totalFiatMinor, d.fiatCurrency, animate)
+            val bucket = d.buckets[sel]
+            val bucketLabel = formatSelectedBucketLabel(d.range, bucket)
+            binding.statLabel.text = bucketLabel
+            updatePrimary(bucket.totalSats, bucket.totalFiatMinor, d.fiatCurrency, animate)
             binding.statSecondary.visibility = View.VISIBLE
             binding.statSecondaryLabel.visibility = View.GONE
             secondaryAnimator?.cancel()
-            binding.statSecondaryValue.text = if (day.transactionCount == 1) {
+            binding.statSecondaryValue.text = if (bucket.transactionCount == 1) {
                 getString(R.string.insights_day_count_one)
             } else {
-                getString(R.string.insights_day_count_other, day.transactionCount)
+                getString(R.string.insights_day_count_other, bucket.transactionCount)
             }
 
-            val daySlice = d.transactions.filter {
-                it.date.time in day.dayStartMillis until day.dayEndExclusiveMillis
+            val slice = d.transactions.filter {
+                it.date.time in bucket.startMillis until bucket.endExclusiveMillis
             }
-            adapter.submit(daySlice, unit, d.fiatCurrency)
+            adapter.submit(slice, unit, d.fiatCurrency)
 
-            if (daySlice.isEmpty()) {
+            if (slice.isEmpty()) {
                 binding.transactionsRecycler.visibility = View.GONE
                 binding.emptyText.visibility = View.VISIBLE
-                binding.emptyText.text = getString(R.string.insights_empty_day, dayName)
+                binding.emptyText.text = getString(R.string.insights_empty_day, bucketLabel)
             }
         }
     }
@@ -146,7 +150,7 @@ class InsightsActivity : AppCompatActivity() {
         binding.emptyText.visibility = View.VISIBLE
         binding.emptyText.text = getString(R.string.insights_empty_hint)
 
-        binding.statLabel.text = getString(R.string.insights_this_week)
+        binding.statLabel.text = getString(periodLabelRes(d.range))
         binding.statValue.text = getString(R.string.insights_empty_headline)
         binding.statSecondary.visibility = View.GONE
         primaryAnimator?.cancel()
@@ -203,13 +207,65 @@ class InsightsActivity : AppCompatActivity() {
 
     private fun openViewOptions() {
         ViewOptionsSheet().apply {
-            configure(unit) { newUnit ->
-                if (newUnit == unit) return@configure
-                unit = newUnit
-                prefs().edit().putString(KEY_UNIT, newUnit.toKey()).apply()
-                renderForSelection(animate = false)
-            }
+            configure(
+                currentUnit = unit,
+                currentRange = range,
+                onUnitChanged = { newUnit ->
+                    if (newUnit == unit) return@configure
+                    unit = newUnit
+                    prefs().edit().putString(KEY_UNIT, newUnit.toKey()).apply()
+                    renderForSelection(animate = false)
+                },
+                onRangeChanged = { newRange ->
+                    if (newRange == range) return@configure
+                    range = newRange
+                    selectedIndex = null
+                    prefs().edit().putString(KEY_RANGE, newRange.toKey()).apply()
+                    refresh(animate = true)
+                },
+            )
         }.show(supportFragmentManager, ViewOptionsSheet.TAG)
+    }
+
+    private fun periodLabelRes(range: InsightsRange): Int = when (range) {
+        InsightsRange.DAY -> R.string.insights_this_week
+        InsightsRange.WEEK -> R.string.insights_last_7_weeks
+        InsightsRange.MONTH -> R.string.insights_last_7_months
+    }
+
+    private fun avgLabelRes(range: InsightsRange): Int = when (range) {
+        InsightsRange.DAY -> R.string.insights_avg_daily
+        InsightsRange.WEEK -> R.string.insights_avg_weekly
+        InsightsRange.MONTH -> R.string.insights_avg_monthly
+    }
+
+    private fun formatSelectedBucketLabel(range: InsightsRange, bucket: BucketTotal): String {
+        val locale = Locale.getDefault()
+        val start = Date(bucket.startMillis)
+        return when (range) {
+            InsightsRange.DAY -> SimpleDateFormat("EEEE", locale).format(start)
+            InsightsRange.WEEK -> {
+                val endInclusive = Date(bucket.endExclusiveMillis - 1)
+                val startCal = Calendar.getInstance(locale).apply { time = start }
+                val endCal = Calendar.getInstance(locale).apply { time = endInclusive }
+                val mmmD = SimpleDateFormat("MMM d", locale)
+                if (startCal.get(Calendar.MONTH) == endCal.get(Calendar.MONTH)) {
+                    val dayOnly = SimpleDateFormat("d", locale)
+                    "${mmmD.format(start)} – ${dayOnly.format(endInclusive)}"
+                } else {
+                    "${mmmD.format(start)} – ${mmmD.format(endInclusive)}"
+                }
+            }
+            InsightsRange.MONTH -> {
+                val startCal = Calendar.getInstance(locale).apply { time = start }
+                val nowYear = Calendar.getInstance(locale).get(Calendar.YEAR)
+                if (startCal.get(Calendar.YEAR) == nowYear) {
+                    SimpleDateFormat("MMMM", locale).format(start)
+                } else {
+                    SimpleDateFormat("MMMM yyyy", locale).format(start)
+                }
+            }
+        }
     }
 
     private fun prefs() = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -217,5 +273,6 @@ class InsightsActivity : AppCompatActivity() {
     companion object {
         private const val PREFS_NAME = "InsightsPrefs"
         private const val KEY_UNIT = "display_unit"
+        private const val KEY_RANGE = "date_range"
     }
 }
