@@ -96,7 +96,10 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
         migrateLegacyFilterStateIfNeeded()
         registerDateFilterResultListener()
-        updateToolbarSubtitle()
+        findViewById<TextView>(R.id.active_filter_indicator).setOnClickListener {
+            clearAllFilters()
+        }
+        updateActiveFilterIndicator()
 
         // Load and display history
         loadHistory()
@@ -349,7 +352,17 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         val current = prefs.getBoolean(KEY_HIDE_PENDING, true)
         prefs.edit().putBoolean(KEY_HIDE_PENDING, !current).apply()
-        updateToolbarSubtitle()
+        updateActiveFilterIndicator()
+        loadHistory()
+    }
+
+    private fun clearAllFilters() {
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+            .putBoolean(KEY_HIDE_PENDING, true)
+            .putLong(KEY_FILTER_DATE_START, 0L)
+            .putLong(KEY_FILTER_DATE_END, 0L)
+            .apply()
+        updateActiveFilterIndicator()
         loadHistory()
     }
 
@@ -378,12 +391,12 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 .putLong(KEY_FILTER_DATE_START, start)
                 .putLong(KEY_FILTER_DATE_END, end)
                 .apply()
-            updateToolbarSubtitle()
+            updateActiveFilterIndicator()
             loadHistory()
         }
     }
 
-    private fun updateToolbarSubtitle() {
+    private fun updateActiveFilterIndicator() {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         val hidePending = prefs.getBoolean(KEY_HIDE_PENDING, true)
         val start = prefs.getLong(KEY_FILTER_DATE_START, 0L)
@@ -402,12 +415,12 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             parts += getString(R.string.history_subtitle_pending_shown)
         }
 
-        val subtitle = findViewById<TextView>(R.id.toolbar_subtitle)
+        val indicator = findViewById<TextView>(R.id.active_filter_indicator)
         if (parts.isEmpty()) {
-            subtitle.visibility = View.GONE
+            indicator.visibility = View.GONE
         } else {
-            subtitle.text = parts.joinToString(getString(R.string.history_subtitle_separator))
-            subtitle.visibility = View.VISIBLE
+            indicator.text = parts.joinToString(getString(R.string.history_subtitle_separator))
+            indicator.visibility = View.VISIBLE
         }
     }
 
@@ -440,6 +453,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             .setValidator(DateValidatorPointBackward.now())
 
         val builder = MaterialDatePicker.Builder.dateRangePicker()
+            .setTheme(R.style.ThemeOverlay_Numo_MaterialCalendar)
             .setTitleText(R.string.history_filter_date_picker_title)
             .setCalendarConstraints(constraintsBuilder.build())
 
@@ -463,7 +477,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 .putLong(KEY_FILTER_DATE_START, selection.first)
                 .putLong(KEY_FILTER_DATE_END, selection.second)
                 .apply()
-            updateToolbarSubtitle()
+            updateActiveFilterIndicator()
             loadHistory()
         }
         picker.show(supportFragmentManager, "DATE_RANGE_PICKER")

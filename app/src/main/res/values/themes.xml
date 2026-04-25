@@ -149,4 +149,15 @@
         <item name="cornerSizeBottomLeft">0dp</item>
         <item name="cornerSizeBottomRight">0dp</item>
     </style>
+
+    <!-- Date range picker: light surface, brand accent, dialog (not fullscreen). -->
+    <style name="ThemeOverlay.Numo.MaterialCalendar" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
+        <item name="colorPrimary">@color/color_primary_green_light</item>
+        <item name="colorOnPrimary">@color/color_bg_white</item>
+        <item name="colorSurface">@color/color_bg_white</item>
+        <item name="colorOnSurface">@color/color_text_primary</item>
+        <item name="android:colorBackground">@color/color_bg_white</item>
+        <item name="android:textColorPrimary">@color/color_text_primary</item>
+        <item name="android:textColorSecondary">@color/color_text_secondary</item>
+    </style>
 </resources>

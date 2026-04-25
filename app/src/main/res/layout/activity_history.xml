@@ -31,38 +31,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <LinearLayout
-            android:id="@+id/top_bar_titles"
-            android:layout_width="0dp"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:layout_marginHorizontal="8dp"
+            android:text="@string/history_toolbar_title"
+            android:textAppearance="@style/Text.Title"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/overflow_button"
-            app:layout_constraintStart_toEndOf="@id/back_button"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <TextView
-                android:id="@+id/toolbar_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/history_toolbar_title"
-                android:textAppearance="@style/Text.Title" />
-
-            <TextView
-                android:id="@+id/toolbar_subtitle"
-                style="@style/Text.Caption"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:visibility="gone"
-                tools:text="Mar 15 - Apr 20 · Pending shown"
-                tools:visibility="visible" />
-
-        </LinearLayout>
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
             android:id="@+id/overflow_button"
@@ -118,6 +95,25 @@
             android:textColor="@color/color_text_tertiary"
             android:textSize="16sp"
             tools:text="₿21,305" />
+
+        <!-- Active filter indicator (visible only when a non-default filter is set; tap to clear) -->
+        <TextView
+            android:id="@+id/active_filter_indicator"
+            style="@style/Text.Caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="6dp"
+            android:textColor="@color/color_text_tertiary"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone"
+            tools:text="Mar 15 - Apr 20 · Pending shown"
+            tools:visibility="visible" />
 
     </LinearLayout>
 
