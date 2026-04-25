@@ -218,12 +218,12 @@ class PaymentsHistoryActivityTest {
     }
 
     @Test
-    fun `loadHistory shows only pending transactions when FILTER_PENDING is set`() {
-        // Change preference to show only pending transactions
+    fun `legacy FILTER_PENDING preference migrates to show-all behavior`() {
+        // Pre-refactor users on the now-removed "pending only" mode (filter_state=2)
+        // should see all transactions after upgrade, since pending-only is gone.
         val prefs = context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE)
-        prefs.edit().putInt("filter_state", 2).apply() // 2 = FILTER_PENDING
+        prefs.edit().putInt("filter_state", 2).apply()
 
-        // Add one pending and one completed transaction
         val pendingId = PaymentsHistoryActivity.addPendingPayment(
             context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
             bitcoinPrice = null, paymentRequest = null, formattedAmount = null
@@ -238,16 +238,19 @@ class PaymentsHistoryActivityTest {
             paymentType = PaymentHistoryEntry.TYPE_CASHU, mintUrl = null
         )
 
-        // Launch the activity
         val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
         val activity = controller.get()
 
         val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
         val adapter = recyclerView.adapter
 
-        // Expected size = 2 (1 Header + 1 Pending Transaction)
+        // 1 month header + 2 transactions (both pending and completed visible)
         assertNotNull("Adapter should not be null", adapter)
-        assertEquals(2, adapter!!.itemCount)
+        assertEquals(3, adapter!!.itemCount)
+
+        // Migration should have removed the legacy key and written the new one.
+        assertFalse(prefs.contains("filter_state"))
+        assertFalse(prefs.getBoolean("hide_pending", true))
     }
 
     @Test
