@@ -933,7 +933,7 @@
     <string name="insights_empty_headline">0 sales</string>
     <string name="insights_empty_hint">Your sales will appear here.</string>
     <string name="insights_empty_day">No sales on %1$s</string>
-    <string name="insights_show_me_in">Show me in</string>
+    <string name="insights_show_me_in">Display in</string>
     <string name="insights_currency_sats">Sats</string>
     <string name="insights_currency_btc">BTC</string>
     <string name="insights_close">Close</string>

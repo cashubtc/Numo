@@ -57,9 +57,8 @@ class ViewOptionsSheet : BottomSheetDialogFragment() {
         view.findViewById<View>(R.id.row_date_range).setOnClickListener {
             RangeOptionsSheet().apply {
                 configure(currentRange) { newRange ->
-                    currentRange = newRange
-                    rangeValue.text = labelFor(newRange)
                     onRangeChanged?.invoke(newRange)
+                    this@ViewOptionsSheet.dismiss()
                 }
             }.show(parentFragmentManager, RangeOptionsSheet.TAG)
         }
