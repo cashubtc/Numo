@@ -12,6 +12,7 @@ import com.electricdreams.numo.util.createProgressDialog
 import com.electricdreams.numo.util.startActivityForResultCompat
 import android.view.View
 import android.widget.Toast
+import com.google.android.material.chip.Chip
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -66,8 +67,6 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             }
         }
 
-    private var isFiltersExpanded = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityHistoryBinding.inflate(layoutInflater)
@@ -95,7 +94,13 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         binding.historyRecyclerView.adapter = adapter
         binding.historyRecyclerView.layoutManager = LinearLayoutManager(this)
 
-        setupFilterBar()
+        migrateLegacyFilterStateIfNeeded()
+        registerDateFilterResultListener()
+        findViewById<Chip>(R.id.active_filter_indicator).apply {
+            setOnClickListener { clearAllFilters() }
+            setOnCloseIconClickListener { clearAllFilters() }
+        }
+        updateActiveFilterIndicator()
 
         // Load and display history
         loadHistory()
@@ -333,75 +338,90 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun setupFilterBar() {
+    private fun migrateLegacyFilterStateIfNeeded() {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        updateFilterButtonTexts()
+        if (!prefs.contains(LEGACY_KEY_FILTER_STATE) || prefs.contains(KEY_HIDE_PENDING)) return
+        val legacy = prefs.getInt(LEGACY_KEY_FILTER_STATE, LEGACY_FILTER_PAID)
+        val hidePending = legacy == LEGACY_FILTER_PAID
+        prefs.edit()
+            .putBoolean(KEY_HIDE_PENDING, hidePending)
+            .remove(LEGACY_KEY_FILTER_STATE)
+            .apply()
+    }
 
-        binding.filterHeader?.setOnClickListener {
-            toggleFilters()
-        }
+    private fun togglePending() {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val current = prefs.getBoolean(KEY_HIDE_PENDING, true)
+        prefs.edit().putBoolean(KEY_HIDE_PENDING, !current).apply()
+        updateActiveFilterIndicator()
+        loadHistory()
+    }
 
-        binding.btnFilterStatus?.setOnClickListener { view ->
-            val popup = PopupMenu(this, view)
-            popup.menuInflater.inflate(R.menu.menu_filter_status, popup.menu)
-            
-            val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID)
-            when (filterState) {
-                FILTER_PAID -> popup.menu.findItem(R.id.filter_status_paid)?.isChecked = true
-                FILTER_PENDING -> popup.menu.findItem(R.id.filter_status_pending)?.isChecked = true
-                FILTER_ALL -> popup.menu.findItem(R.id.filter_status_all)?.isChecked = true
+    private fun clearAllFilters() {
+        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+            .putBoolean(KEY_HIDE_PENDING, true)
+            .putLong(KEY_FILTER_DATE_START, 0L)
+            .putLong(KEY_FILTER_DATE_END, 0L)
+            .apply()
+        updateActiveFilterIndicator()
+        loadHistory()
+    }
+
+    private fun showDateFilterSheet() {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val currentStart = prefs.getLong(KEY_FILTER_DATE_START, 0L)
+        val currentEnd = prefs.getLong(KEY_FILTER_DATE_END, 0L)
+        DateFilterBottomSheet
+            .newInstance(currentStart, currentEnd)
+            .show(supportFragmentManager, DateFilterBottomSheet.TAG)
+    }
+
+    private fun registerDateFilterResultListener() {
+        supportFragmentManager.setFragmentResultListener(
+            DateFilterBottomSheet.RESULT_KEY,
+            this
+        ) { _, bundle ->
+            val start = bundle.getLong(DateFilterBottomSheet.RESULT_START, 0L)
+            val end = bundle.getLong(DateFilterBottomSheet.RESULT_END, 0L)
+            if (start == DateFilterBottomSheet.SENTINEL_CUSTOM) {
+                showDateRangePicker()
+                return@setFragmentResultListener
             }
-
-            popup.setOnMenuItemClickListener { item ->
-                val newState = when (item.itemId) {
-                    R.id.filter_status_paid -> FILTER_PAID
-                    R.id.filter_status_pending -> FILTER_PENDING
-                    R.id.filter_status_all -> FILTER_ALL
-                    else -> FILTER_PAID
-                }
-                prefs.edit().putInt(KEY_FILTER_STATE, newState).apply()
-                updateFilterButtonTexts()
-                loadHistory()
-                true
-            }
-            popup.show()
-        }
-
-        binding.btnFilterDate?.setOnClickListener { view ->
-            val popup = PopupMenu(this, view)
-            popup.menuInflater.inflate(R.menu.menu_filter_date, popup.menu)
-            
-            popup.setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.filter_date_all -> {
-                        prefs.edit()
-                            .putLong(KEY_FILTER_DATE_START, 0L)
-                            .putLong(KEY_FILTER_DATE_END, 0L)
-                            .apply()
-                        updateFilterButtonTexts()
-                        loadHistory()
-                        true
-                    }
-                    R.id.filter_date_custom -> {
-                        showDateRangePicker()
-                        true
-                    }
-                    else -> false
-                }
-            }
-            popup.show()
+            val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            prefs.edit()
+                .putLong(KEY_FILTER_DATE_START, start)
+                .putLong(KEY_FILTER_DATE_END, end)
+                .apply()
+            updateActiveFilterIndicator()
+            loadHistory()
         }
     }
 
-    private fun toggleFilters() {
-        isFiltersExpanded = !isFiltersExpanded
-        
-        if (isFiltersExpanded) {
-            binding.filtersContainer?.visibility = View.VISIBLE
-            binding.filterExpandIcon?.animate()?.rotation(180f)?.setDuration(200)?.start()
+    private fun updateActiveFilterIndicator() {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+        val hidePending = prefs.getBoolean(KEY_HIDE_PENDING, true)
+        val start = prefs.getLong(KEY_FILTER_DATE_START, 0L)
+        val end = prefs.getLong(KEY_FILTER_DATE_END, 0L)
+
+        val parts = mutableListOf<String>()
+        if (start > 0L && end > 0L) {
+            val format = SimpleDateFormat("MMM d", Locale.getDefault())
+            parts += getString(
+                R.string.history_filter_date_range_format,
+                format.format(Date(start)),
+                format.format(Date(end))
+            )
+        }
+        if (!hidePending) {
+            parts += getString(R.string.history_subtitle_pending_shown)
+        }
+
+        val indicator = findViewById<Chip>(R.id.active_filter_indicator)
+        if (parts.isEmpty()) {
+            indicator.visibility = View.GONE
         } else {
-            binding.filtersContainer?.visibility = View.GONE
-            binding.filterExpandIcon?.animate()?.rotation(0f)?.setDuration(200)?.start()
+            indicator.text = parts.joinToString(getString(R.string.history_subtitle_separator))
+            indicator.visibility = View.VISIBLE
         }
     }
 
@@ -434,6 +454,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             .setValidator(DateValidatorPointBackward.now())
 
         val builder = MaterialDatePicker.Builder.dateRangePicker()
+            .setTheme(R.style.ThemeOverlay_Numo_MaterialCalendar)
             .setTitleText(R.string.history_filter_date_picker_title)
             .setCalendarConstraints(constraintsBuilder.build())
 
@@ -457,64 +478,36 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 .putLong(KEY_FILTER_DATE_START, selection.first)
                 .putLong(KEY_FILTER_DATE_END, selection.second)
                 .apply()
-            updateFilterButtonTexts()
+            updateActiveFilterIndicator()
             loadHistory()
         }
         picker.show(supportFragmentManager, "DATE_RANGE_PICKER")
     }
 
-    private fun updateFilterButtonTexts() {
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        
-        val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID)
-        val statusText = when (filterState) {
-            FILTER_PAID -> getString(R.string.history_menu_filter_paid)
-            FILTER_PENDING -> getString(R.string.history_menu_filter_pending)
-            FILTER_ALL -> getString(R.string.history_menu_filter_all)
-            else -> getString(R.string.history_menu_filter_paid)
-        }
-        binding.btnFilterStatus?.text = getString(R.string.history_filter_status_format, statusText)
-
-        val start = prefs.getLong(KEY_FILTER_DATE_START, 0L)
-        val end = prefs.getLong(KEY_FILTER_DATE_END, 0L)
-        
-        var dateText = ""
-        if (start > 0 && end > 0) {
-            val format = SimpleDateFormat("MMM d", Locale.getDefault())
-            val startStr = format.format(Date(start))
-            val endStr = format.format(Date(end))
-            dateText = getString(R.string.history_filter_date_range_format, startStr, endStr)
-            binding.btnFilterDate?.text = getString(R.string.history_filter_date_format, dateText)
-        } else {
-            dateText = getString(R.string.history_filter_date_all)
-            binding.btnFilterDate?.text = getString(R.string.history_filter_date_format, dateText)
-        }
-
-        // Update the main header text to reflect active filters if any
-        if (filterState == FILTER_ALL && start == 0L && end == 0L) {
-            binding.filterHeaderText?.text = getString(R.string.history_menu_filter)
-            binding.filterHeaderText?.setTextColor(getColor(R.color.color_text_secondary))
-            binding.filterExpandIcon?.setColorFilter(getColor(R.color.color_text_secondary))
-        } else {
-            val activeFilters = mutableListOf<String>()
-            if (filterState != FILTER_ALL) activeFilters.add(statusText)
-            if (start > 0 || end > 0) activeFilters.add(dateText)
-            
-            val summary = activeFilters.joinToString(", ")
-            binding.filterHeaderText?.text = summary
-            
-            // Highlight the text to indicate active filters
-            binding.filterHeaderText?.setTextColor(getColor(R.color.color_text_primary))
-            binding.filterExpandIcon?.setColorFilter(getColor(R.color.color_text_primary))
-        }
-    }
-
     private fun showOverflowMenu(anchor: View) {
+        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         val popup = PopupMenu(this, anchor, android.view.Gravity.END)
         popup.menuInflater.inflate(R.menu.menu_activity_history, popup.menu)
 
+        val hidePending = prefs.getBoolean(KEY_HIDE_PENDING, true)
+        popup.menu.findItem(R.id.menu_toggle_pending)?.apply {
+            title = getString(
+                if (hidePending) R.string.history_overflow_show_pending
+                else R.string.history_overflow_hide_pending
+            )
+            setIcon(if (hidePending) R.drawable.ic_visibility else R.drawable.ic_visibility_off)
+        }
+
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
+                R.id.menu_toggle_pending -> {
+                    togglePending()
+                    true
+                }
+                R.id.menu_filter_date -> {
+                    showDateFilterSheet()
+                    true
+                }
                 R.id.menu_export_activity -> {
                     val dateStr = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
                     csvExportLauncher.launch("numo_activity_export_$dateStr.csv")
@@ -528,7 +521,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
     private fun loadHistory() {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID) // Hide pending by default
+        val hidePending = prefs.getBoolean(KEY_HIDE_PENDING, true)
         val filterStart = prefs.getLong(KEY_FILTER_DATE_START, 0L)
         val filterEnd = prefs.getLong(KEY_FILTER_DATE_END, 0L)
 
@@ -541,11 +534,8 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         var filteredList = (paymentHistory + withdrawHistory)
             .sortedByDescending { it.date.time }
 
-        // Apply Status Filter
-        if (filterState == FILTER_PAID) {
+        if (hidePending) {
             filteredList = filteredList.filterNot { it.isPending() }
-        } else if (filterState == FILTER_PENDING) {
-            filteredList = filteredList.filter { it.isPending() }
         }
 
         // Apply Date Filter
@@ -554,7 +544,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             val endOfDay = filterEnd + 86400000L - 1L
             filteredList = filteredList.filter { it.date.time in filterStart..endOfDay }
         }
-        
+
         currentHistoryList = filteredList
         adapter.setEntries(currentHistoryList)
 
@@ -589,12 +579,11 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     companion object {
         private const val PREFS_NAME = "PaymentHistory"
         private const val KEY_HISTORY = "history"
-        private const val KEY_FILTER_STATE = "filter_state"
+        private const val KEY_HIDE_PENDING = "hide_pending"
         private const val KEY_FILTER_DATE_START = "filter_date_start"
         private const val KEY_FILTER_DATE_END = "filter_date_end"
-        private const val FILTER_ALL = 0
-        private const val FILTER_PAID = 1
-        private const val FILTER_PENDING = 2
+        private const val LEGACY_KEY_FILTER_STATE = "filter_state"
+        private const val LEGACY_FILTER_PAID = 1
         private const val REQUEST_TRANSACTION_DETAIL = 1001
         private const val REQUEST_RESUME_PAYMENT = 1002
 
