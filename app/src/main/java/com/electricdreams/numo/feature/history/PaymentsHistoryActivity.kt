@@ -11,8 +11,8 @@ import android.os.Bundle
 import com.electricdreams.numo.util.createProgressDialog
 import com.electricdreams.numo.util.startActivityForResultCompat
 import android.view.View
-import android.widget.TextView
 import android.widget.Toast
+import com.google.android.material.chip.Chip
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -96,8 +96,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
         migrateLegacyFilterStateIfNeeded()
         registerDateFilterResultListener()
-        findViewById<TextView>(R.id.active_filter_indicator).setOnClickListener {
-            clearAllFilters()
+        findViewById<Chip>(R.id.active_filter_indicator).apply {
+            setOnClickListener { clearAllFilters() }
+            setOnCloseIconClickListener { clearAllFilters() }
         }
         updateActiveFilterIndicator()
 
@@ -415,7 +416,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             parts += getString(R.string.history_subtitle_pending_shown)
         }
 
-        val indicator = findViewById<TextView>(R.id.active_filter_indicator)
+        val indicator = findViewById<Chip>(R.id.active_filter_indicator)
         if (parts.isEmpty()) {
             indicator.visibility = View.GONE
         } else {

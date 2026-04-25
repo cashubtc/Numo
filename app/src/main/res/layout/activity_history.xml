@@ -96,21 +96,26 @@
             android:textSize="16sp"
             tools:text="₿21,305" />
 
-        <!-- Active filter indicator (visible only when a non-default filter is set; tap to clear) -->
-        <TextView
+        <!-- Active filter chip (visible only when a non-default filter is set; tap or close icon clears) -->
+        <com.google.android.material.chip.Chip
             android:id="@+id/active_filter_indicator"
-            style="@style/Text.Caption"
+            style="@style/Widget.MaterialComponents.Chip.Action"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="6dp"
-            android:textColor="@color/color_text_tertiary"
-            android:singleLine="true"
-            android:ellipsize="end"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
+            android:textColor="@color/color_text_primary"
+            android:textSize="13sp"
+            app:chipBackgroundColor="@color/color_bg_white"
+            app:chipStrokeColor="@color/color_divider"
+            app:chipStrokeWidth="1dp"
+            app:chipMinHeight="30dp"
+            app:chipStartPadding="10dp"
+            app:chipEndPadding="4dp"
+            app:closeIcon="@drawable/ic_close"
+            app:closeIconEnabled="true"
+            app:closeIconTint="@color/color_text_secondary"
+            app:closeIconSize="14dp"
+            app:rippleColor="@color/color_divider"
             android:visibility="gone"
             tools:text="Mar 15 - Apr 20 · Pending shown"
             tools:visibility="visible" />
