@@ -74,10 +74,10 @@
 
     <!-- Activity screen -->
     <string name="history_total_balance_label">Total Balance</string>
-    <string name="history_menu_export_activity">Export Activity</string>
-    <string name="history_filter_date_all">All Time</string>
-    <string name="history_filter_date_range_format">%1$s - %2$s</string>
-    <string name="history_filter_date_picker_title">Select Date Range</string>
+    <string name="history_menu_export_activity">Export to CSV</string>
+    <string name="history_filter_date_all">All time</string>
+    <string name="history_filter_date_range_format">%1$s – %2$s</string>
+    <string name="history_filter_date_picker_title">Choose dates</string>
     <string name="history_export_success">Activity exported to CSV</string>
     <string name="history_export_error">Error exporting activity</string>
 
@@ -94,7 +94,7 @@
     <string name="history_date_sheet_custom">Custom range…</string>
 
     <!-- Activity toolbar subtitle -->
-    <string name="history_subtitle_pending_shown">Pending shown</string>
+    <string name="history_subtitle_pending_shown">Including pending</string>
     <string name="history_subtitle_separator"> · </string>
 
     <!-- Basket receipt -->
