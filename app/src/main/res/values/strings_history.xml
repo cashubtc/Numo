@@ -95,7 +95,7 @@
 
     <!-- Activity toolbar subtitle -->
     <string name="history_subtitle_pending_shown">Including pending</string>
-    <string name="history_subtitle_separator"> · </string>
+    <string name="history_subtitle_separator">" · "</string>
 
     <!-- Basket receipt -->
     <string name="basket_receipt_title">Receipt</string>
