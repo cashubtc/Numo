@@ -127,6 +127,18 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ModernPOSActivity" />
         </activity>
+
+        <activity android:name="com.electricdreams.numo.feature.insights.InsightsActivity"
+            android:exported="false"
+            android:label="@string/insights_title"
+            android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.history.PaymentsHistoryActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.history.PaymentsHistoryActivity" />
+        </activity>
         
         <activity android:name="com.electricdreams.numo.feature.history.TransactionDetailActivity"
             android:exported="false"

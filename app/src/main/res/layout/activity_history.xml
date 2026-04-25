@@ -42,6 +42,19 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
+            android:id="@+id/insights_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:padding="12dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/insights_open"
+            android:src="@drawable/ic_insights"
+            app:tint="@color/color_text_primary"
+            app:layout_constraintEnd_toStartOf="@id/overflow_button"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <ImageButton
             android:id="@+id/overflow_button"
             android:layout_width="48dp"
             android:layout_height="48dp"
