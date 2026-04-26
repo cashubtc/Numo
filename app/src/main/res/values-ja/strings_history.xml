@@ -68,6 +68,7 @@
     <string name="transaction_detail_tip_added_with_percentage">チップ追加 (%1$d%%)</string>
     <string name="history_filter_date_custom">カスタム範囲...</string>
     <string name="history_filter_status_format">ステータス: %1$s</string>
+    <string name="history_filter_header_format">フィルター: %1$s</string>
     <string name="history_filter_date_format">日付: %1$s</string>
     <string name="history_filter_date_range_format">%1$s - %2$s</string>
     <string name="history_filter_date_picker_title">日付範囲を選択</string>
