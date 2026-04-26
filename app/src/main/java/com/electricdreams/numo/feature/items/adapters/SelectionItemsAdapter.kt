@@ -48,6 +48,14 @@ class SelectionItemsAdapter(
     // Store custom variation items (items created during this session)
     private val customVariationItems: MutableList<Item> = mutableListOf()
 
+    var isTileView: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                notifyDataSetChanged()
+            }
+        }
+
     // ----- Public Methods -----
 
     fun updateItems(newItems: List<Item>) {
@@ -171,8 +179,9 @@ class SelectionItemsAdapter(
     // ----- RecyclerView.Adapter Implementation -----
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemViewHolder {
+        val layoutId = if (isTileView) R.layout.item_product_selection_tile else R.layout.item_product_selection
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_product_selection, parent, false)
+            .inflate(layoutId, parent, false)
         return ItemViewHolder(view)
     }
 

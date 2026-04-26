@@ -26,6 +26,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.max
 import com.electricdreams.numo.R
@@ -68,6 +69,8 @@ class ItemSelectionActivity : AppCompatActivity() {
     private lateinit var animatedEmptyState: View
     private lateinit var toolbarTitle: TextView
     private lateinit var savedBasketsButton: TextView
+    private lateinit var viewToggleButton: ImageButton
+    private var isTileView = false
     private lateinit var searchInput: EditText
     private lateinit var scanButton: ImageButton
     private lateinit var clearFiltersButton: ImageButton
@@ -238,6 +241,7 @@ class ItemSelectionActivity : AppCompatActivity() {
         mainScrollView = findViewById(R.id.main_scroll_view)
         toolbarTitle = findViewById(R.id.toolbar_title)
         savedBasketsButton = findViewById(R.id.saved_baskets_button)
+        viewToggleButton = findViewById(R.id.view_toggle_button)
         searchInput = findViewById(R.id.search_input)
         scanButton = findViewById(R.id.scan_button)
         clearFiltersButton = findViewById(R.id.clear_filters_button)
@@ -333,11 +337,31 @@ class ItemSelectionActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerViews() {
-        itemsRecyclerView.layoutManager = LinearLayoutManager(this)
+        updateRecyclerViewLayoutManager()
         itemsRecyclerView.adapter = itemsAdapter
 
         basketRecyclerView.layoutManager = LinearLayoutManager(this)
         basketRecyclerView.adapter = basketAdapter
+    }
+    
+    private fun updateRecyclerViewLayoutManager() {
+        if (isTileView) {
+            itemsRecyclerView.layoutManager = GridLayoutManager(this, 2)
+        } else {
+            itemsRecyclerView.layoutManager = LinearLayoutManager(this)
+        }
+    }
+    
+    private fun toggleViewMode() {
+        isTileView = !isTileView
+        updateRecyclerViewLayoutManager()
+        itemsAdapter.isTileView = isTileView
+        
+        if (isTileView) {
+            viewToggleButton.setImageResource(R.drawable.ic_list)
+        } else {
+            viewToggleButton.setImageResource(R.drawable.ic_grid)
+        }
     }
 
     private fun setupClickListeners() {
@@ -389,6 +413,10 @@ class ItemSelectionActivity : AppCompatActivity() {
         
         savedBasketsButton.setOnClickListener {
             openSavedBaskets()
+        }
+
+        viewToggleButton.setOnClickListener {
+            toggleViewMode()
         }
 
         // Setup search focus listener to show/hide category chips

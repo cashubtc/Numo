@@ -586,6 +586,7 @@
 
     <string name="item_selection_save_button">Save</string>
     <string name="item_selection_saved_baskets_button">Saved</string>
+    <string name="item_selection_toggle_view">Toggle view</string>
     <string name="item_selection_save_basket_hint">Enter a name (optional)</string>
 
     
