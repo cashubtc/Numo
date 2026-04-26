@@ -90,6 +90,7 @@
     <string name="basket_receipt_title">Recibo</string>
     <string name="history_filter_date_custom">Rango personalizado...</string>
     <string name="history_filter_status_format">Estado: %1$s</string>
+    <string name="history_filter_header_format">Filtrar por: %1$s</string>
     <string name="history_filter_date_format">Fecha: %1$s</string>
     <string name="history_filter_date_range_format">%1$s - %2$s</string>
     <string name="history_filter_date_picker_title">Seleccionar rango</string>
