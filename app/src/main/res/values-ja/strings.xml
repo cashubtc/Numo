@@ -905,4 +905,36 @@
     <string name="default_payment_method_option_cashu">Cashu</string>
     <string name="default_payment_method_option_lightning">Lightning</string>
     <string name="payment_request_default_method_set">%1$sがデフォルトの支払い方法として設定されました</string>
+    <!-- Insights Screen -->
+    <string name="insights_open">インサイトを開く</string>
+    <string name="insights_title">売上</string>
+    <string name="insights_back">戻る</string>
+    <string name="insights_view_options">表示オプション</string>
+    <string name="insights_this_week">今週</string>
+    <string name="insights_last_7_weeks">過去7週間</string>
+    <string name="insights_last_7_months">過去7ヶ月</string>
+    <string name="insights_date_range">期間</string>
+    <string name="insights_range_days">過去7日間</string>
+    <string name="insights_range_weeks">過去7週間</string>
+    <string name="insights_range_months">過去7ヶ月</string>
+    <string name="insights_day_count_one">1件の取引</string>
+    <string name="insights_day_count_other">%1$d件の取引</string>
+    <string name="insights_quick_charge">クイックチャージ</string>
+    <string name="insights_items_count_one">1個のアイテム</string>
+    <string name="insights_items_count_other">%1$d個のアイテム</string>
+    <string name="insights_items_lead_with_more">%1$s · %2$s 他%3$d件</string>
+    <string name="insights_item_xn">%1$d × %2$s</string>
+    <string name="insights_empty_headline">売上0</string>
+    <string name="insights_empty_hint">ここに売上が表示されます。</string>
+    <string name="insights_empty_day">%1$sの売上はありません</string>
+    <string name="insights_show_me_in">表示単位</string>
+    <string name="insights_currency_sats">₿</string>
+    <string name="insights_close">閉じる</string>
+    <string name="insights_day_label_mon">月</string>
+    <string name="insights_day_label_tue">火</string>
+    <string name="insights_day_label_wed">水</string>
+    <string name="insights_day_label_thu">木</string>
+    <string name="insights_day_label_fri">金</string>
+    <string name="insights_day_label_sat">土</string>
+    <string name="insights_day_label_sun">日</string>
 </resources>

@@ -907,4 +907,37 @@
     <string name="payment_request_default_method_set">%1$s set as default payment method</string>
     <string name="payment_request_default_description">Payment of %1$d sats</string>
     <string name="payment_request_lightning_description">Numo POS payment of %1$d sats</string>
+
+    <!-- Insights Screen -->
+    <string name="insights_open">Open insights</string>
+    <string name="insights_title">Sales</string>
+    <string name="insights_back">Back</string>
+    <string name="insights_view_options">View options</string>
+    <string name="insights_this_week">This week</string>
+    <string name="insights_last_7_weeks">Last 7 weeks</string>
+    <string name="insights_last_7_months">Last 7 months</string>
+    <string name="insights_date_range">Date range</string>
+    <string name="insights_range_days">Last 7 days</string>
+    <string name="insights_range_weeks">Last 7 weeks</string>
+    <string name="insights_range_months">Last 7 months</string>
+    <string name="insights_day_count_one">1 transaction</string>
+    <string name="insights_day_count_other">%1$d transactions</string>
+    <string name="insights_quick_charge">Quick charge</string>
+    <string name="insights_items_count_one">1 item</string>
+    <string name="insights_items_count_other">%1$d items</string>
+    <string name="insights_items_lead_with_more">%1$s · %2$s +%3$d more</string>
+    <string name="insights_item_xn">%1$d × %2$s</string>
+    <string name="insights_empty_headline">0 sales</string>
+    <string name="insights_empty_hint">Your sales will appear here.</string>
+    <string name="insights_empty_day">No sales on %1$s</string>
+    <string name="insights_show_me_in">Display in</string>
+    <string name="insights_currency_sats">₿</string>
+    <string name="insights_close">Close</string>
+    <string name="insights_day_label_mon">Mon</string>
+    <string name="insights_day_label_tue">Tue</string>
+    <string name="insights_day_label_wed">Wed</string>
+    <string name="insights_day_label_thu">Thu</string>
+    <string name="insights_day_label_fri">Fri</string>
+    <string name="insights_day_label_sat">Sat</string>
+    <string name="insights_day_label_sun">Sun</string>
 </resources>

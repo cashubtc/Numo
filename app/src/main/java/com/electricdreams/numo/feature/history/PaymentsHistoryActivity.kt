@@ -82,6 +82,11 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         // Setup overflow menu button
         binding.overflowButton?.setOnClickListener { showOverflowMenu(it) }
 
+        // Setup insights entry point
+        binding.insightsButton?.setOnClickListener {
+            startActivity(Intent(this, com.electricdreams.numo.feature.insights.InsightsActivity::class.java))
+        }
+
         // Setup RecyclerView
         adapter = PaymentsHistoryAdapter().apply {
             setOnItemClickListener { entry, position ->
