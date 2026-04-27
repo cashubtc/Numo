@@ -17,4 +17,8 @@
     <string name="basket_receipt_vat_label">VAT %1$d%% 포함</string>
     <string name="basket_receipt_bitcoin_items_label">비트코인 항목</string>
     <string name="basket_receipt_print_content_description">영수증 인쇄</string>
+
+    <string name="basket_receipt_fiat_subtotal_net_label">명목화폐 소계 (순액)</string>
+    <string name="basket_receipt_fiat_items_label">명목화폐 항목</string>
+    <string name="basket_receipt_item_each">각 %1$s</string>
 </resources>

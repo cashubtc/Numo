@@ -368,18 +368,18 @@ class TransactionDetailActivity : AppCompatActivity() {
             val unitPriceText = itemView.findViewById<TextView>(R.id.item_unit_price)
             val priceText = itemView.findViewById<TextView>(R.id.item_total)
             
-            qtyText.text = "${item.quantity}"
+            qtyText.text = item.quantity.toString()
             nameText.text = item.displayName
             
             if (item.isFiatPrice()) {
                 val unitPrice = Amount(item.getGrossPricePerUnitCents(), currency)
-                unitPriceText.text = if (item.quantity > 1) "$unitPrice each" else "$unitPrice"
+                unitPriceText.text = if (item.quantity > 1) getString(R.string.basket_receipt_item_each, unitPrice.toString()) else unitPrice.toString()
                 
                 val lineTotal = Amount(item.getGrossTotalCents(), currency)
                 priceText.text = lineTotal.toString()
             } else {
                 val unitPrice = Amount(item.priceSats, Amount.Currency.BTC)
-                unitPriceText.text = if (item.quantity > 1) "$unitPrice each" else "$unitPrice"
+                unitPriceText.text = if (item.quantity > 1) getString(R.string.basket_receipt_item_each, unitPrice.toString()) else unitPrice.toString()
                 
                 val directTotal = item.quantity * item.priceSats
                 priceText.text = Amount(directTotal, Amount.Currency.BTC).toString()
@@ -413,11 +413,11 @@ class TransactionDetailActivity : AppCompatActivity() {
 
         if (hasVat && hasFiatItems) {
             val netTotal = basket.getFiatNetTotalCents()
-            subtotalLabel.text = "Fiat Subtotal (net)"
+            subtotalLabel.text = getString(R.string.basket_receipt_fiat_subtotal_net_label)
             subtotalValue.text = Amount(netTotal, currency).toString()
             subtotalRow.visibility = View.VISIBLE
         } else if (hasFiatItems && hasSatsItems) {
-            subtotalLabel.text = "Fiat Items"
+            subtotalLabel.text = getString(R.string.basket_receipt_fiat_items_label)
             subtotalValue.text = Amount(basket.getFiatGrossTotalCents(), currency).toString()
             subtotalRow.visibility = View.VISIBLE
         } else {

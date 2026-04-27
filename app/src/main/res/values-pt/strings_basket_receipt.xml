@@ -25,4 +25,8 @@
     <string name="basket_receipt_tip_label">Gorjeta</string>
     <string name="basket_receipt_tip_label_with_percentage">Gorjeta (%1$d%%)</string>
     <string name="basket_receipt_vat_row_label">Imposto (%1$d%%)</string>
+
+    <string name="basket_receipt_fiat_subtotal_net_label">Subtotal fiat (líquido)</string>
+    <string name="basket_receipt_fiat_items_label">Itens fiat</string>
+    <string name="basket_receipt_item_each">%1$s cada</string>
 </resources>
