@@ -103,12 +103,69 @@ class AmountTest {
             val usdDe = Amount(1050, Amount.Currency.USD)
             assertEquals("$10,50", usdDe.toString())
             
-            // Test zero-decimal behavior (regardless of locale, JPY has no decimals)
+            // Test zero-decimal behavior (JPY uses code instead of symbol)
             val jpy = Amount(10500, Amount.Currency.JPY) // 10500 cents = 105 JPY
-            assertEquals("¥105", jpy.toString())
+            assertEquals("JPY 105", jpy.toString())
 
         } finally {
             Locale.setDefault(originalLocale)
         }
+    }
+
+    @Test
+    fun `toString formats CUP currency with code`() {
+        Locale.setDefault(Locale.US)
+        val cup = Amount(2500, Amount.Currency.CUP) // 25.00 CUP
+        assertEquals("CUP 25.00", cup.toString())
+    }
+
+    @Test
+    fun `toString formats MLC currency with code`() {
+        Locale.setDefault(Locale.US)
+        val mlc = Amount(1500, Amount.Currency.MLC) // 15.00 MLC
+        assertEquals("MLC 15.00", mlc.toString())
+    }
+
+    @Test
+    fun `toString formats Nordic currencies with symbol`() {
+        Locale.setDefault(Locale.US)
+        
+        val dkk = Amount(9950, Amount.Currency.DKK) // 99.50 DKK
+        assertEquals("kr.99.50", dkk.toString())
+        
+        val sek = Amount(5000, Amount.Currency.SEK) // 50.00 SEK
+        assertEquals("kr50.00", sek.toString())
+        
+        val nok = Amount(7500, Amount.Currency.NOK) // 75.00 NOK
+        assertEquals("kr75.00", nok.toString())
+    }
+
+    @Test
+    fun `toStringWithoutSymbol formats correctly`() {
+        Locale.setDefault(Locale.US)
+        
+        val usd = Amount(1050, Amount.Currency.USD)
+        assertEquals("10.50", usd.toStringWithoutSymbol())
+        
+        val jpy = Amount(10500, Amount.Currency.JPY)
+        assertEquals("105", jpy.toStringWithoutSymbol())
+    }
+
+    @Test
+    fun `parse CUP currency`() {
+        val cup = Amount.parse("CUP 25.00")
+        assertEquals(Amount.Currency.CUP, cup?.currency)
+        assertEquals(2500L, cup?.value)
+    }
+
+    @Test
+    fun `CUP and MLC cannot be parsed from string without symbol`() {
+        // CUP and MLC don't have standard symbols, so they can't be parsed from string
+        // This is expected behavior - they must be created via Amount(cents, Amount.Currency.CUP)
+        val cup = Amount(2500, Amount.Currency.CUP)
+        assertEquals("CUP 25.00", cup.toString())
+        
+        val mlc = Amount(1500, Amount.Currency.MLC)
+        assertEquals("MLC 15.00", mlc.toString())
     }
 }

@@ -127,8 +127,8 @@ class AmountDisplayManagerTest {
         // Update display
         manager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
 
-        // Verify: Input "1" should result in "¥1", not "¥0" (which would happen if treated as cents)
-        verify(amountDisplay).text = "¥1"
+        // Verify: Input "1" should result in "JPY 1", not "¥0" (which would happen if treated as cents)
+        verify(amountDisplay).text = "JPY 1"
         
         // Verify secondary display (BTC)
         // 1 JPY = 10 sats (at 10M JPY/BTC price)
@@ -158,8 +158,8 @@ class AmountDisplayManagerTest {
         // Update display
         manager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
 
-        // Verify: Input "123" should result in "¥123"
-        verify(amountDisplay).text = "¥123"
+        // Verify: Input "123" should result in "JPY 123"
+        verify(amountDisplay).text = "JPY 123"
     }
 
     @Test

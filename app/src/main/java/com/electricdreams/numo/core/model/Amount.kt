@@ -30,8 +30,8 @@ data class Amount(
         fun isZeroDecimal(): Boolean {
             if (isBtc) return true
             
-            // ISO 4217 specifies decimals for some highly inflated currencies that never use them in practice
-            val practicalZeroDecimal = setOf("COP", "VND", "IDR", "CLP", "ARS", "VES", "LBP", "UGX", "ZWL", "GNF", "PYG")
+            // Currencies with no decimal places (practical, not ISO standard)
+            val practicalZeroDecimal = setOf("JPY", "KRW", "VND", "IDR", "CLP", "LBP", "UGX", "ZWL", "GNF", "PYG", "ISK")
             if (name in practicalZeroDecimal) return true
             
             return runCatching {
@@ -77,6 +77,10 @@ data class Amount(
             val NOK = Currency("NOK", "kr")
             @JvmField
             val KRW = Currency("KRW", "₩")
+            @JvmField
+            val CUP = Currency("CUP", "CUP")
+            @JvmField
+            val MLC = Currency("MLC", "MLC")
             
             private val cache = java.util.concurrent.ConcurrentHashMap<String, Currency>()
             
@@ -118,6 +122,8 @@ data class Amount(
                         "SEK" -> SEK
                         "NOK" -> NOK
                         "KRW" -> KRW
+                        "CUP" -> CUP
+                        "MLC" -> MLC
                         else -> cache.getOrPut(upperCode) {
                             runCatching {
                                 val javaCurrency = JavaCurrency.getInstance(upperCode)
@@ -222,32 +228,45 @@ data class Amount(
     }
 
     /**
+     * Currencies that should display their code instead of symbol (e.g., JPY, KRW).
+     */
+    private object CurrencyDisplay {
+        val USE_CODE_INSTEAD_OF_SYMBOL = setOf(
+            "JPY", "KRW", "VND", "IDR", "ISK", "CLP", "COP", "ARS", "VES", "LBP", 
+            "UGX", "GNF", "PYG", "CUP", "MLC"
+        )
+    }
+
+    /**
      * Format the amount as a string with the currency symbol.
      * Uses currency-appropriate decimal separator:
-     * - USD: $4.20
-     * - EUR: €4,20
-     * - GBP: £4.20
-     * - JPY: ¥420
+     * - USD: $10.50
+     * - EUR: €10.50
+     * - DKK: kr.10.50
+     * - SEK: kr10.00
+     * - JPY: JPY 105
      * - BTC: ₿1,000
      */
     override fun toString(): String {
+        val useCode = currency.name in CurrencyDisplay.USE_CODE_INSTEAD_OF_SYMBOL
+        val prefix = if (useCode) currency.name else currency.symbol
+        val separator = if (useCode) " " else ""
+        
         return when {
             currency.isBtc -> {
                 val formatter = NumberFormat.getNumberInstance(currency.getLocale())
-                "${currency.symbol}${formatter.format(value)}"
+                "${prefix}${formatter.format(value)}"
             }
             currency.isZeroDecimal() -> {
-                // Have no decimal places (stored as cents internally, divide by 100)
                 val major = value / 100.0
                 val formatter = NumberFormat.getIntegerInstance(currency.getLocale())
-                "${currency.symbol}${formatter.format(major.toLong())}"
+                "$prefix$separator${formatter.format(major.toLong())}"
             }
             else -> {
-                // 2 decimal places with currency-appropriate separator
                 val major = value / 100.0
                 val symbols = DecimalFormatSymbols(currency.getLocale())
                 val formatter = DecimalFormat("#,##0.00", symbols)
-                "${currency.symbol}${formatter.format(major)}"
+                "$prefix$separator${formatter.format(major)}"
             }
         }
     }
