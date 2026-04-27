@@ -13,8 +13,8 @@ android {
         applicationId = "com.electricdreams.numo"
         minSdk = 24
         targetSdk = 35
-        versionCode = 11
-        versionName = "1.4"
+        versionCode = 12
+        versionName = "1.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
