@@ -742,4 +742,36 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="default_payment_method_option_cashu">Cashu</string>
     <string name="default_payment_method_option_lightning">Lightning</string>
     <string name="payment_request_default_method_set">%1$s definido como método de pagamento padrão</string>
+    <!-- Tela de Estatísticas / Vendas -->
+    <string name="insights_open">Abrir estatísticas</string>
+    <string name="insights_title">Vendas</string>
+    <string name="insights_back">Voltar</string>
+    <string name="insights_view_options">Ver opções</string>
+    <string name="insights_this_week">Esta semana</string>
+    <string name="insights_last_7_weeks">Últimas 7 semanas</string>
+    <string name="insights_last_7_months">Últimos 7 meses</string>
+    <string name="insights_date_range">Período</string>
+    <string name="insights_range_days">Últimos 7 dias</string>
+    <string name="insights_range_weeks">Últimas 7 semanas</string>
+    <string name="insights_range_months">Últimos 7 meses</string>
+    <string name="insights_day_count_one">1 transação</string>
+    <string name="insights_day_count_other">%1$d transações</string>
+    <string name="insights_quick_charge">Cobrança rápida</string>
+    <string name="insights_items_count_one">1 item</string>
+    <string name="insights_items_count_other">%1$d itens</string>
+    <string name="insights_items_lead_with_more">%1$s · %2$s +%3$d mais</string>
+    <string name="insights_item_xn">%1$d × %2$s</string>
+    <string name="insights_empty_headline">0 vendas</string>
+    <string name="insights_empty_hint">Suas vendas aparecerão aqui.</string>
+    <string name="insights_empty_day">Nenhuma venda em %1$s</string>
+    <string name="insights_show_me_in">Exibir em</string>
+    <string name="insights_currency_sats">₿</string>
+    <string name="insights_close">Fechar</string>
+    <string name="insights_day_label_mon">Seg</string>
+    <string name="insights_day_label_tue">Ter</string>
+    <string name="insights_day_label_wed">Qua</string>
+    <string name="insights_day_label_thu">Qui</string>
+    <string name="insights_day_label_fri">Sex</string>
+    <string name="insights_day_label_sat">Sáb</string>
+    <string name="insights_day_label_sun">Dom</string>
 </resources>

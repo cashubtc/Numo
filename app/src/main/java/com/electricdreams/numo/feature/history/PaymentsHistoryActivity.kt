@@ -82,6 +82,11 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         // Setup overflow menu button
         binding.overflowButton?.setOnClickListener { showOverflowMenu(it) }
 
+        // Setup insights entry point
+        binding.insightsButton?.setOnClickListener {
+            startActivity(Intent(this, com.electricdreams.numo.feature.insights.InsightsActivity::class.java))
+        }
+
         // Setup RecyclerView
         adapter = PaymentsHistoryAdapter().apply {
             setOnItemClickListener { entry, position ->
@@ -345,7 +350,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             val popup = PopupMenu(this, view)
             popup.menuInflater.inflate(R.menu.menu_filter_status, popup.menu)
             
-            val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID)
+            val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_ALL)
             when (filterState) {
                 FILTER_PAID -> popup.menu.findItem(R.id.filter_status_paid)?.isChecked = true
                 FILTER_PENDING -> popup.menu.findItem(R.id.filter_status_pending)?.isChecked = true
@@ -357,7 +362,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     R.id.filter_status_paid -> FILTER_PAID
                     R.id.filter_status_pending -> FILTER_PENDING
                     R.id.filter_status_all -> FILTER_ALL
-                    else -> FILTER_PAID
+                    else -> FILTER_ALL
                 }
                 prefs.edit().putInt(KEY_FILTER_STATE, newState).apply()
                 updateFilterButtonTexts()
@@ -466,12 +471,12 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     private fun updateFilterButtonTexts() {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
         
-        val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID)
+        val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_ALL)
         val statusText = when (filterState) {
             FILTER_PAID -> getString(R.string.history_menu_filter_paid)
             FILTER_PENDING -> getString(R.string.history_menu_filter_pending)
             FILTER_ALL -> getString(R.string.history_menu_filter_all)
-            else -> getString(R.string.history_menu_filter_paid)
+            else -> getString(R.string.history_menu_filter_all)
         }
         binding.btnFilterStatus?.text = getString(R.string.history_filter_status_format, statusText)
 
@@ -490,20 +495,19 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             binding.btnFilterDate?.text = getString(R.string.history_filter_date_format, dateText)
         }
 
-        // Update the main header text to reflect active filters if any
+        // Update the main header text
+        val activeFilters = mutableListOf<String>()
+        activeFilters.add(statusText)
+        if (start > 0 || end > 0) activeFilters.add(dateText)
+        
+        val summary = getString(R.string.history_filter_header_format, activeFilters.joinToString(", "))
+        binding.filterHeaderText?.text = summary
+        
+        // Highlight the text to indicate active filters
         if (filterState == FILTER_ALL && start == 0L && end == 0L) {
-            binding.filterHeaderText?.text = getString(R.string.history_menu_filter)
             binding.filterHeaderText?.setTextColor(getColor(R.color.color_text_secondary))
             binding.filterExpandIcon?.setColorFilter(getColor(R.color.color_text_secondary))
         } else {
-            val activeFilters = mutableListOf<String>()
-            if (filterState != FILTER_ALL) activeFilters.add(statusText)
-            if (start > 0 || end > 0) activeFilters.add(dateText)
-            
-            val summary = activeFilters.joinToString(", ")
-            binding.filterHeaderText?.text = summary
-            
-            // Highlight the text to indicate active filters
             binding.filterHeaderText?.setTextColor(getColor(R.color.color_text_primary))
             binding.filterExpandIcon?.setColorFilter(getColor(R.color.color_text_primary))
         }
@@ -528,7 +532,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
     private fun loadHistory() {
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_PAID) // Hide pending by default
+        val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_ALL) // Show all by default
         val filterStart = prefs.getLong(KEY_FILTER_DATE_START, 0L)
         val filterEnd = prefs.getLong(KEY_FILTER_DATE_END, 0L)
 

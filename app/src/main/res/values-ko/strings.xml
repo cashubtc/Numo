@@ -905,4 +905,36 @@
     <string name="default_payment_method_option_cashu">Cashu</string>
     <string name="default_payment_method_option_lightning">Lightning</string>
     <string name="payment_request_default_method_set">%1$s(이)가 기본 결제 수단으로 설정되었습니다</string>
+    <!-- Insights Screen -->
+    <string name="insights_open">인사이트 열기</string>
+    <string name="insights_title">매출</string>
+    <string name="insights_back">뒤로</string>
+    <string name="insights_view_options">보기 옵션</string>
+    <string name="insights_this_week">이번 주</string>
+    <string name="insights_last_7_weeks">지난 7주</string>
+    <string name="insights_last_7_months">지난 7개월</string>
+    <string name="insights_date_range">기간</string>
+    <string name="insights_range_days">지난 7일</string>
+    <string name="insights_range_weeks">지난 7주</string>
+    <string name="insights_range_months">지난 7개월</string>
+    <string name="insights_day_count_one">거래 1건</string>
+    <string name="insights_day_count_other">거래 %1$d건</string>
+    <string name="insights_quick_charge">빠른 결제</string>
+    <string name="insights_items_count_one">항목 1개</string>
+    <string name="insights_items_count_other">항목 %1$d개</string>
+    <string name="insights_items_lead_with_more">%1$s · %2$s 외 %3$d개</string>
+    <string name="insights_item_xn">%1$d × %2$s</string>
+    <string name="insights_empty_headline">매출 0</string>
+    <string name="insights_empty_hint">여기에 매출이 표시됩니다.</string>
+    <string name="insights_empty_day">%1$s의 매출이 없습니다</string>
+    <string name="insights_show_me_in">표시 단위</string>
+    <string name="insights_currency_sats">₿</string>
+    <string name="insights_close">닫기</string>
+    <string name="insights_day_label_mon">월</string>
+    <string name="insights_day_label_tue">화</string>
+    <string name="insights_day_label_wed">수</string>
+    <string name="insights_day_label_thu">목</string>
+    <string name="insights_day_label_fri">금</string>
+    <string name="insights_day_label_sat">토</string>
+    <string name="insights_day_label_sun">일</string>
 </resources>

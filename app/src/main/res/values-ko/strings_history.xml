@@ -68,6 +68,7 @@
     <string name="transaction_detail_tip_added_with_percentage">팁 추가됨 (%1$d%%)</string>
     <string name="history_filter_date_custom">사용자 지정 범위...</string>
     <string name="history_filter_status_format">상태: %1$s</string>
+    <string name="history_filter_header_format">필터 기준: %1$s</string>
     <string name="history_filter_date_format">날짜: %1$s</string>
     <string name="history_filter_date_range_format">%1$s - %2$s</string>
     <string name="history_filter_date_picker_title">날짜 범위 선택</string>

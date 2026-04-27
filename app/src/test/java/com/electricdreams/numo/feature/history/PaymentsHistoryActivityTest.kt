@@ -154,7 +154,7 @@ class PaymentsHistoryActivityTest {
     }
 
     @Test
-    fun `loadHistory hides pending transactions by default`() {
+    fun `loadHistory shows all transactions by default`() {
         // Add one pending and one completed transaction
         val pendingId = PaymentsHistoryActivity.addPendingPayment(
             context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
@@ -177,44 +177,43 @@ class PaymentsHistoryActivityTest {
         val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
         val adapter = recyclerView.adapter
 
-        // Since pending are hidden by default, adapter should only show the completed transaction (plus 1 for the month header)
-        // Expected size = 2 (1 Header + 1 Completed Transaction)
-        assertNotNull("Adapter should not be null", adapter)
-        assertEquals(2, adapter!!.itemCount)
-    }
-
-    @Test
-    fun `loadHistory shows all transactions when FILTER_ALL is set`() {
-        // Change preference to show all transactions
-        val prefs = context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE)
-        prefs.edit().putInt("filter_state", 0).apply() // 0 = FILTER_ALL
-
-        // Add one pending and one completed transaction
-        val pendingId = PaymentsHistoryActivity.addPendingPayment(
-            context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
-            bitcoinPrice = null, paymentRequest = null, formattedAmount = null
-        )
-
-        val completedId = PaymentsHistoryActivity.addPendingPayment(
-            context = context, amount = 200L, entryUnit = "sat", enteredAmount = 200L,
-            bitcoinPrice = null, paymentRequest = null, formattedAmount = null
-        )
-        PaymentsHistoryActivity.completePendingPayment(
-            context = context, paymentId = completedId, token = "token",
-            paymentType = PaymentHistoryEntry.TYPE_CASHU, mintUrl = null
-        )
-
-        // Launch the activity
-        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
-        val activity = controller.get()
-
-        val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
-        val adapter = recyclerView.adapter
-
-        // Now all are visible, so adapter should show both transactions (plus 1 for the month header)
+        // Since all are shown by default, adapter should show both transactions (plus 1 for the month header)
         // Expected size = 3 (1 Header + 2 Transactions)
         assertNotNull("Adapter should not be null", adapter)
         assertEquals(3, adapter!!.itemCount)
+    }
+
+    @Test
+    fun `loadHistory shows only completed transactions when FILTER_PAID is set`() {
+        // Change preference to show only completed transactions
+        val prefs = context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE)
+        prefs.edit().putInt("filter_state", 1).apply() // 1 = FILTER_PAID
+
+        // Add one pending and one completed transaction
+        val pendingId = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null
+        )
+
+        val completedId = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 200L, entryUnit = "sat", enteredAmount = 200L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null
+        )
+        PaymentsHistoryActivity.completePendingPayment(
+            context = context, paymentId = completedId, token = "token",
+            paymentType = PaymentHistoryEntry.TYPE_CASHU, mintUrl = null
+        )
+
+        // Launch the activity
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+        val activity = controller.get()
+
+        val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
+        val adapter = recyclerView.adapter
+
+        // Expected size = 2 (1 Header + 1 Completed Transaction)
+        assertNotNull("Adapter should not be null", adapter)
+        assertEquals(2, adapter!!.itemCount)
     }
 
     @Test
