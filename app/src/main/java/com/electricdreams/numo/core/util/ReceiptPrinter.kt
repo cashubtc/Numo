@@ -379,7 +379,7 @@ class ReceiptPrinter(private val context: Context) {
                     """
                     <div class="item">
                         <div class="row">
-                            <span class="item-name">${item.displayName}</span>
+                            <span class="item-name">${android.text.TextUtils.htmlEncode(item.displayName)}</span>
                             <span class="bold">$lineTotal</span>
                         </div>
                         <div class="item-detail">${item.quantity} × $unitPrice</div>
@@ -397,7 +397,7 @@ class ReceiptPrinter(private val context: Context) {
                     """
                     <div class="item">
                         <div class="row">
-                            <span class="item-name">${item.displayName}</span>
+                            <span class="item-name">${android.text.TextUtils.htmlEncode(item.displayName)}</span>
                             <span class="bold">$lineTotal</span>
                         </div>
                         <div class="item-detail">${item.quantity} × $unitPrice</div>
@@ -578,7 +578,8 @@ class ReceiptPrinter(private val context: Context) {
     </div>
     ${data.transactionId?.let { 
         val shortId = if (it.length > 16) it.take(8) + "..." + it.takeLast(4) else it
-        "<div class=\"row\"><span>Tx ID:</span><span class=\"small\">$shortId</span></div>" 
+        val escapedId = android.text.TextUtils.htmlEncode(shortId)
+        "<div class=\"row\"><span>Tx ID:</span><span class=\"small\">$escapedId</span></div>" 
     } ?: ""}
     
     <div class="divider"></div>
@@ -648,7 +649,7 @@ class ReceiptPrinter(private val context: Context) {
     ${data.mintUrl?.let { """
     <div class="row small" style="margin-top: 4px; display: block;">
         <div>Mint:</div>
-        <div style="word-wrap: break-word; text-align: left;">${it}</div>
+        <div style="word-wrap: break-word; text-align: left;">${android.text.TextUtils.htmlEncode(it)}</div>
     </div>
     """ } ?: ""}
     

@@ -17,4 +17,8 @@
     <string name="basket_receipt_vat_label">税込 %1$d%%</string>
     <string name="basket_receipt_bitcoin_items_label">ビットコインアイテム</string>
     <string name="basket_receipt_print_content_description">レシートを印刷</string>
+
+    <string name="basket_receipt_fiat_subtotal_net_label">法定通貨の小計 (純額)</string>
+    <string name="basket_receipt_fiat_items_label">法定通貨のアイテム</string>
+    <string name="basket_receipt_item_each">各 %1$s</string>
 </resources>

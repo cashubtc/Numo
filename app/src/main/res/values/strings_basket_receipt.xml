@@ -21,6 +21,9 @@
     <string name="basket_receipt_paid_equivalent_label">paid</string>
 
     <!-- Basket receipt totals and tip -->
+    <string name="basket_receipt_fiat_subtotal_net_label">Fiat Subtotal (net)</string>
+    <string name="basket_receipt_fiat_items_label">Fiat Items</string>
+    <string name="basket_receipt_item_each">%1$s each</string>
     <string name="basket_receipt_total_paid_label">Total Paid</string>
     <string name="basket_receipt_tip_label">Tip</string>
     <string name="basket_receipt_tip_label_with_percentage">Tip (%1$d%%)</string>
