@@ -152,18 +152,6 @@
                 android:value=".feature.history.PaymentsHistoryActivity" />
         </activity>
         
-        <activity android:name="com.electricdreams.numo.feature.history.BasketReceiptActivity"
-            android:exported="false"
-            android:label="@string/basket_receipt_title"
-            android:theme="@style/Theme.Numo"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.history.TransactionDetailActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".feature.history.TransactionDetailActivity" />
-        </activity>
-        
         <activity android:name="com.electricdreams.numo.feature.settings.SettingsActivity"
             android:exported="false"
             android:label="@string/settings_title"

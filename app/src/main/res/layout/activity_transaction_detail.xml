@@ -422,6 +422,189 @@
 
             </LinearLayout>
 
+            <!-- Items Section Header -->
+            <TextView
+                android:id="@+id/items_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:layout_marginTop="32dp"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@color/color_text_secondary"
+                android:letterSpacing="0.08"
+                android:text="@string/basket_receipt_items_header_single"
+                android:visibility="gone"
+                tools:text="3 ITEMS" />
+
+            <!-- Items List Container -->
+            <LinearLayout
+                android:id="@+id/items_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="12dp"
+                android:layout_marginHorizontal="16dp"
+                android:background="@drawable/bg_rounded_card_large"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:visibility="gone">
+
+                <!-- Items will be added programmatically -->
+
+            </LinearLayout>
+
+            <!-- Totals Section -->
+            <LinearLayout
+                android:id="@+id/totals_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="20dp"
+                android:layout_marginHorizontal="16dp"
+                android:background="@drawable/bg_rounded_card_large"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <!-- Subtotal Row (Net) -->
+                <LinearLayout
+                    android:id="@+id/subtotal_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/subtotal_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="15sp"
+                        android:textColor="@color/color_text_secondary"
+                        android:text="@string/basket_receipt_subtotal_label" />
+
+                    <TextView
+                        android:id="@+id/subtotal_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="15sp"
+                        android:textColor="@color/color_text_secondary"
+                        tools:text="$62.48" />
+
+                </LinearLayout>
+
+                <!-- VAT Breakdown Container -->
+                <LinearLayout
+                    android:id="@+id/vat_breakdown_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="10dp">
+
+                    <!-- VAT rows will be added programmatically -->
+
+                </LinearLayout>
+
+                <!-- Sats Items Row (for mixed baskets) -->
+                <LinearLayout
+                    android:id="@+id/sats_items_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="10dp"
+                    android:visibility="gone">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textSize="15sp"
+                            android:textColor="@color/color_text_secondary"
+                            android:text="@string/basket_receipt_bitcoin_items_label" />
+
+                        <TextView
+                            android:id="@+id/sats_items_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textSize="15sp"
+                            android:textColor="@color/color_text_secondary"
+                            tools:text="₿50,000" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/sats_items_equiv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textSize="13sp"
+                        android:textColor="@color/color_text_tertiary"
+                        android:gravity="end"
+                        android:visibility="gone"
+                        tools:text="≈ $50.00" />
+
+                </LinearLayout>
+
+                <!-- Divider before total -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginBottom="14dp"
+                    android:background="@color/color_divider" />
+
+                <!-- Final Total Row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:id="@+id/final_total_label"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="17sp"
+                        android:textColor="@color/color_text_primary"
+                        android:fontFamily="sans-serif-medium"
+                        android:text="@string/basket_receipt_total_label" />
+
+                    <TextView
+                        android:id="@+id/final_total_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="20sp"
+                        android:textColor="@color/color_text_primary"
+                        android:fontFamily="sans-serif-medium"
+                        tools:text="$74.97" />
+
+                </LinearLayout>
+
+                <!-- Sats Equivalent (if applicable) -->
+                <TextView
+                    android:id="@+id/sats_equivalent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textSize="14sp"
+                    android:textColor="@color/color_text_tertiary"
+                    android:gravity="end"
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    tools:text="≈ ₿74,970" />
+
+            </LinearLayout>
+
+
             <!-- Print Receipt Button -->
             <Button
                 android:id="@+id/btn_print_receipt"
