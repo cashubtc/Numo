@@ -192,80 +192,58 @@ class BitcoinPriceWorker private constructor(context: Context) {
     /** Fetch the current Bitcoin price from Coinbase API for the current currency. */
     private fun fetchPrice() {
         Thread {
-            val currency = currencyManager.getCurrentCurrency()
-            val primaryUrl = currencyManager.getPriceApiUrl()
-            
-            var price: Double? = null
-            
-            // Try primary API first
-            price = tryFetchPrice(primaryUrl, currency, forceYadio = false)
-            
-            // If primary fails, try fallback (Yadio.io)
-            if (price == null) {
-                Log.d(TAG, "Primary API failed, trying fallback: ${currencyManager.getFallbackApiUrl()}")
-                price = tryFetchPrice(currencyManager.getFallbackApiUrl(), currency, forceYadio = true)
-            }
-            
-            if (price != null) {
-                priceByCurrency[currency] = price
-                cachePrice(currency, price)
-                Log.d(TAG, "Bitcoin price updated: $price $currency")
-                notifyListener()
-            } else {
-                Log.e(TAG, "All price APIs failed for $currency")
+            var connection: HttpURLConnection? = null
+            var reader: BufferedReader? = null
+
+            try {
+                val currency = currencyManager.getCurrentCurrency()
+                val apiUrl = currencyManager.getPriceApiUrl()
+                Log.d(TAG, "Fetching Bitcoin price in $currency from: $apiUrl")
+
+                val uri = URI(apiUrl)
+                val url: URL = uri.toURL()
+
+                connection = (url.openConnection() as HttpURLConnection).apply {
+                    requestMethod = "GET"
+                    connectTimeout = 5000
+                    readTimeout = 5000
+                }
+
+                val responseCode = connection.responseCode
+                if (responseCode == HttpURLConnection.HTTP_OK) {
+                    reader = BufferedReader(InputStreamReader(connection.inputStream))
+                    val response = buildString {
+                        var line: String?
+                        while (reader!!.readLine().also { line = it } != null) {
+                            append(line)
+                        }
+                    }
+
+                    val price = currencyManager.parsePriceResponse(response)
+
+                    priceByCurrency[currency] = price
+                    cachePrice(currency, price)
+
+                    Log.d(TAG, "Bitcoin price updated: $price $currency")
+                    notifyListener()
+                } else {
+                    Log.e(TAG, "Failed to fetch Bitcoin price, response code: $responseCode")
+                }
+            } catch (e: IOException) {
+                Log.e(TAG, "Error fetching Bitcoin price: ${e.message}", e)
+            } catch (e: JSONException) {
+                Log.e(TAG, "Error parsing Bitcoin price JSON: ${e.message}", e)
+            } catch (e: URISyntaxException) {
+                Log.e(TAG, "Invalid Bitcoin price URI: ${e.message}", e)
+            } finally {
+                try {
+                    reader?.close()
+                } catch (e: IOException) {
+                    Log.e(TAG, "Error closing reader: ${e.message}", e)
+                }
+                connection?.disconnect()
             }
         }.start()
-    }
-    
-    /** Try to fetch price from a specific URL. Returns null on failure. */
-    private fun tryFetchPrice(apiUrl: String, currency: String, forceYadio: Boolean = false): Double? {
-        var connection: HttpURLConnection? = null
-        var reader: BufferedReader? = null
-        
-        try {
-            Log.d(TAG, "Fetching Bitcoin price in $currency from: $apiUrl (forceYadio=$forceYadio)")
-            
-            val uri = URI(apiUrl)
-            val url: URL = uri.toURL()
-            
-            connection = (url.openConnection() as HttpURLConnection).apply {
-                requestMethod = "GET"
-                connectTimeout = 5000
-                readTimeout = 5000
-            }
-            
-            val responseCode = connection.responseCode
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                reader = BufferedReader(InputStreamReader(connection.inputStream))
-                val response = buildString {
-                    var line: String?
-                    while (reader!!.readLine().also { line = it } != null) {
-                        append(line)
-                    }
-                }
-                
-                return currencyManager.parsePriceResponse(response, forceYadio)
-            } else {
-                Log.e(TAG, "Failed to fetch Bitcoin price, response code: $responseCode")
-                return null
-            }
-        } catch (e: IOException) {
-            Log.e(TAG, "Error fetching Bitcoin price: ${e.message}", e)
-            return null
-        } catch (e: JSONException) {
-            Log.e(TAG, "Error parsing Bitcoin price JSON: ${e.message}", e)
-            return null
-        } catch (e: URISyntaxException) {
-            Log.e(TAG, "Invalid Bitcoin price URI: ${e.message}", e)
-            return null
-        } finally {
-            try {
-                reader?.close()
-            } catch (e: IOException) {
-                Log.e(TAG, "Error closing reader: ${e.message}", e)
-            }
-            connection?.disconnect()
-        }
     }
 
     /** Cache the Bitcoin price for a specific currency in SharedPreferences. */
