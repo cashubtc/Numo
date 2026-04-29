@@ -15,9 +15,9 @@ import java.util.Locale
 object InsightsRepository {
 
     fun compute(context: Context, range: InsightsRange): InsightsData {
-        val fiatCurrency = Amount.Currency.fromCode(
-            CurrencyManager.getInstance(context).getCurrentCurrency()
-        )
+        val currentCurrencyCode = CurrencyManager.getInstance(context).getCurrentCurrency()
+        val fiatCurrency = Amount.Currency.fromCode(currentCurrencyCode)
+        val currentBtcPrice = com.electricdreams.numo.core.worker.BitcoinPriceWorker.getInstance(context).getCurrentPrice()
 
         val locale = Locale.getDefault()
         val buckets = buildBuckets(range, locale)
@@ -51,7 +51,9 @@ object InsightsRepository {
             perBucketTxCount[idx] += 1
             periodTotalSats += entry.amount
 
-            val fiatMinor = satsToFiatMinor(entry.amount, entry.bitcoinPrice)
+            // Calculate fiat minor using the current BTC price in the current selected currency
+            // to avoid mixing mismatched historical exchange rates (e.g. adding USD and CUP values).
+            val fiatMinor = satsToFiatMinor(entry.amount, currentBtcPrice)
             perBucketFiat[idx] += fiatMinor
             periodTotalFiatMinor += fiatMinor
 

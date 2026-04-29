@@ -1215,7 +1215,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         try {
             val hceService = NdefHostCardEmulationService.getInstance()
             if (hceService != null) {
-                if (isFinishing || (hcePaymentCallback != null && hceService.paymentCallback === hcePaymentCallback)) {
+                if (hcePaymentCallback != null && hceService.paymentCallback === hcePaymentCallback) {
                     hceService.clearPaymentRequest()
                     hceService.setPaymentCallback(null)
                 }

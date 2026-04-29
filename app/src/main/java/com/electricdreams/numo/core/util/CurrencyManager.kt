@@ -30,6 +30,8 @@ class CurrencyManager private constructor(context: Context) {
         const val CURRENCY_SEK = "SEK"
         const val CURRENCY_NOK = "NOK"
         const val CURRENCY_KRW = "KRW"
+        const val CURRENCY_CUP = "CUP"
+        const val CURRENCY_MLC = "MLC"
 
         // Default currency is USD
         private const val DEFAULT_CURRENCY = CURRENCY_USD
@@ -40,7 +42,15 @@ class CurrencyManager private constructor(context: Context) {
             JSONObject(response).getJSONObject("data").getDouble("amount")
         }
 
-        /** Add entries here for currencies not on Coinbase (or where we prefer a different source). */
+        private val YADIO_PARSER: (String) -> Double = { response ->
+            1.0 / JSONObject(response).getDouble("rate")
+        }
+
+        /** 
+         * Add entries here for currencies not on Coinbase (or where we prefer a different source).
+         * Note: Cuban currencies (CUP, MLC) use Yadio because Coinbase provides inaccurate 
+         * market rates for CUP and still uses the obsolete CUC instead of the current MLC.
+         */
         private val CUSTOM_APIS = mapOf(
             CURRENCY_JPY to PriceApiConfig(
                 url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=jpy",
@@ -54,6 +64,14 @@ class CurrencyManager private constructor(context: Context) {
                     JSONArray(response).getJSONObject(0).getDouble("trade_price")
                 }
             ),
+            CURRENCY_CUP to PriceApiConfig(
+                url = "https://api.yadio.io/rate/BTC/CUP",
+                parsePrice = YADIO_PARSER
+            ),
+            CURRENCY_MLC to PriceApiConfig(
+                url = "https://api.yadio.io/rate/BTC/MLC",
+                parsePrice = YADIO_PARSER
+            )
         )
 
         @Volatile
@@ -117,8 +135,10 @@ class CurrencyManager private constructor(context: Context) {
     /** Check if a currency code is valid and supported. */
     fun isValidCurrency(currencyCode: String?): Boolean {
         if (currencyCode.isNullOrEmpty()) return false
+        val upperCode = currencyCode.uppercase()
+        if (upperCode == CURRENCY_CUP || upperCode == CURRENCY_MLC) return true
         return runCatching {
-            java.util.Currency.getInstance(currencyCode.uppercase())
+            java.util.Currency.getInstance(upperCode)
             true
         }.getOrDefault(false)
     }

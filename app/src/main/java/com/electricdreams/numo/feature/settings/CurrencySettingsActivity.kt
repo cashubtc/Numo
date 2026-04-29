@@ -35,7 +35,7 @@ class CurrencySettingsActivity : AppCompatActivity() {
     private lateinit var clearButton: ImageButton
     private lateinit var emptyStateText: TextView
     
-    private var allCurrencies: List<Currency> = emptyList()
+    private var allCurrencies: List<CurrencyWrapper> = emptyList()
     private var hasScrolledToSelection = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,9 +64,9 @@ class CurrencySettingsActivity : AppCompatActivity() {
 
     private fun setupRecyclerView() {
         adapter = CurrencyAdapter { currency ->
-            currencyManager.setPreferredCurrency(currency.currencyCode)
+            currencyManager.setPreferredCurrency(currency.code)
             // Update UI to show selection
-            adapter.submitList(getFilteredCurrencies(searchInput.text.toString()), currency.currencyCode)
+            adapter.submitList(getFilteredCurrencies(searchInput.text.toString()), currency.code)
         }
         
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -85,8 +85,16 @@ class CurrencySettingsActivity : AppCompatActivity() {
         )
         
         // Show cached or default immediately
-        allCurrencies = Currency.getAvailableCurrencies()
+        val standardCurrencies = Currency.getAvailableCurrencies()
             .filter { initialSupportedCodes.contains(it.currencyCode) }
+            .map { CurrencyWrapper(it.currencyCode, it) }
+            
+        // Inject CUP and MLC directly (supported via Yadio API instead of Coinbase)
+        // Coinbase provides inaccurate market rates for CUP and uses obsolete CUC instead of MLC.
+        allCurrencies = standardCurrencies + listOf(
+            CurrencyWrapper(CurrencyManager.CURRENCY_CUP, runCatching { Currency.getInstance(CurrencyManager.CURRENCY_CUP) }.getOrNull()),
+            CurrencyWrapper(CurrencyManager.CURRENCY_MLC, runCatching { Currency.getInstance(CurrencyManager.CURRENCY_MLC) }.getOrNull())
+        )
             
         val currentList = getFilteredCurrencies(searchInput.text.toString())
         adapter.submitList(currentList, currencyManager.getCurrentCurrency())
@@ -114,12 +122,22 @@ class CurrencySettingsActivity : AppCompatActivity() {
                     // Always ensure our custom API fallback currencies are included
                     supported.add(CurrencyManager.CURRENCY_KRW)
                     supported.add(CurrencyManager.CURRENCY_JPY)
+                    supported.add(CurrencyManager.CURRENCY_CUP)
+                    supported.add(CurrencyManager.CURRENCY_MLC)
                     
                     withContext(Dispatchers.Main) {
                         prefs.edit().putStringSet("cached_supported_currencies", supported).apply()
                         
-                        allCurrencies = Currency.getAvailableCurrencies()
+                        val newStandardCurrencies = Currency.getAvailableCurrencies()
                             .filter { supported.contains(it.currencyCode) }
+                            .map { CurrencyWrapper(it.currencyCode, it) }
+                            
+                        // Inject CUP and MLC directly (supported via Yadio API instead of Coinbase)
+                        // Coinbase provides inaccurate market rates for CUP and uses obsolete CUC instead of MLC.
+                        allCurrencies = newStandardCurrencies + listOf(
+                            CurrencyWrapper(CurrencyManager.CURRENCY_CUP, runCatching { Currency.getInstance(CurrencyManager.CURRENCY_CUP) }.getOrNull()),
+                            CurrencyWrapper(CurrencyManager.CURRENCY_MLC, runCatching { Currency.getInstance(CurrencyManager.CURRENCY_MLC) }.getOrNull())
+                        )
                             
                         val currentList = getFilteredCurrencies(searchInput.text.toString())
                         adapter.submitList(currentList, currencyManager.getCurrentCurrency())
@@ -160,7 +178,7 @@ class CurrencySettingsActivity : AppCompatActivity() {
         }
     }
     
-    private fun getFilteredCurrencies(query: String): List<Currency> {
+    private fun getFilteredCurrencies(query: String): List<CurrencyWrapper> {
         val currentCode = currencyManager.getCurrentCurrency()
         
         val filtered = if (query.isEmpty()) {
@@ -168,22 +186,22 @@ class CurrencySettingsActivity : AppCompatActivity() {
         } else {
             val lowerQuery = query.lowercase()
             allCurrencies.filter {
-                it.currencyCode.lowercase().contains(lowerQuery) ||
-                it.getDisplayName(java.util.Locale.getDefault()).lowercase().contains(lowerQuery)
+                it.code.lowercase().contains(lowerQuery) ||
+                it.displayName.lowercase().contains(lowerQuery)
             }
         }
         
         // Sort alphabetically
         return filtered.sortedWith { c1, c2 ->
-            c1.currencyCode.compareTo(c2.currencyCode)
+            c1.code.compareTo(c2.code)
         }
     }
 
-    private fun scrollToSelectedCurrencyOnce(list: List<Currency>) {
+    private fun scrollToSelectedCurrencyOnce(list: List<CurrencyWrapper>) {
         if (hasScrolledToSelection || searchInput.text.toString().isNotEmpty()) return
         
         val currentCode = currencyManager.getCurrentCurrency()
-        val index = list.indexOfFirst { it.currencyCode == currentCode }
+        val index = list.indexOfFirst { it.code == currentCode }
         if (index != -1) {
             hasScrolledToSelection = true
             recyclerView.post {
