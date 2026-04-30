@@ -36,6 +36,11 @@ class CurrencyManager private constructor(context: Context) {
         // Default currency is USD
         private const val DEFAULT_CURRENCY = CURRENCY_USD
 
+        val LATAM_CURRENCIES = setOf(
+            "ARS", "BOB", "BRL", "CLP", "COP", "CRC", "CUP", "DOP", "GTQ",
+            "HNL", "MLC", "MXN", "NIO", "PAB", "PEN", "PYG", "UYU", "VES"
+        )
+
         private const val COINBASE_BASE_URL = "https://api.coinbase.com/v2/prices/BTC-"
 
         private val COINBASE_PARSER: (String) -> Double = { response ->
@@ -48,8 +53,6 @@ class CurrencyManager private constructor(context: Context) {
 
         /** 
          * Add entries here for currencies not on Coinbase (or where we prefer a different source).
-         * Note: Cuban currencies (CUP, MLC) use Yadio because Coinbase provides inaccurate 
-         * market rates for CUP and still uses the obsolete CUC instead of the current MLC.
          */
         private val CUSTOM_APIS = mapOf(
             CURRENCY_JPY to PriceApiConfig(
@@ -63,14 +66,6 @@ class CurrencyManager private constructor(context: Context) {
                 parsePrice = { response ->
                     JSONArray(response).getJSONObject(0).getDouble("trade_price")
                 }
-            ),
-            CURRENCY_CUP to PriceApiConfig(
-                url = "https://api.yadio.io/rate/BTC/CUP",
-                parsePrice = YADIO_PARSER
-            ),
-            CURRENCY_MLC to PriceApiConfig(
-                url = "https://api.yadio.io/rate/BTC/MLC",
-                parsePrice = YADIO_PARSER
             )
         )
 
@@ -136,7 +131,7 @@ class CurrencyManager private constructor(context: Context) {
     fun isValidCurrency(currencyCode: String?): Boolean {
         if (currencyCode.isNullOrEmpty()) return false
         val upperCode = currencyCode.uppercase()
-        if (upperCode == CURRENCY_CUP || upperCode == CURRENCY_MLC) return true
+        if (LATAM_CURRENCIES.contains(upperCode)) return true
         return runCatching {
             java.util.Currency.getInstance(upperCode)
             true
@@ -145,12 +140,18 @@ class CurrencyManager private constructor(context: Context) {
 
     /** Get the API URL for the current currency. Falls back to Coinbase. */
     fun getPriceApiUrl(): String {
+        if (LATAM_CURRENCIES.contains(currentCurrency)) {
+            return "https://api.yadio.io/rate/BTC/$currentCurrency"
+        }
         return CUSTOM_APIS[currentCurrency]?.url
             ?: "${COINBASE_BASE_URL}$currentCurrency/spot"
     }
 
     /** Parse a price API response for the current currency. */
     fun parsePriceResponse(response: String): Double {
+        if (LATAM_CURRENCIES.contains(currentCurrency)) {
+            return YADIO_PARSER(response)
+        }
         val parser = CUSTOM_APIS[currentCurrency]?.parsePrice ?: COINBASE_PARSER
         return parser(response)
     }

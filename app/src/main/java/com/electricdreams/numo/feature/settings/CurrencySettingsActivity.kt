@@ -89,12 +89,12 @@ class CurrencySettingsActivity : AppCompatActivity() {
             .filter { initialSupportedCodes.contains(it.currencyCode) }
             .map { CurrencyWrapper(it.currencyCode, it) }
             
-        // Inject CUP and MLC directly (supported via Yadio API instead of Coinbase)
-        // Coinbase provides inaccurate market rates for CUP and uses obsolete CUC instead of MLC.
-        allCurrencies = standardCurrencies + listOf(
-            CurrencyWrapper(CurrencyManager.CURRENCY_CUP, runCatching { Currency.getInstance(CurrencyManager.CURRENCY_CUP) }.getOrNull()),
-            CurrencyWrapper(CurrencyManager.CURRENCY_MLC, runCatching { Currency.getInstance(CurrencyManager.CURRENCY_MLC) }.getOrNull())
-        )
+        // Inject LATAM currencies directly (supported via Yadio API instead of Coinbase to bypass blacklists)
+        val latamWrappers = CurrencyManager.LATAM_CURRENCIES.map { code ->
+            CurrencyWrapper(code, runCatching { Currency.getInstance(code) }.getOrNull())
+        }
+        val currentCodes = standardCurrencies.map { it.code }.toSet()
+        allCurrencies = standardCurrencies + latamWrappers.filter { it.code !in currentCodes }
             
         val currentList = getFilteredCurrencies(searchInput.text.toString())
         adapter.submitList(currentList, currencyManager.getCurrentCurrency())
@@ -122,8 +122,7 @@ class CurrencySettingsActivity : AppCompatActivity() {
                     // Always ensure our custom API fallback currencies are included
                     supported.add(CurrencyManager.CURRENCY_KRW)
                     supported.add(CurrencyManager.CURRENCY_JPY)
-                    supported.add(CurrencyManager.CURRENCY_CUP)
-                    supported.add(CurrencyManager.CURRENCY_MLC)
+                    supported.addAll(CurrencyManager.LATAM_CURRENCIES)
                     
                     withContext(Dispatchers.Main) {
                         prefs.edit().putStringSet("cached_supported_currencies", supported).apply()
@@ -132,12 +131,12 @@ class CurrencySettingsActivity : AppCompatActivity() {
                             .filter { supported.contains(it.currencyCode) }
                             .map { CurrencyWrapper(it.currencyCode, it) }
                             
-                        // Inject CUP and MLC directly (supported via Yadio API instead of Coinbase)
-                        // Coinbase provides inaccurate market rates for CUP and uses obsolete CUC instead of MLC.
-                        allCurrencies = newStandardCurrencies + listOf(
-                            CurrencyWrapper(CurrencyManager.CURRENCY_CUP, runCatching { Currency.getInstance(CurrencyManager.CURRENCY_CUP) }.getOrNull()),
-                            CurrencyWrapper(CurrencyManager.CURRENCY_MLC, runCatching { Currency.getInstance(CurrencyManager.CURRENCY_MLC) }.getOrNull())
-                        )
+                        // Inject LATAM currencies directly (supported via Yadio API instead of Coinbase to bypass blacklists)
+                        val latamWrappers = CurrencyManager.LATAM_CURRENCIES.map { code ->
+                            CurrencyWrapper(code, runCatching { Currency.getInstance(code) }.getOrNull())
+                        }
+                        val currentNewCodes = newStandardCurrencies.map { it.code }.toSet()
+                        allCurrencies = newStandardCurrencies + latamWrappers.filter { it.code !in currentNewCodes }
                             
                         val currentList = getFilteredCurrencies(searchInput.text.toString())
                         adapter.submitList(currentList, currencyManager.getCurrentCurrency())
