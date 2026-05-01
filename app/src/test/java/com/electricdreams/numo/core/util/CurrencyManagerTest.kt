@@ -89,6 +89,10 @@ class CurrencyManagerTest {
         assertTrue(currencyManager.isValidCurrency("CAD"))
         assertTrue(currencyManager.isValidCurrency("COP"))
         
+        // Supports LATAM currencies specifically
+        assertTrue(currencyManager.isValidCurrency("MXN"))
+        assertTrue(currencyManager.isValidCurrency("ARS"))
+        
         assertFalse(currencyManager.isValidCurrency(""))
         assertFalse(currencyManager.isValidCurrency(null))
         assertFalse(currencyManager.isValidCurrency("INVALID"))
@@ -181,5 +185,27 @@ class CurrencyManagerTest {
         currencyManager.setPreferredCurrency("JPY")
         val coingeckoResponse = """{"bitcoin":{"jpy":11052002.70}}"""
         assertEquals(11052002.70, currencyManager.parsePriceResponse(coingeckoResponse), 0.01)
+    }
+
+    @Test
+    fun `getPriceApiUrl returns correct URL for LATAM currencies`() {
+        currencyManager.setPreferredCurrency("MXN")
+        assertEquals("https://api.yadio.io/rate/BTC/MXN", currencyManager.getPriceApiUrl())
+
+        currencyManager.setPreferredCurrency("ARS")
+        assertEquals("https://api.yadio.io/rate/BTC/ARS", currencyManager.getPriceApiUrl())
+    }
+
+    @Test
+    fun `parsePriceResponse parses Yadio response for LATAM currencies`() {
+        currencyManager.setPreferredCurrency("MXN")
+        // Yadio rate API returns {"rate": 0.00002} where 1 / rate = BTC price in Fiat
+        // If 1 BTC = 50,000 MXN, rate = 0.00002
+        val yadioResponse = """{"rate":0.00002}"""
+        assertEquals(50000.0, currencyManager.parsePriceResponse(yadioResponse), 0.01)
+
+        currencyManager.setPreferredCurrency("ARS")
+        val yadioResponseArs = """{"rate":0.00001}"""
+        assertEquals(100000.0, currencyManager.parsePriceResponse(yadioResponseArs), 0.01)
     }
 }
