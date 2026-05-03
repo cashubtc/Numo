@@ -67,13 +67,52 @@
 
     </LinearLayout>
 
+    <!-- Mint Info Bar -->
+    <LinearLayout
+        android:id="@+id/mint_info_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="4dp"
+        app:layout_constraintTop_toBottomOf="@id/top_navigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/mint_info_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@color/color_bg_white"
+            android:textSize="13sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="6dp"
+            android:text="·"
+            android:textColor="@color/color_bg_white"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/mint_info_balance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/color_bg_white"
+            android:textSize="13sp" />
+
+    </LinearLayout>
+
     <!-- Input Mode Container -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/input_mode_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_navigation">
+        app:layout_constraintTop_toBottomOf="@id/mint_info_bar">
 
         <!-- Upper content (amount + currency) - dynamically sized -->
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -90,13 +129,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="8dp"
-            android:gravity="center"
-            android:text="@string/pos_error_amount_required"
-            android:textColor="@color/color_bg_white"
-            android:textSize="16sp"
-            android:visibility="gone"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="8dp"
+                android:gravity="center"
+                android:text="@string/pos_error_amount_required"
+                android:textColor="@color/color_bg_white"
+                android:textSize="16sp"
+                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -108,12 +147,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp"
-            android:gravity="center"
-            android:text="@string/pos_amount_placeholder_main"
-            android:textColor="@color/color_bg_white"
-            android:textSize="64sp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:gravity="center"
+                android:text="@string/pos_amount_placeholder_main"
+                android:textColor="@color/color_bg_white"
+                android:textSize="64sp"
                 android:textStyle="bold"
                 android:maxLines="1"
                 android:singleLine="true"
@@ -228,7 +267,7 @@
         layout="@layout/auto_withdraw_progress_indicator"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/top_navigation"
+        app:layout_constraintTop_toBottomOf="@id/mint_info_bar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
