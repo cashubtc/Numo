@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
@@ -47,6 +48,9 @@ class PosUiCoordinator(
     private lateinit var switchCurrencyButton: View
     private lateinit var inputModeContainer: ConstraintLayout
     private lateinit var errorMessage: TextView
+    private var mintInfoContainer: View? = null
+    private var mintInfoName: TextView? = null
+    private var mintInfoBalance: TextView? = null
 
     // Input state
     private val satoshiInput = StringBuilder()
@@ -67,11 +71,12 @@ class PosUiCoordinator(
         initializeViews()
         initializeManagers()
         setupNavigationButtons()
-        
+        updateMintIndicator()
+
         // Disable charge button initially, enable when wallet is ready
         submitButton.isEnabled = false
         submitButton.alpha = 0.5f
-        
+
         // Load mint limits from preferred Lightning mint
         loadMintLimits()
 
@@ -86,7 +91,7 @@ class PosUiCoordinator(
                     if (submitButtonSpinner.visibility != android.view.View.VISIBLE) {
                         submitButton.isEnabled = canCharge
                         submitButton.alpha = if (canCharge) 1.0f else 0.5f
-                        
+
                         // Rely on AmountDisplayManager to set correct text/state based on amount and wallet readiness
                         amountDisplayManager.updateDisplay(
                             satoshiInput,
@@ -115,18 +120,18 @@ class PosUiCoordinator(
                         Log.w(TAG, "Failed to pre-load cache for: $mintUrl", e)
                     }
                 }
-                
+
                 // Now get limits for the preferred mint
                 val isStale = mintManager.needsRefresh(lightningMint)
                 val limits = mintManager.getMintLimits(lightningMint, activity, forceRefresh = isStale, isFirstFetch = false)
                 amountDisplayManager.setMintLimits(limits)
-                
+
                 // Update display to re-evaluate button state based on new limits
                 amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
             }
         }
     }
-    
+
     /** Reload mint limits - called when returning to POS (e.g., after changing lightning mint) */
     fun reloadMintLimits() {
         Log.d(TAG, "reloadMintLimits() called")
@@ -135,7 +140,7 @@ class PosUiCoordinator(
         if (lightningMint != null) {
             // Disable button while refreshing, but let AmountDisplayManager handle the text based on wallet state
             submitButton.isEnabled = false
-            
+
             activity.lifecycleScope.launch {
                 // Force refresh if stale, NOT first fetch - preserve existing cache
                 // This prevents inconsistent mint responses from overwriting valid limits
@@ -143,10 +148,10 @@ class PosUiCoordinator(
                 Log.d(TAG, "Fetching mint limits with forceRefresh=\$isStale (NOT first fetch)")
                 val limits = mintManager.getMintLimits(lightningMint, activity, forceRefresh = isStale, isFirstFetch = false)
                 Log.d(TAG, "Got limits: $limits")
-                
+
                 // Same behavior as onCreate - always set limits
                 amountDisplayManager.setMintLimits(limits)
-                
+
                 // Update display to re-evaluate button state based on new limits
                 amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
             }
@@ -191,7 +196,7 @@ class PosUiCoordinator(
     fun showAmountRequiredError() {
         errorMessage.visibility = View.VISIBLE
         amountDisplayManager.shakeAmountDisplay()
-        
+
         mainHandler.postDelayed({
             errorMessage.visibility = View.GONE
         }, 3000)
@@ -206,6 +211,7 @@ class PosUiCoordinator(
     fun refreshDisplay() {
         // Force a display update to reflect any currency changes
         amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
+        updateMintIndicator()
     }
 
     /** Handle NFC payment */
@@ -234,7 +240,7 @@ class PosUiCoordinator(
         } catch (e: Exception) {
             android.util.Log.e("PosUiCoordinator", "Error playing success sound: ${e.message}")
         }
-        
+
         // Vibrate
         try {
             val vibrator = activity.getVibrator()
@@ -272,7 +278,10 @@ class PosUiCoordinator(
         errorMessage = activity.findViewById(R.id.error_message)
         switchCurrencyButton = activity.findViewById(R.id.currency_switch_button)
         inputModeContainer = activity.findViewById(R.id.input_mode_container)
-        
+        mintInfoContainer = activity.findViewById(R.id.mint_info_bar)
+        mintInfoName = activity.findViewById(R.id.mint_info_name)
+        mintInfoBalance = activity.findViewById(R.id.mint_info_balance)
+
         // Initialize currency switch button translationY to 2dp
         val iconOffsetPx = 2f * activity.resources.displayMetrics.density
         switchCurrencyButton.translationY = iconOffsetPx
@@ -302,14 +311,14 @@ class PosUiCoordinator(
         // Initialize payment handlers
         paymentMethodHandler = PaymentMethodHandler(activity)
         paymentResultHandler = PaymentResultHandler(activity, bitcoinPriceWorker)
-        
+
         // Initialize NFC processor
         nfcPaymentProcessor = NfcPaymentProcessor(
             activity,
             onPaymentSuccess = { token ->
                 paymentResultHandler.handlePaymentSuccess(
-                    token, 
-                    amountDisplayManager.requestedAmount, 
+                    token,
+                    amountDisplayManager.requestedAmount,
                     amountDisplayManager.isUsdInputMode
                 ) { resultToken, resultAmount ->
                     // Use unified success handler
@@ -325,18 +334,37 @@ class PosUiCoordinator(
         )
     }
 
+    private fun updateMintIndicator() {
+        if (mintInfoContainer == null || mintInfoName == null || mintInfoBalance == null) return
+
+        val mintUrl = mintManager.getPreferredLightningMint()
+        if (mintUrl == null) {
+            mintInfoContainer?.visibility = View.GONE
+            return
+        }
+
+        mintInfoContainer?.visibility = View.VISIBLE
+        val displayName = mintManager.getMintDisplayName(mintUrl)
+        mintInfoName?.text = displayName
+
+        activity.lifecycleScope.launch {
+            val balance = CashuWalletManager.getBalanceForMint(mintUrl)
+            mintInfoBalance?.text = Amount(balance, Amount.Currency.BTC).toString()
+        }
+    }
+
     private fun setupNavigationButtons() {
         // Set up currency toggle
         val secondaryAmountContainer = activity.findViewById<View>(R.id.secondary_amount_container)
-        secondaryAmountContainer.setOnClickListener { 
+        secondaryAmountContainer.setOnClickListener {
             if (amountDisplayManager.toggleInputMode(satoshiInput, fiatInput)) {
                 amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.CURRENCY_SWITCH)
             }
         }
 
         // Navigation buttons
-        activity.findViewById<ImageButton>(R.id.action_more_options).setOnClickListener { 
-            showOverflowMenu(it) 
+        activity.findViewById<ImageButton>(R.id.action_more_options).setOnClickListener {
+            showOverflowMenu(it)
         }
         activity.findViewById<ImageButton>(R.id.action_history).setOnClickListener {
             activity.startActivity(Intent(activity, PaymentsHistoryActivity::class.java))
