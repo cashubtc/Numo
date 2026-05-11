@@ -1,6 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <!-- Item selection: clear basket dialog -->
     <string name="item_selection_dialog_clear_basket_title">Vaciar cesta</string>
     <string name="item_selection_dialog_clear_basket_message">¿Quieres eliminar todos los artículos de la cesta?</string>
     <string name="item_selection_dialog_clear_basket_positive">Vaciar</string>
+    <string name="item_selection_discard">Descartar</string>
+    <string name="item_selection_save_basket_message">¿Guardar cambios en esta cesta?</string>
+    <string name="item_selection_toast_no_stock">No hay más stock disponible</string>
+    <string name="item_selection_toast_enter_variation">Introduzca un nombre de variación</string>
 </resources>

@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="item_list_dialog_clear_all_positive">すべて削除</string>
+    <string name="item_list_toast_camera_permission">写真を撮るにはカメラの権限が必要です</string>
+    <string name="item_list_toast_failed_open_csv">CSVファイルを開けませんでした</string>
+    <string name="item_list_toast_imported_items">%1$d個のアイテムをインポートしました</string>
+    <string name="item_list_toast_error_creating_image">画像ファイルの作成中にエラーが発生しました: %1$s</string>
+    <string name="item_list_toast_sku_not_unique">一意のSKUを使用してください</string>
+    <string name="item_list_toast_no_items_imported">CSVからアイテムはインポートされませんでした</string>
+    <string name="item_list_toast_saved_without_image">アイテムは保存されましたが、画像を保存できませんでした</string>
+    <string name="item_list_toast_all_items_cleared">すべてのアイテムがクリアされました</string>
+    <string name="item_list_dialog_clear_all_message">
+ カタログからすべてのアイテムを削除してもよろしいですか？この操作は元に戻せません。
+ </string>
+    <string name="item_list_toast_failed_load_image">画像の読み込みに失敗しました</string>
+    <string name="item_list_toast_error_importing_csv">CSVファイルのインポート中にエラーが発生しました: %1$s</string>
+    <string name="item_list_toast_failed_save_item">アイテムの保存に失敗しました</string>
+    <string name="item_list_toast_gtin_not_unique">一意のGTINを使用してください</string>
+    <string name="item_list_dialog_clear_all_title">すべてのアイテムをクリア</string>
+</resources>

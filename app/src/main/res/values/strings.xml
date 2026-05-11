@@ -109,7 +109,7 @@
     
     <string name="onboarding_welcome_tagline">Accept Bitcoin payments instantly with zero fees.</string>
     <string name="onboarding_welcome_message">Accept Bitcoin payments instantly with zero fees using Cashu ecash technology.</string>
-    <string name="onboarding_terms_text">By continuing, you agree to our Terms of Service and Privacy Policy</string>
+    <string name="onboarding_terms_text">By continuing, you agree to our <annotation id="terms">Terms of Service</annotation> and <annotation id="privacy">Privacy Policy</annotation></string>
     <string name="onboarding_get_started">Get Started</string>
 
     
@@ -599,7 +599,9 @@
     <string name="item_selection_basket_items_count">%1$d items</string>
     <string name="item_selection_charge_button">Charge</string>
     <string name="item_selection_charge_button_default">Charge</string>
-    <string name="pos_error_no_mints_configured">To accept payments, add a mint first. Go to Settings → Mints to get started.</string>
+    <string name="pos_error_no_mints_configured">Add at least one mint in Settings → Mints before charging customers.</string>
+    <string name="pos_error_no_network_pending_payment">Network connection is required to open pending payments.</string>
+    <string name="pos_error_no_network_charge">Network connection is required to create a charge.</string>
 
     <string name="item_selection_save_button">Save</string>
     <string name="item_selection_saved_baskets_button">Saved</string>
@@ -749,6 +751,14 @@
     
     <string name="settings_item_withdrawals_title">Withdrawals</string>
     <string name="settings_item_withdrawals_subtitle">Auto-withdraw settings and history</string>
+    <string name="settings_item_default_payment_method_title">Default Payment</string>
+    <string name="settings_item_default_payment_method_subtitle">Unified</string>
+    <string name="default_payment_method_explainer_title">Quick Settings</string>
+    <string name="default_payment_method_explainer_body">You can quickly change the default payment method directly from the payment screen by long-pressing on any of the Unified, Cashu, or Lightning tabs.</string>
+    <string name="default_payment_method_section_options">DEFAULT QR CODE</string>
+    <string name="default_payment_method_option_unified">Unified (Cashu + Lightning)</string>
+    <string name="default_payment_method_option_cashu">Cashu</string>
+    <string name="default_payment_method_option_lightning">Lightning</string>
 
     
     <string name="manual_withdraw_section_title">Manual Withdraw</string>
@@ -924,6 +934,7 @@
     <string name="pin_reset_paste_clipboard">Paste from Clipboard</string>
     <string name="pin_reset_button">Reset PIN</string>
     <string name="payment_request_tab_unified">Unified</string>
+    <string name="payment_request_default_method_set">%1$s set as default payment method</string>
     <string name="payment_request_default_description">Payment of %1$d sats</string>
     <string name="payment_request_lightning_description">Numo POS payment of %1$d sats</string>
 
@@ -954,4 +965,37 @@
     <string name="label_percent_symbol" translatable="false">%</string>
     <string name="auto_withdraw_percentage_min" translatable="false">50%</string>
     <string name="auto_withdraw_percentage_max" translatable="false">98%</string>
+
+    <!-- Insights Screen -->
+    <string name="insights_open">Open insights</string>
+    <string name="insights_title">Sales</string>
+    <string name="insights_back">Back</string>
+    <string name="insights_view_options">View options</string>
+    <string name="insights_this_week">This week</string>
+    <string name="insights_last_7_weeks">Last 7 weeks</string>
+    <string name="insights_last_7_months">Last 7 months</string>
+    <string name="insights_date_range">Date range</string>
+    <string name="insights_range_days">Last 7 days</string>
+    <string name="insights_range_weeks">Last 7 weeks</string>
+    <string name="insights_range_months">Last 7 months</string>
+    <string name="insights_day_count_one">1 transaction</string>
+    <string name="insights_day_count_other">%1$d transactions</string>
+    <string name="insights_quick_charge">Quick charge</string>
+    <string name="insights_items_count_one">1 item</string>
+    <string name="insights_items_count_other">%1$d items</string>
+    <string name="insights_items_lead_with_more">%1$s · %2$s +%3$d more</string>
+    <string name="insights_item_xn">%1$d × %2$s</string>
+    <string name="insights_empty_headline">0 sales</string>
+    <string name="insights_empty_hint">Your sales will appear here.</string>
+    <string name="insights_empty_day">No sales on %1$s</string>
+    <string name="insights_show_me_in">Display in</string>
+    <string name="insights_currency_sats">₿</string>
+    <string name="insights_close">Close</string>
+    <string name="insights_day_label_mon">Mon</string>
+    <string name="insights_day_label_tue">Tue</string>
+    <string name="insights_day_label_wed">Wed</string>
+    <string name="insights_day_label_thu">Thu</string>
+    <string name="insights_day_label_fri">Fri</string>
+    <string name="insights_day_label_sat">Sat</string>
+    <string name="insights_day_label_sun">Sun</string>
 </resources>

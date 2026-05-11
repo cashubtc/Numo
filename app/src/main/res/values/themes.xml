@@ -108,6 +108,7 @@
         <item name="android:windowLightNavigationBar">true</item>
         <item name="enableEdgeToEdge">true</item>
         <item name="bottomSheetStyle">@style/Widget.Numo.BottomSheet</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
     <!-- Bottom Sheet Widget Style -->

@@ -380,7 +380,8 @@ class MintDetailsActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val result = withContext(Dispatchers.IO) {
-                    mintProfileService.fetchAndStoreMintProfile(mintUrl, validateEndpoint = false)
+                    // Don't store in cache - let POS handle cache when needed
+                    mintProfileService.fetchAndStoreMintProfile(mintUrl, validateEndpoint = false, storeInCache = false)
                 }
 
                 if (result.success) {

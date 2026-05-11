@@ -1,3 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="webhook_settings_title">Webhooks</string>
     <string name="webhook_settings_description">Envia uma solicitação POST com metadados do pagamento sempre que este terminal recebe um pagamento.</string>
@@ -9,24 +10,19 @@
     <string name="webhook_settings_auth_not_set">Sem chave de auth</string>
     <string name="webhook_settings_edit_auth_key">Editar chave de auth</string>
     <string name="webhook_settings_delete_endpoint">Excluir endpoint</string>
-
     <string name="webhook_settings_add_dialog_title">Adicionar endpoint de webhook</string>
     <string name="webhook_settings_add_dialog_description">Insira a URL do webhook. Você pode adicionar uma chave de auth opcional no próximo passo.</string>
     <string name="webhook_settings_add_dialog_hint">https://example.com/webhooks/numo</string>
     <string name="webhook_settings_add_dialog_confirm">Adicionar</string>
-
     <string name="webhook_settings_edit_dialog_title">Editar endpoint</string>
     <string name="webhook_settings_edit_dialog_description">Atualize para onde os metadados do pagamento são enviados.</string>
-
     <string name="webhook_settings_auth_dialog_title">Chave de auth (opcional)</string>
     <string name="webhook_settings_auth_dialog_description">Se configurado, este valor é enviado no cabeçalho Authorization.</string>
     <string name="webhook_settings_auth_dialog_hint">Bearer sua-chave-secreta</string>
     <string name="webhook_settings_auth_dialog_helper">Deixe vazio para remover a chave de auth deste endpoint.</string>
-
     <string name="webhook_settings_delete_dialog_title">Excluir endpoint?</string>
     <string name="webhook_settings_delete_dialog_message">Este endpoint não receberá mais eventos de pagamento.\n\n%1$s</string>
     <string name="webhook_settings_delete_dialog_confirm">Excluir</string>
-
     <string name="webhook_settings_add_success">Endpoint de webhook adicionado</string>
     <string name="webhook_settings_edit_success">Endpoint de webhook atualizado</string>
     <string name="webhook_settings_auth_success">Chave de auth atualizada</string>
@@ -34,4 +30,12 @@
     <string name="webhook_settings_error_invalid_url">Insira uma URL http(s) válida</string>
     <string name="webhook_settings_error_duplicate">Esse endpoint já está configurado</string>
     <string name="webhook_settings_error_not_found">O endpoint já não existe</string>
+    <string name="webhook_settings_sync_all">Sincronizar Todas as Transações</string>
+    <string name="webhook_settings_sync_all_success">%1$d transações sincronizadas</string>
+    <string name="webhook_settings_section_actions">Ações</string>
+    <string name="webhook_settings_scan_instruction">Escaneie um código QR com uma URL de webhook ou configuração JSON.</string>
+    <string name="webhook_settings_sync_cancelled">Sincronização cancelada</string>
+    <string name="webhook_settings_scan_title">Escanear Webhook</string>
+    <string name="webhook_settings_syncing_progress">Sincronizando %1$d de %2$d</string>
+    <string name="webhook_settings_sync_all_empty">Não há transações concluídas para sincronizar</string>
 </resources>

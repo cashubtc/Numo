@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="item_list_dialog_clear_all_positive">모두 삭제</string>
+    <string name="item_list_toast_camera_permission">사진을 찍으려면 카메라 권한이 필요합니다</string>
+    <string name="item_list_toast_failed_open_csv">CSV 파일 열기 실패</string>
+    <string name="item_list_toast_imported_items">%1$d개 항목 가져옴</string>
+    <string name="item_list_toast_error_creating_image">이미지 파일 생성 오류: %1$s</string>
+    <string name="item_list_toast_sku_not_unique">고유한 SKU를 사용하세요</string>
+    <string name="item_list_toast_no_items_imported">CSV에서 가져온 항목이 없습니다</string>
+    <string name="item_list_toast_saved_without_image">항목은 저장되었지만 이미지를 저장할 수 없습니다</string>
+    <string name="item_list_toast_all_items_cleared">모든 항목이 지워졌습니다</string>
+    <string name="item_list_dialog_clear_all_message">
+ 카탈로그에서 모든 항목을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+ </string>
+    <string name="item_list_toast_failed_load_image">이미지 로드 실패</string>
+    <string name="item_list_toast_error_importing_csv">CSV 파일 가져오기 오류: %1$s</string>
+    <string name="item_list_toast_failed_save_item">항목 저장 실패</string>
+    <string name="item_list_toast_gtin_not_unique">고유한 GTIN을 사용하세요</string>
+    <string name="item_list_dialog_clear_all_title">모든 항목 지우기</string>
+</resources>

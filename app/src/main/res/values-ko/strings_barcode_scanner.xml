@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="barcode_scanner_toast_gtin_not_unique">이 GTIN은 이미 다른 항목에서 사용 중입니다</string>
+    <string name="barcode_format_code_39">Code 39</string>
+    <string name="barcode_format_data_matrix">Data Matrix</string>
+    <string name="barcode_format_unknown">알 수 없음</string>
+    <string name="barcode_format_code_128">Code 128</string>
+    <string name="barcode_format_ean_8">EAN-8</string>
+    <string name="checkout_scanner_instruction_scan_to_add">항목을 추가하려면 바코드를 스캔하세요</string>
+    <string name="barcode_format_ean_13">EAN-13</string>
+    <string name="barcode_scanner_toast_gtin_scanned">GTIN이 성공적으로 스캔되었습니다</string>
+    <string name="barcode_format_upc_a">UPC-A</string>
+    <string name="barcode_format_itf">ITF</string>
+    <string name="checkout_scanner_done_button">완료</string>
+    <string name="checkout_scanner_title">스캔하여 추가</string>
+    <string name="barcode_format_codabar">Codabar</string>
+    <string name="barcode_scanner_instruction_position_barcode">바코드를 프레임 안에 배치하세요</string>
+    <string name="barcode_scanner_title">바코드 스캔</string>
+    <string name="barcode_format_upc_e">UPC-E</string>
+    <string name="barcode_format_qr_code">QR 코드</string>
+    <string name="barcode_scanner_error_camera_permission_required">바코드를 스캔하려면 카메라 권한이 필요합니다</string>
+    <string name="barcode_format_code_93">Code 93</string>
+</resources>

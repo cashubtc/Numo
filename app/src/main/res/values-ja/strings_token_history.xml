@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="token_history_toolbar_title">トークン履歴</string>
+    <string name="token_history_toast_no_app">このトークンを処理できるアプリがありません</string>
+    <string name="token_history_dialog_clear_title">履歴を消去</string>
+    <string name="token_history_dialog_clear_message">すべてのトークン履歴を消去してもよろしいですか？この操作は元に戻せません。</string>
+    <string name="token_history_toast_copied">トークンがクリップボードにコピーされました</string>
+    <string name="token_history_dialog_delete_title">トークンを削除</string>
+    <string name="token_history_dialog_delete_positive">削除</string>
+    <string name="token_history_dialog_clear_positive">すべて消去</string>
+    <string name="token_history_dialog_delete_message">このトークンを履歴から削除してもよろしいですか？</string>
+</resources>

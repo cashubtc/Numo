@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="payment_toast_error_payment">결제 오류: %1$s</string>
+    <string name="payment_toast_hce_not_available">이 기기에서는 호스트 카드 에뮬레이션을 사용할 수 없습니다</string>
+    <string name="payment_toast_error_ndef_setup">NDEF 결제 설정 오류: %1$s</string>
+    <string name="payment_toast_failed_create_request">결제 요청 생성 실패</string>
+</resources>

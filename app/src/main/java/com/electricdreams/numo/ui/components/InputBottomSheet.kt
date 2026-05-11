@@ -8,6 +8,9 @@ import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import androidx.core.content.getSystemService
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.FragmentManager
 import com.electricdreams.numo.R
 import com.electricdreams.numo.databinding.DialogInputBinding
@@ -56,6 +59,13 @@ class InputBottomSheet : BottomSheetDialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        val originalPaddingBottom = view.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
+            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+            v.updatePadding(bottom = originalPaddingBottom + ime.bottom)
+            insets
+        }
 
         // Allow keyboard to resize the bottom sheet
         dialog?.window?.setSoftInputMode(

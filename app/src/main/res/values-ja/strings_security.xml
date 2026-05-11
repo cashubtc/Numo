@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="security_settings_pin_info_body">PINを設定して、従業員がNumoを安全に使用できるようにします。支払いの受け入れや取引の管理はできますが、資金の引き出し、mintへのアクセス、シードフレーズの表示、またはアイテム価格の変更はできません。</string>
+    <string name="security_toast_pin_must_be_digits">PINは4〜16桁である必要があります</string>
+    <string name="security_settings_section_pin_protection">PIN保護</string>
+    <string name="security_settings_pin_info_title">従業員モード</string>
+    <string name="security_toast_copied">クリップボードにコピーされました</string>
+    <string name="security_settings_remove_pin_subtitle">PIN保護を無効にする</string>
+    <string name="security_toast_pin_set_success">PINが正常に設定されました</string>
+    <string name="security_settings_section_backup">ウォレットバックアップ</string>
+    <string name="security_settings_remove_pin_title">PINを削除</string>
+    <string name="security_toast_incorrect_pin">不正なPINです</string>
+    <string name="security_toast_pin_dont_match">PINが一致しません</string>
+    <string name="security_settings_setup_pin_title">PINを設定</string>
+    <string name="security_toast_seed_invalid">有効な12単語のシードフレーズを貼り付けてください</string>
+    <string name="security_settings_section_recovery">ウォレットの回復</string>
+    <string name="security_toast_wait_seconds">%.1f秒お待ちください</string>
+    <string name="security_toast_wallet_not_initialized">ウォレットが初期化されていません</string>
+    <string name="security_settings_change_pin_title">PINを変更</string>
+    <string name="security_toast_pin_removed">PINが削除されました</string>
+    <string name="security_settings_card_title">ウォレットを保護する</string>
+    <string name="security_settings_setup_pin_subtitle">機密機能を保護する</string>
+    <string name="security_toast_clipboard_empty">クリップボードは空です</string>
+    <string name="security_settings_enter_pin_title">PINを入力</string>
+    <string name="security_settings_restore_wallet_subtitle">シードフレーズから回復する</string>
+    <string name="security_settings_change_pin_subtitle">セキュリティPINを更新</string>
+    <string name="security_settings_backup_mnemonic_subtitle">12単語のシードフレーズを表示</string>
+    <string name="security_settings_remove_pin_confirm">削除</string>
+    <string name="security_settings_remove_pin_dialog_title">PINを削除しますか？</string>
+    <string name="security_settings_backup_mnemonic_title">バックアップニーモニック</string>
+    <string name="security_settings_card_body">シードフレーズは、このデバイスへのアクセスを失った場合にウォレットを回復する唯一の方法です。安全に保管し、絶対に誰とも共有しないでください。</string>
+    <string name="security_settings_enter_pin_subtitle">続行するには身元を確認してください</string>
+    <string name="security_toast_seed_pasted">シードフレーズが貼り付けられました</string>
+    <string name="security_settings_restore_wallet_title">ウォレットを復元</string>
+    <string name="security_toast_pin_failed">PINの設定に失敗しました</string>
+    <string name="security_settings_remove_pin_dialog_message">これによりPIN保護が無効になります。このデバイスにアクセスできる人は誰でも、資金の引き出しやシードフレーズの表示などの機密機能にアクセスできるようになります。</string>
+</resources>

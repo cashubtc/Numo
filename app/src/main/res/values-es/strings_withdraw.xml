@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="withdraw_toast_insufficient_balance">Saldo insuficiente</string>
+</resources>

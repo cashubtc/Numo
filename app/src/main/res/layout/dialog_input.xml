@@ -1,138 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:fillViewport="true">
 
-    <!-- Close Button (top-left) -->
-    <ImageButton
-        android:id="@+id/close_button"
-        android:layout_width="@dimen/icon_size_large"
-        android:layout_height="@dimen/icon_size_large"
-        android:layout_marginStart="@dimen/space_s"
-        android:layout_marginTop="@dimen/space_s"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="@string/common_close"
-        android:padding="@dimen/space_m"
-        android:src="@drawable/ic_close"
-        app:tint="@color/color_text_secondary" />
-
-    <!-- Title -->
-    <TextView
-        android:id="@+id/dialog_title"
-        style="@style/Text.DialogTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="@dimen/space_xl"
-        android:layout_marginTop="@dimen/space_xs"
-        android:text="@string/dialog_input_title_default"
-        tools:text="Edit Threshold" />
-
-    <!-- Description (optional) -->
-    <TextView
-        android:id="@+id/dialog_description"
-        style="@style/Text.DialogSubtitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="@dimen/space_xl"
-        android:layout_marginTop="@dimen/space_xs"
-        android:text="@string/dialog_input_description_default"
-        android:lineSpacingMultiplier="1.3"
-        android:visibility="gone"
-        tools:visibility="visible"
-        tools:text="Auto-withdraw triggers when balance exceeds this." />
-
-    <!-- Divider -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="@dimen/space_l"
-        android:layout_marginHorizontal="@dimen/space_xl"
-        android:background="@color/color_divider" />
-
-    <!-- Content Section -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingHorizontal="@dimen/margin_screen_horizontal"
-        android:paddingTop="@dimen/margin_screen_horizontal">
+        android:orientation="vertical">
 
-        <!-- Input Field Container -->
+        <!-- Close Button (top-left) -->
+        <ImageButton
+            android:id="@+id/close_button"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
+            android:layout_marginStart="@dimen/space_s"
+            android:layout_marginTop="@dimen/space_s"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/common_close"
+            android:padding="@dimen/space_m"
+            android:src="@drawable/ic_close"
+            app:tint="@color/color_text_secondary" />
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/dialog_title"
+            style="@style/Text.DialogTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/space_xl"
+            android:layout_marginTop="@dimen/space_xs"
+            android:text="@string/dialog_input_title_default"
+            tools:text="Edit Threshold" />
+
+        <!-- Description (optional) -->
+        <TextView
+            android:id="@+id/dialog_description"
+            style="@style/Text.DialogSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/space_xl"
+            android:layout_marginTop="@dimen/space_xs"
+            android:text="@string/dialog_input_description_default"
+            android:lineSpacingMultiplier="1.3"
+            android:visibility="gone"
+            tools:visibility="visible"
+            tools:text="Auto-withdraw triggers when balance exceeds this." />
+
+        <!-- Divider -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="@dimen/space_l"
+            android:layout_marginHorizontal="@dimen/space_xl"
+            android:background="@color/color_divider" />
+
+        <!-- Content Section -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/margin_screen_horizontal"
+            android:paddingTop="@dimen/margin_screen_horizontal">
 
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/input_container"
-                style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
+            <!-- Input Field Container -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                app:prefixText="&#8383;"
-                app:prefixTextAppearance="@style/Text.InputAffix"
-                app:suffixText="%"
-                app:suffixTextAppearance="@style/Text.InputAffix"
-                tools:hint="Enter value">
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/dialog_input"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/button_height"
-                    android:hint="@string/hint_enter_value"
-                    android:textAppearance="@style/Text.Body"
-                    android:textColor="@color/color_text_primary"
-                    android:textColorHint="@color/color_text_tertiary"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:imeOptions="actionDone"
-                    tools:text="50000" />
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/input_container"
+                    style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    app:prefixText="&#8383;"
+                    app:prefixTextAppearance="@style/Text.InputAffix"
+                    app:suffixText="%"
+                    app:suffixTextAppearance="@style/Text.InputAffix"
+                    tools:hint="Enter value">
 
-            </com.google.android.material.textfield.TextInputLayout>
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/dialog_input"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/button_height"
+                        android:hint="@string/hint_enter_value"
+                        android:textAppearance="@style/Text.Body"
+                        android:textColor="@color/color_text_primary"
+                        android:textColorHint="@color/color_text_tertiary"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:imeOptions="actionDone"
+                        tools:text="50000" />
 
-            <!-- Optional Scan Button -->
-            <ImageButton
-                android:id="@+id/input_scan_button"
-                android:contentDescription="@string/cd_scan_qr"
-                android:layout_width="@dimen/icon_size_large"
-                android:layout_height="@dimen/icon_size_large"
-                android:layout_marginStart="@dimen/space_s"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_qr_code"
-                android:padding="@dimen/space_m"
-                app:tint="@color/color_text_secondary"
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Optional Scan Button -->
+                <ImageButton
+                    android:id="@+id/input_scan_button"
+                    android:contentDescription="@string/cd_scan_qr"
+                    android:layout_width="@dimen/icon_size_large"
+                    android:layout_height="@dimen/icon_size_large"
+                    android:layout_marginStart="@dimen/space_s"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_qr_code"
+                    android:padding="@dimen/space_m"
+                    app:tint="@color/color_text_secondary"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+            </LinearLayout>
+
+            <!-- Helper Text (optional) -->
+            <TextView
+                android:id="@+id/dialog_helper"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_s"
+                android:layout_marginHorizontal="@dimen/space_xs"
+                android:text="@string/dialog_input_helper_default"
+                android:textAppearance="@style/Text.Helper"
                 android:visibility="gone"
                 tools:visibility="visible" />
 
         </LinearLayout>
 
-        <!-- Helper Text (optional) -->
-        <TextView
-            android:id="@+id/dialog_helper"
+        <!-- Save Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/save_button"
+            style="@style/Widget.Numo.Button.Dialog.Confirm"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_s"
-            android:layout_marginHorizontal="@dimen/space_xs"
-            android:text="@string/dialog_input_helper_default"
-            android:textAppearance="@style/Text.Helper"
-            android:visibility="gone"
-            tools:visibility="visible" />
+            android:layout_height="@dimen/button_height"
+            android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+            android:layout_marginTop="@dimen/margin_screen_horizontal"
+            android:layout_marginBottom="@dimen/space_xl"
+            android:text="@string/common_save" />
 
     </LinearLayout>
-
-    <!-- Save Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/save_button"
-        style="@style/Widget.Numo.Button.Dialog.Confirm"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/button_height"
-        android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-        android:layout_marginTop="@dimen/margin_screen_horizontal"
-        android:layout_marginBottom="@dimen/space_xl"
-        android:text="@string/common_save" />
-
-</LinearLayout>
+</androidx.core.widget.NestedScrollView>

@@ -5,5 +5,7 @@
     <string name="language_settings_option_english">English</string>
     <string name="language_settings_option_spanish">Spanish</string>
     <string name="language_settings_option_portuguese">Portuguese</string>
+    <string name="language_settings_option_korean">Korean</string>
+    <string name="language_settings_option_japanese">Japanese</string>
     <string name="language_settings_summary_current">Current language: %1$s</string>
 </resources>

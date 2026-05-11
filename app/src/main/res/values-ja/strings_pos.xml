@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="item_selection_undo_button_short">元に戻す</string>
+    <string name="pos_amount_placeholder_secondary">$0.00 USD</string>
+    <string name="pos_charge_button_with_amount">%1$sを請求</string>
+    <string name="item_selection_redo_button_short">やり直し</string>
+    <string name="pos_toast_no_stock">在庫がありません</string>
+    <string name="pos_nav_settings_content_description">設定</string>
+    <string name="basket_charge_fiat_and_sats">%1$s + %2$sを請求</string>
+    <string name="basket_charge_fiat_only">%1$sを請求</string>
+    <string name="pos_nav_history_content_description">履歴</string>
+    <string name="pos_error_amount_required">請求する金額を入力する必要があります</string>
+    <string name="pos_amount_placeholder_main">$0</string>
+    <string name="pos_currency_switch_content_description">通貨を切り替え</string>
+    <string name="item_selection_undo_button">最後の変更を元に戻す</string>
+    <string name="pos_charge_button">請求</string>
+    <string name="item_selection_redo_button">変更をやり直す</string>
+    <string name="pos_secondary_amount_btc_label">BTC</string>
+    <string name="pos_toast_basket_empty">バスケットは空です</string>
+    <string name="pos_nav_more_options_content_description">その他のオプション</string>
+    <string name="pos_charge_button_loading">ウォレットを起動中...</string>
+    <string name="pos_toast_invalid_amount">無効な支払い金額</string>
+    <string name="basket_charge_sats_only">%1$sを請求</string>
+    <string name="pos_nav_catalog_content_description">アイテムリスト</string>
+    <string name="pos_charge_button_min_limit">最小: %1$d sats</string>
+    <string name="pos_charge_button_max_limit">最大: %1$d sats</string>
+    <string name="pos_charge_button_mint_disabled">ミントが無効になっています</string>
+</resources>

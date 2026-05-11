@@ -26,7 +26,7 @@ class MintManager private constructor(context: Context) {
         private const val KEY_ENABLE_SWAP_UNKNOWN_MINTS = "enableSwapUnknownMints"
         private const val KEY_MINT_INFO_PREFIX = "mintInfo_"
         private const val KEY_MINT_REFRESH_PREFIX = "mintRefresh_"
-        private const val REFRESH_INTERVAL_MS = 24 * 60 * 60 * 1000L // 24 hours
+        private const val REFRESH_INTERVAL_MS = 60 * 1000L // 1 minute
 
         // Default mints
         private val DEFAULT_MINTS: Set<String> = setOf(
@@ -127,6 +127,11 @@ class MintManager private constructor(context: Context) {
         preferredLightningMint = url
         savePreferredLightningMint()
         Log.d(TAG, "Set preferred Lightning mint to: $url")
+        
+        // DO NOT fetch or update mint info here - let POS handle it
+        // This prevents caching inconsistent responses from mints like Minibits
+        // The POS will fetch fresh mint info when it needs it
+        
         return true
     }
 
@@ -258,7 +263,10 @@ class MintManager private constructor(context: Context) {
      */
     fun getMintInfo(mintUrl: String): String? {
         val normalized = normalizeMintUrl(mintUrl)
-        return preferences.getString(KEY_MINT_INFO_PREFIX + normalized, null)
+        val key = KEY_MINT_INFO_PREFIX + normalized
+        val result = preferences.getString(key, null)
+        Log.d(TAG, "getMintInfo: key=$key, found=${result != null}, length=${result?.length}")
+        return result
     }
 
     /**
@@ -303,7 +311,132 @@ class MintManager private constructor(context: Context) {
     }
 
     /**
-     * Set the last refresh timestamp for a mint.
+     * Get the mint limits for a mint URL.
+     * First checks cache, then fetches fresh from network if cache doesn't have limits.
+     * The isFirstFetch parameter should be true only when the app first opens.
+     */
+    suspend fun getMintLimits(mintUrl: String, context: android.content.Context, forceRefresh: Boolean = false, isFirstFetch: Boolean = false): CashuWalletManager.MintLimits? {
+        Log.d(TAG, "getMintLimits() called with mintUrl=$mintUrl, forceRefresh=$forceRefresh, isFirstFetch=$isFirstFetch")
+        
+        // Always normalize the URL for cache lookup
+        val normalizedUrl = normalizeMintUrl(mintUrl)
+        Log.d(TAG, "Normalized URL for cache lookup: $normalizedUrl")
+        
+        // First try cache (works offline) - only if NOT force refresh
+        if (!forceRefresh) {
+            val infoJson = getMintInfo(mintUrl)
+            if (infoJson != null) {
+                try {
+                    val cachedInfo = CashuWalletManager.mintInfoFromJson(infoJson)
+                    val cachedLimits = cachedInfo?.mintLimits
+                    
+                    if (cachedLimits != null && cachedLimits.mintMethods.isNotEmpty()) {
+                        Log.d(TAG, "Returning cached limits: $cachedLimits")
+                        return cachedLimits
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to parse cached mint info", e)
+                }
+            }
+        } else {
+            Log.d(TAG, "forceRefresh=true, skipping cache and fetching from network")
+        }
+        
+        // Cache miss, stale, or force refresh - fetch from network
+        // Pass isFirstFetch to control whether to store the result in cache
+        return fetchMintLimitsSimple(mintUrl, context, isFirstFetch, forceRefresh)
+    }
+    
+    /**
+     * Simple fetch - returns exactly what the mint provides.
+     * Only updates cache on first call (when app opens), then uses existing cache.
+     * This prevents inconsistent responses from mints like Minibits from overwriting valid limits.
+     */
+    private suspend fun fetchMintLimitsSimple(mintUrl: String, context: android.content.Context, isFirstFetch: Boolean = false, forceRefresh: Boolean = false): CashuWalletManager.MintLimits? {
+        return try {
+            val normalizedUrl = normalizeMintUrl(mintUrl)
+            Log.d(TAG, "fetchMintLimitsSimple: normalizedUrl=$normalizedUrl, isFirstFetch=$isFirstFetch")
+            
+            // Get cache info BEFORE fetching (for fallback)
+            val cachedInfoBefore = getMintInfo(normalizedUrl)
+            val cachedLimitsBefore = cachedInfoBefore?.let {
+                try {
+                    CashuWalletManager.mintInfoFromJson(it)?.mintLimits
+                } catch (e: Exception) { null }
+            }
+            val hasCachedLimitsBefore = cachedLimitsBefore != null && cachedLimitsBefore.mintMethods.isNotEmpty()
+            Log.d(TAG, "Cached limits before fetch: $cachedLimitsBefore, hasValid: $hasCachedLimitsBefore")
+            
+            val profileService = MintProfileService.getInstance(context)
+            
+            // Fetch if it's the first fetch, if there's no cache, OR if a force refresh is explicitly requested
+            val shouldStore = isFirstFetch || !hasCachedLimitsBefore || forceRefresh
+            
+            if (shouldStore) {
+                val result = profileService.fetchAndStoreMintProfile(normalizedUrl, validateEndpoint = false, storeInCache = true)
+                Log.d(TAG, "fetchMintLimitsSimple result: success=${result.success}, stored=$shouldStore")
+                
+                if (result.success) {
+                    // If the fetch succeeded, get the limits from the response
+                    val infoJson = getMintInfo(normalizedUrl)
+                    val cachedInfo = infoJson?.let { CashuWalletManager.mintInfoFromJson(it) }
+                    val newLimits = cachedInfo?.mintLimits
+                    
+                    // If new limits are valid (not null and has methods), use them
+                    // Otherwise, fallback to cached limits (for mints like Minibits that sometimes return empty nuts)
+                    if (newLimits != null && newLimits.mintMethods.isNotEmpty()) {
+                        Log.d(TAG, "Fetch succeeded with valid limits: $newLimits")
+                        return newLimits
+                    } else if (cachedLimitsBefore != null && cachedLimitsBefore.mintMethods.isNotEmpty()) {
+                        Log.d(TAG, "Fetch returned empty limits, using cached fallback: $cachedLimitsBefore")
+                        // Restore the cache to previous valid state
+                        cachedInfoBefore?.let {
+                            preferences.edit().putString(KEY_MINT_INFO_PREFIX + normalizedUrl, it).apply()
+                        }
+                        return cachedLimitsBefore
+                    }
+                    // No limits at all - return null
+                    Log.d(TAG, "Fetch succeeded but no limits (null), no cache to fallback")
+                    return null
+                }
+            } else {
+                // Skip fetch, use existing cache
+                Log.d(TAG, "Skipping fetch - using existing cache (not first fetch)")
+            }
+            
+            // Get info from cache (either newly stored or existing)
+            val infoJson = getMintInfo(normalizedUrl)
+            if (infoJson != null) {
+                val cachedInfo = CashuWalletManager.mintInfoFromJson(infoJson)
+                val limits = cachedInfo?.mintLimits
+                Log.d(TAG, "Cache returned: $limits")
+                
+                // If we have valid limits, use them
+                if (limits != null && limits.mintMethods.isNotEmpty()) {
+                    Log.d(TAG, "Using cached limits (has valid mint methods)")
+                    return limits
+                }
+            }
+            
+            // Fetch failed or no valid limits, use cached if available
+            if (hasCachedLimitsBefore) {
+                Log.d(TAG, "Using cached limits as fallback")
+                cachedInfoBefore?.let {
+                    preferences.edit().putString(KEY_MINT_INFO_PREFIX + normalizedUrl, it).apply()
+                }
+                return cachedLimitsBefore
+            }
+            
+            Log.d(TAG, "No valid limits available, returning null")
+            return null
+        } catch (e: Exception) {
+            Log.e(TAG, "fetchMintLimitsSimple failed", e)
+            return null
+        }
+    }
+    
+    /**
+     * Get the primary mint URL used for Lightning payments.
      */
     fun setMintRefreshTimestamp(mintUrl: String, timestamp: Long = System.currentTimeMillis()) {
         val normalized = normalizeMintUrl(mintUrl)
@@ -321,7 +454,7 @@ class MintManager private constructor(context: Context) {
     }
 
     /**
-     * Check if a mint's info needs to be refreshed (older than 24 hours).
+     * Check if a mint's info needs to be refreshed (older than 1 minute).
      * @return true if the mint info should be refreshed, false otherwise.
      */
     fun needsRefresh(mintUrl: String): Boolean {
@@ -333,13 +466,13 @@ class MintManager private constructor(context: Context) {
         val now = System.currentTimeMillis()
         val needsUpdate = (now - lastRefresh) > REFRESH_INTERVAL_MS
         if (needsUpdate) {
-            Log.d(TAG, "Mint $mintUrl needs refresh (last: ${(now - lastRefresh) / (1000 * 60 * 60)}h ago)")
+            Log.d(TAG, "Mint $mintUrl needs refresh (last: ${(now - lastRefresh) / 1000}s ago)")
         }
         return needsUpdate
     }
 
     /**
-     * Get list of mints that need to be refreshed (info older than 24 hours).
+     * Get list of mints that need to be refreshed (info older than 1 minute).
      * @return List of mint URLs that need refreshing.
      */
     fun getMintsNeedingRefresh(): List<String> {

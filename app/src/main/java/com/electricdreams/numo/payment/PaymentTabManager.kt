@@ -62,16 +62,72 @@ class PaymentTabManager(
         this.listener = listener
 
         // Enable layout transitions for smooth text appearance/disappearance
-        (unifiedTab.parent as? ViewGroup)?.layoutTransition = LayoutTransition().apply {
+        val container = unifiedTab.parent as? ViewGroup
+        container?.layoutTransition = LayoutTransition().apply {
             enableTransitionType(LayoutTransition.CHANGING)
         }
         
-        // Default: show Unified
-        selectTab(PaymentTab.UNIFIED)
+        // Setup long click listeners to change default payment method
+        unifiedTab.setOnLongClickListener {
+            setDefaultTab(PaymentTab.UNIFIED)
+            true
+        }
+        cashuTab.setOnLongClickListener {
+            setDefaultTab(PaymentTab.CASHU)
+            true
+        }
+        lightningTab.setOnLongClickListener {
+            setDefaultTab(PaymentTab.LIGHTNING)
+            true
+        }
+        
+        // Reorder tabs based on default payment method
+        reorderTabs()
+
+        // Default: show the default payment method
+        selectTab(DefaultPaymentMethodManager.getInstance(unifiedTab.context).getDefaultPaymentMethod())
 
         unifiedTab.setOnClickListener { selectTab(PaymentTab.UNIFIED) }
         cashuTab.setOnClickListener { selectTab(PaymentTab.CASHU) }
         lightningTab.setOnClickListener { selectTab(PaymentTab.LIGHTNING) }
+    }
+    
+    private fun setDefaultTab(tab: PaymentTab) {
+        DefaultPaymentMethodManager.getInstance(unifiedTab.context).setDefaultPaymentMethod(tab)
+        reorderTabs()
+        selectTab(tab)
+        android.widget.Toast.makeText(
+            unifiedTab.context, 
+            unifiedTab.context.getString(com.electricdreams.numo.R.string.payment_request_default_method_set, tab.name.lowercase().replaceFirstChar { it.uppercase() }), 
+            android.widget.Toast.LENGTH_SHORT
+        ).show()
+    }
+    
+    fun reorderTabs() {
+        val container = unifiedTab.parent as? ViewGroup ?: return
+        val defaultTab = DefaultPaymentMethodManager.getInstance(unifiedTab.context).getDefaultPaymentMethod()
+        
+        container.removeView(unifiedTab)
+        container.removeView(cashuTab)
+        container.removeView(lightningTab)
+        
+        when (defaultTab) {
+            PaymentTab.UNIFIED -> {
+                container.addView(unifiedTab)
+                container.addView(cashuTab)
+                container.addView(lightningTab)
+            }
+            PaymentTab.CASHU -> {
+                container.addView(cashuTab)
+                container.addView(unifiedTab)
+                container.addView(lightningTab)
+            }
+            PaymentTab.LIGHTNING -> {
+                container.addView(lightningTab)
+                container.addView(unifiedTab)
+                container.addView(cashuTab)
+            }
+        }
     }
 
     fun selectTab(tab: PaymentTab) {

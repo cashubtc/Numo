@@ -145,6 +145,7 @@ class MintProfileService private constructor(context: Context) {
     suspend fun fetchAndStoreMintProfile(
         rawUrl: String,
         validateEndpoint: Boolean = false,
+        storeInCache: Boolean = true,
     ): ProfileSyncResult = withContext(Dispatchers.IO) {
         val normalizedUrl = normalizeUrl(rawUrl)
 
@@ -204,8 +205,14 @@ class MintProfileService private constructor(context: Context) {
             iconUrl = canonicalInfo.optString("iconUrl", "").trim().ifEmpty { null }
         }
 
-        mintManager.setMintInfo(normalizedUrl, infoJson)
-        mintManager.setMintRefreshTimestamp(normalizedUrl)
+        // Only store in cache if storeInCache is true
+        if (storeInCache) {
+            mintManager.setMintInfo(normalizedUrl, infoJson)
+            Log.d("MintProfileService", "setMintInfo called for $normalizedUrl, length=${infoJson.length}")
+            mintManager.setMintRefreshTimestamp(normalizedUrl)
+        } else {
+            Log.d("MintProfileService", "Skipped storing mint info in cache for $normalizedUrl (storeInCache=false)")
+        }
 
         var iconCached = false
         if (!iconUrl.isNullOrBlank()) {
@@ -248,6 +255,10 @@ class MintProfileService private constructor(context: Context) {
                     }
 
                     val parsed = JSONObject(body)
+                    Log.d(TAG, "Network mint info response has nuts: ${parsed.has("nuts")}")
+                    if (parsed.has("nuts")) {
+                        Log.d(TAG, "Network nuts: ${parsed.optJSONObject("nuts")}")
+                    }
                     NetworkMintInfoResult(infoJson = parsed, errorType = null)
                 }
             } catch (e: Exception) {
@@ -303,6 +314,12 @@ class MintProfileService private constructor(context: Context) {
         val contactObj = raw.opt("contact")
         if (contactObj is JSONArray) {
             result.put("contact", contactObj)
+        }
+
+        // Copy nuts section (NUT-04 and NUT-05 for mint limits)
+        val nutsObj = raw.opt("nuts")
+        if (nutsObj is JSONObject) {
+            result.put("nuts", nutsObj)
         }
 
         return result

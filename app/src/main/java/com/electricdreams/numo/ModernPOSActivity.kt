@@ -192,6 +192,9 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
         
         // Refresh display to update currency formatting when returning from settings
         uiCoordinator.refreshDisplay()
+        
+        // Reload mint limits every time we return to POS to ensure fresh data
+        uiCoordinator.reloadMintLimits()
     }
 
     override fun onPause() {

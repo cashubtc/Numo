@@ -173,8 +173,8 @@
         android:layout_marginBottom="@dimen/margin_screen_horizontal"
         android:text="@string/basket_archive_detail_view_payment"
         app:icon="@drawable/ic_receipt"
-        app:iconTint="@android:color/white"
-        app:iconPadding="@dimen/space_s"
+        app:iconTint="@color/color_bg_white"
+        app:iconPadding="8dp"
         app:iconGravity="textStart" />
 
 </LinearLayout>

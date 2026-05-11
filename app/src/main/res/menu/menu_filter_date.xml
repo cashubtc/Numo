@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/filter_date_all"
+        android:title="@string/history_filter_date_all" />
+    <item
+        android:id="@+id/filter_date_custom"
+        android:title="@string/history_filter_date_custom" />
+</menu>

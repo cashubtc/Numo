@@ -78,6 +78,12 @@ data class Amount(
             @JvmField
             val KRW = Currency("KRW", "₩")
             
+            // Explicitly defined because MLC is not a standard ISO 4217 code and will crash java.util.Currency
+            @JvmField
+            val CUP = Currency("CUP", "CUP")
+            @JvmField
+            val MLC = Currency("MLC", "MLC")
+            
             private val cache = java.util.concurrent.ConcurrentHashMap<String, Currency>()
             
             private val nativeSymbolCache by lazy {
@@ -118,6 +124,8 @@ data class Amount(
                         "SEK" -> SEK
                         "NOK" -> NOK
                         "KRW" -> KRW
+                        "CUP" -> CUP
+                        "MLC" -> MLC
                         else -> cache.getOrPut(upperCode) {
                             runCatching {
                                 val javaCurrency = JavaCurrency.getInstance(upperCode)

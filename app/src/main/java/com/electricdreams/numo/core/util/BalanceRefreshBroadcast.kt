@@ -31,6 +31,7 @@ object BalanceRefreshBroadcast {
     const val REASON_MINT_RESET = "mint_reset"
     const val REASON_AUTO_WITHDRAWAL = "auto_withdrawal"
     const val REASON_PAYMENT_RECEIVED = "payment_received"
+    const val REASON_LIGHTNING_MINT_CHANGED = "lightning_mint_changed"
     
     /**
      * Send a broadcast to notify all listeners that balances may have changed.

@@ -25,4 +25,8 @@
     <string name="basket_receipt_tip_label">Propina</string>
     <string name="basket_receipt_tip_label_with_percentage">Propina (%1$d%%)</string>
     <string name="basket_receipt_vat_row_label">IVA (%1$d%%)</string>
+
+    <string name="basket_receipt_fiat_subtotal_net_label">Subtotal fiat (neto)</string>
+    <string name="basket_receipt_fiat_items_label">Artículos fiat</string>
+    <string name="basket_receipt_item_each">%1$s c/u</string>
 </resources>

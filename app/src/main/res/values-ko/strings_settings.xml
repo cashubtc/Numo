@@ -1,0 +1,124 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="settings_section_developer">개발자</string>
+    <string name="about_android_version">Android 버전</string>
+    <string name="settings_item_theme_title">테마</string>
+    <string name="settings_mints_title">Mints</string>
+    <string name="settings_item_mints_title">Mints</string>
+    <string name="settings_item_security_title">보안 및 개인 정보 보호</string>
+    <string name="settings_item_basket_names_title">바구니 이름</string>
+    <string name="settings_title">설정</string>
+    <string name="currency_settings_option_jpy">일본 엔 (JPY)</string>
+    <string name="settings_item_webhooks_subtitle">외부 관리 대시보드에 판매 데이터 전송</string>
+    <string name="currency_settings_option_sek">스웨덴 크로나 (SEK)</string>
+    <string name="settings_language_title">언어</string>
+    <string name="settings_verify_pin_subtitle">설정에 액세스하기 위한 인증</string>
+    <string name="settings_item_mints_subtitle">Cashu mints 및 Lightning 설정 관리</string>
+    <string name="about_contact_us">문의하기</string>
+    <string name="settings_item_tips_subtitle">결제를 위한 팁 옵션 구성</string>
+    <string name="about_device_info">기기 정보</string>
+    <string name="settings_section_payments">결제</string>
+    <string name="settings_about_toast_no_email">이메일 앱을 찾을 수 없습니다</string>
+    <string name="about_about_us">회사 소개</string>
+    <string name="about_app_version">앱 버전</string>
+    <string name="settings_about_toast_developer_already_enabled">개발자 모드가 이미 활성화되어 있습니다</string>
+    <string name="settings_item_items_title">항목</string>
+    <string name="settings_item_currency_title">법정 화폐</string>
+    <string name="currency_settings_option_krw">대한민국 원 (KRW)</string>
+    <string name="settings_item_language_title">언어</string>
+    <string name="settings_item_items_subtitle">카탈로그 항목 생성 및 관리</string>
+    <string name="settings_item_currency_subtitle">기본 법정 화폐 선택</string>
+    <string name="currency_settings_option_eur">유로 (EUR)</string>
+    <string name="settings_section_terminal">터미널</string>
+    <string name="settings_item_language_subtitle">앱 언어 선택</string>
+    <string name="about_privacy_policy">개인정보처리방침</string>
+    <string name="privacy_policy_full">NUMO WALLET - 개인정보처리방침
+
+1. 데이터 수집
+Numo는 개인 데이터를 수집, 저장 또는 전송하지 않습니다. 앱은 전적으로 기기에서 실행됩니다.
+
+2. 지갑 데이터
+시드 문구 및 지갑 데이터는 기기에 로컬로 저장됩니다. 당사는 이 정보에 액세스할 수 없습니다.
+
+3. 네트워크 통신
+앱은 다음과 통신합니다:
+• Cashu mints (ecash 토큰 관리)
+• 가격 API (환율 가져오기)
+• Nostr 릴레이 (선택적 백업 기능)
+
+이러한 서비스에는 자체 개인정보처리방침이 있을 수 있습니다.
+
+4. 분석
+당사는 어떠한 분석이나 추적 서비스도 사용하지 않습니다.
+
+5. 타사 MINTS
+ecash mint를 사용할 때 mint 운영자는 거래 금액 및 타이밍을 볼 수 있습니다. 신뢰할 수 있는 mint를 선택하세요.
+
+6. 백업
+Nostr 백업을 활성화하면 암호화된 지갑 데이터가 Nostr 릴레이에 게시됩니다. 시드 문구를 사용하여 본인만 이 데이터를 복호화할 수 있습니다.
+
+7. 연락처
+개인 정보 관련 문의: numopay@proton.me
+
+최종 업데이트: 2024년 11월</string>
+    <string name="settings_section_general">일반</string>
+    <string name="about_build_number">빌드 번호</string>
+    <string name="settings_item_about_title">정보</string>
+    <string name="settings_item_basket_names_subtitle">빠른 바구니 저장을 위한 프리셋 이름 생성</string>
+    <string name="settings_about_toast_developer_taps_remaining">개발자 모드를 활성화하려면 %1$d번 더 탭하세요</string>
+    <string name="about_terms_of_service">서비스 약관</string>
+    <string name="settings_theme_title">테마</string>
+    <string name="currency_settings_section_preferred_currency">기본 통화</string>
+    <string name="settings_item_tips_title">팁</string>
+    <string name="settings_currency_title">법정 화폐</string>
+    <string name="terms_of_service_full">NUMO WALLET - 서비스 약관
+
+1. 수락
+이 지갑 애플리케이션을 사용함으로써 귀하는 이 약관에 동의합니다.
+
+2. 서비스의 성격
+이것은 Cashu ecash 기술을 사용하는 셀프 커스터디 비트코인 지갑입니다. 귀하는 귀하의 자금과 시드 문구에 대해 전적으로 책임이 있습니다.
+
+3. 시드 문구
+12단어 시드 문구는 지갑을 복구할 수 있는 유일한 방법입니다. 절대 공유하지 마세요. 오프라인에 안전하게 보관하세요. 분실된 시드 문구는 복구할 수 없습니다.
+
+4. 보증 없음
+이 소프트웨어는 어떠한 종류의 보증 없이 "있는 그대로" 제공됩니다. 자신의 책임 하에 사용하세요.
+
+5. 책임의 한계
+버그, 사용자 오류 또는 타사 mint 오류를 통한 자금 손실에 대해 당사는 책임지지 않습니다.
+
+6. ECASH MINTS
+Ecash 토큰은 타사 mint가 보유합니다. 이러한 mint는 실패하거나 사용할 수 없게 될 수 있습니다. 여러 mint에 분산하세요.
+
+7. 개인 정보 보호
+이 지갑은 개인 데이터를 수집하지 않습니다. 거래는 자체 개인정보처리방침이 있는 ecash mint를 통해 처리됩니다.
+
+8. 업데이트
+이 약관은 업데이트될 수 있습니다. 계속 사용하면 수락한 것으로 간주됩니다.
+
+최종 업데이트: 2024년 11월</string>
+    <string name="settings_about_toast_link_error">링크를 열 수 없습니다</string>
+    <string name="settings_section_security">보안 및 개인 정보 보호</string>
+    <string name="settings_item_webhooks_title">웹훅</string>
+    <string name="settings_about_dialog_terms_title">서비스 약관</string>
+    <string name="settings_section_appearance">모양</string>
+    <string name="settings_security_title">보안 및 개인 정보 보호</string>
+    <string name="currency_settings_option_dkk">덴마크 크로네 (DKK)</string>
+    <string name="settings_about_dialog_privacy_title">개인정보처리방침</string>
+    <string name="about_website">웹사이트</string>
+    <string name="settings_item_developer_subtitle">고급 설정 및 디버깅 도구</string>
+    <string name="settings_item_theme_subtitle">라이트 및 다크 모드 전환</string>
+    <string name="about_email_subject">Numo 지원</string>
+    <string name="currency_settings_option_gbp">영국 파운드 (GBP)</string>
+    <string name="about_title">정보</string>
+    <string name="settings_item_developer_title">개발자 설정</string>
+    <string name="about_device">기기</string>
+    <string name="currency_settings_option_nok">노르웨이 크로네 (NOK)</string>
+    <string name="settings_item_security_subtitle">시드 문구 백업, 지갑 복원</string>
+    <string name="currency_settings_option_usd">미국 달러 (USD)</string>
+    <string name="settings_item_about_subtitle">버전, 약관 및 연락처</string>
+    <string name="settings_about_toast_developer_enabled">개발자 모드가 활성화되었습니다!</string>
+    <string name="currency_settings_search_hint">통화 검색</string>
+    <string name="currency_settings_no_results">통화를 찾을 수 없습니다</string>
+</resources>

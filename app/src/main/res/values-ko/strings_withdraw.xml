@@ -1,0 +1,4 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="withdraw_toast_insufficient_balance">잔액 부족</string>
+</resources>

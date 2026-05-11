@@ -11,15 +11,25 @@ import com.electricdreams.numo.R
 import java.util.Currency
 import java.util.Locale
 
+/**
+ * Simple wrapper class to handle both valid Java Currencies and custom/non-ISO ones.
+ * For example, MLC (Cuban Freely Convertible Currency) is not a standard ISO 4217 code 
+ * and will crash standard java.util.Currency initializers.
+ */
+class CurrencyWrapper(val code: String, val javaCurrency: Currency?) {
+    val displayName: String
+        get() = javaCurrency?.getDisplayName(Locale.getDefault()) ?: code
+}
+
 class CurrencyAdapter(
-    private val onCurrencySelected: (Currency) -> Unit
+    private val onCurrencySelected: (CurrencyWrapper) -> Unit
 ) : RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>() {
 
-    private var currencies: List<Currency> = emptyList()
+    private var currencies: List<CurrencyWrapper> = emptyList()
     private var selectedCurrencyCode: String = ""
 
     @SuppressLint("NotifyDataSetDataSetChanged")
-    fun submitList(newCurrencies: List<Currency>, selectedCode: String) {
+    fun submitList(newCurrencies: List<CurrencyWrapper>, selectedCode: String) {
         currencies = newCurrencies
         selectedCurrencyCode = selectedCode
         notifyDataSetChanged()
@@ -41,11 +51,11 @@ class CurrencyAdapter(
         private val nameText: TextView = itemView.findViewById(R.id.currency_name_text)
         private val checkIcon: ImageView = itemView.findViewById(R.id.currency_check_icon)
 
-        fun bind(currency: Currency) {
-            val displayName = currency.getDisplayName(Locale.getDefault())
-            nameText.text = "${displayName} (${currency.currencyCode})"
+        fun bind(currency: CurrencyWrapper) {
+            val displayName = currency.displayName
+            nameText.text = "${displayName} (${currency.code})"
             
-            val isSelected = currency.currencyCode == selectedCurrencyCode
+            val isSelected = currency.code == selectedCurrencyCode
             checkIcon.visibility = if (isSelected) View.VISIBLE else View.INVISIBLE
             checkIcon.setImageResource(R.drawable.ic_check)
 

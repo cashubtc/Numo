@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="mints_settings_dialog_remove_positive">제거</string>
+    <string name="mints_settings_dialog_remove_title">Mint 제거</string>
+    <string name="mints_settings_dialog_remove_message">이 Mint를 제거하시겠습니까?
+
+%1$s</string>
+</resources>

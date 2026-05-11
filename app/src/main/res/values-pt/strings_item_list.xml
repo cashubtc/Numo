@@ -1,14 +1,20 @@
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <!-- Item list: clear all items dialog + toasts -->
     <string name="item_list_dialog_clear_all_title">Excluir todos os itens</string>
     <string name="item_list_dialog_clear_all_message">
         Tem certeza de que deseja excluir TODOS os itens do seu catálogo? Esta ação não pode ser desfeita.
     </string>
     <string name="item_list_dialog_clear_all_positive">Excluir tudo</string>
-
     <string name="item_list_toast_all_items_cleared">Todos os itens foram excluídos</string>
     <string name="item_list_toast_failed_open_csv">Não foi possível abrir o arquivo CSV</string>
     <string name="item_list_toast_imported_items">%1$d itens importados</string>
     <string name="item_list_toast_no_items_imported">Nenhum item importado do CSV</string>
     <string name="item_list_toast_error_importing_csv">Erro ao importar o arquivo CSV: %1$s</string>
+    <string name="item_list_toast_saved_without_image">Item salvo, mas a imagem não pôde ser salva</string>
+    <string name="item_list_toast_camera_permission">A permissão da câmera é necessária para tirar fotos</string>
+    <string name="item_list_toast_failed_load_image">Falha ao carregar imagem</string>
+    <string name="item_list_toast_gtin_not_unique">Por favor, use um GTIN exclusivo</string>
+    <string name="item_list_toast_sku_not_unique">Por favor, use um SKU exclusivo</string>
+    <string name="item_list_toast_failed_save_item">Falha ao salvar item</string>
+    <string name="item_list_toast_error_creating_image">Erro ao criar arquivo de imagem: %1$s</string>
 </resources>

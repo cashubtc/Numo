@@ -78,6 +78,30 @@
                     android:text="@string/language_settings_option_portuguese"
                     android:textAppearance="@style/Text.RowTitle" />
 
+                <RadioButton
+                    android:id="@+id/radio_korean"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/settings_item_height"
+                    android:background="?attr/selectableItemBackground"
+                    android:button="@null"
+                    android:drawableEnd="@drawable/selector_radio_custom"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                    android:text="@string/language_settings_option_korean"
+                    android:textAppearance="@style/Text.RowTitle" />
+
+                <RadioButton
+                    android:id="@+id/radio_japanese"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/settings_item_height"
+                    android:background="?attr/selectableItemBackground"
+                    android:button="@null"
+                    android:drawableEnd="@drawable/selector_radio_custom"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                    android:text="@string/language_settings_option_japanese"
+                    android:textAppearance="@style/Text.RowTitle" />
+
             </RadioGroup>
 
             <!-- Current language summary -->

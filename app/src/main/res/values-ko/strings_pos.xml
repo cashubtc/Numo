@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="item_selection_undo_button_short">실행 취소</string>
+    <string name="pos_amount_placeholder_secondary">$0.00 USD</string>
+    <string name="pos_charge_button_with_amount">%1$s 청구</string>
+    <string name="item_selection_redo_button_short">다시 실행</string>
+    <string name="pos_toast_no_stock">재고가 없습니다</string>
+    <string name="pos_nav_settings_content_description">설정</string>
+    <string name="basket_charge_fiat_and_sats">%1$s + %2$s 청구</string>
+    <string name="basket_charge_fiat_only">%1$s 청구</string>
+    <string name="pos_nav_history_content_description">내역</string>
+    <string name="pos_error_amount_required">청구할 금액을 입력해야 합니다</string>
+    <string name="pos_amount_placeholder_main">$0</string>
+    <string name="pos_currency_switch_content_description">통화 전환</string>
+    <string name="item_selection_undo_button">마지막 변경 취소</string>
+    <string name="pos_charge_button">청구</string>
+    <string name="item_selection_redo_button">변경 사항 다시 실행</string>
+    <string name="pos_secondary_amount_btc_label">BTC</string>
+    <string name="pos_toast_basket_empty">바구니가 비어 있습니다</string>
+    <string name="pos_nav_more_options_content_description">추가 옵션</string>
+    <string name="pos_charge_button_loading">지갑 시작 중...</string>
+    <string name="pos_toast_invalid_amount">잘못된 결제 금액</string>
+    <string name="basket_charge_sats_only">%1$s 청구</string>
+    <string name="pos_nav_catalog_content_description">항목 목록</string>
+    <string name="pos_charge_button_min_limit">최소: %1$d sats</string>
+    <string name="pos_charge_button_max_limit">최대: %1$d sats</string>
+    <string name="pos_charge_button_mint_disabled">발행 비활성화됨</string>
+</resources>

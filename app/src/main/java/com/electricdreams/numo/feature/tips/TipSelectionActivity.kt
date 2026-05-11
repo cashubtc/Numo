@@ -23,6 +23,8 @@ import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -30,9 +32,14 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.electricdreams.numo.PaymentRequestActivity
 import com.electricdreams.numo.R
+import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.Amount.Currency
+import com.electricdreams.numo.core.util.MintLimitChecker
+import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
+import android.widget.Toast
+import android.util.Log
 import kotlin.math.roundToLong
 
 /**
@@ -57,6 +64,7 @@ class TipSelectionActivity : AppCompatActivity() {
 
     // Custom tip input state
     private var customInputIsBtc: Boolean = false
+    private var customInputCurrency: Currency = Currency.USD
     private var customInputValue: String = ""
 
     // Views
@@ -161,6 +169,7 @@ class TipSelectionActivity : AppCompatActivity() {
 
         // Set default for custom input based on entry currency
         customInputIsBtc = (entryCurrency == Currency.BTC)
+        customInputCurrency = entryCurrency
 
         // Get Bitcoin price
         bitcoinPriceWorker = BitcoinPriceWorker.getInstance(this)
@@ -402,7 +411,14 @@ class TipSelectionActivity : AppCompatActivity() {
                 decimalKeyButton = keyButton
             }
 
-            customKeypad.addView(keyButton)
+            val params = GridLayout.LayoutParams().apply {
+                width = 0
+                height = 0
+                columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                setMargins(dpToPx(4), dpToPx(2), dpToPx(4), dpToPx(2))
+            }
+            customKeypad.addView(keyButton, params)
         }
         
         // Update decimal key visibility based on initial currency mode
@@ -484,9 +500,10 @@ class TipSelectionActivity : AppCompatActivity() {
     private fun updateCustomCurrencyDisplay() {
         if (customInputIsBtc) {
             customCurrencyPrefix.text = "₿"
-            customCurrencyToggle.text = getString(R.string.tip_selection_custom_currency_switch_to_fiat, entryCurrency.symbol)
+            val fiatCurrency = if (entryCurrency == Currency.BTC) getCurrentFiatCurrency() else entryCurrency
+            customCurrencyToggle.text = getString(R.string.tip_selection_custom_currency_switch_to_fiat, fiatCurrency.symbol)
         } else {
-            customCurrencyPrefix.text = entryCurrency.symbol
+            customCurrencyPrefix.text = customInputCurrency.symbol
             customCurrencyToggle.text = getString(R.string.tip_selection_custom_currency_switch_to_btc)
         }
     }
@@ -567,6 +584,9 @@ class TipSelectionActivity : AppCompatActivity() {
 
     private fun toggleCustomCurrency() {
         customInputIsBtc = !customInputIsBtc
+        customInputCurrency = if (customInputIsBtc) Currency.BTC else {
+            if (entryCurrency == Currency.BTC) getCurrentFiatCurrency() else entryCurrency
+        }
         customInputValue = ""
         updateCustomAmountDisplay()
         updateCustomCurrencyDisplay()
@@ -851,6 +871,58 @@ class TipSelectionActivity : AppCompatActivity() {
     private fun proceedToPayment() {
         val totalAmountSats = paymentAmountSats + selectedTipSats
         
+        // Validate total against mint limits (base + tip)
+        val mintManager = MintManager.getInstance(this)
+        val preferredMint = mintManager.getPreferredLightningMint()
+        
+        if (preferredMint != null) {
+            // Get raw mint info and parse limits directly
+            val mintInfoJson = mintManager.getMintInfo(preferredMint)
+            var limits: CashuWalletManager.MintLimits? = null
+            
+            if (mintInfoJson != null) {
+                // Try parsing from stored JSON
+                try {
+                    limits = CashuWalletManager.extractMintLimitsFromJson(mintInfoJson)
+                } catch (e: Exception) {
+                    Log.w(TAG, "Failed to parse limits from cache: ${e.message}")
+                }
+            }
+            
+            // If still null, try force refresh (not first fetch - preserve cache)
+            if (limits == null) {
+                lifecycleScope.launch {
+                    limits = mintManager.getMintLimits(preferredMint, this@TipSelectionActivity, forceRefresh = true, isFirstFetch = false)
+                    handleLimitsCheckAndProceed(limits, totalAmountSats)
+                }
+                return
+            } else {
+                handleLimitsCheckAndProceed(limits, totalAmountSats)
+                return
+            }
+        }
+        
+        continuePaymentWithAmount(totalAmountSats)
+    }
+
+    private fun handleLimitsCheckAndProceed(limits: CashuWalletManager.MintLimits?, totalAmountSats: Long) {
+        if (limits != null) {
+            val limitCheck = MintLimitChecker.checkMintLimitsWithTip(paymentAmountSats, selectedTipSats, limits)
+            if (!limitCheck.isValid) {
+                val errorMsg = when (limitCheck.limitType) {
+                    MintLimitChecker.LimitType.MAX -> getString(R.string.pos_charge_button_max_limit, limitCheck.maxAmount ?: 0)
+                    MintLimitChecker.LimitType.MIN -> getString(R.string.pos_charge_button_min_limit, limitCheck.minAmount ?: 0)
+                    else -> getString(R.string.pos_charge_button_mint_disabled)
+                }
+                Toast.makeText(this@TipSelectionActivity, errorMsg, Toast.LENGTH_LONG).show()
+                return
+            }
+        }
+        
+        continuePaymentWithAmount(totalAmountSats)
+    }
+
+    private fun continuePaymentWithAmount(totalAmountSats: Long) {
         // Calculate new formatted amount (total)
         val newFormattedAmount = if (entryCurrency == Currency.BTC) {
             Amount(totalAmountSats, Currency.BTC).toString()
@@ -927,7 +999,14 @@ class TipSelectionActivity : AppCompatActivity() {
         return (dp * resources.displayMetrics.density).toInt()
     }
 
+    private fun getCurrentFiatCurrency(): Currency {
+        val currencyManager = com.electricdreams.numo.core.util.CurrencyManager.getInstance(this)
+        val currencyCode = currencyManager.getCurrentCurrency()
+        return Amount.Currency.fromCode(currencyCode)
+    }
+
     companion object {
+        private const val TAG = "TipSelectionActivity"
         const val EXTRA_PAYMENT_AMOUNT = "payment_amount"
         const val EXTRA_FORMATTED_AMOUNT = "formatted_amount"
         const val EXTRA_CHECKOUT_BASKET_JSON = "checkout_basket_json"

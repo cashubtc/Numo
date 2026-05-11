@@ -14,11 +14,13 @@ import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
-import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.util.NetworkUtils
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.electricdreams.numo.R
+import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
@@ -70,14 +72,20 @@ class PosUiCoordinator(
         submitButton.isEnabled = false
         submitButton.alpha = 0.5f
         
+        // Load mint limits from preferred Lightning mint
+        loadMintLimits()
+
         if (true) {
             activity.lifecycleScope.launch {
-                CashuWalletManager.walletState.collect { state ->
+                CashuWalletManager.walletState.combine(NetworkUtils.observeNetworkState(activity)) { state, isNetworkAvailable ->
+                    Pair(state, isNetworkAvailable)
+                }.collect { (state, isNetworkAvailable) ->
                     val isReady = state == com.electricdreams.numo.core.cashu.WalletState.READY
+                    val canCharge = isReady && isNetworkAvailable
                     // Make sure we only enable it if we don't have a spinner shown
                     if (submitButtonSpinner.visibility != android.view.View.VISIBLE) {
-                        submitButton.isEnabled = isReady
-                        submitButton.alpha = if (isReady) 1.0f else 0.5f
+                        submitButton.isEnabled = canCharge
+                        submitButton.alpha = if (canCharge) 1.0f else 0.5f
                         
                         // Rely on AmountDisplayManager to set correct text/state based on amount and wallet readiness
                         amountDisplayManager.updateDisplay(
@@ -87,6 +95,60 @@ class PosUiCoordinator(
                         )
                     }
                 }
+            }
+        }
+    }
+
+    private fun loadMintLimits() {
+        val lightningMint = mintManager.getPreferredLightningMint()
+        if (lightningMint != null) {
+            activity.lifecycleScope.launch {
+                // Pre-load cache for ALL allowed mints when app opens
+                // This ensures every mint has valid cached data, preventing issues when switching mints
+                Log.d(TAG, "Pre-loading cache for all allowed mints...")
+                for (mintUrl in mintManager.getAllowedMints()) {
+                    try {
+                        // Use isFirstFetch=true to store valid cache, skip if already cached
+                        mintManager.getMintLimits(mintUrl, activity, forceRefresh = false, isFirstFetch = true)
+                        Log.d(TAG, "Pre-loaded cache for: $mintUrl")
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to pre-load cache for: $mintUrl", e)
+                    }
+                }
+                
+                // Now get limits for the preferred mint
+                val isStale = mintManager.needsRefresh(lightningMint)
+                val limits = mintManager.getMintLimits(lightningMint, activity, forceRefresh = isStale, isFirstFetch = false)
+                amountDisplayManager.setMintLimits(limits)
+                
+                // Update display to re-evaluate button state based on new limits
+                amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
+            }
+        }
+    }
+    
+    /** Reload mint limits - called when returning to POS (e.g., after changing lightning mint) */
+    fun reloadMintLimits() {
+        Log.d(TAG, "reloadMintLimits() called")
+        val lightningMint = mintManager.getPreferredLightningMint()
+        Log.d(TAG, "Preferred mint: $lightningMint")
+        if (lightningMint != null) {
+            // Disable button while refreshing, but let AmountDisplayManager handle the text based on wallet state
+            submitButton.isEnabled = false
+            
+            activity.lifecycleScope.launch {
+                // Force refresh if stale, NOT first fetch - preserve existing cache
+                // This prevents inconsistent mint responses from overwriting valid limits
+                val isStale = mintManager.needsRefresh(lightningMint)
+                Log.d(TAG, "Fetching mint limits with forceRefresh=\$isStale (NOT first fetch)")
+                val limits = mintManager.getMintLimits(lightningMint, activity, forceRefresh = isStale, isFirstFetch = false)
+                Log.d(TAG, "Got limits: $limits")
+                
+                // Same behavior as onCreate - always set limits
+                amountDisplayManager.setMintLimits(limits)
+                
+                // Update display to re-evaluate button state based on new limits
+                amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
             }
         }
     }
@@ -198,6 +260,7 @@ class PosUiCoordinator(
     fun getRequestedAmount(): Long = amountDisplayManager.requestedAmount
 
     companion object {
+        private const val TAG = "PosUiCoordinator"
         private val PATTERN_SUCCESS = longArrayOf(0, 50, 100, 50)
     }
 
@@ -287,6 +350,14 @@ class PosUiCoordinator(
 
         // Submit button
         submitButton.setOnClickListener {
+            if (!NetworkUtils.isNetworkAvailable(activity)) {
+                android.widget.Toast.makeText(
+                    activity,
+                    activity.getString(R.string.pos_error_no_network_charge),
+                    android.widget.Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
             // Do not allow charging if no mints are configured
             if (!mintManager.hasAnyMints()) {
                 // Optional: show a gentle message guiding user to configure mints
@@ -328,9 +399,11 @@ class PosUiCoordinator(
     fun hideChargeButtonSpinner() {
         submitButtonSpinner.visibility = View.GONE
         submitButton.text = activity.getString(R.string.pos_charge_button) // Restore button text
-        // Only re-enable if the wallet is ready
+        // Only re-enable if the wallet is ready and network is available
         val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
-        submitButton.isEnabled = isReady
-        submitButton.alpha = if (isReady) 1.0f else 0.5f
+        val isNetworkAvailable = NetworkUtils.isNetworkAvailable(activity)
+        val canCharge = isReady && isNetworkAvailable
+        submitButton.isEnabled = canCharge
+        submitButton.alpha = if (canCharge) 1.0f else 0.5f
     }
 }

@@ -1,0 +1,124 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="settings_section_developer">開発者</string>
+    <string name="about_android_version">Androidバージョン</string>
+    <string name="settings_item_theme_title">テーマ</string>
+    <string name="settings_mints_title">Mints</string>
+    <string name="settings_item_mints_title">Mints</string>
+    <string name="settings_item_security_title">セキュリティとプライバシー</string>
+    <string name="settings_item_basket_names_title">バスケット名</string>
+    <string name="settings_title">設定</string>
+    <string name="currency_settings_option_jpy">日本円 (JPY)</string>
+    <string name="settings_item_webhooks_subtitle">外部管理ダッシュボードへの売上データのフィード</string>
+    <string name="currency_settings_option_sek">スウェーデン・クローナ (SEK)</string>
+    <string name="settings_language_title">言語</string>
+    <string name="settings_verify_pin_subtitle">設定にアクセスするための確認</string>
+    <string name="settings_item_mints_subtitle">Cashu mintsとLightning設定の管理</string>
+    <string name="about_contact_us">お問い合わせ</string>
+    <string name="settings_item_tips_subtitle">チェックアウトのチップオプションを設定する</string>
+    <string name="about_device_info">デバイス情報</string>
+    <string name="settings_section_payments">支払い</string>
+    <string name="settings_about_toast_no_email">メールアプリが見つかりません</string>
+    <string name="about_about_us">私たちについて</string>
+    <string name="about_app_version">アプリバージョン</string>
+    <string name="settings_about_toast_developer_already_enabled">開発者モードはすでに有効になっています</string>
+    <string name="settings_item_items_title">アイテム</string>
+    <string name="settings_item_currency_title">法定通貨</string>
+    <string name="currency_settings_option_krw">韓国ウォン (KRW)</string>
+    <string name="settings_item_language_title">言語</string>
+    <string name="settings_item_items_subtitle">カタログアイテムを作成および管理</string>
+    <string name="settings_item_currency_subtitle">デフォルトの法定通貨を選択</string>
+    <string name="currency_settings_option_eur">ユーロ (EUR)</string>
+    <string name="settings_section_terminal">端末</string>
+    <string name="settings_item_language_subtitle">アプリの言語を選択</string>
+    <string name="about_privacy_policy">プライバシーポリシー</string>
+    <string name="privacy_policy_full">NUMO WALLET - プライバシーポリシー
+
+1. データ収集
+Numoはいかなる個人データも収集、保存、または送信しません。アプリはデバイス上で完全に実行されます。
+
+2. ウォレットデータ
+シードフレーズとウォレットデータはデバイスにローカルに保存されます。私たちはこの情報にアクセスできません。
+
+3. ネットワーク通信
+アプリは以下と通信します:
+• Cashu mints (ecashトークンを管理するため)
+• 価格API (為替レートを取得するため)
+• Nostrリレー (オプションのバックアップ機能のため)
+
+これらのサービスには独自のプライバシーポリシーがある場合があります。
+
+4. 分析
+分析や追跡サービスは使用していません。
+
+5. サードパーティのMINTS
+ecash mintを使用する場合、mintの運営者は取引金額とタイミングを見ることができます。信頼できるmintを選択してください。
+
+6. バックアップ
+Nostrバックアップを有効にすると、暗号化されたウォレットデータがNostrリレーに公開されます。このデータは、シードフレーズを使用するあなただけが復号化できます。
+
+7. 連絡先
+プライバシーに関する質問: numopay@proton.me
+
+最終更新日: 2024年11月</string>
+    <string name="settings_section_general">一般</string>
+    <string name="about_build_number">ビルド番号</string>
+    <string name="settings_item_about_title">情報</string>
+    <string name="settings_item_basket_names_subtitle">クイックバスケット保存用のプリセット名を作成</string>
+    <string name="settings_about_toast_developer_taps_remaining">開発者モードを有効にするには、あと%1$d回タップしてください</string>
+    <string name="about_terms_of_service">利用規約</string>
+    <string name="settings_theme_title">テーマ</string>
+    <string name="currency_settings_section_preferred_currency">優先通貨</string>
+    <string name="settings_item_tips_title">チップ</string>
+    <string name="settings_currency_title">法定通貨</string>
+    <string name="terms_of_service_full">NUMO WALLET - 利用規約
+
+1. 承認
+このウォレットアプリを使用することにより、これらの規約に同意したことになります。
+
+2. サービスの性質
+これはCashu ecashテクノロジーを使用したセルフカストディアルBitcoinウォレットです。資金とシードフレーズについてはお客様ご自身が責任を負います。
+
+3. シードフレーズ
+12単語のシードフレーズはウォレットを回復する唯一の方法です。絶対に共有しないでください。オフラインで安全に保管してください。紛失したシードフレーズの回復はできません。
+
+4. 無保証
+このソフトウェアは「現状のまま」提供され、いかなる保証もありません。自己責任でご使用ください。
+
+5. 責任の制限
+バグ、ユーザーの過失、サードパーティのmintの障害による資金の損失について、当社は責任を負いません。
+
+6. ECASH MINTS
+Ecashトークンはサードパーティのmintによって保持されます。これらのmintは失敗したり利用できなくなったりする可能性があります。複数のmintに分散させることをお勧めします。
+
+7. プライバシー
+このウォレットは個人データを収集しません。取引は独自のプライバシーポリシーを持つecash mintを通じて処理されます。
+
+8. 更新
+これらの規約は更新される場合があります。継続的な使用は承認とみなされます。
+
+最終更新日: 2024年11月</string>
+    <string name="settings_about_toast_link_error">リンクを開けませんでした</string>
+    <string name="settings_section_security">セキュリティとプライバシー</string>
+    <string name="settings_item_webhooks_title">Webhook</string>
+    <string name="settings_about_dialog_terms_title">利用規約</string>
+    <string name="settings_section_appearance">外観</string>
+    <string name="settings_security_title">セキュリティとプライバシー</string>
+    <string name="currency_settings_option_dkk">デンマーク・クローネ (DKK)</string>
+    <string name="settings_about_dialog_privacy_title">プライバシーポリシー</string>
+    <string name="about_website">ウェブサイト</string>
+    <string name="settings_item_developer_subtitle">詳細設定とデバッグツール</string>
+    <string name="settings_item_theme_subtitle">ライトモードとダークモードの切り替え</string>
+    <string name="about_email_subject">Numoサポート</string>
+    <string name="currency_settings_option_gbp">イギリスポンド (GBP)</string>
+    <string name="about_title">情報</string>
+    <string name="settings_item_developer_title">開発者設定</string>
+    <string name="about_device">デバイス</string>
+    <string name="currency_settings_option_nok">ノルウェー・クローネ (NOK)</string>
+    <string name="settings_item_security_subtitle">シードフレーズのバックアップ、ウォレットの復元</string>
+    <string name="currency_settings_option_usd">米ドル (USD)</string>
+    <string name="settings_item_about_subtitle">バージョン、規約、および連絡先</string>
+    <string name="settings_about_toast_developer_enabled">開発者モードが有効になりました！</string>
+    <string name="currency_settings_search_hint">通貨を検索</string>
+    <string name="currency_settings_no_results">通貨が見つかりません</string>
+</resources>

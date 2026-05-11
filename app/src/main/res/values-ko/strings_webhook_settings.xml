@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="webhook_settings_section_endpoints">엔드포인트</string>
+    <string name="webhook_settings_sync_cancelled">동기화 취소됨</string>
+    <string name="webhook_settings_syncing_progress">%2$d개 중 %1$d개 동기화 중</string>
+    <string name="webhook_settings_sync_all">모든 거래 동기화</string>
+    <string name="webhook_settings_auth_dialog_hint">Bearer your-secret-key</string>
+    <string name="webhook_settings_section_actions">작업</string>
+    <string name="webhook_settings_auth_not_set">인증 키 없음</string>
+    <string name="webhook_settings_delete_dialog_confirm">제거</string>
+    <string name="webhook_settings_add_endpoint">엔드포인트 추가</string>
+    <string name="webhook_settings_error_invalid_url">유효한 http(s) URL을 입력하세요</string>
+    <string name="webhook_settings_add_success">Webhook 엔드포인트 추가됨</string>
+    <string name="webhook_settings_sync_all_empty">동기화할 완료된 거래가 없습니다</string>
+    <string name="webhook_settings_delete_endpoint">엔드포인트 삭제</string>
+    <string name="webhook_settings_sync_all_success">%1$d개 거래가 동기화되었습니다</string>
+    <string name="webhook_settings_auth_dialog_helper">이 엔드포인트의 인증 키를 제거하려면 비워 두세요.</string>
+    <string name="webhook_settings_auth_dialog_description">설정된 경우 이 값이 Authorization 헤더로 전송됩니다.</string>
+    <string name="webhook_settings_auth_dialog_title">인증 키 (선택 사항)</string>
+    <string name="webhook_settings_auth_set">인증 키 설정됨</string>
+    <string name="webhook_settings_add_dialog_hint">https://example.com/webhooks/numo</string>
+    <string name="webhook_settings_scan_title">Webhook 스캔</string>
+    <string name="webhook_settings_dialog_continue">계속</string>
+    <string name="webhook_settings_delete_success">Webhook 엔드포인트 제거됨</string>
+    <string name="webhook_settings_delete_dialog_title">엔드포인트를 제거하시겠습니까?</string>
+    <string name="webhook_settings_empty">아직 구성된 Webhook 엔드포인트가 없습니다.</string>
+    <string name="webhook_settings_edit_auth_key">인증 키 편집</string>
+    <string name="webhook_settings_scan_instruction">Webhook URL 또는 JSON 구성의 QR 코드를 스캔합니다.</string>
+    <string name="webhook_settings_error_duplicate">해당 엔드포인트는 이미 구성되었습니다</string>
+    <string name="webhook_settings_auth_success">인증 키 업데이트됨</string>
+    <string name="webhook_settings_edit_dialog_title">엔드포인트 편집</string>
+    <string name="webhook_settings_error_not_found">엔드포인트가 더 이상 존재하지 않습니다</string>
+    <string name="webhook_settings_add_dialog_title">Webhook 엔드포인트 추가</string>
+    <string name="webhook_settings_add_dialog_confirm">추가</string>
+    <string name="webhook_settings_edit_success">Webhook 엔드포인트 업데이트됨</string>
+    <string name="webhook_settings_add_dialog_description">Webhook URL을 입력하거나 QR 코드를 스캔하세요.</string>
+    <string name="webhook_settings_delete_dialog_message">이 엔드포인트는 더 이상 결제 이벤트를 수신하지 않습니다.
+
+%1$s</string>
+    <string name="webhook_settings_description">이 터미널이 결제를 받을 때마다 결제 메타데이터와 함께 POST 요청을 보냅니다.</string>
+    <string name="webhook_settings_edit_dialog_description">결제 메타데이터 전송 위치를 업데이트합니다.</string>
+    <string name="webhook_settings_title">웹훅</string>
+</resources>

@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="webhook_settings_section_endpoints">エンドポイント</string>
+    <string name="webhook_settings_sync_cancelled">同期がキャンセルされました</string>
+    <string name="webhook_settings_syncing_progress">%1$d / %2$d を同期中</string>
+    <string name="webhook_settings_sync_all">すべてのトランザクションを同期</string>
+    <string name="webhook_settings_auth_dialog_hint">Bearer your-secret-key</string>
+    <string name="webhook_settings_section_actions">アクション</string>
+    <string name="webhook_settings_auth_not_set">認証キーがありません</string>
+    <string name="webhook_settings_delete_dialog_confirm">削除</string>
+    <string name="webhook_settings_add_endpoint">エンドポイントを追加</string>
+    <string name="webhook_settings_error_invalid_url">有効なhttp(s) URLを入力してください</string>
+    <string name="webhook_settings_add_success">Webhookエンドポイントが追加されました</string>
+    <string name="webhook_settings_sync_all_empty">同期する完了したトランザクションはありません</string>
+    <string name="webhook_settings_delete_endpoint">エンドポイントを削除</string>
+    <string name="webhook_settings_sync_all_success">%1$dのトランザクションが同期されました</string>
+    <string name="webhook_settings_auth_dialog_helper">このエンドポイントの認証キーを削除するには空のままにしてください。</string>
+    <string name="webhook_settings_auth_dialog_description">設定されている場合、この値はAuthorizationヘッダーとして送信されます。</string>
+    <string name="webhook_settings_auth_dialog_title">認証キー (オプション)</string>
+    <string name="webhook_settings_auth_set">認証キーが設定されています</string>
+    <string name="webhook_settings_add_dialog_hint">https://example.com/webhooks/numo</string>
+    <string name="webhook_settings_scan_title">Webhookをスキャン</string>
+    <string name="webhook_settings_dialog_continue">続行</string>
+    <string name="webhook_settings_delete_success">Webhookエンドポイントが削除されました</string>
+    <string name="webhook_settings_delete_dialog_title">エンドポイントを削除しますか？</string>
+    <string name="webhook_settings_empty">Webhookエンドポイントはまだ構成されていません。</string>
+    <string name="webhook_settings_edit_auth_key">認証キーを編集</string>
+    <string name="webhook_settings_scan_instruction">Webhook URLまたはJSON構成のQRコードをスキャンします。</string>
+    <string name="webhook_settings_error_duplicate">そのエンドポイントはすでに構成されています</string>
+    <string name="webhook_settings_auth_success">認証キーが更新されました</string>
+    <string name="webhook_settings_edit_dialog_title">エンドポイントを編集</string>
+    <string name="webhook_settings_error_not_found">エンドポイントはもう存在しません</string>
+    <string name="webhook_settings_add_dialog_title">Webhookエンドポイントを追加</string>
+    <string name="webhook_settings_add_dialog_confirm">追加</string>
+    <string name="webhook_settings_edit_success">Webhookエンドポイントが更新されました</string>
+    <string name="webhook_settings_add_dialog_description">Webhook URLを入力するか、QRコードをスキャンしてください。</string>
+    <string name="webhook_settings_delete_dialog_message">このエンドポイントは今後支払いイベントを受信しなくなります。
+
+%1$s</string>
+    <string name="webhook_settings_description">この端末が支払いを受け取るたびに、支払いメタデータを含むPOSTリクエストを送信します。</string>
+    <string name="webhook_settings_edit_dialog_description">支払いメタデータの送信先を更新します。</string>
+    <string name="webhook_settings_title">Webhook</string>
+</resources>

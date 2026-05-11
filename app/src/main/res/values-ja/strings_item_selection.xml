@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="item_selection_dialog_clear_basket_positive">クリア</string>
+    <string name="item_selection_discard">破棄</string>
+    <string name="item_selection_toast_enter_variation">バリエーション名を入力してください</string>
+    <string name="item_selection_save_basket_message">このバスケットへの変更を保存しますか？</string>
+    <string name="item_selection_dialog_clear_basket_message">バスケットからすべてのアイテムを削除しますか？</string>
+    <string name="item_selection_dialog_clear_basket_title">バスケットをクリア</string>
+    <string name="item_selection_save_basket">バスケットを保存</string>
+    <string name="item_selection_toast_no_stock">在庫がありません</string>
+</resources>

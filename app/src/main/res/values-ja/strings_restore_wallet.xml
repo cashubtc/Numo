@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="restore_success_balance_changed_summary">残高が%1$d sats変更されました</string>
+    <string name="restore_confirm_dialog_title">復元の確認</string>
+    <string name="restore_confirm_dialog_positive">復元</string>
+    <string name="restore_success_restored_with_balance_summary">ウォレットが合計%1$d satsで復元されました</string>
+    <string name="restore_success_recovered_summary">%2$dのmintから%1$d satsを回復しました</string>
+    <string name="restore_success_balance_change_line">%1$d → %2$d sats</string>
+</resources>

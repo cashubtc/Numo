@@ -30,9 +30,16 @@ class CurrencyManager private constructor(context: Context) {
         const val CURRENCY_SEK = "SEK"
         const val CURRENCY_NOK = "NOK"
         const val CURRENCY_KRW = "KRW"
+        const val CURRENCY_CUP = "CUP"
+        const val CURRENCY_MLC = "MLC"
 
         // Default currency is USD
         private const val DEFAULT_CURRENCY = CURRENCY_USD
+
+        val LATAM_CURRENCIES = setOf(
+            "ARS", "BOB", "BRL", "CLP", "COP", "CRC", "CUP", "DOP", "GTQ",
+            "HNL", "MLC", "MXN", "NIO", "PAB", "PEN", "PYG", "UYU", "VES"
+        )
 
         private const val COINBASE_BASE_URL = "https://api.coinbase.com/v2/prices/BTC-"
 
@@ -40,7 +47,13 @@ class CurrencyManager private constructor(context: Context) {
             JSONObject(response).getJSONObject("data").getDouble("amount")
         }
 
-        /** Add entries here for currencies not on Coinbase (or where we prefer a different source). */
+        private val YADIO_PARSER: (String) -> Double = { response ->
+            1.0 / JSONObject(response).getDouble("rate")
+        }
+
+        /** 
+         * Add entries here for currencies not on Coinbase (or where we prefer a different source).
+         */
         private val CUSTOM_APIS = mapOf(
             CURRENCY_JPY to PriceApiConfig(
                 url = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=jpy",
@@ -53,7 +66,7 @@ class CurrencyManager private constructor(context: Context) {
                 parsePrice = { response ->
                     JSONArray(response).getJSONObject(0).getDouble("trade_price")
                 }
-            ),
+            )
         )
 
         @Volatile
@@ -117,20 +130,28 @@ class CurrencyManager private constructor(context: Context) {
     /** Check if a currency code is valid and supported. */
     fun isValidCurrency(currencyCode: String?): Boolean {
         if (currencyCode.isNullOrEmpty()) return false
+        val upperCode = currencyCode.uppercase()
+        if (LATAM_CURRENCIES.contains(upperCode)) return true
         return runCatching {
-            java.util.Currency.getInstance(currencyCode.uppercase())
+            java.util.Currency.getInstance(upperCode)
             true
         }.getOrDefault(false)
     }
 
     /** Get the API URL for the current currency. Falls back to Coinbase. */
     fun getPriceApiUrl(): String {
+        if (LATAM_CURRENCIES.contains(currentCurrency)) {
+            return "https://api.yadio.io/rate/BTC/$currentCurrency"
+        }
         return CUSTOM_APIS[currentCurrency]?.url
             ?: "${COINBASE_BASE_URL}$currentCurrency/spot"
     }
 
     /** Parse a price API response for the current currency. */
     fun parsePriceResponse(response: String): Double {
+        if (LATAM_CURRENCIES.contains(currentCurrency)) {
+            return YADIO_PARSER(response)
+        }
         val parser = CUSTOM_APIS[currentCurrency]?.parsePrice ?: COINBASE_PARSER
         return parser(response)
     }

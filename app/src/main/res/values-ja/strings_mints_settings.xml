@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="mints_settings_error_already_exists">Mintはすでにリストにあります</string>
+    <string name="mints_settings_toast_lightning_mint_selected">Lightningの支払いにこのMintが使用されます</string>
+    <string name="mints_settings_toast_reset_defaults">Mintがデフォルトにリセットされました</string>
+    <string name="mints_settings_add_button">追加</string>
+    <string name="mints_settings_add_mint_hint">MintのURLを追加</string>
+    <string name="mints_settings_lightning_hint">
+ ⚡ Lightningの支払いのためのMintを選択してください。選択したMintは、Lightning経由でBitcoinを受け取り、送信するために使用されます。
+ </string>
+    <string name="mints_settings_reset_defaults">デフォルトにリセット</string>
+    <string name="mints_settings_error_invalid_url">Mintが利用できないか、URLが間違っています</string>
+    <string name="mints_settings_section_allowed_mints">許可されたMINTS</string>
+</resources>
