@@ -81,7 +81,7 @@
                 android:layout_height="wrap_content"
                 app:rowIcon="@drawable/ic_qr_code"
                 app:rowTitle="@string/settings_item_default_payment_method_title"
-                app:rowShowChevron="true" />
+                app:rowShowChevron="false" />
 
             <!-- Fiat Currency -->
             <com.electricdreams.numo.ui.components.SettingsRowView
