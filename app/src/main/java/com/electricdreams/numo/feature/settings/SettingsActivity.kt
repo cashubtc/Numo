@@ -15,6 +15,7 @@ import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.feature.tips.TipsSettingsActivity
 import com.electricdreams.numo.feature.baskets.BasketNamesSettingsActivity
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawSettingsActivity
+import com.electricdreams.numo.ui.components.SettingsRowView
 import com.electricdreams.numo.payment.DefaultPaymentMethodManager
 import android.widget.TextView
 
@@ -62,8 +63,9 @@ class SettingsActivity : AppCompatActivity() {
     private fun updateDefaultPaymentMethodSubtitle() {
         val manager = DefaultPaymentMethodManager.getInstance(this)
         val defaultTab = manager.getDefaultPaymentMethod()
-        findViewById<TextView>(R.id.default_payment_method_subtitle)?.text = 
+        findViewById<SettingsRowView>(R.id.default_payment_method_settings_item)?.setSubtitle(
             defaultTab.name.lowercase().replaceFirstChar { it.uppercase() }
+        )
     }
     
     private fun updateDeveloperSectionVisibility() {
