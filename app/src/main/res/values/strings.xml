@@ -941,7 +941,7 @@
     <!-- Extracted from layout hardcoded strings -->
     <string name="basket_receipt_items_header_default">ITEMS</string>
     <string name="action_add_new_mint">+ Add New Mint</string>
-    <string name="action_add_endpoint">+ Add Endpoint</string>
+    <string name="action_add_endpoint">Add Endpoint</string>
     <string name="action_sync_all_endpoints">Sync All Endpoints</string>
     <string name="dialog_confirm_message_default">Are you sure you want to proceed?</string>
     <string name="dialog_ndef_payment_title">NFC Payment</string>
