@@ -33,7 +33,6 @@ import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.feature.settings.WithdrawLightningActivity
 import com.electricdreams.numo.ui.components.EmptyStateHelper
-import com.electricdreams.numo.ui.components.LightningStrikeView
 import com.electricdreams.numo.ui.components.MintSelectionBottomSheet
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.google.android.material.slider.Slider
@@ -169,7 +168,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
                 animateConfigContainer(isChecked)
                 animateStatusChange(isChecked)
                 if (isChecked) {
-                    playLightningStrike()
                 }
             }
         }
@@ -360,16 +358,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-
-    private fun playLightningStrike() {
-        val root = findViewById<ViewGroup>(R.id.root_layout)
-        val strike = LightningStrikeView(this)
-        root.addView(strike, ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        ))
-        strike.strike()
     }
 
     private fun animateStatusChange(enabled: Boolean) {
