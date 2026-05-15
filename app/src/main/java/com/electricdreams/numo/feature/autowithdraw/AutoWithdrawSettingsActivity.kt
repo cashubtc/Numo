@@ -30,6 +30,7 @@ import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.util.LightningAddressManager
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.feature.settings.WithdrawLightningActivity
 import com.electricdreams.numo.ui.components.EmptyStateHelper
@@ -180,7 +181,9 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
                 val address = s?.toString()?.trim() ?: ""
                 if (!isUpdatingUI) {
                     settingsManager.setDefaultLightningAddress(address)
-                    fetchMinThreshold(address)
+                    if (LightningAddressManager.getInstance(this@AutoWithdrawSettingsActivity).isValidLightningAddress(address)) {
+                        fetchMinThreshold(address)
+                    }
                 }
             }
         })
@@ -303,7 +306,10 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         configContainer.visibility = if (enabled) View.VISIBLE else View.GONE
 
         lightningAddressInput.setText(settingsManager.getDefaultLightningAddress())
-        fetchMinThreshold(settingsManager.getDefaultLightningAddress())
+        val savedAddress = settingsManager.getDefaultLightningAddress()
+        if (LightningAddressManager.getInstance(this).isValidLightningAddress(savedAddress)) {
+            fetchMinThreshold(savedAddress)
+        }
         
         currentThreshold = settingsManager.getDefaultThreshold()
         updateThresholdDisplay()
