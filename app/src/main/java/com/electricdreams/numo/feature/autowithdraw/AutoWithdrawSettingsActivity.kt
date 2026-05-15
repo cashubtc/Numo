@@ -361,6 +361,8 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun playLightningStrike() {
         val root = findViewById<ViewGroup>(R.id.root_layout)
         val strike = LightningStrikeView(this)
         root.addView(strike, ViewGroup.LayoutParams(
