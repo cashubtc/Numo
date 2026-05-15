@@ -19,8 +19,8 @@ object LnUrlClient {
 
     fun fetchLnUrlDetails(address: String): LnUrlPayResponse? {
         val url = convertAddressToUrl(address) ?: return null
-        val request = Request.Builder().url(url).build()
         try {
+            val request = Request.Builder().url(url).build()
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) return null
                 val json = response.body?.string() ?: return null
@@ -34,6 +34,7 @@ object LnUrlClient {
     private fun convertAddressToUrl(address: String): String? {
         val parts = address.split("@")
         if (parts.size != 2) return null
+        if (parts[1].isBlank() || !parts[1].contains(".")) return null
         return "https://${parts[1]}/.well-known/lnurlp/${parts[0]}"
     }
 }
