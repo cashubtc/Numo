@@ -34,7 +34,21 @@ object LnUrlClient {
     private fun convertAddressToUrl(address: String): String? {
         val parts = address.split("@")
         if (parts.size != 2) return null
-        if (parts[1].isBlank() || !parts[1].contains(".")) return null
-        return "https://${parts[1]}/.well-known/lnurlp/${parts[0]}"
+        val username = parts[0]
+        val domain = parts[1]
+        
+        // Reject invalid domain characters that could lead to SSRF or path injection
+        if (domain.isBlank() || !domain.contains(".") || domain.contains("/") || domain.contains("#") || domain.contains("?")) {
+            return null
+        }
+        
+        return okhttp3.HttpUrl.Builder()
+            .scheme("https")
+            .host(domain)
+            .addPathSegment(".well-known")
+            .addPathSegment("lnurlp")
+            .addPathSegment(username)
+            .build()
+            .toString()
     }
 }
