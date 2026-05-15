@@ -91,10 +91,13 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
 
     private var isUpdatingUI = false
     
-    // Current threshold value (in sats)
+        // Current threshold value (in sats)
     private var currentThreshold: Long = AutoWithdrawSettingsManager.DEFAULT_THRESHOLD_SATS
+    // Min threshold fetched from LNURL
+    private var fetchedMinThresholdSats: Long = AutoWithdrawSettingsManager.MIN_THRESHOLD_SATS
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_auto_withdraw_settings)
 
@@ -176,8 +179,10 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
+                val address = s?.toString()?.trim() ?: ""
                 if (!isUpdatingUI) {
-                    settingsManager.setDefaultLightningAddress(s?.toString()?.trim() ?: "")
+                    settingsManager.setDefaultLightningAddress(address)
+                    fetchMinThreshold(address)
                 }
             }
         })
@@ -277,7 +282,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
                 },
                 validator = { value ->
                     val amount = value.replace(",", "").toLongOrNull()
-                    amount != null && amount >= AutoWithdrawSettingsManager.MIN_THRESHOLD_SATS 
+                    amount != null && amount >= fetchedMinThresholdSats
                         && amount <= AutoWithdrawSettingsManager.MAX_THRESHOLD_SATS
                 }
             )
@@ -300,6 +305,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         configContainer.visibility = if (enabled) View.VISIBLE else View.GONE
 
         lightningAddressInput.setText(settingsManager.getDefaultLightningAddress())
+        fetchMinThreshold(settingsManager.getDefaultLightningAddress())
         
         currentThreshold = settingsManager.getDefaultThreshold()
         updateThresholdDisplay()
@@ -336,7 +342,25 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
 
     }
 
-    private fun playLightningStrike() {
+    private fun fetchMinThreshold(address: String) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val details = com.electricdreams.numo.core.util.LnUrlClient.fetchLnUrlDetails(address)
+            withContext(Dispatchers.Main) {
+                if (details != null) {
+                    // convert msat to sat
+                    fetchedMinThresholdSats = details.minSendable / 1000
+                    // Ensure threshold is at least the min
+                    if (currentThreshold < fetchedMinThresholdSats) {
+                        currentThreshold = fetchedMinThresholdSats
+                        settingsManager.setDefaultThreshold(currentThreshold)
+                        updateThresholdDisplay()
+                    }
+                } else {
+                    fetchedMinThresholdSats = AutoWithdrawSettingsManager.MIN_THRESHOLD_SATS
+                }
+            }
+        }
+    }
         val root = findViewById<ViewGroup>(R.id.root_layout)
         val strike = LightningStrikeView(this)
         root.addView(strike, ViewGroup.LayoutParams(
