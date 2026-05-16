@@ -216,6 +216,12 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
                 settingsManager.setDefaultPercentage(percentage)
                 // Subtle haptic on step changes
                 slider.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
+                
+                // Recalculate minimum threshold based on new percentage
+                val address = lightningAddressInput.text.toString().trim()
+                if (LightningAddressManager.getInstance(this@AutoWithdrawSettingsActivity).isValidLightningAddress(address)) {
+                    fetchMinThreshold(address)
+                }
             }
         }
         
@@ -374,6 +380,8 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         lightningAddressValidation.text = getString(R.string.auto_withdraw_lightning_address_checking)
         lightningAddressValidation.setTextColor(ContextCompat.getColor(this, R.color.color_text_tertiary))
 
+        val percentage = settingsManager.getDefaultPercentage()
+
         lifecycleScope.launch(Dispatchers.IO) {
             val details = com.electricdreams.numo.core.util.LnUrlClient.fetchLnUrlDetails(address)
             withContext(Dispatchers.Main) {
@@ -383,7 +391,11 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
                     lightningAddressValidation.setTextColor(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_success_green))
 
                     // convert msat to sat
-                    fetchedMinThresholdSats = details.minSendable / 1000
+                    val minSendableSats = details.minSendable / 1000
+                    
+                    // Min threshold = minSendableSats * 100 / percentage
+                    fetchedMinThresholdSats = (minSendableSats * 100 / percentage) + 1 // +1 to ensure it's strictly > min
+                    
                     // Ensure threshold is at least the min
                     if (currentThreshold < fetchedMinThresholdSats) {
                         currentThreshold = fetchedMinThresholdSats
