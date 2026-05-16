@@ -70,6 +70,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     private lateinit var enableSwitch: SwitchCompat
     private lateinit var enableToggleRow: LinearLayout
     private lateinit var lightningAddressInput: EditText
+    private lateinit var lightningAddressValidation: TextView
     private lateinit var thresholdDisplay: TextView
     private lateinit var percentageSlider: Slider
     private lateinit var percentageBadge: TextView
@@ -135,6 +136,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
 
         // Config inputs
         lightningAddressInput = findViewById(R.id.lightning_address_input)
+        lightningAddressValidation = findViewById(R.id.lightning_address_validation)
         thresholdDisplay = findViewById(R.id.threshold_display)
         percentageSlider = findViewById(R.id.percentage_slider)
         percentageBadge = findViewById(R.id.percentage_badge)
@@ -179,9 +181,12 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 val address = s?.toString()?.trim() ?: ""
+                val isValid = LightningAddressManager.getInstance(this@AutoWithdrawSettingsActivity).isValidLightningAddress(address)
+                updateAddressValidation(isValid)
+                
                 if (!isUpdatingUI) {
                     settingsManager.setDefaultLightningAddress(address)
-                    if (LightningAddressManager.getInstance(this@AutoWithdrawSettingsActivity).isValidLightningAddress(address)) {
+                    if (isValid) {
                         fetchMinThreshold(address)
                     }
                 }
@@ -307,7 +312,11 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
 
         lightningAddressInput.setText(settingsManager.getDefaultLightningAddress())
         val savedAddress = settingsManager.getDefaultLightningAddress()
-        if (LightningAddressManager.getInstance(this).isValidLightningAddress(savedAddress)) {
+        
+        val isValid = LightningAddressManager.getInstance(this).isValidLightningAddress(savedAddress)
+        updateAddressValidation(isValid)
+        
+        if (isValid) {
             fetchMinThreshold(savedAddress)
         }
         
@@ -344,6 +353,22 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         heroBolt.setColorFilter(ContextCompat.getColor(this, boltColor))
         heroBoltFade.setBackgroundResource(fadeRes)
 
+    }
+
+    private fun updateAddressValidation(isValid: Boolean) {
+        if (lightningAddressInput.text.isNullOrBlank()) {
+            lightningAddressValidation.visibility = View.GONE
+            return
+        }
+
+        lightningAddressValidation.visibility = View.VISIBLE
+        if (isValid) {
+            lightningAddressValidation.text = getString(R.string.auto_withdraw_lightning_address_valid)
+            lightningAddressValidation.setTextColor(ContextCompat.getColor(this, R.color.color_success_green))
+        } else {
+            lightningAddressValidation.text = getString(R.string.auto_withdraw_lightning_address_invalid)
+            lightningAddressValidation.setTextColor(ContextCompat.getColor(this, R.color.color_error))
+        }
     }
 
     private fun fetchMinThreshold(address: String) {

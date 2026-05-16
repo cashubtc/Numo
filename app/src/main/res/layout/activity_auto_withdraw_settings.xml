@@ -256,6 +256,16 @@
                                 android:textColorHint="@color/color_text_tertiary" />
 
                         </com.google.android.material.textfield.TextInputLayout>
+                        
+                        <!-- Validation Label -->
+                        <TextView
+                            android:id="@+id/lightning_address_validation"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/space_s"
+                            android:textAppearance="@style/Text.Helper"
+                            android:visibility="gone"
+                            tools:text="@string/auto_withdraw_lightning_address_valid" />
 
                         <!-- Helper Text -->
                         <TextView
