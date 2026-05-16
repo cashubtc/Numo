@@ -719,6 +719,7 @@
     <string name="auto_withdraw_lightning_address_helper">Funds will be sent to this address automatically</string>
     <string name="auto_withdraw_lightning_address_valid">Valid Lightning address</string>
     <string name="auto_withdraw_lightning_address_invalid">Invalid Lightning address</string>
+    <string name="auto_withdraw_lightning_address_checking">Checking address...</string>
     
     <string name="auto_withdraw_threshold_title">Balance Threshold</string>
     <string name="auto_withdraw_threshold_subtitle">Trigger when balance exceeds</string>

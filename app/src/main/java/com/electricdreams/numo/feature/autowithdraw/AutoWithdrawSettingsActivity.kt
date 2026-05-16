@@ -181,14 +181,23 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
                 val address = s?.toString()?.trim() ?: ""
-                val isValid = LightningAddressManager.getInstance(this@AutoWithdrawSettingsActivity).isValidLightningAddress(address)
-                updateAddressValidation(isValid)
+                val isValidFormat = LightningAddressManager.getInstance(this@AutoWithdrawSettingsActivity).isValidLightningAddress(address)
+                
+                if (address.isBlank()) {
+                    lightningAddressValidation.visibility = View.GONE
+                } else if (!isValidFormat) {
+                    lightningAddressValidation.visibility = View.VISIBLE
+                    lightningAddressValidation.text = getString(R.string.auto_withdraw_lightning_address_invalid)
+                    lightningAddressValidation.setTextColor(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_error))
+                } else {
+                    // Valid format, start network ping
+                    if (!isUpdatingUI) {
+                        fetchMinThreshold(address)
+                    }
+                }
                 
                 if (!isUpdatingUI) {
                     settingsManager.setDefaultLightningAddress(address)
-                    if (isValid) {
-                        fetchMinThreshold(address)
-                    }
                 }
             }
         })
@@ -313,11 +322,12 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         lightningAddressInput.setText(settingsManager.getDefaultLightningAddress())
         val savedAddress = settingsManager.getDefaultLightningAddress()
         
-        val isValid = LightningAddressManager.getInstance(this).isValidLightningAddress(savedAddress)
-        updateAddressValidation(isValid)
-        
-        if (isValid) {
+        if (LightningAddressManager.getInstance(this).isValidLightningAddress(savedAddress)) {
             fetchMinThreshold(savedAddress)
+        } else if (savedAddress.isNotBlank()) {
+            lightningAddressValidation.visibility = View.VISIBLE
+            lightningAddressValidation.text = getString(R.string.auto_withdraw_lightning_address_invalid)
+            lightningAddressValidation.setTextColor(ContextCompat.getColor(this, R.color.color_error))
         }
         
         currentThreshold = settingsManager.getDefaultThreshold()
@@ -355,27 +365,20 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
 
     }
 
-    private fun updateAddressValidation(isValid: Boolean) {
-        if (lightningAddressInput.text.isNullOrBlank()) {
-            lightningAddressValidation.visibility = View.GONE
-            return
-        }
-
-        lightningAddressValidation.visibility = View.VISIBLE
-        if (isValid) {
-            lightningAddressValidation.text = getString(R.string.auto_withdraw_lightning_address_valid)
-            lightningAddressValidation.setTextColor(ContextCompat.getColor(this, R.color.color_success_green))
-        } else {
-            lightningAddressValidation.text = getString(R.string.auto_withdraw_lightning_address_invalid)
-            lightningAddressValidation.setTextColor(ContextCompat.getColor(this, R.color.color_error))
-        }
-    }
-
     private fun fetchMinThreshold(address: String) {
+        // Show checking state
+        lightningAddressValidation.visibility = View.VISIBLE
+        lightningAddressValidation.text = getString(R.string.auto_withdraw_lightning_address_checking)
+        lightningAddressValidation.setTextColor(ContextCompat.getColor(this, R.color.color_text_tertiary))
+
         lifecycleScope.launch(Dispatchers.IO) {
             val details = com.electricdreams.numo.core.util.LnUrlClient.fetchLnUrlDetails(address)
             withContext(Dispatchers.Main) {
                 if (details != null) {
+                    // Update validation UI
+                    lightningAddressValidation.text = getString(R.string.auto_withdraw_lightning_address_valid)
+                    lightningAddressValidation.setTextColor(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_success_green))
+
                     // convert msat to sat
                     fetchedMinThresholdSats = details.minSendable / 1000
                     // Ensure threshold is at least the min
@@ -385,6 +388,10 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
                         updateThresholdDisplay()
                     }
                 } else {
+                    // Update validation UI
+                    lightningAddressValidation.text = getString(R.string.auto_withdraw_lightning_address_invalid)
+                    lightningAddressValidation.setTextColor(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_error))
+                    
                     fetchedMinThresholdSats = AutoWithdrawSettingsManager.MIN_THRESHOLD_SATS
                 }
             }
