@@ -726,6 +726,7 @@
     <string name="auto_withdraw_threshold_label">Threshold</string>
     <string name="auto_withdraw_threshold_hint">Trigger withdrawal when balance reaches this amount</string>
     <string name="auto_withdraw_threshold_helper">Min: ₿1,000 • Max: ₿1,000,000</string>
+    <string name="auto_withdraw_threshold_helper_dynamic">Min: %1$s • Max: ₿1,000,000</string>
     
     <string name="auto_withdraw_percentage_title">Withdraw Amount</string>
     <string name="auto_withdraw_percentage_subtitle">Percentage of balance to send</string>

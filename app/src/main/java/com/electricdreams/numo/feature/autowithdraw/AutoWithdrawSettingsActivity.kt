@@ -274,6 +274,9 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     }
     
     private fun showThresholdEditDialog() {
+        val minAmount = Amount(fetchedMinThresholdSats, Amount.Currency.BTC)
+        val dynamicHelperText = getString(R.string.auto_withdraw_threshold_helper_dynamic, minAmount.toString())
+
         DialogHelper.showInput(
             context = this,
             config = DialogHelper.InputConfig(
@@ -282,14 +285,14 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
                 hint = "50000",
                 initialValue = currentThreshold.toString(),
                 prefix = "₿",
-                helperText = getString(R.string.auto_withdraw_threshold_helper),
+                helperText = dynamicHelperText,
                 inputType = android.text.InputType.TYPE_CLASS_NUMBER,
                 saveText = getString(R.string.common_save),
                 onSave = { value ->
                     val newThreshold = value.replace(",", "").toLongOrNull()
                         ?: AutoWithdrawSettingsManager.DEFAULT_THRESHOLD_SATS
                     currentThreshold = newThreshold.coerceIn(
-                        AutoWithdrawSettingsManager.MIN_THRESHOLD_SATS,
+                        fetchedMinThresholdSats,
                         AutoWithdrawSettingsManager.MAX_THRESHOLD_SATS
                     )
                     settingsManager.setDefaultThreshold(currentThreshold)
