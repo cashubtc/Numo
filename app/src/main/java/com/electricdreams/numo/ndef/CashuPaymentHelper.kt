@@ -3,12 +3,12 @@ package com.electricdreams.numo.ndef
 import android.content.Context
 import android.util.Base64
 import android.util.Log
-import com.google.gson.JsonObject
-import com.google.gson.JsonArray
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.dev.WalletLogger
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.payment.SwapToLightningMintManager
 import com.google.gson.*
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.cashudevkit.CurrencyUnit
@@ -373,6 +373,9 @@ object CashuPaymentHelper {
 
             mintWallet.receive(cdkToken, receiveOptions)
 
+            val tokenAmount = cdkToken.value().value.toLong()
+            WalletLogger.log("IN", tokenAmount, mintUrl, "Token redeemed")
+
             Log.d(TAG, "Token received via CDK successfully (mintUrl=$mintUrl)")
             // Return the original token instead of sending a new one
             tokenString
@@ -405,6 +408,8 @@ object CashuPaymentHelper {
         )
 
         mintWallet.receiveProofs(proofs, receiveOptions, null, null)
+        val proofsAmount = proofs.map { it.amount.value.toLong() }.sum()
+        WalletLogger.log("IN", proofsAmount, mintUrl, "Proofs redeemed")
     }
 
     // === High-level redemption with optional swap-to-Lightning-mint ========

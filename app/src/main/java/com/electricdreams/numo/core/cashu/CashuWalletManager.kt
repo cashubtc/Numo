@@ -5,6 +5,7 @@ import android.util.Log
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.prefs.PreferenceStore
+import com.electricdreams.numo.core.dev.WalletLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -163,9 +164,11 @@ object CashuWalletManager : MintManager.MintChangeListener {
                 
                 onMintProgress(mintUrl, "Restoring proofs...", balancesBefore[mintUrl] ?: 0L, 0L)
                 
-                // Use CDK's restore function to recover proofs
                 val mintWallet = newWallet.getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)
                 val recoveredAmount = mintWallet?.restore()?.unspent?.value?.toLong() ?: 0L
+                if (recoveredAmount > 0) {
+                    WalletLogger.log("IN", recoveredAmount, mintUrl, "Mint restored")
+                }
                 val oldBalance = balancesBefore[mintUrl] ?: 0L
                 val newBalance = recoveredAmount
                 

@@ -222,6 +222,8 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
                                     feeSats = actualFee
                                 )
                             }
+                            val destinationLabel = lightningAddress ?: request
+                            com.electricdreams.numo.core.dev.WalletLogger.log("OUT", amount, mintUrl, "Withdrawal successful: $destinationLabel")
                             showPaymentSuccess()
                         }
                         QuoteState.UNPAID -> {
