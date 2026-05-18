@@ -6,6 +6,7 @@ import android.widget.Toast
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.R
+import com.electricdreams.numo.core.dev.WalletLogger
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
@@ -43,6 +44,7 @@ class PaymentResultHandler(
         val bitcoinPrice = bitcoinPriceWorker?.getCurrentPrice()?.takeIf { it > 0 }
         
         val mintUrl = extractMintUrlFromToken(token)
+        WalletLogger.log("IN", amount, mintUrl ?: "Unknown", "Payment received")
         val historyEntryId = PaymentsHistoryActivity.addToHistory(
             activity, 
             token, 

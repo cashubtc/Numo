@@ -3,12 +3,13 @@ package com.electricdreams.numo.ndef
 import android.content.Context
 import android.util.Base64
 import android.util.Log
-import com.google.gson.JsonObject
-import com.google.gson.JsonArray
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.dev.WalletLogger
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.payment.SwapToLightningMintManager
 import com.google.gson.*
+import org.json.JSONObject
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.cashudevkit.CurrencyUnit
@@ -373,6 +374,9 @@ object CashuPaymentHelper {
 
             mintWallet.receive(cdkToken, receiveOptions)
 
+            val tokenAmount = cdkToken.value().value.toLong()
+            WalletLogger.log("IN", tokenAmount, mintUrl, "Token redeemed")
+
             Log.d(TAG, "Token received via CDK successfully (mintUrl=$mintUrl)")
             // Return the original token instead of sending a new one
             tokenString
@@ -405,6 +409,8 @@ object CashuPaymentHelper {
         )
 
         mintWallet.receiveProofs(proofs, receiveOptions, null, null)
+        val proofsAmount = proofs.map { it.amount.value.toLong() }.sum()
+        WalletLogger.log("IN", proofsAmount, mintUrl, "Proofs redeemed")
     }
 
     // === High-level redemption with optional swap-to-Lightning-mint ========
@@ -548,6 +554,10 @@ object CashuPaymentHelper {
 
                 try {
                     mintWallet.receive(cdkToken, receiveOptions)
+                    
+                    val tokenAmount = cdkToken.value().value.toLong()
+                    WalletLogger.log("IN", tokenAmount, cdkToken.mintUrl().url, "Token redeemed (swap flow)")
+                    
                     tokenString ?: "" // SUCCESS!
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to redeem token for known mint", e)
@@ -634,7 +644,35 @@ object CashuPaymentHelper {
         }
         try {
             Log.d(TAG, "payloadJson: $payloadJson")
-            val payload = org.cashudevkit.PaymentRequestPayload.fromString(payloadJson)
+            val json = JSONObject(payloadJson)
+            
+            // Helper to sanitize amount fields recursively
+            fun sanitizeAmount(obj: Any) {
+                if (obj is JSONObject) {
+                    if (obj.has("amount") && obj.get("amount") is String) {
+                        try {
+                            obj.put("amount", obj.getString("amount").toLong())
+                            Log.d(TAG, "Fixed string amount to long in object")
+                        } catch (e: Exception) {
+                            Log.w(TAG, "Failed to fix amount: ${e.message}")
+                        }
+                    }
+                    val keys = obj.keys()
+                    while (keys.hasNext()) {
+                        val key = keys.next()
+                        sanitizeAmount(obj.get(key))
+                    }
+                } else if (obj is org.json.JSONArray) {
+                    for (i in 0 until obj.length()) {
+                        sanitizeAmount(obj.get(i))
+                    }
+                }
+            }
+            
+            sanitizeAmount(json)
+            val correctedJson = json.toString()
+            Log.d(TAG, "Corrected payload: $correctedJson")
+            val payload = org.cashudevkit.PaymentRequestPayload.fromString(correctedJson)
 
             val mintUrl = payload.mint().url
             val unit = payload.unit().let { tokenUnit ->

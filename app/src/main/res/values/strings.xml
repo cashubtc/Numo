@@ -1002,4 +1002,13 @@
     <string name="insights_day_label_fri">Fri</string>
     <string name="insights_day_label_sat">Sat</string>
     <string name="insights_day_label_sun">Sun</string>
+    <string name="developer_wallet_logs_title">Wallet Logs</string>
+    <string name="developer_wallet_logs_subtitle">View and export recent wallet activity logs</string>
+    <string name="developer_wallet_logs_section_title">WALLET ACTIVITY LOGS</string>
+    <string name="developer_wallet_logs_empty">No wallet activity logs available.</string>
+    <string name="developer_wallet_logs_share_title">Share Wallet Activity Logs</string>
+    <string name="developer_wallet_logs_copied">Wallet activity logs copied to clipboard</string>
+    <string name="developer_wallet_logs_clear_dialog_title">Clear Wallet Logs</string>
+    <string name="developer_wallet_logs_clear_dialog_message">Clear all stored wallet logs? This cannot be undone.</string>
+
 </resources>
