@@ -553,6 +553,10 @@ object CashuPaymentHelper {
 
                 try {
                     mintWallet.receive(cdkToken, receiveOptions)
+                    
+                    val tokenAmount = cdkToken.value().value.toLong()
+                    WalletLogger.log("IN", tokenAmount, cdkToken.mintUrl().url, "Token redeemed (swap flow)")
+                    
                     tokenString ?: "" // SUCCESS!
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to redeem token for known mint", e)

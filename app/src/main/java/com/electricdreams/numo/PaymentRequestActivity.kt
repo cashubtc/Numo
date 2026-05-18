@@ -21,6 +21,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
+import com.electricdreams.numo.core.dev.WalletLogger
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -1027,6 +1028,8 @@ class PaymentRequestActivity : AppCompatActivity() {
             null
         }
 
+        WalletLogger.log("IN", paymentAmount, mintUrl ?: "Unknown", "Payment successful (NFC)")
+
         // Update pending payment to completed (Cashu payment path)
         pendingPaymentId?.let { paymentId ->
             PaymentsHistoryActivity.completePendingPayment(
@@ -1062,6 +1065,8 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         Log.d(TAG, "Lightning payment successful (no Cashu token)")
         cancelNfcSafetyTimeout()
+
+        WalletLogger.log("IN", paymentAmount, lightningMintUrl ?: "Unknown", "Lightning payment successful (NFC)")
 
         statusText.visibility = View.VISIBLE
         statusText.text = getString(R.string.payment_request_status_success)
