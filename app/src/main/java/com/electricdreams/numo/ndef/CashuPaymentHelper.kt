@@ -645,11 +645,33 @@ object CashuPaymentHelper {
         try {
             Log.d(TAG, "payloadJson: $payloadJson")
             val json = JSONObject(payloadJson)
-            if (json.has("amount") && json.get("amount") is String) {
-                json.put("amount", json.getString("amount").toLong())
-                Log.d(TAG, "Fixed string amount to long")
+            
+            // Helper to sanitize amount fields recursively
+            fun sanitizeAmount(obj: Any) {
+                if (obj is JSONObject) {
+                    if (obj.has("amount") && obj.get("amount") is String) {
+                        try {
+                            obj.put("amount", obj.getString("amount").toLong())
+                            Log.d(TAG, "Fixed string amount to long in object")
+                        } catch (e: Exception) {
+                            Log.w(TAG, "Failed to fix amount: ${e.message}")
+                        }
+                    }
+                    val keys = obj.keys()
+                    while (keys.hasNext()) {
+                        val key = keys.next()
+                        sanitizeAmount(obj.get(key))
+                    }
+                } else if (obj is org.json.JSONArray) {
+                    for (i in 0 until obj.length()) {
+                        sanitizeAmount(obj.get(i))
+                    }
+                }
             }
+            
+            sanitizeAmount(json)
             val correctedJson = json.toString()
+            Log.d(TAG, "Corrected payload: $correctedJson")
             val payload = org.cashudevkit.PaymentRequestPayload.fromString(correctedJson)
 
             val mintUrl = payload.mint().url
