@@ -937,4 +937,6 @@
     <string name="insights_day_label_fri">금</string>
     <string name="insights_day_label_sat">토</string>
     <string name="insights_day_label_sun">일</string>
+    <string name="auto_withdraw_lightning_address_valid">유효한 라이트닝 주소</string>
+    <string name="auto_withdraw_lightning_address_invalid">유효하지 않은 라이트닝 주소</string>
 </resources>

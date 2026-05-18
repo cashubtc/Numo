@@ -937,4 +937,6 @@
     <string name="insights_day_label_fri">金</string>
     <string name="insights_day_label_sat">土</string>
     <string name="insights_day_label_sun">日</string>
+    <string name="auto_withdraw_lightning_address_valid">有効な Lightning アドレス</string>
+    <string name="auto_withdraw_lightning_address_invalid">無効な Lightning アドレス</string>
 </resources>

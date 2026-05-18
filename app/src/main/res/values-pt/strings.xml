@@ -774,4 +774,6 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="insights_day_label_fri">Sex</string>
     <string name="insights_day_label_sat">Sáb</string>
     <string name="insights_day_label_sun">Dom</string>
+    <string name="auto_withdraw_lightning_address_valid">Endereço Lightning válido</string>
+    <string name="auto_withdraw_lightning_address_invalid">Endereço Lightning inválido</string>
 </resources>

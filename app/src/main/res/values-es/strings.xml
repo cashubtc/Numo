@@ -694,4 +694,6 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="payment_request_tab_unified">Unificado</string>
     <string name="payment_request_default_description">Pago de %1$d sats</string>
     <string name="payment_request_lightning_description">Pago Numo POS de %1$d sats</string>
+    <string name="auto_withdraw_lightning_address_valid">Dirección Lightning válida</string>
+    <string name="auto_withdraw_lightning_address_invalid">Dirección Lightning no válida</string>
 </resources>
