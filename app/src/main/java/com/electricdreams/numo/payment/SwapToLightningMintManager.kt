@@ -3,7 +3,6 @@ package com.electricdreams.numo.payment
 import android.util.Log
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
-import com.electricdreams.numo.core.dev.WalletLogger
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.nostr.Bech32
 import kotlinx.coroutines.Dispatchers
@@ -317,7 +316,6 @@ object SwapToLightningMintManager {
             Log.e(TAG, msg)
             return@withContext SwapResult.Failure(msg)
         }
-        WalletLogger.log("OUT", quoteAmount, unknownMintUrl, "Melt successful during swap")
 
         // 6) We no longer verify the preimage against the BOLT11 invoice
         // payment hash here. The Lightning mint will only mint proofs if the
@@ -352,11 +350,6 @@ object SwapToLightningMintManager {
                         val msg = "Failed to mint proofs on Lightning mint for quoteId=${finalMintQuote.id}: ${mintError.message}"
                         Log.e(TAG, msg, mintError)
                         return@withContext SwapResult.Failure(msg)
-                    }
-
-                    if (mintedProofs.isNotEmpty()) {
-                        val mintAmount = mintedProofs.map { it.amount.value.toLong() }.sum()
-                        WalletLogger.log("IN", mintAmount, lightningMintUrl, "Mint successful during swap")
                     }
 
                     if (mintedProofs.isEmpty()) {

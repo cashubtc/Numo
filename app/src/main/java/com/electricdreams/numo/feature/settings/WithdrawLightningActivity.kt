@@ -25,7 +25,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
-import com.electricdreams.numo.core.dev.WalletLogger
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
@@ -300,7 +299,6 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 val token = withContext(Dispatchers.IO) {
                     preparedSend.confirm(null)
                 }
-                WalletLogger.log("OUT", amountSats, mintUrl, "Token created (melt)")
                 
                 val tokenString = token.encode()
 
@@ -436,10 +434,8 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 val meltQuote = withContext(Dispatchers.IO) {
                     mintWallet.meltQuote(org.cashudevkit.PaymentMethod.Bolt11, invoice, null,null)
                 }
-                WalletLogger.log("OUT", meltQuote.amount.value.toLong(), mintUrl, "Invoice melt quote requested")
-                
-                withContext(Dispatchers.Main) {
 
+                withContext(Dispatchers.Main) {
                     setLoading(false)
                     
                     // Check if we have enough balance (including fee reserve)
@@ -514,10 +510,8 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 val meltQuote = withContext(Dispatchers.IO) {
                     mintWallet.meltLightningAddressQuote(address, org.cashudevkit.Amount(amountMsat.toULong()))
                 }
-                WalletLogger.log("OUT", meltQuote.amount.value.toLong(), mintUrl, "Lightning address melt quote requested")
-                
-                withContext(Dispatchers.Main) {
 
+                withContext(Dispatchers.Main) {
                     setLoading(false)
                     
                     // Check if we have enough balance (including fee reserve)

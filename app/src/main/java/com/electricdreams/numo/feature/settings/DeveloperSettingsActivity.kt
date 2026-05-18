@@ -35,10 +35,6 @@ class DeveloperSettingsActivity : AppCompatActivity() {
             startActivity(Intent(this, ErrorLogsActivity::class.java))
         }
 
-        binding.walletLogsItem.setOnClickListener {
-            startActivity(Intent(this, WalletLogsActivity::class.java))
-        }
-
         // Delay Lightning Invoice
         binding.delayLightningInvoiceSwitch.isChecked = DeveloperPrefs.isLightningInvoiceDelayed(this)
 
