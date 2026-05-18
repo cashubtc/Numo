@@ -1028,8 +1028,6 @@ class PaymentRequestActivity : AppCompatActivity() {
             null
         }
 
-        WalletLogger.log("IN", paymentAmount, mintUrl ?: "Unknown", "Payment successful (NFC)")
-
         // Update pending payment to completed (Cashu payment path)
         pendingPaymentId?.let { paymentId ->
             PaymentsHistoryActivity.completePendingPayment(
