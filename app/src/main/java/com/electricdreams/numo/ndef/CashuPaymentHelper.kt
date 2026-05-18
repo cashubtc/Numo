@@ -8,6 +8,7 @@ import com.electricdreams.numo.core.dev.WalletLogger
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.payment.SwapToLightningMintManager
 import com.google.gson.*
+import org.json.JSONObject
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -643,7 +644,13 @@ object CashuPaymentHelper {
         }
         try {
             Log.d(TAG, "payloadJson: $payloadJson")
-            val payload = org.cashudevkit.PaymentRequestPayload.fromString(payloadJson)
+            val json = JSONObject(payloadJson)
+            if (json.has("amount") && json.get("amount") is String) {
+                json.put("amount", json.getString("amount").toLong())
+                Log.d(TAG, "Fixed string amount to long")
+            }
+            val correctedJson = json.toString()
+            val payload = org.cashudevkit.PaymentRequestPayload.fromString(correctedJson)
 
             val mintUrl = payload.mint().url
             val unit = payload.unit().let { tokenUnit ->
