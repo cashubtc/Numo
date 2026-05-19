@@ -37,9 +37,13 @@ class BtcMapExplainerActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btn_open_btcmap).setOnClickListener {
-            val builder = CustomTabsIntent.Builder()
-            val customTabsIntent = builder.build()
-            customTabsIntent.launchUrl(this, Uri.parse("https://btcmap.org/add-location"))
+            try {
+                val builder = CustomTabsIntent.Builder()
+                val customTabsIntent = builder.build()
+                customTabsIntent.launchUrl(this, Uri.parse("https://btcmap.org/add-location"))
+            } catch (e: android.content.ActivityNotFoundException) {
+                android.widget.Toast.makeText(this, "No web browser found.", android.widget.Toast.LENGTH_SHORT).show()
+            }
         }
     }
 }
