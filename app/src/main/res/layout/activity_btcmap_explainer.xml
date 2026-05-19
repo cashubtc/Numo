@@ -3,12 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Hero Background Image (Zoomed) -->
+    <!-- Hero Background Image (No crop) -->
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/bg_btcmap_explainer"
-        android:scaleType="centerCrop" />
+        android:scaleType="fitCenter" />
 
     <LinearLayout
         android:layout_width="match_parent"
