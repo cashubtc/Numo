@@ -40,7 +40,7 @@ class DeveloperSettingsActivity : AppCompatActivity() {
             startActivity(Intent(this, WalletLogsActivity::class.java))
         }
 
-        binding.resetBtcMapPromoItem.setOnClickListener {
+        binding.btcmapReset.setOnClickListener {
             PreferenceStore.app(this).putBoolean("has_shown_btcmap_popup", false)
             android.widget.Toast.makeText(this, "BTCMap Promo Reset", android.widget.Toast.LENGTH_SHORT).show()
         }
