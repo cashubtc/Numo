@@ -939,4 +939,17 @@
     <string name="insights_day_label_sun">일</string>
     <string name="auto_withdraw_lightning_address_valid">유효한 라이트닝 주소</string>
     <string name="auto_withdraw_lightning_address_invalid">유효하지 않은 라이트닝 주소</string>
+    <!-- BTCMap Explainer -->
+    <string name="btcmap_explainer_title">BTCMap이 무엇인가요?</string>
+    <string name="btcmap_explainer_desc">BTCMap은 비트코인을 허용하는 장소를 찾기 위한 공동 지도입니다. 매장을 등록하면 비트코인 커뮤니티의 더 많은 고객에게 도달할 수 있습니다.</string>
+    <string name="btcmap_explainer_add_store">매장 추가하기</string>
+
+    <string name="developer_settings_reset_btcmap_promo_title">BTCMap 프로모션 초기화</string>
+    <string name="developer_settings_reset_btcmap_promo_subtitle">다음 앱 실행 시 BTCMap 프로모션 배너 다시 표시</string>
+    <string name="btcmap_promo_title">BTCMap에 게시</string>
+    <string name="btcmap_promo_message">BTCMap에 매장을 등록하고 더 많은 비트코인 사용자를 유치하시겠습니까?</string>
+    <string name="btcmap_promo_dismiss">나중에</string>
+    <string name="btcmap_promo_learn_more">자세히 알아보기</string>
+    <string name="btcmap_banner_message">BTCMap에 매장을 추가하세요.</string>
+    <string name="btcmap_banner_dismiss">닫기</string>
 </resources>
