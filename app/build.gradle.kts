@@ -150,9 +150,6 @@ dependencies {
     
     // Flexbox layout for tag-based category selection
     implementation("com.google.android.flexbox:flexbox:3.0.0")
-    
-    // Custom Tabs for embedded web links
-    implementation("androidx.browser:browser:1.8.0")
 }
 
 tasks.withType<Test>().configureEach {

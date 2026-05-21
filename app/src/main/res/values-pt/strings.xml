@@ -776,17 +776,4 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="insights_day_label_sun">Dom</string>
     <string name="auto_withdraw_lightning_address_valid">Endereço Lightning válido</string>
     <string name="auto_withdraw_lightning_address_invalid">Endereço Lightning inválido</string>
-    <!-- BTCMap Explainer -->
-    <string name="btcmap_explainer_title">O que é o BTCMap?</string>
-    <string name="btcmap_explainer_desc">O BTCMap é um mapa colaborativo para encontrar lugares que aceitam Bitcoin. Ao listar sua loja, você pode alcançar mais clientes na comunidade Bitcoin.</string>
-    <string name="btcmap_explainer_add_store">Adicione sua loja</string>
-
-    <string name="developer_settings_reset_btcmap_promo_title">Redefinir promoção do BTCMap</string>
-    <string name="developer_settings_reset_btcmap_promo_subtitle">Mostrar o banner promocional do BTCMap novamente na próxima vez que abrir o aplicativo</string>
-    <string name="btcmap_promo_title">Publicar no BTCMap</string>
-    <string name="btcmap_promo_message">Gostaria de listar sua loja no BTCMap e atrair mais usuários de Bitcoin?</string>
-    <string name="btcmap_promo_dismiss">Agora não</string>
-    <string name="btcmap_promo_learn_more">Saiba mais</string>
-    <string name="btcmap_banner_message">Adicione sua loja ao BTCMap.</string>
-    <string name="btcmap_banner_dismiss">Dispensar</string>
 </resources>

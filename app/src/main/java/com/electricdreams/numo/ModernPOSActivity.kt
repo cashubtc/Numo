@@ -19,14 +19,12 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import com.electricdreams.numo.core.cashu.CashuWalletManager
-
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
@@ -53,7 +51,6 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
     private var progressTitle: TextView? = null
     private var progressSubtitle: TextView? = null
     private var progressAmount: TextView? = null
-    private var btcmapBanner: View? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,9 +61,6 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
         // Initialize basic setup
         CashuWalletManager.init(this)
         setContentView(R.layout.activity_modern_pos)
-
-        // Initialize BTCMap banner
-        initBtcMapBanner()
 
         // Initialize vibrator for haptic feedback used in auto-withdraw UI
         vibrator = getVibrator()
@@ -89,63 +83,6 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
 
         // Handle initial payment amount if provided
         uiCoordinator.handleInitialPaymentAmount(paymentAmount)
-
-        val prefs = PreferenceStore.app(this)
-        val hasShown = prefs.getBoolean("has_shown_btcmap_popup", false)
-        Log.d(TAG, "onCreate: hasShown_btcmap_popup=$hasShown")
-        if (!hasShown) {
-            Log.d(TAG, "onCreate: Attempting to show BTCMap popup")
-            showBtcMapBanner()
-        }
-    }
-
-    private fun initBtcMapBanner() {
-        val root = findViewById<android.view.ViewGroup>(android.R.id.content)
-        btcmapBanner = layoutInflater.inflate(R.layout.layout_btcmap_banner, root, false)
-        root.addView(btcmapBanner)
-        
-        btcmapBanner?.findViewById<android.view.View>(R.id.btn_dismiss)?.setOnClickListener {
-            hideBtcMapBanner()
-        }
-        
-        btcmapBanner?.findViewById<android.view.View>(R.id.btn_learn_more)?.setOnClickListener {
-            hideBtcMapBanner()
-            startActivity(Intent(this, com.electricdreams.numo.feature.btcmap.BtcMapExplainerActivity::class.java))
-        }
-    }
-
-    private fun showBtcMapBanner() {
-        Log.d(TAG, "Showing BTCMap banner")
-        btcmapBanner?.visibility = android.view.View.VISIBLE
-        btcmapBanner?.alpha = 0f
-        
-        // Add delay and animation: Slide down + Shake
-        btcmapBanner?.postDelayed({
-            btcmapBanner?.animate()
-                ?.alpha(1f)
-                ?.translationYBy(20f)
-                ?.setDuration(400)
-                ?.setInterpolator(android.view.animation.OvershootInterpolator(1.5f))
-                ?.start()
-            
-            // Add a simple shake animation
-            val shake = android.view.animation.AnimationUtils.loadAnimation(this, android.R.anim.fade_in) // Placeholder, will use property animation for shake
-            // Create shake animation
-            val shakeAnim = android.animation.ObjectAnimator.ofFloat(btcmapBanner, "translationX", 0f, 10f, -10f, 10f, -10f, 0f)
-            shakeAnim.duration = 500
-            shakeAnim.start()
-            
-        }, 1000) // 1 second delay
-
-        PreferenceStore.app(this).putBoolean("has_shown_btcmap_popup", true)
-        Log.d(TAG, "showBtcMapBanner: flag set to true")
-    }
-
-    private fun hideBtcMapBanner() {
-        Log.d(TAG, "Hiding BTCMap banner")
-        btcmapBanner?.animate()?.alpha(0f)?.setDuration(300)?.withEndAction {
-            btcmapBanner?.visibility = android.view.View.GONE
-        }?.start()
     }
 
     private fun setupThemeSettings() {
@@ -258,14 +195,9 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
         
         // Reload mint limits every time we return to POS to ensure fresh data
         uiCoordinator.reloadMintLimits()
-
-        if (!PreferenceStore.app(this).getBoolean("has_shown_btcmap_popup", false)) {
-            showBtcMapBanner()
-        }
     }
 
     override fun onPause() {
-
         try {
             val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
             if (nfcAdapter != null) {
