@@ -66,13 +66,6 @@ jobs:
           }
           EOT
 
-      # Also update Java compatibility to 21 if needed
-      - name: Update Java compatibility
-        run: |
-          sed -i 's/sourceCompatibility = JavaVersion.VERSION_17/sourceCompatibility = JavaVersion.VERSION_21/g' app/build.gradle.kts
-          sed -i 's/targetCompatibility = JavaVersion.VERSION_17/targetCompatibility = JavaVersion.VERSION_21/g' app/build.gradle.kts
-          sed -i 's/jvmTarget = "17"/jvmTarget = "21"/g' app/build.gradle.kts
-
       # Enable native debug symbols for pre-releases
       - name: Enable debug symbols for pre-release
         if: ${{ github.event.inputs.pre_release == 'true' }}
