@@ -939,4 +939,17 @@
     <string name="insights_day_label_sun">日</string>
     <string name="auto_withdraw_lightning_address_valid">有効な Lightning アドレス</string>
     <string name="auto_withdraw_lightning_address_invalid">無効な Lightning アドレス</string>
+    <!-- BTCMap Explainer -->
+    <string name="btcmap_explainer_title">BTCMapとは？</string>
+    <string name="btcmap_explainer_desc">BTCMapは、ビットコインが使えるお店を見つけるための協力型マップです。あなたのお店を登録することで、ビットコインコミュニティのより多くのお客様にリーチできます。</string>
+    <string name="btcmap_explainer_add_store">お店を追加する</string>
+
+    <string name="developer_settings_reset_btcmap_promo_title">BTCMap プロモーションのリセット</string>
+    <string name="developer_settings_reset_btcmap_promo_subtitle">次回のアプリ起動時にBTCMapのプロモーションバナーを再度表示する</string>
+    <string name="btcmap_promo_title">BTCMapに公開する</string>
+    <string name="btcmap_promo_message">あなたのお店をBTCMapに登録して、より多くのビットコインユーザーを引き付けませんか？</string>
+    <string name="btcmap_promo_dismiss">今はしない</string>
+    <string name="btcmap_promo_learn_more">詳細を見る</string>
+    <string name="btcmap_banner_message">あなたのお店をBTCMapに追加する。</string>
+    <string name="btcmap_banner_dismiss">閉じる</string>
 </resources>

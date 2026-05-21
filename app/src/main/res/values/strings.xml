@@ -273,6 +273,23 @@
     <string name="developer_settings_restart_onboarding_subtitle">Start the onboarding flow again</string>
     <string name="developer_settings_lightning_invoice_title">Delay Lightning Invoice</string>
     <string name="developer_settings_lightning_invoice_subtitle">Only fetch invoice when Lightning tab is selected</string>
+    <string name="developer_settings_reset_btcmap_promo_title">Reset BTCMap Promotion</string>
+    <string name="developer_settings_reset_btcmap_promo_subtitle">Show the BTCMap promo banner again on next app launch</string>
+    
+
+    <!-- BTCMap Promo & Banner -->
+    <string name="btcmap_promo_title">Publish on BTCMap</string>
+    <string name="btcmap_promo_message">Would you like to list your store on BTCMap and attract more Bitcoin users?</string>
+    <string name="btcmap_promo_dismiss">Not now</string>
+    <string name="btcmap_promo_learn_more">Learn more</string>
+    <string name="btcmap_banner_message">Add your store to BTCMap.</string>
+    <string name="btcmap_banner_dismiss">Dismiss</string>
+
+    <!-- BTCMap Explainer -->
+    <string name="btcmap_explainer_title">What is BTCMap?</string>
+    <string name="btcmap_explainer_desc">BTCMap is a collaborative map for finding places that accept Bitcoin. By listing your store, you can reach more customers in the Bitcoin community.</string>
+    <string name="btcmap_explainer_add_store">Add your store</string>
+
     <string name="developer_settings_warning">⚠️ Developer settings are for testing and debugging purposes only. Use with caution.</string>
 
     
