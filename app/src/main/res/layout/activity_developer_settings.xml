@@ -84,54 +84,6 @@
                     app:tint="@color/color_icon_secondary" />
             </LinearLayout>
 
-            <!-- Reset BTCMap Promo -->
-            <LinearLayout
-                android:id="@+id/btcmap_reset"
-                android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="@dimen/settings_horizontal_padding">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/space_l"
-                    android:src="@drawable/ic_btcmap_logo"
-                    app:tint="@color/color_icon_secondary" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/developer_settings_reset_btcmap_promo_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/developer_settings_reset_btcmap_promo_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
-            </LinearLayout>
-
             <!-- Delay Lightning Invoice -->
             <LinearLayout
                 android:id="@+id/delay_lightning_invoice_item"

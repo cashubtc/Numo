@@ -7,7 +7,6 @@ import com.electricdreams.numo.R
 import com.electricdreams.numo.databinding.ActivityDeveloperSettingsBinding
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.feature.onboarding.OnboardingActivity
-import com.electricdreams.numo.core.prefs.PreferenceStore
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
@@ -38,11 +37,6 @@ class DeveloperSettingsActivity : AppCompatActivity() {
 
         binding.walletLogsItem.setOnClickListener {
             startActivity(Intent(this, WalletLogsActivity::class.java))
-        }
-
-        binding.btcmapReset.setOnClickListener {
-            PreferenceStore.app(this).putBoolean("has_shown_btcmap_popup", false)
-            android.widget.Toast.makeText(this, "BTCMap Promo Reset", android.widget.Toast.LENGTH_SHORT).show()
         }
 
         // Delay Lightning Invoice
