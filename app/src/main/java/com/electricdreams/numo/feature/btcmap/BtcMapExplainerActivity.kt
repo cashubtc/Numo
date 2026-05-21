@@ -30,10 +30,30 @@ class BtcMapExplainerActivity : AppCompatActivity() {
         
         setContentView(R.layout.activity_btcmap_explainer)
         
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.root_layout)) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, 0, 0, 0) // No padding, allow content to be truly edge-to-edge
+            
+            // Convert 16dp to pixels
+            val margin16dp = (16 * resources.displayMetrics.density).toInt()
+            
+            // Adjust the close button to be below the status bar
+            val btnClose = findViewById<android.view.View>(R.id.btn_close)
+            val closeParams = btnClose.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
+            closeParams.topMargin = insets.top + margin16dp
+            btnClose.layoutParams = closeParams
+
+            // Ensure the center card remains centered visually between system bars
+            val card = findViewById<android.view.View>(R.id.content_card)
+            val cardParams = card.layoutParams as androidx.constraintlayout.widget.ConstraintLayout.LayoutParams
+            cardParams.topMargin = insets.top + margin16dp
+            cardParams.bottomMargin = insets.bottom + margin16dp
+            card.layoutParams = cardParams
+
             windowInsets
+        }
+
+        findViewById<android.view.View>(R.id.btn_close).setOnClickListener {
+            finish()
         }
 
         findViewById<Button>(R.id.btn_open_btcmap).setOnClickListener {
