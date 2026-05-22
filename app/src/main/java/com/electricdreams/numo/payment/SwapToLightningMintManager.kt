@@ -149,6 +149,22 @@ object SwapToLightningMintManager {
                 return@withContext SwapResult.Failure("No Lightning mint configured")
             }
         Log.d(TAG, "swapFromUnknownMint: preferred Lightning mint is $lightningMintUrl")
+        
+        // Check if the preferred lightning mint actually supports bolt11
+        val limits = mintManager.getMintLimits(lightningMintUrl, appContext)
+        val limitCheck = com.electricdreams.numo.core.util.MintLimitChecker.checkMintLimits(paymentContext.amountSats, limits)
+        if (!limitCheck.isBolt11Supported) {
+            val msg = "Preferred mint does not support Lightning (bolt11). Cannot perform swap."
+            Log.e(TAG, msg)
+            try { tempWallet.close() } catch (_: Throwable) {}
+            return@withContext SwapResult.Failure(msg)
+        }
+        if (!limitCheck.isValid) {
+            val msg = "Amount ${paymentContext.amountSats} is not within Lightning limits for preferred mint."
+            Log.e(TAG, msg)
+            try { tempWallet.close() } catch (_: Throwable) {}
+            return@withContext SwapResult.Failure(msg)
+        }
 
         Log.d(
             TAG,
