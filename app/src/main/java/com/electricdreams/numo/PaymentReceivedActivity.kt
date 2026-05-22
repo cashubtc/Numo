@@ -140,14 +140,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
             val decodedToken = Token.decode(token)
             
             // Extract unit
-            unit = when (val tokenUnit = decodedToken.unit()) {
-                is CurrencyUnit.Sat -> "sat"
-                is CurrencyUnit.Msat -> "msat"
-                is CurrencyUnit.Eur -> "eur"
-                is CurrencyUnit.Usd -> "usd"
-                is CurrencyUnit.Custom -> tokenUnit.unit
-                else -> "sat"
-            }
+            unit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
             
             // Calculate total amount from all proofs using the public API
             amount = decodedToken.value().value.toLong()

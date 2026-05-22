@@ -193,7 +193,8 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
                 }
 
                 // Get the wallet for this mint
-                val mintWallet = wallet.getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)
+                val unit = com.electricdreams.numo.core.util.MintManager.getInstance(this@WithdrawMeltQuoteActivity).getPreferredUnit()
+                val mintWallet = wallet.getWallet(MintUrl(mintUrl), com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unit))
                     ?: throw Exception("Failed to get wallet for mint: $mintUrl")
 
                 // Prepare and confirm melt
