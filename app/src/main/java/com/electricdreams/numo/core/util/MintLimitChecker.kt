@@ -18,7 +18,8 @@ object MintLimitChecker {
         val isValid: Boolean,
         val minAmount: Long?,
         val maxAmount: Long?,
-        val limitType: LimitType = LimitType.NONE
+        val limitType: LimitType = LimitType.NONE,
+        val isBolt11Supported: Boolean = true
     )
 
     fun checkMintLimits(amount: Long, mintLimits: CashuWalletManager.MintLimits?): LimitCheckResult {
@@ -36,10 +37,11 @@ object MintLimitChecker {
         
         if (mintLimits == null) {
             return LimitCheckResult(
-                isValid = false,
+                isValid = true,
                 minAmount = null,
                 maxAmount = null,
-                limitType = LimitType.DISABLED
+                limitType = LimitType.NONE,
+                isBolt11Supported = false
             )
         }
 
@@ -53,21 +55,13 @@ object MintLimitChecker {
             methodMatch && unitMatch
         }
 
-        if (bolt11Method == null) {
+        if (bolt11Method == null || bolt11Method.disabled) {
             return LimitCheckResult(
-                isValid = false,
+                isValid = true,
                 minAmount = null,
                 maxAmount = null,
-                limitType = LimitType.DISABLED
-            )
-        }
-
-        if (bolt11Method.disabled) {
-            return LimitCheckResult(
-                isValid = false,
-                minAmount = bolt11Method.minAmount,
-                maxAmount = bolt11Method.maxAmount,
-                limitType = LimitType.DISABLED
+                limitType = LimitType.NONE,
+                isBolt11Supported = false
             )
         }
 
@@ -88,7 +82,8 @@ object MintLimitChecker {
                     isValid = false,
                     minAmount = min,
                     maxAmount = bolt11Method.maxAmount,
-                    limitType = LimitType.MIN
+                    limitType = LimitType.MIN,
+                    isBolt11Supported = true
                 )
             }
         }
@@ -99,7 +94,8 @@ object MintLimitChecker {
                     isValid = false,
                     minAmount = bolt11Method.minAmount,
                     maxAmount = max,
-                    limitType = LimitType.MAX
+                    limitType = LimitType.MAX,
+                    isBolt11Supported = true
                 )
             }
         }
@@ -107,7 +103,8 @@ object MintLimitChecker {
         return LimitCheckResult(
             isValid = true,
             minAmount = bolt11Method.minAmount,
-            maxAmount = bolt11Method.maxAmount
+            maxAmount = bolt11Method.maxAmount,
+            isBolt11Supported = true
         )
     }
 }

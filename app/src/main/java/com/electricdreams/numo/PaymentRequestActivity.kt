@@ -34,6 +34,7 @@ import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.Amount.Currency
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.util.MintLimitChecker
 import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.core.util.CurrencyManager
@@ -571,11 +572,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         val preferredLightningMint = mintManager.getPreferredLightningMint()
         lightningHandler = LightningMintHandler(this, preferredLightningMint, allowedMints, uiScope)
 
-        // Unless developer setting to delay it is enabled, start it immediately
-        if (!DeveloperPrefs.isLightningInvoiceDelayed(this)) {
-            startLightningMintFlow()
-        }
-
         // Check if NDEF is available
         val ndefAvailable = NdefHostCardEmulationService.isHceAvailable(this)
 
@@ -611,7 +607,35 @@ class PaymentRequestActivity : AppCompatActivity() {
         nostrHandler = NostrPaymentHandler(this, allowedMints)
         startNostrPaymentFlow()
 
-        // Lightning flow is now also started immediately (see startLightningMintFlow() call above)
+        // Check mint limits for the preferred mint to see if lightning bolt11 is supported
+        uiScope.launch {
+            val mintUrlToUse = preferredLightningMint ?: allowedMints.firstOrNull()
+            var isBolt11Supported = true
+            
+            if (mintUrlToUse != null) {
+                val limits = mintManager.getMintLimits(mintUrlToUse, this@PaymentRequestActivity)
+                val checkResult = MintLimitChecker.checkMintLimits(paymentAmount, limits)
+                isBolt11Supported = checkResult.isBolt11Supported
+            }
+            
+            if (!isBolt11Supported) {
+                Log.d(TAG, "Mint does not support bolt11. Bypassing Lightning tab and showing raw Cashu request.")
+                // Bypass lightning entirely
+                runOnUiThread {
+                    // Hide Unified and Lightning tabs
+                    unifiedTab.visibility = View.GONE
+                    lightningTab.visibility = View.GONE
+                    
+                    // Force selecting CASHU tab
+                    tabManager.selectTab(PaymentTabManager.PaymentTab.CASHU)
+                }
+            } else {
+                // Unless developer setting to delay it is enabled, start it immediately
+                if (!DeveloperPrefs.isLightningInvoiceDelayed(this@PaymentRequestActivity)) {
+                    startLightningMintFlow()
+                }
+            }
+        }
     }
 
     private fun setHceToCashu() {
