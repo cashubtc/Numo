@@ -134,6 +134,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     // BTCPay payment tracking
     private var btcPayPaymentId: String? = null
     private var btcPayCashuPR: String? = null
+    private var btcPayCashuPRBech32: String? = null
     private var btcPayPollingJob: Job? = null
     private var btcPayInvoiceCreatedAt: Long = 0L
 
@@ -638,9 +639,11 @@ class PaymentRequestActivity : AppCompatActivity() {
 
                 // Show Cashu QR (cashuPR from BTCNutServer)
                 if (hasCashu) {
-                    btcPayCashuPR = payment.cashuPR
+                    val (cashuCbor, cashuBech32) = prepareBtcPayCashuPR(payment.cashuPR!!, paymentAmount)
+                    btcPayCashuPR = cashuCbor
+                    btcPayCashuPRBech32 = cashuBech32
                     try {
-                        val qrBitmap = QrCodeGenerator.generate(payment.cashuPR!!, 512)
+                        val qrBitmap = QrCodeGenerator.generate(cashuCbor, 512)
                         cashuQrImageView.setImageBitmap(qrBitmap)
                         cashuQrImageView.visibility = View.VISIBLE
                         cashuLogoCard.visibility = View.VISIBLE
@@ -649,7 +652,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     }
                     cashuLoadingSpinner.visibility = View.GONE
 
-                    hcePaymentRequest = CashuPaymentHelper.stripTransports(payment.cashuPR!!) ?: payment.cashuPR
+                    hcePaymentRequest = CashuPaymentHelper.stripTransports(cashuCbor) ?: cashuCbor
                     if (NdefHostCardEmulationService.isHceAvailable(this@PaymentRequestActivity)) {
                         val serviceIntent = Intent(this@PaymentRequestActivity, NdefHostCardEmulationService::class.java)
                         startService(serviceIntent)
@@ -725,9 +728,11 @@ class PaymentRequestActivity : AppCompatActivity() {
                 }
 
                 if (hasCashu) {
-                    btcPayCashuPR = payment.cashuPR
+                    val (cashuCbor, cashuBech32) = prepareBtcPayCashuPR(payment.cashuPR!!, paymentAmount)
+                    btcPayCashuPR = cashuCbor
+                    btcPayCashuPRBech32 = cashuBech32
                     try {
-                        val qrBitmap = QrCodeGenerator.generate(payment.cashuPR!!, 512)
+                        val qrBitmap = QrCodeGenerator.generate(cashuCbor, 512)
                         cashuQrImageView.setImageBitmap(qrBitmap)
                         cashuQrImageView.visibility = View.VISIBLE
                         cashuLogoCard.visibility = View.VISIBLE
@@ -735,7 +740,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                         Log.e(TAG, "Error generating BTCPay Cashu QR on resume: ${e.message}", e)
                     }
                     cashuLoadingSpinner.visibility = View.GONE
-                    hcePaymentRequest = CashuPaymentHelper.stripTransports(payment.cashuPR!!) ?: payment.cashuPR
+                    hcePaymentRequest = CashuPaymentHelper.stripTransports(cashuCbor) ?: cashuCbor
                     if (NdefHostCardEmulationService.isHceAvailable(this@PaymentRequestActivity)) {
                         startService(Intent(this@PaymentRequestActivity, NdefHostCardEmulationService::class.java))
                         setupNdefPayment()
@@ -986,8 +991,59 @@ class PaymentRequestActivity : AppCompatActivity() {
         return QrCodeGenerator.generate(text, 512, qrForeground, qrBackground)
     }
 
+    /**
+     * Ensures the BTCPay cashuPR has an amount field (inject [amount] if missing)
+     * and returns both the CBOR form and its bech32m-encoded equivalent.
+     */
+    private fun prepareBtcPayCashuPR(rawCashuPR: String, amount: Long): Pair<String, String?> {
+        val cbor = try {
+            val decoded = org.cashudevkit.PaymentRequest.fromString(rawCashuPR)
+            if (decoded.amount() != null) {
+                rawCashuPR
+            } else {
+                val map = com.upokecenter.cbor.CBORObject.NewMap()
+                decoded.paymentId()?.let { map.Add("i", it) }
+                map.Add("a", amount)
+                decoded.unit()?.let { u ->
+                    map.Add("u", when (u) {
+                        is org.cashudevkit.CurrencyUnit.Sat -> "sat"
+                        is org.cashudevkit.CurrencyUnit.Msat -> "msat"
+                        is org.cashudevkit.CurrencyUnit.Eur -> "eur"
+                        is org.cashudevkit.CurrencyUnit.Usd -> "usd"
+                        is org.cashudevkit.CurrencyUnit.Custom -> u.unit
+                        else -> "sat"
+                    })
+                }
+                decoded.description()?.let { map.Add("d", it) }
+                decoded.singleUse()?.let { map.Add("s", it) }
+                val mints = decoded.mints()
+                if (mints.isNotEmpty()) {
+                    val mintsArray = com.upokecenter.cbor.CBORObject.NewArray()
+                    mints.forEach { mintsArray.Add(it) }
+                    map.Add("m", mintsArray)
+                }
+                "creqA" + android.util.Base64.encodeToString(
+                    map.EncodeToBytes(),
+                    android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or android.util.Base64.NO_PADDING
+                )
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "prepareBtcPayCashuPR: could not inject amount: ${e.message}")
+            rawCashuPR
+        }
+
+        val bech32 = try {
+            org.cashudevkit.PaymentRequest.fromString(cbor).toBech32String()
+        } catch (e: Exception) {
+            Log.w(TAG, "prepareBtcPayCashuPR: could not convert to bech32m: ${e.message}")
+            null
+        }
+
+        return cbor to bech32
+    }
+
     private fun updateUnifiedQrCode() {
-        val creq = nostrHandler?.paymentRequestBech32 ?: hcePaymentRequestBech32 ?: btcPayCashuPR ?: hcePaymentRequest
+        val creq = nostrHandler?.paymentRequestBech32 ?: hcePaymentRequestBech32 ?: btcPayCashuPRBech32 ?: btcPayCashuPR ?: hcePaymentRequest
         val lnbc = lightningInvoice
 
 
@@ -1222,13 +1278,14 @@ class PaymentRequestActivity : AppCompatActivity() {
                                         Log.d(TAG, "Redeeming NFC token via BTCPay /cashu/pay-invoice")
                                         val result = paymentService.redeemToken(token, invoiceId)
                                         result.onSuccess {
-                                            withContext(Dispatchers.Main) {
-                                                handleLightningPaymentSuccess(PaymentHistoryEntry.TYPE_CASHU)
-                                            }
+                                            // BTCPay now returns 200 when the token is accepted for
+                                            // processing, not when the invoice is settled. Settlement
+                                            // is confirmed by the polling loop (startBtcPayPolling)
+                                            // which calls handleLightningPaymentSuccess on PAID.
+                                            Log.d(TAG, "BTCPay token submitted — waiting for invoice settlement via polling")
                                         }.onFailure { e ->
-                                            // Redemption failed on our side — check BTCPay invoice
-                                            // status to see if it was settled anyway (e.g. race
-                                            // condition). If still unpaid, reset and allow retry.
+                                            // Redemption failed — check BTCPay invoice status to see
+                                            // if it settled anyway (e.g. race condition).
                                             Log.w(TAG, "BTCPay NFC redemption failed: ${e.message} — checking invoice status")
                                             val statusResult = paymentService.checkPaymentStatus(invoiceId)
                                             statusResult.onSuccess { state ->
@@ -1237,7 +1294,6 @@ class PaymentRequestActivity : AppCompatActivity() {
                                                         handleLightningPaymentSuccess(PaymentHistoryEntry.TYPE_CASHU)
                                                     }
                                                     PaymentState.PENDING -> withContext(Dispatchers.Main) {
-                                                        // Invoice still open — show error screen with retry option
                                                         handlePaymentError(e.message ?: "NFC payment failed")
                                                     }
                                                     else -> throw Exception("BTCPay redemption failed: ${e.message}")

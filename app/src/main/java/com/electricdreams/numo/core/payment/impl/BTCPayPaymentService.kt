@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -105,20 +106,21 @@ class BTCPayPaymentService(
         paymentId: String?
     ): WalletResult<RedeemResult> = withContext(Dispatchers.IO) {
         WalletResult.runCatching {
-            val urlBuilder = StringBuilder("${baseUrl()}/cashu/pay-invoice?token=$token")
-            if (!paymentId.isNullOrBlank()) {
-                urlBuilder.append("&invoiceId=$paymentId")
-            }
+            val url = "${baseUrl()}/cashu/pay-invoice".toHttpUrl().newBuilder()
+                .addQueryParameter("token", token)
+                .apply { if (!paymentId.isNullOrBlank()) addQueryParameter("invoiceId", paymentId) }
+                .build()
             val request = Request.Builder()
-                .url(urlBuilder.toString())
+                .url(url)
                 .post("".toRequestBody(jsonMediaType))
                 .addHeader("Authorization", "token ${config.apiKey}")
                 .build()
 
-            executeForBody(request)
+            val body = executeForBody(request)
+            Log.d(TAG, "redeemToken response: ${body.take(200)}")
 
-            // BTCNutServer does not return detailed amount info; return a
-            // placeholder so the caller knows the operation succeeded.
+            // 200 means the token was accepted for processing; the invoice may
+            // still be in "Processing" state until BTCPay settles it.
             RedeemResult(amount = Satoshis(0), proofsCount = 0)
         }
     }
