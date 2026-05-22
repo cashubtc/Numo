@@ -609,9 +609,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
         val stale = history.filter { entry ->
             entry.isPending() && (
-                // No resume data at all — always orphaned
-                (entry.lightningQuoteId == null && entry.nostrNprofile == null && entry.btcPayInvoiceId == null) ||
-                // Has resume data but payment is too old to still be valid
+                // Old enough that no invoice type would still be valid
                 entry.date.time < cutoff ||
                 // BTCPay is disabled — pending BTCPay entries can never be resolved.
                 // BTCPay entries have lightningQuoteId (set to invoice ID) but no
