@@ -33,6 +33,7 @@
         android:theme="@style/Theme.Numo"
         android:localeConfig="@xml/locales_config"
         android:name=".NumoApplication"
+        android:usesCleartextTraffic="true"
         tools:targetApi="33">
 
         <service
