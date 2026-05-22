@@ -1,0 +1,10 @@
+feat(ecash): introduce custom unit ecash support
+
+This commit introduces support for custom unit ecash (units different from "sat" that mints may advertise) across the Numo application. The core objective is to disable fiat currency conversions and format inputs 1:1 if a unit other than "sat" is selected as the base unit.
+
+Updates include:
+- `MintManager`: Added a new setting to store the active `preferredBaseUnit` to allow selecting and tracking units outside "sat".
+- `CashuWalletManager`: Replaced all hardcoded usages of `CurrencyUnit.Sat` dynamically with the `preferredBaseUnit`. Whenever the unit changes, a wallet rebuild is triggered to re-bind the CDK wallet.
+- `AmountDisplayManager` & `TransactionDetailActivity`: Hidden UI components for currency switching and fiat conversions when a non-sat unit is active. Implemented verbatim custom unit printing string structures (e.g. `150 mxn`).
+- `TipSelectionActivity` & `PaymentRequestActivity`: Adjusted the logic to omit the toggle custom currency interactions if we're not operating with standard satoshis.
+- `MintsSettingsActivity`: Implemented Option B functionality; exposed a new selectable row below the active Lightning Mint card where users can swap their "Base Currency Unit" (pulling values dynamically from the parsed `MintLimits` methods).

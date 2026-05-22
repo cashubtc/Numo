@@ -44,7 +44,17 @@ object CashuWalletManager : MintManager.MintChangeListener {
     private const val KEY_MNEMONIC = "wallet_mnemonic"
     private const val DB_FILE_NAME = "cashu_wallet.db"
 
-    private lateinit var appContext: Context
+    fun getCurrencyUnit(unit: String): CurrencyUnit {
+        return when (unit.lowercase()) {
+            "sat" -> CurrencyUnit.Sat
+            "msat" -> CurrencyUnit.Msat
+            "usd" -> CurrencyUnit.Usd
+            "eur" -> CurrencyUnit.Eur
+            else -> CurrencyUnit.Custom(unit)
+        }
+    }
+
+    lateinit var appContext: Context
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     @Volatile
@@ -163,11 +173,13 @@ object CashuWalletManager : MintManager.MintChangeListener {
             try {
                 onMintProgress(mintUrl, "Connecting...", balancesBefore[mintUrl] ?: 0L, 0L)
                 
-                newWallet.createWallet(MintUrl(mintUrl), CurrencyUnit.Sat, 10u)
+                val unitStr = mintManager.getPreferredUnit()
+                val unit = getCurrencyUnit(unitStr)
+                newWallet.createWallet(MintUrl(mintUrl), unit, 10u)
                 
                 onMintProgress(mintUrl, "Restoring proofs...", balancesBefore[mintUrl] ?: 0L, 0L)
                 
-                val mintWallet = newWallet.getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)
+                val mintWallet = newWallet.getWallet(MintUrl(mintUrl), unit)
                 val recoveredAmount = mintWallet?.restore()?.unspent?.value?.toLong() ?: 0L
                 if (recoveredAmount > 0) {
                     WalletLogger.log("IN", recoveredAmount, mintUrl, "Mint restored")
@@ -228,10 +240,12 @@ object CashuWalletManager : MintManager.MintChangeListener {
         val tempDbStore = WalletStore.Custom(tempDb)
 
         val config = WalletConfig(targetProofCount = 10u)
+        val unitStr = MintManager.getInstance(appContext).getPreferredUnit()
+        val unit = getCurrencyUnit(unitStr)
 
         return Wallet(
             unknownMintUrl,
-            CurrencyUnit.Sat,
+            unit,
             tempMnemonic,
             tempDbStore,
             config
@@ -277,12 +291,14 @@ object CashuWalletManager : MintManager.MintChangeListener {
      */
     suspend fun getBalanceForMint(mintUrl: String): Long {
         val w = wallet ?: return 0L
+        val unitStr = MintManager.getInstance(appContext).getPreferredUnit()
+        val unit = getCurrencyUnit(unitStr)
         return try {
             val balances = w.getBalances()
             val normalizedInput = mintUrl.removeSuffix("/")
             for (entry in balances) {
                 val cdkUrl = entry.key.mintUrl.url.removeSuffix("/")
-                if (cdkUrl == normalizedInput && entry.key.unit == CurrencyUnit.Sat) {
+                if (cdkUrl == normalizedInput && entry.key.unit == unit) {
                     return entry.value.value.toLong()
                 }
             }
@@ -299,10 +315,12 @@ object CashuWalletManager : MintManager.MintChangeListener {
      */
     suspend fun getAllMintBalances(): Map<String, Long> {
         val w = wallet ?: return emptyMap()
+        val unitStr = MintManager.getInstance(appContext).getPreferredUnit()
+        val unit = getCurrencyUnit(unitStr)
         return try {
             val balanceMap = w.getBalances()
             balanceMap
-                .filter { it.key.unit == CurrencyUnit.Sat }
+                .filter { it.key.unit == unit }
                 .mapKeys { it.key.mintUrl.url.removeSuffix("/") }
                 .mapValues { it.value.value.toLong() }
         } catch (e: Exception) {
@@ -317,8 +335,10 @@ object CashuWalletManager : MintManager.MintChangeListener {
      */
     suspend fun fetchMintInfo(mintUrl: String): org.cashudevkit.MintInfo? {
         val w = wallet ?: return null
+        val unitStr = MintManager.getInstance(appContext).getPreferredUnit()
+        val unit = getCurrencyUnit(unitStr)
         return try {
-            val mintWallet = w.getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)
+            val mintWallet = w.getWallet(MintUrl(mintUrl), unit)
             mintWallet?.fetchMintInfo()
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching mint info for $mintUrl: ${e.message}", e)
@@ -612,14 +632,16 @@ object CashuWalletManager : MintManager.MintChangeListener {
 
             // 3) Construct WalletRepository in sats.
             val newWallet = WalletRepository(mnemonic, db)
+            val unitStr = MintManager.getInstance(appContext).getPreferredUnit()
+        val unit = getCurrencyUnit(unitStr)
 
             // 4) Register allowed mints.
             for (url in mints) {
                 try {
-                    newWallet.createWallet(MintUrl(url), CurrencyUnit.Sat, 10u)
+                    newWallet.createWallet(MintUrl(url), unit, 10u)
                     
                     // Recover incomplete sagas (e.g. pending melts or mints)
-                    val mintWallet = newWallet.getWallet(MintUrl(url), CurrencyUnit.Sat)
+                    val mintWallet = newWallet.getWallet(MintUrl(url), unit)
                     try {
                         Log.i(TAG, "Recovering incomplete sagas for mint: $url")
                         mintWallet.recoverIncompleteSagas()

@@ -11,6 +11,7 @@ import com.electricdreams.numo.core.cashu.CashuWalletManager
 import android.widget.Toast
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.prefs.PreferenceStore
+import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.util.MintLimitChecker
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
@@ -51,11 +52,19 @@ class AmountDisplayManager(
     /** Initialize input mode from preferences */
     fun initializeInputMode() {
         val prefs = PreferenceStore.app(context)
-        isUsdInputMode = prefs.getBoolean(KEY_INPUT_MODE, false)
+        val preferredUnit = MintManager.getInstance(context).getPreferredUnit()
+        if (preferredUnit.lowercase() != "sat") {
+            isUsdInputMode = false
+        } else {
+            isUsdInputMode = prefs.getBoolean(KEY_INPUT_MODE, false)
+        }
     }
 
     /** Check if we can switch to USD (need price data) */
     fun canSwitchToUsd(): Boolean {
+        val preferredUnit = MintManager.getInstance(context).getPreferredUnit()
+        if (preferredUnit.lowercase() != "sat") return false
+
         if (!isUsdInputMode) {
             val price = bitcoinPriceWorker?.getCurrentPrice() ?: 0.0
             if (price <= 0) {
@@ -124,6 +133,8 @@ class AmountDisplayManager(
         
         // Check if we have Bitcoin price data
         val hasBitcoinPrice = (bitcoinPriceWorker?.getCurrentPrice() ?: 0.0) > 0
+        val preferredUnit = MintManager.getInstance(context).getPreferredUnit()
+        val isCustomUnit = preferredUnit.lowercase() != "sat"
 
         if (isUsdInputMode) {
             // Input mode: fiat, display fiat as primary, sats as secondary
@@ -149,9 +160,11 @@ class AmountDisplayManager(
             // Input mode: satoshi, display sats as primary, fiat as secondary
             satsValue = if (currentInputStr.isEmpty()) 0L else currentInputStr.toLong()
             amountDisplayText = formatAmount(currentInputStr)
-            amountDisplayText = if (amountDisplayText.length > 9) Amount(satsValue, Amount.Currency.BTC).toShortString() else amountDisplayText
+            if (!isCustomUnit) {
+                amountDisplayText = if (amountDisplayText.length > 9) Amount(satsValue, Amount.Currency.BTC).toShortString() else amountDisplayText
+            }
             
-            if (hasBitcoinPrice) {
+            if (hasBitcoinPrice && !isCustomUnit) {
                 // Show fiat conversion with swap icon
                 val fiatValue = bitcoinPriceWorker?.satoshisToFiat(satsValue) ?: 0.0
                 val currencyCode = CurrencyManager.getInstance(context).getCurrentCurrency()
@@ -160,8 +173,8 @@ class AmountDisplayManager(
                 secondaryDisplayText = Amount.fromMajorUnits(fiatValue, currency).toShortString()
                 switchCurrencyButton.visibility = View.VISIBLE
             } else {
-                // No price data - just show "BTC" without swap icon
-                secondaryDisplayText = context.getString(R.string.pos_secondary_amount_btc_label)
+                // No price data or custom unit - just show unit name without swap icon
+                secondaryDisplayText = if (isCustomUnit) preferredUnit else context.getString(R.string.pos_secondary_amount_btc_label)
                 switchCurrencyButton.visibility = View.GONE
             }
         }
@@ -189,7 +202,8 @@ class AmountDisplayManager(
             val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
             val isNetworkAvailable = NetworkUtils.isNetworkAvailable(context)
             if (isReady) {
-                val limitCheck = MintLimitChecker.checkMintLimits(satsValue, currentMintLimits)
+                val preferredUnit = MintManager.getInstance(context).getPreferredUnit()
+                val limitCheck = MintLimitChecker.checkMintLimits(satsValue, currentMintLimits, preferredUnit)
                 if (limitCheck.isValid) {
                     submitButton.text = context.getString(R.string.pos_charge_button)
                     submitButton.isEnabled = isNetworkAvailable
@@ -251,7 +265,13 @@ class AmountDisplayManager(
     /** Format amount using Amount class */
     private fun formatAmount(amount: String): String = try {
         val value = if (amount.isEmpty()) 0L else amount.toLong()
-        Amount(value, Amount.Currency.BTC).toString()
+        val preferredUnit = MintManager.getInstance(context).getPreferredUnit()
+        if (preferredUnit.lowercase() != "sat") {
+            // Verbatim output
+            "$value $preferredUnit"
+        } else {
+            Amount(value, Amount.Currency.BTC).toString()
+        }
     } catch (_: NumberFormatException) {
         ""
     }

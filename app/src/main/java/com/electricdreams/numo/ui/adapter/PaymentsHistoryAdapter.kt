@@ -246,7 +246,12 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             }
 
             // ── Amount display ──
-            val formattedAmount = if (entry.getEntryUnit() != "sat") {
+            val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(itemView.context).getPreferredUnit()
+            val isCustomUnit = preferredUnit.lowercase() != "sat"
+            
+            val formattedAmount = if (isCustomUnit) {
+                "${kotlin.math.abs(entry.enteredAmount)} $preferredUnit"
+            } else if (entry.getEntryUnit() != "sat") {
                 val entryCurrency = Amount.Currency.fromCode(entry.getEntryUnit())
                 val entryAmount = Amount(kotlin.math.abs(entry.enteredAmount), entryCurrency)
                 entryAmount.toString()
