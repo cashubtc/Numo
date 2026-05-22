@@ -22,17 +22,18 @@ object MintLimitChecker {
         val isBolt11Supported: Boolean = true
     )
 
-    fun checkMintLimits(amount: Long, mintLimits: CashuWalletManager.MintLimits?): LimitCheckResult {
-        return checkMintLimitsWithTip(amount, 0, mintLimits)
+    fun checkMintLimits(amount: Long, mintLimits: CashuWalletManager.MintLimits?, preferredUnit: String = "sat"): LimitCheckResult {
+        return checkMintLimitsWithTip(amount, 0, mintLimits, preferredUnit)
     }
     
     /**
      * Check if amount + tip is within mint limits.
-     * @param amount The base payment amount in sats
-     * @param tipAmount The tip amount in sats
+     * @param amount The base payment amount
+     * @param tipAmount The tip amount
      * @param mintLimits The mint limits from the mint info
+     * @param preferredUnit The unit to check against
      */
-    fun checkMintLimitsWithTip(amount: Long, tipAmount: Long, mintLimits: CashuWalletManager.MintLimits?): LimitCheckResult {
+    fun checkMintLimitsWithTip(amount: Long, tipAmount: Long, mintLimits: CashuWalletManager.MintLimits?, preferredUnit: String = "sat"): LimitCheckResult {
         val totalAmount = amount + tipAmount
         
         if (mintLimits == null) {
@@ -50,8 +51,7 @@ object MintLimitChecker {
             val unitStr = method.unit
             val methodMatch = methodStr.equals("bolt11", ignoreCase = true) ||
                 methodStr.contains("Bolt11") || methodStr.contains("bolt11")
-            val unitMatch = unitStr.equals("sat", ignoreCase = true) ||
-                unitStr.equals("SAT", ignoreCase = true) || unitStr.contains("Sat")
+            val unitMatch = unitStr.equals(preferredUnit, ignoreCase = true)
             methodMatch && unitMatch
         }
 

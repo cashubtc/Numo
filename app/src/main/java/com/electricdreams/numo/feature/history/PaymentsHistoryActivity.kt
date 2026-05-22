@@ -163,27 +163,36 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 }
                 val totalSats = balances.values.sum()
 
-                // Display sat balance
-                val satAmount = Amount(totalSats, Amount.Currency.BTC)
-                binding.balanceSats?.text = satAmount.toString()
-                binding.balanceSats?.visibility = View.VISIBLE
-
-                // Display fiat balance
-                val currencyCode = CurrencyManager.getInstance(this@PaymentsHistoryActivity)
-                    .getCurrentCurrency()
-                val btcPrice = BitcoinPriceWorker.getInstance(this@PaymentsHistoryActivity)
-                    .getCurrentPrice()
-
-                if (btcPrice > 0) {
-                    val fiatValue = (totalSats.toDouble() / 100_000_000.0) * btcPrice
-                    val fiatCurrency = Amount.Currency.fromCode(currencyCode)
-                    val fiatMinorUnits = kotlin.math.round(fiatValue * 100).toLong()
-                    val fiatAmount = Amount(fiatMinorUnits, fiatCurrency)
-                    binding.balanceFiat?.text = fiatAmount.toString()
+                // Display primary balance
+                val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this@PaymentsHistoryActivity).getPreferredUnit()
+                val isCustomUnit = preferredUnit.lowercase() != "sat"
+                
+                if (isCustomUnit) {
+                    binding.balanceSats?.text = "$totalSats $preferredUnit"
+                    binding.balanceFiat?.visibility = View.GONE
                 } else {
-                    // No price available, show sats as primary
-                    binding.balanceFiat?.text = satAmount.toString()
-                    binding.balanceSats?.visibility = View.GONE
+                    val satAmount = Amount(totalSats, Amount.Currency.BTC)
+                    binding.balanceSats?.text = satAmount.toString()
+                    binding.balanceSats?.visibility = View.VISIBLE
+
+                    // Display fiat balance
+                    val currencyManager = CurrencyManager.getInstance(this@PaymentsHistoryActivity)
+                    val currencyCode = currencyManager.getCurrentCurrency()
+                    val btcPrice = BitcoinPriceWorker.getInstance(this@PaymentsHistoryActivity).getCurrentPrice()
+                    
+                    if (btcPrice > 0) {
+                        val fiatValue = (totalSats.toDouble() / 100_000_000.0) * btcPrice
+                        val fiatCurrency = Amount.Currency.fromCode(currencyCode)
+                        val fiatMinorUnits = kotlin.math.round(fiatValue * 100).toLong()
+                        val fiatAmount = Amount(fiatMinorUnits, fiatCurrency)
+                        binding.balanceFiat?.text = fiatAmount.toString()
+                        binding.balanceFiat?.visibility = View.VISIBLE
+                    } else {
+                        // No price available, show sats as primary
+                        binding.balanceFiat?.text = satAmount.toString()
+                        binding.balanceFiat?.visibility = View.VISIBLE
+                        binding.balanceSats?.visibility = View.GONE
+                    }
                 }
             } catch (e: Exception) {
                 // Silently handle - balance display is supplementary

@@ -1,0 +1,5 @@
+#!/bin/bash
+sed -i 's/val mockMintWallet = mock(org.cashudevkit.Wallet::class.java)\n            `when`(mockMintWallet.loadMintInfo()).thenReturn(mockMintInfo)/`when`(mockWallet.loadMintInfo()).thenReturn(mockMintInfo)/g' app/src/test/java/com/electricdreams/numo/payment/LightningMintHandlerTest.kt
+sed -i 's/`when`(mockMintWallet.mintQuote(org.mockito.kotlin.any(), org.mockito.kotlin.any(), org.mockito.kotlin.anyOrNull(), org.mockito.kotlin.anyOrNull())).thenReturn(mockMintQuote)//g' app/src/test/java/com/electricdreams/numo/payment/LightningMintHandlerTest.kt
+sed -i 's/`when`(mockMintWallet.checkMintQuote(org.mockito.kotlin.any())).thenReturn(mockMintQuote)//g' app/src/test/java/com/electricdreams/numo/payment/LightningMintHandlerTest.kt
+sed -i 's/`when`(mockWalletRepository.getWallet(org.mockito.kotlin.any(), org.mockito.kotlin.any())).thenReturn(mockMintWallet)/`when`(mockWalletRepository.getWallet(org.mockito.kotlin.any(), org.mockito.kotlin.any())).thenReturn(mockWallet)/g' app/src/test/java/com/electricdreams/numo/payment/LightningMintHandlerTest.kt

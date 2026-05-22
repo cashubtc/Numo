@@ -486,6 +486,14 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun updateConvertedAmount(formattedAmountString: String) {
+        val preferredUnit = MintManager.getInstance(this).getPreferredUnit()
+        val isCustomUnit = preferredUnit.lowercase() != "sat"
+        
+        if (isCustomUnit) {
+            convertedAmountDisplay.visibility = View.GONE
+            return
+        }
+
         // Check if the formatted amount is BTC (satoshis) or fiat
         val isBtcAmount = formattedAmountString.startsWith("₿")
 
@@ -868,7 +876,8 @@ class PaymentRequestActivity : AppCompatActivity() {
             
             if (mintUrlToUse != null) {
                 val limits = mintManager.getMintLimits(mintUrlToUse, this@PaymentRequestActivity)
-                val checkResult = MintLimitChecker.checkMintLimits(paymentAmount, limits)
+                val preferredUnit = MintManager.getInstance(this@PaymentRequestActivity).getPreferredUnit()
+                val checkResult = MintLimitChecker.checkMintLimits(paymentAmount, limits, preferredUnit)
                 isBolt11Supported = checkResult.isBolt11Supported
             }
             

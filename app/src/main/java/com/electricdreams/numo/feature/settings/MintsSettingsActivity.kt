@@ -63,6 +63,8 @@ class MintsSettingsActivity : AppCompatActivity() {
     private lateinit var lightningMintName: TextView
     private lateinit var lightningMintUrlText: TextView
     private lateinit var lightningMintBalance: TextView
+    private lateinit var activeUnitRow: View
+    private lateinit var activeUnitValue: TextView
     private lateinit var swapUnknownMintsSwitch: SwitchCompat
     private lateinit var allMintsHeader: TextView
     private lateinit var mintsContainer: LinearLayout
@@ -170,6 +172,8 @@ class MintsSettingsActivity : AppCompatActivity() {
         lightningMintName = findViewById(R.id.lightning_mint_name)
         lightningMintUrlText = findViewById(R.id.lightning_mint_url)
         lightningMintBalance = findViewById(R.id.lightning_mint_balance)
+        activeUnitRow = findViewById(R.id.active_unit_row)
+        activeUnitValue = findViewById(R.id.active_unit_value)
         swapUnknownMintsSwitch = findViewById(R.id.swap_unknown_mints_switch)
         allMintsHeader = findViewById(R.id.all_mints_header)
         mintsContainer = findViewById(R.id.mints_container)
@@ -201,6 +205,10 @@ class MintsSettingsActivity : AppCompatActivity() {
     private fun setupListeners() {
         topBar.onNavClick { finish() }
         topBar.onActionClick { showResetConfirmation() }
+        
+        activeUnitRow.setOnClickListener {
+            showUnitSelectorDialog()
+        }
 
         swapUnknownMintsSwitch.setOnCheckedChangeListener { _, isChecked ->
             mintManager.setSwapFromUnknownMintsEnabled(isChecked)
@@ -227,6 +235,40 @@ class MintsSettingsActivity : AppCompatActivity() {
             putExtra(QRScannerActivity.EXTRA_INSTRUCTION, getString(R.string.mints_scan_instruction))
         }
         qrScannerLauncher.launch(intent)
+    }
+
+    private fun showUnitSelectorDialog() {
+        val mintUrl = selectedLightningMint ?: return
+        lifecycleScope.launch {
+            val limits = mintManager.getMintLimits(mintUrl, this@MintsSettingsActivity)
+            val units = mutableSetOf<String>()
+            limits?.mintMethods?.forEach { units.add(it.unit.lowercase()) }
+            if (units.isEmpty()) {
+                units.add("sat")
+            }
+            
+            val items = units.toList().sorted()
+            val currentUnit = mintManager.getPreferredUnit().lowercase()
+            var selectedIndex = items.indexOf(currentUnit)
+            if (selectedIndex < 0) selectedIndex = 0
+            
+            val builder = androidx.appcompat.app.AlertDialog.Builder(this@MintsSettingsActivity)
+            builder.setTitle("Select Base Unit")
+            builder.setSingleChoiceItems(items.toTypedArray(), selectedIndex) { dialog, which ->
+                val selectedUnit = items[which]
+                if (selectedUnit != currentUnit) {
+                    mintManager.setPreferredUnit(selectedUnit)
+                    // Trigger refresh
+                    activeUnitValue.text = selectedUnit
+                    // Let CashuWalletManager rebuild the wallet with the new unit
+                    // Balance will be updated via broadcast
+                    Toast.makeText(this@MintsSettingsActivity, "Changed base unit to $selectedUnit", Toast.LENGTH_SHORT).show()
+                }
+                dialog.dismiss()
+            }
+            builder.setNegativeButton(android.R.string.cancel, null)
+            builder.show()
+        }
     }
 
     private fun loadMintsAndBalances() {
@@ -369,7 +411,17 @@ class MintsSettingsActivity : AppCompatActivity() {
         
         lightningMintName.text = displayName
         lightningMintUrlText.text = shortUrl
-        lightningMintBalance.text = Amount(balance, Amount.Currency.BTC).toString()
+        
+        val preferredUnit = mintManager.getPreferredUnit()
+        val isCustomUnit = preferredUnit.lowercase() != "sat"
+        
+        if (isCustomUnit) {
+            lightningMintBalance.text = "$balance $preferredUnit"
+        } else {
+            lightningMintBalance.text = Amount(balance, Amount.Currency.BTC).toString()
+        }
+        
+        activeUnitValue.text = preferredUnit
         
         // Load icon
         loadLightningMintIcon(url)
