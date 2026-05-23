@@ -165,10 +165,16 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
                 // Display primary balance
                 val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this@PaymentsHistoryActivity).getPreferredUnit()
-                val isCustomUnit = preferredUnit.lowercase() != "sat"
+                val lowerUnit = preferredUnit.lowercase()
+                val isCustomUnit = lowerUnit != "sat"
                 
                 if (isCustomUnit) {
-                    binding.balanceSats?.text = "$totalSats $preferredUnit"
+                    val currency = Amount.Currency.fromCode(lowerUnit)
+                    if (currency.symbol != lowerUnit.uppercase()) {
+                        binding.balanceSats?.text = Amount(totalSats * 100, currency).toString()
+                    } else {
+                        binding.balanceSats?.text = "$totalSats $preferredUnit"
+                    }
                     binding.balanceFiat?.visibility = View.GONE
                 } else {
                     val satAmount = Amount(totalSats, Amount.Currency.BTC)

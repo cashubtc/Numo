@@ -166,11 +166,17 @@ class TransactionDetailActivity : AppCompatActivity() {
 
         // Use BASE amount (excluding tip) for display; use absolute value for withdrawals
         val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
-        val isCustomUnit = preferredUnit.lowercase() != "sat"
+        val lowerUnit = preferredUnit.lowercase()
+        val isCustomUnit = lowerUnit != "sat"
         val baseAmountSats = kotlin.math.abs(entry.getBaseAmountSats())
 
         if (isCustomUnit) {
-            amountText.text = "$baseAmountSats $preferredUnit"
+            val currency = Amount.Currency.fromCode(lowerUnit)
+            if (currency.symbol != lowerUnit.uppercase()) {
+                amountText.text = Amount(baseAmountSats * 100, currency).toString()
+            } else {
+                amountText.text = "$baseAmountSats $preferredUnit"
+            }
             amountSubtitleText.visibility = View.GONE
             fiatEquivalentText.visibility = View.GONE
         } else {

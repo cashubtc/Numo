@@ -83,10 +83,16 @@ class MintListItem @JvmOverloads constructor(
         urlText.text = shortUrl
         
         val preferredUnit = mintManager.getPreferredUnit()
-        val isCustomUnit = preferredUnit.lowercase() != "sat"
+        val lowerUnit = preferredUnit.lowercase()
+        val isCustomUnit = lowerUnit != "sat"
         
         if (isCustomUnit) {
-            balanceText.text = "$balance $preferredUnit"
+            val currency = Amount.Currency.fromCode(lowerUnit)
+            if (currency.symbol != lowerUnit.uppercase()) {
+                balanceText.text = Amount(balance * 100, currency).toString()
+            } else {
+                balanceText.text = "$balance $preferredUnit"
+            }
         } else {
             balanceText.text = Amount(balance, Amount.Currency.BTC).toString()
         }
