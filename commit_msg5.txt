@@ -1,0 +1,3 @@
+fix: align "sat" vs "₿" hardcoded symbols and update tests
+
+This replaces hardcoded internal string/formatting references that assumed "₿" with "sat", standardising eCash references safely alongside custom unit implementations. Also fixes the test suites that broke when the number formatting rules adapted.

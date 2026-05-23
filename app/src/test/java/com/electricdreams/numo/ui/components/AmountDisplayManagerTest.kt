@@ -132,7 +132,7 @@ class AmountDisplayManagerTest {
         
         // Verify secondary display (BTC)
         // 1 JPY = 10 sats (at 10M JPY/BTC price)
-        verify(secondaryAmountDisplay).text = "₿10"
+        verify(secondaryAmountDisplay).text = "10 sat"
     }
     
     @Test

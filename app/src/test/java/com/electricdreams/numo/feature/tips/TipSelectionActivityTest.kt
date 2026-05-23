@@ -51,7 +51,7 @@ class TipSelectionActivityTest {
     fun `customInputCurrency is initialized from entryCurrency when order is in sats`() {
         val intent = Intent().apply {
             putExtra(TipSelectionActivity.EXTRA_PAYMENT_AMOUNT, 1000L)
-            putExtra(TipSelectionActivity.EXTRA_FORMATTED_AMOUNT, "₿1000")
+            putExtra(TipSelectionActivity.EXTRA_FORMATTED_AMOUNT, "1,000 sat")
         }
         val satActivity = Robolectric.buildActivity(TipSelectionActivity::class.java, intent)
             .create()
