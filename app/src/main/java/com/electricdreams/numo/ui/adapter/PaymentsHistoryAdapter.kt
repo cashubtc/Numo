@@ -245,7 +245,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             val formattedAmount = if (isCustomUnit) {
                 val currency = Amount.Currency.fromCode(lowerUnit)
                 if (currency.symbol != lowerUnit.uppercase()) {
-                    Amount(kotlin.math.abs(entry.enteredAmount) * 100, currency).toString()
+                    Amount(kotlin.math.abs(entry.enteredAmount), currency).toString()
                 } else {
                     "${kotlin.math.abs(entry.enteredAmount)} $preferredUnit"
                 }

@@ -171,7 +171,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 if (isCustomUnit) {
                     val currency = Amount.Currency.fromCode(lowerUnit)
                     if (currency.symbol != lowerUnit.uppercase()) {
-                        binding.balanceSats?.text = Amount(totalSats * 100, currency).toString()
+                        binding.balanceSats?.text = Amount(totalSats, currency).toString()
                     } else {
                         binding.balanceSats?.text = "$totalSats $preferredUnit"
                     }

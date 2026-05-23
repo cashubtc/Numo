@@ -173,7 +173,7 @@ class TransactionDetailActivity : AppCompatActivity() {
         if (isCustomUnit) {
             val currency = Amount.Currency.fromCode(lowerUnit)
             if (currency.symbol != lowerUnit.uppercase()) {
-                amountText.text = Amount(baseAmountSats * 100, currency).toString()
+                amountText.text = Amount(baseAmountSats, currency).toString()
             } else {
                 amountText.text = "$baseAmountSats $preferredUnit"
             }
