@@ -55,12 +55,14 @@ class SettingsActivity : AppCompatActivity() {
         updateDeveloperSectionVisibility()
         updateDefaultPaymentMethodSubtitle()
         updateBtcPayDependentItems()
+        updateCurrencySettingVisibility()
     }
 
     private fun setupViews() {
         updateDeveloperSectionVisibility()
         updateDefaultPaymentMethodSubtitle()
         updateBtcPayDependentItems()
+        updateCurrencySettingVisibility()
     }
 
     private fun updateBtcPayDependentItems() {
@@ -90,6 +92,16 @@ class SettingsActivity : AppCompatActivity() {
             webhooksItem.alpha = 1f
             webhooksItem.isEnabled = true
             webhooksItem.setOnClickListener { openProtectedActivity(WebhookSettingsActivity::class.java) }
+        }
+    }
+    
+    private fun updateCurrencySettingVisibility() {
+        val currencySettingsItem = findViewById<View>(R.id.currency_settings_item)
+        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
+        if (preferredUnit.lowercase() != "sat") {
+            currencySettingsItem.alpha = 0.5f
+        } else {
+            currencySettingsItem.alpha = 1.0f
         }
     }
     
@@ -133,7 +145,12 @@ class SettingsActivity : AppCompatActivity() {
         // === Payments Section ===
 
         findViewById<View>(R.id.currency_settings_item).setOnClickListener {
-            startActivity(Intent(this, CurrencySettingsActivity::class.java))
+            val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
+            if (preferredUnit.lowercase() != "sat") {
+                android.widget.Toast.makeText(this, "Fiat currency conversion is disabled when using a custom base unit.", android.widget.Toast.LENGTH_SHORT).show()
+            } else {
+                startActivity(Intent(this, CurrencySettingsActivity::class.java))
+            }
         }
 
         // Mints, Withdrawals and Webhooks listeners are managed by updateBtcPayDependentItems()
