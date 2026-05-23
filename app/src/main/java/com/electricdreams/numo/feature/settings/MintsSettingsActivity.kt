@@ -413,10 +413,16 @@ class MintsSettingsActivity : AppCompatActivity() {
         lightningMintUrlText.text = shortUrl
         
         val preferredUnit = mintManager.getPreferredUnit()
-        val isCustomUnit = preferredUnit.lowercase() != "sat"
+        val lowerUnit = preferredUnit.lowercase()
+        val isCustomUnit = lowerUnit != "sat"
         
         if (isCustomUnit) {
-            lightningMintBalance.text = "$balance $preferredUnit"
+            val currency = Amount.Currency.fromCode(lowerUnit)
+            if (currency.symbol != lowerUnit.uppercase()) {
+                lightningMintBalance.text = Amount(balance * 100, currency).toString()
+            } else {
+                lightningMintBalance.text = "$balance $preferredUnit"
+            }
         } else {
             lightningMintBalance.text = Amount(balance, Amount.Currency.BTC).toString()
         }

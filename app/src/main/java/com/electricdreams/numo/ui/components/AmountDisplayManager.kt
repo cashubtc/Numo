@@ -266,9 +266,17 @@ class AmountDisplayManager(
     private fun formatAmount(amount: String): String = try {
         val value = if (amount.isEmpty()) 0L else amount.toLong()
         val preferredUnit = MintManager.getInstance(context).getPreferredUnit()
-        if (preferredUnit.lowercase() != "sat") {
-            // Verbatim output
-            "$value $preferredUnit"
+        val lowerUnit = preferredUnit.lowercase()
+        if (lowerUnit != "sat") {
+            // Check if it's a known fiat unit we should format with symbol
+            val currency = Amount.Currency.fromCode(lowerUnit)
+            if (currency.symbol != lowerUnit.uppercase()) {
+                // If the symbol is not just the unit itself (e.g. it found '$' or '€')
+                Amount(value * 100, currency).toString() // Multiply by 100 for cents
+            } else {
+                // Verbatim output
+                "$value $preferredUnit"
+            }
         } else {
             Amount(value, Amount.Currency.BTC).toString()
         }

@@ -54,6 +54,17 @@ object CashuWalletManager : MintManager.MintChangeListener {
         }
     }
 
+    fun CurrencyUnit.toUnitString(): String {
+        return when (this) {
+            is CurrencyUnit.Sat -> "sat"
+            is CurrencyUnit.Msat -> "msat"
+            is CurrencyUnit.Usd -> "usd"
+            is CurrencyUnit.Eur -> "eur"
+            is CurrencyUnit.Custom -> this.unit
+            else -> "sat"
+        }
+    }
+
     lateinit var appContext: Context
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -390,7 +401,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
                     nut04.methods?.forEach { method ->
                         val methodObj = org.json.JSONObject()
                         methodObj.put("method", method.method.toString())
-                        methodObj.put("unit", method.unit.toString())
+                        methodObj.put("unit", method.unit.toUnitString())
                         method.minAmount?.let { methodObj.put("min_amount", it) }
                         method.maxAmount?.let { methodObj.put("max_amount", it) }
                         method.description?.let { methodObj.put("description", it) }
@@ -406,7 +417,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
                     nut05.methods?.forEach { method ->
                         val methodObj = org.json.JSONObject()
                         methodObj.put("method", method.method.toString())
-                        methodObj.put("unit", method.unit.toString())
+                        methodObj.put("unit", method.unit.toUnitString())
                         method.minAmount?.let { methodObj.put("min_amount", it) }
                         method.maxAmount?.let { methodObj.put("max_amount", it) }
                         methodsArray.put(methodObj)
@@ -484,7 +495,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
                                     mintMethods.add(
                                         MintMethodSettings(
                                             method = methodObj.optString("method", ""),
-                                            unit = methodObj.optString("unit", ""),
+                                            unit = methodObj.optString("unit", "").let { if (it.contains("CurrencyUnit$")) it.substringAfter("CurrencyUnit$").substringBefore("@").lowercase() else it },
                                             minAmount = minAmt,
                                             maxAmount = maxAmt,
                                             disabled = disabled
@@ -505,7 +516,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
                                     meltMethods.add(
                                         MintMethodSettings(
                                             method = methodObj.optString("method", ""),
-                                            unit = methodObj.optString("unit", ""),
+                                            unit = methodObj.optString("unit", "").let { if (it.contains("CurrencyUnit$")) it.substringAfter("CurrencyUnit$").substringBefore("@").lowercase() else it },
                                             minAmount = if (methodObj.has("min_amount")) methodObj.getLong("min_amount") else null,
                                             maxAmount = if (methodObj.has("max_amount")) methodObj.getLong("max_amount") else null,
                                             disabled = disabled
@@ -708,7 +719,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
                         mintMethods.add(
                             MintMethodSettings(
                                 method = methodObj.optString("method", ""),
-                                unit = methodObj.optString("unit", ""),
+                                unit = methodObj.optString("unit", "").let { if (it.contains("CurrencyUnit$")) it.substringAfter("CurrencyUnit$").substringBefore("@").lowercase() else it },
                                 minAmount = if (methodObj.has("min_amount")) methodObj.getLong("min_amount") else null,
                                 maxAmount = if (methodObj.has("max_amount")) methodObj.getLong("max_amount") else null,
                                 disabled = disabled
@@ -729,7 +740,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
                         meltMethods.add(
                             MintMethodSettings(
                                 method = methodObj.optString("method", ""),
-                                unit = methodObj.optString("unit", ""),
+                                unit = methodObj.optString("unit", "").let { if (it.contains("CurrencyUnit$")) it.substringAfter("CurrencyUnit$").substringBefore("@").lowercase() else it },
                                 minAmount = if (methodObj.has("min_amount")) methodObj.getLong("min_amount") else null,
                                 maxAmount = if (methodObj.has("max_amount")) methodObj.getLong("max_amount") else null,
                                 disabled = disabled

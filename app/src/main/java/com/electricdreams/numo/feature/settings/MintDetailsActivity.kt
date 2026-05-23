@@ -270,8 +270,14 @@ class MintDetailsActivity : AppCompatActivity() {
             }
             val balance = balances[mintUrl] ?: 0L
             val preferredUnit = mintManager.getPreferredUnit()
-            if (preferredUnit.lowercase() != "sat") {
-                balanceText.text = "$balance $preferredUnit"
+            val lowerUnit = preferredUnit.lowercase()
+            if (lowerUnit != "sat") {
+                val currency = Amount.Currency.fromCode(lowerUnit)
+                if (currency.symbol != lowerUnit.uppercase()) {
+                    balanceText.text = Amount(balance * 100, currency).toString()
+                } else {
+                    balanceText.text = "$balance $preferredUnit"
+                }
             } else {
                 balanceText.text = Amount(balance, Amount.Currency.BTC).toString()
             }
