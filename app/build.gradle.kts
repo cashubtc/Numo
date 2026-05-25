@@ -12,7 +12,7 @@ android {
         applicationId = "com.electricdreams.numo"
         minSdk = 24
         targetSdk = 35
-        versionCode = 16
+        versionCode = 17
         versionName = "1.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
