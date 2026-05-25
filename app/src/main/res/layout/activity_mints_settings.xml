@@ -182,14 +182,15 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Base Currency Unit"
-                                            android:textAppearance="@style/Text.RowTitle" />
+                                            style="@style/Text.RowTitle" />
 
                                         <TextView
                                             android:id="@+id/active_unit_subtitle"
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
+                                            android:layout_marginTop="2dp"
                                             android:text="If the mint supports other units, you can switch it here."
-                                            android:textAppearance="@style/Text.RowSubtitle" />
+                                            style="@style/Text.RowSubtitle" />
 
                                     </LinearLayout>
 
