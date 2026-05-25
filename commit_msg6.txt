@@ -1,0 +1,3 @@
+style: fix base unit subtitle text appearance
+
+Use `style="@style/Text.RowSubtitle"` instead of `android:textAppearance` to ensure the subtitle receives the correct text color attributes (grey), matching the other settings rows. Also added the missing 2dp top margin.
