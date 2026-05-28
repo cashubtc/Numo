@@ -245,6 +245,16 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
                 val componentName = ComponentName(this, com.electricdreams.numo.ndef.NdefHostCardEmulationService::class.java)
                 cardEmulation.setPreferredService(this, componentName)
                 Log.d(TAG, "setPreferredService to NdefHostCardEmulationService")
+                
+                // Mute the active polling loop to prevent Apple Pay popups on iPhones 
+                // by restricting reader mode to non-standard tags only.
+                nfcAdapter.enableReaderMode(
+                    this,
+                    { /* Do nothing, we only want HCE */ },
+                    NfcAdapter.FLAG_READER_NFC_BARCODE or NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK,
+                    null
+                )
+                Log.d(TAG, "enableReaderMode called to suppress active polling")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to set preferred HCE service: ${e.message}", e)
@@ -272,6 +282,9 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
                 val cardEmulation = CardEmulation.getInstance(nfcAdapter)
                 cardEmulation.unsetPreferredService(this)
                 Log.d(TAG, "unsetPreferredService for HCE")
+                
+                nfcAdapter.disableReaderMode(this)
+                Log.d(TAG, "disableReaderMode called")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to unset preferred HCE service: ${e.message}", e)
