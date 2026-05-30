@@ -246,15 +246,16 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
                 cardEmulation.setPreferredService(this, componentName)
                 Log.d(TAG, "setPreferredService to NdefHostCardEmulationService")
                 
-                // Mute the active polling loop to prevent Apple Pay popups on iPhones 
-                // by restricting reader mode to non-standard tags only.
-                nfcAdapter.enableReaderMode(
-                    this,
-                    { /* Do nothing, we only want HCE */ },
-                    NfcAdapter.FLAG_READER_NFC_BARCODE or NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK,
-                    null
-                )
-                Log.d(TAG, "enableReaderMode called to suppress active polling")
+                // Mute the active polling loop to prevent Apple Pay popups on iPhones.
+                // NOTE: enableReaderMode disables HCE, so we can only suppress polling on Android 15+.
+                if (android.os.Build.VERSION.SDK_INT >= 35) {
+                    nfcAdapter.setDiscoveryTechnology(
+                        this,
+                        NfcAdapter.FLAG_READER_DISABLE,
+                        NfcAdapter.FLAG_LISTEN_KEEP
+                    )
+                    Log.d(TAG, "setDiscoveryTechnology called to suppress active polling")
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to set preferred HCE service: ${e.message}", e)
@@ -283,8 +284,10 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
                 cardEmulation.unsetPreferredService(this)
                 Log.d(TAG, "unsetPreferredService for HCE")
                 
-                nfcAdapter.disableReaderMode(this)
-                Log.d(TAG, "disableReaderMode called")
+                if (android.os.Build.VERSION.SDK_INT >= 35) {
+                    nfcAdapter.resetDiscoveryTechnology(this)
+                    Log.d(TAG, "resetDiscoveryTechnology called")
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to unset preferred HCE service: ${e.message}", e)
