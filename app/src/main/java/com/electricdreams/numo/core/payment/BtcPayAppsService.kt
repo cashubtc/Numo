@@ -134,6 +134,7 @@ object BtcPayAppsService {
         val url = when {
             imageValue.startsWith("http://") || imageValue.startsWith("https://") -> imageValue
             imageValue.startsWith("/") -> "${config.serverUrl.trimEnd('/')}$imageValue"
+            imageValue.startsWith("~/") -> "${config.serverUrl.trimEnd('/')}/${imageValue.removePrefix("~/")}"
             else -> {
                 Log.w(TAG, "resolveImage: unrecognised image format: ${imageValue.take(40)}")
                 return null
