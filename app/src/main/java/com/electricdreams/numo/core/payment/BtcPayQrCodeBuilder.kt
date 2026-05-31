@@ -61,14 +61,14 @@ object BtcPayQrCodeBuilder {
                     Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING,
                 )
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.w(TAG, "prepareCashuQrContent: could not inject amount: ${e.message}")
             rawCashuPR
         }
 
         val bech32 = try {
             org.cashudevkit.PaymentRequest.fromString(cbor).toBech32String()
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             Log.w(TAG, "prepareCashuQrContent: could not convert to bech32m: ${e.message}")
             null
         }
