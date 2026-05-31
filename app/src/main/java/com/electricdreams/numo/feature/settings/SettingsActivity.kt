@@ -68,6 +68,7 @@ class SettingsActivity : AppCompatActivity() {
 
         val mintsItem = findViewById<View>(R.id.mints_settings_item)
         val withdrawalsItem = findViewById<View>(R.id.withdrawals_settings_item)
+        val webhooksItem = findViewById<View>(R.id.webhooks_settings_item)
 
         if (btcPayEnabled) {
             mintsItem.alpha = 0.4f
@@ -76,6 +77,9 @@ class SettingsActivity : AppCompatActivity() {
             withdrawalsItem.alpha = 0.4f
             withdrawalsItem.isEnabled = false
             withdrawalsItem.setOnClickListener(null)
+            webhooksItem.alpha = 0.4f
+            webhooksItem.isEnabled = false
+            webhooksItem.setOnClickListener(null)
         } else {
             mintsItem.alpha = 1f
             mintsItem.isEnabled = true
@@ -83,6 +87,9 @@ class SettingsActivity : AppCompatActivity() {
             withdrawalsItem.alpha = 1f
             withdrawalsItem.isEnabled = true
             withdrawalsItem.setOnClickListener { openProtectedActivity(AutoWithdrawSettingsActivity::class.java) }
+            webhooksItem.alpha = 1f
+            webhooksItem.isEnabled = true
+            webhooksItem.setOnClickListener { openProtectedActivity(WebhookSettingsActivity::class.java) }
         }
     }
     
@@ -129,13 +136,7 @@ class SettingsActivity : AppCompatActivity() {
             startActivity(Intent(this, CurrencySettingsActivity::class.java))
         }
 
-        // Mints and Withdrawals listeners are managed by updateBtcPayDependentItems()
-
-        findViewById<View>(R.id.webhooks_settings_item).setOnClickListener {
-            openProtectedActivity(WebhookSettingsActivity::class.java)
-        }
-
-        // Withdrawals listener managed by updateBtcPayDependentItems()
+        // Mints, Withdrawals and Webhooks listeners are managed by updateBtcPayDependentItems()
 
         findViewById<View>(R.id.default_payment_method_settings_item).setOnClickListener {
             startActivity(Intent(this, DefaultPaymentMethodSettingsActivity::class.java))
