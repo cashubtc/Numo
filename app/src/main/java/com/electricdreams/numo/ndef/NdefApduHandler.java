@@ -63,8 +63,13 @@ public class NdefApduHandler {
         if (length == 0) length = 256;
         int offset = ((apdu[2] & 0xFF) << 8) | (apdu[3] & 0xFF);
         
-        if (offset + length > selectedFile.length) {
+        if (offset >= selectedFile.length) {
             return NdefConstants.NDEF_RESPONSE_ERROR;
+        }
+        
+        // Adjust length if requesting more than what's available
+        if (offset + length > selectedFile.length) {
+            length = selectedFile.length - offset;
         }
         
         // Extract the requested data

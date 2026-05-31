@@ -57,7 +57,7 @@ object SwapToLightningMintManager {
     }
 
     /**
-     * Lightweight context for a POS payment used to associate Lightning
+     * Lightweight appContext for a POS payment used to associate Lightning
      * invoices and quotes with the payment history entry.
      */
     data class PaymentContext(
@@ -70,9 +70,9 @@ object SwapToLightningMintManager {
      * merchant's configured Lightning mint.
      *
      * This method performs network and wallet I/O and must be called from a
-     * coroutine context.
+     * coroutine appContext.
      *
-     * @param appContext Android application context for accessing MintManager
+     * @param appContext Android application appContext for accessing MintManager
      *                   and updating payment history.
      * @param proofs The Cashu proofs presented by the payer.
      * @param expectedAmount Amount in satoshis that the POS expects to receive
@@ -149,6 +149,23 @@ object SwapToLightningMintManager {
                 return@withContext SwapResult.Failure("No Lightning mint configured")
             }
         Log.d(TAG, "swapFromUnknownMint: preferred Lightning mint is $lightningMintUrl")
+        
+        // Check if the preferred lightning mint actually supports bolt11
+        val limits = mintManager.getMintLimits(lightningMintUrl, appContext)
+        val preferredUnit = MintManager.getInstance(appContext).getPreferredUnit()
+        val limitCheck = com.electricdreams.numo.core.util.MintLimitChecker.checkMintLimits(paymentContext.amountSats, limits, preferredUnit)
+        if (!limitCheck.isBolt11Supported) {
+            val msg = "Preferred mint does not support Lightning (bolt11). Cannot perform swap."
+            Log.e(TAG, msg)
+            try { tempWallet.close() } catch (_: Throwable) {}
+            return@withContext SwapResult.Failure(msg)
+        }
+        if (!limitCheck.isValid) {
+            val msg = "Amount ${paymentContext.amountSats} is not within Lightning limits for preferred mint."
+            Log.e(TAG, msg)
+            try { tempWallet.close() } catch (_: Throwable) {}
+            return@withContext SwapResult.Failure(msg)
+        }
 
         Log.d(
             TAG,
@@ -157,7 +174,9 @@ object SwapToLightningMintManager {
         )
 
         val lightningMintUrlObj = MintUrl(lightningMintUrl)
-        val lightningWallet = wallet.getWallet(lightningMintUrlObj, CurrencyUnit.Sat)
+        val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(appContext).getPreferredUnit()
+        val unit = CashuWalletManager.getCurrencyUnit(unitStr)
+        val lightningWallet = wallet.getWallet(lightningMintUrlObj, unit)
             ?: run {
                 Log.e(TAG, "Failed to get Lightning wallet for: $lightningMintUrl")
                 return@withContext SwapResult.Failure("Failed to get Lightning wallet")
@@ -409,7 +428,7 @@ object SwapToLightningMintManager {
      * @return true if the payment was successfully finalized (minted), false otherwise.
      */
     suspend fun tryFinalizePendingSwap(
-        context: android.content.Context,
+        appContext: android.content.Context,
         entry: PaymentHistoryEntry
     ): Boolean = withContext(Dispatchers.IO) {
         val swapJson = entry.swapToLightningMintJson ?: return@withContext false
@@ -433,7 +452,9 @@ object SwapToLightningMintManager {
 
         try {
             val mintUrl = MintUrl(lightningMintUrl)
-            val mintWallet = wallet.getWallet(mintUrl, org.cashudevkit.CurrencyUnit.Sat)
+            val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(appContext).getPreferredUnit()
+            val unit = CashuWalletManager.getCurrencyUnit(unitStr)
+            val mintWallet = wallet.getWallet(mintUrl, unit)
 
             val quote = mintWallet.checkMintQuote(lightningQuoteId)
             
@@ -454,7 +475,7 @@ object SwapToLightningMintManager {
                         
                         withContext(Dispatchers.Main) {
                             PaymentsHistoryActivity.completePendingPayment(
-                                context = context,
+                                context = appContext,
                                 paymentId = entry.id,
                                 token = "", // Lightning payments have no token string
                                 paymentType = PaymentHistoryEntry.TYPE_LIGHTNING,
@@ -473,7 +494,7 @@ object SwapToLightningMintManager {
                     Log.d(TAG, "tryFinalizePendingSwap: Quote already ISSUED. Marking as complete.")
                      withContext(Dispatchers.Main) {
                         PaymentsHistoryActivity.completePendingPayment(
-                            context = context,
+                            context = appContext,
                             paymentId = entry.id,
                             token = "",
                             paymentType = PaymentHistoryEntry.TYPE_LIGHTNING,

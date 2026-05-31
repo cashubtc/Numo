@@ -4,6 +4,7 @@ import com.electricdreams.numo.core.cashu.CashuWalletManager
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -12,12 +13,37 @@ import org.robolectric.RobolectricTestRunner
 class MintLimitCheckerTest {
 
     @Test
-    fun `given null mintLimits, when checkMintLimits called, then reject with DISABLED`() {
+    fun `given null mintLimits, when checkMintLimits called, then allow but flag bolt11 unsupported`() {
         val result = MintLimitChecker.checkMintLimits(1000, null)
-        assertFalse(result.isValid)
-        assertEquals(null, result.minAmount)
-        assertEquals(null, result.maxAmount)
-        assertEquals(MintLimitChecker.LimitType.DISABLED, result.limitType)
+        
+        assertTrue(result.isValid)
+        assertFalse(result.isBolt11Supported)
+        assertNull(result.minAmount)
+        assertNull(result.maxAmount)
+        assertEquals(MintLimitChecker.LimitType.NONE, result.limitType)
+    }
+
+    @Test
+    fun `given mintLimits without bolt11 method, when checkMintLimits called, then allow but flag bolt11 unsupported`() {
+        val mintLimits = CashuWalletManager.MintLimits(
+            mintMethods = listOf(
+                CashuWalletManager.MintMethodSettings(
+                    method = "someOtherMethod",
+                    unit = "sat",
+                    minAmount = 100,
+                    maxAmount = 10000,
+                    disabled = false
+                )
+            )
+        )
+
+        val result = MintLimitChecker.checkMintLimits(1000, mintLimits)
+        
+        assertTrue(result.isValid)
+        assertFalse(result.isBolt11Supported)
+        assertNull(result.minAmount)
+        assertNull(result.maxAmount)
+        assertEquals(MintLimitChecker.LimitType.NONE, result.limitType)
     }
 
     @Test
@@ -34,8 +60,11 @@ class MintLimitCheckerTest {
             meltMethods = emptyList()
         )
         val result = MintLimitChecker.checkMintLimits(1000, mintLimits)
-        assertFalse(result.isValid)
-        assertEquals(MintLimitChecker.LimitType.DISABLED, result.limitType)
+        assertTrue(result.isValid)
+        assertFalse(result.isBolt11Supported)
+        assertNull(result.minAmount)
+        assertNull(result.maxAmount)
+        assertEquals(MintLimitChecker.LimitType.NONE, result.limitType)
     }
 
     @Test
@@ -98,7 +127,7 @@ class MintLimitCheckerTest {
     }
 
     @Test
-    fun `given mint with disabled true, when checkMintLimits called, then reject with DISABLED`() {
+    fun `given mint with disabled true, when checkMintLimits called, then allow but flag bolt11 unsupported`() {
         val mintLimits = CashuWalletManager.MintLimits(
             mintMethods = listOf(
                 CashuWalletManager.MintMethodSettings(
@@ -108,12 +137,16 @@ class MintLimitCheckerTest {
                     maxAmount = 10000,
                     disabled = true
                 )
-            ),
-            meltMethods = emptyList()
+            )
         )
+
         val result = MintLimitChecker.checkMintLimits(5000, mintLimits)
-        assertFalse(result.isValid)
-        assertEquals(MintLimitChecker.LimitType.DISABLED, result.limitType)
+        
+        assertTrue(result.isValid)
+        assertFalse(result.isBolt11Supported)
+        assertNull(result.minAmount)
+        assertNull(result.maxAmount)
+        assertEquals(MintLimitChecker.LimitType.NONE, result.limitType)
     }
 
     @Test

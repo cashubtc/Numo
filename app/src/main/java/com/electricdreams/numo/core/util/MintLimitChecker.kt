@@ -18,28 +18,31 @@ object MintLimitChecker {
         val isValid: Boolean,
         val minAmount: Long?,
         val maxAmount: Long?,
-        val limitType: LimitType = LimitType.NONE
+        val limitType: LimitType = LimitType.NONE,
+        val isBolt11Supported: Boolean = true
     )
 
-    fun checkMintLimits(amount: Long, mintLimits: CashuWalletManager.MintLimits?): LimitCheckResult {
-        return checkMintLimitsWithTip(amount, 0, mintLimits)
+    fun checkMintLimits(amount: Long, mintLimits: CashuWalletManager.MintLimits?, preferredUnit: String = "sat"): LimitCheckResult {
+        return checkMintLimitsWithTip(amount, 0, mintLimits, preferredUnit)
     }
     
     /**
      * Check if amount + tip is within mint limits.
-     * @param amount The base payment amount in sats
-     * @param tipAmount The tip amount in sats
+     * @param amount The base payment amount
+     * @param tipAmount The tip amount
      * @param mintLimits The mint limits from the mint info
+     * @param preferredUnit The unit to check against
      */
-    fun checkMintLimitsWithTip(amount: Long, tipAmount: Long, mintLimits: CashuWalletManager.MintLimits?): LimitCheckResult {
+    fun checkMintLimitsWithTip(amount: Long, tipAmount: Long, mintLimits: CashuWalletManager.MintLimits?, preferredUnit: String = "sat"): LimitCheckResult {
         val totalAmount = amount + tipAmount
         
         if (mintLimits == null) {
             return LimitCheckResult(
-                isValid = false,
+                isValid = true,
                 minAmount = null,
                 maxAmount = null,
-                limitType = LimitType.DISABLED
+                limitType = LimitType.NONE,
+                isBolt11Supported = false
             )
         }
 
@@ -48,26 +51,17 @@ object MintLimitChecker {
             val unitStr = method.unit
             val methodMatch = methodStr.equals("bolt11", ignoreCase = true) ||
                 methodStr.contains("Bolt11") || methodStr.contains("bolt11")
-            val unitMatch = unitStr.equals("sat", ignoreCase = true) ||
-                unitStr.equals("SAT", ignoreCase = true) || unitStr.contains("Sat")
+            val unitMatch = unitStr.equals(preferredUnit, ignoreCase = true)
             methodMatch && unitMatch
         }
 
-        if (bolt11Method == null) {
+        if (bolt11Method == null || bolt11Method.disabled) {
             return LimitCheckResult(
-                isValid = false,
+                isValid = true,
                 minAmount = null,
                 maxAmount = null,
-                limitType = LimitType.DISABLED
-            )
-        }
-
-        if (bolt11Method.disabled) {
-            return LimitCheckResult(
-                isValid = false,
-                minAmount = bolt11Method.minAmount,
-                maxAmount = bolt11Method.maxAmount,
-                limitType = LimitType.DISABLED
+                limitType = LimitType.NONE,
+                isBolt11Supported = false
             )
         }
 
@@ -88,7 +82,8 @@ object MintLimitChecker {
                     isValid = false,
                     minAmount = min,
                     maxAmount = bolt11Method.maxAmount,
-                    limitType = LimitType.MIN
+                    limitType = LimitType.MIN,
+                    isBolt11Supported = true
                 )
             }
         }
@@ -99,7 +94,8 @@ object MintLimitChecker {
                     isValid = false,
                     minAmount = bolt11Method.minAmount,
                     maxAmount = max,
-                    limitType = LimitType.MAX
+                    limitType = LimitType.MAX,
+                    isBolt11Supported = true
                 )
             }
         }
@@ -107,7 +103,8 @@ object MintLimitChecker {
         return LimitCheckResult(
             isValid = true,
             minAmount = bolt11Method.minAmount,
-            maxAmount = bolt11Method.maxAmount
+            maxAmount = bolt11Method.maxAmount,
+            isBolt11Supported = true
         )
     }
 }

@@ -165,34 +165,48 @@ class TransactionDetailActivity : AppCompatActivity() {
         val fiatEquivalentText: TextView = findViewById(R.id.detail_fiat_equivalent)
 
         // Use BASE amount (excluding tip) for display; use absolute value for withdrawals
+        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
+        val lowerUnit = preferredUnit.lowercase()
+        val isCustomUnit = lowerUnit != "sat"
         val baseAmountSats = kotlin.math.abs(entry.getBaseAmountSats())
-        val baseSatAmount = Amount(baseAmountSats, Amount.Currency.BTC)
 
-        // Determine what to show as primary vs secondary amount
-        if (entry.enteredAmount > 0 && entry.getEntryUnit() != "sat") {
-            // Fiat entry: show fiat large, sats subtitle, no fiat equivalent (already primary)
-            val entryCurrency = Amount.Currency.fromCode(entry.getEntryUnit())
-            val fiatAmount = Amount(entry.enteredAmount, entryCurrency)
-            amountText.text = fiatAmount.toString()
-            amountSubtitleText.text = baseSatAmount.toString()
-            amountSubtitleText.visibility = View.VISIBLE
+        if (isCustomUnit) {
+            val currency = Amount.Currency.fromCode(lowerUnit)
+            if (currency.symbol != lowerUnit.uppercase()) {
+                amountText.text = Amount(baseAmountSats, currency).toString()
+            } else {
+                amountText.text = "$baseAmountSats $preferredUnit"
+            }
+            amountSubtitleText.visibility = View.GONE
             fiatEquivalentText.visibility = View.GONE
         } else {
-            // Sat entry: show sats large, calculate fiat equivalent if exchange rate available
-            amountText.text = baseSatAmount.toString()
-            amountSubtitleText.visibility = View.GONE
-
-            val btcPriceForFiat = entry.bitcoinPrice
-            if (btcPriceForFiat != null && btcPriceForFiat > 0) {
-                val fiatValue = (baseAmountSats.toDouble() / 100_000_000.0) * btcPriceForFiat
-                val currencyCode = CurrencyManager.getInstance(this).getCurrentCurrency()
-                val fiatCurrency = Amount.Currency.fromCode(currencyCode)
-                val fiatMinorUnits = kotlin.math.round(fiatValue * 100).toLong()
-                val fiatAmount = Amount(fiatMinorUnits, fiatCurrency)
-                fiatEquivalentText.text = "$fiatAmount"
-                fiatEquivalentText.visibility = View.VISIBLE
-            } else {
+            val baseSatAmount = Amount(baseAmountSats, Amount.Currency.BTC)
+            // Determine what to show as primary vs secondary amount
+            if (entry.enteredAmount > 0 && entry.getEntryUnit() != "sat") {
+                // Fiat entry: show fiat large, sats subtitle, no fiat equivalent (already primary)
+                val entryCurrency = Amount.Currency.fromCode(entry.getEntryUnit())
+                val fiatAmount = Amount(entry.enteredAmount, entryCurrency)
+                amountText.text = fiatAmount.toString()
+                amountSubtitleText.text = baseSatAmount.toString()
+                amountSubtitleText.visibility = View.VISIBLE
                 fiatEquivalentText.visibility = View.GONE
+            } else {
+                // Sat entry: show sats large, calculate fiat equivalent if exchange rate available
+                amountText.text = baseSatAmount.toString()
+                amountSubtitleText.visibility = View.GONE
+
+                val btcPriceForFiat = entry.bitcoinPrice
+                if (btcPriceForFiat != null && btcPriceForFiat > 0) {
+                    val fiatValue = (baseAmountSats.toDouble() / 100_000_000.0) * btcPriceForFiat
+                    val currencyCode = CurrencyManager.getInstance(this).getCurrentCurrency()
+                    val fiatCurrency = Amount.Currency.fromCode(currencyCode)
+                    val fiatMinorUnits = kotlin.math.round(fiatValue * 100).toLong()
+                    val fiatAmount = Amount(fiatMinorUnits, fiatCurrency)
+                    fiatEquivalentText.text = "$fiatAmount"
+                    fiatEquivalentText.visibility = View.VISIBLE
+                } else {
+                    fiatEquivalentText.visibility = View.GONE
+                }
             }
         }
 

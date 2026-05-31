@@ -269,7 +269,18 @@ class MintDetailsActivity : AppCompatActivity() {
                 CashuWalletManager.getAllMintBalances()
             }
             val balance = balances[mintUrl] ?: 0L
-            balanceText.text = Amount(balance, Amount.Currency.BTC).toString()
+            val preferredUnit = mintManager.getPreferredUnit()
+            val lowerUnit = preferredUnit.lowercase()
+            if (lowerUnit != "sat") {
+                val currency = Amount.Currency.fromCode(lowerUnit)
+                if (currency.symbol != lowerUnit.uppercase()) {
+                    balanceText.text = Amount(balance * 100, currency).toString()
+                } else {
+                    balanceText.text = "$balance $preferredUnit"
+                }
+            } else {
+                balanceText.text = Amount(balance, Amount.Currency.BTC).toString()
+            }
         }
     }
 

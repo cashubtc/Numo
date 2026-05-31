@@ -34,6 +34,7 @@ import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.Amount.Currency
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.util.MintLimitChecker
 import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.core.util.CurrencyManager
@@ -357,9 +358,9 @@ class PaymentRequestActivity : AppCompatActivity() {
                 PaymentTabManager.PaymentTab.UNIFIED -> {
                     val creq = nostrHandler?.paymentRequestBech32
                     val lnbc = lightningHandler?.currentInvoice ?: lightningInvoice
-                    if (lnbc != null) {
+                    if (creq != null || lnbc != null) {
                         org.cashudevkit.createBip321Uri(creq, lnbc, null)
-                    } else creq ?: lnbc
+                    } else null
                 }
             }
             if (toShare != null) {
@@ -459,6 +460,14 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun updateConvertedAmount(formattedAmountString: String) {
+        val preferredUnit = MintManager.getInstance(this).getPreferredUnit()
+        val isCustomUnit = preferredUnit.lowercase() != "sat"
+        
+        if (isCustomUnit) {
+            convertedAmountDisplay.visibility = View.GONE
+            return
+        }
+
         // Check if the formatted amount is BTC (satoshis) or fiat
         val isBtcAmount = formattedAmountString.startsWith("₿")
 
@@ -587,11 +596,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         val preferredLightningMint = mintManager.getPreferredLightningMint()
         lightningHandler = LightningMintHandler(this, preferredLightningMint, allowedMints, uiScope)
 
-        // Unless developer setting to delay it is enabled, start it immediately
-        if (!DeveloperPrefs.isLightningInvoiceDelayed(this)) {
-            startLightningMintFlow()
-        }
-
         // Check if NDEF is available
         val ndefAvailable = NdefHostCardEmulationService.isHceAvailable(this)
 
@@ -627,7 +631,40 @@ class PaymentRequestActivity : AppCompatActivity() {
         nostrHandler = NostrPaymentHandler(this, allowedMints)
         startNostrPaymentFlow()
 
-        // Lightning flow is now also started immediately (see startLightningMintFlow() call above)
+        // Check mint limits for the preferred mint to see if lightning bolt11 is supported
+        uiScope.launch {
+            val mintUrlToUse = preferredLightningMint ?: allowedMints.firstOrNull()
+            var isBolt11Supported = true
+            
+            if (mintUrlToUse != null) {
+                val limits = mintManager.getMintLimits(mintUrlToUse, this@PaymentRequestActivity)
+                val preferredUnit = MintManager.getInstance(this@PaymentRequestActivity).getPreferredUnit()
+                val checkResult = MintLimitChecker.checkMintLimits(paymentAmount, limits, preferredUnit)
+                isBolt11Supported = checkResult.isBolt11Supported
+            }
+            
+            if (!isBolt11Supported) {
+                Log.d(TAG, "Mint does not support bolt11. Bypassing Lightning tab and showing BIP321 Cashu request.")
+                // Bypass lightning entirely
+                runOnUiThread {
+                    // Hide Lightning tab ONLY
+                    lightningTab.visibility = View.GONE
+                    
+                    // Force selecting UNIFIED tab if LIGHTNING was the default
+                    if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.LIGHTNING) {
+                        tabManager.selectTab(PaymentTabManager.PaymentTab.UNIFIED)
+                    }
+                    
+                    // We need to call updateUnifiedQrCode here because the creq might already be ready
+                    updateUnifiedQrCode()
+                }
+            } else {
+                // Unless developer setting to delay it is enabled, start it immediately
+                if (!DeveloperPrefs.isLightningInvoiceDelayed(this@PaymentRequestActivity)) {
+                    startLightningMintFlow()
+                }
+            }
+        }
     }
 
     private fun setHceToCashu() {
@@ -681,9 +718,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             return
         }
 
-        val payload = if (lnbc != null) {
-            org.cashudevkit.createBip321Uri(creq, lnbc, null)
-        } else creq ?: lnbc
+        val payload = org.cashudevkit.createBip321Uri(creq, lnbc, null)
 
         try {
             val hceService = NdefHostCardEmulationService.getInstance()
@@ -733,11 +768,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             return
         }
         
-        val unifiedUri = if (lnbc != null) {
-            org.cashudevkit.createBip321Uri(creq, lnbc, null)
-        } else creq ?: lnbc
-        
-        if (unifiedUri == null) return
+        val unifiedUri = org.cashudevkit.createBip321Uri(creq, lnbc, null)
 
         try {
             val qrBitmap = generateThemedQrCode(unifiedUri)

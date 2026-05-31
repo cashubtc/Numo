@@ -285,8 +285,10 @@ object CashuPaymentHelper {
                 tokenString ?: error("tokenString is null"),
             )
 
-            if (token.unit() != CurrencyUnit.Sat) {
-                Log.e(TAG, "Unsupported token unit: ${token.unit()}")
+            val expectedUnitStr = com.electricdreams.numo.core.util.MintManager.getInstance(CashuWalletManager.appContext).getPreferredUnit()
+            val expectedUnit = CashuWalletManager.getCurrencyUnit(expectedUnitStr)
+            if (token.unit() != expectedUnit) {
+                Log.e(TAG, "Unsupported token unit: ${token.unit()}, expected: $expectedUnit")
                 return TokenValidationResult.InvalidFormat
             }
 
@@ -362,7 +364,9 @@ object CashuPaymentHelper {
             val wallet = CashuWalletManager.getWallet()
                 ?: throw RedemptionException("CDK wallet not initialized")
 
-            val mintWallet = wallet.getWallet(cdkToken.mintUrl(), cdkToken.unit() ?: CurrencyUnit.Sat)
+            val expectedUnitStr = com.electricdreams.numo.core.util.MintManager.getInstance(CashuWalletManager.appContext).getPreferredUnit()
+            val expectedUnit = CashuWalletManager.getCurrencyUnit(expectedUnitStr)
+            val mintWallet = wallet.getWallet(cdkToken.mintUrl(), cdkToken.unit() ?: expectedUnit)
                 ?: throw RedemptionException("Failed to get wallet for mint: ${cdkToken.mintUrl().url}")
 
             val receiveOptions = org.cashudevkit.ReceiveOptions(
@@ -398,7 +402,9 @@ object CashuPaymentHelper {
         val wallet = CashuWalletManager.getWallet()
             ?: throw RedemptionException("CDK wallet not initialized")
 
-        val mintWallet = wallet.getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)
+        val expectedUnitStr = com.electricdreams.numo.core.util.MintManager.getInstance(CashuWalletManager.appContext).getPreferredUnit()
+        val expectedUnit = CashuWalletManager.getCurrencyUnit(expectedUnitStr)
+        val mintWallet = wallet.getWallet(MintUrl(mintUrl), expectedUnit)
             ?: throw RedemptionException("Failed to get wallet for mint: $mintUrl")
 
         val receiveOptions = ReceiveOptions(
@@ -542,7 +548,9 @@ object CashuPaymentHelper {
                 val wallet = CashuWalletManager.getWallet()
                     ?: throw RedemptionException("CDK wallet not initialized")
 
-                val mintWallet = wallet.getWallet(cdkToken.mintUrl(), cdkToken.unit() ?: CurrencyUnit.Sat)
+                val expectedUnitStr = com.electricdreams.numo.core.util.MintManager.getInstance(CashuWalletManager.appContext).getPreferredUnit()
+            val expectedUnit = CashuWalletManager.getCurrencyUnit(expectedUnitStr)
+            val mintWallet = wallet.getWallet(cdkToken.mintUrl(), cdkToken.unit() ?: expectedUnit)
                     ?: throw RedemptionException("Failed to get wallet for mint: ${cdkToken.mintUrl().url}")
 
                 val receiveOptions = org.cashudevkit.ReceiveOptions(
