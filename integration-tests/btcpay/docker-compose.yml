@@ -9,7 +9,7 @@ services:
     command: ["/bin/bash", "-c", "cp -r /output/BTCPayServer.Plugins.Cashu /plugins/"]
 
   btcpayserver:
-    image: btcpayserver/btcpayserver:2.2.1
+    image: btcpayserver/btcpayserver:2.3.9
     restart: unless-stopped
     environment:
       BTCPAY_NETWORK: "regtest"

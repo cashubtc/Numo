@@ -899,14 +899,22 @@ class BtcPayPaymentServiceIntegrationTest {
 
         assertFalse("bech32m form must not start with 'creqA'", bech32!!.startsWith("creqA"))
 
-        // Decode both forms and verify all fields survive the creqA → bech32m round-trip
-        val originalPR = org.cashudevkit.PaymentRequest.fromString(cashuCbor)
-        val bech32PR   = org.cashudevkit.PaymentRequest.fromString(bech32)
-        assertEquals("payment ID must survive creqA→bech32m", originalPR.paymentId(), bech32PR.paymentId())
-        assertEquals("amount must survive creqA→bech32m",     originalPR.amount(),    bech32PR.amount())
-        assertEquals("unit must survive creqA→bech32m",       originalPR.unit(),      bech32PR.unit())
-        assertEquals("description must survive creqA→bech32m", originalPR.description(), bech32PR.description())
-        assertEquals("mints must survive creqA→bech32m",      originalPR.mints(),     bech32PR.mints())
+        // Compare against the raw BTCPay PR so that any silent field loss during
+        // amount-injection (?.let dropping nulls) is also caught, not just the
+        // bech32m round-trip itself.
+        val rawPR   = org.cashudevkit.PaymentRequest.fromString(data.cashuPR!!)
+        val bech32PR = org.cashudevkit.PaymentRequest.fromString(bech32)
+
+        // Assert non-null first so that a CDK bug returning null for both sides
+        // doesn't make assertEquals(null, null) pass silently.
+        assertNotNull("payment ID must be present in source creqA", rawPR.paymentId())
+        assertNotNull("amount must be present after prepareCashuQrContent", bech32PR.amount())
+
+        assertEquals("payment ID must survive → bech32m",  rawPR.paymentId(),    bech32PR.paymentId())
+        assertEquals("amount must survive → bech32m",      rawPR.amount() ?: 1000L, bech32PR.amount())
+        assertEquals("unit must survive → bech32m",        rawPR.unit(),         bech32PR.unit())
+        assertEquals("description must survive → bech32m", rawPR.description(),  bech32PR.description())
+        assertEquals("mints must survive → bech32m",       rawPR.mints(),        bech32PR.mints())
 
         val unifiedUri = BtcPayQrCodeBuilder.buildUnifiedUri(bech32, data.bolt11!!)
 
