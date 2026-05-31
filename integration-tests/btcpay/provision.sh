@@ -190,14 +190,17 @@ if [ "$CASHU_ENABLED" == "true" ]; then
 fi
 
 # Create POS app with test items
+# BTCPay's Greenfield API expects items via the "template" field (a JSON-encoded string),
+# not an "items" array directly on the request body.
 echo "Creating POS app..."
 POS_ITEMS='[{"id":"test-item-coffee","title":"Test Coffee","price":1000,"priceType":"Fixed","description":"Integration test item"},{"id":"test-item-tea","title":"Test Tea","price":500,"priceType":"Fixed","description":"Integration test item"}]'
+POS_TEMPLATE=$(echo "$POS_ITEMS" | jq -Rs .)
 
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
     "$BASE_URL/api/v1/stores/$STORE_ID/apps/pos" \
     -H "Authorization: token $API_KEY" \
     -H "Content-Type: application/json" \
-    --data-raw "{\"appName\":\"IntegrationTestPOS\",\"currency\":\"SATS\",\"title\":\"Integration Test POS\",\"defaultView\":\"Cart\",\"items\":$POS_ITEMS}")
+    --data-raw "{\"appName\":\"IntegrationTestPOS\",\"currency\":\"SATS\",\"title\":\"Integration Test POS\",\"defaultView\":\"Cart\",\"template\":$POS_TEMPLATE}")
 HTTP_CODE=$(echo "$RESPONSE" | tail -1)
 BODY=$(echo "$RESPONSE" | sed '$d')
 
