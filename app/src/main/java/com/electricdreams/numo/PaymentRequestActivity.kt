@@ -121,6 +121,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var nostrHandler: NostrPaymentHandler? = null
     private var lightningHandler: LightningMintHandler? = null
     private var lightningStarted = false
+    private var isBolt11Supported = true
 
     // Lightning quote info for history
     private var lightningInvoice: String? = null
@@ -278,13 +279,13 @@ class PaymentRequestActivity : AppCompatActivity() {
                 Log.d(TAG, "onTabSelected() called. tab=$tab, lightningStarted=$lightningStarted, lightningInvoice=$lightningInvoice")
                 when (tab) {
                     PaymentTabManager.PaymentTab.UNIFIED -> {
-                        if (!lightningStarted && DeveloperPrefs.isLightningInvoiceDelayed(this@PaymentRequestActivity)) {
+                        if (!lightningStarted && DeveloperPrefs.isLightningInvoiceDelayed(this@PaymentRequestActivity) && isBolt11Supported) {
                             startLightningMintFlow()
                         }
                         setHceToUnified()
                     }
                     PaymentTabManager.PaymentTab.LIGHTNING -> {
-                        if (!lightningStarted && DeveloperPrefs.isLightningInvoiceDelayed(this@PaymentRequestActivity)) {
+                        if (!lightningStarted && DeveloperPrefs.isLightningInvoiceDelayed(this@PaymentRequestActivity) && isBolt11Supported) {
                             startLightningMintFlow()
                         }
                         if (lightningInvoice != null) {
@@ -610,7 +611,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         // Check mint limits for the preferred mint to see if lightning bolt11 is supported
         uiScope.launch {
             val mintUrlToUse = preferredLightningMint ?: allowedMints.firstOrNull()
-            var isBolt11Supported = true
             
             if (mintUrlToUse != null) {
                 val limits = mintManager.getMintLimits(mintUrlToUse, this@PaymentRequestActivity)
