@@ -1048,4 +1048,12 @@
     <string name="btcpay_test_failed">Connection failed: %1$s</string>
     <string name="btcpay_test_fill_all_fields">Please fill in all fields</string>
     <string name="btcpay_test_unknown_error">Unknown error</string>
+    <string name="btcpay_section_pos">Point of Sale</string>
+    <string name="btcpay_pos_app_title">POS App</string>
+    <string name="btcpay_pos_app_subtitle_none">Local item directory</string>
+    <string name="btcpay_pos_select_title">Select POS App</string>
+    <string name="btcpay_pos_none_option">None — use local items</string>
+    <string name="btcpay_pos_no_apps">No Point of Sale apps found for this store</string>
+    <string name="btcpay_pos_load_error">Failed to load apps: %1$s</string>
+    <string name="btcpay_pos_items_error">Could not load BTCPay items</string>
 </resources>

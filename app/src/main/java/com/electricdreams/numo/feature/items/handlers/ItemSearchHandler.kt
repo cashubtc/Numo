@@ -50,11 +50,21 @@ class ItemSearchHandler(
     }
 
     /**
-     * Get all available categories from items.
+     * Override the item list with an externally fetched set (e.g. BTCPay POS).
+     * Search and category filtering still work normally on the provided list.
      */
-    fun getCategories(): List<String> {
-        return itemManager.getAllCategories()
+    fun setItems(items: List<Item>) {
+        allItems = items
+        applyFilters()
     }
+
+    /**
+     * Get all available categories derived from the currently loaded items.
+     */
+    fun getCategories(): List<String> = allItems
+        .mapNotNull { it.category?.takeIf { c -> c.isNotBlank() } }
+        .distinct()
+        .sorted()
 
     /**
      * Check if any categories exist.

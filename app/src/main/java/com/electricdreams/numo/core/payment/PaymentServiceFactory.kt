@@ -23,7 +23,8 @@ object PaymentServiceFactory {
             val config = BTCPayConfig(
                 serverUrl = prefs.getString("btcpay_server_url") ?: "",
                 apiKey = prefs.getString("btcpay_api_key") ?: "",
-                storeId = prefs.getString("btcpay_store_id") ?: ""
+                storeId = prefs.getString("btcpay_store_id") ?: "",
+                posAppId = prefs.getString("btcpay_pos_app_id")?.takeIf { it.isNotBlank() },
             )
             if (config.serverUrl.isNotBlank()
                 && config.apiKey.isNotBlank()

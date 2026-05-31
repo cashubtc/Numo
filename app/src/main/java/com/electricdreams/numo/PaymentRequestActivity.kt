@@ -615,7 +615,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         cashuLoadingSpinner.visibility = View.VISIBLE
 
         uiScope.launch {
-            val result = paymentService.createPayment(paymentAmount, "Payment of $paymentAmount sats")
+            val result = paymentService.createPayment(paymentAmount, "Payment of $paymentAmount sats", checkoutBasketJson)
             result.onSuccess { payment ->
                 btcPayPaymentId = payment.paymentId
                 btcPayInvoiceCreatedAt = System.currentTimeMillis()

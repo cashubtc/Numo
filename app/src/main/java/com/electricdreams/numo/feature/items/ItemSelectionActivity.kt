@@ -45,10 +45,15 @@ import com.electricdreams.numo.feature.items.handlers.CheckoutHandler
 import com.electricdreams.numo.feature.items.handlers.ItemSearchHandler
 import com.electricdreams.numo.feature.items.handlers.SelectionAnimationHandler
 
+import com.electricdreams.numo.core.payment.BTCPayConfig
+import com.electricdreams.numo.core.payment.BtcPayAppsService
+import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.util.NetworkUtils
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Activity for selecting items and adding them to a basket for checkout.
@@ -138,8 +143,7 @@ class ItemSelectionActivity : AppCompatActivity() {
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
-            // Items may have been added/modified, refresh and check empty state
-            searchHandler.loadItems()
+            loadItems()
             updateAnimatedEmptyStateVisibility()
         }
     }
@@ -155,8 +159,7 @@ class ItemSelectionActivity : AppCompatActivity() {
                 clearExisting = true
             ) { importedCount ->
                 if (importedCount > 0) {
-                    // Refresh catalog and switch from empty state to main content
-                    searchHandler.loadItems()
+                    loadItems()
                     updateAnimatedEmptyStateVisibility()
                 }
             }
@@ -188,7 +191,7 @@ class ItemSelectionActivity : AppCompatActivity() {
         }
 
         // Load initial data and check empty state
-        searchHandler.loadItems()
+        loadItems()
         refreshBasket()
 
         bitcoinPriceWorker.start()
@@ -202,8 +205,7 @@ class ItemSelectionActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Refresh in case items were modified
-        searchHandler.loadItems()
+        loadItems()
         refreshBasket()
         updateEditingState()
         updateAnimatedEmptyStateVisibility()
@@ -217,6 +219,43 @@ class ItemSelectionActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         emptyStateAnimator?.stop()
+    }
+
+    // ----- Item loading -----
+
+    private fun loadItems() {
+        val prefs = PreferenceStore.app(this)
+        val posAppId = if (prefs.getBoolean("btcpay_enabled", false))
+            prefs.getString("btcpay_pos_app_id", null)?.takeIf { it.isNotBlank() }
+        else null
+
+        if (posAppId != null) {
+            val config = BTCPayConfig(
+                serverUrl = prefs.getString("btcpay_server_url", "") ?: "",
+                apiKey = prefs.getString("btcpay_api_key", "") ?: "",
+                storeId = prefs.getString("btcpay_store_id", "") ?: "",
+            )
+            lifecycleScope.launch {
+                val result = withContext(Dispatchers.IO) {
+                    runCatching { BtcPayAppsService.fetchPosItems(config, posAppId) }
+                }
+                result.onSuccess { items ->
+                    searchHandler.setItems(items)
+                    updateAnimatedEmptyStateVisibility()
+                }.onFailure {
+                    if (searchHandler.getAllItems().isEmpty()) {
+                        Toast.makeText(
+                            this@ItemSelectionActivity,
+                            R.string.btcpay_pos_items_error,
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    }
+                }
+            }
+        } else {
+            searchHandler.loadItems()
+            updateAnimatedEmptyStateVisibility()
+        }
     }
 
     // ----- Initialization -----
@@ -447,7 +486,7 @@ class ItemSelectionActivity : AppCompatActivity() {
      * Shows animated empty state when there are no items in the catalog.
      */
     private fun updateAnimatedEmptyStateVisibility() {
-        val hasItems = itemManager.getAllItems().isNotEmpty()
+        val hasItems = searchHandler.getAllItems().isNotEmpty()
         
         if (hasItems) {
             // Show main content, hide animated empty state

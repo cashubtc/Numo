@@ -321,6 +321,92 @@
 
             </androidx.cardview.widget.CardView>
 
+            <!-- ==================== -->
+            <!-- POINT OF SALE        -->
+            <!-- ==================== -->
+            <TextView
+                android:id="@+id/pos_section_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="28dp"
+                android:layout_marginBottom="12dp"
+                android:fontFamily="sans-serif"
+                android:text="@string/btcpay_section_pos"
+                android:textAllCaps="true"
+                android:textColor="@color/color_text_secondary"
+                android:textSize="13sp"
+                android:letterSpacing="0.03"
+                android:visibility="gone" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/pos_app_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:cardBackgroundColor="@color/color_bg_card"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:id="@+id/pos_app_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="20dp">
+
+                    <FrameLayout
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_marginEnd="16dp"
+                        android:background="@drawable/bg_circle"
+                        android:backgroundTint="#E8F5E9">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_shopping_bag"
+                            app:tint="#2E7D32" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="sans-serif-medium"
+                            android:text="@string/btcpay_pos_app_title"
+                            android:textColor="@color/color_text_primary"
+                            android:textSize="17sp" />
+
+                        <TextView
+                            android:id="@+id/pos_app_subtitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/btcpay_pos_app_subtitle_none"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/ic_chevron_forward"
+                        app:tint="@color/color_text_tertiary" />
+
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
         </LinearLayout>
     </ScrollView>
 

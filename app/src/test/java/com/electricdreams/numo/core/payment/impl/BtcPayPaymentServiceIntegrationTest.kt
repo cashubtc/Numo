@@ -2,6 +2,7 @@ package com.electricdreams.numo.core.payment.impl
 
 import android.util.Base64
 import com.electricdreams.numo.core.payment.BTCPayConfig
+import com.electricdreams.numo.core.payment.BtcPayAppsService
 import com.electricdreams.numo.core.payment.BtcPayQrCodeBuilder
 import com.electricdreams.numo.core.payment.PaymentState
 import com.electricdreams.numo.core.wallet.WalletResult
@@ -42,6 +43,7 @@ class BtcPayPaymentServiceIntegrationTest {
     private var cashuEnabled = false
     private var cdkMintUrl: String = "http://localhost:3338"
     private var customerLndUrl: String = "http://localhost:35532"
+    private var posAppId: String = ""
 
     @Before
     fun setup() {
@@ -60,6 +62,7 @@ class BtcPayPaymentServiceIntegrationTest {
             cashuEnabled = props.getProperty("CASHU_ENABLED", "false").toBoolean()
             cdkMintUrl = props.getProperty("CDK_MINT_URL", "http://localhost:3338")
             customerLndUrl = props.getProperty("CUSTOMER_LND_URL", "http://localhost:35532")
+            posAppId = props.getProperty("BTCPAY_POS_APP_ID", "")
         } else {
             config = BTCPayConfig(
                 serverUrl = System.getenv("BTCPAY_SERVER_URL") ?: "http://localhost:49392",
@@ -69,6 +72,7 @@ class BtcPayPaymentServiceIntegrationTest {
             cashuEnabled = System.getenv("CASHU_ENABLED")?.toBoolean() ?: false
             cdkMintUrl = System.getenv("CDK_MINT_URL") ?: "http://localhost:3338"
             customerLndUrl = System.getenv("CUSTOMER_LND_URL") ?: "http://localhost:35532"
+            posAppId = System.getenv("BTCPAY_POS_APP_ID") ?: ""
         }
         service = BTCPayPaymentService(config)
     }
@@ -925,5 +929,127 @@ class BtcPayPaymentServiceIntegrationTest {
         println("Unified QR verified for invoice ${data.paymentId}")
         println("  bech32m: ${bech32.take(60)}...")
         println("  BIP321 URI: ${unifiedUri.take(80)}...")
+    }
+
+    // =========================================================================
+    // BTCPay POS — BtcPayAppsService + POS invoice creation
+    // =========================================================================
+
+    private fun skipIfPosNotConfigured() {
+        assumeFalse("BTCPay not configured — skipping", config.apiKey.isEmpty() || config.storeId.isEmpty())
+        assumeFalse("POS app not provisioned — skipping", posAppId.isBlank())
+    }
+
+    private fun posConfig() = BTCPayConfig(
+        serverUrl = config.serverUrl,
+        apiKey = config.apiKey,
+        storeId = config.storeId,
+        posAppId = posAppId,
+    )
+
+    /** Minimal CheckoutBasket JSON with the two provisioned test items. */
+    private fun testCartJson(coffeeQty: Int = 1, teaQty: Int = 1): String {
+        val items = com.google.gson.JsonArray().apply {
+            add(com.google.gson.JsonObject().apply {
+                addProperty("itemId", "test-item-coffee")
+                addProperty("uuid", java.util.UUID.randomUUID().toString())
+                addProperty("name", "Test Coffee")
+                addProperty("quantity", coffeeQty)
+                addProperty("priceType", "FIAT")
+                addProperty("netPriceCents", 1000L)
+                addProperty("priceSats", 1000L)
+                addProperty("priceCurrency", "SATS")
+                addProperty("vatEnabled", false)
+                addProperty("vatRate", 0)
+            })
+            add(com.google.gson.JsonObject().apply {
+                addProperty("itemId", "test-item-tea")
+                addProperty("uuid", java.util.UUID.randomUUID().toString())
+                addProperty("name", "Test Tea")
+                addProperty("quantity", teaQty)
+                addProperty("priceType", "FIAT")
+                addProperty("netPriceCents", 500L)
+                addProperty("priceSats", 500L)
+                addProperty("priceCurrency", "SATS")
+                addProperty("vatEnabled", false)
+                addProperty("vatRate", 0)
+            })
+        }
+        return com.google.gson.JsonObject().apply { add("items", items) }.toString()
+    }
+
+    @Test
+    fun testFetchPosApps_returnsProvisionedApp() {
+        skipIfPosNotConfigured()
+        val apps = BtcPayAppsService.fetchPosApps(config)
+        assertTrue("fetchPosApps should return at least one POS app", apps.isNotEmpty())
+        val found = apps.any { it.id == posAppId }
+        assertTrue("Provisioned POS app ($posAppId) should be in the list", found)
+        println("POS apps: ${apps.map { "${it.name}(${it.id})" }}")
+    }
+
+    @Test
+    fun testFetchPosItems_returnsTestItems() {
+        skipIfPosNotConfigured()
+        val items = BtcPayAppsService.fetchPosItems(config, posAppId)
+        assertTrue("fetchPosItems should return items", items.isNotEmpty())
+        val coffee = items.find { it.id == "test-item-coffee" }
+        val tea    = items.find { it.id == "test-item-tea" }
+        assertNotNull("Test Coffee item should be present", coffee)
+        assertNotNull("Test Tea item should be present", tea)
+        assertEquals("Coffee price should be 1000", 1000.0, coffee!!.price, 0.01)
+        assertEquals("Tea price should be 500",     500.0,  tea!!.price,    0.01)
+        println("POS items: ${items.map { "${it.name}=\${it.price}" }}")
+    }
+
+    @Test
+    fun testCreatePosPayment_withCart_returnsInvoice() = runBlocking {
+        skipIfPosNotConfigured()
+        val posService = BTCPayPaymentService(posConfig())
+        val result = posService.createPayment(
+            amountSats = 2500L,
+            description = "POS integration test",
+            posCartJson = testCartJson(coffeeQty = 2, teaQty = 1),
+        )
+        assertTrue("createPayment via POS endpoint should succeed", result is WalletResult.Success)
+        val data = result.getOrThrow()
+        assertTrue("Invoice ID should not be blank", data.paymentId.isNotBlank())
+        println("POS invoice created: ${data.paymentId}")
+        println("  bolt11: ${data.bolt11?.take(40) ?: "null"}")
+        println("  cashuPR: ${data.cashuPR?.take(40) ?: "null"}")
+    }
+
+    @Test
+    fun testCreatePosPayment_invoiceStatusIsPending() = runBlocking {
+        skipIfPosNotConfigured()
+        val posService = BTCPayPaymentService(posConfig())
+        val invoiceId = posService.createPayment(
+            amountSats = 1000L,
+            posCartJson = testCartJson(coffeeQty = 1, teaQty = 0),
+        ).getOrThrow().paymentId
+
+        val status = posService.checkPaymentStatus(invoiceId).getOrThrow()
+        assertEquals("Freshly created POS invoice should be PENDING", PaymentState.PENDING, status)
+        println("POS invoice $invoiceId status: $status")
+    }
+
+    @Test
+    fun testCreatePosPayment_emptyCart_fallsBackToSimpleInvoice() = runBlocking {
+        skipIfPosNotConfigured()
+        val posService = BTCPayPaymentService(posConfig())
+        // Cart with no items — service should fall back to a plain invoice
+        val emptyCart = """{"items":[]}"""
+        val result = posService.createPayment(amountSats = 500L, posCartJson = emptyCart)
+        assertTrue("createPayment with empty cart should still succeed via fallback", result is WalletResult.Success)
+        println("Fallback invoice: ${result.getOrThrow().paymentId}")
+    }
+
+    @Test
+    fun testCreatePosPayment_nullCart_usesSimpleInvoice() = runBlocking {
+        skipIfPosNotConfigured()
+        val posService = BTCPayPaymentService(posConfig())
+        val result = posService.createPayment(amountSats = 500L, posCartJson = null)
+        assertTrue("createPayment without cart should succeed as plain invoice", result is WalletResult.Success)
+        println("Plain invoice (no cart): ${result.getOrThrow().paymentId}")
     }
 }

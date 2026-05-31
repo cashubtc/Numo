@@ -40,7 +40,8 @@ RESPONSE=$(curl -s -u "$EMAIL:$PASSWORD" -X POST "$BASE_URL/api/v1/api-keys" \
             "btcpay.store.canviewinvoices",
             "btcpay.store.canmodifyinvoices",
             "btcpay.user.canviewprofile",
-            "btcpay.server.canuseinternallightningnode"
+            "btcpay.server.canuseinternallightningnode",
+            "btcpay.user.canviewapps"
         ]
     }')
 
@@ -188,6 +189,26 @@ if [ "$CASHU_ENABLED" == "true" ]; then
     done
 fi
 
+# Create POS app with test items
+echo "Creating POS app..."
+POS_ITEMS='[{"id":"test-item-coffee","title":"Test Coffee","price":1000,"priceType":"Fixed","description":"Integration test item"},{"id":"test-item-tea","title":"Test Tea","price":500,"priceType":"Fixed","description":"Integration test item"}]'
+
+RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
+    "$BASE_URL/api/v1/stores/$STORE_ID/apps/pos" \
+    -H "Authorization: token $API_KEY" \
+    -H "Content-Type: application/json" \
+    --data-raw "{\"appName\":\"IntegrationTestPOS\",\"currency\":\"SATS\",\"title\":\"Integration Test POS\",\"defaultView\":\"Cart\",\"items\":$POS_ITEMS}")
+HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+BODY=$(echo "$RESPONSE" | sed '$d')
+
+POS_APP_ID=""
+if [ "$HTTP_CODE" == "200" ] || [ "$HTTP_CODE" == "201" ]; then
+    POS_APP_ID=$(echo "$BODY" | jq -r '.id // empty')
+    echo "POS App ID: $POS_APP_ID"
+else
+    echo "WARNING: Could not create POS app (HTTP $HTTP_CODE): $BODY"
+fi
+
 # Output to properties file
 OUTPUT_FILE="btcpay_env.properties"
 
@@ -198,6 +219,7 @@ BTCPAY_STORE_ID=$STORE_ID
 CASHU_ENABLED=$CASHU_ENABLED
 CDK_MINT_URL=http://localhost:3338
 CUSTOMER_LND_URL=http://localhost:35532
+BTCPAY_POS_APP_ID=$POS_APP_ID
 EOF
 
 echo ""

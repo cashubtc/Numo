@@ -16,6 +16,8 @@ import com.google.gson.JsonParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import com.google.gson.JsonArray
+import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
@@ -51,11 +53,17 @@ class BTCPayPaymentService(
 
     override suspend fun createPayment(
         amountSats: Long,
-        description: String?
+        description: String?,
+        posCartJson: String?,
     ): WalletResult<PaymentData> = withContext(Dispatchers.IO) {
         WalletResult.runCatching {
-            // 1. Create invoice
-            val invoiceId = createInvoice(amountSats, description)
+            // 1. Create invoice — use POS endpoint when a POS app is configured and
+            //    the caller supplied cart data, so BTCPay can track inventory.
+            val invoiceId = if (config.posAppId != null && posCartJson != null) {
+                createPosInvoice(config.posAppId, amountSats, posCartJson)
+            } else {
+                createInvoice(amountSats, description, posCartJson)
+            }
 
             // 2. Fetch payment methods to get bolt11 + cashu PR.
             //    BTCPay may return null destinations on the first call while
@@ -194,21 +202,109 @@ class BTCPayPaymentService(
         .build()
 
     /**
-     * Create a BTCPay invoice and return the invoice ID.
+     * Create a BTCPay invoice through the POS web endpoint so BTCPay can link
+     * the invoice to specific items and decrement inventory on payment.
+     *
+     * Endpoint: POST /apps/{appId}/pos  (web UI, not Greenfield)
+     * Request:  form-encoded, cartData = JSON array of {id, count}
+     * Response: 302 redirect to /i/{invoiceId} or /invoice?id={invoiceId}
+     *
+     * Falls back to [createInvoice] if the cart is empty or the endpoint fails.
      */
-    private fun createInvoice(amountSats: Long, description: String?): String {
+    private fun createPosInvoice(posAppId: String, amountSats: Long, posCartJson: String): String {
+        val cartItems = try {
+            JsonParser.parseString(posCartJson).asJsonObject
+                .getAsJsonArray("items")
+                ?.filter { it.isJsonObject }
+                ?.mapNotNull { el ->
+                    val obj = el.asJsonObject
+                    val id = obj.get("itemId")?.takeIf { !it.isJsonNull }?.asString
+                        ?: return@mapNotNull null
+                    val count = obj.get("quantity")?.asInt ?: 1
+                    JsonObject().apply {
+                        addProperty("id", id)
+                        addProperty("count", count)
+                    }
+                } ?: emptyList()
+        } catch (e: Exception) {
+            Log.w(TAG, "createPosInvoice: cart parse failed, falling back: ${e.message}")
+            return createInvoice(amountSats, null)
+        }
+
+        if (cartItems.isEmpty()) {
+            Log.w(TAG, "createPosInvoice: empty cart, falling back to simple invoice")
+            return createInvoice(amountSats, null)
+        }
+
+        val cartJson = JsonArray().apply { cartItems.forEach { add(it) } }.toString()
+        val formBody = FormBody.Builder()
+            .add("cartData", cartJson)
+            .build()
+
+        val noRedirectClient = client.newBuilder()
+            .followRedirects(false)
+            .followSslRedirects(false)
+            .build()
+
+        val request = Request.Builder()
+            .url("${baseUrl()}/apps/$posAppId/pos")
+            .post(formBody)
+            .addHeader("Authorization", "token ${config.apiKey}")
+            .build()
+
+        val (code, location, body) = noRedirectClient.newCall(request).execute().use { r ->
+            Triple(r.code, r.header("Location"), r.body?.string() ?: "")
+        }
+        Log.d(TAG, "createPosInvoice: HTTP $code, Location=$location")
+
+        // 302 redirect → extract invoice ID from Location header
+        if (code in 300..399 && !location.isNullOrBlank()) {
+            val invoiceId = extractInvoiceIdFromUrl(location)
+            if (!invoiceId.isNullOrBlank()) {
+                Log.d(TAG, "createPosInvoice: invoice $invoiceId (from redirect $location)")
+                return invoiceId
+            }
+            Log.w(TAG, "createPosInvoice: could not parse invoice ID from Location=$location")
+        }
+
+        // Some BTCPay versions return 200 + JSON instead of redirect
+        if (code in 200..299) {
+            val invoiceId = runCatching {
+                JsonParser.parseString(body).asJsonObject.get("id")?.asString
+            }.getOrNull()
+            if (!invoiceId.isNullOrBlank()) {
+                Log.d(TAG, "createPosInvoice: invoice $invoiceId (from JSON body)")
+                return invoiceId
+            }
+        }
+
+        Log.w(TAG, "createPosInvoice: unexpected response HTTP $code, falling back. Body: ${body.take(120)}")
+        return createInvoice(amountSats, null)
+    }
+
+    /** Extract invoice ID from BTCPay redirect URLs.
+     *  Handles: /i/XXXX, /invoice/XXXX, /invoice?id=XXXX, ?id=XXXX */
+    private fun extractInvoiceIdFromUrl(url: String): String? {
+        Regex("[?&]id=([A-Za-z0-9]+)").find(url)?.groupValues?.get(1)
+            ?.takeIf { it.isNotBlank() }?.let { return it }
+        Regex("/(?:i|invoice)/([A-Za-z0-9]+)").find(url)?.groupValues?.get(1)
+            ?.takeIf { it.isNotBlank() }?.let { return it }
+        return null
+    }
+
+    /**
+     * Create a BTCPay invoice via the standard Greenfield endpoint.
+     * If [posCartJson] is provided (CheckoutBasket JSON), the cart is attached
+     * as metadata.posData so BTCPay displays line items on the receipt.
+     */
+    private fun createInvoice(amountSats: Long, description: String?, posCartJson: String? = null): String {
         val payload = JsonObject().apply {
-            // BTCPay expects the amount as a string in the currency unit.
-            // For BTC-denominated stores this is BTC; for sats-denominated stores
-            // it is sats. We pass sats and rely on the store being configured for
-            // the "SATS" denomination.
             addProperty("amount", amountSats.toString())
             addProperty("currency", "SATS")
-            if (!description.isNullOrBlank()) {
-                val metadata = JsonObject()
-                metadata.addProperty("itemDesc", description)
-                add("metadata", metadata)
-            }
+            val metadata = JsonObject()
+            if (!description.isNullOrBlank()) metadata.addProperty("itemDesc", description)
+            if (posCartJson != null) metadata.addProperty("posData", posCartJson)
+            if (metadata.size() > 0) add("metadata", metadata)
         }
 
         val request = Request.Builder()

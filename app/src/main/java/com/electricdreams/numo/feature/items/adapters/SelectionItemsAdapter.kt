@@ -437,15 +437,26 @@ class SelectionItemsAdapter(
         }
 
         private fun loadItemImage(item: Item) {
-            if (!item.imagePath.isNullOrEmpty()) {
-                val imageFile = File(item.imagePath!!)
-                if (imageFile.exists()) {
-                    val bitmap = BitmapFactory.decodeFile(imageFile.absolutePath)
-                    if (bitmap != null) {
-                        itemImageView.setImageBitmap(bitmap)
-                        imagePlaceholder?.visibility = View.GONE
-                        return
+            val path = item.imagePath
+            if (!path.isNullOrEmpty()) {
+                val bitmap = when {
+                    path.startsWith("data:") -> {
+                        try {
+                            val base64 = path.substringAfter(",")
+                            val bytes = android.util.Base64.decode(base64, android.util.Base64.DEFAULT)
+                            BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                        } catch (_: Exception) { null }
                     }
+                    path.startsWith("http://") || path.startsWith("https://") -> null
+                    else -> {
+                        val file = java.io.File(path)
+                        if (file.exists()) BitmapFactory.decodeFile(file.absolutePath) else null
+                    }
+                }
+                if (bitmap != null) {
+                    itemImageView.setImageBitmap(bitmap)
+                    imagePlaceholder?.visibility = View.GONE
+                    return
                 }
             }
             itemImageView.setImageBitmap(null)

@@ -24,7 +24,8 @@ class LocalPaymentService(
 
     override suspend fun createPayment(
         amountSats: Long,
-        description: String?
+        description: String?,
+        posCartJson: String?,
     ): WalletResult<PaymentData> {
         val mintUrl = mintManager.getPreferredLightningMint()
             ?: return WalletResult.Failure(

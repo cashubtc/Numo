@@ -20,7 +20,8 @@ interface IPaymentService {
      */
     suspend fun createPayment(
         amountSats: Long,
-        description: String? = null
+        description: String? = null,
+        posCartJson: String? = null,
     ): WalletResult<PaymentData>
 
     /**
