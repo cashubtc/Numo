@@ -2,9 +2,18 @@ package com.electricdreams.numo.core.payment.impl
 
 import android.util.Base64
 import com.electricdreams.numo.core.payment.BTCPayConfig
+import com.electricdreams.numo.core.payment.BtcPayQrCodeBuilder
 import com.electricdreams.numo.core.payment.PaymentState
 import com.electricdreams.numo.core.wallet.WalletResult
 import com.google.gson.JsonParser
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.BinaryBitmap
+import com.google.zxing.EncodeHintType
+import com.google.zxing.LuminanceSource
+import com.google.zxing.common.HybridBinarizer
+import com.google.zxing.qrcode.QRCodeReader
+import com.google.zxing.qrcode.QRCodeWriter
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import com.upokecenter.cbor.CBORObject
 import kotlinx.coroutines.runBlocking
 import okhttp3.MediaType.Companion.toMediaType
@@ -806,5 +815,107 @@ class BtcPayPaymentServiceIntegrationTest {
             kotlinx.coroutines.delay(2_000)
         }
         return false
+    }
+
+    // =========================================================================
+    // QR Code Content — Cashu tab and Unified tab
+    // =========================================================================
+
+    /**
+     * Encodes [expectedText] as a QR code (same ZXing hints as QrCodeGenerator)
+     * and immediately decodes it — asserts the round-trip is lossless.
+     *
+     * Uses ZXing's BitMatrix directly via a custom LuminanceSource so there is
+     * no dependency on Android Bitmap rendering in Robolectric.
+     */
+    private fun assertQrEncodes(expectedText: String) {
+        val hints = mapOf<EncodeHintType, Any>(
+            EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.L,
+            EncodeHintType.MARGIN to 1,
+        )
+        val bitMatrix = QRCodeWriter().encode(expectedText, BarcodeFormat.QR_CODE, 512, 512, hints)
+        val source = object : LuminanceSource(bitMatrix.width, bitMatrix.height) {
+            override fun getRow(y: Int, row: ByteArray?): ByteArray {
+                val r = row ?: ByteArray(width)
+                for (x in 0 until width) r[x] = if (bitMatrix[x, y]) 0 else 255.toByte()
+                return r
+            }
+            override fun getMatrix(): ByteArray {
+                val matrix = ByteArray(width * height)
+                for (y in 0 until height)
+                    for (x in 0 until width)
+                        matrix[y * width + x] = if (bitMatrix[x, y]) 0 else 255.toByte()
+                return matrix
+            }
+        }
+        val decoded = QRCodeReader().decode(BinaryBitmap(HybridBinarizer(source))).text
+        assertEquals("QR must encode the expected text unchanged", expectedText, decoded)
+    }
+
+    /**
+     * Cashu tab QR: the QR shown on the Cashu tab must encode exactly the creqA
+     * that [BtcPayQrCodeBuilder.prepareCashuQrContent] produces from the real
+     * BTCPay payment request.
+     *
+     * Production path:
+     *   val (cashuCbor, _) = BtcPayQrCodeBuilder.prepareCashuQrContent(payment.cashuPR, amount)
+     *   QrCodeGenerator.generate(cashuCbor, 512)
+     */
+    @Test
+    fun testCashuQr_encodesExactCreqAFromBtcPay() {
+        skipIfCashuNotEnabled()
+
+        val (invoiceId, rawCashuPR) = createInvoiceAndGetCashuPR(1000L)
+        assertNotNull("BTCPay invoice must include a Cashu payment request", rawCashuPR)
+
+        val (cashuCbor, _) = BtcPayQrCodeBuilder.prepareCashuQrContent(rawCashuPR!!, 1000L)
+
+        assertTrue("Cashu QR content must be a valid creqA", cashuCbor.startsWith("creqA"))
+        assertQrEncodes(cashuCbor)
+
+        println("Cashu QR verified for invoice $invoiceId")
+        println("  creqA: ${cashuCbor.take(60)}...")
+    }
+
+    /**
+     * Unified tab QR: the QR shown on the Unified tab must encode a BIP321 URI
+     * where the Cashu portion is the **bech32m** form — not the raw creqA.
+     *
+     * Production path:
+     *   val (cashuCbor, bech32) = BtcPayQrCodeBuilder.prepareCashuQrContent(payment.cashuPR, amount)
+     *   val unifiedUri = BtcPayQrCodeBuilder.buildUnifiedUri(bech32 ?: cashuCbor, bolt11)
+     *   QrCodeGenerator.generate(unifiedUri, 512)
+     */
+    @Test
+    fun testUnifiedQr_containsBech32mEncodedCashuPR() = runBlocking {
+        skipIfCashuNotEnabled()
+
+        val data = service.createPayment(1000L, "Unified QR bech32m test").getOrThrow()
+        assertNotNull("BTCPay must return a cashuPR", data.cashuPR)
+        assertNotNull("BTCPay must return a bolt11 for the Unified QR", data.bolt11)
+
+        val (cashuCbor, bech32) = BtcPayQrCodeBuilder.prepareCashuQrContent(data.cashuPR!!, 1000L)
+        assumeFalse("CDK bech32m conversion not available — skipping", bech32 == null)
+
+        assertFalse("bech32m form must not start with 'creqA'", bech32!!.startsWith("creqA"))
+
+        // Decode both forms and verify all fields survive the creqA → bech32m round-trip
+        val originalPR = org.cashudevkit.PaymentRequest.fromString(cashuCbor)
+        val bech32PR   = org.cashudevkit.PaymentRequest.fromString(bech32)
+        assertEquals("payment ID must survive creqA→bech32m", originalPR.paymentId(), bech32PR.paymentId())
+        assertEquals("amount must survive creqA→bech32m",     originalPR.amount(),    bech32PR.amount())
+        assertEquals("unit must survive creqA→bech32m",       originalPR.unit(),      bech32PR.unit())
+        assertEquals("description must survive creqA→bech32m", originalPR.description(), bech32PR.description())
+        assertEquals("mints must survive creqA→bech32m",      originalPR.mints(),     bech32PR.mints())
+
+        val unifiedUri = BtcPayQrCodeBuilder.buildUnifiedUri(bech32, data.bolt11!!)
+
+        assertQrEncodes(unifiedUri)
+        assertTrue("Unified URI must embed the bech32m Cashu PR", unifiedUri.contains(bech32))
+        assertFalse("Unified URI must not embed the raw creqA form", unifiedUri.contains(cashuCbor))
+
+        println("Unified QR verified for invoice ${data.paymentId}")
+        println("  bech32m: ${bech32.take(60)}...")
+        println("  BIP321 URI: ${unifiedUri.take(80)}...")
     }
 }

@@ -49,6 +49,7 @@ import com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
 import com.electricdreams.numo.ui.util.QrCodeGenerator
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.feature.settings.DeveloperPrefs
+import com.electricdreams.numo.core.payment.BtcPayQrCodeBuilder
 import com.electricdreams.numo.core.payment.IPaymentService
 import com.electricdreams.numo.core.payment.PaymentServiceFactory
 import com.electricdreams.numo.core.payment.PaymentState
@@ -991,56 +992,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         return QrCodeGenerator.generate(text, 512, qrForeground, qrBackground)
     }
 
-    /**
-     * Ensures the BTCPay cashuPR has an amount field (inject [amount] if missing)
-     * and returns both the CBOR form and its bech32m-encoded equivalent.
-     */
-    private fun prepareBtcPayCashuPR(rawCashuPR: String, amount: Long): Pair<String, String?> {
-        val cbor = try {
-            val decoded = org.cashudevkit.PaymentRequest.fromString(rawCashuPR)
-            if (decoded.amount() != null) {
-                rawCashuPR
-            } else {
-                val map = com.upokecenter.cbor.CBORObject.NewMap()
-                decoded.paymentId()?.let { map.Add("i", it) }
-                map.Add("a", amount)
-                decoded.unit()?.let { u ->
-                    map.Add("u", when (u) {
-                        is org.cashudevkit.CurrencyUnit.Sat -> "sat"
-                        is org.cashudevkit.CurrencyUnit.Msat -> "msat"
-                        is org.cashudevkit.CurrencyUnit.Eur -> "eur"
-                        is org.cashudevkit.CurrencyUnit.Usd -> "usd"
-                        is org.cashudevkit.CurrencyUnit.Custom -> u.unit
-                        else -> "sat"
-                    })
-                }
-                decoded.description()?.let { map.Add("d", it) }
-                decoded.singleUse()?.let { map.Add("s", it) }
-                val mints = decoded.mints()
-                if (mints.isNotEmpty()) {
-                    val mintsArray = com.upokecenter.cbor.CBORObject.NewArray()
-                    mints.forEach { mintsArray.Add(it) }
-                    map.Add("m", mintsArray)
-                }
-                "creqA" + android.util.Base64.encodeToString(
-                    map.EncodeToBytes(),
-                    android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or android.util.Base64.NO_PADDING
-                )
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "prepareBtcPayCashuPR: could not inject amount: ${e.message}")
-            rawCashuPR
-        }
-
-        val bech32 = try {
-            org.cashudevkit.PaymentRequest.fromString(cbor).toBech32String()
-        } catch (e: Exception) {
-            Log.w(TAG, "prepareBtcPayCashuPR: could not convert to bech32m: ${e.message}")
-            null
-        }
-
-        return cbor to bech32
-    }
+    private fun prepareBtcPayCashuPR(rawCashuPR: String, amount: Long): Pair<String, String?> =
+        BtcPayQrCodeBuilder.prepareCashuQrContent(rawCashuPR, amount)
 
     private fun updateUnifiedQrCode() {
         val creq = nostrHandler?.paymentRequestBech32 ?: hcePaymentRequestBech32 ?: btcPayCashuPRBech32 ?: btcPayCashuPR ?: hcePaymentRequest
