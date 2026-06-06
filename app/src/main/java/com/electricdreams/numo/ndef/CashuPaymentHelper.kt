@@ -774,43 +774,8 @@ object CashuPaymentHelper {
                 paymentContext = paymentContext,
             )
 
-            // Return the encoded Cashu token so it can be saved in history
-            return if (swapResult == "SUCCESS_KNOWN") {
-                try {
-                    val tokenJson = JSONObject()
-                    val tokenEntry = JSONObject()
-                    tokenEntry.put("mint", payload.mint().url)
-
-                    val proofsArray = org.json.JSONArray()
-                    for (proof in payload.proofs()) {
-                        val proofJson = JSONObject()
-                        proofJson.put("id", proof.keysetId)
-                        proofJson.put("amount", proof.amount.value.toLong())
-                        proofJson.put("C", proof.c)
-                        proofJson.put("secret", proof.secret)
-                        proofsArray.put(proofJson)
-                    }
-                    tokenEntry.put("proofs", proofsArray)
-
-                    val tokenArray = org.json.JSONArray()
-                    tokenArray.put(tokenEntry)
-
-                    tokenJson.put("token", tokenArray)
-                    tokenJson.put("unit", unit)
-
-                    val tokenBytes = tokenJson.toString().toByteArray()
-                    val base64 = Base64.encodeToString(
-                        tokenBytes,
-                        Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
-                    )
-                    "cashuA$base64"
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to encode redeemed proofs to Cashu token", e)
-                    payloadJson
-                }
-            } else {
-                swapResult
-            }
+            // Return the payload JSON so it can be saved in history
+            return if (swapResult == "SUCCESS_KNOWN") payloadJson else swapResult
         } catch (e: Exception) {
             if (e is RedemptionException) throw e
             val errorMsg = "PaymentRequestPayload redemption failed: ${e.message}"
