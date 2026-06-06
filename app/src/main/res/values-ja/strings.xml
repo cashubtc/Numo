@@ -952,4 +952,33 @@
     <string name="btcmap_promo_learn_more">詳細を見る</string>
     <string name="btcmap_banner_message">あなたのお店をBTCMapに追加する。</string>
     <string name="btcmap_banner_dismiss">閉じる</string>
+
+    <!-- BTCPay Server Settings -->
+    <string name="btcpay_settings_title">BTCPay Server</string>
+    <string name="btcpay_settings_subtitle">BTCPay Serverとの連携</string>
+    <string name="btcpay_enable_title">BTCPay Server</string>
+    <string name="btcpay_enable_subtitle">BTCPay Server連携を有効にする</string>
+    <string name="btcpay_section_connection">接続</string>
+    <string name="btcpay_server_url_label">サーバーURL</string>
+    <string name="btcpay_server_url_hint">https://btcpay.example.com</string>
+    <string name="btcpay_api_key_label">APIキー</string>
+    <string name="btcpay_api_key_hint">APIキーを入力してください</string>
+    <string name="btcpay_store_id_label">ストアID</string>
+    <string name="btcpay_store_id_hint">ストアIDを入力してください</string>
+    <string name="btcpay_section_test">テスト</string>
+    <string name="btcpay_test_connection_title">接続テスト</string>
+    <string name="btcpay_test_connection_subtitle">サーバー設定を確認します</string>
+    <string name="btcpay_test_connecting">接続中...</string>
+    <string name="btcpay_test_success">正常に接続されました</string>
+    <string name="btcpay_test_failed">接続に失敗しました: %1$s</string>
+    <string name="btcpay_test_fill_all_fields">すべてのフィールドを入力してください</string>
+    <string name="btcpay_test_unknown_error">不明なエラー</string>
+    <string name="btcpay_section_pos">レジ（POS）</string>
+    <string name="btcpay_pos_app_title">POSアプリ</string>
+    <string name="btcpay_pos_app_subtitle_none">ローカルの商品ディレクトリ</string>
+    <string name="btcpay_pos_select_title">POSアプリを選択</string>
+    <string name="btcpay_pos_none_option">なし — ローカルの商品を使用</string>
+    <string name="btcpay_pos_no_apps">このストアにレジ（POS）アプリが見つかりません</string>
+    <string name="btcpay_pos_load_error">アプリの読み込みに失敗しました: %1$s</string>
+    <string name="btcpay_pos_items_error">BTCPayの商品の読み込みに失敗しました</string>
 </resources>

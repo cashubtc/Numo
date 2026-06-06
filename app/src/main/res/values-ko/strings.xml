@@ -952,4 +952,33 @@
     <string name="btcmap_promo_learn_more">자세히 알아보기</string>
     <string name="btcmap_banner_message">BTCMap에 매장을 추가하세요.</string>
     <string name="btcmap_banner_dismiss">닫기</string>
+
+    <!-- BTCPay Server Settings -->
+    <string name="btcpay_settings_title">BTCPay Server</string>
+    <string name="btcpay_settings_subtitle">BTCPay Server 연동</string>
+    <string name="btcpay_enable_title">BTCPay Server</string>
+    <string name="btcpay_enable_subtitle">BTCPay Server 연동 활성화</string>
+    <string name="btcpay_section_connection">연결</string>
+    <string name="btcpay_server_url_label">서버 URL</string>
+    <string name="btcpay_server_url_hint">https://btcpay.example.com</string>
+    <string name="btcpay_api_key_label">API 키</string>
+    <string name="btcpay_api_key_hint">API 키를 입력하세요</string>
+    <string name="btcpay_store_id_label">상점 ID</string>
+    <string name="btcpay_store_id_hint">상점 ID를 입력하세요</string>
+    <string name="btcpay_section_test">테스트</string>
+    <string name="btcpay_test_connection_title">연결 테스트</string>
+    <string name="btcpay_test_connection_subtitle">서버 설정 확인</string>
+    <string name="btcpay_test_connecting">연결 중...</string>
+    <string name="btcpay_test_success">성공적으로 연결되었습니다</string>
+    <string name="btcpay_test_failed">연결 실패: %1$s</string>
+    <string name="btcpay_test_fill_all_fields">모든 필드를 입력하세요</string>
+    <string name="btcpay_test_unknown_error">알 수 없는 오류</string>
+    <string name="btcpay_section_pos">포스기 (POS)</string>
+    <string name="btcpay_pos_app_title">POS 앱</string>
+    <string name="btcpay_pos_app_subtitle_none">로컬 상품 디렉토리</string>
+    <string name="btcpay_pos_select_title">POS 앱 선택</string>
+    <string name="btcpay_pos_none_option">없음 — 로컬 상품 사용</string>
+    <string name="btcpay_pos_no_apps">이 상점에 등록된 POS 앱이 없습니다</string>
+    <string name="btcpay_pos_load_error">앱 로드 실패: %1$s</string>
+    <string name="btcpay_pos_items_error">BTCPay 상품을 불러올 수 없습니다</string>
 </resources>

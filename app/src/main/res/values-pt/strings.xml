@@ -789,4 +789,33 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="btcmap_promo_learn_more">Saiba mais</string>
     <string name="btcmap_banner_message">Adicione sua loja ao BTCMap.</string>
     <string name="btcmap_banner_dismiss">Dispensar</string>
+
+    <!-- BTCPay Server Settings -->
+    <string name="btcpay_settings_title">BTCPay Server</string>
+    <string name="btcpay_settings_subtitle">Integração com o BTCPay Server</string>
+    <string name="btcpay_enable_title">BTCPay Server</string>
+    <string name="btcpay_enable_subtitle">Habilitar integração com o BTCPay Server</string>
+    <string name="btcpay_section_connection">Conexão</string>
+    <string name="btcpay_server_url_label">URL do Servidor</string>
+    <string name="btcpay_server_url_hint">https://btcpay.example.com</string>
+    <string name="btcpay_api_key_label">Chave API</string>
+    <string name="btcpay_api_key_hint">Digite sua chave API</string>
+    <string name="btcpay_store_id_label">ID da Loja</string>
+    <string name="btcpay_store_id_hint">Digite o ID da sua loja</string>
+    <string name="btcpay_section_test">Teste</string>
+    <string name="btcpay_test_connection_title">Testar Conexão</string>
+    <string name="btcpay_test_connection_subtitle">Verifique as configurações do seu servidor</string>
+    <string name="btcpay_test_connecting">Conectando...</string>
+    <string name="btcpay_test_success">Conectado com sucesso</string>
+    <string name="btcpay_test_failed">Falha na conexão: %1$s</string>
+    <string name="btcpay_test_fill_all_fields">Por favor, preencha todos os campos</string>
+    <string name="btcpay_test_unknown_error">Erro desconhecido</string>
+    <string name="btcpay_section_pos">Ponto de Venda</string>
+    <string name="btcpay_pos_app_title">Aplicativo POS</string>
+    <string name="btcpay_pos_app_subtitle_none">Diretório de itens local</string>
+    <string name="btcpay_pos_select_title">Selecionar Aplicativo POS</string>
+    <string name="btcpay_pos_none_option">Nenhum — usar itens locais</string>
+    <string name="btcpay_pos_no_apps">Nenhum aplicativo de Ponto de Venda encontrado para esta loja</string>
+    <string name="btcpay_pos_load_error">Falha ao carregar os aplicativos: %1$s</string>
+    <string name="btcpay_pos_items_error">Não foi possível carregar os itens do BTCPay</string>
 </resources>
