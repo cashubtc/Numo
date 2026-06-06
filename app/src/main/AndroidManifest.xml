@@ -33,8 +33,8 @@
         android:theme="@style/Theme.Numo"
         android:localeConfig="@xml/locales_config"
         android:name=".NumoApplication"
-        android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="33">
+        <!-- For local dev only: add android:networkSecurityConfig="@xml/development_network_security_config" to <application> above -->
 
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
