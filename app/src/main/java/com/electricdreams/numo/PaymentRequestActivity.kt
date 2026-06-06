@@ -1372,12 +1372,18 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Update pending payment to completed (Cashu payment path)
         pendingPaymentId?.let { paymentId ->
+            val creq = nostrHandler?.paymentRequestBech32 
+                ?: hcePaymentRequestBech32 
+                ?: btcPayCashuPRBech32 
+                ?: btcPayCashuPR 
+                ?: hcePaymentRequest
             PaymentsHistoryActivity.completePendingPayment(
                 context = this,
                 paymentId = paymentId,
                 token = token,
                 paymentType = PaymentHistoryEntry.TYPE_CASHU,
                 mintUrl = mintUrl,
+                lightningInvoice = creq,
             )
         }
 
