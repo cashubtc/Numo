@@ -33,6 +33,7 @@ import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.LightningAddressManager
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.feature.settings.WithdrawLightningActivity
+import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.ui.components.EmptyStateHelper
 import com.electricdreams.numo.ui.components.MintSelectionBottomSheet
 import com.electricdreams.numo.ui.util.DialogHelper
@@ -228,6 +229,12 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         // Manual withdraw row
         manualWithdrawRow.setOnClickListener {
             showMintSelectionDialog()
+        }
+
+        // See all button (recent activity view all)
+        seeAllButton.setOnClickListener {
+            val intent = Intent(this, PaymentsHistoryActivity::class.java)
+            startActivity(intent)
         }
     }
     
