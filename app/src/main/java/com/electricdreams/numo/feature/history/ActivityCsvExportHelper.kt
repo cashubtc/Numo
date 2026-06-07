@@ -69,7 +69,7 @@ object ActivityCsvExportHelper {
         }
     }
 
-    private fun exportActivityToCsv(context: Context, outputStream: OutputStream): Boolean {
+    internal fun exportActivityToCsv(context: Context, outputStream: OutputStream): Boolean {
         try {
             val writer = BufferedWriter(OutputStreamWriter(outputStream))
 
@@ -86,6 +86,7 @@ object ActivityCsvExportHelper {
                 "Invoice/Cashu Request",
                 "Sent To",
                 "Label",
+                "Items",
                 "Transaction ID",
             )
             writer.write(header.joinToString(",") { formatCsvField(it) })
@@ -183,6 +184,16 @@ object ActivityCsvExportHelper {
                 // Label
                 val label = entry.label ?: ""
 
+                // Items
+                val itemsStr = if (entry is PaymentHistoryEntry && entry.hasCheckoutBasket()) {
+                    val basket = entry.getCheckoutBasket()
+                    basket?.items?.joinToString("; ") { item ->
+                        "${item.displayName} (x${item.quantity})"
+                    } ?: ""
+                } else {
+                    ""
+                }
+
                 // Transaction ID
                 val transactionId = entry.id
 
@@ -198,6 +209,7 @@ object ActivityCsvExportHelper {
                     invoiceOrToken,
                     sentTo,
                     label,
+                    itemsStr,
                     transactionId,
                 )
                 writer.write(row.joinToString(",") { formatCsvField(it) })
