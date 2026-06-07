@@ -82,143 +82,159 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/converted_amount_display" />
 
-    <!-- Tip Options Container -->
-    <LinearLayout
-        android:id="@+id/tip_options_container"
+    <!-- Tip Options ScrollView -->
+    <ScrollView
+        android:id="@+id/tip_options_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:orientation="vertical"
-        android:gravity="top|center_horizontal"
-        android:paddingHorizontal="@dimen/space_xl"
-        android:paddingTop="@dimen/space_xl"
+        android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@id/question_text"
         app:layout_constraintBottom_toTopOf="@id/confirm_button">
 
-        <!-- Preset Buttons Container (2x2 grid) -->
+        <!-- Tip Options Container -->
         <LinearLayout
-            android:id="@+id/preset_buttons_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-
-        <!-- Custom Tip Button -->
-        <LinearLayout
-            android:id="@+id/custom_tip_button"
+            android:id="@+id/tip_options_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:gravity="center"
-            android:paddingVertical="18dp"
-            android:paddingHorizontal="@dimen/space_l"
-            android:layout_marginTop="@dimen/space_m"
-            android:background="@drawable/bg_tip_button_large"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground">
+            android:gravity="top|center_horizontal"
+            android:paddingHorizontal="@dimen/space_xl"
+            android:paddingTop="@dimen/space_xl">
 
+            <!-- Preset Buttons Container (2x2 grid) -->
+            <LinearLayout
+                android:id="@+id/preset_buttons_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <!-- Custom Tip Button -->
+            <LinearLayout
+                android:id="@+id/custom_tip_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingVertical="18dp"
+                android:paddingHorizontal="@dimen/space_l"
+                android:layout_marginTop="@dimen/space_m"
+                android:background="@drawable/bg_tip_button_large"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <TextView
+                    android:id="@+id/custom_tip_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/tip_selection_custom_tip_label"
+                    android:textColor="@color/color_text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/custom_tip_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="@string/tip_selection_custom_tip_subtitle"
+                    android:textColor="@color/color_text_secondary"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <!-- No Tip Button -->
             <TextView
-                android:id="@+id/custom_tip_label"
+                android:id="@+id/no_tip_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/tip_selection_custom_tip_label"
-                android:textColor="@color/color_text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/custom_tip_subtitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="@string/tip_selection_custom_tip_subtitle"
+                android:layout_marginTop="@dimen/space_xl"
+                android:paddingHorizontal="@dimen/space_3xl"
+                android:paddingVertical="@dimen/row_padding_vertical"
+                android:text="@string/tip_selection_no_tip_button"
                 android:textColor="@color/color_text_secondary"
-                android:textSize="14sp" />
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:background="?attr/selectableItemBackground" />
+
         </LinearLayout>
+    </ScrollView>
 
-        <!-- No Tip Button -->
-        <TextView
-            android:id="@+id/no_tip_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_xl"
-            android:paddingHorizontal="@dimen/space_3xl"
-            android:paddingVertical="@dimen/row_padding_vertical"
-            android:text="@string/tip_selection_no_tip_button"
-            android:textColor="@color/color_text_secondary"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:background="?attr/selectableItemBackground" />
-
-    </LinearLayout>
-
-    <!-- Custom Input Container (hidden by default) -->
-    <LinearLayout
-        android:id="@+id/custom_input_container"
+    <!-- Custom Input ScrollView -->
+    <ScrollView
+        android:id="@+id/custom_input_scroll_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:paddingHorizontal="@dimen/space_xl"
-        android:paddingTop="@dimen/space_l"
+        android:fillViewport="true"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/question_text"
         app:layout_constraintBottom_toTopOf="@id/custom_buttons_container">
 
-        <!-- Custom Amount Display -->
+        <!-- Custom Input Container (hidden by default) -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:id="@+id/custom_input_container"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="@dimen/space_l">
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingHorizontal="@dimen/space_xl"
+            android:paddingTop="@dimen/space_l">
 
-            <!-- Currency Symbol (before amount) -->
-            <TextView
-                android:id="@+id/custom_currency_prefix"
+            <!-- Custom Amount Display -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="$"
-                android:textColor="@color/color_text_primary"
-                android:textSize="48sp"
-                android:textStyle="bold"
-                android:includeFontPadding="false" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="@dimen/space_l">
 
+                <!-- Currency Symbol (before amount) -->
+                <TextView
+                    android:id="@+id/custom_currency_prefix"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="$"
+                    android:textColor="@color/color_text_primary"
+                    android:textSize="48sp"
+                    android:textStyle="bold"
+                    android:includeFontPadding="false" />
+
+                <TextView
+                    android:id="@+id/custom_amount_display"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textColor="@color/color_text_primary"
+                    android:textSize="56sp"
+                    android:textStyle="bold"
+                    android:includeFontPadding="false" />
+
+            </LinearLayout>
+
+            <!-- Currency Toggle Button -->
             <TextView
-                android:id="@+id/custom_amount_display"
+                android:id="@+id/custom_currency_toggle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="0"
-                android:textColor="@color/color_text_primary"
-                android:textSize="56sp"
+                android:layout_marginBottom="@dimen/space_xl"
+                android:paddingHorizontal="@dimen/space_l"
+                android:paddingVertical="@dimen/space_s"
+                android:text="@string/tip_selection_custom_currency_switch_to_btc"
+                android:textColor="@color/color_accent_blue"
+                android:textSize="14sp"
                 android:textStyle="bold"
-                android:includeFontPadding="false" />
+                android:background="?attr/selectableItemBackground" />
+
+            <!-- Keypad -->
+            <GridLayout
+                android:id="@+id/custom_keypad"
+                android:layout_width="match_parent"
+                android:layout_height="240dp"
+                android:layout_marginHorizontal="16dp"
+                android:columnCount="3"
+                android:rowCount="4" />
 
         </LinearLayout>
-
-        <!-- Currency Toggle Button -->
-        <TextView
-            android:id="@+id/custom_currency_toggle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/space_xl"
-            android:paddingHorizontal="@dimen/space_l"
-            android:paddingVertical="@dimen/space_s"
-            android:text="@string/tip_selection_custom_currency_switch_to_btc"
-            android:textColor="@color/color_accent_blue"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:background="?attr/selectableItemBackground" />
-
-        <!-- Keypad -->
-        <GridLayout
-            android:id="@+id/custom_keypad"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_marginHorizontal="16dp"
-            android:columnCount="3"
-            android:rowCount="4" />
-
-    </LinearLayout>
+    </ScrollView>
 
     <!-- Custom Mode Buttons Container -->
     <LinearLayout

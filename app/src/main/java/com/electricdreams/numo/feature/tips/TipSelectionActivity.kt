@@ -71,8 +71,8 @@ class TipSelectionActivity : AppCompatActivity() {
     private lateinit var amountDisplay: TextView
     private lateinit var convertedAmountDisplay: TextView
     private lateinit var questionText: TextView
-    private lateinit var tipOptionsContainer: LinearLayout
-    private lateinit var customInputContainer: LinearLayout
+    private lateinit var tipOptionsContainer: android.widget.ScrollView
+    private lateinit var customInputContainer: android.widget.ScrollView
     private lateinit var customAmountDisplay: TextView
     private lateinit var customCurrencyPrefix: TextView
     private lateinit var customCurrencyToggle: TextView
@@ -184,8 +184,8 @@ class TipSelectionActivity : AppCompatActivity() {
         amountDisplay = findViewById(R.id.amount_display)
         convertedAmountDisplay = findViewById(R.id.converted_amount_display)
         questionText = findViewById(R.id.question_text)
-        tipOptionsContainer = findViewById(R.id.tip_options_container)
-        customInputContainer = findViewById(R.id.custom_input_container)
+        tipOptionsContainer = findViewById(R.id.tip_options_scroll_view)
+        customInputContainer = findViewById(R.id.custom_input_scroll_view)
         customAmountDisplay = findViewById(R.id.custom_amount_display)
         customCurrencyPrefix = findViewById(R.id.custom_currency_prefix)
         customCurrencyToggle = findViewById(R.id.custom_currency_toggle)
