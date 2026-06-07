@@ -238,8 +238,8 @@ class ImageHandler(
                 ExifInterface.ORIENTATION_ROTATE_90 -> 90f
                 ExifInterface.ORIENTATION_ROTATE_180 -> 180f
                 ExifInterface.ORIENTATION_ROTATE_270 -> 270f
-                ExifInterface.ORIENTATION_NORMAL -> if (fromCamera) 90f else 0f  // Camera with no EXIF often needs 90° fix
-                else -> if (fromCamera) 90f else 0f
+                ExifInterface.ORIENTATION_NORMAL -> 0f
+                else -> 0f
             }
 
             if (rotationDegrees == 0f) {
