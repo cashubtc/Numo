@@ -103,13 +103,24 @@ object BarkWalletManager {
             daemonSlowSyncIntervalSecs = null
         )
 
+        val dbFile = File(dataDir, "db.sqlite")
         try {
-            val wallet = Wallet.create(
-                mnemonic = mnemonic,
-                config = config,
-                datadir = dataDir.absolutePath,
-                forceRescan = false
-            )
+            val wallet = if (dbFile.exists()) {
+                Log.i(TAG, "db.sqlite exists. Opening existing Bark Wallet.")
+                Wallet.open(
+                    mnemonic = mnemonic,
+                    config = config,
+                    datadir = dataDir.absolutePath
+                )
+            } else {
+                Log.i(TAG, "db.sqlite does not exist. Creating new Bark Wallet.")
+                Wallet.create(
+                    mnemonic = mnemonic,
+                    config = config,
+                    datadir = dataDir.absolutePath,
+                    forceRescan = false
+                )
+            }
             walletInstance = wallet
             Log.i(TAG, "Bark Wallet successfully created/loaded.")
             
@@ -118,8 +129,32 @@ object BarkWalletManager {
                 runSyncAndMaintenance()
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Error creating Bark Wallet: ${e.message}", e)
-            throw e
+            Log.e(TAG, "Error initializing Bark Wallet (trying fallback): ${e.message}", e)
+            try {
+                // Fallback attempt: if open/create above threw, try the other as fallback
+                val wallet = if (dbFile.exists()) {
+                    Wallet.create(
+                        mnemonic = mnemonic,
+                        config = config,
+                        datadir = dataDir.absolutePath,
+                        forceRescan = false
+                    )
+                } else {
+                    Wallet.open(
+                        mnemonic = mnemonic,
+                        config = config,
+                        datadir = dataDir.absolutePath
+                    )
+                }
+                walletInstance = wallet
+                Log.i(TAG, "Bark Wallet successfully initialized on fallback.")
+                scope.launch {
+                    runSyncAndMaintenance()
+                }
+            } catch (fallbackEx: Exception) {
+                Log.e(TAG, "Bark Wallet initialization failed completely: ${fallbackEx.message}", fallbackEx)
+                throw fallbackEx
+            }
         }
     }
 
