@@ -69,8 +69,6 @@ object BarkWalletManager {
         }
 
         val prefs = PreferenceStore.app(appContext)
-        val serverUrl = prefs.getString("bark_server_url") ?: "https://ark.signet.2nd.dev"
-        val esploraUrl = prefs.getString("bark_esplora_url") ?: "https://esplora.signet.2nd.dev"
         val networkStr = prefs.getString("bark_network") ?: "SIGNET"
 
         val network = when (networkStr.uppercase()) {
@@ -78,6 +76,13 @@ object BarkWalletManager {
             "TESTNET" -> Network.TESTNET
             else -> Network.SIGNET
         }
+
+        // Automatic fallback configurations for MAINNET and SIGNET
+        val defaultServer = if (network == Network.BITCOIN) "https://ark.second.tech" else "https://ark.signet.2nd.dev"
+        val defaultEsplora = if (network == Network.BITCOIN) "https://mempool.second.tech/api" else "https://esplora.signet.2nd.dev"
+
+        val serverUrl = prefs.getString("bark_server_url")?.takeIf { it.isNotBlank() } ?: defaultServer
+        val esploraUrl = prefs.getString("bark_esplora_url")?.takeIf { it.isNotBlank() } ?: defaultEsplora
 
         Log.i(TAG, "Initializing Bark Wallet with network=$network, server=$serverUrl, esplora=$esploraUrl")
 

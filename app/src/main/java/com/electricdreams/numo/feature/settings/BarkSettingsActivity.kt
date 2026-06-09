@@ -134,9 +134,35 @@ class BarkSettingsActivity : AppCompatActivity() {
     private fun loadSettings() {
         val prefs = PreferenceStore.app(this)
         enableSwitch.isChecked = prefs.getBoolean("bark_enabled", false)
-        serverInput.setText(prefs.getString("bark_server_url") ?: "https://ark.signet.2nd.dev")
-        esploraInput.setText(prefs.getString("bark_esplora_url") ?: "https://esplora.signet.2nd.dev")
-        networkInput.setText(prefs.getString("bark_network") ?: "SIGNET")
+        val network = prefs.getString("bark_network") ?: "SIGNET"
+        networkInput.setText(network)
+
+        val defaultServer = if (network.uppercase() == "MAINNET") "https://ark.second.tech" else "https://ark.signet.2nd.dev"
+        val defaultEsplora = if (network.uppercase() == "MAINNET") "https://mempool.second.tech/api" else "https://esplora.signet.2nd.dev"
+
+        serverInput.setText(prefs.getString("bark_server_url")?.takeIf { it.isNotBlank() } ?: defaultServer)
+        esploraInput.setText(prefs.getString("bark_esplora_url")?.takeIf { it.isNotBlank() } ?: defaultEsplora)
+
+        // Add dynamically updated hints / pre-fill on network input change
+        networkInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                val currentNet = s?.toString()?.trim()?.uppercase() ?: ""
+                val defSrv = if (currentNet == "MAINNET") "https://ark.second.tech" else "https://ark.signet.2nd.dev"
+                val defEsp = if (currentNet == "MAINNET") "https://mempool.second.tech/api" else "https://esplora.signet.2nd.dev"
+                
+                // Only auto-update if the user hasn't typed a completely custom URL
+                val currentSrv = serverInput.text?.toString()?.trim() ?: ""
+                if (currentSrv == "https://ark.signet.2nd.dev" || currentSrv == "https://ark.second.tech" || currentSrv.isBlank()) {
+                    serverInput.setText(defSrv)
+                }
+                val currentEsp = esploraInput.text?.toString()?.trim() ?: ""
+                if (currentEsp == "https://esplora.signet.2nd.dev" || currentEsp == "https://mempool.second.tech/api" || currentEsp.isBlank()) {
+                    esploraInput.setText(defEsp)
+                }
+            }
+        })
     }
 
     private fun updateWalletInfo() {
