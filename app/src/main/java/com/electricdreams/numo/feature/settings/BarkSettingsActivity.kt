@@ -3,6 +3,7 @@ package com.electricdreams.numo.feature.settings
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -27,6 +28,7 @@ class BarkSettingsActivity : AppCompatActivity() {
     private lateinit var balanceText: TextView
     private lateinit var addressText: TextView
     private lateinit var syncButton: Button
+    private lateinit var withdrawFundsButton: Button
     private lateinit var serverInput: TextInputEditText
     private lateinit var esploraInput: TextInputEditText
     private lateinit var networkInput: TextInputEditText
@@ -49,6 +51,7 @@ class BarkSettingsActivity : AppCompatActivity() {
         balanceText = findViewById(R.id.bark_balance_text)
         addressText = findViewById(R.id.bark_address_text)
         syncButton = findViewById(R.id.sync_button)
+        withdrawFundsButton = findViewById(R.id.withdraw_funds_button)
         serverInput = findViewById(R.id.bark_server_input)
         esploraInput = findViewById(R.id.bark_esplora_input)
         networkInput = findViewById(R.id.bark_network_input)
@@ -81,6 +84,14 @@ class BarkSettingsActivity : AppCompatActivity() {
                 updateWalletInfo()
                 Toast.makeText(this@BarkSettingsActivity, "Bark Wallet Synced!", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        withdrawFundsButton.setOnClickListener {
+            if (!enableSwitch.isChecked) {
+                Toast.makeText(this, "Please enable Bark Wallet first", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            startActivity(Intent(this, BarkWithdrawActivity::class.java))
         }
 
         saveConfigButton.setOnClickListener {

@@ -204,6 +204,14 @@
                         android:layout_marginTop="16dp"
                         android:text="Sync Wallet" />
 
+                    <Button
+                        android:id="@+id/withdraw_funds_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="Withdraw Funds"
+                        android:backgroundTint="@color/color_accent_blue" />
+
                 </LinearLayout>
 
             </androidx.cardview.widget.CardView>
