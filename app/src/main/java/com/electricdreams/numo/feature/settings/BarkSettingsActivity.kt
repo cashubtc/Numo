@@ -154,7 +154,7 @@ class BarkSettingsActivity : AppCompatActivity() {
         val prefs = PreferenceStore.app(this)
         enableSwitch.isChecked = prefs.getBoolean("bark_enabled", false)
         val network = prefs.getString("bark_network") ?: "SIGNET"
-        networkInput.setText(network)
+        networkInput.setText(network, false)
 
         val defaultServer = if (network.uppercase() == "MAINNET") "https://ark.second.tech" else "https://ark.signet.2nd.dev"
         val defaultEsplora = if (network.uppercase() == "MAINNET") "https://mempool.second.tech/api" else "https://esplora.signet.2nd.dev"
