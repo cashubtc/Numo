@@ -207,6 +207,7 @@ class TransactionDetailActivity : AppCompatActivity() {
             isWithdrawal -> getString(R.string.transaction_detail_type_withdrawal)
             paymentType == PaymentHistoryEntry.TYPE_LIGHTNING -> getString(R.string.transaction_detail_payment_type_lightning_value)
             paymentType == PaymentHistoryEntry.TYPE_CASHU -> getString(R.string.transaction_detail_payment_type_cashu_value)
+            paymentType == PaymentHistoryEntry.TYPE_ARK -> "Ark Protocol"
             else -> getString(R.string.transaction_detail_type_payment_received)
         }
 

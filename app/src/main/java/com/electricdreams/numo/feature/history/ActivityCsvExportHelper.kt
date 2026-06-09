@@ -114,6 +114,7 @@ object ActivityCsvExportHelper {
                     is PaymentHistoryEntry -> when (entry.paymentType) {
                         PaymentHistoryEntry.TYPE_LIGHTNING -> "Lightning"
                         PaymentHistoryEntry.TYPE_CASHU -> "Cashu"
+                        PaymentHistoryEntry.TYPE_ARK -> "Ark"
                         else -> "Cashu"
                     }
                     is WithdrawHistoryEntry -> "Lightning"

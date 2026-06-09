@@ -26,6 +26,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.bark.BarkWalletManager
 
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
@@ -63,6 +64,7 @@ class ModernPOSActivity : AppCompatActivity(), AutoWithdrawProgressListener {
         
         // Initialize basic setup
         CashuWalletManager.init(this)
+        BarkWalletManager.init(this)
         setContentView(R.layout.activity_modern_pos)
 
         // Initialize BTCMap banner

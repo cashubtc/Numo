@@ -148,6 +148,11 @@ class SettingsActivity : AppCompatActivity() {
             openProtectedActivity(BtcPaySettingsActivity::class.java)
         }
 
+        // Bark Wallet - protected because it holds self-custodial Ark funds
+        findViewById<View>(R.id.bark_settings_item).setOnClickListener {
+            openProtectedActivity(BarkSettingsActivity::class.java)
+        }
+
         // === Security Section ===
 
         // Security settings - always accessible (contains PIN setup itself)
