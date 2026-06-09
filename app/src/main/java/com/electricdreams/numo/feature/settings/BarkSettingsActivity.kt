@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.lifecycleScope
+import android.widget.AutoCompleteTextView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.bark.BarkWalletManager
 import com.electricdreams.numo.core.prefs.PreferenceStore
@@ -31,7 +32,7 @@ class BarkSettingsActivity : AppCompatActivity() {
     private lateinit var withdrawFundsButton: Button
     private lateinit var serverInput: TextInputEditText
     private lateinit var esploraInput: TextInputEditText
-    private lateinit var networkInput: TextInputEditText
+    private lateinit var networkInput: AutoCompleteTextView
     private lateinit var saveConfigButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -128,6 +129,24 @@ class BarkSettingsActivity : AppCompatActivity() {
                 clipboard.setPrimaryClip(clip)
                 Toast.makeText(this, "Address copied to clipboard!", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        // Setup Network Exposed Dropdown Menu
+        val networks = arrayOf("SIGNET", "MAINNET")
+        val adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, networks)
+        networkInput.setAdapter(adapter)
+
+        networkInput.setOnItemClickListener { _, _, position, _ ->
+            val selectedNet = networks[position]
+            val defSrv = if (selectedNet == "MAINNET") "https://ark.second.tech" else "https://ark.signet.2nd.dev"
+            val defEsp = if (selectedNet == "MAINNET") "https://mempool.second.tech/api" else "https://esplora.signet.2nd.dev"
+            
+            serverInput.setText(defSrv)
+            esploraInput.setText(defEsp)
+        }
+
+        networkInput.setOnClickListener {
+            networkInput.showDropDown()
         }
     }
 
