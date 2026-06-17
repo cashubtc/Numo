@@ -20,7 +20,9 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: 'gradle'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Start BTCPay + CDK mint stack
         working-directory: integration-tests/btcpay
