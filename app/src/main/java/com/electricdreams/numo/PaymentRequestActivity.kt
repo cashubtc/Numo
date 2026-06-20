@@ -1497,12 +1497,34 @@ class PaymentRequestActivity : AppCompatActivity() {
      * @return true if this is the first terminal outcome and should be
      * handled; false if a terminal outcome has already been processed.
      */
+    /**
+     * Clears the payment request and unregisters the callback from the active HCE service.
+     */
+    private fun clearHceService() {
+        try {
+            val hceService = NdefHostCardEmulationService.getInstance()
+            if (hceService != null && hcePaymentCallback != null) {
+                if (hceService.paymentCallback === hcePaymentCallback) {
+                    Log.d(TAG, "clearHceService: Clearing HCE payment request and callback")
+                    hceService.clearPaymentRequest()
+                    hceService.setPaymentCallback(null)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error clearing HCE service: ${e.message}", e)
+        }
+    }
+
     private fun beginTerminalOutcome(reason: String): Boolean {
         if (hasTerminalOutcome) {
             Log.w(TAG, "Ignoring terminal outcome after completion. reason=$reason")
             return false
         }
         hasTerminalOutcome = true
+
+        // Immediately stop/clear NFC/HCE service to prevent paying wallets from attempting again
+        clearHceService()
+
         return true
     }
 
@@ -1581,18 +1603,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         lightningHandler = null
 
         // Clean up HCE service
-        try {
-            val hceService = NdefHostCardEmulationService.getInstance()
-            if (hceService != null && hcePaymentCallback != null) {
-                if (hceService.paymentCallback === hcePaymentCallback) {
-                    Log.d(TAG, "Cleaning up HCE service")
-                    hceService.clearPaymentRequest()
-                    hceService.setPaymentCallback(null)
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error cleaning up HCE service: ${e.message}", e)
-        }
+        clearHceService()
 
         nfcAnimationView.reset()
         nfcAnimationContainer.visibility = View.GONE
@@ -1613,17 +1624,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         lightningHandler?.cancel()
         lightningHandler = null
 
-        try {
-            val hceService = NdefHostCardEmulationService.getInstance()
-            if (hceService != null) {
-                if (hcePaymentCallback != null && hceService.paymentCallback === hcePaymentCallback) {
-                    hceService.clearPaymentRequest()
-                    hceService.setPaymentCallback(null)
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error cleaning up HCE service in onDestroy: ${e.message}", e)
-        }
+        // Clean up HCE service
+        clearHceService()
 
         super.onDestroy()
     }
@@ -1785,18 +1787,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         lightningHandler = null
 
         // Clean up HCE service
-        try {
-            val hceService = NdefHostCardEmulationService.getInstance()
-            if (hceService != null && hcePaymentCallback != null) {
-                if (hceService.paymentCallback === hcePaymentCallback) {
-                    Log.d(TAG, "Cleaning up HCE service")
-                    hceService.clearPaymentRequest()
-                    hceService.setPaymentCallback(null)
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error cleaning up HCE service: ${e.message}", e)
-        }
+        clearHceService()
 
         finish()
         
