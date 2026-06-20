@@ -287,9 +287,11 @@ class WithdrawLightningActivity : AppCompatActivity() {
                     amountSplitTarget = SplitTarget.None,
                     sendKind = SendKind.OnlineTolerance(org.cashudevkit.Amount(0UL)),
                     includeFee = true,
+                    useP2bk = false,
                     maxProofs = null,
                     metadata = emptyMap(),
-                    useP2bk = false
+                    p2pkSigningKeys = emptyList(),
+                    p2pkLockedProofSendMode = org.cashudevkit.P2pkLockedProofSendMode.SWAP
                 )
 
                 val preparedSend = withContext(Dispatchers.IO) {
