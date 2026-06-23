@@ -51,6 +51,16 @@ class MintManager private constructor(context: Context) {
             }
             return instance as MintManager
         }
+
+        @JvmStatic
+        fun getActiveCurrencyCode(context: Context): String {
+            val preferredUnit = getInstance(context).getPreferredUnit()
+            return if (preferredUnit.lowercase() != "sat") {
+                preferredUnit.uppercase()
+            } else {
+                CurrencyManager.getInstance(context).getCurrentCurrency()
+            }
+        }
     }
 
     private val context: Context = context.applicationContext

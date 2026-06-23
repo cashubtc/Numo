@@ -122,14 +122,24 @@ data class Item(
      * - BTC: comma thousand separator (e.g., ₿1,000)
      */
     fun getFormattedPrice(currencyCode: String): String {
-        return when (priceType) {
-            PriceType.SATS -> Amount(priceSats, Amount.Currency.BTC).toString()
-            PriceType.FIAT -> {
-                // Use gross price (including VAT) for customer-facing display
-                val displayPrice = getGrossPrice()
-                val minorUnits = (displayPrice * 100).roundToLong()
-                val currency = Amount.Currency.fromCode(currencyCode)
-                Amount(minorUnits, currency).toString()
+        val lowerCurrency = currencyCode.lowercase()
+        val isCustomUnit = lowerCurrency != "sat"
+        
+        return if (isCustomUnit) {
+            val displayPrice = if (priceType == PriceType.FIAT) getGrossPrice() else priceSats.toDouble()
+            val currency = Amount.Currency.fromCode(lowerCurrency)
+            val minorUnits = if (currency.isZeroDecimal()) displayPrice.roundToLong() else (displayPrice * 100).roundToLong()
+            Amount(minorUnits, currency).toString()
+        } else {
+            when (priceType) {
+                PriceType.SATS -> Amount(priceSats, Amount.Currency.BTC).toString()
+                PriceType.FIAT -> {
+                    // Use gross price (including VAT) for customer-facing display
+                    val displayPrice = getGrossPrice()
+                    val minorUnits = (displayPrice * 100).roundToLong()
+                    val currency = Amount.Currency.fromCode(currencyCode)
+                    Amount(minorUnits, currency).toString()
+                }
             }
         }
     }
@@ -139,8 +149,8 @@ data class Item(
      */
     fun getFormattedNetPrice(currencyCode: String): String {
         if (priceType != PriceType.FIAT) return ""
-        val minorUnits = (price * 100).roundToLong()
         val currency = Amount.Currency.fromCode(currencyCode)
+        val minorUnits = if (currency.isZeroDecimal()) price.roundToLong() else (price * 100).roundToLong()
         return Amount(minorUnits, currency).toString()
     }
 
@@ -150,8 +160,8 @@ data class Item(
     fun getFormattedVatAmount(currencyCode: String): String {
         if (priceType != PriceType.FIAT || !vatEnabled) return ""
         val vatAmount = getVatAmount()
-        val minorUnits = (vatAmount * 100).roundToLong()
         val currency = Amount.Currency.fromCode(currencyCode)
+        val minorUnits = if (currency.isZeroDecimal()) vatAmount.roundToLong() else (vatAmount * 100).roundToLong()
         return Amount(minorUnits, currency).toString()
     }
 
@@ -161,8 +171,8 @@ data class Item(
     fun getFormattedGrossPrice(currencyCode: String): String {
         if (priceType != PriceType.FIAT) return ""
         val grossPrice = getGrossPrice()
-        val minorUnits = (grossPrice * 100).roundToLong()
         val currency = Amount.Currency.fromCode(currencyCode)
+        val minorUnits = if (currency.isZeroDecimal()) grossPrice.roundToLong() else (grossPrice * 100).roundToLong()
         return Amount(minorUnits, currency).toString()
     }
 

@@ -75,21 +75,37 @@ class BasketUIHandler(
         val fiatTotal = basketManager.getTotalPrice()
         val satsTotal = basketManager.getTotalSatsDirectPrice()
 
+        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(basketTotalView.context).getPreferredUnit()
+        val isCustomUnit = preferredUnit.lowercase() != "sat"
+
         val formattedTotal = if (itemCount > 0) {
-            val currencyCode = currencyManager.getCurrentCurrency()
+            val currencyCode = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(basketTotalView.context)
             val currency = Amount.Currency.fromCode(currencyCode)
 
-            when {
-                fiatTotal > 0 && satsTotal > 0 -> {
-                    val fiatAmount = Amount.fromMajorUnits(fiatTotal, currency)
-                    val satsAmount = Amount(satsTotal, Amount.Currency.BTC)
-                    "$fiatAmount + $satsAmount"
+            if (isCustomUnit) {
+                var total = 0.0
+                for (basketItem in basketManager.getBasketItems()) {
+                    if (basketItem.isSatsPrice()) {
+                        total += basketItem.item.getGrossSats().toDouble() * basketItem.quantity
+                    } else {
+                        total += basketItem.getTotalPrice()
+                    }
                 }
-                satsTotal > 0 -> Amount(satsTotal, Amount.Currency.BTC).toString()
-                else -> Amount.fromMajorUnits(fiatTotal, currency).toString()
+                val minorUnits = if (currency.isZeroDecimal()) total.toLong() else Math.round(total * 100)
+                Amount(minorUnits, currency).toString()
+            } else {
+                when {
+                    fiatTotal > 0 && satsTotal > 0 -> {
+                        val fiatAmount = Amount.fromMajorUnits(fiatTotal, currency)
+                        val satsAmount = Amount(satsTotal, Amount.Currency.BTC)
+                        "$fiatAmount + $satsAmount"
+                    }
+                    satsTotal > 0 -> Amount(satsTotal, Amount.Currency.BTC).toString()
+                    else -> Amount.fromMajorUnits(fiatTotal, currency).toString()
+                }
             }
         } else {
-            "0.00"
+            if (isCustomUnit && Amount.Currency.fromCode(preferredUnit.uppercase()).isZeroDecimal()) "0" else "0.00"
         }
 
         // Update the header total display
