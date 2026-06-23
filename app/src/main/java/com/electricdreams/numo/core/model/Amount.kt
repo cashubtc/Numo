@@ -36,7 +36,10 @@ data class Amount(
             
             return runCatching {
                 JavaCurrency.getInstance(name).defaultFractionDigits == 0
-            }.getOrDefault(false)
+            }.getOrElse {
+                // Unrecognized custom units (e.g., "points") default to zero decimals
+                true
+            }
         }
 
         /**
