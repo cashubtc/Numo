@@ -222,16 +222,22 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 true // Consume event
             }
 
-            mainContent.setOnClickListener {
-                if (openItemPosition == position) {
-                    closeOpenItem()
-                } else {
-                    if (openItemPosition != RecyclerView.NO_POSITION) {
+            if (isExpired) {
+                mainContent.setOnClickListener(null)
+                mainContent.isClickable = false
+            } else {
+                mainContent.setOnClickListener {
+                    if (openItemPosition == position) {
                         closeOpenItem()
                     } else {
-                        onItemClickListener?.onItemClick(entry, item.originalPosition)
+                        if (openItemPosition != RecyclerView.NO_POSITION) {
+                            closeOpenItem()
+                        } else {
+                            onItemClickListener?.onItemClick(entry, item.originalPosition)
+                        }
                     }
                 }
+                mainContent.isClickable = true
             }
 
             deleteButtonContainer.setOnClickListener {
@@ -326,8 +332,14 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             }
 
             // ── Click handler ──
-            itemView.setOnClickListener {
-                onItemClickListener?.onItemClick(entry, item.originalPosition)
+            if (isExpired) {
+                itemView.setOnClickListener(null)
+                itemView.isClickable = false
+            } else {
+                itemView.setOnClickListener {
+                    onItemClickListener?.onItemClick(entry, item.originalPosition)
+                }
+                itemView.isClickable = true
             }
         }
     }

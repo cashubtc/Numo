@@ -5,6 +5,7 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
+import com.electricdreams.numo.ui.adapter.PaymentsHistoryAdapter
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -276,5 +277,73 @@ class PaymentsHistoryActivityTest {
         // Wait, adapter always groups. If empty, items.size == 0
         assertNotNull("Adapter should not be null", adapter)
         assertEquals(0, adapter!!.itemCount)
+    }
+
+    @Test
+    fun `expired payment is not tappable and does not show details`() {
+        val paymentId = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null
+        )
+        PaymentsHistoryActivity.markPaymentExpired(context, paymentId)
+
+        // Launch the activity
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+        val activity = controller.get()
+
+        val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
+        val adapter = recyclerView.adapter as PaymentsHistoryAdapter
+
+        val position = 1
+        val item = adapter.getItemViewType(position)
+        assertEquals(1, item) // 1 = VIEW_TYPE_ITEM
+
+        val holder = adapter.createViewHolder(recyclerView, 1) as PaymentsHistoryAdapter.TransactionViewHolder
+        adapter.bindViewHolder(holder, position)
+
+        // Click the main content or the item view and verify no activity is launched
+        assertFalse(holder.mainContent.isClickable)
+        assertFalse(holder.itemView.isClickable)
+
+        val shadowActivity = org.robolectric.Shadows.shadowOf(activity)
+        assertNull(shadowActivity.nextStartedActivity)
+
+        holder.mainContent.performClick()
+        holder.itemView.performClick()
+
+        assertNull(shadowActivity.nextStartedActivity)
+    }
+
+    @Test
+    fun `completed payment is tappable and shows details`() {
+        val paymentId = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null
+        )
+        PaymentsHistoryActivity.completePendingPayment(
+            context = context, paymentId = paymentId, token = "token",
+            paymentType = PaymentHistoryEntry.TYPE_CASHU, mintUrl = null
+        )
+
+        // Launch the activity
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+        val activity = controller.get()
+
+        val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
+        val adapter = recyclerView.adapter as PaymentsHistoryAdapter
+
+        val position = 1
+
+        val holder = adapter.createViewHolder(recyclerView, 1) as PaymentsHistoryAdapter.TransactionViewHolder
+        adapter.bindViewHolder(holder, position)
+
+        assertTrue(holder.mainContent.isClickable)
+
+        holder.mainContent.performClick()
+
+        val shadowActivity = org.robolectric.Shadows.shadowOf(activity)
+        val nextStartedActivity = shadowActivity.nextStartedActivity
+        assertNotNull(nextStartedActivity)
+        assertEquals(TransactionDetailActivity::class.java.name, nextStartedActivity.component?.className)
     }
 }
