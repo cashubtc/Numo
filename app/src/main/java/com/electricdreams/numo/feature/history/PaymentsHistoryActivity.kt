@@ -216,6 +216,11 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                         // Expired payments shouldn't be tappable
                     }
                     entry.isPending() -> {
+                        val activeUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
+                        if (!entry.getUnit().equals(activeUnit, ignoreCase = true)) {
+                            Toast.makeText(this, "This pending payment is for a different unit and cannot be resumed.", Toast.LENGTH_SHORT).show()
+                            return
+                        }
                         if (!com.electricdreams.numo.core.util.NetworkUtils.isNetworkAvailable(this)) {
                             Toast.makeText(this, getString(R.string.pos_error_no_network_pending_payment), Toast.LENGTH_SHORT).show()
                             return
@@ -686,6 +691,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             tipAmountSats: Long = 0,
             tipPercentage: Int = 0,
         ): String {
+            val ecashUnit = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
             val entry = PaymentHistoryEntry.createPending(
                 amount = amount,
                 entryUnit = entryUnit,
@@ -697,6 +703,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 basketId = basketId,
                 tipAmountSats = tipAmountSats,
                 tipPercentage = tipPercentage,
+                ecashUnit = ecashUnit,
             )
 
             val history = getPaymentHistory(context).toMutableList()
