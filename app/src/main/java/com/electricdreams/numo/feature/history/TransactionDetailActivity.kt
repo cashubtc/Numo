@@ -165,17 +165,17 @@ class TransactionDetailActivity : AppCompatActivity() {
         val fiatEquivalentText: TextView = findViewById(R.id.detail_fiat_equivalent)
 
         // Use BASE amount (excluding tip) for display; use absolute value for withdrawals
-        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
-        val lowerUnit = preferredUnit.lowercase()
-        val isCustomUnit = lowerUnit != "sat"
+        val entryUnit = entry.getEntryUnit()
+        val lowerEntryUnit = entryUnit.lowercase()
+        val isCustomUnit = lowerEntryUnit != "sat"
         val baseAmountSats = kotlin.math.abs(entry.getBaseAmountSats())
 
         if (isCustomUnit) {
-            val currency = Amount.Currency.fromCode(lowerUnit)
-            if (currency.symbol != lowerUnit.uppercase()) {
+            val currency = Amount.Currency.fromCode(lowerEntryUnit)
+            if (currency.symbol != lowerEntryUnit.uppercase()) {
                 amountText.text = Amount(baseAmountSats, currency).toString()
             } else {
-                amountText.text = "$baseAmountSats $preferredUnit"
+                amountText.text = "$baseAmountSats ${entryUnit.uppercase()}"
             }
             amountSubtitleText.visibility = View.GONE
             fiatEquivalentText.visibility = View.GONE
