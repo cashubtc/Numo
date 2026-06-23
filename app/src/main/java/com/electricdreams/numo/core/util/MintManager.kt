@@ -107,23 +107,46 @@ class MintManager private constructor(context: Context) {
     fun hasAnyMints(): Boolean = allowedMints.isNotEmpty()
 
     /**
+     * Check if a mint supports a specific unit based on its cached info.
+     * Defaults to true if no cached info is available or on parsing errors.
+     */
+    fun mintSupportsUnit(mintUrl: String, unit: String): Boolean {
+        val infoJson = getMintInfo(mintUrl) ?: return true
+        return try {
+            val cachedInfo = CashuWalletManager.mintInfoFromJson(infoJson) ?: return true
+            val limits = cachedInfo.mintLimits ?: return true
+            
+            val unitLower = unit.lowercase()
+            val hasMintUnit = limits.mintMethods.any { it.unit.lowercase() == unitLower && !it.disabled }
+            val hasMeltUnit = limits.meltMethods.any { it.unit.lowercase() == unitLower && !it.disabled }
+            
+            hasMintUnit || hasMeltUnit
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse mint info for unit check of $mintUrl", e)
+            true
+        }
+    }
+
+    /**
      * Get the preferred mint for Lightning payments.
-     * Falls back to the first allowed mint if not set.
+     * Filters out mints that do not support the active preferred unit.
+     * Falls back to the first allowed supporting mint if not set or invalid.
      */
     fun getPreferredLightningMint(): String? {
+        val activeUnit = getPreferredUnit()
+        val supportingMints = allowedMints.filter { mintSupportsUnit(it, activeUnit) }
+        
         val preferred = preferredLightningMint
-        // Return preferred if it's still in the allowed list
-        if (preferred != null && allowedMints.contains(preferred)) {
+        if (preferred != null && supportingMints.contains(preferred)) {
             return preferred
         }
-        // Otherwise return the first allowed mint
-        return allowedMints.firstOrNull()
+        return supportingMints.firstOrNull()
     }
 
     /**
      * Set the preferred mint for Lightning payments.
-     * @param mintUrl The mint URL to set as preferred. Must be in the allowed list.
-     * @return true if the preference was set, false if the mint is not in the allowed list.
+     * @param mintUrl The mint URL to set as preferred. Must be in the allowed list and support active unit.
+     * @return true if the preference was set, false if invalid.
      */
     fun setPreferredLightningMint(mintUrl: String?): Boolean {
         var url = mintUrl?.trim()
@@ -135,6 +158,12 @@ class MintManager private constructor(context: Context) {
         url = normalizeMintUrl(url)
         if (!allowedMints.contains(url)) {
             Log.e(TAG, "Cannot set preferred Lightning mint: $url is not in the allowed list")
+            return false
+        }
+
+        val activeUnit = getPreferredUnit()
+        if (!mintSupportsUnit(url, activeUnit)) {
+            Log.e(TAG, "Cannot set preferred Lightning mint: $url does not support active unit $activeUnit")
             return false
         }
 
@@ -167,6 +196,16 @@ class MintManager private constructor(context: Context) {
         preferredUnit = unit
         preferences.edit().putString(KEY_PREFERRED_UNIT, unit).apply()
         Log.d(TAG, "Preferred unit changed to: $unit")
+        
+        // Auto-migrate preferred Lightning mint if it doesn't support the new unit
+        val currentPreferred = preferredLightningMint
+        if (currentPreferred != null && !mintSupportsUnit(currentPreferred, unit)) {
+            val supportingMints = allowedMints.filter { mintSupportsUnit(it, unit) }
+            preferredLightningMint = supportingMints.firstOrNull()
+            savePreferredLightningMint()
+            Log.d(TAG, "Migrated preferred Lightning mint to: $preferredLightningMint because $currentPreferred doesn't support $unit")
+        }
+        
         // Treat as a mints change so that CashuWalletManager rebuilds the wallet with the new unit
         listener?.onMintsChanged(getAllowedMints())
     }
