@@ -826,9 +826,10 @@ class PaymentRequestActivity : AppCompatActivity() {
      * Local (CDK) mode: the original flow – NDEF, Nostr, and Lightning tab.
      */
     private fun initializeLocalPaymentRequest() {
-        // Get allowed mints
+        // Get allowed mints supporting the active unit
         val mintManager = MintManager.getInstance(this)
-        val allowedMints = mintManager.getAllowedMints()
+        val activeUnit = mintManager.getPreferredUnit()
+        val allowedMints = mintManager.getAllowedMints().filter { mintManager.mintSupportsUnit(it, activeUnit) }
         Log.d(TAG, "Using ${allowedMints.size} allowed mints for payment request")
 
         // Initialize Lightning handler with preferred mint (will be started when tab is selected)
@@ -1315,7 +1316,8 @@ class PaymentRequestActivity : AppCompatActivity() {
                                 )
 
                                 val mintManager = MintManager.getInstance(this@PaymentRequestActivity)
-                                val allowedMints = mintManager.getAllowedMints()
+                                val activeUnit = mintManager.getPreferredUnit()
+                                val allowedMints = mintManager.getAllowedMints().filter { mintManager.mintSupportsUnit(it, activeUnit) }
 
                                 val redeemedToken = CashuPaymentHelper.redeemTokenWithSwap(
                                     appContext = this@PaymentRequestActivity,

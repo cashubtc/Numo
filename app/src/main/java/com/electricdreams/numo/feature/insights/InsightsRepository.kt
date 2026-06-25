@@ -15,7 +15,7 @@ import java.util.Locale
 object InsightsRepository {
 
     fun compute(context: Context, range: InsightsRange): InsightsData {
-        val currentCurrencyCode = CurrencyManager.getInstance(context).getCurrentCurrency()
+        val currentCurrencyCode = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(context)
         val fiatCurrency = Amount.Currency.fromCode(currentCurrencyCode)
         val currentBtcPrice = com.electricdreams.numo.core.worker.BitcoinPriceWorker.getInstance(context).getCurrentPrice()
 
@@ -27,6 +27,12 @@ object InsightsRepository {
         val payments = PaymentsHistoryActivity.getPaymentHistory(context)
             .filter { it.isCompleted() }
             .filter { it.date.time in periodStart until periodEnd }
+            .filter {
+                val entryUnit = it.getEntryUnit().lowercase()
+                val activeUnitLower = currentCurrencyCode.lowercase()
+                entryUnit == activeUnitLower ||
+                (activeUnitLower == "sat" && (entryUnit == "btc" || entryUnit == "sats"))
+            }
             .sortedByDescending { it.date.time }
 
         val basketManager = SavedBasketManager.getInstance(context)
@@ -47,20 +53,30 @@ object InsightsRepository {
 
         val txRows = payments.map { entry ->
             val idx = buckets.indexOfBucket(entry.date.time)
-            perBucketSats[idx] += entry.amount
             perBucketTxCount[idx] += 1
-            periodTotalSats += entry.amount
 
-            // Calculate fiat minor using the current BTC price in the current selected currency
-            // to avoid mixing mismatched historical exchange rates (e.g. adding USD and CUP values).
-            val fiatMinor = satsToFiatMinor(entry.amount, currentBtcPrice)
+            val activeUnitLower = currentCurrencyCode.lowercase()
+
+            val (sats, fiatMinor) = if (activeUnitLower == "sat") {
+                // Sats mode: standard sats-to-fiat calculation
+                val satsVal = entry.amount
+                val fiatVal = satsToFiatMinor(satsVal, currentBtcPrice)
+                Pair(satsVal, fiatVal)
+            } else {
+                // Custom unit mode: use entered custom unit minor units directly
+                val valCents = entry.enteredAmount
+                Pair(valCents, valCents)
+            }
+
+            perBucketSats[idx] += sats
             perBucketFiat[idx] += fiatMinor
+            periodTotalSats += sats
             periodTotalFiatMinor += fiatMinor
 
             TxRow(
                 id = entry.id,
                 date = entry.date,
-                totalSats = entry.amount,
+                totalSats = sats,
                 totalFiatMinor = fiatMinor,
                 basket = buildBasketSummary(entry, basketManager, imagesByItemId),
             )
