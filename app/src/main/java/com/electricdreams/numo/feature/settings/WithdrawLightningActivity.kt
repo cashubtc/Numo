@@ -44,6 +44,7 @@ import org.cashudevkit.MintUrl
 import org.cashudevkit.SendKind
 import org.cashudevkit.SendOptions
 import org.cashudevkit.SplitTarget
+import org.cashudevkit.P2pkLockedProofSendMode
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
@@ -289,7 +290,9 @@ class WithdrawLightningActivity : AppCompatActivity() {
                     includeFee = true,
                     maxProofs = null,
                     metadata = emptyMap(),
-                    useP2bk = false
+                    useP2bk = false,
+                    p2pkSigningKeys = emptyList(),
+                    p2pkLockedProofSendMode = P2pkLockedProofSendMode.SWAP,
                 )
 
                 val preparedSend = withContext(Dispatchers.IO) {
