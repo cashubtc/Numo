@@ -147,7 +147,7 @@ class SettingsActivity : AppCompatActivity() {
         findViewById<View>(R.id.currency_settings_item).setOnClickListener {
             val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
             if (preferredUnit.lowercase() != "sat") {
-                android.widget.Toast.makeText(this, "Fiat currency conversion is disabled when using a custom base unit.", android.widget.Toast.LENGTH_SHORT).show()
+                android.widget.Toast.makeText(this, getString(R.string.settings_fiat_conversion_disabled_custom_unit), android.widget.Toast.LENGTH_SHORT).show()
             } else {
                 startActivity(Intent(this, CurrencySettingsActivity::class.java))
             }

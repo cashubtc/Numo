@@ -178,19 +178,19 @@
                                         android:layout_weight="1"
                                         android:orientation="vertical">
 
-                                        <TextView
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:text="Base Currency Unit"
-                                            style="@style/Text.RowTitle" />
+                                         <TextView
+                                             android:layout_width="wrap_content"
+                                             android:layout_height="wrap_content"
+                                             android:text="@string/mints_base_currency_unit_title"
+                                             style="@style/Text.RowTitle" />
 
-                                        <TextView
-                                            android:id="@+id/active_unit_subtitle"
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:layout_marginTop="2dp"
-                                            android:text="If the mint supports other units, you can switch it here."
-                                            style="@style/Text.RowSubtitle" />
+                                         <TextView
+                                             android:id="@+id/active_unit_subtitle"
+                                             android:layout_width="wrap_content"
+                                             android:layout_height="wrap_content"
+                                             android:layout_marginTop="2dp"
+                                             android:text="@string/mints_base_currency_unit_subtitle"
+                                             style="@style/Text.RowSubtitle" />
 
                                     </LinearLayout>
 

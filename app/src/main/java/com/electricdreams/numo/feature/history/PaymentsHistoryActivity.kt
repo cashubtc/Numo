@@ -218,7 +218,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     entry.isPending() -> {
                         val activeUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
                         if (!entry.getUnit().equals(activeUnit, ignoreCase = true)) {
-                            Toast.makeText(this, "This pending payment is for a different unit and cannot be resumed.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, getString(R.string.pos_error_pending_payment_different_unit), Toast.LENGTH_SHORT).show()
                             return
                         }
                         if (!com.electricdreams.numo.core.util.NetworkUtils.isNetworkAvailable(this)) {
