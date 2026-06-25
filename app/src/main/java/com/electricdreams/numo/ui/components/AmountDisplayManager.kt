@@ -126,6 +126,12 @@ class AmountDisplayManager(
         fiatInput: StringBuilder,
         animationType: AnimationType
     ) {
+        val preferredUnit = MintManager.getInstance(context).getPreferredUnit()
+        val isCustomUnit = preferredUnit.lowercase() != "sat"
+        if (isCustomUnit) {
+            isUsdInputMode = false
+        }
+
         val currentInputStr = getCurrentInput(satoshiInput, fiatInput).toString()
         var amountDisplayText: String
         var secondaryDisplayText: String
@@ -133,8 +139,6 @@ class AmountDisplayManager(
         
         // Check if we have Bitcoin price data
         val hasBitcoinPrice = (bitcoinPriceWorker?.getCurrentPrice() ?: 0.0) > 0
-        val preferredUnit = MintManager.getInstance(context).getPreferredUnit()
-        val isCustomUnit = preferredUnit.lowercase() != "sat"
 
         if (isUsdInputMode) {
             // Input mode: fiat, display fiat as primary, sats as secondary

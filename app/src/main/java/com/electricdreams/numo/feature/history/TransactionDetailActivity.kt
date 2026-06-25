@@ -166,16 +166,17 @@ class TransactionDetailActivity : AppCompatActivity() {
 
         // Use BASE amount (excluding tip) for display; use absolute value for withdrawals
         val entryUnit = entry.getEntryUnit()
-        val lowerEntryUnit = entryUnit.lowercase()
-        val isCustomUnit = lowerEntryUnit != "sat"
+        val tokenUnit = entry.getUnit()
+        val lowerTokenUnit = tokenUnit.lowercase()
+        val isCustomUnit = lowerTokenUnit != "sat"
         val baseAmountSats = kotlin.math.abs(entry.getBaseAmountSats())
 
         if (isCustomUnit) {
-            val currency = Amount.Currency.fromCode(lowerEntryUnit)
-            if (currency.symbol != lowerEntryUnit.uppercase()) {
+            val currency = Amount.Currency.fromCode(lowerTokenUnit)
+            if (currency.symbol != lowerTokenUnit.uppercase()) {
                 amountText.text = Amount(baseAmountSats, currency).toString()
             } else {
-                amountText.text = "$baseAmountSats ${entryUnit.uppercase()}"
+                amountText.text = "$baseAmountSats ${tokenUnit.uppercase()}"
             }
             amountSubtitleText.visibility = View.GONE
             fiatEquivalentText.visibility = View.GONE
@@ -489,30 +490,38 @@ class TransactionDetailActivity : AppCompatActivity() {
             satsItemsRow.visibility = View.GONE
         }
 
-        val baseSats = basket.totalSatoshis - entry.tipAmountSats
-        val showSatsAsPrimary = basket.getFiatItems().isEmpty() || 
-            (basket.getFiatItems().isEmpty() && entry.enteredAmount == 0L)
-            
-        if (showSatsAsPrimary) {
-            finalTotalValue.text = Amount(baseSats, Amount.Currency.BTC).toString()
+        val baseAmountSats = kotlin.math.abs(entry.getBaseAmountSats())
+        val isCustomUnit = enteredCurrency.lowercase() != "sat"
+        if (isCustomUnit) {
+            finalTotalValue.text = Amount(baseAmountSats, currency).toString()
             satsEquivalentText.visibility = View.GONE
+            satsItemsRow.visibility = View.GONE
         } else {
-            val baseFiat = if (entry.enteredAmount > 0) {
-                // Approximate tip in fiat if we have the entered amount
-                val tipRatio = if (entry.amount > 0) entry.tipAmountSats.toDouble() / entry.amount.toDouble() else 0.0
-                entry.enteredAmount - (entry.enteredAmount * tipRatio).toLong()
-            } else {
-                basket.getFiatGrossTotalCents() + if (entry.bitcoinPrice != null && entry.bitcoinPrice!! > 0) {
-                    ((basket.getSatsDirectTotal().toDouble() / 100_000_000.0) * entry.bitcoinPrice!! * 100).toLong()
-                } else 0L
-            }
-            finalTotalValue.text = Amount(baseFiat, currency).toString()
-            
-            if (baseSats > 0) {
-                satsEquivalentText.text = "≈ ${Amount(baseSats, Amount.Currency.BTC)}"
-                satsEquivalentText.visibility = View.VISIBLE
-            } else {
+            val baseSats = basket.totalSatoshis - entry.tipAmountSats
+            val showSatsAsPrimary = basket.getFiatItems().isEmpty() || 
+                (basket.getFiatItems().isEmpty() && entry.enteredAmount == 0L)
+                
+            if (showSatsAsPrimary) {
+                finalTotalValue.text = Amount(baseSats, Amount.Currency.BTC).toString()
                 satsEquivalentText.visibility = View.GONE
+            } else {
+                val baseFiat = if (entry.enteredAmount > 0) {
+                    // Approximate tip in fiat if we have the entered amount
+                    val tipRatio = if (entry.amount > 0) entry.tipAmountSats.toDouble() / entry.amount.toDouble() else 0.0
+                    entry.enteredAmount - (entry.enteredAmount * tipRatio).toLong()
+                } else {
+                    basket.getFiatGrossTotalCents() + if (entry.bitcoinPrice != null && entry.bitcoinPrice!! > 0) {
+                        ((basket.getSatsDirectTotal().toDouble() / 100_000_000.0) * entry.bitcoinPrice!! * 100).toLong()
+                    } else 0L
+                }
+                finalTotalValue.text = Amount(baseFiat, currency).toString()
+                
+                if (baseSats > 0) {
+                    satsEquivalentText.text = "≈ ${Amount(baseSats, Amount.Currency.BTC)}"
+                    satsEquivalentText.visibility = View.VISIBLE
+                } else {
+                    satsEquivalentText.visibility = View.GONE
+                }
             }
         }
     }

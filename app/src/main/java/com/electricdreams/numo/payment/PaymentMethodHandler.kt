@@ -37,7 +37,8 @@ class PaymentMethodHandler(
         }
 
         val mintManager = MintManager.getInstance(activity)
-        val allowedMints = mintManager.getAllowedMints()
+        val activeUnit = mintManager.getPreferredUnit()
+        val allowedMints = mintManager.getAllowedMints().filter { mintManager.mintSupportsUnit(it, activeUnit) }
         // When "Accept payments from unknown mints" is enabled we intentionally
         // omit the mints field from the PaymentRequest. Some wallets interpret
         // an explicit mints list as a strict requirement rather than a
