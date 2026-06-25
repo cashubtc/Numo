@@ -31,6 +31,7 @@ object InsightsRepository {
                 val entryUnit = it.getEntryUnit().lowercase()
                 val activeUnitLower = currentCurrencyCode.lowercase()
                 entryUnit == activeUnitLower ||
+                // Backward compatibility fallback for legacy satoshi entries recorded as "btc" or "sats"
                 (activeUnitLower == "sat" && (entryUnit == "btc" || entryUnit == "sats"))
             }
             .sortedByDescending { it.date.time }
