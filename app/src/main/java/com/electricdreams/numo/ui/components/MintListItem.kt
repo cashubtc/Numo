@@ -89,7 +89,7 @@ class MintListItem @JvmOverloads constructor(
         
         container.alpha = 1.0f
         if (!supportsUnit) {
-            balanceText.text = "Unsupported unit ($preferredUnit)"
+            balanceText.text = context.getString(R.string.mints_unsupported_unit, preferredUnit)
         } else {
             if (isCustomUnit) {
                 val currency = Amount.Currency.fromCode(lowerUnit)

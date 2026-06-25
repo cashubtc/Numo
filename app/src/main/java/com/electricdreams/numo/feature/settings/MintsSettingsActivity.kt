@@ -253,7 +253,7 @@ class MintsSettingsActivity : AppCompatActivity() {
             if (selectedIndex < 0) selectedIndex = 0
             
             val builder = androidx.appcompat.app.AlertDialog.Builder(this@MintsSettingsActivity)
-            builder.setTitle("Select Base Unit")
+            builder.setTitle(getString(R.string.mints_select_base_unit))
             builder.setSingleChoiceItems(items.toTypedArray(), selectedIndex) { dialog, which ->
                 val selectedUnit = items[which]
                 if (selectedUnit != currentUnit) {
@@ -262,7 +262,7 @@ class MintsSettingsActivity : AppCompatActivity() {
                     activeUnitValue.text = selectedUnit
                     // Let CashuWalletManager rebuild the wallet with the new unit
                     // Balance will be updated via broadcast
-                    Toast.makeText(this@MintsSettingsActivity, "Changed base unit to $selectedUnit", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MintsSettingsActivity, getString(R.string.mints_changed_base_unit_toast, selectedUnit), Toast.LENGTH_SHORT).show()
                 }
                 dialog.dismiss()
             }

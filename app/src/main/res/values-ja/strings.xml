@@ -981,4 +981,13 @@
     <string name="btcpay_pos_no_apps">このストアにレジ（POS）アプリが見つかりません</string>
     <string name="btcpay_pos_load_error">アプリの読み込みに失敗しました: %1$s</string>
     <string name="btcpay_pos_items_error">BTCPayの商品の読み込みに失敗しました</string>
+
+    <!-- Custom eCash Unit settings and messages -->
+    <string name="pos_error_pending_payment_different_unit">この保留中の支払いは異なる単位のものであるため、再開できません。</string>
+    <string name="mints_unsupported_unit">サポートされていない単位 (%1$s)</string>
+    <string name="mints_select_base_unit">ベース単位の選択</string>
+    <string name="mints_changed_base_unit_toast">ベース単位を %1$s に変更しました</string>
+    <string name="settings_fiat_conversion_disabled_custom_unit">カスタムベース単位を使用している場合、法定通貨への変換は無効になります。</string>
+    <string name="mints_base_currency_unit_title">基準通貨単位</string>
+    <string name="mints_base_currency_unit_subtitle">ミントが他の単位をサポートしている場合は、ここで切り替えることができます。</string>
 </resources>
