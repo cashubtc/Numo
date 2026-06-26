@@ -349,8 +349,6 @@ class PricingHandler(
     private fun formatFiatPrice(price: Double): String {
         val activeCurrency = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(priceInput.context)
         val currency = Amount.Currency.fromCode(activeCurrency)
-        val minorUnits = if (currency.isZeroDecimal()) Math.round(price) else Math.round(price * 100)
-        val amount = Amount(minorUnits, currency)
-        return amount.toStringWithoutSymbol()
+        return Amount.fromMajorUnits(price, currency).toStringWithoutSymbol()
     }
 }

@@ -94,7 +94,8 @@ class MintListItem @JvmOverloads constructor(
             if (isCustomUnit) {
                 val currency = Amount.Currency.fromCode(lowerUnit)
                 if (currency.symbol != lowerUnit.uppercase()) {
-                    balanceText.text = Amount(balance, currency).toString()
+                    val valueToFormat = if (currency.isZeroDecimal()) balance * 100 else balance
+                    balanceText.text = Amount(valueToFormat, currency).toString()
                 } else {
                     balanceText.text = "$balance $preferredUnit"
                 }

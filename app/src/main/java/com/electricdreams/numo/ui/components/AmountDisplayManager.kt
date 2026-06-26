@@ -276,7 +276,7 @@ class AmountDisplayManager(
             val currency = Amount.Currency.fromCode(lowerUnit)
             if (currency.symbol != lowerUnit.uppercase()) {
                 // If the symbol is not just the unit itself (e.g. it found '$' or '€')
-                Amount(value, currency).toString() // Fiat values are in cents natively
+                Amount.fromMajorUnits(value.toDouble(), currency).toString()
             } else {
                 // Verbatim output
                 "$value $preferredUnit"

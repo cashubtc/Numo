@@ -115,8 +115,7 @@ class CheckoutHandler(
                     total += basketItem.getTotalPrice()
                 }
             }
-            val minorUnits = if (currency.isZeroDecimal()) total.toLong() else Math.round(total * 100)
-            return Amount(minorUnits, currency).toString()
+            return Amount.fromMajorUnits(total, currency).toString()
         }
 
         return when {

@@ -128,8 +128,7 @@ data class Item(
         return if (isCustomUnit) {
             val displayPrice = if (priceType == PriceType.FIAT) getGrossPrice() else priceSats.toDouble()
             val currency = Amount.Currency.fromCode(lowerCurrency)
-            val minorUnits = if (currency.isZeroDecimal()) displayPrice.roundToLong() else (displayPrice * 100).roundToLong()
-            Amount(minorUnits, currency).toString()
+            Amount.fromMajorUnits(displayPrice, currency).toString()
         } else {
             when (priceType) {
                 PriceType.SATS -> Amount(priceSats, Amount.Currency.BTC).toString()
@@ -150,8 +149,7 @@ data class Item(
     fun getFormattedNetPrice(currencyCode: String): String {
         if (priceType != PriceType.FIAT) return ""
         val currency = Amount.Currency.fromCode(currencyCode)
-        val minorUnits = if (currency.isZeroDecimal()) price.roundToLong() else (price * 100).roundToLong()
-        return Amount(minorUnits, currency).toString()
+        return Amount.fromMajorUnits(price, currency).toString()
     }
 
     /**
@@ -161,8 +159,7 @@ data class Item(
         if (priceType != PriceType.FIAT || !vatEnabled) return ""
         val vatAmount = getVatAmount()
         val currency = Amount.Currency.fromCode(currencyCode)
-        val minorUnits = if (currency.isZeroDecimal()) vatAmount.roundToLong() else (vatAmount * 100).roundToLong()
-        return Amount(minorUnits, currency).toString()
+        return Amount.fromMajorUnits(vatAmount, currency).toString()
     }
 
     /**
@@ -172,8 +169,7 @@ data class Item(
         if (priceType != PriceType.FIAT) return ""
         val grossPrice = getGrossPrice()
         val currency = Amount.Currency.fromCode(currencyCode)
-        val minorUnits = if (currency.isZeroDecimal()) grossPrice.roundToLong() else (grossPrice * 100).roundToLong()
-        return Amount(minorUnits, currency).toString()
+        return Amount.fromMajorUnits(grossPrice, currency).toString()
     }
 
     // Java interop helper for isAlertEnabled() to match original Java API

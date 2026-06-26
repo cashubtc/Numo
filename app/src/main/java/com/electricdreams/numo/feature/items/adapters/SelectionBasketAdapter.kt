@@ -92,8 +92,7 @@ class SelectionBasketAdapter(
             totalView.text = if (isCustomUnit) {
                 val displayPrice = if (basketItem.isSatsPrice()) basketItem.getTotalSats().toDouble() else basketItem.getTotalPrice()
                 val currency = Amount.Currency.fromCode(activeCurrencyCode)
-                val minorUnits = if (currency.isZeroDecimal()) displayPrice.toLong() else Math.round(displayPrice * 100)
-                Amount(minorUnits, currency).toString()
+                Amount.fromMajorUnits(displayPrice, currency).toString()
             } else {
                 if (basketItem.isSatsPrice()) {
                     Amount(basketItem.getTotalSats(), Amount.Currency.BTC).toString()
