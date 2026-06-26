@@ -494,7 +494,12 @@ class TransactionDetailActivity : AppCompatActivity() {
         val baseAmountSats = kotlin.math.abs(entry.getBaseAmountSats())
         val isCustomUnit = enteredCurrency.lowercase() != "sat"
         if (isCustomUnit) {
-            finalTotalValue.text = Amount(baseAmountSats, currency).toString()
+            if (currency.symbol != enteredCurrency.uppercase()) {
+                val valueToFormat = if (currency.isZeroDecimal()) baseAmountSats * 100 else baseAmountSats
+                finalTotalValue.text = Amount(valueToFormat, currency).toString()
+            } else {
+                finalTotalValue.text = "$baseAmountSats ${enteredCurrency.uppercase()}"
+            }
             satsEquivalentText.visibility = View.GONE
             satsItemsRow.visibility = View.GONE
         } else {
