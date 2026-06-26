@@ -137,6 +137,9 @@ dependencies {
     // CDK Kotlin bindings
     implementation("org.cashudevkit:cdk-android:0.17.2-rc.1")
     
+    // Bark Wallet (Ark) Android SDK
+    implementation("tech.second.bark:bark-android:0.3.0+bark.0.1.1")
+    
     // ML Kit Barcode Scanning
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
     

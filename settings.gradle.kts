@@ -14,6 +14,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://gitlab.com/api/v4/projects/78057981/packages/maven") }
     }
 }
 

@@ -166,6 +166,9 @@ data class PaymentHistoryEntry(
     /** Check if this payment was via Cashu */
     fun isCashu(): Boolean = paymentType == TYPE_CASHU
 
+    /** Check if this payment was via Ark */
+    fun isArk(): Boolean = paymentType == TYPE_ARK
+
     /** Get abbreviated lightning invoice for display (first 10 + ... + last 10 chars) */
     fun getAbbreviatedInvoice(): String? {
         val invoice = lightningInvoice ?: return null
@@ -215,6 +218,7 @@ data class PaymentHistoryEntry(
 
         const val TYPE_CASHU = "cashu"
         const val TYPE_LIGHTNING = "lightning"
+        const val TYPE_ARK = "ark"
 
         /**
          * Simple DTO for recording swap-to-Lightning-mint metadata on a

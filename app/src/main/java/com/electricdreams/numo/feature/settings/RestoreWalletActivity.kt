@@ -21,6 +21,8 @@ import androidx.gridlayout.widget.GridLayout
 import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.bark.BarkWalletManager
+import android.util.Log
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.nostr.NostrMintBackup
 import com.electricdreams.numo.ui.seed.Bip39Wordlist
@@ -656,6 +658,12 @@ class RestoreWalletActivity : AppCompatActivity() {
             mintProgressViews[mintUrl] = progressView
         }
 
+        if (BarkWalletManager.isEnabled()) {
+            val progressView = createMintProgressView("ark_wallet_restore")
+            mintProgressContainer.addView(progressView)
+            mintProgressViews["ark_wallet_restore"] = progressView
+        }
+
         lifecycleScope.launch {
             try {
                 progressStatus.text = getString(R.string.onboarding_restoring_initializing)
@@ -663,8 +671,38 @@ class RestoreWalletActivity : AppCompatActivity() {
                 // Create custom restore that only uses selected mints
                 val balanceChanges = restoreWithSelectedMints(mnemonic, selectedMints.toList())
 
+                val arkBalance = if (BarkWalletManager.isEnabled()) {
+                    withContext(Dispatchers.Main) {
+                        updateMintProgress("ark_wallet_restore", "Restoring from mailbox...", 0, 0)
+                    }
+                    try {
+                        val wallet = BarkWalletManager.getWallet()
+                        if (wallet != null) {
+                            BarkWalletManager.runSyncAndMaintenance()
+                            val bal = wallet.balance().spendableSats.toLong()
+                            withContext(Dispatchers.Main) {
+                                updateMintProgress("ark_wallet_restore", "Complete", 0, bal)
+                            }
+                            bal
+                        } else {
+                            withContext(Dispatchers.Main) {
+                                updateMintProgress("ark_wallet_restore", "Failed to initialize", 0, 0)
+                            }
+                            0L
+                        }
+                    } catch (e: Exception) {
+                        Log.e("RestoreWallet", "Bark restore failed: ${e.message}", e)
+                        withContext(Dispatchers.Main) {
+                            updateMintProgress("ark_wallet_restore", "Failed: ${e.message}", 0, 0)
+                        }
+                        0L
+                    }
+                } else {
+                    0L
+                }
+
                 withContext(Dispatchers.Main) {
-                    showSuccess(balanceChanges)
+                    showSuccess(balanceChanges, arkBalance)
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
@@ -698,8 +736,12 @@ class RestoreWalletActivity : AppCompatActivity() {
         val view = inflater.inflate(R.layout.item_mint_restore_progress, mintProgressContainer, false)
 
         val mintName = view.findViewById<TextView>(R.id.mint_name)
-        val mintManager = MintManager.getInstance(this)
-        mintName.text = mintManager.getMintDisplayName(mintUrl)
+        if (mintUrl == "ark_wallet_restore") {
+            mintName.text = "Bark Wallet (Ark)"
+        } else {
+            val mintManager = MintManager.getInstance(this)
+            mintName.text = mintManager.getMintDisplayName(mintUrl)
+        }
 
         return view
     }
@@ -746,7 +788,7 @@ class RestoreWalletActivity : AppCompatActivity() {
         }
     }
 
-    private fun showSuccess(balanceChanges: Map<String, Pair<Long, Long>>) {
+    private fun showSuccess(balanceChanges: Map<String, Pair<Long, Long>>, arkBalance: Long = 0) {
         updateUIForStep(RestoreStep.SUCCESS)
 
         // Filter to only selected mints
@@ -754,13 +796,12 @@ class RestoreWalletActivity : AppCompatActivity() {
 
         // Calculate totals
         val totalBefore = relevantChanges.values.sumOf { it.first }
-        val totalAfter = relevantChanges.values.sumOf { it.second }
+        val totalAfter = relevantChanges.values.sumOf { it.second } + arkBalance
         val totalDiff = totalAfter - totalBefore
 
         successSummaryText.text = when {
-            totalDiff > 0 -> getString(R.string.restore_success_recovered_summary, totalDiff, relevantChanges.size)
-            totalDiff < 0 -> getString(R.string.restore_success_balance_changed_summary, totalDiff)
-            else -> getString(R.string.restore_success_restored_with_balance_summary, totalAfter)
+            totalDiff > 0 -> "Recovered $totalDiff sats from ${relevantChanges.size + (if (arkBalance > 0) 1 else 0)} source(s) successfully!"
+            else -> "Restore completed successfully. Your total balance is $totalAfter sats."
         }
 
         // Show balance changes per mint
@@ -772,11 +813,14 @@ class RestoreWalletActivity : AppCompatActivity() {
             val itemView = createBalanceChangeItem(mintUrl, before, after, diff)
             balanceChangesContainer.addView(itemView)
         }
+
+        if (BarkWalletManager.isEnabled() && arkBalance > 0) {
+            val itemView = createBalanceChangeItem("ark_wallet_restore", 0, arkBalance, arkBalance)
+            balanceChangesContainer.addView(itemView)
+        }
     }
 
     private fun createBalanceChangeItem(mintUrl: String, before: Long, after: Long, diff: Long): View {
-        val mintManager = MintManager.getInstance(this)
-
         val container = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = android.view.Gravity.CENTER_VERTICAL
@@ -796,7 +840,12 @@ class RestoreWalletActivity : AppCompatActivity() {
         }
 
         val nameText = TextView(this).apply {
-            text = mintManager.getMintDisplayName(mintUrl)
+            text = if (mintUrl == "ark_wallet_restore") {
+                "Bark Wallet (Ark)"
+            } else {
+                val mintManager = MintManager.getInstance(context)
+                mintManager.getMintDisplayName(mintUrl)
+            }
             setTextColor(ContextCompat.getColor(context, R.color.color_text_primary))
             textSize = 15f
             typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)

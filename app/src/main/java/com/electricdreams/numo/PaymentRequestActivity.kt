@@ -56,6 +56,7 @@ import com.electricdreams.numo.core.payment.PaymentServiceFactory
 import com.electricdreams.numo.core.payment.PaymentState
 import com.electricdreams.numo.core.payment.impl.BTCPayPaymentService
 import com.electricdreams.numo.core.wallet.WalletError
+import com.electricdreams.numo.core.bark.BarkWalletManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -111,6 +112,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var bitcoinPriceWorker: BitcoinPriceWorker? = null
     private var hcePaymentRequest: String? = null
     private var hcePaymentRequestBech32: String? = null
+    private var arkAddress: String? = null
     private var formattedAmountString: String = ""
     
     // Tip state (received from TipSelectionActivity)
@@ -139,6 +141,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var btcPayCashuPR: String? = null
     private var btcPayCashuPRBech32: String? = null
     private var btcPayPollingJob: Job? = null
+    private var barkPollingJob: Job? = null
     private var btcPayInvoiceCreatedAt: Long = 0L
 
     // Lightning quote info for history
@@ -379,7 +382,12 @@ class PaymentRequestActivity : AppCompatActivity() {
                     val creq = nostrHandler?.paymentRequestBech32
                     val lnbc = lightningHandler?.currentInvoice ?: lightningInvoice
                     if (creq != null || lnbc != null) {
-                        org.cashudevkit.createBip321Uri(creq, lnbc, null)
+                        val baseUri = org.cashudevkit.createBip321Uri(creq, lnbc, null)
+                        if (!arkAddress.isNullOrBlank() && !baseUri.isNullOrBlank()) {
+                            "$baseUri&ark=$arkAddress"
+                        } else {
+                            baseUri
+                        }
                     } else null
                 }
             }
@@ -862,6 +870,23 @@ class PaymentRequestActivity : AppCompatActivity() {
         nostrHandler = NostrPaymentHandler(this, allowedMints)
         startNostrPaymentFlow()
 
+        // Fetch a unique Ark address for each POS transaction if Bark wallet is enabled
+        if (BarkWalletManager.isEnabled()) {
+            uiScope.launch {
+                try {
+                    val wallet = BarkWalletManager.getWallet()
+                    if (wallet != null) {
+                        arkAddress = wallet.newAddress()
+                        Log.i(TAG, "Generated unique Ark address for transaction: $arkAddress")
+                        updateUnifiedQrCode()
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error generating unique Ark address: ${e.message}", e)
+                }
+            }
+            startBarkPolling()
+        }
+
         // Check mint limits for the preferred mint to see if lightning bolt11 is supported
         uiScope.launch {
             val mintUrlToUse = preferredLightningMint ?: allowedMints.firstOrNull()
@@ -1010,7 +1035,12 @@ class PaymentRequestActivity : AppCompatActivity() {
             return
         }
 
-        val payload = org.cashudevkit.createBip321Uri(creq, lnbc, null)
+        val baseUri = org.cashudevkit.createBip321Uri(creq, lnbc, null)
+        val payload = if (!arkAddress.isNullOrBlank() && !baseUri.isNullOrBlank()) {
+            "$baseUri&ark=$arkAddress"
+        } else {
+            baseUri
+        }
 
         try {
             val hceService = NdefHostCardEmulationService.getInstance()
@@ -1064,7 +1094,12 @@ class PaymentRequestActivity : AppCompatActivity() {
             return
         }
         
-        val unifiedUri = org.cashudevkit.createBip321Uri(creq, lnbc, null)
+        val baseUri = org.cashudevkit.createBip321Uri(creq, lnbc, null)
+        val unifiedUri = if (!arkAddress.isNullOrBlank() && !baseUri.isNullOrBlank()) {
+            "$baseUri&ark=$arkAddress"
+        } else {
+            baseUri
+        }
 
         try {
             val qrBitmap = generateThemedQrCode(unifiedUri)
@@ -1484,6 +1519,81 @@ class PaymentRequestActivity : AppCompatActivity() {
         showPaymentSuccess("", paymentAmount)
     }
 
+    private fun handleArkPaymentSuccess() {
+        if (!beginTerminalOutcome("ark_success")) return
+
+        Log.d(TAG, "Ark payment successful")
+        cancelNfcSafetyTimeout()
+
+        WalletLogger.log("IN", paymentAmount, "Ark", "Ark payment successful")
+
+        statusText.visibility = View.VISIBLE
+        statusText.text = getString(R.string.payment_request_status_success)
+
+        // Update pending payment to completed with Ark info
+        pendingPaymentId?.let { paymentId ->
+            PaymentsHistoryActivity.completePendingPayment(
+                context = this,
+                paymentId = paymentId,
+                token = "",
+                paymentType = PaymentHistoryEntry.TYPE_ARK,
+                mintUrl = "Ark",
+                lightningInvoice = arkAddress,
+                lightningQuoteId = null,
+                lightningMintUrl = null,
+                btcPayInvoiceId = null,
+            )
+        }
+
+        dispatchPaymentReceivedWebhook()
+
+        val resultIntent = Intent().apply {
+            putExtra(RESULT_EXTRA_TOKEN, "")
+            putExtra(RESULT_EXTRA_AMOUNT, paymentAmount)
+        }
+        setResult(Activity.RESULT_OK, resultIntent)
+
+        showPaymentSuccess("", paymentAmount)
+    }
+
+    private fun startBarkPolling() {
+        barkPollingJob = uiScope.launch {
+            Log.d(TAG, "Starting Bark/Ark payment polling...")
+            val wallet = BarkWalletManager.getWallet()
+            if (wallet == null) {
+                Log.w(TAG, "Cannot start Bark polling: wallet is null")
+                return@launch
+            }
+
+            val initialBalance = try {
+                wallet.balance().spendableSats.toLong()
+            } catch (e: Exception) {
+                0L
+            }
+            Log.d(TAG, "Bark wallet initial spendable balance: $initialBalance sats")
+
+            while (!hasTerminalOutcome) {
+                delay(3000)
+                if (hasTerminalOutcome) break
+
+                try {
+                    // Sync the wallet off-chain state
+                    BarkWalletManager.runSyncAndMaintenance()
+                    
+                    val currentBalance = wallet.balance().spendableSats.toLong()
+                    if (currentBalance >= initialBalance + paymentAmount) {
+                        Log.i(TAG, "Direct Ark payment detected! Balance increased from $initialBalance to $currentBalance (target increase: $paymentAmount)")
+                        barkPollingJob?.cancel()
+                        handleArkPaymentSuccess()
+                        break
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Bark polling error: ${e.message}")
+                }
+            }
+        }
+    }
+
     /**
      * Mark the payment flow as having reached a terminal outcome
      * (success, failure, or user cancellation).
@@ -1777,6 +1887,10 @@ class PaymentRequestActivity : AppCompatActivity() {
      */
     private fun cleanupAndFinishWithFade() {
         cancelNfcSafetyTimeout()
+
+        // Stop Bark polling
+        barkPollingJob?.cancel()
+        barkPollingJob = null
 
         // Stop Nostr handler
         nostrHandler?.stop()
