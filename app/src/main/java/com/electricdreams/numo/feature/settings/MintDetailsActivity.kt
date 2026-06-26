@@ -274,7 +274,8 @@ class MintDetailsActivity : AppCompatActivity() {
             if (lowerUnit != "sat") {
                 val currency = Amount.Currency.fromCode(lowerUnit)
                 if (currency.symbol != lowerUnit.uppercase()) {
-                    balanceText.text = Amount(balance * 100, currency).toString()
+                    val valueToFormat = if (currency.isZeroDecimal()) balance * 100 else balance
+                    balanceText.text = Amount(valueToFormat, currency).toString()
                 } else {
                     balanceText.text = "$balance $preferredUnit"
                 }

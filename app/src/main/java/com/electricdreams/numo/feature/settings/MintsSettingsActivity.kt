@@ -419,7 +419,8 @@ class MintsSettingsActivity : AppCompatActivity() {
         if (isCustomUnit) {
             val currency = Amount.Currency.fromCode(lowerUnit)
             if (currency.symbol != lowerUnit.uppercase()) {
-                lightningMintBalance.text = Amount(balance, currency).toString()
+                val valueToFormat = if (currency.isZeroDecimal()) balance * 100 else balance
+                lightningMintBalance.text = Amount(valueToFormat, currency).toString()
             } else {
                 lightningMintBalance.text = "$balance $preferredUnit"
             }

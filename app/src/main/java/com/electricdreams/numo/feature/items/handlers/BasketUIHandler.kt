@@ -91,8 +91,7 @@ class BasketUIHandler(
                         total += basketItem.getTotalPrice()
                     }
                 }
-                val minorUnits = if (currency.isZeroDecimal()) total.toLong() else Math.round(total * 100)
-                Amount(minorUnits, currency).toString()
+                Amount.fromMajorUnits(total, currency).toString()
             } else {
                 when {
                     fiatTotal > 0 && satsTotal > 0 -> {
@@ -105,7 +104,12 @@ class BasketUIHandler(
                 }
             }
         } else {
-            if (isCustomUnit && Amount.Currency.fromCode(preferredUnit.uppercase()).isZeroDecimal()) "0" else "0.00"
+            if (isCustomUnit) {
+                val currency = Amount.Currency.fromCode(preferredUnit)
+                Amount.fromMajorUnits(0.0, currency).toStringWithoutSymbol()
+            } else {
+                "0.00"
+            }
         }
 
         // Update the header total display
