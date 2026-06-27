@@ -272,14 +272,17 @@ class AmountDisplayManager(
         val preferredUnit = MintManager.getInstance(context).getPreferredUnit()
         val lowerUnit = preferredUnit.lowercase()
         if (lowerUnit != "sat") {
-            // Check if it's a known fiat unit we should format with symbol
             val currency = Amount.Currency.fromCode(lowerUnit)
-            if (currency.symbol != lowerUnit.uppercase()) {
-                // If the symbol is not just the unit itself (e.g. it found '$' or '€')
-                Amount.fromMajorUnits(value.toDouble(), currency).toString()
+            val fiatCents = if (currency.isZeroDecimal()) {
+                value * 100
             } else {
-                // Verbatim output
-                "$value $preferredUnit"
+                value
+            }
+            if (currency.symbol != lowerUnit.uppercase()) {
+                Amount(fiatCents, currency).toString()
+            } else {
+                val formattedNum = Amount(fiatCents, currency).toStringWithoutSymbol()
+                "$formattedNum $preferredUnit"
             }
         } else {
             Amount(value, Amount.Currency.BTC).toString()

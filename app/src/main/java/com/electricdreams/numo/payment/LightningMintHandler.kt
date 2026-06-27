@@ -152,7 +152,7 @@ class LightningMintHandler(
                 val quoteAmount = CdkAmount(paymentAmount.toULong())
 
                 Log.d(TAG, "Requesting Lightning mint quote from ${mintUrl.url} for $paymentAmount sats")
-                val unitStr = "sat"
+                val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
         val unit = com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unitStr)
         val mintWallet = wallet.getWallet(mintUrl, unit)
 
@@ -499,7 +499,7 @@ class LightningMintHandler(
         }
 
         Log.d(TAG, "Mint quote $quoteId is paid (detected by $source), calling wallet.mint")
-        val unitStr = "sat"
+        val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
         val unit = com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unitStr)
         val mintWallet = wallet.getWallet(mintUrl, unit)
         val proofs = mintWallet?.mint(quoteId, org.cashudevkit.SplitTarget.None, null)
@@ -548,7 +548,7 @@ class LightningMintHandler(
                 Log.v(TAG, "Polling mint quote state for $quoteId")
                 
                 // Check quote state using checkMintQuote API
-                val unitStr = "sat"
+                val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
         val unit = com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unitStr)
         val mintWallet = wallet.getWallet(mintUrl, unit)
                     ?: throw Exception("Failed to get wallet for mint: ${mintUrl.url}")

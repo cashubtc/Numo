@@ -72,11 +72,13 @@ object CashuPaymentHelper {
         allowedMints: List<String>?,
     ): GeneratedPaymentRequest? {
         return try {
+            val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(com.electricdreams.numo.core.cashu.CashuWalletManager.appContext).getPreferredUnit()
+            val descUnit = if (unitStr == "sat") "sats" else unitStr
             val map = com.upokecenter.cbor.CBORObject.NewMap()
             map.Add("i", java.util.UUID.randomUUID().toString().substring(0, 8))
             map.Add("a", amount)
-            map.Add("u", "sat")
-            map.Add("d", description ?: "Payment for $amount sats")
+            map.Add("u", unitStr)
+            map.Add("d", description ?: "Payment for $amount $descUnit")
             map.Add("s", true)
             if (!allowedMints.isNullOrEmpty()) {
                 val mintsArray = com.upokecenter.cbor.CBORObject.NewArray()
@@ -114,11 +116,13 @@ object CashuPaymentHelper {
         nprofile: String,
     ): GeneratedPaymentRequest? {
         return try {
+            val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(com.electricdreams.numo.core.cashu.CashuWalletManager.appContext).getPreferredUnit()
+            val descUnit = if (unitStr == "sat") "sats" else unitStr
             val map = com.upokecenter.cbor.CBORObject.NewMap()
             map.Add("i", java.util.UUID.randomUUID().toString().substring(0, 8))
             map.Add("a", amount)
-            map.Add("u", "sat")
-            map.Add("d", description ?: "Payment for $amount sats")
+            map.Add("u", unitStr)
+            map.Add("d", description ?: "Payment for $amount $descUnit")
             map.Add("s", true)
             if (!allowedMints.isNullOrEmpty()) {
                 val mintsArray = com.upokecenter.cbor.CBORObject.NewArray()
