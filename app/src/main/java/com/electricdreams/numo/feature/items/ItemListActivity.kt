@@ -504,9 +504,7 @@ class ItemListActivity : AppCompatActivity() {
                 }
 
                 // Price
-                val currencyCode = com.electricdreams.numo.core.util.CurrencyManager
-                    .getInstance(itemView.context)
-                    .getCurrentCurrency()
+                val currencyCode = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(itemView.context)
                 priceView.text = item.getFormattedPrice(currencyCode)
 
                 // Stock quantity (only if tracking inventory)

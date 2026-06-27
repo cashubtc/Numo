@@ -981,4 +981,13 @@
     <string name="btcpay_pos_no_apps">이 상점에 등록된 POS 앱이 없습니다</string>
     <string name="btcpay_pos_load_error">앱 로드 실패: %1$s</string>
     <string name="btcpay_pos_items_error">BTCPay 상품을 불러올 수 없습니다</string>
+
+    <!-- Custom eCash Unit settings and messages -->
+    <string name="pos_error_pending_payment_different_unit">이 보류 중인 결제는 다른 단위에 대한 결제이므로 재개할 수 없습니다.</string>
+    <string name="mints_unsupported_unit">지원되지 않는 단위 (%1$s)</string>
+    <string name="mints_select_base_unit">기준 단위 선택</string>
+    <string name="mints_changed_base_unit_toast">기준 단위가 %1$s(으)로 변경되었습니다</string>
+    <string name="settings_fiat_conversion_disabled_custom_unit">사용자 정의 기준 단위를 사용할 때는 법정 화폐 환율 변환이 비활성화됩니다.</string>
+    <string name="mints_base_currency_unit_title">기준 통화 단위</string>
+    <string name="mints_base_currency_unit_subtitle">민트가 다른 단위를 지원하는 경우 여기에서 전환할 수 있습니다.</string>
 </resources>

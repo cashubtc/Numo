@@ -301,7 +301,9 @@ class AutoWithdrawManager private constructor(private val context: Context) {
             Log.d(TAG, "   Requesting quote for $withdrawAmount sats ($amountMsat msat) to $lightningAddress")
             
             // Get the wallet for this mint first
-            val mintWallet = wallet.getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)
+            val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
+            val unit = com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unitStr)
+            val mintWallet = wallet.getWallet(MintUrl(mintUrl), unit)
                 ?: throw Exception("Failed to get wallet for mint: $mintUrl")
             
             val meltQuote = withContext(Dispatchers.IO) {

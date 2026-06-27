@@ -216,8 +216,35 @@ class BasketManager private constructor() {
     /**
      * Calculate the total price in satoshis (combining fiat and sats priced items).
      * @param btcPrice Current BTC price in fiat.
+     * @param context Android context for preferred unit resolution.
      */
-    fun getTotalSatoshis(btcPrice: Double): Long {
+    fun getTotalSatoshis(btcPrice: Double, context: android.content.Context? = null): Long {
+        val preferredUnit = if (context != null) {
+            MintManager.getInstance(context).getPreferredUnit()
+        } else {
+            "sat"
+        }
+        val lowerUnit = preferredUnit.lowercase()
+        if (lowerUnit != "sat") {
+            val currency = com.electricdreams.numo.core.model.Amount.Currency.fromCode(lowerUnit)
+            
+            // All items (both originally Sats and Fiat) are now treated as priced in the custom unit
+            var total = 0.0
+            for (basketItem in basketItems) {
+                if (basketItem.isSatsPrice()) {
+                    total += basketItem.item.getGrossSats().toDouble() * basketItem.quantity
+                } else {
+                    total += basketItem.getTotalPrice()
+                }
+            }
+            
+            return if (currency.isZeroDecimal()) {
+                total.toLong()
+            } else {
+                Math.round(total * 100)
+            }
+        }
+
         // Start with items already priced in sats
         var totalSats = getTotalSatsDirectPrice()
         

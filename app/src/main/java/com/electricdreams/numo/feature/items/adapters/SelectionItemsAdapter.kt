@@ -248,9 +248,7 @@ class SelectionItemsAdapter(
             nameView.text = item.name ?: ""
 
             setupVariationDisplay(item, isCustomVariation)
-            val currencyCode = com.electricdreams.numo.core.util.CurrencyManager
-                .getInstance(itemView.context)
-                .getCurrentCurrency()
+            val currencyCode = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(itemView.context)
             priceView.text = item.getFormattedPrice(currencyCode)
 
             setupStockDisplay(item, isCustomVariation)

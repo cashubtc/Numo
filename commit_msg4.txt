@@ -1,0 +1,5 @@
+fix: properly format known fiat units for custom unit ecash
+
+If a custom unit is technically a known fiat currency code (like "usd", "eur"), map it using the `Amount.Currency` formatting utility so it displays as "$1.50" rather than verbatim "150 usd" because fiat ecash tokens are inherently defined in minor units (cents). 
+Previously it would be misaligned when dealing with fiat currencies. 
+All UI components, test suites, and wallet abstractions properly integrate with the newly resolved `Amount.Currency` structures.

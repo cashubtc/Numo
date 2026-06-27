@@ -86,12 +86,20 @@ class SelectionBasketAdapter(
             }
 
             // Format total using unified Amount class
-            totalView.text = if (basketItem.isSatsPrice()) {
-                Amount(basketItem.getTotalSats(), Amount.Currency.BTC).toString()
+            val activeCurrencyCode = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(itemView.context)
+            val isCustomUnit = com.electricdreams.numo.core.util.MintManager.getInstance(itemView.context).getPreferredUnit().lowercase() != "sat"
+            
+            totalView.text = if (isCustomUnit) {
+                val displayPrice = if (basketItem.isSatsPrice()) basketItem.getTotalSats().toDouble() else basketItem.getTotalPrice()
+                val currency = Amount.Currency.fromCode(activeCurrencyCode)
+                Amount.fromMajorUnits(displayPrice, currency).toString()
             } else {
-                val currencyCode = currencyManager.getCurrentCurrency()
-                val currency = Amount.Currency.fromCode(currencyCode)
-                Amount.fromMajorUnits(basketItem.getTotalPrice(), currency).toString()
+                if (basketItem.isSatsPrice()) {
+                    Amount(basketItem.getTotalSats(), Amount.Currency.BTC).toString()
+                } else {
+                    val currency = Amount.Currency.fromCode(activeCurrencyCode)
+                    Amount.fromMajorUnits(basketItem.getTotalPrice(), currency).toString()
+                }
             }
 
             removeButton.setOnClickListener {

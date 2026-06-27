@@ -137,13 +137,14 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:orientation="horizontal"
-                                    android:gravity="center_vertical">
+                                    android:gravity="center_vertical"
+                                    android:paddingVertical="@dimen/space_xs">
 
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="@string/mints_balance"
-                                        style="@style/Text.Body" />
+                                        android:text="@string/mints_total_balance"
+                                        android:textAppearance="@style/Text.RowSubtitle" />
 
                                     <View
                                         android:layout_width="0dp"
@@ -156,6 +157,58 @@
                                         android:layout_height="wrap_content"
                                         android:text="&#8383;0"
                                         android:textAppearance="@style/Text.RowTitle" />
+
+                                </LinearLayout>
+                                
+                                <!-- Active Unit Row -->
+                                <LinearLayout
+                                    android:id="@+id/active_unit_row"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/space_m"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical"
+                                    android:background="?attr/selectableItemBackground"
+                                    android:clickable="true"
+                                    android:focusable="true">
+
+                                    <LinearLayout
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:orientation="vertical">
+
+                                         <TextView
+                                             android:layout_width="wrap_content"
+                                             android:layout_height="wrap_content"
+                                             android:text="@string/mints_base_currency_unit_title"
+                                             style="@style/Text.RowTitle" />
+
+                                         <TextView
+                                             android:id="@+id/active_unit_subtitle"
+                                             android:layout_width="wrap_content"
+                                             android:layout_height="wrap_content"
+                                             android:layout_marginTop="2dp"
+                                             android:text="@string/mints_base_currency_unit_subtitle"
+                                             style="@style/Text.RowSubtitle" />
+
+                                    </LinearLayout>
+
+                                    <TextView
+                                        android:id="@+id/active_unit_value"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginEnd="@dimen/space_s"
+                                        android:text="sat"
+                                        android:textAppearance="@style/Text.RowSubtitle"
+                                        android:textColor="@color/color_text_primary" />
+
+                                    <ImageView
+                                        android:importantForAccessibility="no"
+                                        android:layout_width="16dp"
+                                        android:layout_height="16dp"
+                                        android:src="@drawable/ic_chevron_right"
+                                        app:tint="@color/color_icon_secondary" />
 
                                 </LinearLayout>
 

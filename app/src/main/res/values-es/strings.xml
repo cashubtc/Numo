@@ -738,4 +738,13 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="btcpay_pos_no_apps">No se encontraron aplicaciones de Punto de venta para esta tienda</string>
     <string name="btcpay_pos_load_error">Error al cargar las aplicaciones: %1$s</string>
     <string name="btcpay_pos_items_error">No se pudieron cargar los artículos de BTCPay</string>
+
+    <!-- Custom eCash Unit settings and messages -->
+    <string name="pos_error_pending_payment_different_unit">Este pago pendiente es de una unidad diferente y no se puede reanudar.</string>
+    <string name="mints_unsupported_unit">Unidad no soportada (%1$s)</string>
+    <string name="mints_select_base_unit">Seleccionar unidad base</string>
+    <string name="mints_changed_base_unit_toast">Se cambió la unidad base a %1$s</string>
+    <string name="settings_fiat_conversion_disabled_custom_unit">La conversión de moneda fiduciaria está deshabilitada cuando se usa una unidad base personalizada.</string>
+    <string name="mints_base_currency_unit_title">Unidad de moneda base</string>
+    <string name="mints_base_currency_unit_subtitle">Si la casa de la moneda admite otras unidades, puedes cambiarla aquí.</string>
 </resources>
