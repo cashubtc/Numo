@@ -96,8 +96,8 @@ class PaymentReceivedActivity : AppCompatActivity() {
         fromNfcAnimation = intent.getBooleanExtra(EXTRA_FROM_NFC_ANIMATION, false)
         unit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
         
-        // Parse token to extract amount and unit if not provided
-        if (amount == 0L && tokenString != null) {
+        // Parse token to extract amount and unit if provided
+        if (tokenString != null && tokenString!!.isNotBlank()) {
             parseToken(tokenString!!)
         }
         
@@ -141,7 +141,14 @@ class PaymentReceivedActivity : AppCompatActivity() {
             val decodedToken = Token.decode(token)
             
             // Extract unit
-            unit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
+            unit = when (val tokenUnit = decodedToken.unit()) {
+                is CurrencyUnit.Sat -> "sat"
+                is CurrencyUnit.Msat -> "msat"
+                is CurrencyUnit.Eur -> "eur"
+                is CurrencyUnit.Usd -> "usd"
+                is CurrencyUnit.Custom -> tokenUnit.unit
+                else -> com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
+            }
             
             // Calculate total amount from all proofs using the public API
             amount = decodedToken.value().value.toLong()

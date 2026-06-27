@@ -47,7 +47,7 @@ class CdkWalletProvider(
             val normalizedInput = mintUrl.removeSuffix("/")
             for (entry in balances) {
                 val cdkUrl = entry.key.mintUrl.url.removeSuffix("/")
-                if (cdkUrl == normalizedInput && entry.key.unit == CurrencyUnit.Sat) {
+                if (cdkUrl == normalizedInput && entry.key.unit == getActiveUnit()) {
                     return Satoshis(entry.value.value.toLong())
                 }
             }
@@ -63,7 +63,7 @@ class CdkWalletProvider(
         return try {
             val balanceMap = w.getBalances()
             balanceMap
-                .filter { it.key.unit == CurrencyUnit.Sat }
+                .filter { it.key.unit == getActiveUnit() }
                 .mapKeys { it.key.mintUrl.url.removeSuffix("/") }
                 .mapValues { Satoshis(it.value.value.toLong()) }
         } catch (e: Exception) {
@@ -87,7 +87,7 @@ class CdkWalletProvider(
         return try {
             val cdkMintUrl = MintUrl(mintUrl)
             val cdkAmount = CdkAmount(amount.value.toULong())
-            val mintWallet = w.getWallet(cdkMintUrl, CurrencyUnit.Sat)
+            val mintWallet = w.getWallet(cdkMintUrl, getActiveUnit())
                 ?: return WalletResult.Failure(WalletError.MintUnreachable(mintUrl, "Wallet not found for mint"))
 
             Log.d(TAG, "Requesting mint quote from $mintUrl for ${amount.value} sats")
@@ -117,7 +117,7 @@ class CdkWalletProvider(
 
         return try {
             val cdkMintUrl = MintUrl(mintUrl)
-            val mintWallet = w.getWallet(cdkMintUrl, CurrencyUnit.Sat)
+            val mintWallet = w.getWallet(cdkMintUrl, getActiveUnit())
                 ?: return WalletResult.Failure(WalletError.MintUnreachable(mintUrl, "Wallet not found for mint"))
             val quote = mintWallet.checkMintQuote(quoteId)
 
@@ -143,7 +143,7 @@ class CdkWalletProvider(
 
         return try {
             val cdkMintUrl = MintUrl(mintUrl)
-            val mintWallet = w.getWallet(cdkMintUrl, CurrencyUnit.Sat)
+            val mintWallet = w.getWallet(cdkMintUrl, getActiveUnit())
                 ?: return WalletResult.Failure(WalletError.MintUnreachable(mintUrl, "Wallet not found for mint"))
 
             Log.d(TAG, "Minting proofs for quote $quoteId")
@@ -174,7 +174,7 @@ class CdkWalletProvider(
 
         return try {
             val cdkMintUrl = MintUrl(mintUrl)
-            val mintWallet = w.getWallet(cdkMintUrl, CurrencyUnit.Sat)
+            val mintWallet = w.getWallet(cdkMintUrl, getActiveUnit())
                 ?: return WalletResult.Failure(WalletError.MintUnreachable(mintUrl, "Wallet not found for mint"))
 
             Log.d(TAG, "Requesting melt quote from $mintUrl")
@@ -204,7 +204,7 @@ class CdkWalletProvider(
 
         return try {
             val cdkMintUrl = MintUrl(mintUrl)
-            val mintWallet = w.getWallet(cdkMintUrl, CurrencyUnit.Sat)
+            val mintWallet = w.getWallet(cdkMintUrl, getActiveUnit())
                 ?: return WalletResult.Failure(WalletError.MintUnreachable(mintUrl, "Wallet not found for mint"))
 
             Log.d(TAG, "Executing melt for quote $quoteId")
@@ -247,15 +247,10 @@ class CdkWalletProvider(
 
         return try {
             val cdkToken = CdkToken.decode(encodedToken)
-
-            if (cdkToken.unit() != CurrencyUnit.Sat) {
-                return WalletResult.Failure(
-                    WalletError.InvalidToken("Unsupported token unit: ${cdkToken.unit()}")
-                )
-            }
+            val tokenUnit = cdkToken.unit() ?: getActiveUnit()
 
             val mintUrl = cdkToken.mintUrl()
-            val mintWallet = w.getWallet(mintUrl, CurrencyUnit.Sat)
+            val mintWallet = w.getWallet(mintUrl, tokenUnit)
                 ?: return WalletResult.Failure(
                     WalletError.MintUnreachable(mintUrl.url, "Wallet not found for mint")
                 )
@@ -268,14 +263,14 @@ class CdkWalletProvider(
             )
 
             val totalAmount = cdkToken.value().value.toLong()
-            Log.d(TAG, "Receiving token from mint ${mintUrl.url}, amount=$totalAmount sats")
+            Log.d(TAG, "Receiving token from mint ${mintUrl.url}, amount=$totalAmount $tokenUnit")
             mintWallet.receive(cdkToken, receiveOptions)
 
             val result = ReceiveResult(
                 amount = Satoshis(totalAmount),
                 proofsCount = 0
             )
-            Log.d(TAG, "Token received: $totalAmount sats")
+            Log.d(TAG, "Token received: $totalAmount $tokenUnit")
             WalletResult.Success(result)
         } catch (e: Exception) {
             Log.e(TAG, "Error receiving token: ${e.message}", e)
@@ -316,7 +311,7 @@ class CdkWalletProvider(
 
         return try {
             val cdkMintUrl = MintUrl(mintUrl)
-            val mintWallet = w.getWallet(cdkMintUrl, CurrencyUnit.Sat)
+            val mintWallet = w.getWallet(cdkMintUrl, getActiveUnit())
                 ?: return WalletResult.Failure(WalletError.MintUnreachable(mintUrl, "Wallet not found for mint"))
             val info = mintWallet.fetchMintInfo()
                 ?: return WalletResult.Failure(WalletError.MintUnreachable(mintUrl, "Mint returned no info"))
@@ -357,7 +352,7 @@ class CdkWalletProvider(
 
             val cdkWallet = CdkWallet(
                 mintUrl,
-                CurrencyUnit.Sat,
+                getActiveUnit(),
                 tempMnemonic,
                 tempDbStore,
                 config
@@ -374,6 +369,16 @@ class CdkWalletProvider(
     // ========================================================================
     // Helper Functions
     // ========================================================================
+
+    private fun getActiveUnit(): CurrencyUnit {
+        val hasAppContext = try { com.electricdreams.numo.core.cashu.CashuWalletManager.appContext; true } catch (e: Exception) { false }
+        val unitStr = if (hasAppContext) {
+            com.electricdreams.numo.core.util.MintManager.getInstance(com.electricdreams.numo.core.cashu.CashuWalletManager.appContext).getPreferredUnit()
+        } else {
+            "sat"
+        }
+        return com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unitStr)
+    }
 
     private fun mapQuoteState(state: CdkQuoteState): QuoteStatus = when (state) {
         CdkQuoteState.UNPAID -> QuoteStatus.UNPAID

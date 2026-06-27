@@ -101,6 +101,10 @@ class LightningMintHandlerTest {
         cashuWalletManagerMock = mockStatic(CashuWalletManager::class.java)
             cashuWalletManagerMock.`when`<WalletRepository> { CashuWalletManager.getWallet() }.thenReturn(mockWalletRepository)
         
+        val mockMintManager = mock(com.electricdreams.numo.core.util.MintManager::class.java)
+        `when`(mockMintManager.getPreferredUnit()).thenReturn("sat")
+        ReflectionHelpers.setStaticField(com.electricdreams.numo.core.util.MintManager::class.java, "instance", mockMintManager)
+        
         // Mock WalletRepository.getWallet() to return our mock Wallet (it's a suspend function)
         // Mock loadMintInfo() chain: MintInfo -> nuts -> nut04 -> methods (empty = no description support)
         val mockNut04 = mock(org.cashudevkit.Nut04Settings::class.java)
@@ -132,6 +136,7 @@ class LightningMintHandlerTest {
     @After
     fun tearDown() {
         cashuWalletManagerMock.close()
+        ReflectionHelpers.setStaticField(com.electricdreams.numo.core.util.MintManager::class.java, "instance", null)
         logMock.close()
         mockWebServer.shutdown()
     }
