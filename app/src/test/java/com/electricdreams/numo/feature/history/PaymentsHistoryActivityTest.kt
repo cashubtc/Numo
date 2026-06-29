@@ -346,4 +346,40 @@ class PaymentsHistoryActivityTest {
         assertNotNull(nextStartedActivity)
         assertEquals(TransactionDetailActivity::class.java.name, nextStartedActivity.component?.className)
     }
+
+    @Test
+    fun `custom zero decimal currency entry displays formatted amount with correct scale`() {
+        val paymentId = PaymentsHistoryActivity.addPendingPayment(
+            context = context,
+            amount = 1000L,
+            entryUnit = "point",
+            enteredAmount = 1000L, // Representing 10 POINT since stored as cents internally
+            bitcoinPrice = null,
+            paymentRequest = null,
+            formattedAmount = null
+        )
+        PaymentsHistoryActivity.completePendingPayment(
+            context = context,
+            paymentId = paymentId,
+            token = "token",
+            paymentType = PaymentHistoryEntry.TYPE_CASHU,
+            mintUrl = null
+        )
+
+        // Launch the activity
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+        val activity = controller.get()
+
+        val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
+        val adapter = recyclerView.adapter as PaymentsHistoryAdapter
+
+        val position = 1 // 0 is Month Header, 1 is the completed item
+
+        val holder = adapter.createViewHolder(recyclerView, 1) as PaymentsHistoryAdapter.TransactionViewHolder
+        adapter.bindViewHolder(holder, position)
+
+        // Assert that the amount display is "+10 POINT" instead of "+1000 POINT" or similar scaling bug
+        val amountDisplay = holder.amountText.text.toString()
+        assertEquals("+10 POINT", amountDisplay)
+    }
 }

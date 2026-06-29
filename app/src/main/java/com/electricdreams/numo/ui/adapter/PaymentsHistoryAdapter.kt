@@ -255,7 +255,8 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 if (currency.symbol != lowerEntryUnit.uppercase()) {
                     Amount(kotlin.math.abs(entry.enteredAmount), currency).toString()
                 } else {
-                    "${kotlin.math.abs(entry.enteredAmount)} ${entryUnit.uppercase()}"
+                    val formattedNum = Amount(kotlin.math.abs(entry.enteredAmount), currency).toStringWithoutSymbol()
+                    "$formattedNum ${entryUnit.uppercase()}"
                 }
             } else {
                 val baseAmountSats = kotlin.math.abs(entry.getBaseAmountSats())
