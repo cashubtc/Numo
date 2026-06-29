@@ -152,7 +152,9 @@ class LightningMintHandler(
                 val quoteAmount = CdkAmount(paymentAmount.toULong())
 
                 Log.d(TAG, "Requesting Lightning mint quote from ${mintUrl.url} for $paymentAmount sats")
-                val mintWallet = wallet.getWallet(mintUrl, CurrencyUnit.Sat)
+                val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
+        val unit = com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unitStr)
+        val mintWallet = wallet.getWallet(mintUrl, unit)
 
                 val nut04 = mintWallet.loadMintInfo().nuts.nut04
                 val supportsDescription = nut04?.methods?.any {
@@ -497,7 +499,9 @@ class LightningMintHandler(
         }
 
         Log.d(TAG, "Mint quote $quoteId is paid (detected by $source), calling wallet.mint")
-        val mintWallet = wallet.getWallet(mintUrl, CurrencyUnit.Sat)
+        val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
+        val unit = com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unitStr)
+        val mintWallet = wallet.getWallet(mintUrl, unit)
         val proofs = mintWallet?.mint(quoteId, org.cashudevkit.SplitTarget.None, null)
             ?: run {
                 Log.e(TAG, "Failed to get wallet for mint: ${mintUrl.url}")
@@ -544,7 +548,9 @@ class LightningMintHandler(
                 Log.v(TAG, "Polling mint quote state for $quoteId")
                 
                 // Check quote state using checkMintQuote API
-                val mintWallet = wallet.getWallet(mintUrl, CurrencyUnit.Sat)
+                val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
+        val unit = com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unitStr)
+        val mintWallet = wallet.getWallet(mintUrl, unit)
                     ?: throw Exception("Failed to get wallet for mint: ${mintUrl.url}")
                 
                 val quote = mintWallet.checkMintQuote( quoteId)

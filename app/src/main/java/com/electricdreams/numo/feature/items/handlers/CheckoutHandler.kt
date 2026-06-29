@@ -42,7 +42,7 @@ class CheckoutHandler(
         val btcPrice = bitcoinPriceWorker.getCurrentPrice()
 
         // Calculate total in satoshis
-        val totalSatoshis = basketManager.getTotalSatoshis(btcPrice)
+        val totalSatoshis = basketManager.getTotalSatoshis(btcPrice, activity)
 
         if (totalSatoshis <= 0) {
             Toast.makeText(activity, R.string.pos_toast_invalid_amount, Toast.LENGTH_SHORT).show()
@@ -56,7 +56,7 @@ class CheckoutHandler(
         // This preserves the checkout data for receipt generation
         val checkoutBasket = CheckoutBasket.fromBasketManager(
             basketManager = basketManager,
-            currency = currencyManager.getCurrentCurrency(),
+            currency = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(activity),
             bitcoinPrice = if (btcPrice > 0) btcPrice else null,
             totalSatoshis = totalSatoshis,
         )
@@ -101,6 +101,23 @@ class CheckoutHandler(
      * - Mixed: Treat as pure sats (display as BTC)
      */
     private fun formatPaymentAmount(fiatTotal: Double, satsTotal: Long): String {
+        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(activity).getPreferredUnit()
+        val isCustomUnit = preferredUnit.lowercase() != "sat"
+        
+        if (isCustomUnit) {
+            val currencyCode = preferredUnit.uppercase()
+            val currency = Amount.Currency.fromCode(currencyCode)
+            var total = 0.0
+            for (basketItem in basketManager.getBasketItems()) {
+                if (basketItem.isSatsPrice()) {
+                    total += basketItem.item.getGrossSats().toDouble() * basketItem.quantity
+                } else {
+                    total += basketItem.getTotalPrice()
+                }
+            }
+            return Amount.fromMajorUnits(total, currency).toString()
+        }
+
         return when {
             // Pure fiat (no sats items) - display as fiat
             satsTotal == 0L && fiatTotal > 0 -> {
@@ -116,7 +133,7 @@ class CheckoutHandler(
             // Mixed fiat + sats - treat as pure sats (display as BTC)
             else -> {
                 val btcPrice = bitcoinPriceWorker.getCurrentPrice()
-                val totalSatoshis = basketManager.getTotalSatoshis(btcPrice)
+                val totalSatoshis = basketManager.getTotalSatoshis(btcPrice, activity)
                 Amount(totalSatoshis, Amount.Currency.BTC).toString()
             }
         }

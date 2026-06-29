@@ -1056,4 +1056,13 @@
     <string name="btcpay_pos_no_apps">No Point of Sale apps found for this store</string>
     <string name="btcpay_pos_load_error">Failed to load apps: %1$s</string>
     <string name="btcpay_pos_items_error">Could not load BTCPay items</string>
+
+    <!-- Custom eCash Unit settings and messages -->
+    <string name="pos_error_pending_payment_different_unit">This pending payment is for a different unit and cannot be resumed.</string>
+    <string name="mints_unsupported_unit">Unsupported unit (%1$s)</string>
+    <string name="mints_select_base_unit">Select Base Unit</string>
+    <string name="mints_changed_base_unit_toast">Changed base unit to %1$s</string>
+    <string name="settings_fiat_conversion_disabled_custom_unit">Fiat currency conversion is disabled when using a custom base unit.</string>
+    <string name="mints_base_currency_unit_title">Base Currency Unit</string>
+    <string name="mints_base_currency_unit_subtitle">If the mint supports other units, you can switch it here.</string>
 </resources>

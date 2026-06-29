@@ -36,7 +36,10 @@ data class Amount(
             
             return runCatching {
                 JavaCurrency.getInstance(name).defaultFractionDigits == 0
-            }.getOrDefault(false)
+            }.getOrElse {
+                // Unrecognized custom units (e.g., "points") default to zero decimals
+                true
+            }
         }
 
         /**
@@ -60,7 +63,7 @@ data class Amount(
 
         companion object {
             @JvmField
-            val BTC = Currency("BTC", "₿", true)
+            val BTC = Currency("BTC", "sat", true)
             @JvmField
             val USD = Currency("USD", "$")
             @JvmField
@@ -152,7 +155,7 @@ data class Amount(
             /** Find currency by its symbol (e.g., "$" -> USD) */
             @JvmStatic
             fun fromSymbol(symbol: String): Currency? {
-                if (symbol == "₿") return BTC
+                if (symbol == "sat" || symbol == "₿") return BTC
                 
                 // Check known ones first
                 val known = listOf(USD, EUR, GBP, JPY, DKK, SEK, NOK, KRW)
@@ -173,7 +176,7 @@ data class Amount(
                 if (prefix.isEmpty()) return emptyList()
                 
                 val knownMatches = listOf(BTC, USD, EUR, GBP, JPY, DKK, SEK, NOK, KRW)
-                    .filter { prefix.startsWith(it.symbol) }
+                    .filter { prefix.startsWith(it.symbol) || prefix.endsWith(it.symbol) }
                     
                 if (knownMatches.isNotEmpty()) {
                     return knownMatches.sortedByDescending { it.symbol.length }
@@ -186,7 +189,7 @@ data class Amount(
                             // Safely convert JavaCurrency back to our Currency class without crashing if invalid
                             runCatching { fromCode(it.currencyCode) }.getOrNull()
                         }
-                        .filter { prefix.startsWith(it.symbol) }
+                        .filter { prefix.startsWith(it.symbol) || prefix.endsWith(it.symbol) }
                         .sortedByDescending { it.symbol.length }
                 }.getOrDefault(emptyList())
             }
@@ -202,7 +205,7 @@ data class Amount(
                 // For BTC, value is satoshis. We explicitly abbreviate with K/M/B to avoid confusion with BTC conversion
                 val sats = value.toDouble()
                 if (sats >= 100_000.0) { // >= 100,000 sats -> 100k
-                    "${currency.symbol}${formatAbbreviated(sats, currency.getLocale())}"
+                    "${formatAbbreviated(sats, currency.getLocale())} ${currency.symbol}"
                 } else {
                     toString()
                 }
@@ -242,7 +245,7 @@ data class Amount(
         return when {
             currency.isBtc -> {
                 val formatter = NumberFormat.getNumberInstance(currency.getLocale())
-                "${currency.symbol}${formatter.format(value)}"
+                "${formatter.format(value)} ${currency.symbol}"
             }
             currency.isZeroDecimal() -> {
                 // Have no decimal places (stored as cents internally, divide by 100)
@@ -320,7 +323,7 @@ data class Amount(
             }
             
             // Extract the numeric part (remove symbol)
-            var numericPart = formatted.drop(currency.symbol.length).trim()
+            var numericPart = formatted.replace(currency.symbol, "").trim()
             
             // Normalize the input: handle both comma and period as decimal separators
             // First, determine if comma is used as thousand separator or decimal separator
