@@ -12,8 +12,8 @@ android {
         applicationId = "com.electricdreams.numo"
         minSdk = 24
         targetSdk = 35
-        versionCode = 19
-        versionName = "1.7"
+        versionCode = 20
+        versionName = "1.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -135,7 +135,7 @@ dependencies {
     implementation("com.google.zxing:core:3.5.3")
 
     // CDK Kotlin bindings
-    implementation("org.cashudevkit:cdk-android:0.17.1")
+    implementation("org.cashudevkit:cdk-android:0.17.2-rc.1")
     
     // ML Kit Barcode Scanning
     implementation("com.google.mlkit:barcode-scanning:17.3.0")

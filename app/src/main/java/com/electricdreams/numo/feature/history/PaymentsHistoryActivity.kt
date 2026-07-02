@@ -197,7 +197,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         when (entry) {
             is PaymentHistoryEntry -> {
                 when {
-                    entry.isExpired() -> showTransactionDetails(entry, position)
+                    entry.isExpired() -> {
+                        // Expired payments shouldn't be tappable
+                    }
                     entry.isPending() -> {
                         if (!com.electricdreams.numo.core.util.NetworkUtils.isNetworkAvailable(this)) {
                             Toast.makeText(this, getString(R.string.pos_error_no_network_pending_payment), Toast.LENGTH_SHORT).show()
