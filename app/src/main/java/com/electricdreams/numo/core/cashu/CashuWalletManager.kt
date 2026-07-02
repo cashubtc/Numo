@@ -617,8 +617,17 @@ object CashuWalletManager : MintManager.MintChangeListener {
             for (url in mints) {
                 try {
                     newWallet.createWallet(MintUrl(url), CurrencyUnit.Sat, 10u)
+                    
+                    // Recover incomplete sagas (e.g. pending melts or mints)
+                    val mintWallet = newWallet.getWallet(MintUrl(url), CurrencyUnit.Sat)
+                    try {
+                        Log.i(TAG, "Recovering incomplete sagas for mint: $url")
+                        mintWallet.recoverIncompleteSagas()
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to recover incomplete sagas for mint: $url", e)
+                    }
                 } catch (t: Throwable) {
-                    Log.w(TAG, "Failed to add mint to wallet: ${'$'}url", t)
+                    Log.w(TAG, "Failed to add mint to wallet: $url", t)
                 }
             }
 
