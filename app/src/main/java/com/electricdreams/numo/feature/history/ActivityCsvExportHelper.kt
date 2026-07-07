@@ -132,6 +132,29 @@ object ActivityCsvExportHelper {
                 // Amount (BTC) - absolute value in sats
                 val amountSats = kotlin.math.abs(entry.amount).toString()
 
+                // Unit and Formatted Amount
+                val entryUnit = if (entry is PaymentHistoryEntry) entry.getUnit() else "sat"
+                val lowerEntryUnit = entryUnit.lowercase(Locale.US)
+                val isCustomUnit = lowerEntryUnit != "sat" && lowerEntryUnit != "sats" && lowerEntryUnit != "btc"
+
+                val formattedAmount = if (isCustomUnit) {
+                    val currency = Amount.Currency.fromCode(lowerEntryUnit)
+                    if (currency.symbol != lowerEntryUnit.uppercase(Locale.US)) {
+                        val valueToFormat = if (currency.isZeroDecimal()) {
+                            kotlin.math.abs(entry.getBaseAmountSats()) * 100
+                        } else {
+                            kotlin.math.abs(entry.getBaseAmountSats())
+                        }
+                        Amount(valueToFormat, currency).toString()
+                    } else {
+                        "${kotlin.math.abs(entry.getBaseAmountSats())} ${entryUnit.uppercase(Locale.US)}"
+                    }
+                } else {
+                    val baseAmountSats = kotlin.math.abs(entry.getBaseAmountSats())
+                    val satAmount = Amount(baseAmountSats, Amount.Currency.BTC)
+                    satAmount.toString()
+                }
+
                 // Determine the fiat currency to use
                 val fiatCurrencyCode = if (entry.getEntryUnit() != "sat" &&
                     entry.getEntryUnit() != "BTC" &&
@@ -205,6 +228,8 @@ object ActivityCsvExportHelper {
                     method,
                     status,
                     amountSats,
+                    entryUnit,
+                    formattedAmount,
                     amountFiat,
                     exchangeRate,
                     mint,

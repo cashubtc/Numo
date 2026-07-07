@@ -18,12 +18,20 @@ class ActivityCsvExportHelperTest {
 
     private lateinit var context: Context
 
+    private fun splitCsvLine(line: String): List<String> {
+        return line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)".toRegex())
+    }
+
     @Before
     fun setUp() {
         context = RuntimeEnvironment.getApplication()
         // Clear history before each test
         val prefs = context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE)
         prefs.edit().clear().apply()
+        // Reset MintPreferences to default state (including preferredUnit = "sat")
+        val mintPrefs = context.getSharedPreferences("MintPreferences", Context.MODE_PRIVATE)
+        mintPrefs.edit().clear().apply()
+        com.electricdreams.numo.core.util.MintManager.getInstance(context).setPreferredUnit("sat")
     }
 
     @Test
@@ -107,7 +115,8 @@ class ActivityCsvExportHelperTest {
         assertTrue(lines.size >= 3) // Header + 2 entries
 
         // Verify headers
-        val headers = lines[0].split(",")
+        val headers = splitCsvLine(lines[0])
+        assertEquals(15, headers.size)
         assertTrue(headers.contains("Items"))
         
         // Find index of "Items" column in the headers
@@ -115,8 +124,97 @@ class ActivityCsvExportHelperTest {
         val transactionIdIndex = headers.indexOf("Transaction ID")
         assertEquals(itemsIndex + 1, transactionIdIndex) // "Items" is right before "Transaction ID"
 
+        // Verify that all rows have exactly 15 columns
+        for (line in lines) {
+            assertEquals(15, splitCsvLine(line).size)
+        }
+
+        // Verify that the Unit column contains "sat" and Amount (Formatted) contains "sat" representation
+        val unitIndex = headers.indexOf("Unit")
+        val formattedAmountIndex = headers.indexOf("Amount (Formatted)")
+        
+        val row1 = splitCsvLine(lines[1])
+        val row2 = splitCsvLine(lines[2])
+        
+        assertEquals("sat", row1[unitIndex])
+        assertEquals("sat", row2[unitIndex])
+        
+        // One should have 500 sat and other 300 sat
+        val formattedAmounts = setOf(row1[formattedAmountIndex], row2[formattedAmountIndex])
+        assertTrue(formattedAmounts.contains("500 sat"))
+        assertTrue(formattedAmounts.contains("300 sat"))
+
         // Verify entries
         val expectedItemsStr = "Item A (x2); Item B - Large (x1)"
         assertTrue("CSV output should contain the formatted items list", csvOutput.contains(expectedItemsStr))
+    }
+
+    @Test
+    fun `export to CSV supports custom units and formats correctly`() {
+        // Set preferred unit to points
+        com.electricdreams.numo.core.util.MintManager.getInstance(context).setPreferredUnit("points")
+
+        // Add custom unit payment history entry
+        PaymentsHistoryActivity.addPendingPayment(
+            context = context,
+            amount = 15L, // 15 points
+            entryUnit = "points",
+            enteredAmount = 15L,
+            bitcoinPrice = null,
+            paymentRequest = null,
+            formattedAmount = "15 POINTS",
+        )
+
+        // Set preferred unit to USD
+        com.electricdreams.numo.core.util.MintManager.getInstance(context).setPreferredUnit("usd")
+
+        // Add custom unit payment history entry in USD cents
+        PaymentsHistoryActivity.addPendingPayment(
+            context = context,
+            amount = 150L, // $1.50
+            entryUnit = "usd",
+            enteredAmount = 150L,
+            bitcoinPrice = null,
+            paymentRequest = null,
+            formattedAmount = "$1.50",
+        )
+
+        val outputStream = ByteArrayOutputStream()
+        val success = ActivityCsvExportHelper.exportActivityToCsv(context, outputStream)
+        assertTrue(success)
+
+        val csvOutput = outputStream.toString("UTF-8")
+        assertNotNull(csvOutput)
+
+        // Split CSV into lines
+        val lines = csvOutput.trim().split("\n")
+        assertTrue(lines.size >= 3) // Header + 2 entries
+
+        // Verify headers
+        val headers = splitCsvLine(lines[0])
+        assertEquals(15, headers.size)
+        val unitIndex = headers.indexOf("Unit")
+        val formattedAmountIndex = headers.indexOf("Amount (Formatted)")
+
+        assertEquals(5, unitIndex)
+        assertEquals(6, formattedAmountIndex)
+
+        // Verify that all rows have exactly 15 columns
+        for (line in lines) {
+            assertEquals(15, splitCsvLine(line).size)
+        }
+
+        val row1 = splitCsvLine(lines[1])
+        val row2 = splitCsvLine(lines[2])
+
+        val pointsRow = if (row1[unitIndex] == "points") row1 else row2
+        val usdRow = if (row1[unitIndex] == "usd") row1 else row2
+
+        assertEquals("points", pointsRow[unitIndex])
+        assertEquals("15 POINTS", pointsRow[formattedAmountIndex])
+
+        assertEquals("usd", usdRow[unitIndex])
+        // Depending on formatting in test locale (should format with $ and 2 decimals)
+        assertEquals("$1.50", usdRow[formattedAmountIndex])
     }
 }
