@@ -38,6 +38,9 @@ class BitcoinPriceWorker private constructor(context: Context) {
         @Volatile
         private var instance: BitcoinPriceWorker? = null
 
+        @Volatile
+        var isTesting = false
+
         @JvmStatic
         @Synchronized
         fun getInstance(context: Context): BitcoinPriceWorker {
@@ -191,6 +194,9 @@ class BitcoinPriceWorker private constructor(context: Context) {
 
     /** Fetch the current Bitcoin price from Coinbase API for the current currency. */
     private fun fetchPrice() {
+        if (isTesting) {
+            return
+        }
         Thread {
             var connection: HttpURLConnection? = null
             var reader: BufferedReader? = null
