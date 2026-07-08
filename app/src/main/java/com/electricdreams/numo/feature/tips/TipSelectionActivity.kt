@@ -218,7 +218,7 @@ class TipSelectionActivity : AppCompatActivity() {
             return
         }
 
-        val isBtcAmount = formattedAmount.startsWith("₿")
+        val isBtcAmount = entryCurrency.isBtc
         
         if (bitcoinPrice <= 0) {
             convertedAmountDisplay.visibility = View.GONE
