@@ -158,8 +158,10 @@ data class Amount(
                 if (symbol == "sat" || symbol == "₿") return BTC
                 
                 // Check known ones first
-                val known = listOf(USD, EUR, GBP, JPY, DKK, SEK, NOK, KRW)
+                val known = listOf(USD, EUR, GBP, JPY, DKK, SEK, NOK, KRW, CUP, MLC)
                 known.find { it.symbol == symbol }?.let { return it }
+                
+                cache.values.find { it.symbol == symbol }?.let { return it }
 
                 // Search through available currencies
                 return runCatching {
@@ -175,8 +177,10 @@ data class Amount(
             fun getMatchingCurrencies(prefix: String): List<Currency> {
                 if (prefix.isEmpty()) return emptyList()
                 
-                val knownMatches = listOf(BTC, USD, EUR, GBP, JPY, DKK, SEK, NOK, KRW)
+                val cachedMatches = cache.values.filter { prefix.startsWith(it.symbol) || prefix.endsWith(it.symbol) }
+                val knownMatches = (listOf(BTC, USD, EUR, GBP, JPY, DKK, SEK, NOK, KRW, CUP, MLC) + cachedMatches)
                     .filter { prefix.startsWith(it.symbol) || prefix.endsWith(it.symbol) }
+                    .distinct()
                     
                 if (knownMatches.isNotEmpty()) {
                     return knownMatches.sortedByDescending { it.symbol.length }
@@ -339,7 +343,7 @@ data class Amount(
                     currency.isZeroDecimal() -> {
                         // have no decimal places, but stored as cents internally
                         val amount = numericPart.replace(",", "").toDouble()
-                        Amount((amount * 100).toLong(), currency)
+                        Amount(Math.round(amount * 100), currency)
                     }
                     else -> {
                         // For other fiat, convert decimal to minor units (cents)

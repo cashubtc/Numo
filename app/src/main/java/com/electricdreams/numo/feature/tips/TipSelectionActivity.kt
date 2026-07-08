@@ -62,6 +62,11 @@ class TipSelectionActivity : AppCompatActivity() {
     private var bitcoinPrice: Double = 0.0
     private var presets: List<Int> = listOf()
 
+    private val isCustomUnit: Boolean by lazy {
+        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
+        preferredUnit.lowercase() != "sat"
+    }
+
     // Custom tip input state
     private var customInputIsBtc: Boolean = false
     private var customInputCurrency: Currency = Currency.USD
@@ -309,7 +314,9 @@ class TipSelectionActivity : AppCompatActivity() {
     }
 
     private fun formatTotalAmount(totalSats: Long): String {
-        return if (entryCurrency == Currency.BTC) {
+        return if (isCustomUnit) {
+            Amount(totalSats, entryCurrency).toString()
+        } else if (entryCurrency == Currency.BTC) {
             Amount(totalSats, Currency.BTC).toString()
         } else {
             if (bitcoinPrice > 0) {
@@ -947,7 +954,9 @@ class TipSelectionActivity : AppCompatActivity() {
 
     private fun continuePaymentWithAmount(totalAmountSats: Long) {
         // Calculate new formatted amount (total)
-        val newFormattedAmount = if (entryCurrency == Currency.BTC) {
+        val newFormattedAmount = if (isCustomUnit) {
+            Amount(totalAmountSats, entryCurrency).toString()
+        } else if (entryCurrency == Currency.BTC) {
             Amount(totalAmountSats, Currency.BTC).toString()
         } else {
             // For fiat, recalculate the total
