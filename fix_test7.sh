@@ -1,2 +1,0 @@
-#!/bin/bash
-sed -i 's/mintManagerStaticMock.`when`<com.electricdreams.numo.core.util.MintManager> { com.electricdreams.numo.core.util.MintManager.getInstance(org.mockito.ArgumentMatchers.any()) }.thenReturn(mockMintManager)/mintManagerStaticMock.`when`<com.electricdreams.numo.core.util.MintManager> { com.electricdreams.numo.core.util.MintManager.getInstance(org.mockito.kotlin.any()) }.thenReturn(mockMintManager)/g' app/src/test/java/com/electricdreams/numo/payment/LightningMintHandlerTest.kt

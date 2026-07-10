@@ -1,3 +1,0 @@
-fix: disable fiat currency setting when custom base unit is active
-
-This correctly handles the fiat currency preference in `SettingsActivity` to prevent users from interacting with it when a custom base unit is currently set. The row is greyed out (opacity lowered to 0.5f) and tapping it will surface a descriptive Toast letting the user know they must revert back to standard `sat` first.

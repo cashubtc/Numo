@@ -1,1 +1,0 @@
-sed -i 's/val expectedUnitStr = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()/val expectedUnitStr = com.electricdreams.numo.core.util.MintManager.getInstance(CashuWalletManager.appContext).getPreferredUnit()/g' app/src/main/java/com/electricdreams/numo/ndef/CashuPaymentHelper.kt
