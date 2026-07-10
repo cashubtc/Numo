@@ -277,7 +277,8 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 }
 
                 // Get single mint wallet
-                val mintWallet = walletRepo.getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)
+                val unit = com.electricdreams.numo.core.util.MintManager.getInstance(this@WithdrawLightningActivity).getPreferredUnit()
+                val mintWallet = walletRepo.getWallet(MintUrl(mintUrl), com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unit))
                     ?: throw Exception("Failed to get wallet for mint: $mintUrl")
 
                 // Prepare Send
@@ -434,7 +435,8 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
                 // Get melt quote
                 val meltQuoteObj = MintUrl(mintUrl)
-                val mintWallet = wallet.getWallet(meltQuoteObj, CurrencyUnit.Sat)
+                val unit = com.electricdreams.numo.core.util.MintManager.getInstance(this@WithdrawLightningActivity).getPreferredUnit()
+                val mintWallet = wallet.getWallet(meltQuoteObj, com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unit))
                     ?: throw Exception("Failed to get wallet for mint: $mintUrl")
                 val meltQuote = withContext(Dispatchers.IO) {
                     mintWallet.meltQuote(org.cashudevkit.PaymentMethod.Bolt11, invoice, null,null)
@@ -512,7 +514,8 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
                 // Get melt quote for Lightning address
                 val amountMsat = amountSats * 1000
-                val mintWallet = wallet.getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)
+                val unit = com.electricdreams.numo.core.util.MintManager.getInstance(this@WithdrawLightningActivity).getPreferredUnit()
+                val mintWallet = wallet.getWallet(MintUrl(mintUrl), com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unit))
                     ?: throw Exception("Failed to get wallet for mint: $mintUrl")
                 val meltQuote = withContext(Dispatchers.IO) {
                     mintWallet.meltLightningAddressQuote(address, org.cashudevkit.Amount(amountMsat.toULong()))

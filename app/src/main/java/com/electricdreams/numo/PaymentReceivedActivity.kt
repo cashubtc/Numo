@@ -94,9 +94,10 @@ class PaymentReceivedActivity : AppCompatActivity() {
         tokenString = intent.getStringExtra(EXTRA_TOKEN)
         amount = intent.getLongExtra(EXTRA_AMOUNT, 0)
         fromNfcAnimation = intent.getBooleanExtra(EXTRA_FROM_NFC_ANIMATION, false)
+        unit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
         
-        // Parse token to extract amount and unit if not provided
-        if (amount == 0L && tokenString != null) {
+        // Parse token to extract amount and unit if provided
+        if (tokenString != null && tokenString!!.isNotBlank()) {
             parseToken(tokenString!!)
         }
         
@@ -146,7 +147,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
                 is CurrencyUnit.Eur -> "eur"
                 is CurrencyUnit.Usd -> "usd"
                 is CurrencyUnit.Custom -> tokenUnit.unit
-                else -> "sat"
+                else -> com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
             }
             
             // Calculate total amount from all proofs using the public API
@@ -156,7 +157,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing token: ${e.message}", e)
             // Fallback to provided amount or 0
-            unit = "sat"
+            unit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
         }
     }
     

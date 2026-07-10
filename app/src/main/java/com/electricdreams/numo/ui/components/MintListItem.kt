@@ -81,7 +81,28 @@ class MintListItem @JvmOverloads constructor(
         
         nameText.text = displayName
         urlText.text = shortUrl
-        balanceText.text = Amount(balance, Amount.Currency.BTC).toString()
+        
+        val preferredUnit = mintManager.getPreferredUnit()
+        val supportsUnit = mintManager.mintSupportsUnit(url, preferredUnit)
+        val lowerUnit = preferredUnit.lowercase()
+        val isCustomUnit = lowerUnit != "sat"
+        
+        container.alpha = 1.0f
+        if (!supportsUnit) {
+            balanceText.text = context.getString(R.string.mints_unsupported_unit, preferredUnit)
+        } else {
+            if (isCustomUnit) {
+                val currency = Amount.Currency.fromCode(lowerUnit)
+                if (currency.symbol != lowerUnit.uppercase()) {
+                    val valueToFormat = if (currency.isZeroDecimal()) balance * 100 else balance
+                    balanceText.text = Amount(valueToFormat, currency).toString()
+                } else {
+                    balanceText.text = "$balance $preferredUnit"
+                }
+            } else {
+                balanceText.text = Amount(balance, Amount.Currency.BTC).toString()
+            }
+        }
         
         // Load icon
         loadIcon(url)

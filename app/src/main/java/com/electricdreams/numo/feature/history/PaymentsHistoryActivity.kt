@@ -163,27 +163,43 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 }
                 val totalSats = balances.values.sum()
 
-                // Display sat balance
-                val satAmount = Amount(totalSats, Amount.Currency.BTC)
-                binding.balanceSats?.text = satAmount.toString()
-                binding.balanceSats?.visibility = View.VISIBLE
-
-                // Display fiat balance
-                val currencyCode = CurrencyManager.getInstance(this@PaymentsHistoryActivity)
-                    .getCurrentCurrency()
-                val btcPrice = BitcoinPriceWorker.getInstance(this@PaymentsHistoryActivity)
-                    .getCurrentPrice()
-
-                if (btcPrice > 0) {
-                    val fiatValue = (totalSats.toDouble() / 100_000_000.0) * btcPrice
-                    val fiatCurrency = Amount.Currency.fromCode(currencyCode)
-                    val fiatMinorUnits = kotlin.math.round(fiatValue * 100).toLong()
-                    val fiatAmount = Amount(fiatMinorUnits, fiatCurrency)
-                    binding.balanceFiat?.text = fiatAmount.toString()
+                // Display primary balance
+                val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this@PaymentsHistoryActivity).getPreferredUnit()
+                val lowerUnit = preferredUnit.lowercase()
+                val isCustomUnit = lowerUnit != "sat"
+                
+                if (isCustomUnit) {
+                    val currency = Amount.Currency.fromCode(lowerUnit)
+                    if (currency.symbol != lowerUnit.uppercase()) {
+                        val valueToFormat = if (currency.isZeroDecimal()) totalSats * 100 else totalSats
+                        binding.balanceSats?.text = Amount(valueToFormat, currency).toString()
+                    } else {
+                        binding.balanceSats?.text = "$totalSats $preferredUnit"
+                    }
+                    binding.balanceFiat?.visibility = View.GONE
                 } else {
-                    // No price available, show sats as primary
-                    binding.balanceFiat?.text = satAmount.toString()
-                    binding.balanceSats?.visibility = View.GONE
+                    val satAmount = Amount(totalSats, Amount.Currency.BTC)
+                    binding.balanceSats?.text = satAmount.toString()
+                    binding.balanceSats?.visibility = View.VISIBLE
+
+                    // Display fiat balance
+                    val currencyManager = CurrencyManager.getInstance(this@PaymentsHistoryActivity)
+                    val currencyCode = currencyManager.getCurrentCurrency()
+                    val btcPrice = BitcoinPriceWorker.getInstance(this@PaymentsHistoryActivity).getCurrentPrice()
+                    
+                    if (btcPrice > 0) {
+                        val fiatValue = (totalSats.toDouble() / 100_000_000.0) * btcPrice
+                        val fiatCurrency = Amount.Currency.fromCode(currencyCode)
+                        val fiatMinorUnits = kotlin.math.round(fiatValue * 100).toLong()
+                        val fiatAmount = Amount(fiatMinorUnits, fiatCurrency)
+                        binding.balanceFiat?.text = fiatAmount.toString()
+                        binding.balanceFiat?.visibility = View.VISIBLE
+                    } else {
+                        // No price available, show sats as primary
+                        binding.balanceFiat?.text = satAmount.toString()
+                        binding.balanceFiat?.visibility = View.VISIBLE
+                        binding.balanceSats?.visibility = View.GONE
+                    }
                 }
             } catch (e: Exception) {
                 // Silently handle - balance display is supplementary
@@ -201,6 +217,11 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                         // Expired payments shouldn't be tappable
                     }
                     entry.isPending() -> {
+                        val activeUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
+                        if (!entry.getUnit().equals(activeUnit, ignoreCase = true)) {
+                            Toast.makeText(this, getString(R.string.pos_error_pending_payment_different_unit), Toast.LENGTH_SHORT).show()
+                            return
+                        }
                         if (!com.electricdreams.numo.core.util.NetworkUtils.isNetworkAvailable(this)) {
                             Toast.makeText(this, getString(R.string.pos_error_no_network_pending_payment), Toast.LENGTH_SHORT).show()
                             return
@@ -671,6 +692,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             tipAmountSats: Long = 0,
             tipPercentage: Int = 0,
         ): String {
+            val ecashUnit = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
             val entry = PaymentHistoryEntry.createPending(
                 amount = amount,
                 entryUnit = entryUnit,
@@ -682,6 +704,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 basketId = basketId,
                 tipAmountSats = tipAmountSats,
                 tipPercentage = tipPercentage,
+                ecashUnit = ecashUnit,
             )
 
             val history = getPaymentHistory(context).toMutableList()
