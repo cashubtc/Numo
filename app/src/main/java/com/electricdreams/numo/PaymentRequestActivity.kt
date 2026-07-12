@@ -1552,23 +1552,21 @@ class PaymentRequestActivity : AppCompatActivity() {
         statusText.text = getString(R.string.payment_request_status_failed, errorMessage)
         setResult(Activity.RESULT_CANCELED)
 
-        if (nfcAnimationContainer.visibility == View.VISIBLE) {
-            showNfcAnimationError(errorMessage)
-            return
+        // ALWAYS render the native failure overlay (the ALL RED screen) so that failure paths stay consistent,
+        // mirroring the behavior of showPaymentSuccess.
+        if (nfcAnimationContainer.visibility != View.VISIBLE) {
+            nfcOverlayShownAtMs = SystemClock.elapsedRealtime()
+            applyFullscreenForAnimationOverlay()
+            nfcAnimationContainer.visibility = View.VISIBLE
+            nfcAnimationView.reset()
+            resetResultTextViews()
+            resetResultActionButtons()
+            ViewCompat.requestApplyInsets(nfcAnimationContainer)
+        } else {
+            applyFullscreenForAnimationOverlay()
         }
 
-        Toast.makeText(
-            this,
-            getString(R.string.payment_request_status_failed, errorMessage),
-            Toast.LENGTH_LONG,
-        ).show()
-
-        // Navigate to the global payment failure screen, which will allow
-        // the user to try the latest pending entry again.
-        startActivity(Intent(this, PaymentFailureActivity::class.java))
-
-        // Clean up payment resources and finish this Activity.
-        cleanupAndFinish()
+        showNfcAnimationError(errorMessage)
     }
 
     private fun cancelPayment() {
