@@ -72,4 +72,9 @@
     <string name="security_toast_pin_removed">PIN removed</string>
     <string name="security_toast_incorrect_pin">Incorrect PIN</string>
     <string name="security_toast_wait_seconds">Wait %.1fs</string>
+    <string name="security_settings_device_backup_hero_title">Your wallet, recoverable</string>
+    <string name="security_settings_device_backup_hero_body">Numo keeps one encrypted recovery file ready for Android cloud backup.</string>
+    <string name="security_settings_device_backup_password_section">Recovery password</string>
+    <string name="security_settings_device_backup_password_note">Keep this password separate from your PIN. It is required to open the backup on a new device.</string>
+    <string name="restore_device_backup_hero_title">Your encrypted backup is ready</string>
 </resources>
