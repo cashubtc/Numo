@@ -114,6 +114,7 @@ class RestoreWalletActivity : AppCompatActivity() {
     private var backupTimestamp: Long? = null
     private var backupFound = false
     private val restoredDeviceBackupMints = mutableSetOf<String>()
+    private var deviceBackupRestored = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -497,6 +498,7 @@ class RestoreWalletActivity : AppCompatActivity() {
         if (requestCode != REQUEST_DEVICE_BACKUP_RESTORE || resultCode != RESULT_OK || data == null) return
         val mnemonic = data.getStringExtra(DeviceBackupRestoreActivity.EXTRA_MNEMONIC) ?: return
         restoredDeviceBackupMints.clear()
+        deviceBackupRestored = true
         restoredDeviceBackupMints.addAll(data.getStringArrayListExtra(DeviceBackupRestoreActivity.EXTRA_MINTS).orEmpty())
         mnemonic.split(" ").forEachIndexed { index, word -> seedInputs.getOrNull(index)?.setText(word) }
         proceedToFetchBackup()
@@ -504,7 +506,18 @@ class RestoreWalletActivity : AppCompatActivity() {
 
     private fun updateMintsUI() {
         // Update backup status card
-        if (backupFound) {
+        if (deviceBackupRestored) {
+            backupStatusCard.background = ContextCompat.getDrawable(this, R.drawable.bg_success_card)
+            backupStatusIcon.setImageResource(R.drawable.ic_cloud_done)
+            backupStatusIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_success_green))
+            backupStatusTitle.text = getString(R.string.restore_device_backup_found_title)
+            backupStatusTitle.setTextColor(ContextCompat.getColor(this, R.color.color_success_green))
+            backupStatusSubtitle.text = getString(
+                R.string.restore_device_backup_found_subtitle,
+                restoredDeviceBackupMints.size,
+            )
+            backupStatusSubtitle.setTextColor(ContextCompat.getColor(this, R.color.color_text_secondary))
+        } else if (backupFound) {
             backupStatusCard.background = ContextCompat.getDrawable(this, R.drawable.bg_success_card)
             backupStatusIcon.setImageResource(R.drawable.ic_cloud_done)
             backupStatusIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_success_green))

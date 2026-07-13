@@ -7,4 +7,6 @@
     <string name="restore_success_balance_changed_summary">El saldo ha cambiado en %1$d sats</string>
     <string name="restore_success_restored_with_balance_summary">Cartera restaurada con un total de %1$d sats</string>
     <string name="restore_success_balance_change_line">%1$d → %2$d sats</string>
+    <string name="restore_device_backup_found_title">Copia de seguridad cifrada encontrada</string>
+    <string name="restore_device_backup_found_subtitle">Se han recuperado %1 mint(s) de esta copia del dispositivo.</string>
 </resources>

@@ -6,4 +6,6 @@
     <string name="restore_success_restored_with_balance_summary">지갑이 총 %1$d sats로 복원되었습니다</string>
     <string name="restore_success_recovered_summary">%2$d mint에서 %1$d sats를 복구했습니다</string>
     <string name="restore_success_balance_change_line">%1$d → %2$d sats</string>
+    <string name="restore_device_backup_found_title">암호화된 기기 백업을 찾았습니다</string>
+    <string name="restore_device_backup_found_subtitle">이 기기 백업에서 mint %1개를 복구했습니다.</string>
 </resources>
