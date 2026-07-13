@@ -7,5 +7,5 @@
     <string name="restore_success_recovered_summary">%2$dのmintから%1$d satsを回復しました</string>
     <string name="restore_success_balance_change_line">%1$d → %2$d sats</string>
     <string name="restore_device_backup_found_title">暗号化されたデバイスバックアップが見つかりました</string>
-    <string name="restore_device_backup_found_subtitle">このデバイスバックアップから%1個のmintを復元しました。</string>
+    <string name="restore_device_backup_found_subtitle">このデバイスバックアップから%1$d個のmintを復元しました。</string>
 </resources>
