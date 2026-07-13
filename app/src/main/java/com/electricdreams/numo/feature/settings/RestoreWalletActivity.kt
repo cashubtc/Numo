@@ -501,7 +501,21 @@ class RestoreWalletActivity : AppCompatActivity() {
         deviceBackupRestored = true
         restoredDeviceBackupMints.addAll(data.getStringArrayListExtra(DeviceBackupRestoreActivity.EXTRA_MINTS).orEmpty())
         mnemonic.split(" ").forEachIndexed { index, word -> seedInputs.getOrNull(index)?.setText(word) }
-        proceedToFetchBackup()
+        proceedWithDeviceBackup()
+    }
+
+    /** The encrypted device backup already contains the mint list, so no network lookup is needed. */
+    private fun proceedWithDeviceBackup() {
+        val existingMints = MintManager.getInstance(this).getAllowedMints()
+        discoveredMints.clear()
+        selectedMints.clear()
+        backupFound = false
+        backupTimestamp = null
+        discoveredMints.addAll(restoredDeviceBackupMints)
+        selectedMints.addAll(restoredDeviceBackupMints)
+        discoveredMints.addAll(existingMints)
+        selectedMints.addAll(existingMints)
+        updateUIForStep(RestoreStep.REVIEW_MINTS)
     }
 
     private fun updateMintsUI() {
