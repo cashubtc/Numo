@@ -58,4 +58,7 @@
     <string name="security_settings_device_backup_password_section">復元パスワード</string>
     <string name="security_settings_device_backup_password_note">このパスワードはPINとは別に保管してください。新しいデバイスでバックアップを開くために必要です。</string>
     <string name="restore_device_backup_hero_title">暗号化バックアップの準備ができました</string>
+    <string name="security_settings_device_backup_success_title">暗号化バックアップを有効にしました</string>
+    <string name="security_settings_device_backup_success_body">復元データはAndroidクラウドバックアップの準備ができました。</string>
+    <string name="security_settings_device_backup_done">完了</string>
 </resources>

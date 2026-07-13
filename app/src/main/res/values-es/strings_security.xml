@@ -76,4 +76,7 @@
     <string name="security_settings_device_backup_password_section">Contraseña de recuperación</string>
     <string name="security_settings_device_backup_password_note">Guarda esta contraseña aparte de tu PIN. Es necesaria para abrir la copia en un dispositivo nuevo.</string>
     <string name="restore_device_backup_hero_title">Tu copia cifrada está lista</string>
+    <string name="security_settings_device_backup_success_title">Copia de seguridad cifrada activada</string>
+    <string name="security_settings_device_backup_success_body">Tus datos de recuperación están listos para la copia en la nube de Android.</string>
+    <string name="security_settings_device_backup_done">Listo</string>
 </resources>

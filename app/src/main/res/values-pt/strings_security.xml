@@ -76,4 +76,7 @@
     <string name="security_settings_device_backup_password_section">Senha de recuperação</string>
     <string name="security_settings_device_backup_password_note">Guarde esta senha separadamente do seu PIN. Ela é necessária para abrir o backup em um novo dispositivo.</string>
     <string name="restore_device_backup_hero_title">Seu backup criptografado está pronto</string>
+    <string name="security_settings_device_backup_success_title">Backup criptografado ativado</string>
+    <string name="security_settings_device_backup_success_body">Seus dados de recuperação estão prontos para o backup na nuvem do Android.</string>
+    <string name="security_settings_device_backup_done">Concluído</string>
 </resources>

@@ -22,6 +22,9 @@
     <string name="security_settings_device_backup_password_short">Use at least 12 characters for the recovery password.</string>
     <string name="security_settings_device_backup_enabled">Encrypted device backup enabled</string>
     <string name="security_settings_device_backup_error">Unable to enable encrypted device backup</string>
+    <string name="security_settings_device_backup_success_title">Encrypted backup is on</string>
+    <string name="security_settings_device_backup_success_body">Your recovery data is ready for Android cloud backup.</string>
+    <string name="security_settings_device_backup_done">Done</string>
 
     <string name="restore_device_backup_title">Restore encrypted device backup</string>
     <string name="restore_device_backup_button">Restore encrypted device backup</string>

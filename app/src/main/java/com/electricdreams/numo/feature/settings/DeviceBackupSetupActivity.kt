@@ -1,7 +1,6 @@
 package com.electricdreams.numo.feature.settings
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -13,6 +12,7 @@ import com.electricdreams.numo.databinding.ActivityDeviceBackupSetupBinding
 class DeviceBackupSetupActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDeviceBackupSetupBinding
+    private var backupEnabled = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,7 +26,11 @@ class DeviceBackupSetupActivity : AppCompatActivity() {
         }
 
         binding.topBar.onNavClick { finish() }
-        binding.enableBackupButton.setOnClickListener { enableBackup() }
+        backupEnabled = DeviceRecoveryBackup.isEnabled(this)
+        if (backupEnabled) showActivatedState()
+        binding.enableBackupButton.setOnClickListener {
+            if (backupEnabled) finish() else enableBackup()
+        }
         binding.confirmationInput.setOnEditorActionListener { _, _, _ ->
             enableBackup()
             true
@@ -51,14 +55,20 @@ class DeviceBackupSetupActivity : AppCompatActivity() {
                     DeviceRecoveryBackup.enable(this, password.toCharArray())
                     binding.passwordInput.text?.clear()
                     binding.confirmationInput.text?.clear()
-                    Toast.makeText(this, R.string.security_settings_device_backup_enabled, Toast.LENGTH_SHORT).show()
-                    finish()
+                    showActivatedState()
                 } catch (exception: Exception) {
                     binding.passwordLayout.error = exception.message
                         ?: getString(R.string.security_settings_device_backup_error)
                 }
             }
         }
+    }
+
+    private fun showActivatedState() {
+        backupEnabled = true
+        binding.setupForm.visibility = android.view.View.GONE
+        binding.successState.visibility = android.view.View.VISIBLE
+        binding.enableBackupButton.setText(R.string.security_settings_device_backup_done)
     }
 
     private companion object {
