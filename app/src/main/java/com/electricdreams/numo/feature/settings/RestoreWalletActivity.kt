@@ -2,6 +2,7 @@ package com.electricdreams.numo.feature.settings
 
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -49,6 +50,10 @@ import androidx.core.view.WindowInsetsCompat
  */
 class RestoreWalletActivity : AppCompatActivity() {
 
+    private companion object {
+        const val REQUEST_DEVICE_BACKUP_RESTORE = 801
+    }
+
     // === UI State ===
     private enum class RestoreStep {
         ENTER_SEED,
@@ -69,6 +74,7 @@ class RestoreWalletActivity : AppCompatActivity() {
     private lateinit var seedInputGrid: GridLayout
     private lateinit var pasteButton: MaterialButton
     private lateinit var continueButton: MaterialButton
+    private lateinit var restoreDeviceBackupButton: MaterialButton
     private lateinit var validationStatus: LinearLayout
     private lateinit var validationIcon: ImageView
     private lateinit var validationText: TextView
@@ -107,6 +113,7 @@ class RestoreWalletActivity : AppCompatActivity() {
     private val selectedMints = mutableSetOf<String>()
     private var backupTimestamp: Long? = null
     private var backupFound = false
+    private val restoredDeviceBackupMints = mutableSetOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -133,6 +140,7 @@ class RestoreWalletActivity : AppCompatActivity() {
         seedInputGrid = findViewById(R.id.seed_input_grid)
         pasteButton = findViewById(R.id.paste_button)
         continueButton = findViewById(R.id.continue_button)
+        restoreDeviceBackupButton = findViewById(R.id.restore_device_backup_button)
         validationStatus = findViewById(R.id.validation_status)
         validationIcon = findViewById(R.id.validation_icon)
         validationText = findViewById(R.id.validation_text)
@@ -255,6 +263,10 @@ class RestoreWalletActivity : AppCompatActivity() {
 
         continueButton.setOnClickListener {
             proceedToFetchBackup()
+        }
+
+        restoreDeviceBackupButton.setOnClickListener {
+            startActivityForResult(Intent(this, DeviceBackupRestoreActivity::class.java), REQUEST_DEVICE_BACKUP_RESTORE)
         }
 
         startRestoreButton.setOnClickListener {
@@ -456,7 +468,9 @@ class RestoreWalletActivity : AppCompatActivity() {
                 backupTimestamp = null
             }
 
-            // Also include existing configured mints
+            // Also include mints restored from the encrypted device backup and existing configuration.
+            discoveredMints.addAll(restoredDeviceBackupMints)
+            selectedMints.addAll(restoredDeviceBackupMints)
             discoveredMints.addAll(existingMints)
             selectedMints.addAll(existingMints)
 
@@ -475,6 +489,17 @@ class RestoreWalletActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode != REQUEST_DEVICE_BACKUP_RESTORE || resultCode != RESULT_OK || data == null) return
+        val mnemonic = data.getStringExtra(DeviceBackupRestoreActivity.EXTRA_MNEMONIC) ?: return
+        restoredDeviceBackupMints.clear()
+        restoredDeviceBackupMints.addAll(data.getStringArrayListExtra(DeviceBackupRestoreActivity.EXTRA_MINTS).orEmpty())
+        mnemonic.split(" ").forEachIndexed { index, word -> seedInputs.getOrNull(index)?.setText(word) }
+        proceedToFetchBackup()
     }
 
     private fun updateMintsUI() {

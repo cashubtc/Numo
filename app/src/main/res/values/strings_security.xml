@@ -10,6 +10,26 @@
     <!-- Security &amp; Privacy screen: backup mnemonic row -->
     <string name="security_settings_backup_mnemonic_title">Backup Mnemonic</string>
     <string name="security_settings_backup_mnemonic_subtitle">View your 12-word seed phrase</string>
+    <string name="security_settings_device_backup_title">Encrypted device backup</string>
+    <string name="security_settings_device_backup_subtitle">Back up recovery data to your Google account</string>
+    <string name="security_settings_device_backup_enabled_subtitle">Enabled — encrypted recovery backup</string>
+    <string name="security_settings_device_backup_dialog_title">Enable encrypted device backup</string>
+    <string name="security_settings_device_backup_dialog_body">Choose a separate recovery password. Numo cannot recover this password. Android only backs up the encrypted recovery file when cloud backup and a screen lock are enabled.</string>
+    <string name="security_settings_device_backup_password_hint">Recovery password (12+ characters)</string>
+    <string name="security_settings_device_backup_confirm_hint">Confirm recovery password</string>
+    <string name="security_settings_device_backup_enable">Enable backup</string>
+    <string name="security_settings_device_backup_password_mismatch">The recovery passwords do not match.</string>
+    <string name="security_settings_device_backup_password_short">Use at least 12 characters for the recovery password.</string>
+    <string name="security_settings_device_backup_enabled">Encrypted device backup enabled</string>
+    <string name="security_settings_device_backup_error">Unable to enable encrypted device backup</string>
+
+    <string name="restore_device_backup_title">Restore encrypted device backup</string>
+    <string name="restore_device_backup_button">Restore encrypted device backup</string>
+    <string name="restore_device_backup_body">Enter the recovery password created when this backup was enabled.</string>
+    <string name="restore_device_backup_password_hint">Recovery password</string>
+    <string name="restore_device_backup_continue">Unlock backup</string>
+    <string name="restore_device_backup_missing">No encrypted device backup was restored by Android.</string>
+    <string name="restore_device_backup_invalid_password">Incorrect recovery password or invalid backup.</string>
 
     <!-- Security &amp; Privacy screen: restore wallet row -->
     <string name="security_settings_restore_wallet_title">Restore Wallet</string>

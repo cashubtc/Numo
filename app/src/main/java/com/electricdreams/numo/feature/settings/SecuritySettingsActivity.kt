@@ -3,6 +3,7 @@ package com.electricdreams.numo.feature.settings
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import com.electricdreams.numo.core.backup.DeviceRecoveryBackup
 import com.electricdreams.numo.util.startActivityForResultCompat
 import android.view.View
 import android.widget.TextView
@@ -27,6 +28,7 @@ class SecuritySettingsActivity : AppCompatActivity() {
 
     private enum class PendingAction {
         BACKUP_MNEMONIC,
+        ENABLE_DEVICE_BACKUP,
         RESTORE_WALLET,
         CHANGE_PIN,
         REMOVE_PIN
@@ -90,6 +92,15 @@ class SecuritySettingsActivity : AppCompatActivity() {
             }
         }
 
+        findViewById<View>(R.id.device_backup_item).setOnClickListener {
+            if (pinManager.isPinEnabled()) {
+                pendingAction = PendingAction.ENABLE_DEVICE_BACKUP
+                requestPinVerification()
+            } else {
+                openDeviceBackupSetup()
+            }
+        }
+
         // Restore wallet - requires PIN if set
         findViewById<View>(R.id.restore_wallet_item).setOnClickListener {
             if (pinManager.isPinEnabled()) {
@@ -100,6 +111,21 @@ class SecuritySettingsActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateBackupUI()
+    }
+
+    private fun updateBackupUI() {
+        val isBackupEnabled = DeviceRecoveryBackup.isEnabled(this)
+        val deviceBackupItem = findViewById<com.electricdreams.numo.ui.components.SettingsRowView>(R.id.device_backup_item)
+        if (isBackupEnabled) {
+            deviceBackupItem.setSubtitle(getString(R.string.security_settings_device_backup_enabled_subtitle))
+        } else {
+            deviceBackupItem.setSubtitle(getString(R.string.security_settings_device_backup_subtitle))
+        }
     }
 
     private fun updatePinUI() {
@@ -124,6 +150,10 @@ class SecuritySettingsActivity : AppCompatActivity() {
             putExtra(PinEntryActivity.EXTRA_SUBTITLE, getString(R.string.security_settings_enter_pin_subtitle))
         }
         startActivityForResultCompat(intent, REQUEST_PIN_VERIFY)
+    }
+
+    private fun openDeviceBackupSetup() {
+        startActivity(Intent(this, DeviceBackupSetupActivity::class.java))
     }
 
     private fun openBackupMnemonic() {
@@ -172,6 +202,7 @@ class SecuritySettingsActivity : AppCompatActivity() {
                     // PIN verified - perform pending action
                     when (pendingAction) {
                         PendingAction.BACKUP_MNEMONIC -> openBackupMnemonic()
+                        PendingAction.ENABLE_DEVICE_BACKUP -> openDeviceBackupSetup()
                         PendingAction.RESTORE_WALLET -> openRestoreWallet()
                         PendingAction.CHANGE_PIN -> openChangePin()
                         PendingAction.REMOVE_PIN -> confirmRemovePin()

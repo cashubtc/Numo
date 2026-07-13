@@ -3,6 +3,7 @@ package com.electricdreams.numo.core.cashu
 import android.content.Context
 import android.util.Log
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
+import com.electricdreams.numo.core.backup.DeviceRecoveryBackup
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.dev.WalletLogger
@@ -164,6 +165,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
         val prefs = PreferenceStore.wallet(appContext)
         prefs.putString(KEY_MNEMONIC, newMnemonic)
         Log.i(TAG, "Saved new mnemonic for restore")
+        DeviceRecoveryBackup.updateIfEnabled(appContext)
 
         // Recreate database
         val dbFile = appContext.getDatabasePath(DB_FILE_NAME)
