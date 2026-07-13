@@ -3,6 +3,8 @@ package com.electricdreams.numo.feature.settings
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.backup.DeviceRecoveryBackup
 import com.electricdreams.numo.databinding.ActivityDeviceBackupSetupBinding
@@ -16,6 +18,12 @@ class DeviceBackupSetupActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityDeviceBackupSetupBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+            view.setPadding(0, systemBars.top, 0, maxOf(systemBars.bottom, ime.bottom))
+            insets
+        }
 
         binding.topBar.onNavClick { finish() }
         binding.enableBackupButton.setOnClickListener { enableBackup() }
