@@ -58,6 +58,8 @@ class PaymentsHistoryActivity : AppCompatActivity() {
 
     private var currentHistoryList = listOf<HistoryEntry>()
 
+    private var loadHistoryJob: kotlinx.coroutines.Job? = null
+
     private val csvExportLauncher: ActivityResultLauncher<String> =
         registerForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
             if (uri != null) {
@@ -548,50 +550,58 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     }
 
     private fun loadHistory() {
-        // Stale BTCPay pending entries (no resume data) will never be resolved by polling
-        // if the app was killed mid-flow — expire them now so they don't sit as "Pending" forever.
-        expireStaleBtcPayEntries()
+        loadHistoryJob?.cancel()
+        loadHistoryJob = lifecycleScope.launch {
+            val (filteredList, isEmpty) = withContext(ioDispatcher) {
+                // Stale BTCPay pending entries (no resume data) will never be resolved by polling
+                // if the app was killed mid-flow — expire them now so they don't sit as "Pending" forever.
+                expireStaleBtcPayEntries()
 
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_ALL) // Show all by default
-        val filterStart = prefs.getLong(KEY_FILTER_DATE_START, 0L)
-        val filterEnd = prefs.getLong(KEY_FILTER_DATE_END, 0L)
+                val appContext = this@PaymentsHistoryActivity.applicationContext
+                val prefs = appContext.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_ALL) // Show all by default
+                val filterStart = prefs.getLong(KEY_FILTER_DATE_START, 0L)
+                val filterEnd = prefs.getLong(KEY_FILTER_DATE_END, 0L)
 
-        val paymentHistory: List<HistoryEntry> = getPaymentHistory()
-        val withdrawHistory: List<HistoryEntry> = AutoWithdrawManager.getInstance(this)
-            .getHistory()
-            .filter { it.status != WithdrawHistoryEntry.STATUS_FAILED }
+                val paymentHistory: List<HistoryEntry> = getPaymentHistory(appContext)
+                val withdrawHistory: List<HistoryEntry> = AutoWithdrawManager.getInstance(appContext)
+                    .getHistory()
+                    .filter { it.status != WithdrawHistoryEntry.STATUS_FAILED }
 
-        // Merge and sort by date descending (newest first)
-        var filteredList = (paymentHistory + withdrawHistory)
-            .sortedByDescending { it.date.time }
+                // Merge and sort by date descending (newest first)
+                var list = (paymentHistory + withdrawHistory)
+                    .sortedByDescending { it.date.time }
 
-        // Apply Status Filter
-        if (filterState == FILTER_PAID) {
-            filteredList = filteredList.filterNot { it.isPending() }
-        } else if (filterState == FILTER_PENDING) {
-            filteredList = filteredList.filter { it.isPending() }
-        }
+                // Apply Status Filter
+                if (filterState == FILTER_PAID) {
+                    list = list.filterNot { it.isPending() }
+                } else if (filterState == FILTER_PENDING) {
+                    list = list.filter { it.isPending() }
+                }
 
-        // Apply Date Filter
-        if (filterStart > 0 && filterEnd > 0) {
-            // MaterialDatePicker returns UTC midnights. To include the full end day:
-            val endOfDay = filterEnd + 86400000L - 1L
-            filteredList = filteredList.filter { it.date.time in filterStart..endOfDay }
-        }
-        
-        currentHistoryList = filteredList
-        adapter.setEntries(currentHistoryList)
+                // Apply Date Filter
+                if (filterStart > 0 && filterEnd > 0) {
+                    // MaterialDatePicker returns UTC midnights. To include the full end day:
+                    val endOfDay = filterEnd + 86400000L - 1L
+                    list = list.filter { it.date.time in filterStart..endOfDay }
+                }
 
-        val isEmpty = currentHistoryList.isEmpty()
-        binding.emptyView.root.visibility = if (isEmpty) View.VISIBLE else View.GONE
-        if (isEmpty) {
-            EmptyStateHelper.bind(
-                binding.emptyView.root,
-                R.drawable.ic_receipt,
-                "No Payments Yet",
-                "Payment history will appear here once you start accepting payments"
-            )
+                list to list.isEmpty()
+            }
+
+            currentHistoryList = filteredList
+            adapter.setEntries(currentHistoryList)
+
+            val isEmptyList = isEmpty
+            binding.emptyView.root.visibility = if (isEmptyList) View.VISIBLE else View.GONE
+            if (isEmptyList) {
+                EmptyStateHelper.bind(
+                    binding.emptyView.root,
+                    R.drawable.ic_receipt,
+                    "No Payments Yet",
+                    "Payment history will appear here once you start accepting payments"
+                )
+            }
         }
     }
 
@@ -626,12 +636,14 @@ class PaymentsHistoryActivity : AppCompatActivity() {
      *   without an active BTCPay connection these can never settle)
      */
     private fun expireStaleBtcPayEntries() {
-        val history = getPaymentHistory(this).toMutableList()
+        val appContext = applicationContext
+        val history = getPaymentHistory(appContext).toMutableList()
         val cutoff = System.currentTimeMillis() - STALE_PENDING_THRESHOLD_MS
-        val btcPayEnabled = PreferenceStore.app(this).getBoolean("btcpay_enabled", false)
+        val btcPayEnabled = PreferenceStore.app(appContext).getBoolean("btcpay_enabled", false)
 
-        val stale = history.filter { entry ->
-            entry.isPending() && (
+        var modified = false
+        history.forEachIndexed { index, entry ->
+            if (entry.isPending() && (
                 // Old enough that no invoice type would still be valid
                 entry.date.time < cutoff ||
                 // BTCPay is disabled — pending BTCPay entries can never be resolved.
@@ -639,14 +651,49 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 // lightningMintUrl (local Lightning) or nostrNprofile (Nostr).
                 (!btcPayEnabled && entry.lightningQuoteId != null
                     && entry.lightningMintUrl == null && entry.nostrNprofile == null)
-            )
+            )) {
+                val updated = PaymentHistoryEntry(
+                    id = entry.id,
+                    token = entry.token,
+                    amount = entry.amount,
+                    date = entry.date,
+                    rawUnit = entry.getUnit(),
+                    rawEntryUnit = entry.getEntryUnit(),
+                    enteredAmount = entry.enteredAmount,
+                    bitcoinPrice = entry.bitcoinPrice,
+                    mintUrl = entry.mintUrl,
+                    paymentRequest = entry.paymentRequest,
+                    rawStatus = PaymentHistoryEntry.STATUS_EXPIRED,
+                    paymentType = entry.paymentType,
+                    lightningInvoice = entry.lightningInvoice,
+                    lightningQuoteId = entry.lightningQuoteId,
+                    lightningMintUrl = entry.lightningMintUrl,
+                    formattedAmount = entry.formattedAmount,
+                    nostrNprofile = entry.nostrNprofile,
+                    nostrSecretHex = entry.nostrSecretHex,
+                    checkoutBasketJson = entry.checkoutBasketJson,
+                    basketId = entry.basketId,
+                    tipAmountSats = entry.tipAmountSats,
+                    tipPercentage = entry.tipPercentage,
+                    swapToLightningMintJson = entry.swapToLightningMintJson,
+                )
+                history[index] = updated
+                modified = true
+            }
         }
-        stale.forEach { markPaymentExpired(this, it.id) }
+
+        if (modified) {
+            val prefs = appContext.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+            prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
+        }
     }
 
     private fun getPaymentHistory(): List<PaymentHistoryEntry> = getPaymentHistory(this)
 
     companion object {
+        @Volatile
+        var ioDispatcher: kotlinx.coroutines.CoroutineDispatcher = Dispatchers.IO
+
         private const val PREFS_NAME = "PaymentHistory"
         private const val KEY_HISTORY = "history"
         private const val KEY_FILTER_STATE = "filter_state"
