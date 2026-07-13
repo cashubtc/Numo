@@ -548,50 +548,56 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     }
 
     private fun loadHistory() {
-        // Stale BTCPay pending entries (no resume data) will never be resolved by polling
-        // if the app was killed mid-flow — expire them now so they don't sit as "Pending" forever.
-        expireStaleBtcPayEntries()
+        lifecycleScope.launch {
+            val (filteredList, isEmpty) = withContext(ioDispatcher) {
+                // Stale BTCPay pending entries (no resume data) will never be resolved by polling
+                // if the app was killed mid-flow — expire them now so they don't sit as "Pending" forever.
+                expireStaleBtcPayEntries()
 
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_ALL) // Show all by default
-        val filterStart = prefs.getLong(KEY_FILTER_DATE_START, 0L)
-        val filterEnd = prefs.getLong(KEY_FILTER_DATE_END, 0L)
+                val prefs = this@PaymentsHistoryActivity.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                val filterState = prefs.getInt(KEY_FILTER_STATE, FILTER_ALL) // Show all by default
+                val filterStart = prefs.getLong(KEY_FILTER_DATE_START, 0L)
+                val filterEnd = prefs.getLong(KEY_FILTER_DATE_END, 0L)
 
-        val paymentHistory: List<HistoryEntry> = getPaymentHistory()
-        val withdrawHistory: List<HistoryEntry> = AutoWithdrawManager.getInstance(this)
-            .getHistory()
-            .filter { it.status != WithdrawHistoryEntry.STATUS_FAILED }
+                val paymentHistory: List<HistoryEntry> = getPaymentHistory(this@PaymentsHistoryActivity)
+                val withdrawHistory: List<HistoryEntry> = AutoWithdrawManager.getInstance(this@PaymentsHistoryActivity)
+                    .getHistory()
+                    .filter { it.status != WithdrawHistoryEntry.STATUS_FAILED }
 
-        // Merge and sort by date descending (newest first)
-        var filteredList = (paymentHistory + withdrawHistory)
-            .sortedByDescending { it.date.time }
+                // Merge and sort by date descending (newest first)
+                var list = (paymentHistory + withdrawHistory)
+                    .sortedByDescending { it.date.time }
 
-        // Apply Status Filter
-        if (filterState == FILTER_PAID) {
-            filteredList = filteredList.filterNot { it.isPending() }
-        } else if (filterState == FILTER_PENDING) {
-            filteredList = filteredList.filter { it.isPending() }
-        }
+                // Apply Status Filter
+                if (filterState == FILTER_PAID) {
+                    list = list.filterNot { it.isPending() }
+                } else if (filterState == FILTER_PENDING) {
+                    list = list.filter { it.isPending() }
+                }
 
-        // Apply Date Filter
-        if (filterStart > 0 && filterEnd > 0) {
-            // MaterialDatePicker returns UTC midnights. To include the full end day:
-            val endOfDay = filterEnd + 86400000L - 1L
-            filteredList = filteredList.filter { it.date.time in filterStart..endOfDay }
-        }
-        
-        currentHistoryList = filteredList
-        adapter.setEntries(currentHistoryList)
+                // Apply Date Filter
+                if (filterStart > 0 && filterEnd > 0) {
+                    // MaterialDatePicker returns UTC midnights. To include the full end day:
+                    val endOfDay = filterEnd + 86400000L - 1L
+                    list = list.filter { it.date.time in filterStart..endOfDay }
+                }
 
-        val isEmpty = currentHistoryList.isEmpty()
-        binding.emptyView.root.visibility = if (isEmpty) View.VISIBLE else View.GONE
-        if (isEmpty) {
-            EmptyStateHelper.bind(
-                binding.emptyView.root,
-                R.drawable.ic_receipt,
-                "No Payments Yet",
-                "Payment history will appear here once you start accepting payments"
-            )
+                list to list.isEmpty()
+            }
+
+            currentHistoryList = filteredList
+            adapter.setEntries(currentHistoryList)
+
+            val isEmptyList = isEmpty
+            binding.emptyView.root.visibility = if (isEmptyList) View.VISIBLE else View.GONE
+            if (isEmptyList) {
+                EmptyStateHelper.bind(
+                    binding.emptyView.root,
+                    R.drawable.ic_receipt,
+                    "No Payments Yet",
+                    "Payment history will appear here once you start accepting payments"
+                )
+            }
         }
     }
 
@@ -647,6 +653,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
     private fun getPaymentHistory(): List<PaymentHistoryEntry> = getPaymentHistory(this)
 
     companion object {
+        @Volatile
+        var ioDispatcher: kotlinx.coroutines.CoroutineDispatcher = Dispatchers.IO
+
         private const val PREFS_NAME = "PaymentHistory"
         private const val KEY_HISTORY = "history"
         private const val KEY_FILTER_STATE = "filter_state"

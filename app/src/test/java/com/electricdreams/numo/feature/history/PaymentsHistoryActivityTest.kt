@@ -27,6 +27,8 @@ class PaymentsHistoryActivityTest {
         // Clear history before each test
         val prefs = context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE)
         prefs.edit().clear().apply()
+        // Force synchronous coroutines for testing
+        PaymentsHistoryActivity.ioDispatcher = kotlinx.coroutines.Dispatchers.Unconfined
     }
 
     @Test
