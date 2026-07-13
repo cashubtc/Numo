@@ -8,4 +8,6 @@
     <string name="restore_success_balance_change_line">%1$d → %2$d sats</string>
     <string name="restore_device_backup_found_title">암호화된 기기 백업을 찾았습니다</string>
     <string name="restore_device_backup_found_subtitle">이 기기 백업에서 mint %1$d개를 복구했습니다.</string>
+    <string name="restore_device_backup_card_title">암호화된 백업 복원</string>
+    <string name="restore_device_backup_card_subtitle">복구 비밀번호로 보호된 백업을 사용합니다.</string>
 </resources>

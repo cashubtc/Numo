@@ -74,7 +74,7 @@ class RestoreWalletActivity : AppCompatActivity() {
     private lateinit var seedInputGrid: GridLayout
     private lateinit var pasteButton: MaterialButton
     private lateinit var continueButton: MaterialButton
-    private lateinit var restoreDeviceBackupButton: MaterialButton
+    private lateinit var restoreDeviceBackupButton: View
     private lateinit var validationStatus: LinearLayout
     private lateinit var validationIcon: ImageView
     private lateinit var validationText: TextView
