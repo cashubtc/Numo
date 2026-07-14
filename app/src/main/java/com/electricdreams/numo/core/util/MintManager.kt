@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.backup.DeviceRecoveryBackup
 import com.electricdreams.numo.nostr.NostrMintBackup
 import org.json.JSONObject
 import java.net.URI
@@ -591,6 +592,8 @@ class MintManager private constructor(context: Context) {
 
         val mints = getAllowedMints()
         Log.d(TAG, "Triggering Nostr mint backup for ${mints.size} mints")
+
+        DeviceRecoveryBackup.updateIfEnabled(context)
 
         NostrMintBackup.publishMintBackup(mnemonic, mints) { result ->
             if (result.success) {

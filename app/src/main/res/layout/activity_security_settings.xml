@@ -90,6 +90,15 @@
                 app:rowSubtitle="@string/security_settings_backup_mnemonic_subtitle"
                 app:rowShowChevron="true" />
 
+            <com.electricdreams.numo.ui.components.SettingsRowView
+                android:id="@+id/device_backup_item"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:rowIcon="@drawable/ic_cloud_done"
+                app:rowTitle="@string/security_settings_device_backup_title"
+                app:rowSubtitle="@string/security_settings_device_backup_subtitle"
+                app:rowShowChevron="true" />
+
             <!-- ===================== -->
             <!-- PIN PROTECTION SECTION -->
             <!-- ===================== -->

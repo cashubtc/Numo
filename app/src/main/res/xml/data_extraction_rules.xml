@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <data-extraction-rules>
-    <cloud-backup>
-        <exclude domain="root" />
-        <exclude domain="file" />
-        <exclude domain="database" />
-        <exclude domain="sharedpref" />
+    <cloud-backup disableIfNoEncryptionCapabilities="true">
+        <!-- Do not transfer any preference, database, or unencrypted wallet data. -->
+        <include domain="file" path="numo_recovery_backup.json" />
     </cloud-backup>
     <device-transfer>
-        <exclude domain="root" />
-        <exclude domain="file" />
-        <exclude domain="database" />
-        <exclude domain="sharedpref" />
+        <!-- Device transfer deliberately excludes wallet recovery data. -->
+        <exclude domain="root" path="." />
+        <exclude domain="file" path="." />
+        <exclude domain="database" path="." />
+        <exclude domain="sharedpref" path="." />
     </device-transfer>
 </data-extraction-rules>
