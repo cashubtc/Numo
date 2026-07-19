@@ -11,7 +11,6 @@
     <string name="settings_item_language_subtitle">Elige el idioma de la aplicación</string>
     <string name="settings_item_currency_title">Moneda fiduciaria</string>
     <string name="settings_item_currency_subtitle">Elige tu moneda fiduciaria predeterminada</string>
-    <string name="currency_settings_section_preferred_currency">MONEDA PREFERIDA</string>
     <string name="currency_settings_option_usd">Dólar estadounidense (USD)</string>
     <string name="currency_settings_option_eur">Euro (EUR)</string>
     <string name="currency_settings_option_gbp">Libra esterlina (GBP)</string>

@@ -68,7 +68,6 @@ Nostrバックアップを有効にすると、暗号化されたウォレット
     <string name="settings_about_toast_developer_taps_remaining">開発者モードを有効にするには、あと%1$d回タップしてください</string>
     <string name="about_terms_of_service">利用規約</string>
     <string name="settings_theme_title">テーマ</string>
-    <string name="currency_settings_section_preferred_currency">優先通貨</string>
     <string name="settings_item_tips_title">チップ</string>
     <string name="settings_currency_title">法定通貨</string>
     <string name="terms_of_service_full">NUMO WALLET - 利用規約

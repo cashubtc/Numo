@@ -68,7 +68,6 @@ Nostr 백업을 활성화하면 암호화된 지갑 데이터가 Nostr 릴레이
     <string name="settings_about_toast_developer_taps_remaining">개발자 모드를 활성화하려면 %1$d번 더 탭하세요</string>
     <string name="about_terms_of_service">서비스 약관</string>
     <string name="settings_theme_title">테마</string>
-    <string name="currency_settings_section_preferred_currency">기본 통화</string>
     <string name="settings_item_tips_title">팁</string>
     <string name="settings_currency_title">법정 화폐</string>
     <string name="terms_of_service_full">NUMO WALLET - 서비스 약관

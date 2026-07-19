@@ -1,11 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="56dp"
     android:background="?attr/selectableItemBackground"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:paddingHorizontal="24dp">
+
+    <FrameLayout
+        android:layout_width="@dimen/row_icon_size"
+        android:layout_height="@dimen/row_icon_size"
+        android:layout_marginEnd="@dimen/row_icon_gap">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/currency_flag_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_circle"
+            android:importantForAccessibility="no"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Circle"
+            app:strokeColor="@color/color_divider"
+            app:strokeWidth="1dp" />
+
+        <TextView
+            android:id="@+id/currency_flag_fallback"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_circle"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:maxLines="1"
+            android:textColor="@color/color_text_secondary"
+            android:textSize="11sp"
+            android:visibility="gone" />
+    </FrameLayout>
 
     <TextView
         android:id="@+id/currency_name_text"

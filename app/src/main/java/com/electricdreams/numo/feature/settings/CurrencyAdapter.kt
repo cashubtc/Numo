@@ -8,6 +8,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
+import com.electricdreams.numo.core.util.CurrencyFlags
+import com.google.android.material.imageview.ShapeableImageView
 import java.util.Currency
 import java.util.Locale
 
@@ -48,13 +50,27 @@ class CurrencyAdapter(
     override fun getItemCount(): Int = currencies.size
 
     inner class CurrencyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val flagImage: ShapeableImageView = itemView.findViewById(R.id.currency_flag_image)
+        private val flagFallback: TextView = itemView.findViewById(R.id.currency_flag_fallback)
         private val nameText: TextView = itemView.findViewById(R.id.currency_name_text)
         private val checkIcon: ImageView = itemView.findViewById(R.id.currency_check_icon)
 
         fun bind(currency: CurrencyWrapper) {
             val displayName = currency.displayName
             nameText.text = "${displayName} (${currency.code})"
-            
+
+            val flagRes = CurrencyFlags.flagResId(itemView.context, currency.code)
+            if (flagRes != 0) {
+                flagImage.setImageResource(flagRes)
+                flagImage.visibility = View.VISIBLE
+                flagFallback.visibility = View.GONE
+            } else {
+                flagImage.setImageDrawable(null)
+                flagImage.visibility = View.GONE
+                flagFallback.text = currency.code
+                flagFallback.visibility = View.VISIBLE
+            }
+
             val isSelected = currency.code == selectedCurrencyCode
             checkIcon.visibility = if (isSelected) View.VISIBLE else View.INVISIBLE
             checkIcon.setImageResource(R.drawable.ic_check)
