@@ -1,4 +1,43 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="withdraw_toast_insufficient_balance">Saldo insuficiente</string>
+
+    <string name="withdraw_hub_section_automation">AUTOMAÇÃO</string>
+    <string name="withdraw_hub_auto_summary">Para %1$s quando o saldo exceder %2$s</string>
+    <string name="withdraw_hub_auto_off_summary">Envia fundos automaticamente quando o teu saldo exceder um limite</string>
+    <string name="withdraw_hub_auto_needs_setup_summary">Adiciona um endereço Lightning para ativar o levantamento automático</string>
+    <string name="withdraw_hub_status_off">Desativado</string>
+    <string name="withdraw_hub_status_needs_setup">Por configurar</string>
+    <string name="withdraw_history_empty_title">Ainda não há levantamentos</string>
+    <string name="withdraw_history_empty_subtitle">Os levantamentos que fizeres — manuais ou automáticos — vão aparecer aqui.</string>
+
+    <string name="withdraw_destination_hint">Fatura ou endereço Lightning</string>
+    <string name="withdraw_destination_paste">Colar</string>
+    <string name="withdraw_destination_invalid">Introduz uma fatura ou endereço Lightning válido</string>
+    <string name="withdraw_destination_clipboard_invalid">A área de transferência não contém uma fatura ou endereço válido</string>
+    <string name="withdraw_destination_detected_invoice">Fatura Lightning detetada</string>
+    <string name="withdraw_destination_detected_address">Endereço Lightning detetado</string>
+
+    <string name="withdraw_amount_title">Montante a levantar</string>
+    <string name="withdraw_amount_to">Para %1$s</string>
+    <string name="withdraw_amount_max_chip">MÁX %1$s</string>
+    <string name="withdraw_amount_limits">Mín %1$s • Máx %2$s</string>
+
+    <string name="withdraw_failure_title">Levantamento falhou</string>
+    <string name="withdraw_failure_message_generic">Não foi possível concluir o pagamento. Os teus fundos não saíram da tua carteira.</string>
+    <string name="withdraw_pending_title">Pagamento pendente</string>
+    <string name="withdraw_pending_message">O pagamento Lightning está a demorar mais do que o esperado. Verifica a atividade recente mais tarde — não tentes novamente ou poderás pagar duas vezes.</string>
+
+    <string name="withdraw_error_lnurl_incompatible">Este fornecedor de endereços Lightning não é compatível com a verificação rigorosa de faturas da carteira. Tenta colar uma fatura Lightning em alternativa.</string>
+    <string name="withdraw_error_lnurl_wrong_amount">O fornecedor do endereço Lightning devolveu uma fatura com um montante diferente. Tenta novamente.</string>
+    <string name="withdraw_error_insufficient_short">Saldo insuficiente para cobrir este montante mais as taxas.</string>
+    <string name="withdraw_error_expired">Esta fatura expirou. Pede uma nova e tenta novamente.</string>
+    <string name="withdraw_error_already_paid">Esta fatura já foi paga.</string>
+    <string name="withdraw_error_network">Não foi possível ligar à rede. Verifica a tua ligação e tenta novamente.</string>
+    <string name="withdraw_error_generic">Algo correu mal. Tenta novamente.</string>
+    <string name="withdraw_error_generic_detail">Algo correu mal: %1$s</string>
+
+    <string name="withdraw_cashu_token_created">Token criado</string>
+
+    <string name="auto_withdraw_enable_requires_address">Adiciona primeiro um endereço Lightning válido</string>
 </resources>

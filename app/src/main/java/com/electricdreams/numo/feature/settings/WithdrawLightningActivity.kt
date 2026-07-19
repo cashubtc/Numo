@@ -32,9 +32,9 @@ import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.LightningAddressManager
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
-import com.electricdreams.numo.ui.components.WithdrawAddressCard
-import com.electricdreams.numo.ui.components.WithdrawInvoiceCard
+import com.electricdreams.numo.feature.withdraw.WithdrawInputParser
 import com.electricdreams.numo.ui.util.QrCodeGenerator
+import com.electricdreams.numo.ui.util.shake
 import com.google.android.material.card.MaterialCardView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -49,21 +49,19 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 /**
- * Premium Apple-like activity for withdrawing balance from a mint via Lightning.
- * 
- * Features:
- * - Beautiful card-based design
- * - Separate cards for Invoice and Lightning Address
- * - Smooth entrance animations
- * - Elegant loading states
- * - Professional UX suitable for checkout operators
- * - Shared lightning address with auto-withdraw feature
+ * Activity for withdrawing balance from a mint via Lightning or a Cashu token.
+ *
+ * The Lightning tab uses one smart destination input that auto-detects a BOLT11
+ * invoice vs a lightning address (with paste and scan aids). Invoices carry
+ * their own amount and go straight to the melt-quote confirmation; addresses
+ * continue to a keypad amount screen first. The lightning address is shared
+ * with the auto-withdraw feature.
  */
 class WithdrawLightningActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "WithdrawLightning"
-        private const val FEE_BUFFER_PERCENT = 0.02 // 2% buffer for fees
+        private const val FEE_BUFFER_PERCENT = com.electricdreams.numo.feature.withdraw.WithdrawConstants.FEE_BUFFER_PERCENT
     }
 
     private lateinit var mintUrl: String
@@ -77,9 +75,15 @@ class WithdrawLightningActivity : AppCompatActivity() {
     private lateinit var mintNameText: TextView
     private lateinit var balanceText: TextView
     private lateinit var fiatBalanceText: TextView
-    private lateinit var invoiceCard: WithdrawInvoiceCard
-    private lateinit var addressCard: WithdrawAddressCard
+    private lateinit var destinationInput: EditText
+    private lateinit var destinationStatus: TextView
+    private lateinit var suggestionChip: TextView
+    private lateinit var pasteButton: Button
+    private lateinit var scanButton: Button
+    private lateinit var destinationContinueButton: Button
     private lateinit var loadingOverlay: FrameLayout
+
+    private var parsedDestination: WithdrawInputParser.Result = WithdrawInputParser.Result.Invalid
 
     // Tabs
     private lateinit var tabsContainer: View
@@ -101,12 +105,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
         if (result.resultCode == RESULT_OK) {
             val qrValue = result.data?.getStringExtra(QRScannerActivity.EXTRA_QR_VALUE)
             if (!qrValue.isNullOrBlank()) {
-                val cleanedInvoice = if (qrValue.startsWith("lightning:", ignoreCase = true)) {
-                    qrValue.substring(10)
-                } else {
-                    qrValue
-                }
-                invoiceCard.setInvoice(cleanedInvoice)
+                setDestinationFromExternal(qrValue, R.string.withdraw_destination_invalid)
             }
         }
     }
@@ -154,8 +153,12 @@ class WithdrawLightningActivity : AppCompatActivity() {
         mintNameText = findViewById(R.id.mint_name_text)
         balanceText = findViewById(R.id.balance_text)
         fiatBalanceText = findViewById(R.id.fiat_balance_text)
-        invoiceCard = findViewById(R.id.invoice_card)
-        addressCard = findViewById(R.id.address_card)
+        destinationInput = findViewById(R.id.destination_input)
+        destinationStatus = findViewById(R.id.destination_status)
+        suggestionChip = findViewById(R.id.suggestion_chip)
+        pasteButton = findViewById(R.id.paste_button)
+        scanButton = findViewById(R.id.scan_button)
+        destinationContinueButton = findViewById(R.id.destination_continue_button)
         loadingOverlay = findViewById(R.id.loading_overlay)
 
         // Initialize new views
@@ -176,28 +179,33 @@ class WithdrawLightningActivity : AppCompatActivity() {
     private fun setupListeners() {
         topBar.onNavClick { finish() }
 
-        // Invoice card continue listener
-        invoiceCard.setOnContinueListener(object : WithdrawInvoiceCard.OnContinueListener {
-            override fun onContinue(invoice: String) {
-                processInvoice(invoice)
-            }
-        })
-        
-        // Invoice card scan listener
-        invoiceCard.setOnScanListener(object : WithdrawInvoiceCard.OnScanListener {
-            override fun onScanClicked() {
-                val intent = Intent(this@WithdrawLightningActivity, QRScannerActivity::class.java)
-                intent.putExtra(QRScannerActivity.EXTRA_TITLE, getString(R.string.withdraw_scan_qr))
-                scanLauncher.launch(intent)
+        // Smart destination input: parse on every change
+        destinationInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                onDestinationChanged(s?.toString() ?: "")
             }
         })
 
-        // Address card continue listener
-        addressCard.setOnContinueListener(object : WithdrawAddressCard.OnContinueListener {
-            override fun onContinue(address: String, amountSats: Long) {
-                processLightningAddress(address, amountSats)
+        pasteButton.setOnClickListener { pasteDestinationFromClipboard() }
+
+        scanButton.setOnClickListener {
+            val intent = Intent(this@WithdrawLightningActivity, QRScannerActivity::class.java)
+            intent.putExtra(QRScannerActivity.EXTRA_TITLE, getString(R.string.withdraw_scan_qr))
+            scanLauncher.launch(intent)
+        }
+
+        destinationContinueButton.setOnClickListener {
+            when (val destination = parsedDestination) {
+                is WithdrawInputParser.Result.Bolt11 -> processInvoice(destination.invoice)
+                is WithdrawInputParser.Result.LightningAddress -> openAmountScreen(destination.address)
+                WithdrawInputParser.Result.Invalid -> {
+                    destinationInput.shake()
+                    showDestinationError(getString(R.string.withdraw_destination_invalid))
+                }
             }
-        })
+        }
 
         // Tab Listeners
         tabLightning.setOnClickListener {
@@ -351,7 +359,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
                     cashuAmountInput.isEnabled = false
                     createTokenButton.isEnabled = false
                     createTokenButton.alpha = 0.5f
-                    createTokenButton.text = "Token Created"
+                    createTokenButton.text = getString(R.string.withdraw_cashu_token_created)
                     
                     setLoading(false)
                     refreshBalance()
@@ -363,7 +371,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
                     setLoading(false)
                     Toast.makeText(
                         this@WithdrawLightningActivity,
-                        getString(R.string.withdraw_lightning_error_generic, e.message ?: ""),
+                        com.electricdreams.numo.feature.withdraw.WithdrawErrorMapper.resolve(this@WithdrawLightningActivity, e.message),
                         Toast.LENGTH_LONG
                     ).show()
                 }
@@ -392,27 +400,82 @@ class WithdrawLightningActivity : AppCompatActivity() {
     }
 
     private fun prefillFields() {
-        // Pre-fill lightning address from shared LightningAddressManager
-        // This is the same address used by auto-withdraw
+        // Offer the shared auto-withdraw lightning address as a one-tap
+        // suggestion, but don't prefill — the user may want to paste an invoice.
         val savedAddress = lightningAddressManager.getLightningAddress()
         if (savedAddress.isNotEmpty()) {
-            addressCard.setAddress(savedAddress)
+            suggestionChip.text = savedAddress
+            suggestionChip.visibility = View.VISIBLE
+            suggestionChip.setOnClickListener {
+                destinationInput.setText(savedAddress)
+                destinationInput.setSelection(destinationInput.text?.length ?: 0)
+            }
         }
+    }
 
-        // Pre-fill amount with balance - 2% fee buffer
-        val suggestedAmount = (balance * (1 - FEE_BUFFER_PERCENT)).toLong()
-        if (suggestedAmount > 0) {
-            addressCard.setSuggestedAmount(suggestedAmount)
+    private fun parseDestination(raw: String): WithdrawInputParser.Result {
+        return WithdrawInputParser.parse(raw) { lightningAddressManager.isValidLightningAddress(it) }
+    }
+
+    private fun onDestinationChanged(text: String) {
+        parsedDestination = parseDestination(text)
+        when (parsedDestination) {
+            is WithdrawInputParser.Result.Bolt11 -> {
+                showDestinationStatus(getString(R.string.withdraw_destination_detected_invoice))
+                destinationContinueButton.isEnabled = true
+            }
+            is WithdrawInputParser.Result.LightningAddress -> {
+                showDestinationStatus(getString(R.string.withdraw_destination_detected_address))
+                destinationContinueButton.isEnabled = true
+            }
+            WithdrawInputParser.Result.Invalid -> {
+                if (text.isBlank()) {
+                    destinationStatus.text = ""
+                } else {
+                    destinationStatus.setTextColor(getColor(R.color.color_text_tertiary))
+                    destinationStatus.text = getString(R.string.withdraw_destination_invalid)
+                }
+                destinationContinueButton.isEnabled = false
+            }
+        }
+    }
+
+    private fun showDestinationStatus(message: String) {
+        destinationStatus.setTextColor(getColor(R.color.color_success_green))
+        destinationStatus.text = message
+    }
+
+    private fun showDestinationError(message: String) {
+        destinationStatus.setTextColor(getColor(R.color.color_error))
+        destinationStatus.text = message
+    }
+
+    private fun pasteDestinationFromClipboard() {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipText = clipboard.primaryClip?.getItemAt(0)?.coerceToText(this)?.toString()
+        if (clipText.isNullOrBlank()) {
+            destinationInput.shake()
+            showDestinationError(getString(R.string.withdraw_destination_clipboard_invalid))
+            return
+        }
+        setDestinationFromExternal(clipText, R.string.withdraw_destination_clipboard_invalid)
+    }
+
+    /** Fill the input from scan/paste, rejecting content that parses to nothing. */
+    private fun setDestinationFromExternal(raw: String, errorRes: Int) {
+        when (val result = parseDestination(raw)) {
+            is WithdrawInputParser.Result.Bolt11 -> destinationInput.setText(result.invoice)
+            is WithdrawInputParser.Result.LightningAddress -> destinationInput.setText(result.address)
+            WithdrawInputParser.Result.Invalid -> {
+                destinationInput.shake()
+                showDestinationError(getString(errorRes))
+            }
         }
     }
 
     private fun processInvoice(invoice: String) {
         if (invoice.isBlank()) {
-            Toast.makeText(
-                this,
-                getString(R.string.withdraw_lightning_error_enter_invoice),
-                Toast.LENGTH_SHORT
-            ).show()
+            showDestinationError(getString(R.string.withdraw_lightning_error_enter_invoice))
             return
         }
 
@@ -424,8 +487,8 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 if (wallet == null) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
-                            this@WithdrawLightningActivity, 
-                            "Wallet not initialized", 
+                            this@WithdrawLightningActivity,
+                            getString(R.string.withdraw_lightning_error_wallet_not_initialized),
                             Toast.LENGTH_SHORT
                         ).show()
                         setLoading(false)
@@ -451,11 +514,10 @@ class WithdrawLightningActivity : AppCompatActivity() {
                     val totalRequired = meltQuote.amount.value.toLong() + meltQuote.feeReserve.value.toLong()
                     if (totalRequired > balance) {
                         val maxAmount = (balance * (1 - FEE_BUFFER_PERCENT)).toLong()
-                        Toast.makeText(
-                            this@WithdrawLightningActivity,
-                            "Insufficient balance. Amount + fees ($totalRequired sats) exceeds your balance ($balance sats). Try an amount under $maxAmount sats.",
-                            Toast.LENGTH_LONG
-                        ).show()
+                        destinationInput.shake()
+                        showDestinationError(
+                            getString(R.string.withdraw_lightning_error_insufficient_balance, totalRequired, balance, maxAmount)
+                        )
                         return@withContext
                     }
 
@@ -466,97 +528,20 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 Log.e(TAG, "Error getting melt quote for invoice", e)
                 withContext(Dispatchers.Main) {
                     setLoading(false)
-                    Toast.makeText(
-                        this@WithdrawLightningActivity,
-                        getString(R.string.withdraw_lightning_error_generic, e.message ?: ""),
-                        Toast.LENGTH_LONG
-                    ).show()
+                    showDestinationError(
+                        com.electricdreams.numo.feature.withdraw.WithdrawErrorMapper.resolve(this@WithdrawLightningActivity, e.message)
+                    )
                 }
             }
         }
     }
 
-    private fun processLightningAddress(address: String, amountSats: Long) {
-        if (address.isBlank()) {
-            Toast.makeText(
-                this,
-                getString(R.string.withdraw_lightning_error_enter_address),
-                Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
-
-        if (amountSats <= 0) {
-            Toast.makeText(
-                this,
-                getString(R.string.withdraw_lightning_error_enter_valid_amount),
-                Toast.LENGTH_SHORT
-            ).show()
-            return
-        }
-
-        setLoading(true)
-
-        lifecycleScope.launch {
-            try {
-                val wallet = CashuWalletManager.getWallet()
-                if (wallet == null) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(
-                            this@WithdrawLightningActivity, 
-                            "Wallet not initialized", 
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        setLoading(false)
-                    }
-                    return@launch
-                }
-
-                // Get melt quote for Lightning address
-                val amountMsat = amountSats * 1000
-                val unit = com.electricdreams.numo.core.util.MintManager.getInstance(this@WithdrawLightningActivity).getPreferredUnit()
-                val mintWallet = wallet.getWallet(MintUrl(mintUrl), com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unit))
-                    ?: throw Exception("Failed to get wallet for mint: $mintUrl")
-                val meltQuote = withContext(Dispatchers.IO) {
-                    mintWallet.meltLightningAddressQuote(address, org.cashudevkit.Amount(amountMsat.toULong()))
-                }
-                WalletLogger.log("OUT", meltQuote.amount.value.toLong(), mintUrl, "Lightning address melt quote requested")
-                
-                withContext(Dispatchers.Main) {
-
-                    setLoading(false)
-                    
-                    // Check if we have enough balance (including fee reserve)
-                    val totalRequired = meltQuote.amount.value.toLong() + meltQuote.feeReserve.value.toLong()
-                    if (totalRequired > balance) {
-                        val maxAmount = (balance * (1 - FEE_BUFFER_PERCENT)).toLong()
-                        Toast.makeText(
-                            this@WithdrawLightningActivity,
-                            "Insufficient balance. Amount + fees ($totalRequired sats) exceeds your balance ($balance sats). Try an amount under $maxAmount sats.",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        return@withContext
-                    }
-
-                    // Save the lightning address to shared manager
-                    // This persists it for both manual and auto withdrawals
-                    lightningAddressManager.setLightningAddress(address)
-
-                    // Launch melt quote activity
-                    launchMeltQuoteActivity(meltQuote, null, address)
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error getting melt quote for Lightning address", e)
-                withContext(Dispatchers.Main) {
-                    setLoading(false)
-                    Toast.makeText(
-                        this@WithdrawLightningActivity,
-                        getString(R.string.withdraw_lightning_error_generic, e.message ?: ""),
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
-        }
+    private fun openAmountScreen(address: String) {
+        val intent = Intent(this, com.electricdreams.numo.feature.withdraw.WithdrawAmountActivity::class.java)
+        intent.putExtra(com.electricdreams.numo.feature.withdraw.WithdrawAmountActivity.EXTRA_MINT_URL, mintUrl)
+        intent.putExtra(com.electricdreams.numo.feature.withdraw.WithdrawAmountActivity.EXTRA_BALANCE, balance)
+        intent.putExtra(com.electricdreams.numo.feature.withdraw.WithdrawAmountActivity.EXTRA_LIGHTNING_ADDRESS, address)
+        startActivity(intent)
     }
 
     private fun launchMeltQuoteActivity(
@@ -587,9 +572,13 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 .start()
         }
         
-        // Disable cards during loading
-        invoiceCard.setCardEnabled(!loading)
-        addressCard.setCardEnabled(!loading)
+        // Disable destination controls during loading
+        destinationInput.isEnabled = !loading
+        pasteButton.isEnabled = !loading
+        scanButton.isEnabled = !loading
+        suggestionChip.isEnabled = !loading
+        destinationContinueButton.isEnabled =
+            !loading && parsedDestination != WithdrawInputParser.Result.Invalid
     }
 
     override fun onStart() {
@@ -625,13 +614,6 @@ class WithdrawLightningActivity : AppCompatActivity() {
                         val balanceAmount = Amount(balance, Amount.Currency.BTC)
                         balanceText.text = balanceAmount.toString()
                         updateFiatDisplay(balance)
-
-                        // Update suggested amount in address card
-                        val suggestedAmount = (balance * (1 - FEE_BUFFER_PERCENT)).toLong()
-                        if (suggestedAmount > 0) {
-                            addressCard.setSuggestedAmount(suggestedAmount)
-                        }
-                        
                         Log.d(TAG, "Balance updated to: $balance sats")
                     }
                 }

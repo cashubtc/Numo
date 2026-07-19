@@ -85,6 +85,35 @@ class WithdrawLightningActivityTest {
     }
 
     @Test
+    fun `smart destination input gates continue button`() {
+        val intent = Intent(ApplicationProvider.getApplicationContext(), WithdrawLightningActivity::class.java).apply {
+            putExtra("mint_url", mintUrl)
+            putExtra("balance", balance)
+        }
+
+        ActivityScenario.launch<WithdrawLightningActivity>(intent).use { scenario ->
+            scenario.onActivity { activity ->
+                val input = activity.findViewById<EditText>(R.id.destination_input)
+                val continueButton = activity.findViewById<Button>(R.id.destination_continue_button)
+
+                assertTrue("Continue should start disabled", !continueButton.isEnabled)
+
+                input.setText("user@getalby.com")
+                assertTrue("Valid lightning address should enable continue", continueButton.isEnabled)
+
+                input.setText("lightning:lnbc1pj4xyz")
+                assertTrue("BOLT11 invoice (with URI prefix) should enable continue", continueButton.isEnabled)
+
+                input.setText("not a destination")
+                assertTrue("Garbage input should disable continue", !continueButton.isEnabled)
+
+                input.setText("")
+                assertTrue("Empty input should disable continue", !continueButton.isEnabled)
+            }
+        }
+    }
+
+    @Test
     fun `create token button is disabled initially`() {
         val intent = Intent(ApplicationProvider.getApplicationContext(), WithdrawLightningActivity::class.java).apply {
             putExtra("mint_url", mintUrl)

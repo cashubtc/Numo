@@ -1,4 +1,43 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="withdraw_toast_insufficient_balance">残高不足</string>
+
+    <string name="withdraw_hub_section_automation">自動化</string>
+    <string name="withdraw_hub_auto_summary">残高が%2$sを超えたら%1$sへ送金</string>
+    <string name="withdraw_hub_auto_off_summary">残高がしきい値を超えたときに自動的に送金します</string>
+    <string name="withdraw_hub_auto_needs_setup_summary">自動出金を有効にするにはライトニングアドレスを追加してください</string>
+    <string name="withdraw_hub_status_off">オフ</string>
+    <string name="withdraw_hub_status_needs_setup">要設定</string>
+    <string name="withdraw_history_empty_title">出金履歴はまだありません</string>
+    <string name="withdraw_history_empty_subtitle">手動・自動を問わず、出金はここに表示されます。</string>
+
+    <string name="withdraw_destination_hint">インボイスまたはライトニングアドレス</string>
+    <string name="withdraw_destination_paste">貼り付け</string>
+    <string name="withdraw_destination_invalid">有効なライトニングインボイスまたはアドレスを入力してください</string>
+    <string name="withdraw_destination_clipboard_invalid">クリップボードに有効なインボイスまたはアドレスがありません</string>
+    <string name="withdraw_destination_detected_invoice">ライトニングインボイスを検出しました</string>
+    <string name="withdraw_destination_detected_address">ライトニングアドレスを検出しました</string>
+
+    <string name="withdraw_amount_title">出金額</string>
+    <string name="withdraw_amount_to">%1$s宛て</string>
+    <string name="withdraw_amount_max_chip">最大 %1$s</string>
+    <string name="withdraw_amount_limits">最小 %1$s • 最大 %2$s</string>
+
+    <string name="withdraw_failure_title">出金に失敗しました</string>
+    <string name="withdraw_failure_message_generic">支払いを完了できませんでした。資金はウォレットから移動していません。</string>
+    <string name="withdraw_pending_title">支払い保留中</string>
+    <string name="withdraw_pending_message">ライトニング支払いに時間がかかっています。後で履歴を確認してください。再試行すると二重払いになる可能性があります。</string>
+
+    <string name="withdraw_error_lnurl_incompatible">このライトニングアドレスのプロバイダーは、ウォレットの厳格なインボイス検証に対応していません。代わりにライトニングインボイスを貼り付けてみてください。</string>
+    <string name="withdraw_error_lnurl_wrong_amount">ライトニングアドレスのプロバイダーが異なる金額のインボイスを返しました。もう一度お試しください。</string>
+    <string name="withdraw_error_insufficient_short">この金額と手数料をまかなう残高がありません。</string>
+    <string name="withdraw_error_expired">このインボイスは期限切れです。新しいものを取得して再試行してください。</string>
+    <string name="withdraw_error_already_paid">このインボイスはすでに支払われています。</string>
+    <string name="withdraw_error_network">ネットワークに接続できませんでした。接続を確認して再試行してください。</string>
+    <string name="withdraw_error_generic">問題が発生しました。もう一度お試しください。</string>
+    <string name="withdraw_error_generic_detail">問題が発生しました：%1$s</string>
+
+    <string name="withdraw_cashu_token_created">トークン作成済み</string>
+
+    <string name="auto_withdraw_enable_requires_address">先に有効なライトニングアドレスを追加してください</string>
 </resources>

@@ -1,4 +1,50 @@
 <resources>
     <!-- Withdraw: toast messages -->
     <string name="withdraw_toast_insufficient_balance">Insufficient balance</string>
+
+    <!-- Withdraw hub -->
+    <string name="withdraw_hub_section_automation">AUTOMATION</string>
+    <string name="withdraw_hub_auto_summary">To %1$s when balance exceeds %2$s</string>
+    <string name="withdraw_hub_auto_off_summary">Automatically send funds when your balance exceeds a threshold</string>
+    <string name="withdraw_hub_auto_needs_setup_summary">Add a Lightning address to activate auto-withdraw</string>
+    <string name="withdraw_hub_status_off">Off</string>
+    <string name="withdraw_hub_status_needs_setup">Needs setup</string>
+    <string name="withdraw_history_empty_title">No withdrawals yet</string>
+    <string name="withdraw_history_empty_subtitle">Withdrawals you make — manual or automatic — will show up here.</string>
+
+    <!-- Smart destination input -->
+    <string name="withdraw_destination_hint">Invoice or Lightning address</string>
+    <string name="withdraw_destination_paste">Paste</string>
+    <string name="withdraw_destination_invalid">Enter a valid Lightning invoice or address</string>
+    <string name="withdraw_destination_clipboard_invalid">Clipboard doesn\'t contain a valid invoice or address</string>
+    <string name="withdraw_destination_detected_invoice">Lightning invoice detected</string>
+    <string name="withdraw_destination_detected_address">Lightning address detected</string>
+
+    <!-- Amount keypad screen -->
+    <string name="withdraw_amount_title">Withdraw amount</string>
+    <string name="withdraw_amount_to">To %1$s</string>
+    <string name="withdraw_amount_max_chip">MAX %1$s</string>
+    <string name="withdraw_amount_limits">Min %1$s • Max %2$s</string>
+
+    <!-- Failure / pending outcome screen -->
+    <string name="withdraw_failure_title">Withdrawal failed</string>
+    <string name="withdraw_failure_message_generic">The payment could not be completed. Your funds have not left your wallet.</string>
+    <string name="withdraw_pending_title">Payment pending</string>
+    <string name="withdraw_pending_message">The Lightning payment is taking longer than expected. Check Recent Activity later — don\'t retry, or you might pay twice.</string>
+
+    <!-- Mapped error messages -->
+    <string name="withdraw_error_lnurl_incompatible">This Lightning address provider isn\'t compatible with the wallet\'s strict invoice check. Try pasting a Lightning invoice instead.</string>
+    <string name="withdraw_error_lnurl_wrong_amount">The Lightning address provider returned an invoice for a different amount. Please try again.</string>
+    <string name="withdraw_error_insufficient_short">Not enough balance to cover this amount plus fees.</string>
+    <string name="withdraw_error_expired">This invoice has expired. Request a new one and try again.</string>
+    <string name="withdraw_error_already_paid">This invoice has already been paid.</string>
+    <string name="withdraw_error_network">Couldn\'t reach the network. Check your connection and try again.</string>
+    <string name="withdraw_error_generic">Something went wrong. Please try again.</string>
+    <string name="withdraw_error_generic_detail">Something went wrong: %1$s</string>
+
+    <!-- Cashu token -->
+    <string name="withdraw_cashu_token_created">Token Created</string>
+
+    <!-- Auto-withdraw settings -->
+    <string name="auto_withdraw_enable_requires_address">Add a valid Lightning address first</string>
 </resources>

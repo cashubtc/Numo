@@ -315,15 +315,7 @@
     <string name="withdraw_lightning_title">撤回する</string>
     <string name="withdraw_lightning_balance_label">利用可能残高</string>
     <string name="withdraw_lightning_mint_name_label">造幣局の名前</string>
-    <string name="withdraw_lightning_section_withdraw_to">に撤退する</string>
-    <string name="withdraw_lightning_option_invoice">⚡ ライトニング請求書</string>
-    <string name="withdraw_lightning_invoice_hint_label">Lightning 請求書を入力します (BOLT11)</string>
-    <string name="withdraw_lightning_invoice_hint_value">lnbc...</string>
-    <string name="withdraw_lightning_option_address">📧 ライトニングアドレス</string>
-    <string name="withdraw_lightning_address_hint_label">Lightning アドレスを入力してください</string>
-    <string name="withdraw_lightning_address_hint_value">user@domain.com</string>
     <string name="withdraw_lightning_amount_label">金額（飽和）</string>
-    <string name="withdraw_lightning_amount_hint">1000</string>
     <string name="withdraw_lightning_button_continue">続く</string>
 
     
@@ -331,7 +323,6 @@
     <string name="withdraw_lightning_error_enter_invoice">Lightning 請求書を入力してください</string>
     <string name="withdraw_lightning_error_wallet_not_initialized">ウォレットが初期化されていません</string>
     <string name="withdraw_lightning_error_insufficient_balance">バランスが不十分です。金額 + 手数料 (%1$d sats) が残高 (%2$d sats) を超えています。 %3$d sats 未満の量をお試しください。</string>
-    <string name="withdraw_lightning_error_enter_address">Lightning アドレスを入力してください</string>
     <string name="withdraw_lightning_error_enter_valid_amount">有効な金額を入力してください</string>
     <string name="withdraw_lightning_error_generic">エラー: %1$s</string>
 
@@ -345,7 +336,6 @@
     <string name="withdraw_melt_fee_label">料金準備金</string>
     <string name="withdraw_melt_total_label">合計</string>
     <string name="withdraw_melt_fee_note">実際の Lightning 料金が低い場合、料金リザーブは返還されます。</string>
-    <string name="withdraw_melt_loading">出金処理中...</string>
 
     
     <string name="withdraw_melt_error_invalid_data">無効なメルト見積もりデータ</string>
@@ -673,48 +663,35 @@
     
     <string name="auto_withdraw_title">出金</string>
     <string name="auto_withdraw_hero_title">自動引き出し</string>
-    <string name="auto_withdraw_hero_subtitle">残高がしきい値を超えると、Lightning ウォレットに資金が自動的に送金されます</string>
     <string name="auto_withdraw_status_active">アクティブ</string>
-    <string name="auto_withdraw_status_inactive">非アクティブ</string>
     
     <string name="auto_withdraw_enable_title">自動引き出し</string>
     <string name="auto_withdraw_enable_subtitle">残高が基準値を超えると自動的に引き落とされる</string>
     
     <string name="auto_withdraw_section_destination">行き先</string>
     <string name="auto_withdraw_section_trigger">トリガー設定</string>
-    <string name="auto_withdraw_section_config">構成</string>
     <string name="auto_withdraw_lightning_address_label">ライトニングアドレス</string>
     <string name="auto_withdraw_lightning_address_hint">you@wallet.com</string>
     <string name="auto_withdraw_lightning_address_helper">資金はこのアドレスに自動的に送金されます</string>
     
     <string name="auto_withdraw_threshold_title">バランスしきい値</string>
     <string name="auto_withdraw_threshold_subtitle">残高超過時に発動</string>
-    <string name="auto_withdraw_threshold_label">しきい値</string>
-    <string name="auto_withdraw_threshold_hint">残高がこの金額に達すると引き出しがトリガーされます</string>
     <string name="auto_withdraw_threshold_helper">最小: ₿1,000 • 最大: ₿1,000,000</string>
     
     <string name="auto_withdraw_percentage_title">出金金額</string>
     <string name="auto_withdraw_percentage_subtitle">送金する残高の割合</string>
-    <string name="auto_withdraw_percentage_label">出金率</string>
-    <string name="auto_withdraw_percentage_hint">出金する残高の割合（一部は手数料のために取っておきます）</string>
     
     <string name="auto_withdraw_section_history">最近の活動</string>
     <string name="auto_withdraw_see_all">すべて見る</string>
-    <string name="auto_withdraw_history_empty">まだ自動引き落としはありません</string>
-    <string name="auto_withdraw_history_empty_title">まだアクティビティはありません</string>
-    <string name="auto_withdraw_history_empty_subtitle">出金はここに表示されます</string>
     
     <string name="auto_withdraw_status_completed">送信済み</string>
     <string name="auto_withdraw_status_pending">保留中</string>
     <string name="auto_withdraw_status_failed">失敗した</string>
     
-    <string name="auto_withdraw_progress_started">自動引き落とし中...</string>
-    <string name="auto_withdraw_progress_quote">見積もりを取得しています...</string>
     <string name="auto_withdraw_progress_sending">ウォレットに送信中...</string>
     <string name="auto_withdraw_progress_completed">無事送信されました！</string>
     <string name="auto_withdraw_progress_failed">出金に失敗しました</string>
     
-    <string name="auto_withdraw_settings_title">自動引き出し</string>
     <string name="auto_withdraw_error_title">エラーの詳細</string>
 
     
@@ -722,10 +699,6 @@
     <string name="settings_item_withdrawals_subtitle">自動出金設定と履歴</string>
 
     
-    <string name="manual_withdraw_section_title">手動引き出し</string>
-    <string name="manual_withdraw_title">今すぐ撤退</string>
-    <string name="manual_withdraw_subtitle">Lightning の請求書または住所に資金を送金します</string>
-    <string name="manual_withdraw_select_mint">ミントを選択</string>
     <string name="manual_withdraw_no_balance">出金できる残高がありません。まずウォレットに資金を追加してください。</string>
 
     
@@ -738,28 +711,17 @@
     <string name="mint_selection_select_description">このミントを選択してください</string>
 
     
-    <string name="withdraw_invoice_card_title">ライトニング請求書</string>
-    <string name="withdraw_invoice_card_subtitle">請求書を貼り付けてすぐに支払います</string>
-    <string name="withdraw_address_card_title">ライトニングアドレス</string>
-    <string name="withdraw_address_card_subtitle">電子メールのようなアドレスに送信する</string>
-    <string name="withdraw_invoice_placeholder">lnbc1...</string>
     <string name="withdraw_amount_placeholder">金額をsatで入力してください</string>
     <string name="withdraw_continue_button">続く</string>
     <string name="withdraw_scan_qr">QRをスキャン</string>
-    <string name="withdraw_section_send_to">送信先</string>
-    <string name="withdraw_balance_available">利用可能: %1$s</string>
 
     <string name="withdraw_tab_lightning">稲妻</string>
     <string name="withdraw_tab_cashu">キャッシュトークン</string>
     
-    <string name="withdraw_cashu_amount_card_title">額</string>
-    <string name="withdraw_cashu_amount_card_subtitle">トークンを作成する金額を入力してください</string>
     <string name="withdraw_cashu_create_button">トークンの作成</string>
     <string name="withdraw_cashu_result_title">キャッシュトークン</string>
-    <string name="withdraw_cashu_result_subtitle">このトークンを共有して引き出します</string>
     <string name="withdraw_cashu_copy_token">トークンのコピー</string>
     <string name="withdraw_cashu_copied">トークンがクリップボードにコピーされました</string>
-    <string name="withdraw_cashu_creating">トークンを作成しています...</string>
 
     
     <string name="qr_scanner_title">QRコードをスキャン</string>

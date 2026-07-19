@@ -2,6 +2,7 @@ package com.electricdreams.numo.feature.settings
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -77,8 +78,12 @@ class WithdrawSuccessActivity : AppCompatActivity() {
             destination
         )
 
-        // Set up button listener
+        // Close pops the destination/amount screens and lands on the hub,
+        // which refreshes via the balance broadcast sent from finish().
         closeButton.setOnClickListener {
+            val intent = Intent(this, com.electricdreams.numo.feature.withdraw.WithdrawHubActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            startActivity(intent)
             finish()
         }
 

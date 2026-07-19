@@ -8,9 +8,11 @@ import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.R
+import com.electricdreams.numo.feature.withdraw.WithdrawFailureActivity
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.MintManager
@@ -58,6 +60,12 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
     private lateinit var processingStepPreparingLabel: TextView
     private lateinit var processingStepContactingLabel: TextView
     private lateinit var processingStepSettlingLabel: TextView
+
+    // Whether the user retries (with a fresh quote) or closes the outcome
+    // screen, this consumed quote is done — drop back to the input screen.
+    private val failureLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { finish() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -140,6 +148,17 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
         amountText.text = amountObj.toString()
         feeText.text = feeObj.toString()
         totalText.text = totalObj.toString()
+
+        // Fiat equivalent of the total, when price data is available
+        val totalFiatText = findViewById<TextView>(R.id.total_fiat_text)
+        val priceWorker = com.electricdreams.numo.core.worker.BitcoinPriceWorker.getInstance(this)
+        val fiatAmount = priceWorker.satoshisToFiat(amount + feeReserve)
+        if (fiatAmount > 0) {
+            totalFiatText.text = "≈ ${priceWorker.formatFiatAmount(fiatAmount)}"
+            totalFiatText.visibility = View.VISIBLE
+        } else {
+            totalFiatText.visibility = View.GONE
+        }
 
         val mintName = mintManager.getMintDisplayName(mintUrl)
         summaryText.text = getString(
@@ -240,9 +259,14 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
                             )
                         }
                         QuoteState.PENDING -> {
-                            showPaymentError(
-                                getString(R.string.withdraw_melt_error_pending)
-                            )
+                            withdrawEntryId?.let {
+                                autoWithdrawManager.updateWithdrawalStatus(
+                                    id = it,
+                                    status = com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry.STATUS_PENDING,
+                                    errorMessage = getString(R.string.withdraw_melt_error_pending)
+                                )
+                            }
+                            showPendingOutcome()
                         }
                         else -> {
                             withdrawEntryId?.let {
@@ -263,20 +287,18 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     setLoading(false)
 
+                    val friendlyMessage = com.electricdreams.numo.feature.withdraw.WithdrawErrorMapper
+                        .resolve(this@WithdrawMeltQuoteActivity, e.message)
+
                     withdrawEntryId?.let { id ->
                         autoWithdrawManager.updateWithdrawalStatus(
                             id = id,
                             status = com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry.STATUS_FAILED,
-                            errorMessage = e.message
+                            errorMessage = friendlyMessage
                         )
                     }
 
-                    showPaymentError(
-                        getString(
-                            R.string.withdraw_melt_error_generic,
-                            e.message ?: ""
-                        )
-                    )
+                    showPaymentError(friendlyMessage)
                 }
             }
         }
@@ -288,14 +310,24 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
         val destinationLabel = lightningAddress
             ?: getString(R.string.withdraw_melt_destination_invoice_fallback)
         intent.putExtra("destination", destinationLabel)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
         finish()
     }
 
     private fun showPaymentError(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-        finish()
+        launchOutcomeScreen(WithdrawFailureActivity.MODE_FAILED, message)
+    }
+
+    private fun showPendingOutcome() {
+        launchOutcomeScreen(WithdrawFailureActivity.MODE_PENDING, null)
+    }
+
+    private fun launchOutcomeScreen(mode: String, message: String?) {
+        val intent = Intent(this, WithdrawFailureActivity::class.java)
+        intent.putExtra(WithdrawFailureActivity.EXTRA_MODE, mode)
+        intent.putExtra(WithdrawFailureActivity.EXTRA_MESSAGE, message)
+        intent.putExtra(WithdrawFailureActivity.EXTRA_DESTINATION, lightningAddress)
+        failureLauncher.launch(intent)
     }
 
     private fun updateProcessingState(step: ProcessingStep) {

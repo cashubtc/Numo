@@ -438,7 +438,6 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         val paymentHistory: List<HistoryEntry> = getPaymentHistory()
         val withdrawHistory: List<HistoryEntry> = AutoWithdrawManager.getInstance(this)
             .getHistory()
-            .filter { it.status != WithdrawHistoryEntry.STATUS_FAILED }
         
         val allHistory = paymentHistory + withdrawHistory
         val oldestDate = allHistory.minByOrNull { it.date.time }?.date?.time
@@ -566,7 +565,6 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 val paymentHistory: List<HistoryEntry> = getPaymentHistory(appContext)
                 val withdrawHistory: List<HistoryEntry> = AutoWithdrawManager.getInstance(appContext)
                     .getHistory()
-                    .filter { it.status != WithdrawHistoryEntry.STATUS_FAILED }
 
                 // Merge and sort by date descending (newest first)
                 var list = (paymentHistory + withdrawHistory)

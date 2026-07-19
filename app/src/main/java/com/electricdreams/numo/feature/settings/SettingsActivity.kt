@@ -14,7 +14,6 @@ import com.electricdreams.numo.feature.pin.PinProtectionHelper
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.feature.tips.TipsSettingsActivity
 import com.electricdreams.numo.feature.baskets.BasketNamesSettingsActivity
-import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawSettingsActivity
 import com.electricdreams.numo.ui.components.SettingsRowView
 import com.electricdreams.numo.payment.DefaultPaymentMethodManager
 import android.widget.TextView
@@ -88,7 +87,7 @@ class SettingsActivity : AppCompatActivity() {
             mintsItem.setOnClickListener { openProtectedActivity(MintsSettingsActivity::class.java) }
             withdrawalsItem.alpha = 1f
             withdrawalsItem.isEnabled = true
-            withdrawalsItem.setOnClickListener { openProtectedActivity(AutoWithdrawSettingsActivity::class.java) }
+            withdrawalsItem.setOnClickListener { openProtectedActivity(com.electricdreams.numo.feature.withdraw.WithdrawHubActivity::class.java) }
             webhooksItem.alpha = 1f
             webhooksItem.isEnabled = true
             webhooksItem.setOnClickListener { openProtectedActivity(WebhookSettingsActivity::class.java) }

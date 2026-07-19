@@ -12,7 +12,7 @@
         android:id="@+id/top_bar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/top_bar_height"
-        app:topBarTitle="@string/auto_withdraw_settings_title"
+        app:topBarTitle="@string/auto_withdraw_hero_title"
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Scrollable Content -->
@@ -28,126 +28,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:paddingBottom="@dimen/space_2xl">
-
-            <!-- Hero Section -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/space_l"
-                android:paddingBottom="@dimen/space_xl">
-
-                <!-- Hero Card -->
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/hero_card"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="@dimen/radius_card"
-                    app:cardElevation="0dp">
-
-                    <FrameLayout
-                        android:id="@+id/hero_bg"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_hero_gradient_green"
-                        android:clipChildren="false">
-
-                        <!-- Decorative background lightning bolt with fade -->
-                        <FrameLayout
-                            android:layout_width="140dp"
-                            android:layout_height="140dp"
-                            android:layout_gravity="bottom|end"
-                            android:layout_marginEnd="-30dp"
-                            android:layout_marginBottom="-30dp">
-
-                            <ImageView
-                                android:id="@+id/hero_bolt"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:alpha="0.06"
-                                android:rotation="-15"
-                                android:importantForAccessibility="no"
-                                android:src="@drawable/ic_lightning_bolt"
-                                app:tint="@color/color_success_green" />
-
-                            <View
-                                android:id="@+id/hero_bolt_fade"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@drawable/bg_hero_bolt_fade_green" />
-
-                        </FrameLayout>
-
-                        <!-- Content -->
-                        <androidx.constraintlayout.widget.ConstraintLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:padding="@dimen/space_xl">
-
-                            <!-- Status badge (top-left) -->
-                            <LinearLayout
-                                android:id="@+id/status_container"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/bg_status_pill_success"
-                                android:gravity="center"
-                                android:orientation="horizontal"
-                                android:paddingHorizontal="@dimen/space_m"
-                                android:paddingVertical="@dimen/space_xs"
-                                app:layout_constraintTop_toTopOf="parent"
-                                app:layout_constraintStart_toStartOf="parent">
-                                <View
-                                    android:id="@+id/status_dot"
-                                    android:layout_width="8dp"
-                                    android:layout_height="8dp"
-                                    android:layout_marginEnd="@dimen/space_s"
-                                    android:background="@drawable/bg_notification_dot"
-                                    android:backgroundTint="@color/color_success_green" />
-                                <TextView
-                                    android:id="@+id/status_text"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:textAppearance="@style/Text.Badge"
-                                    android:text="@string/auto_withdraw_status_inactive"
-                                    android:textColor="@color/color_success_green" />
-                            </LinearLayout>
-
-                            <!-- Title Row -->
-                            <LinearLayout
-                                android:id="@+id/hero_content_row"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/space_m"
-                                android:orientation="vertical"
-                                app:layout_constraintEnd_toEndOf="parent"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintTop_toBottomOf="@id/status_container">
-
-                                <TextView
-                                    android:id="@+id/hero_title"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:textAppearance="@style/Text.RowTitle"
-                                    android:text="@string/auto_withdraw_hero_title"
-                                    android:letterSpacing="-0.012" />
-                                <TextView
-                                    android:id="@+id/hero_subtitle"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
-                                    android:textAppearance="@style/Text.Caption"
-                                    android:text="@string/auto_withdraw_hero_subtitle"
-                                    android:textColor="@color/color_text_secondary" />
-
-                            </LinearLayout>
-
-                        </androidx.constraintlayout.widget.ConstraintLayout>
-                    </FrameLayout>
-                </androidx.cardview.widget.CardView>
-
-            </LinearLayout>
 
             <!-- ==================== -->
             <!-- MAIN TOGGLE ROW -->
@@ -193,16 +73,6 @@
                         app:trackTint="@color/selector_switch_track" />
 
                 </LinearLayout>
-
-                <!-- ==================== -->
-                <!-- AUTO-WITHDRAW CONFIG (hidden when toggle off) -->
-                <!-- ==================== -->
-                <LinearLayout
-                    android:id="@+id/auto_withdraw_config_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:visibility="gone">
 
                 <!-- ==================== -->
                 <!-- DESTINATION SECTION -->
@@ -281,6 +151,15 @@
                 </androidx.cardview.widget.CardView>
 
                 <!-- ==================== -->
+                <!-- AUTO-WITHDRAW CONFIG (hidden when toggle off) -->
+                <!-- ==================== -->
+                <LinearLayout
+                    android:id="@+id/auto_withdraw_config_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+                <!-- ==================== -->
                 <!-- TRIGGER SETTINGS -->
                 <!-- ==================== -->
                 <TextView
@@ -307,10 +186,14 @@
                         android:divider="@drawable/bg_divider_inset"
                         android:showDividers="middle">
 
-                        <!-- Threshold Row -->
+                        <!-- Threshold Row (whole row opens the edit sheet) -->
                         <LinearLayout
+                            android:id="@+id/threshold_row"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:background="@drawable/bg_row_ripple"
+                            android:clickable="true"
+                            android:focusable="true"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
                             android:padding="@dimen/margin_screen_horizontal">
@@ -347,9 +230,15 @@
                                     android:paddingHorizontal="@dimen/space_l"
                                     android:paddingVertical="@dimen/space_m"
                                     android:text="₿50,000"
-                                    android:textAppearance="@style/Text.RowTitle"
-                                    android:clickable="true"
-                                    android:focusable="true" />
+                                    android:textAppearance="@style/Text.RowTitle" />
+
+                                <ImageView
+                                    android:importantForAccessibility="no"
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:layout_marginStart="@dimen/space_s"
+                                    android:src="@drawable/ic_chevron_forward"
+                                    app:tint="@color/color_text_tertiary" />
 
                         </LinearLayout>
 
@@ -413,12 +302,12 @@
                                 android:stepSize="1"
                                 android:valueFrom="50"
                                 android:valueTo="98"
-                                app:haloColor="@color/color_bitcoin_orange"
+                                app:haloColor="@color/color_primary"
                                 app:haloRadius="24dp"
-                                app:thumbColor="@color/color_bitcoin_orange"
+                                app:thumbColor="@color/color_primary"
                                 app:thumbRadius="12dp"
                                 app:tickVisible="false"
-                                app:trackColorActive="@color/color_bitcoin_orange"
+                                app:trackColorActive="@color/color_primary"
                                 app:trackColorInactive="@color/color_bg_tertiary"
                                 app:trackHeight="6dp" />
 
@@ -450,124 +339,6 @@
                 </androidx.cardview.widget.CardView>
 
                 </LinearLayout>
-
-                <!-- ==================== -->
-                <!-- MANUAL WITHDRAW SECTION -->
-                <!-- ==================== -->
-                <TextView
-                    style="@style/Text.SectionHeader"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="@dimen/section_gap"
-                    android:paddingBottom="@dimen/row_padding_vertical"
-                    android:text="@string/manual_withdraw_section_title" />
-
-                <LinearLayout
-                    android:id="@+id/manual_withdraw_row"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_row_ripple"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingVertical="@dimen/row_padding_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/manual_withdraw_title"
-                            android:textAppearance="@style/Text.RowTitle" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="@string/manual_withdraw_subtitle"
-                            android:textAppearance="@style/Text.RowSubtitle" />
-
-                    </LinearLayout>
-
-                    <ImageView
-                        android:importantForAccessibility="no"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_forward"
-                        app:tint="@color/color_text_tertiary" />
-
-                </LinearLayout>
-
-                <!-- ==================== -->
-                <!-- HISTORY SECTION -->
-                <!-- ==================== -->
-                <LinearLayout
-                    android:id="@+id/history_section_header"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="@dimen/section_gap"
-                    android:paddingBottom="@dimen/row_padding_vertical"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        style="@style/Text.SectionHeader"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/auto_withdraw_section_history" />
-
-                    <TextView
-                        android:id="@+id/see_all_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:fontFamily="sans-serif-medium"
-                        android:paddingHorizontal="@dimen/space_s"
-                        android:paddingVertical="@dimen/space_xs"
-                        android:text="@string/auto_withdraw_see_all"
-                        android:textAppearance="@style/Text.SecondaryButton"
-                        android:textColor="@color/color_bitcoin_orange"
-                        android:visibility="gone" />
-
-                </LinearLayout>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/history_card"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                    app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="@dimen/radius_card"
-                    app:cardElevation="0dp">
-
-                    <!-- Empty State -->
-                    <include
-                        android:id="@+id/history_empty_container"
-                        layout="@layout/component_empty_state" />
-
-                    <!-- History List -->
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/history_recycler_view"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:clipToPadding="false"
-                        android:nestedScrollingEnabled="false"
-                        android:paddingVertical="@dimen/space_s"
-                        android:visibility="gone"
-                        tools:listitem="@layout/item_auto_withdraw_history" />
-
-                </androidx.cardview.widget.CardView>
 
         </LinearLayout>
     </ScrollView>

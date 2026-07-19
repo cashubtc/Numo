@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/color_bg_white">
@@ -163,6 +164,17 @@
                             android:textAppearance="@style/Text.RowTitle" />
 
                     </LinearLayout>
+
+                    <!-- Fiat equivalent of the total -->
+                    <TextView
+                        android:id="@+id/total_fiat_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:gravity="end"
+                        android:textAppearance="@style/Text.Helper"
+                        android:visibility="gone"
+                        tools:text="≈ $12.40" />
 
                 </LinearLayout>
 

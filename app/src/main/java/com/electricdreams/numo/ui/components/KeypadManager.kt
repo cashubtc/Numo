@@ -16,6 +16,7 @@ import com.electricdreams.numo.R
 class KeypadManager(
     private val context: Context,
     private val keypad: GridLayout,
+    private val buttonLayoutRes: Int = R.layout.keypad_button_green_screen,
     private val onKeyPressed: (String) -> Unit
 ) {
 
@@ -37,7 +38,7 @@ class KeypadManager(
 
         val inflater = LayoutInflater.from(context)
         for (label in buttonLabels) {
-            val button = inflater.inflate(R.layout.keypad_button_green_screen, keypad, false) as Button
+            val button = inflater.inflate(buttonLayoutRes, keypad, false) as Button
             button.text = label
             button.setOnClickListener { 
                 vibrateKeypad()

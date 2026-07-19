@@ -1,4 +1,43 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="withdraw_toast_insufficient_balance">잔액 부족</string>
+
+    <string name="withdraw_hub_section_automation">자동화</string>
+    <string name="withdraw_hub_auto_summary">잔액이 %2$s을(를) 초과하면 %1$s(으)로 전송</string>
+    <string name="withdraw_hub_auto_off_summary">잔액이 기준액을 초과하면 자동으로 전송합니다</string>
+    <string name="withdraw_hub_auto_needs_setup_summary">자동 출금을 활성화하려면 라이트닝 주소를 추가하세요</string>
+    <string name="withdraw_hub_status_off">꺼짐</string>
+    <string name="withdraw_hub_status_needs_setup">설정 필요</string>
+    <string name="withdraw_history_empty_title">아직 출금 내역이 없습니다</string>
+    <string name="withdraw_history_empty_subtitle">수동 또는 자동으로 진행한 출금이 여기에 표시됩니다.</string>
+
+    <string name="withdraw_destination_hint">인보이스 또는 라이트닝 주소</string>
+    <string name="withdraw_destination_paste">붙여넣기</string>
+    <string name="withdraw_destination_invalid">유효한 라이트닝 인보이스 또는 주소를 입력하세요</string>
+    <string name="withdraw_destination_clipboard_invalid">클립보드에 유효한 인보이스나 주소가 없습니다</string>
+    <string name="withdraw_destination_detected_invoice">라이트닝 인보이스가 감지되었습니다</string>
+    <string name="withdraw_destination_detected_address">라이트닝 주소가 감지되었습니다</string>
+
+    <string name="withdraw_amount_title">출금 금액</string>
+    <string name="withdraw_amount_to">%1$s(으)로</string>
+    <string name="withdraw_amount_max_chip">최대 %1$s</string>
+    <string name="withdraw_amount_limits">최소 %1$s • 최대 %2$s</string>
+
+    <string name="withdraw_failure_title">출금 실패</string>
+    <string name="withdraw_failure_message_generic">결제를 완료할 수 없습니다. 자금은 지갑에서 빠져나가지 않았습니다.</string>
+    <string name="withdraw_pending_title">결제 대기 중</string>
+    <string name="withdraw_pending_message">라이트닝 결제가 예상보다 오래 걸리고 있습니다. 나중에 최근 활동을 확인하세요. 재시도하면 이중 결제가 될 수 있습니다.</string>
+
+    <string name="withdraw_error_lnurl_incompatible">이 라이트닝 주소 제공자는 지갑의 엄격한 인보이스 검증과 호환되지 않습니다. 대신 라이트닝 인보이스를 붙여넣어 보세요.</string>
+    <string name="withdraw_error_lnurl_wrong_amount">라이트닝 주소 제공자가 다른 금액의 인보이스를 반환했습니다. 다시 시도해 주세요.</string>
+    <string name="withdraw_error_insufficient_short">이 금액과 수수료를 충당할 잔액이 부족합니다.</string>
+    <string name="withdraw_error_expired">이 인보이스는 만료되었습니다. 새 인보이스를 받아 다시 시도하세요.</string>
+    <string name="withdraw_error_already_paid">이 인보이스는 이미 결제되었습니다.</string>
+    <string name="withdraw_error_network">네트워크에 연결할 수 없습니다. 연결을 확인하고 다시 시도하세요.</string>
+    <string name="withdraw_error_generic">문제가 발생했습니다. 다시 시도해 주세요.</string>
+    <string name="withdraw_error_generic_detail">문제가 발생했습니다: %1$s</string>
+
+    <string name="withdraw_cashu_token_created">토큰 생성됨</string>
+
+    <string name="auto_withdraw_enable_requires_address">먼저 유효한 라이트닝 주소를 추가하세요</string>
 </resources>

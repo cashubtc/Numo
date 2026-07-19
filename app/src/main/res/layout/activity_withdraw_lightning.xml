@@ -151,53 +151,140 @@
                     android:layout_marginBottom="@dimen/space_m"
                     android:text="@string/auto_withdraw_section_destination" />
 
-                <!-- Invoice Card -->
-                <com.electricdreams.numo.ui.components.WithdrawInvoiceCard
-                    android:id="@+id/invoice_card"
+                <!-- Smart Destination Card: one input for invoice or lightning address -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/destination_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal" />
+                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardCornerRadius="@dimen/radius_card"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp">
 
-                <!-- OR Divider -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/space_2xl"
-                    android:layout_marginVertical="@dimen/margin_screen_horizontal"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_weight="1"
-                        android:background="@color/color_divider" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/space_l"
-                        android:text="@string/common_or"
-                        android:textAppearance="@style/Text.Caption"
-                        android:textColor="@color/color_text_tertiary"
-                        android:textSize="12sp"
-                        android:textAllCaps="true"
-                        android:letterSpacing="0.06" />
+                        android:orientation="vertical"
+                        android:padding="@dimen/margin_screen_horizontal">
 
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_weight="1"
-                        android:background="@color/color_divider" />
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
 
-                </LinearLayout>
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/destination_input"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif"
+                                android:hint="@string/withdraw_destination_hint"
+                                android:inputType="textMultiLine|textNoSuggestions"
+                                android:maxLines="4"
+                                android:minHeight="80dp"
+                                android:gravity="top"
+                                android:textAppearance="@style/Text.Body"
+                                android:textColor="@color/color_text_primary"
+                                android:textColorHint="@color/color_text_tertiary" />
 
-                <!-- Address Card -->
-                <com.electricdreams.numo.ui.components.WithdrawAddressCard
-                    android:id="@+id/address_card"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <!-- Detected type / inline error -->
+                        <TextView
+                            android:id="@+id/destination_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/space_s"
+                            android:minHeight="18dp"
+                            android:textAppearance="@style/Text.Helper" />
+
+                        <!-- Saved lightning address suggestion -->
+                        <TextView
+                            android:id="@+id/suggestion_chip"
+                            style="@style/Text.Chip"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/space_s"
+                            android:background="@drawable/bg_pill_badge"
+                            android:paddingHorizontal="@dimen/space_l"
+                            android:paddingVertical="@dimen/space_s"
+                            android:textColor="@color/color_text_secondary"
+                            android:visibility="gone" />
+
+                        <!-- Paste / Scan input aids -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/space_l"
+                            android:orientation="horizontal">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/paste_button"
+                                android:layout_width="0dp"
+                                android:layout_height="@dimen/button_height"
+                                android:layout_weight="1"
+                                android:layout_marginEnd="@dimen/space_s"
+                                android:insetTop="0dp"
+                                android:insetBottom="0dp"
+                                android:text="@string/withdraw_destination_paste"
+                                android:textAllCaps="false"
+                                android:textSize="17sp"
+                                android:textColor="@color/color_text_primary"
+                                android:fontFamily="sans-serif-medium"
+                                android:stateListAnimator="@null"
+                                app:backgroundTint="@color/color_bg_white"
+                                app:strokeColor="@color/color_chip_border"
+                                app:strokeWidth="1dp"
+                                app:cornerRadius="@dimen/radius_pill"
+                                app:elevation="0dp"
+                                app:icon="@drawable/ic_copy"
+                                app:iconGravity="textStart"
+                                app:iconPadding="@dimen/space_s"
+                                app:iconTint="@color/color_text_primary"
+                                app:rippleColor="@color/color_ripple" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/scan_button"
+                                android:layout_width="0dp"
+                                android:layout_height="@dimen/button_height"
+                                android:layout_weight="1"
+                                android:layout_marginStart="@dimen/space_s"
+                                android:insetTop="0dp"
+                                android:insetBottom="0dp"
+                                android:text="@string/withdraw_scan_qr"
+                                android:textAllCaps="false"
+                                android:textSize="17sp"
+                                android:textColor="@color/color_text_primary"
+                                android:fontFamily="sans-serif-medium"
+                                android:stateListAnimator="@null"
+                                app:backgroundTint="@color/color_bg_white"
+                                app:strokeColor="@color/color_chip_border"
+                                app:strokeWidth="1dp"
+                                app:cornerRadius="@dimen/radius_pill"
+                                app:elevation="0dp"
+                                app:icon="@drawable/ic_qr_scan"
+                                app:iconGravity="textStart"
+                                app:iconPadding="@dimen/space_s"
+                                app:iconTint="@color/color_text_primary"
+                                app:rippleColor="@color/color_ripple" />
+
+                        </LinearLayout>
+
+                        <!-- Continue Button -->
+                        <Button
+                            android:id="@+id/destination_continue_button"
+                            style="@style/Widget.Button.Primary.Green"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/button_height"
+                            android:layout_marginTop="@dimen/space_l"
+                            android:enabled="false"
+                            android:text="@string/withdraw_continue_button"
+                            android:textAllCaps="false"
+                            android:textSize="17sp" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
 
             </LinearLayout>
 
