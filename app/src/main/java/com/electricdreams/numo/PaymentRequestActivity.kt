@@ -486,6 +486,14 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun updateConvertedAmount(formattedAmountString: String) {
+        val preferredUnit = MintManager.getInstance(this).getPreferredUnit()
+        val isCustomUnit = preferredUnit.lowercase() != "sat"
+        
+        if (isCustomUnit) {
+            convertedAmountDisplay.visibility = View.GONE
+            return
+        }
+
         // Check if the formatted amount is BTC (satoshis) or fiat
         val isBtcAmount = formattedAmountString.startsWith("₿")
 
@@ -818,9 +826,10 @@ class PaymentRequestActivity : AppCompatActivity() {
      * Local (CDK) mode: the original flow – NDEF, Nostr, and Lightning tab.
      */
     private fun initializeLocalPaymentRequest() {
-        // Get allowed mints
+        // Get allowed mints supporting the active unit
         val mintManager = MintManager.getInstance(this)
-        val allowedMints = mintManager.getAllowedMints()
+        val activeUnit = mintManager.getPreferredUnit()
+        val allowedMints = mintManager.getAllowedMints().filter { mintManager.mintSupportsUnit(it, activeUnit) }
         Log.d(TAG, "Using ${allowedMints.size} allowed mints for payment request")
 
         // Initialize Lightning handler with preferred mint (will be started when tab is selected)
@@ -868,7 +877,8 @@ class PaymentRequestActivity : AppCompatActivity() {
             
             if (mintUrlToUse != null) {
                 val limits = mintManager.getMintLimits(mintUrlToUse, this@PaymentRequestActivity)
-                val checkResult = MintLimitChecker.checkMintLimits(paymentAmount, limits)
+                val preferredUnit = MintManager.getInstance(this@PaymentRequestActivity).getPreferredUnit()
+                val checkResult = MintLimitChecker.checkMintLimits(paymentAmount, limits, preferredUnit)
                 isBolt11Supported = checkResult.isBolt11Supported
             }
             
@@ -1306,7 +1316,8 @@ class PaymentRequestActivity : AppCompatActivity() {
                                 )
 
                                 val mintManager = MintManager.getInstance(this@PaymentRequestActivity)
-                                val allowedMints = mintManager.getAllowedMints()
+                                val activeUnit = mintManager.getPreferredUnit()
+                                val allowedMints = mintManager.getAllowedMints().filter { mintManager.mintSupportsUnit(it, activeUnit) }
 
                                 val redeemedToken = CashuPaymentHelper.redeemTokenWithSwap(
                                     appContext = this@PaymentRequestActivity,
@@ -1541,23 +1552,21 @@ class PaymentRequestActivity : AppCompatActivity() {
         statusText.text = getString(R.string.payment_request_status_failed, errorMessage)
         setResult(Activity.RESULT_CANCELED)
 
-        if (nfcAnimationContainer.visibility == View.VISIBLE) {
-            showNfcAnimationError(errorMessage)
-            return
+        // ALWAYS render the native failure overlay (the ALL RED screen) so that failure paths stay consistent,
+        // mirroring the behavior of showPaymentSuccess.
+        if (nfcAnimationContainer.visibility != View.VISIBLE) {
+            nfcOverlayShownAtMs = SystemClock.elapsedRealtime()
+            applyFullscreenForAnimationOverlay()
+            nfcAnimationContainer.visibility = View.VISIBLE
+            nfcAnimationView.reset()
+            resetResultTextViews()
+            resetResultActionButtons()
+            ViewCompat.requestApplyInsets(nfcAnimationContainer)
+        } else {
+            applyFullscreenForAnimationOverlay()
         }
 
-        Toast.makeText(
-            this,
-            getString(R.string.payment_request_status_failed, errorMessage),
-            Toast.LENGTH_LONG,
-        ).show()
-
-        // Navigate to the global payment failure screen, which will allow
-        // the user to try the latest pending entry again.
-        startActivity(Intent(this, PaymentFailureActivity::class.java))
-
-        // Clean up payment resources and finish this Activity.
-        cleanupAndFinish()
+        showNfcAnimationError(errorMessage)
     }
 
     private fun cancelPayment() {

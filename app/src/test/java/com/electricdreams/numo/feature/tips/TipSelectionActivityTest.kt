@@ -51,7 +51,7 @@ class TipSelectionActivityTest {
     fun `customInputCurrency is initialized from entryCurrency when order is in sats`() {
         val intent = Intent().apply {
             putExtra(TipSelectionActivity.EXTRA_PAYMENT_AMOUNT, 1000L)
-            putExtra(TipSelectionActivity.EXTRA_FORMATTED_AMOUNT, "₿1000")
+            putExtra(TipSelectionActivity.EXTRA_FORMATTED_AMOUNT, "1,000 sat")
         }
         val satActivity = Robolectric.buildActivity(TipSelectionActivity::class.java, intent)
             .create()
@@ -264,5 +264,30 @@ class TipSelectionActivityTest {
 
         val toggleText = customCurrencyToggle.text.toString()
         assertTrue("Toggle text should contain EUR symbol. Was: $toggleText", toggleText.contains("€"))
+    }
+
+    @Test
+    fun `formatTotalAmount with custom unit does not perform fiat conversion`() {
+        val app = RuntimeEnvironment.getApplication()
+        com.electricdreams.numo.core.util.MintManager.getInstance(app).setPreferredUnit("MLC")
+        
+        val intent = Intent().apply {
+            putExtra(TipSelectionActivity.EXTRA_PAYMENT_AMOUNT, 1000L)
+            putExtra(TipSelectionActivity.EXTRA_FORMATTED_AMOUNT, "MLC 10.00")
+        }
+        val customActivity = Robolectric.buildActivity(TipSelectionActivity::class.java, intent)
+            .create()
+            .get()
+            
+        val formatTotalAmount = customActivity.javaClass.getDeclaredMethod("formatTotalAmount", Long::class.java)
+        formatTotalAmount.isAccessible = true
+        
+        val result = formatTotalAmount.invoke(customActivity, 1100L) as String
+        
+        assertTrue("Result should contain MLC. Was: $result", result.contains("MLC"))
+        assertFalse("Result should not contain USD/fiat symbol. Was: $result", result.contains("$"))
+        
+        // Reset preferred unit back to standard for other tests
+        com.electricdreams.numo.core.util.MintManager.getInstance(app).setPreferredUnit("sat")
     }
 }

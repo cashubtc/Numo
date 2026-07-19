@@ -20,6 +20,7 @@ class BitcoinPriceWorkerTest {
 
     @Before
     fun setUp() {
+        BitcoinPriceWorker.isTesting = true
         context = RuntimeEnvironment.getApplication()
 
         // Clear prefs for price worker
@@ -42,6 +43,11 @@ class BitcoinPriceWorkerTest {
         map.clear()
         map[CurrencyManager.CURRENCY_USD] = 50_000.0
         map[CurrencyManager.CURRENCY_EUR] = 45_000.0
+    }
+
+    @org.junit.After
+    fun tearDown() {
+        BitcoinPriceWorker.isTesting = false
     }
 
     @Test

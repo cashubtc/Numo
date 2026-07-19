@@ -249,6 +249,20 @@
                 android:value=".feature.settings.SettingsActivity" />
         </activity>
 
+        <activity android:name="com.electricdreams.numo.feature.settings.DeviceBackupRestoreActivity"
+            android:exported="false"
+            android:label="@string/restore_device_backup_title"
+            android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".feature.settings.RestoreWalletActivity" />
+
+        <activity android:name="com.electricdreams.numo.feature.settings.DeviceBackupSetupActivity"
+            android:exported="false"
+            android:label="@string/security_settings_device_backup_title"
+            android:theme="@style/Theme.Numo"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".feature.settings.SecuritySettingsActivity" />
+
         <activity android:name="com.electricdreams.numo.feature.settings.LanguageSettingsActivity"
             android:exported="false"
             android:label="@string/language_settings_title"

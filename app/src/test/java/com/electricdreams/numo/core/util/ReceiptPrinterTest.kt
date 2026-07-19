@@ -93,9 +93,9 @@ class ReceiptPrinterTest {
         val receipt = printer.generateTextReceipt(data)
         
         assertTrue(receipt.contains("Sats Item"))
-        assertTrue(receipt.contains("2 x ₿1,000"))
+        assertTrue(receipt.contains("2 x 1,000 sat"))
         assertTrue(receipt.contains("TOTAL:"))
-        assertTrue(receipt.contains("₿2,000"))
+        assertTrue(receipt.contains("2,000 sat"))
         assertTrue(receipt.contains("Cashu"))
     }
 
@@ -131,7 +131,7 @@ class ReceiptPrinterTest {
         assertTrue(receipt.contains("Fiat"))
         assertTrue(receipt.contains("Sats"))
         assertTrue(receipt.contains("TOTAL:"))
-        assertTrue(receipt.contains("₿4,000"))
+        assertTrue(receipt.contains("4,000 sat"))
         assertTrue(receipt.contains("equivalent"))
     }
 

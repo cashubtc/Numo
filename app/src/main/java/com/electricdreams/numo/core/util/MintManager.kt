@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.backup.DeviceRecoveryBackup
 import com.electricdreams.numo.nostr.NostrMintBackup
 import org.json.JSONObject
 import java.net.URI
@@ -24,6 +25,7 @@ class MintManager private constructor(context: Context) {
         private const val KEY_MINTS = "allowedMints"
         private const val KEY_PREFERRED_LIGHTNING_MINT = "preferredLightningMint"
         private const val KEY_ENABLE_SWAP_UNKNOWN_MINTS = "enableSwapUnknownMints"
+        private const val KEY_PREFERRED_UNIT = "preferredBaseUnit"
         private const val KEY_MINT_INFO_PREFIX = "mintInfo_"
         private const val KEY_MINT_REFRESH_PREFIX = "mintRefresh_"
         private const val REFRESH_INTERVAL_MS = 60 * 1000L // 1 minute
@@ -50,6 +52,16 @@ class MintManager private constructor(context: Context) {
             }
             return instance as MintManager
         }
+
+        @JvmStatic
+        fun getActiveCurrencyCode(context: Context): String {
+            val preferredUnit = getInstance(context).getPreferredUnit()
+            return if (preferredUnit.lowercase() != "sat") {
+                preferredUnit.uppercase()
+            } else {
+                CurrencyManager.getInstance(context).getCurrentCurrency()
+            }
+        }
     }
 
     private val context: Context = context.applicationContext
@@ -61,6 +73,9 @@ class MintManager private constructor(context: Context) {
 
     private var preferredLightningMint: String? =
         preferences.getString(KEY_PREFERRED_LIGHTNING_MINT, null)
+
+    private var preferredUnit: String =
+        preferences.getString(KEY_PREFERRED_UNIT, "sat") ?: "sat"
 
     private var enableSwapFromUnknownMints: Boolean =
         preferences.getBoolean(KEY_ENABLE_SWAP_UNKNOWN_MINTS, true)
@@ -93,23 +108,46 @@ class MintManager private constructor(context: Context) {
     fun hasAnyMints(): Boolean = allowedMints.isNotEmpty()
 
     /**
+     * Check if a mint supports a specific unit based on its cached info.
+     * Defaults to true if no cached info is available or on parsing errors.
+     */
+    fun mintSupportsUnit(mintUrl: String, unit: String): Boolean {
+        val infoJson = getMintInfo(mintUrl) ?: return true
+        return try {
+            val cachedInfo = CashuWalletManager.mintInfoFromJson(infoJson) ?: return true
+            val limits = cachedInfo.mintLimits ?: return true
+            
+            val unitLower = unit.lowercase()
+            val hasMintUnit = limits.mintMethods.any { it.unit.lowercase() == unitLower && !it.disabled }
+            val hasMeltUnit = limits.meltMethods.any { it.unit.lowercase() == unitLower && !it.disabled }
+            
+            hasMintUnit || hasMeltUnit
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse mint info for unit check of $mintUrl", e)
+            true
+        }
+    }
+
+    /**
      * Get the preferred mint for Lightning payments.
-     * Falls back to the first allowed mint if not set.
+     * Filters out mints that do not support the active preferred unit.
+     * Falls back to the first allowed supporting mint if not set or invalid.
      */
     fun getPreferredLightningMint(): String? {
+        val activeUnit = getPreferredUnit()
+        val supportingMints = allowedMints.filter { mintSupportsUnit(it, activeUnit) }
+        
         val preferred = preferredLightningMint
-        // Return preferred if it's still in the allowed list
-        if (preferred != null && allowedMints.contains(preferred)) {
+        if (preferred != null && supportingMints.contains(preferred)) {
             return preferred
         }
-        // Otherwise return the first allowed mint
-        return allowedMints.firstOrNull()
+        return supportingMints.firstOrNull()
     }
 
     /**
      * Set the preferred mint for Lightning payments.
-     * @param mintUrl The mint URL to set as preferred. Must be in the allowed list.
-     * @return true if the preference was set, false if the mint is not in the allowed list.
+     * @param mintUrl The mint URL to set as preferred. Must be in the allowed list and support active unit.
+     * @return true if the preference was set, false if invalid.
      */
     fun setPreferredLightningMint(mintUrl: String?): Boolean {
         var url = mintUrl?.trim()
@@ -121,6 +159,12 @@ class MintManager private constructor(context: Context) {
         url = normalizeMintUrl(url)
         if (!allowedMints.contains(url)) {
             Log.e(TAG, "Cannot set preferred Lightning mint: $url is not in the allowed list")
+            return false
+        }
+
+        val activeUnit = getPreferredUnit()
+        if (!mintSupportsUnit(url, activeUnit)) {
+            Log.e(TAG, "Cannot set preferred Lightning mint: $url does not support active unit $activeUnit")
             return false
         }
 
@@ -138,6 +182,33 @@ class MintManager private constructor(context: Context) {
     /** Save preferred Lightning mint to preferences. */
     private fun savePreferredLightningMint() {
         preferences.edit().putString(KEY_PREFERRED_LIGHTNING_MINT, preferredLightningMint).apply()
+    }
+
+    /**
+     * Get the preferred base unit for the active lightning mint.
+     */
+    fun getPreferredUnit(): String = preferredUnit
+
+    /**
+     * Set the preferred base unit.
+     */
+    fun setPreferredUnit(unit: String) {
+        if (preferredUnit == unit) return
+        preferredUnit = unit
+        preferences.edit().putString(KEY_PREFERRED_UNIT, unit).apply()
+        Log.d(TAG, "Preferred unit changed to: $unit")
+        
+        // Auto-migrate preferred Lightning mint if it doesn't support the new unit
+        val currentPreferred = preferredLightningMint
+        if (currentPreferred != null && !mintSupportsUnit(currentPreferred, unit)) {
+            val supportingMints = allowedMints.filter { mintSupportsUnit(it, unit) }
+            preferredLightningMint = supportingMints.firstOrNull()
+            savePreferredLightningMint()
+            Log.d(TAG, "Migrated preferred Lightning mint to: $preferredLightningMint because $currentPreferred doesn't support $unit")
+        }
+        
+        // Treat as a mints change so that CashuWalletManager rebuilds the wallet with the new unit
+        listener?.onMintsChanged(getAllowedMints())
     }
 
     /**
@@ -521,6 +592,8 @@ class MintManager private constructor(context: Context) {
 
         val mints = getAllowedMints()
         Log.d(TAG, "Triggering Nostr mint backup for ${mints.size} mints")
+
+        DeviceRecoveryBackup.updateIfEnabled(context)
 
         NostrMintBackup.publishMintBackup(mnemonic, mints) { result ->
             if (result.success) {

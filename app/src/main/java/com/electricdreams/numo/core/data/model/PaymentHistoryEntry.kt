@@ -260,13 +260,14 @@ data class PaymentHistoryEntry(
             basketId: String? = null,
             tipAmountSats: Long = 0,
             tipPercentage: Int = 0,
+            ecashUnit: String = "sat",
         ): PaymentHistoryEntry {
             return PaymentHistoryEntry(
                 id = UUID.randomUUID().toString(),
                 token = "",
                 amount = amount,
                 date = Date(),
-                rawUnit = "sat",
+                rawUnit = ecashUnit,
                 rawEntryUnit = entryUnit,
                 enteredAmount = enteredAmount,
                 bitcoinPrice = bitcoinPrice,

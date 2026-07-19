@@ -140,12 +140,20 @@ class PricingHandler(
         satsInput.setText(sats.toString())
     }
 
-    /**
-     * Updates the currency display based on current settings.
-     */
     fun updateCurrencyDisplay() {
-        fiatPriceLayout.prefixText = currencyManager.getCurrentSymbol()
-        fiatPriceLayout.suffixText = currencyManager.getCurrentCurrency()
+        val context = priceInput.context
+        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
+        val isCustomUnit = preferredUnit.lowercase() != "sat"
+        
+        if (isCustomUnit) {
+            val activeCurrencyCode = preferredUnit.uppercase()
+            val currency = Amount.Currency.fromCode(activeCurrencyCode)
+            fiatPriceLayout.prefixText = currency.symbol
+            fiatPriceLayout.suffixText = currency.name
+        } else {
+            fiatPriceLayout.prefixText = currencyManager.getCurrentSymbol()
+            fiatPriceLayout.suffixText = currencyManager.getCurrentCurrency()
+        }
     }
 
     /**
@@ -169,6 +177,17 @@ class PricingHandler(
     private fun setupPriceTypeToggle() {
         // Set initial selection
         priceTypeToggle.check(R.id.btn_price_fiat)
+
+        val context = priceInput.context
+        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
+        val isCustomUnit = preferredUnit.lowercase() != "sat"
+        
+        if (isCustomUnit) {
+            priceTypeToggle.visibility = View.GONE
+            currentPriceType = PriceType.FIAT
+            fiatPriceLayout.visibility = View.VISIBLE
+            satsPriceLayout.visibility = View.GONE
+        }
 
         priceTypeToggle.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
@@ -237,7 +256,7 @@ class PricingHandler(
                     enteredPrice = getEnteredFiatPrice(),
                     vatRate = vatRate,
                     priceIncludesVat = switchPriceIncludesVat.isChecked,
-                    currency = currencyManager.getCurrentCurrency()
+                    currency = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(priceInput.context)
                 )
             }
             PriceType.SATS -> {
@@ -267,19 +286,33 @@ class PricingHandler(
                 if (s.toString() != current) {
                     priceInput.removeTextChangedListener(this)
 
-                    val cleanString = s.toString()
+                    var cleanString = s.toString()
 
-                    // Find decimal separator (either . or ,)
-                    val decimalSeparator = if (cleanString.contains(",")) "," else "."
+                    val context = priceInput.context
+                    val activeCurrency = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(context)
+                    val isZeroDecimal = Amount.Currency.fromCode(activeCurrency).isZeroDecimal()
 
-                    // Validate decimal places
-                    if (cleanString.contains(decimalSeparator)) {
-                        val parts = cleanString.split(decimalSeparator)
-                        if (parts.size > 1 && parts[1].length > 2) {
-                            // Truncate to 2 decimal places
-                            val truncated = "${parts[0]}$decimalSeparator${parts[1].substring(0, 2)}"
-                            priceInput.setText(truncated)
-                            priceInput.setSelection(truncated.length)
+                    if (isZeroDecimal) {
+                        // Strip all decimals, periods, commas, and anything after them
+                        val noDecimals = cleanString.replace("[.,].*".toRegex(), "")
+                        if (noDecimals != cleanString) {
+                            cleanString = noDecimals
+                            priceInput.setText(cleanString)
+                            priceInput.setSelection(cleanString.length)
+                        }
+                    } else {
+                        // Find decimal separator (either . or ,)
+                        val decimalSeparator = if (cleanString.contains(",")) "," else "."
+
+                        // Validate decimal places
+                        if (cleanString.contains(decimalSeparator)) {
+                            val parts = cleanString.split(decimalSeparator)
+                            if (parts.size > 1 && parts[1].length > 2) {
+                                // Truncate to 2 decimal places
+                                val truncated = "${parts[0]}$decimalSeparator${parts[1].substring(0, 2)}"
+                                priceInput.setText(truncated)
+                                priceInput.setSelection(truncated.length)
+                            }
                         }
                     }
 
@@ -314,9 +347,8 @@ class PricingHandler(
     }
 
     private fun formatFiatPrice(price: Double): String {
-        val currency = Amount.Currency.fromCode(currencyManager.getCurrentCurrency())
-        val minorUnits = Math.round(price * 100)
-        val amount = Amount(minorUnits, currency)
-        return amount.toStringWithoutSymbol()
+        val activeCurrency = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(priceInput.context)
+        val currency = Amount.Currency.fromCode(activeCurrency)
+        return Amount.fromMajorUnits(price, currency).toStringWithoutSymbol()
     }
 }

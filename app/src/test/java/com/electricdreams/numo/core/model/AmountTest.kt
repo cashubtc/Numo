@@ -111,4 +111,11 @@ class AmountTest {
             Locale.setDefault(originalLocale)
         }
     }
+
+    @Test
+    fun `parse zero decimal currency prevents float truncation`() {
+        val amount = Amount.parse("¥2.29")
+        assertEquals(Amount.Currency.JPY, amount?.currency)
+        assertEquals(229L, amount?.value)
+    }
 }

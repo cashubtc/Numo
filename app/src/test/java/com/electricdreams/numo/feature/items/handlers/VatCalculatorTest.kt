@@ -61,9 +61,9 @@ class VatCalculatorTest {
             priceIncludesVat = false
         )
 
-        assertEquals("₿1,000", result.netPrice)
-        assertEquals("₿100", result.vatAmount)
-        assertEquals("₿1,100", result.grossPrice)
+        assertEquals("1,000 sat", result.netPrice)
+        assertEquals("100 sat", result.vatAmount)
+        assertEquals("1,100 sat", result.grossPrice)
     }
 
     @Test
@@ -76,9 +76,9 @@ class VatCalculatorTest {
             priceIncludesVat = true
         )
 
-        assertEquals("₿1,000", result.netPrice)
-        assertEquals("₿100", result.vatAmount)
-        assertEquals("₿1,100", result.grossPrice)
+        assertEquals("1,000 sat", result.netPrice)
+        assertEquals("100 sat", result.vatAmount)
+        assertEquals("1,100 sat", result.grossPrice)
     }
 
     @Test

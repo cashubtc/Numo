@@ -27,6 +27,8 @@ class PaymentsHistoryActivityTest {
         // Clear history before each test
         val prefs = context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE)
         prefs.edit().clear().apply()
+        // Force synchronous coroutines for testing
+        PaymentsHistoryActivity.ioDispatcher = kotlinx.coroutines.Dispatchers.Unconfined
     }
 
     @Test
@@ -345,5 +347,121 @@ class PaymentsHistoryActivityTest {
         val nextStartedActivity = shadowActivity.nextStartedActivity
         assertNotNull(nextStartedActivity)
         assertEquals(TransactionDetailActivity::class.java.name, nextStartedActivity.component?.className)
+    }
+
+    @Test
+    fun `custom zero decimal currency entry displays formatted amount with correct scale`() {
+        val paymentId = PaymentsHistoryActivity.addPendingPayment(
+            context = context,
+            amount = 1000L,
+            entryUnit = "point",
+            enteredAmount = 1000L, // Representing 10 POINT since stored as cents internally
+            bitcoinPrice = null,
+            paymentRequest = null,
+            formattedAmount = null
+        )
+        PaymentsHistoryActivity.completePendingPayment(
+            context = context,
+            paymentId = paymentId,
+            token = "token",
+            paymentType = PaymentHistoryEntry.TYPE_CASHU,
+            mintUrl = null
+        )
+
+        // Launch the activity
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+        val activity = controller.get()
+
+        val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
+        val adapter = recyclerView.adapter as PaymentsHistoryAdapter
+
+        val position = 1 // 0 is Month Header, 1 is the completed item
+
+        val holder = adapter.createViewHolder(recyclerView, 1) as PaymentsHistoryAdapter.TransactionViewHolder
+        adapter.bindViewHolder(holder, position)
+
+        // Assert that the amount display is "+10 POINT" instead of "+1000 POINT" or similar scaling bug
+        val amountDisplay = holder.amountText.text.toString()
+        assertEquals("+10 POINT", amountDisplay)
+    }
+
+    @Test
+    fun `loadHistory automatically expires stale BTCPay entries`() {
+        // Set btcpay_enabled to false
+        val appPrefs = com.electricdreams.numo.core.prefs.PreferenceStore.app(context)
+        appPrefs.putBoolean("btcpay_enabled", false)
+
+        val id = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null
+        )
+
+        // Make it a BTCPay entry (has lightningQuoteId but no lightningMintUrl/nostrNprofile)
+        PaymentsHistoryActivity.updatePendingWithLightningInfo(
+            context = context,
+            paymentId = id,
+            lightningQuoteId = "btcpay_invoice_id"
+        )
+
+        // Launch the activity
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+        
+        // Check that the entry is now expired
+        val history = PaymentsHistoryActivity.getPaymentHistory(context)
+        assertEquals(1, history.size)
+        val entry = history.first()
+        assertTrue(entry.isExpired())
+    }
+
+    @Test
+    fun `loadHistory automatically expires backdated stale entries`() {
+        val id = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null
+        )
+
+        // Backdate the entry to be older than 2 hours ago
+        val history = PaymentsHistoryActivity.getPaymentHistory(context).toMutableList()
+        val index = history.indexOfFirst { it.id == id }
+        val existing = history[index]
+        val backdatedDate = java.util.Date(System.currentTimeMillis() - 3 * 60 * 60 * 1000L) // 3 hours ago
+        val backdatedEntry = PaymentHistoryEntry(
+            id = existing.id,
+            token = existing.token,
+            amount = existing.amount,
+            date = backdatedDate,
+            rawUnit = existing.getUnit(),
+            rawEntryUnit = existing.getEntryUnit(),
+            enteredAmount = existing.enteredAmount,
+            bitcoinPrice = existing.bitcoinPrice,
+            mintUrl = existing.mintUrl,
+            paymentRequest = existing.paymentRequest,
+            rawStatus = existing.status,
+            paymentType = existing.paymentType,
+            lightningInvoice = existing.lightningInvoice,
+            lightningQuoteId = existing.lightningQuoteId,
+            lightningMintUrl = existing.lightningMintUrl,
+            formattedAmount = existing.formattedAmount,
+            nostrNprofile = existing.nostrNprofile,
+            nostrSecretHex = existing.nostrSecretHex,
+            checkoutBasketJson = existing.checkoutBasketJson,
+            basketId = existing.basketId,
+            tipAmountSats = existing.tipAmountSats,
+            tipPercentage = existing.tipPercentage,
+            swapToLightningMintJson = existing.swapToLightningMintJson,
+        )
+        history[index] = backdatedEntry
+
+        val prefs = context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE)
+        prefs.edit().putString("history", com.google.gson.Gson().toJson(history)).apply()
+
+        // Launch the activity
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+
+        // Check that the entry is now expired
+        val updatedHistory = PaymentsHistoryActivity.getPaymentHistory(context)
+        assertEquals(1, updatedHistory.size)
+        val entry = updatedHistory.first()
+        assertTrue(entry.isExpired())
     }
 }
