@@ -65,27 +65,16 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Section Header -->
-    <TextView
-        android:id="@+id/section_header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="8dp"
-        android:text="@string/currency_settings_section_preferred_currency"
-        android:textAppearance="@style/Text.SectionHeader"
-        app:layout_constraintTop_toBottomOf="@id/search_card" />
-
     <!-- Currency RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/currency_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="@dimen/space_m"
         android:clipToPadding="false"
         android:paddingBottom="32dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/section_header" />
+        app:layout_constraintTop_toBottomOf="@id/search_card" />
 
     <TextView
         android:id="@+id/empty_state_text"
@@ -97,6 +86,6 @@
         android:textAppearance="@style/Text.Body"
         android:textColor="@color/color_text_secondary"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/section_header" />
+        app:layout_constraintTop_toBottomOf="@id/search_card" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

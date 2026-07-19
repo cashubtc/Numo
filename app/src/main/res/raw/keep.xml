@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Flag drawables are resolved reflectively via getIdentifier (CurrencyFlags.kt),
+     so resource shrinking must not strip them if it is ever enabled. -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/flag_*" />
