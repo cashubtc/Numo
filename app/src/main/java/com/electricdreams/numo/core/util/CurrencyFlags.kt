@@ -2,6 +2,7 @@ package com.electricdreams.numo.core.util
 
 import android.annotation.SuppressLint
 import android.content.Context
+import java.util.Locale
 
 /**
  * Maps ISO 4217 currency codes to the bundled flag_xx drawables
@@ -25,11 +26,13 @@ object CurrencyFlags {
      */
     @SuppressLint("DiscouragedApi")
     fun flagResId(context: Context, currencyCode: String): Int {
-        val code = currencyCode.uppercase()
+        val code = currencyCode.uppercase(Locale.ROOT)
         return cache.getOrPut(code) {
             // X-prefixed codes are supranational or commodities (XOF, XAU, ...)
             val country = OVERRIDES[code]
-                ?: code.takeIf { it.length == 3 && it[0] != 'X' }?.substring(0, 2)?.lowercase()
+                ?: code.takeIf { it.length == 3 && it[0] != 'X' }
+                    ?.substring(0, 2)
+                    ?.lowercase(Locale.ROOT)
                 ?: return@getOrPut 0
             context.resources.getIdentifier("flag_$country", "drawable", context.packageName)
         }
