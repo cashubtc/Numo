@@ -319,6 +319,18 @@
                 android:value=".feature.settings.SettingsActivity" />
         </activity>
 
+        <activity
+            android:name="com.electricdreams.numo.feature.reporting.IssueReportActivity"
+            android:exported="false"
+            android:label="@string/issue_report_title"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Numo"
+            android:parentActivityName=".feature.settings.AboutActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.settings.AboutActivity" />
+        </activity>
+
         <activity android:name="com.electricdreams.numo.feature.btcmap.BtcMapExplainerActivity"
             android:exported="false"
             android:label="BTCMap"
