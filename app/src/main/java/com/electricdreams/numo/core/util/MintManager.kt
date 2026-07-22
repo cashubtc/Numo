@@ -35,7 +35,6 @@ class MintManager private constructor(context: Context) {
             "https://mint.minibits.cash/Bitcoin",
             "https://mint.chorus.community",
             "https://mint.cubabitcoin.org",
-            "https://mint.coinos.io",
         )
         
         // Default Lightning mint (first of the default mints)

@@ -93,8 +93,7 @@ class OnboardingActivity : AppCompatActivity() {
         private val ONBOARDING_DEFAULT_MINTS = listOf(
             "https://mint.minibits.cash/Bitcoin",
             "https://mint.chorus.community",
-            "https://mint.cubabitcoin.org",
-            "https://mint.coinos.io"
+            "https://mint.cubabitcoin.org"
         )
 
         fun isOnboardingComplete(context: Context): Boolean {
