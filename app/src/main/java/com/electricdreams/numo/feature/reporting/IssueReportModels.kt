@@ -37,8 +37,8 @@ data class IssueReportPayload(
 }
 
 data class IssueReportSubmission(
-    val serializedEvent: String,
-    val eventId: String
+    val payloadJson: String,
+    val privateKeyHex: String
 )
 
 sealed interface IssueReportValidationResult {

@@ -91,7 +91,7 @@ class IssueReportViewModel(
                 Result.success(currentPending)
             } else {
                 withContext(Dispatchers.Default) {
-                    builder.build(input, validatedConfiguration.recipientPublicKey)
+                    builder.build(input)
                 }
             }
             val submission = submissionResult.getOrElse {

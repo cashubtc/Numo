@@ -15,21 +15,15 @@ android {
         versionCode = 23
         versionName = "1.8"
 
-        val issueReportRecipient = providers.gradleProperty("issueReportRecipientPubkey")
-            .orElse("")
-            .get()
-        val issueReportRelays = providers.gradleProperty("issueReportRelays")
-            .orElse("wss://relay.damus.io,wss://nos.lol")
-            .get()
         buildConfigField(
             "String",
-            "ISSUE_REPORT_RECIPIENT_PUBKEY",
-            "\"${issueReportRecipient.replace("\\", "\\\\").replace("\"", "\\\"")}\""
+            "ISSUE_REPORT_RELAY",
+            "\"wss://buzz.cashu.space\""
         )
         buildConfigField(
             "String",
-            "ISSUE_REPORT_RELAYS",
-            "\"${issueReportRelays.replace("\\", "\\\\").replace("\"", "\\\"")}\""
+            "ISSUE_REPORT_CHANNEL",
+            "\"numo-reports\""
         )
         buildConfigField("long", "ISSUE_REPORT_RELAY_TIMEOUT_MS", "7000L")
         buildConfigField("long", "ISSUE_REPORT_OVERALL_TIMEOUT_MS", "10000L")

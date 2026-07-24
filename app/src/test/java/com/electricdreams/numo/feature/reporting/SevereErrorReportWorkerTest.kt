@@ -44,7 +44,7 @@ class SevereErrorReportWorkerTest {
     }
 
     @Test
-    fun `worker retains fresh report when release recipient is unavailable`() = runBlocking {
+    fun `worker retains fresh report when relay does not accept it`() = runBlocking {
         store.write(
             PendingSevereErrorReport(
                 localToken = "worker-test-token",
@@ -55,10 +55,11 @@ class SevereErrorReportWorkerTest {
         )
         assertNotNull(store.read())
         val worker = TestListenableWorkerBuilder<SevereErrorReportWorker>(context).build()
+        worker.reportPublisher = IssueReportPublisher { _, _, _, _ -> false }
 
         val result = worker.doWork()
 
-        assertEquals(ListenableWorker.Result.success(), result)
+        assertEquals(ListenableWorker.Result.retry(), result)
         assertNotNull(store.read())
     }
 }

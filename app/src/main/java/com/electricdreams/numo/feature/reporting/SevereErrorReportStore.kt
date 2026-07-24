@@ -72,11 +72,13 @@ class SevereErrorReportStore(
                     !it.className.startsWith("com.electricdreams.numo.")
             }
         ) return false
-        val serialized = report.serializedEvent
-        val eventId = report.eventId
-        if ((serialized == null) != (eventId == null)) return false
-        if (serialized != null && serialized.toByteArray(Charsets.UTF_8).size > 65_536) return false
-        if (eventId != null && !eventId.matches(Regex("^[0-9a-f]{64}$"))) return false
+        val payload = report.payloadJson
+        val privateKey = report.privateKeyHex
+        if ((payload == null) != (privateKey == null)) return false
+        if (payload != null &&
+            payload.toByteArray(Charsets.UTF_8).size > IssueReportValidator.PAYLOAD_MAX_BYTES
+        ) return false
+        if (privateKey != null && !privateKey.matches(Regex("^[0-9a-f]{64}$"))) return false
         return true
     }
 

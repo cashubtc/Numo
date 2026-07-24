@@ -1,11 +1,9 @@
 package com.electricdreams.numo.feature.reporting
 
-import com.electricdreams.numo.nostr.Nip59
-import com.electricdreams.numo.nostr.NostrEvent
-import com.electricdreams.numo.nostr.NostrKeyPair
 import com.google.gson.Gson
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -15,7 +13,7 @@ class AutomaticSevereErrorPayloadTest {
     private val gson = Gson()
 
     @Test
-    fun `automatic payload excludes local token and encrypts for receiver`() {
+    fun `automatic payload excludes local token and uses an ephemeral key`() {
         val pending = PendingSevereErrorReport(
             localToken = "must-never-leave-device",
             occurredAtEpochMillis = 1_784_547_296_123L,
@@ -29,17 +27,13 @@ class AutomaticSevereErrorPayloadTest {
             nowMillis = 1_784_547_300_000L
         )
         val payloadJson = gson.toJson(payload)
-        val receiver = NostrKeyPair.generate()
-
         val submission = IssueReportBuilder(currentTimeMillis = { 1_784_547_300_000L })
-            .buildPayload(payloadJson, receiver.hexPub)
+            .buildPayload(payloadJson)
             .getOrThrow()
-        val giftWrap = gson.fromJson(submission.serializedEvent, NostrEvent::class.java)
-        val unwrapped = Nip59.unwrapGiftWrappedDm(giftWrap, receiver.secretKeyBytes)
 
-        assertEquals(payloadJson, unwrapped.rumor.content)
+        assertEquals(payloadJson, submission.payloadJson)
         assertEquals("automatic-severe-error", payload.reportType)
         assertFalse(payloadJson.contains(pending.localToken))
-        assertFalse(submission.serializedEvent.contains("IllegalStateException"))
+        assertTrue(submission.privateKeyHex.matches(Regex("^[0-9a-f]{64}$")))
     }
 }

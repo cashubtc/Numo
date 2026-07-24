@@ -21,6 +21,8 @@ class SevereErrorReportWorker(
     appContext: Context,
     workerParams: WorkerParameters
 ) : CoroutineWorker(appContext, workerParams) {
+    internal var reportPublisher = IssueReportPublisher(OkHttpIssueReportRelayTransport())
+
     override suspend fun doWork(): Result {
         val store = SevereErrorReportStore(applicationContext)
         if (!SevereErrorReportingPreferences.isEnabled(applicationContext)) {
@@ -37,27 +39,24 @@ class SevereErrorReportWorker(
         val validatedConfiguration = configuration.validate().getOrElse {
             return Result.success()
         }
-        val existingEvent = pending.serializedEvent
-        val existingEventId = pending.eventId
-        val submission = if (existingEvent != null && existingEventId != null) {
-            IssueReportSubmission(existingEvent, existingEventId)
+        val existingPayload = pending.payloadJson
+        val existingPrivateKey = pending.privateKeyHex
+        val submission = if (existingPayload != null && existingPrivateKey != null) {
+            IssueReportSubmission(existingPayload, existingPrivateKey)
         } else {
             val payload = AutomaticSevereErrorPayload.from(pending)
-            IssueReportBuilder().buildPayload(
-                Gson().toJson(payload),
-                validatedConfiguration.recipientPublicKey
-            ).getOrElse {
+            IssueReportBuilder().buildPayload(Gson().toJson(payload)).getOrElse {
                 return finishFailedAttempt(store, pending)
             }.also { constructed ->
                 store.write(
                     pending.copy(
-                        serializedEvent = constructed.serializedEvent,
-                        eventId = constructed.eventId
+                        payloadJson = constructed.payloadJson,
+                        privateKeyHex = constructed.privateKeyHex
                     )
                 )
             }
         }
-        val publishResult = IssueReportPublisher(OkHttpIssueReportRelayTransport()).publish(
+        val publishResult = reportPublisher.publish(
             submission,
             validatedConfiguration
         )

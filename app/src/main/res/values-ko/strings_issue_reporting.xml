@@ -3,7 +3,7 @@
     <string name="issue_report_title">문제 신고</string>
     <string name="issue_report_description_label">무슨 일이 있었나요?</string>
     <string name="issue_report_description_hint">무슨 일이 있었고 어떤 결과를 기대했는지 설명해 주세요</string>
-    <string name="issue_report_privacy_disclosure">입력한 설명과 아래에 표시된 기기 정보는 지원팀만 볼 수 있도록 암호화됩니다. 신고는 지갑이나 앱 ID에 연결되지 않습니다. 단, 릴레이 및 네트워크 제공업체는 IP 주소와 전송 시간을 확인할 수 있습니다.</string>
+    <string name="issue_report_privacy_disclosure">입력한 설명과 아래에 표시된 기기 정보는 Numo 지원팀의 비공개 작업 공간에 게시됩니다. 신고에는 새로운 임시 ID가 사용되며 지갑이나 앱 ID에 연결되지 않습니다. 릴레이 및 네트워크 제공업체는 IP 주소와 전송 시간을 확인할 수 있습니다.</string>
     <string name="issue_report_shared_information">포함되는 정보</string>
     <string name="issue_report_platform_value">플랫폼: %1$s</string>
     <string name="issue_report_os_value">OS 버전: %1$s</string>
@@ -12,8 +12,8 @@
     <string name="issue_report_app_build_value">앱 빌드: %1$s</string>
     <string name="issue_report_send">신고 보내기</string>
     <string name="issue_report_retry">다시 시도</string>
-    <string name="issue_report_sending">암호화하여 전송 중…</string>
-    <string name="issue_report_sent">신고를 보냈습니다. 릴레이가 암호화된 신고를 수락했습니다.</string>
+    <string name="issue_report_sending">인증하고 전송 중…</string>
+    <string name="issue_report_sent">Numo 지원팀에 신고를 보냈습니다.</string>
     <string name="issue_report_failed">신고가 수락되지 않았습니다. 입력한 내용은 유지되며 다시 시도할 수 있습니다.</string>
     <string name="issue_report_unavailable">문제 신고를 일시적으로 사용할 수 없습니다.</string>
     <string name="issue_report_required">문제를 설명해 주세요.</string>
@@ -21,7 +21,7 @@
     <string name="issue_report_invalid">신고 정보를 확인하고 다시 시도해 주세요.</string>
     <string name="issue_report_description_count">%1$d / 8,000바이트</string>
     <string name="issue_report_automatic_title">심각한 오류 신고 자동 전송</string>
-    <string name="issue_report_automatic_summary">기본적으로 사용 설정됩니다. 앱이 예기치 않게 종료되면 다음 실행 후 오류 종류와 앱 코드 위치가 포함된 암호화된 신고를 전송합니다. 예외 메시지, 원시 로그, 지갑 데이터 및 식별자는 포함되지 않습니다. 언제든지 사용 중지할 수 있습니다.</string>
+    <string name="issue_report_automatic_summary">기본적으로 사용 설정됩니다. 앱이 예기치 않게 종료되면 다음 실행 후 오류 종류와 앱 코드 위치가 포함된 신고를 Numo 지원팀의 비공개 작업 공간으로 전송합니다. 예외 메시지, 원시 로그, 지갑 데이터 및 식별자는 포함되지 않습니다. 언제든지 사용 중지할 수 있습니다.</string>
     <string name="about_report_issue">문제 신고</string>
-    <string name="about_report_issue_subtitle">암호화된 익명 신고 보내기</string>
+    <string name="about_report_issue_subtitle">Numo 지원팀에 익명 신고 보내기</string>
 </resources>

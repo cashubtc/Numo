@@ -3,7 +3,7 @@
     <string name="issue_report_title">Comunicar um problema</string>
     <string name="issue_report_description_label">O que aconteceu?</string>
     <string name="issue_report_description_hint">Descreva o que aconteceu e o que esperava que acontecesse</string>
-    <string name="issue_report_privacy_disclosure">A sua descrição e as informações do dispositivo apresentadas abaixo serão encriptadas para a equipa de suporte. O relatório não é associado à sua carteira nem à identidade da aplicação. Os relays e fornecedores de rede ainda poderão observar o seu endereço IP e a hora do envio.</string>
+    <string name="issue_report_privacy_disclosure">A sua descrição e as informações do dispositivo apresentadas abaixo serão publicadas no espaço de trabalho privado de suporte da Numo. O relatório usa uma nova identidade temporária e não é associado à sua carteira nem à identidade da aplicação. O relay e os fornecedores de rede poderão observar o seu endereço IP e a hora do envio.</string>
     <string name="issue_report_shared_information">Informações incluídas</string>
     <string name="issue_report_platform_value">Plataforma: %1$s</string>
     <string name="issue_report_os_value">Versão do SO: %1$s</string>
@@ -12,8 +12,8 @@
     <string name="issue_report_app_build_value">Compilação da aplicação: %1$s</string>
     <string name="issue_report_send">Enviar relatório</string>
     <string name="issue_report_retry">Tentar novamente</string>
-    <string name="issue_report_sending">A encriptar e enviar…</string>
-    <string name="issue_report_sent">Relatório enviado. Um relay aceitou o relatório encriptado.</string>
+    <string name="issue_report_sending">A autenticar e enviar…</string>
+    <string name="issue_report_sent">Relatório enviado ao suporte da Numo.</string>
     <string name="issue_report_failed">O relatório não foi aceite. O seu texto continua aqui; pode tentar novamente.</string>
     <string name="issue_report_unavailable">A comunicação de problemas está temporariamente indisponível.</string>
     <string name="issue_report_required">Descreva o problema.</string>
@@ -21,7 +21,7 @@
     <string name="issue_report_invalid">Verifique as informações do relatório e tente novamente.</string>
     <string name="issue_report_description_count">%1$d / 8000 bytes</string>
     <string name="issue_report_automatic_title">Enviar automaticamente relatórios de erros graves</string>
-    <string name="issue_report_automatic_summary">Ativado por predefinição. Se a aplicação terminar inesperadamente, enviará um relatório encriptado após o próximo arranque com a categoria do erro e as localizações do código da aplicação. Nunca são incluídas mensagens de exceção, registos brutos, dados da carteira ou identificadores. Pode desativar esta opção a qualquer momento.</string>
+    <string name="issue_report_automatic_summary">Ativado por predefinição. Se a aplicação terminar inesperadamente, após o próximo arranque enviará para o espaço de trabalho privado de suporte da Numo um relatório com a categoria do erro e as localizações do código da aplicação. Nunca são incluídas mensagens de exceção, registos brutos, dados da carteira ou identificadores. Pode desativar esta opção a qualquer momento.</string>
     <string name="about_report_issue">Comunicar um problema</string>
-    <string name="about_report_issue_subtitle">Enviar um relatório anónimo encriptado</string>
+    <string name="about_report_issue_subtitle">Enviar um relatório anónimo ao suporte da Numo</string>
 </resources>

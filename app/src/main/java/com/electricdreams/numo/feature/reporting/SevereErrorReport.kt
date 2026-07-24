@@ -7,8 +7,8 @@ data class PendingSevereErrorReport(
     val occurredAtEpochMillis: Long,
     val exceptionTypes: List<String>,
     val appFrames: List<SanitizedStackFrame>,
-    val serializedEvent: String? = null,
-    val eventId: String? = null
+    val payloadJson: String? = null,
+    val privateKeyHex: String? = null
 )
 
 data class SanitizedStackFrame(
