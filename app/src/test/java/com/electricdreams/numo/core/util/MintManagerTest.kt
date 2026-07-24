@@ -54,6 +54,7 @@ class MintManagerTest {
         val mints = mintManager.getAllowedMints()
         assertFalse(mints.isEmpty())
         assertTrue(mints.contains("https://mint.minibits.cash/Bitcoin"))
+        assertFalse(mints.contains("https://mint.coinos.io"))
     }
 
     @Test
