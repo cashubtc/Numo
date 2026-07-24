@@ -303,6 +303,53 @@
 
             <!-- Contact Us -->
             <LinearLayout
+                android:id="@+id/report_issue_item"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/settings_item_height"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="@dimen/settings_horizontal_padding">
+
+                <ImageView
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:layout_marginEnd="@dimen/space_l"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_warning"
+                    app:tint="@color/color_icon_secondary" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/about_report_issue"
+                        android:textAppearance="@style/Text.RowTitle" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/about_report_issue_subtitle"
+                        android:textAppearance="@style/Text.RowSubtitle" />
+                </LinearLayout>
+
+                <ImageView
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_chevron_forward"
+                    app:tint="@color/color_icon_secondary" />
+            </LinearLayout>
+
+            <!-- Contact Us -->
+            <LinearLayout
                 android:id="@+id/contact_item"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/settings_item_height"

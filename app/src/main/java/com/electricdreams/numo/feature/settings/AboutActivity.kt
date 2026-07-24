@@ -11,6 +11,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.BuildConfig
 import com.electricdreams.numo.R
+import com.electricdreams.numo.feature.reporting.IssueReportActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
@@ -93,6 +94,10 @@ class AboutActivity : AppCompatActivity() {
         // Contact
         findViewById<View>(R.id.contact_item).setOnClickListener {
             sendEmail("numopay@proton.me")
+        }
+
+        findViewById<View>(R.id.report_issue_item).setOnClickListener {
+            startActivity(Intent(this, IssueReportActivity::class.java))
         }
     }
 

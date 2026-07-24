@@ -3,6 +3,8 @@ package com.electricdreams.numo
 import android.app.Application
 import android.util.Log
 import com.electricdreams.numo.core.dev.ErrorLogCollector
+import com.electricdreams.numo.feature.reporting.SevereErrorExceptionHandler
+import com.electricdreams.numo.feature.reporting.SevereErrorReportScheduler
 
 /**
  * Custom Application class for global initialisation.
@@ -16,6 +18,9 @@ class NumoApplication : Application() {
         AppGlobals.init(this)
         // Wallet initialisation is handled by onboarding / ModernPOS flows.
         Log.d("NumoApplication", "Application initialised")
+
+        SevereErrorExceptionHandler.install(this)
+        SevereErrorReportScheduler.scheduleIfPending(this)
 
         // Start developer error log collection in debug builds so the
         // Developer Settings > Error Logs screen can show recent errors
