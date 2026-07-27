@@ -22,6 +22,10 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
+    <!--
+      Keep legacy onBackPressed() handlers working while targeting API 36.
+      Remove this opt-out after migrating all back navigation to OnBackPressedDispatcher.
+    -->
     <application
         android:enableOnBackInvokedCallback="false"
         android:allowBackup="true"
