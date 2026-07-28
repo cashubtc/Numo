@@ -33,7 +33,8 @@ class MintManager private constructor(context: Context) {
         // Default mints
         private val DEFAULT_MINTS: Set<String> = setOf(
             "https://mint.minibits.cash/Bitcoin",
-            "https://mint.chorus.community",
+            "https://mint.macadamia.cash",
+            "https://antifiat.cash",
             "https://mint.cubabitcoin.org",
         )
         

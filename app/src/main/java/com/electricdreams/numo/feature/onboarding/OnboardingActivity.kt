@@ -92,7 +92,8 @@ class OnboardingActivity : AppCompatActivity() {
         private const val KEY_ONBOARDING_COMPLETE = "onboarding_complete"
         private val ONBOARDING_DEFAULT_MINTS = listOf(
             "https://mint.minibits.cash/Bitcoin",
-            "https://mint.chorus.community",
+            "https://mint.macadamia.cash",
+            "https://antifiat.cash",
             "https://mint.cubabitcoin.org"
         )
 
