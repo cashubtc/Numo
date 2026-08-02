@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import okhttp3.Dns
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -23,6 +24,7 @@ import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.InetAddress
 import java.net.URI
+import java.net.UnknownHostException
 import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
@@ -78,11 +80,29 @@ object NostrMintDiscovery {
         .readTimeout(0, TimeUnit.MILLISECONDS)
         .pingInterval(20, TimeUnit.SECONDS)
         .build()
+    private val publicHttpClient = OkHttpClient.Builder()
+        .dns(publicAddressDns())
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.SECONDS)
+        .build()
 
     suspend fun discover(
         relays: List<String> = DEFAULT_RELAYS,
         timeoutMs: Long = DISCOVERY_TIMEOUT_MS,
     ): List<MintRecommendation> = discoverFlow(relays, timeoutMs).lastOrNull().orEmpty()
+
+    suspend fun fetchPublicMintName(url: String): String? = withContext(Dispatchers.IO) {
+        try {
+            val request = Request.Builder().url("$url/v1/info").get().build()
+            publicHttpClient.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return@withContext null
+                parseName(response.body?.string())
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Public mint profile fetch failed for $url", e)
+            null
+        }
+    }
 
     /**
      * Emits a fresh aggregate whenever a verified mint event arrives. Relays commonly return
@@ -235,6 +255,18 @@ object NostrMintDiscovery {
             is Inet4Address -> isPublicIpv4(bytes)
             is Inet6Address -> isPublicIpv6(bytes)
             else -> false
+        }
+    }
+
+    internal fun publicAddressDns(delegate: Dns = Dns.SYSTEM): Dns = object : Dns {
+        override fun lookup(hostname: String): List<InetAddress> {
+            val addresses = delegate.lookup(hostname)
+            if (addresses.isEmpty() || addresses.any { !isPublicAddress(it) }) {
+                throw UnknownHostException(
+                    "Host does not resolve exclusively to public addresses",
+                )
+            }
+            return addresses
         }
     }
 

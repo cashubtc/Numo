@@ -15,7 +15,6 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.util.MintIconCache
-import com.electricdreams.numo.core.util.MintProfileService
 import com.electricdreams.numo.nostr.NostrMintDiscovery
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -111,19 +110,24 @@ class MintDiscoveryBottomSheet : BottomSheetDialogFragment() {
                     itemViews.remove(url)?.let(list::removeView)
                     profileNames.remove(url)
                 }
-                update.take(NostrMintDiscovery.MAX_DISCOVERY_RESULTS).forEach { recommendation ->
-                    recommendations[recommendation.url] = recommendation
-                    val item = itemViews[recommendation.url] ?: layoutInflater.inflate(
-                        R.layout.item_mint_discovery,
-                        list,
-                        false,
-                    ).also {
-                        itemViews[recommendation.url] = it
-                        list.addView(it)
+                update.take(NostrMintDiscovery.MAX_DISCOVERY_RESULTS)
+                    .forEachIndexed { index, recommendation ->
+                        recommendations[recommendation.url] = recommendation
+                        val item = itemViews[recommendation.url] ?: layoutInflater.inflate(
+                            R.layout.item_mint_discovery,
+                            list,
+                            false,
+                        ).also {
+                            itemViews[recommendation.url] = it
+                        }
+                        val currentIndex = list.indexOfChild(item)
+                        if (currentIndex != index) {
+                            if (currentIndex >= 0) list.removeView(item)
+                            list.addView(item, index)
+                        }
+                        bindRecommendation(item, recommendation)
+                        loadProfile(recommendation.url)
                     }
-                    bindRecommendation(item, recommendation)
-                    loadProfile(recommendation.url)
-                }
                 progress.isVisible = false
                 updateStatus(status)
                 applySearch()
@@ -152,10 +156,9 @@ class MintDiscoveryBottomSheet : BottomSheetDialogFragment() {
         if (!profileRequests.add(url)) return
         viewLifecycleOwner.lifecycleScope.launch {
             val result = profileSemaphore.withPermit {
-                MintProfileService.getInstance(requireContext())
-                    .fetchAndStoreMintProfile(url, storeInCache = false)
+                NostrMintDiscovery.fetchPublicMintName(url)
             }
-            result.displayName?.let { profileNames[url] = it }
+            result?.let { profileNames[url] = it }
             recommendations[url]?.let { recommendation ->
                 itemViews[url]?.let { bindRecommendation(it, recommendation) }
             }

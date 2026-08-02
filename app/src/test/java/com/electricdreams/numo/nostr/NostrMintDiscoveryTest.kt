@@ -3,7 +3,9 @@ package com.electricdreams.numo.nostr
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import okhttp3.Dns
 import java.net.InetAddress
+import java.net.UnknownHostException
 
 class NostrMintDiscoveryTest {
 
@@ -125,6 +127,36 @@ class NostrMintDiscoveryTest {
         }
 
         assertEquals(NostrMintDiscovery.MAX_DISCOVERY_RESULTS, aggregate(events).size)
+    }
+
+    @Test
+    fun `connection DNS rejects any non public answer`() {
+        val dns = NostrMintDiscovery.publicAddressDns(
+            object : Dns {
+                override fun lookup(hostname: String): List<InetAddress> = listOf(
+                    InetAddress.getByName("8.8.8.8"),
+                    InetAddress.getByName("127.0.0.1"),
+                )
+            },
+        )
+
+        try {
+            dns.lookup("mint.example")
+            throw AssertionError("Expected private DNS answer to be rejected")
+        } catch (_: UnknownHostException) {
+            // Expected.
+        }
+    }
+
+    @Test
+    fun `connection DNS returns validated public answers for address pinning`() {
+        val expected = listOf(InetAddress.getByName("8.8.8.8"))
+        val delegate = object : Dns {
+            override fun lookup(hostname: String): List<InetAddress> = expected
+        }
+        val dns = NostrMintDiscovery.publicAddressDns(delegate)
+
+        assertEquals(expected, dns.lookup("mint.example"))
     }
 
     private fun aggregate(events: Collection<NostrEvent>) = NostrMintDiscovery.aggregate(
