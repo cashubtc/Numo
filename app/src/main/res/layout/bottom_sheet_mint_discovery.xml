@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/space_2xl">
+
+        <View
+            android:layout_width="36dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/space_m"
+            android:background="@color/color_divider" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_screen_horizontal"
+            android:paddingHorizontal="@dimen/space_xl"
+            android:text="@string/mint_discovery_title"
+            android:textAppearance="@style/Text.DialogTitle" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_s"
+            android:paddingHorizontal="@dimen/space_xl"
+            android:text="@string/mint_discovery_subtitle"
+            android:textAppearance="@style/Text.DialogSubtitle" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/space_xl"
+            android:layout_marginTop="@dimen/space_l"
+            app:startIconDrawable="@drawable/ic_search"
+            app:startIconTint="@color/color_text_tertiary">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/discovery_search_input"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:hint="@string/mint_discovery_search_hint"
+                android:imeOptions="actionDone"
+                android:inputType="text"
+                android:singleLine="true" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <ProgressBar
+            android:id="@+id/discovery_progress"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/space_2xl"
+            android:indeterminateTint="@color/color_primary" />
+
+        <TextView
+            android:id="@+id/discovery_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_m"
+            android:gravity="center"
+            android:paddingHorizontal="@dimen/space_xl"
+            android:textAppearance="@style/Text.Body" />
+
+        <LinearLayout
+            android:id="@+id/discovery_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/space_xl"
+            android:layout_marginTop="@dimen/space_m"
+            android:orientation="vertical"
+            android:showDividers="middle"
+            android:divider="@drawable/divider_mint_discovery"
+            android:dividerPadding="56dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/discovery_retry_button"
+            style="@style/Widget.Button.Secondary.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginHorizontal="@dimen/space_xl"
+            android:layout_marginTop="@dimen/space_l"
+            android:text="@string/mint_discovery_retry"
+            android:visibility="gone"
+            app:cornerRadius="@dimen/radius_pill" />
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

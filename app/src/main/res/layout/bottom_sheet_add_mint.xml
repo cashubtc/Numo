@@ -91,6 +91,30 @@
 
         </FrameLayout>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/space_l"
+            android:text="@string/onboarding_add_mint_or"
+            android:textAppearance="@style/Text.Caption" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/discover_mints_button"
+            style="@style/Widget.Button.Secondary.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/button_height"
+            android:layout_marginHorizontal="@dimen/space_xl"
+            android:layout_marginTop="@dimen/space_m"
+            android:text="@string/mint_discovery_action"
+            android:textColor="@color/color_text_primary"
+            android:textSize="17sp"
+            app:cornerRadius="@dimen/radius_pill"
+            app:icon="@drawable/ic_search"
+            app:iconGravity="textStart"
+            app:iconPadding="@dimen/space_s"
+            app:iconTint="@color/color_text_primary" />
+
         <!-- Scan QR Code Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/scan_qr_button"

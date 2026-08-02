@@ -191,6 +191,25 @@
     <string name="onboarding_add_mint_or">or</string>
     <string name="onboarding_add_mint_scan_qr">Scan</string>
     <string name="onboarding_add_mint_loading">Adding mint…</string>
+    <string name="mint_discovery_action">Discover on Nostr</string>
+    <string name="mint_discovery_title">Discover mints</string>
+    <string name="mint_discovery_subtitle">Community recommendations from Nostr. Check the operator before trusting a mint with funds.</string>
+    <string name="mint_discovery_loading">Looking across Nostr relays…</string>
+    <string name="mint_discovery_search_hint">Search mints</string>
+    <string name="mint_discovery_no_matches">No mints match your search.</string>
+    <string name="mint_discovery_empty">No mint recommendations were found. Check your connection and try again.</string>
+    <string name="mint_discovery_retry">Try again</string>
+    <string name="mint_discovery_rating">★ %1$s · %2$d recommendations</string>
+    <string name="mint_discovery_announced">Announced on Nostr</string>
+    <string name="mint_discovery_select">Select mint</string>
+    <plurals name="mint_discovery_count">
+        <item quantity="one">%d mint found</item>
+        <item quantity="other">%d mints found</item>
+    </plurals>
+    <plurals name="mint_discovery_recommendations">
+        <item quantity="one">%d recommendation</item>
+        <item quantity="other">%d recommendations</item>
+    </plurals>
 
 
     <string name="onboarding_restoring_title">Restoring Wallet</string>

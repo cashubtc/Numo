@@ -68,6 +68,7 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
         val urlInput = view.findViewById<EditText>(R.id.mint_url_input)
         val addButton = view.findViewById<Button>(R.id.add_mint_button)
         val scanRow = view.findViewById<View>(R.id.scan_qr_button)
+        val discoverRow = view.findViewById<View>(R.id.discover_mints_button)
 
         urlInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -89,7 +90,16 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
             listener?.onScanQrCode()
         }
 
-        urlInput.requestFocus()
+        discoverRow.setOnClickListener {
+            MintDiscoveryBottomSheet.newInstance(
+                object : MintDiscoveryBottomSheet.Listener {
+                    override fun onMintSelected(url: String) {
+                        urlInput.setText(url)
+                        urlInput.setSelection(url.length)
+                    }
+                },
+            ).show(childFragmentManager, "mint_discovery")
+        }
 
         // Expand immediately
         (dialog as? BottomSheetDialog)?.let { bsd ->

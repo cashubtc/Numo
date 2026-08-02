@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:minHeight="76dp"
+    android:orientation="horizontal"
+    android:paddingVertical="@dimen/space_m">
+
+    <ImageView
+        android:id="@+id/discovery_mint_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/bg_mint_item"
+        android:contentDescription="@null"
+        android:padding="@dimen/space_s"
+        android:src="@drawable/ic_bitcoin"
+        android:tint="@color/numo_fluorescent_green" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_m"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/discovery_mint_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="@style/Text.RowTitle" />
+
+        <TextView
+            android:id="@+id/discovery_mint_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:ellipsize="middle"
+            android:maxLines="1"
+            android:textAppearance="@style/Text.RowSubtitle" />
+
+        <TextView
+            android:id="@+id/discovery_mint_reviews"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="@style/Text.Caption" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/discovery_add_icon"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/mint_discovery_select"
+        android:padding="14dp"
+        android:src="@drawable/ic_plus"
+        android:tint="@color/color_primary" />
+
+</LinearLayout>
