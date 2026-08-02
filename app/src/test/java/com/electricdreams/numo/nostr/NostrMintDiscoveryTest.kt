@@ -3,6 +3,7 @@ package com.electricdreams.numo.nostr
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
+import java.net.InetAddress
 
 class NostrMintDiscoveryTest {
 
@@ -39,7 +40,7 @@ class NostrMintDiscoveryTest {
             ),
         )
 
-        val result = NostrMintDiscovery.aggregate(events, verifyEvents = false)
+        val result = aggregate(events)
 
         assertEquals(1, result.size)
         assertEquals("https://mint.example", result.single().url)
@@ -73,13 +74,13 @@ class NostrMintDiscoveryTest {
 
         assertEquals(
             emptyList<NostrMintDiscovery.MintRecommendation>(),
-            NostrMintDiscovery.aggregate(events, verifyEvents = false),
+            aggregate(events),
         )
     }
 
     @Test
     fun `recommendation without rating is still counted`() {
-        val result = NostrMintDiscovery.aggregate(
+        val result = aggregate(
             listOf(
                 event(
                     kind = 38000,
@@ -88,12 +89,49 @@ class NostrMintDiscoveryTest {
                     tags = recommendationTags("https://mint.example"),
                 ),
             ),
-            verifyEvents = false,
         ).single()
 
         assertEquals(1, result.reviewCount)
         assertNull(result.averageRating)
     }
+
+    @Test
+    fun `rejects hosts resolving to non public addresses`() {
+        val events = listOf(
+            event(
+                kind = 38172,
+                author = "mint",
+                tags = listOf(listOf("u", "https://private.example")),
+            ),
+        )
+
+        val result = NostrMintDiscovery.aggregate(
+            events,
+            verifyEvents = false,
+            resolveHost = { listOf(InetAddress.getByName("192.168.1.1")) },
+        )
+
+        assertEquals(emptyList<NostrMintDiscovery.MintRecommendation>(), result)
+    }
+
+    @Test
+    fun `caps discovery results`() {
+        val events = (0..NostrMintDiscovery.MAX_DISCOVERY_RESULTS).map { index ->
+            event(
+                kind = 38172,
+                author = "mint-$index",
+                tags = listOf(listOf("u", "https://mint-$index.example")),
+            )
+        }
+
+        assertEquals(NostrMintDiscovery.MAX_DISCOVERY_RESULTS, aggregate(events).size)
+    }
+
+    private fun aggregate(events: Collection<NostrEvent>) = NostrMintDiscovery.aggregate(
+        events,
+        verifyEvents = false,
+        resolveHost = { listOf(InetAddress.getByName("8.8.8.8")) },
+    )
 
     private fun recommendationTags(url: String) = listOf(
         listOf("k", "38172"),

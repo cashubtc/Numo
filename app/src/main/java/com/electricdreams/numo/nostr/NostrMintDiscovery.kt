@@ -19,6 +19,9 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
+import java.net.Inet4Address
+import java.net.Inet6Address
+import java.net.InetAddress
 import java.net.URI
 import java.util.Locale
 import java.util.UUID
@@ -60,6 +63,7 @@ object NostrMintDiscovery {
     private const val RECOMMENDATION_KIND = 38000
     private const val DISCOVERY_TIMEOUT_MS = 8_000L
     private const val MAX_EVENTS_PER_RELAY = 1_000
+    internal const val MAX_DISCOVERY_RESULTS = 50
 
     val DEFAULT_RELAYS = listOf(
         "wss://relay.primal.net",
@@ -118,6 +122,7 @@ object NostrMintDiscovery {
     internal fun aggregate(
         events: Collection<NostrEvent>,
         verifyEvents: Boolean = true,
+        resolveHost: (String) -> List<InetAddress> = ::resolveHost,
     ): List<MintRecommendation> {
         val mints = linkedMapOf<String, MutableRecommendation>()
 
@@ -126,8 +131,8 @@ object NostrMintDiscovery {
             .filter { !verifyEvents || it.verify() }
             .forEach { event ->
                 when (event.kind) {
-                    MINT_INFO_KIND -> handleMintInfo(event, mints)
-                    RECOMMENDATION_KIND -> handleRecommendation(event, mints)
+                    MINT_INFO_KIND -> handleMintInfo(event, mints, resolveHost)
+                    RECOMMENDATION_KIND -> handleRecommendation(event, mints, resolveHost)
                 }
             }
 
@@ -143,14 +148,15 @@ object NostrMintDiscovery {
             compareByDescending<MintRecommendation> { it.reviewCount }
                 .thenByDescending { it.averageRating ?: 0.0 }
                 .thenBy { it.name?.lowercase(Locale.ROOT) ?: it.url },
-        )
+        ).take(MAX_DISCOVERY_RESULTS)
     }
 
     private fun handleMintInfo(
         event: NostrEvent,
         mints: MutableMap<String, MutableRecommendation>,
+        resolveHost: (String) -> List<InetAddress>,
     ) {
-        val url = event.cashuUrls().firstOrNull() ?: return
+        val url = event.cashuUrls(resolveHost).firstOrNull() ?: return
         val mint = mints.getOrPut(url) { MutableRecommendation(url) }
         if (event.created_at < mint.announcementCreatedAt) return
 
@@ -161,6 +167,7 @@ object NostrMintDiscovery {
     private fun handleRecommendation(
         event: NostrEvent,
         mints: MutableMap<String, MutableRecommendation>,
+        resolveHost: (String) -> List<InetAddress>,
     ) {
         val isCashuRecommendation = event.tags.any {
             it.size >= 2 && it[0] == "k" && it[1] == MINT_INFO_KIND.toString()
@@ -168,7 +175,7 @@ object NostrMintDiscovery {
         if (!isCashuRecommendation) return
 
         val rating = parseRating(event.content)
-        event.cashuUrls().forEach { url ->
+        event.cashuUrls(resolveHost).forEach { url ->
             val mint = mints.getOrPut(url) { MutableRecommendation(url) }
             val previous = mint.reviewsByAuthor[event.pubkey]
             if (previous == null || event.created_at > previous.createdAt) {
@@ -181,24 +188,81 @@ object NostrMintDiscovery {
         }
     }
 
-    private fun NostrEvent.cashuUrls(): List<String> = tags.asSequence()
+    private fun NostrEvent.cashuUrls(
+        resolveHost: (String) -> List<InetAddress>,
+    ): List<String> = tags.asSequence()
         .filter { it.size >= 2 && it[0] == "u" }
         .filter { it.size < 3 || it[2].isBlank() || it[2].equals("cashu", ignoreCase = true) }
-        .mapNotNull { normalizePublicUrl(it[1]) }
+        .mapNotNull { normalizePublicUrl(it[1], resolveHost) }
         .distinct()
         .toList()
 
-    private fun normalizePublicUrl(rawUrl: String): String? {
+    private fun normalizePublicUrl(
+        rawUrl: String,
+        resolveHost: (String) -> List<InetAddress>,
+    ): String? {
         return try {
             val uri = URI(rawUrl.trim())
             if (uri.scheme != "https" && uri.scheme != "http") return null
             val host = uri.host?.lowercase(Locale.ROOT) ?: return null
             if (uri.userInfo != null || uri.fragment != null) return null
+            val addresses = resolveHost(host)
+            if (addresses.isEmpty() || addresses.any { !isPublicAddress(it) }) return null
             val port = if (uri.port == -1) "" else ":${uri.port}"
             val path = uri.rawPath.orEmpty().trimEnd('/')
             "${uri.scheme}://$host$port$path"
         } catch (_: Exception) {
             null
+        }
+    }
+
+    private fun resolveHost(host: String): List<InetAddress> =
+        InetAddress.getAllByName(host).toList()
+
+    internal fun isPublicAddress(address: InetAddress): Boolean {
+        if (
+            address.isAnyLocalAddress ||
+            address.isLoopbackAddress ||
+            address.isLinkLocalAddress ||
+            address.isSiteLocalAddress ||
+            address.isMulticastAddress
+        ) {
+            return false
+        }
+
+        val bytes = address.address
+        return when (address) {
+            is Inet4Address -> isPublicIpv4(bytes)
+            is Inet6Address -> isPublicIpv6(bytes)
+            else -> false
+        }
+    }
+
+    private fun isPublicIpv4(bytes: ByteArray): Boolean {
+        val first = bytes[0].toInt() and 0xff
+        val second = bytes[1].toInt() and 0xff
+        val third = bytes[2].toInt() and 0xff
+        return when {
+            first == 0 -> false
+            first == 100 && second in 64..127 -> false
+            first == 192 && second == 0 && third == 0 -> false
+            first == 192 && second == 0 && third == 2 -> false
+            first == 198 && second in 18..19 -> false
+            first == 198 && second == 51 && third == 100 -> false
+            first == 203 && second == 0 && third == 113 -> false
+            first >= 240 -> false
+            else -> true
+        }
+    }
+
+    private fun isPublicIpv6(bytes: ByteArray): Boolean {
+        val first = bytes[0].toInt() and 0xff
+        val second = bytes[1].toInt() and 0xff
+        return when {
+            first and 0xfe == 0xfc -> false // Unique-local fc00::/7.
+            first == 0x20 && second == 0x01 && bytes[2].toInt() == 0x0d &&
+                bytes[3].toInt() and 0xff == 0xb8 -> false // Documentation 2001:db8::/32.
+            else -> true
         }
     }
 

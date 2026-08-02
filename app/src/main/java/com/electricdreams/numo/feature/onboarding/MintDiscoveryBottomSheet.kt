@@ -105,7 +105,13 @@ class MintDiscoveryBottomSheet : BottomSheetDialogFragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             NostrMintDiscovery.discoverFlow().collect { update ->
                 if (!isAdded) return@collect
-                update.forEach { recommendation ->
+                val visibleUrls = update.mapTo(mutableSetOf()) { it.url }
+                recommendations.keys.filterNot { it in visibleUrls }.forEach { url ->
+                    recommendations.remove(url)
+                    itemViews.remove(url)?.let(list::removeView)
+                    profileNames.remove(url)
+                }
+                update.take(NostrMintDiscovery.MAX_DISCOVERY_RESULTS).forEach { recommendation ->
                     recommendations[recommendation.url] = recommendation
                     val item = itemViews[recommendation.url] ?: layoutInflater.inflate(
                         R.layout.item_mint_discovery,
@@ -142,6 +148,7 @@ class MintDiscoveryBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun loadProfile(url: String) {
+        if (profileRequests.size >= NostrMintDiscovery.MAX_DISCOVERY_RESULTS) return
         if (!profileRequests.add(url)) return
         viewLifecycleOwner.lifecycleScope.launch {
             val result = profileSemaphore.withPermit {
