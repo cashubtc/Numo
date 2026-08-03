@@ -17,8 +17,7 @@
         android:background="@drawable/bg_mint_item"
         android:contentDescription="@null"
         android:padding="@dimen/space_s"
-        android:src="@drawable/ic_bitcoin"
-        android:tint="@color/numo_fluorescent_green" />
+        android:src="@drawable/ic_bitcoin" />
 
     <LinearLayout
         android:layout_width="0dp"

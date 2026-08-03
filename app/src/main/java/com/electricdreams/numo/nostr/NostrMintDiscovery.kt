@@ -27,6 +27,7 @@ import java.net.URI
 import java.net.UnknownHostException
 import java.util.Locale
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.resume
@@ -39,6 +40,11 @@ import kotlin.coroutines.resume
  * selected mint's /v1/info endpoint before trusting it.
  */
 object NostrMintDiscovery {
+
+    data class PublicMintProfile(
+        val name: String?,
+        val iconBytes: ByteArray?,
+    )
 
     data class MintRecommendation(
         val url: String,
@@ -63,8 +69,9 @@ object NostrMintDiscovery {
     private const val TAG = "NostrMintDiscovery"
     private const val MINT_INFO_KIND = 38172
     private const val RECOMMENDATION_KIND = 38000
-    private const val DISCOVERY_TIMEOUT_MS = 8_000L
-    private const val MAX_EVENTS_PER_RELAY = 1_000
+    private const val DISCOVERY_TIMEOUT_MS = 15_000L
+    private const val MAX_EVENTS_PER_FILTER = 5_000
+    private const val MAX_ICON_BYTES = 2 * 1024 * 1024L
     internal const val MAX_DISCOVERY_RESULTS = 50
 
     val DEFAULT_RELAYS = listOf(
@@ -91,12 +98,14 @@ object NostrMintDiscovery {
         timeoutMs: Long = DISCOVERY_TIMEOUT_MS,
     ): List<MintRecommendation> = discoverFlow(relays, timeoutMs).lastOrNull().orEmpty()
 
-    suspend fun fetchPublicMintName(url: String): String? = withContext(Dispatchers.IO) {
+    suspend fun fetchPublicMintProfile(url: String): PublicMintProfile? = withContext(Dispatchers.IO) {
         try {
             val request = Request.Builder().url("$url/v1/info").get().build()
             publicHttpClient.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) return@withContext null
-                parseName(response.body?.string())
+                val info = parsePublicMintInfo(response.body?.string(), url)
+                val iconBytes = info.iconUrl?.let { fetchPublicIcon(it) }
+                PublicMintProfile(info.name, iconBytes)
             }
         } catch (e: Exception) {
             Log.w(TAG, "Public mint profile fetch failed for $url", e)
@@ -114,6 +123,7 @@ object NostrMintDiscovery {
         timeoutMs: Long = DISCOVERY_TIMEOUT_MS,
     ): Flow<List<MintRecommendation>> = channelFlow {
         val verifiedEvents = linkedMapOf<String, NostrEvent>()
+        val resolveHost = memoizingResolver(::resolveHost)
         val lock = Any()
 
         val fetchJob = launch(Dispatchers.IO) {
@@ -129,7 +139,13 @@ object NostrMintDiscovery {
                         }
                     }
                     if (snapshot != null) {
-                        trySend(aggregate(snapshot, verifyEvents = false))
+                        trySend(
+                            aggregate(
+                                snapshot,
+                                verifyEvents = false,
+                                resolveHost = resolveHost,
+                            ),
+                        )
                     }
                 }
             }
@@ -312,6 +328,62 @@ object NostrMintDiscovery {
         }
     }
 
+    private data class PublicMintInfo(
+        val name: String?,
+        val iconUrl: String?,
+    )
+
+    private fun parsePublicMintInfo(content: String?, mintUrl: String): PublicMintInfo {
+        if (content.isNullOrBlank()) return PublicMintInfo(null, null)
+        return try {
+            val json = gson.fromJson(content, JsonObject::class.java)
+            val name = json?.get("name")
+                ?.takeIf { it.isJsonPrimitive }
+                ?.asString
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() }
+            val rawIconUrl = sequenceOf("icon_url", "iconUrl")
+                .mapNotNull { key ->
+                    json?.get(key)?.takeIf { it.isJsonPrimitive }?.asString
+                }
+                .map(String::trim)
+                .firstOrNull(String::isNotEmpty)
+            val iconUrl = rawIconUrl?.let { URI("$mintUrl/").resolve(it).toString() }
+                ?.takeIf {
+                    val scheme = URI(it).scheme
+                    scheme == "https" || scheme == "http"
+                }
+            PublicMintInfo(name, iconUrl)
+        } catch (_: Exception) {
+            PublicMintInfo(null, null)
+        }
+    }
+
+    private fun fetchPublicIcon(iconUrl: String): ByteArray? {
+        return try {
+            val request = Request.Builder().url(iconUrl).get().build()
+            publicHttpClient.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return null
+                val body = response.body ?: return null
+                if (body.contentLength() > MAX_ICON_BYTES) return null
+                val source = body.source()
+                source.request(MAX_ICON_BYTES + 1)
+                if (source.buffer.size > MAX_ICON_BYTES) return null
+                source.readByteArray()
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Public mint icon fetch failed for $iconUrl", e)
+            null
+        }
+    }
+
+    internal fun memoizingResolver(
+        delegate: (String) -> List<InetAddress>,
+    ): (String) -> List<InetAddress> {
+        val cache = ConcurrentHashMap<String, List<InetAddress>>()
+        return { host -> cache.computeIfAbsent(host, delegate) }
+    }
+
     private fun parseRating(content: String?): Int? {
         val match = RATING_REGEX.find(content.orEmpty()) ?: return null
         return match.groupValues[1].toIntOrNull()?.takeIf { it in 1..5 }
@@ -361,20 +433,7 @@ object NostrMintDiscovery {
 
                 val socket = client.newWebSocket(request, object : WebSocketListener() {
                     override fun onOpen(webSocket: WebSocket, response: Response) {
-                        val filter = JsonObject().apply {
-                            add("kinds", JsonArray().apply {
-                                add(MINT_INFO_KIND)
-                                add(RECOMMENDATION_KIND)
-                            })
-                            addProperty("limit", MAX_EVENTS_PER_RELAY)
-                        }
-                        webSocket.send(
-                            gson.toJson(JsonArray().apply {
-                                add("REQ")
-                                add(subscriptionId)
-                                add(filter)
-                            }),
-                        )
+                        webSocket.send(discoveryRequest(subscriptionId))
                     }
 
                     override fun onMessage(webSocket: WebSocket, text: String) {
@@ -436,6 +495,22 @@ object NostrMintDiscovery {
             Log.d(TAG, "Ignoring malformed relay message", e)
         }
     }
+
+    internal fun discoveryRequest(subscriptionId: String): String = gson.toJson(
+        JsonArray().apply {
+            add("REQ")
+            add(subscriptionId)
+            add(JsonObject().apply {
+                add("kinds", JsonArray().apply { add(MINT_INFO_KIND) })
+                addProperty("limit", MAX_EVENTS_PER_FILTER)
+            })
+            add(JsonObject().apply {
+                add("kinds", JsonArray().apply { add(RECOMMENDATION_KIND) })
+                add("#k", JsonArray().apply { add(MINT_INFO_KIND.toString()) })
+                addProperty("limit", MAX_EVENTS_PER_FILTER)
+            })
+        },
+    )
 
     private val RATING_REGEX = Regex("""\[(\d)\s*/\s*5]""")
 }

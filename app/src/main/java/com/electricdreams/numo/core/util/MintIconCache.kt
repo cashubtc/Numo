@@ -114,6 +114,30 @@ object MintIconCache {
             return@withContext null
         }
     }
+
+    /**
+     * Validate and cache icon bytes that were downloaded by a caller with its own network policy.
+     */
+    suspend fun cacheIcon(mintUrl: String, bytes: ByteArray): File? = withContext(Dispatchers.IO) {
+        if (!initialized) {
+            Log.w(TAG, "Icon cache not initialized")
+            return@withContext null
+        }
+
+        try {
+            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                ?: return@withContext null
+            val file = File(cacheDir, getIconFileName(mintUrl))
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            }
+            bitmap.recycle()
+            file
+        } catch (e: Exception) {
+            Log.e(TAG, "Error caching icon for $mintUrl", e)
+            null
+        }
+    }
     
     /**
      * Get or download an icon for a mint.

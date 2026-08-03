@@ -78,11 +78,29 @@ class MintDiscoveryBottomSheet : BottomSheetDialogFragment() {
                     applySearch()
                 }
             })
-        (dialog as? BottomSheetDialog)?.behavior?.apply {
-            state = BottomSheetBehavior.STATE_EXPANDED
-            skipCollapsed = true
-        }
         discover(view)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val sheetDialog = dialog as? BottomSheetDialog ?: return
+        val sheet = sheetDialog.findViewById<View>(
+            com.google.android.material.R.id.design_bottom_sheet,
+        ) ?: return
+
+        sheet.layoutParams = sheet.layoutParams.apply {
+            height = ViewGroup.LayoutParams.MATCH_PARENT
+        }
+        sheetDialog.behavior.apply {
+            setFitToContents(false)
+            halfExpandedRatio = 0.6f
+            expandedOffset = 0
+            skipCollapsed = true
+            isDraggable = true
+        }
+        sheet.post {
+            sheetDialog.behavior.state = BottomSheetBehavior.STATE_HALF_EXPANDED
+        }
     }
 
     private fun discover(root: View) {
@@ -128,7 +146,6 @@ class MintDiscoveryBottomSheet : BottomSheetDialogFragment() {
                         bindRecommendation(item, recommendation)
                         loadProfile(recommendation.url)
                     }
-                progress.isVisible = false
                 updateStatus(status)
                 applySearch()
             }
@@ -156,9 +173,10 @@ class MintDiscoveryBottomSheet : BottomSheetDialogFragment() {
         if (!profileRequests.add(url)) return
         viewLifecycleOwner.lifecycleScope.launch {
             val result = profileSemaphore.withPermit {
-                NostrMintDiscovery.fetchPublicMintName(url)
+                NostrMintDiscovery.fetchPublicMintProfile(url)
             }
-            result?.let { profileNames[url] = it }
+            result?.name?.let { profileNames[url] = it }
+            result?.iconBytes?.let { MintIconCache.cacheIcon(url, it) }
             recommendations[url]?.let { recommendation ->
                 itemViews[url]?.let { bindRecommendation(it, recommendation) }
             }
@@ -222,6 +240,7 @@ class MintDiscoveryBottomSheet : BottomSheetDialogFragment() {
         val cachedIcon = MintIconCache.getCachedIconFile(recommendation.url)
         val bitmap = cachedIcon?.let { BitmapFactory.decodeFile(it.absolutePath) }
         if (bitmap != null) {
+            icon.imageTintList = null
             icon.setImageBitmap(bitmap)
             icon.clearColorFilter()
         } else {

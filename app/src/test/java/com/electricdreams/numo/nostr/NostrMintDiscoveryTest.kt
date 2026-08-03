@@ -1,7 +1,9 @@
 package com.electricdreams.numo.nostr
 
+import com.google.gson.JsonParser
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
 import org.junit.Test
 import okhttp3.Dns
 import java.net.InetAddress
@@ -157,6 +159,34 @@ class NostrMintDiscoveryTest {
         val dns = NostrMintDiscovery.publicAddressDns(delegate)
 
         assertEquals(expected, dns.lookup("mint.example"))
+    }
+
+    @Test
+    fun `memoizing resolver only resolves each host once`() {
+        val expected = listOf(InetAddress.getByName("8.8.8.8"))
+        var calls = 0
+        val resolver = NostrMintDiscovery.memoizingResolver {
+            calls++
+            expected
+        }
+
+        assertSame(expected, resolver("mint.example"))
+        assertSame(expected, resolver("mint.example"))
+        assertEquals(1, calls)
+    }
+
+    @Test
+    fun `discovery request gives announcements and cashu reviews independent limits`() {
+        val request = JsonParser.parseString(NostrMintDiscovery.discoveryRequest("test"))
+            .asJsonArray
+
+        assertEquals("REQ", request[0].asString)
+        assertEquals("test", request[1].asString)
+        assertEquals(38172, request[2].asJsonObject["kinds"].asJsonArray[0].asInt)
+        assertEquals(5000, request[2].asJsonObject["limit"].asInt)
+        assertEquals(38000, request[3].asJsonObject["kinds"].asJsonArray[0].asInt)
+        assertEquals("38172", request[3].asJsonObject["#k"].asJsonArray[0].asString)
+        assertEquals(5000, request[3].asJsonObject["limit"].asInt)
     }
 
     private fun aggregate(events: Collection<NostrEvent>) = NostrMintDiscovery.aggregate(
