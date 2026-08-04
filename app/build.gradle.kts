@@ -15,6 +15,19 @@ android {
         versionCode = 23
         versionName = "1.8"
 
+        buildConfigField(
+            "String",
+            "ISSUE_REPORT_RELAY",
+            "\"wss://buzz.cashu.space\""
+        )
+        buildConfigField(
+            "String",
+            "ISSUE_REPORT_CHANNEL",
+            "\"numo-reports\""
+        )
+        buildConfigField("long", "ISSUE_REPORT_RELAY_TIMEOUT_MS", "7000L")
+        buildConfigField("long", "ISSUE_REPORT_OVERALL_TIMEOUT_MS", "10000L")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -89,6 +102,9 @@ dependencies {
     
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
+    implementation("androidx.activity:activity-ktx:1.8.2")
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
 
     // AndroidX Libraries
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -109,6 +125,7 @@ dependencies {
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     testImplementation("androidx.test:core:1.5.0")
     testImplementation("androidx.test.ext:junit:1.1.5")
+    testImplementation("androidx.work:work-testing:2.9.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 

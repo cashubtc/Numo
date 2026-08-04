@@ -77,6 +77,23 @@ public final class NostrKeyPair {
         return fromSecretBytes(secretBytes);
     }
 
+    /** Returns whether a lowercase hex value is a valid x-only secp256k1 public key. */
+    public static boolean isValidPublicKeyHex(String publicKeyHex) {
+        if (publicKeyHex == null || !publicKeyHex.matches("^[0-9a-f]{64}$")) {
+            return false;
+        }
+        byte[] x = hexToBytes(publicKeyHex);
+        byte[] compressed = new byte[33];
+        compressed[0] = 0x02;
+        System.arraycopy(x, 0, compressed, 1, x.length);
+        try {
+            SECP256K1.getCurve().decodePoint(compressed).normalize();
+            return true;
+        } catch (IllegalArgumentException exception) {
+            return false;
+        }
+    }
+
     private static byte[] hexToBytes(String hex) {
         int len = hex.length();
         byte[] data = new byte[len / 2];
