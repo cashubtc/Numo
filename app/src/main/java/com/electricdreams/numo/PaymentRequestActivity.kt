@@ -190,6 +190,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_payment_request)
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -2120,10 +2121,13 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun restoreSystemBarsAfterAnimation() {
-        WindowInsetsControllerCompat(window, window.decorView).show(
-            WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars()
-        )
-        WindowCompat.setDecorFitsSystemWindows(window, true)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            show(WindowInsetsCompat.Type.statusBars() or WindowInsetsCompat.Type.navigationBars())
+            isAppearanceLightStatusBars = true
+            isAppearanceLightNavigationBars = true
+        }
+        ViewCompat.requestApplyInsets(findViewById(R.id.payment_request_root))
     }
 
     private fun adjustAnimationActionsBottomMargin(insets: WindowInsetsCompat) {
