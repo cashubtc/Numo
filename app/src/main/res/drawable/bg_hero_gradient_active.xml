@@ -6,5 +6,5 @@
         android:startColor="@color/white"
         android:endColor="@color/color_hero_gradient_active_end"
         android:angle="135" />
-    <corners android:radius="24dp" />
+    <corners android:radius="@dimen/radius_xl" />
 </shape>

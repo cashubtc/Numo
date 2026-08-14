@@ -31,6 +31,13 @@
     <dimen name="radius_input">12dp</dimen>
     <dimen name="radius_m">12dp</dimen>
     <dimen name="radius_l">@dimen/radius_card</dimen>
+    <!-- Extended radii (previously hardcoded in bg_* drawables) -->
+    <dimen name="radius_micro">2dp</dimen>
+    <dimen name="radius_xs">4dp</dimen>
+    <dimen name="radius_badge">6dp</dimen>
+    <dimen name="radius_s">10dp</dimen>
+    <dimen name="radius_button_compact">14dp</dimen>
+    <dimen name="radius_xl">24dp</dimen>
 
     <!-- Icon Sizes -->
     <dimen name="icon_size_xs">28dp</dimen>

@@ -3,21 +3,21 @@
     <!-- Disabled state - black with 20% opacity -->
     <item android:state_enabled="false">
         <shape android:shape="rectangle">
-            <corners android:radius="26dp" />
+            <corners android:radius="@dimen/radius_pill" />
             <solid android:color="@color/color_black_20" />
         </shape>
     </item>
     <!-- Pressed state - slightly lighter black -->
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <corners android:radius="26dp" />
+            <corners android:radius="@dimen/radius_pill" />
             <solid android:color="@color/color_button_primary_pressed" />
         </shape>
     </item>
     <!-- Enabled state - 100% black -->
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="26dp" />
+            <corners android:radius="@dimen/radius_pill" />
             <solid android:color="@color/black" />
         </shape>
     </item>

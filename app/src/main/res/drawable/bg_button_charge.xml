@@ -3,21 +3,21 @@
     <!-- Disabled state - black with 30% opacity (brighter than before) -->
     <item android:state_enabled="false">
         <shape android:shape="rectangle">
-            <corners android:radius="26dp" />
+            <corners android:radius="@dimen/radius_pill" />
             <solid android:color="@color/color_black_30" />
         </shape>
     </item>
     <!-- Pressed state - white with 15% opacity (slightly less for feedback) -->
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <corners android:radius="26dp" />
+            <corners android:radius="@dimen/radius_pill" />
             <solid android:color="@color/color_white_15" />
         </shape>
     </item>
     <!-- Enabled state - white with 15% opacity (darker than before) with border -->
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="26dp" />
+            <corners android:radius="@dimen/radius_pill" />
             <solid android:color="@color/color_white_34" />
         </shape>
     </item>

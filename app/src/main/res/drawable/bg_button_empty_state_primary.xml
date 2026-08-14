@@ -3,7 +3,7 @@
     <!-- Pressed state -->
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <corners android:radius="26dp" />
+            <corners android:radius="@dimen/radius_pill" />
             <solid android:color="@color/empty_state_button_primary_bg" />
             <stroke android:width="0dp" android:color="@android:color/transparent" />
         </shape>
@@ -11,7 +11,7 @@
     <!-- Default state -->
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="26dp" />
+            <corners android:radius="@dimen/radius_pill" />
             <solid android:color="@color/empty_state_button_primary_bg" />
         </shape>
     </item>
