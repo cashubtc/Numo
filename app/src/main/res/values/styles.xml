@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Base Text Style -->
-    <style name="Text" parent="TextAppearance.MaterialComponents.Body1">
+    <style name="Text" parent="TextAppearance.Material3.BodyLarge">
         <item name="fontFamily">sans-serif-medium</item>
         <item name="android:textColor">@color/color_text_primary</item>
     </style>
@@ -215,14 +215,14 @@
     <style name="Widget.App" parent=""/>
 
     <!-- Zero out hidden insets so all MaterialButton variants respect their declared height -->
-    <style name="Widget.Numo.Button" parent="Widget.MaterialComponents.Button">
+    <style name="Widget.Numo.Button" parent="Widget.Material3.Button">
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
     </style>
 
-    <style name="Widget.Button" parent="Widget.MaterialComponents.Button"/>
+    <style name="Widget.Button" parent="Widget.Material3.Button"/>
 
-    <style name="Widget.Button.Primary" parent="Widget.MaterialComponents.Button"/>
+    <style name="Widget.Button.Primary" parent="Widget.Material3.Button"/>
 
     <!-- Component Styles -->
     <style name="Widget.Button.Primary.Green">
@@ -238,9 +238,9 @@
         <item name="android:stateListAnimator">@null</item>
     </style>
 
-    <style name="Widget.Button.Secondary" parent="Widget.MaterialComponents.Button.OutlinedButton"/>
+    <style name="Widget.Button.Secondary" parent="Widget.Material3.Button.OutlinedButton"/>
 
-    <style name="Widget.Button.Secondary.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+    <style name="Widget.Button.Secondary.Outlined" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
         <item name="android:textColor">@color/color_text_secondary</item>
@@ -260,7 +260,7 @@
     </style>
 
     <!-- Tertiary: borderless text button with consistent sizing -->
-    <style name="Widget.Numo.Button.Tertiary" parent="Widget.MaterialComponents.Button.TextButton">
+    <style name="Widget.Numo.Button.Tertiary" parent="Widget.Material3.Button.TextButton">
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
         <item name="android:textAllCaps">false</item>
@@ -358,7 +358,7 @@
     </style>
 
     <!-- TextInputLayout: Outlined input (standard across all screens) -->
-    <style name="Widget.Numo.TextInputLayout.OutlinedBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+    <style name="Widget.Numo.TextInputLayout.OutlinedBox" parent="Widget.Material3.TextInputLayout.OutlinedBox">
         <item name="boxCornerRadiusTopStart">@dimen/radius_input</item>
         <item name="boxCornerRadiusTopEnd">@dimen/radius_input</item>
         <item name="boxCornerRadiusBottomStart">@dimen/radius_input</item>
@@ -372,7 +372,7 @@
     </style>
 
     <!-- TextInputLayout prefix/suffix text appearance -->
-    <style name="Text.InputAffix" parent="TextAppearance.MaterialComponents.Subtitle1">
+    <style name="Text.InputAffix" parent="TextAppearance.Material3.TitleMedium">
         <item name="android:textSize">18sp</item>
         <item name="android:textColor">@color/color_text_primary</item>
         <item name="android:fontFamily">sans-serif-medium</item>
@@ -385,13 +385,13 @@
     </style>
 
     <!-- Snackbar -->
-    <style name="Widget.Numo.Snackbar" parent="Widget.MaterialComponents.Snackbar">
+    <style name="Widget.Numo.Snackbar" parent="Widget.Material3.Snackbar">
         <item name="backgroundTint">@color/color_bg_white</item>
         <item name="android:elevation">8dp</item>
         <item name="shapeAppearance">@style/ShapeAppearance.Numo.Snackbar</item>
     </style>
 
-    <style name="Widget.Numo.Snackbar.Text" parent="Widget.MaterialComponents.Snackbar.TextView">
+    <style name="Widget.Numo.Snackbar.Text" parent="Widget.Material3.Snackbar.TextView">
         <item name="android:textColor">@color/color_text_primary</item>
         <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">sans-serif-medium</item>
@@ -408,7 +408,7 @@
     <!-- ══════════════════════════════════════════════════════════ -->
 
     <!-- Dialog: Primary action (dark fill) -->
-    <style name="Widget.Numo.Button.Dialog.Confirm" parent="Widget.MaterialComponents.Button">
+    <style name="Widget.Numo.Button.Dialog.Confirm" parent="Widget.Material3.Button">
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
         <item name="android:textColor">@color/color_bg_white</item>
@@ -424,7 +424,7 @@
     </style>
 
     <!-- Dialog: Cancel action (outlined) -->
-    <style name="Widget.Numo.Button.Dialog.Cancel" parent="Widget.MaterialComponents.Button.UnelevatedButton">
+    <style name="Widget.Numo.Button.Dialog.Cancel" parent="Widget.Material3.Button.OutlinedButton">
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
         <item name="android:textColor">@color/color_text_primary</item>
@@ -440,7 +440,7 @@
     </style>
 
     <!-- Dialog: Destructive action (red fill) -->
-    <style name="Widget.Numo.Button.Dialog.Destructive" parent="Widget.MaterialComponents.Button">
+    <style name="Widget.Numo.Button.Dialog.Destructive" parent="Widget.Material3.Button">
         <item name="android:insetTop">0dp</item>
         <item name="android:insetBottom">0dp</item>
         <item name="android:textColor">@color/color_bg_white</item>

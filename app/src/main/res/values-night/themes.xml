@@ -1,15 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base Theme (Dark Mode) -->
-    <style name="Theme.Numo" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">#FFFFFF</item>
-        <item name="colorPrimaryVariant">@color/dark_colorPrimaryDark</item>
-        <item name="colorOnPrimary">#000000</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">#FFFFFF</item>
-        <item name="colorSecondaryVariant">#FFFFFF</item>
-        <item name="colorOnSecondary">#000000</item>
+    <!-- Base Theme (Dark Mode) — Material 3, brand palette from numo_green seed -->
+    <style name="Theme.Numo" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Material 3 color roles (tonal palette from numo_green seed) -->
+        <item name="colorPrimary">@color/m3_primary</item>
+        <item name="colorOnPrimary">@color/m3_on_primary</item>
+        <item name="colorPrimaryContainer">@color/m3_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/m3_on_primary_container</item>
+        <item name="colorSecondary">@color/m3_secondary</item>
+        <item name="colorOnSecondary">@color/m3_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/m3_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/m3_on_secondary_container</item>
+        <item name="colorTertiary">@color/m3_tertiary</item>
+        <item name="colorOnTertiary">@color/m3_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/m3_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/m3_on_tertiary_container</item>
+        <item name="colorError">@color/m3_error</item>
+        <item name="colorOnError">@color/m3_on_error</item>
+        <item name="colorErrorContainer">@color/m3_error_container</item>
+        <item name="colorOnErrorContainer">@color/m3_on_error_container</item>
+        <item name="colorSurfaceVariant">@color/m3_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/m3_on_surface_variant</item>
+        <item name="colorOutline">@color/m3_outline</item>
+        <item name="colorOutlineVariant">@color/m3_outline_variant</item>
+        <item name="colorSurfaceContainerLowest">@color/m3_surface_container_lowest</item>
+        <item name="colorSurfaceContainerLow">@color/m3_surface_container_low</item>
+        <item name="colorSurfaceContainer">@color/m3_surface_container</item>
+        <item name="colorSurfaceContainerHigh">@color/m3_surface_container_high</item>
+        <item name="colorSurfaceContainerHighest">@color/m3_surface_container_highest</item>
+        <item name="colorSurfaceInverse">@color/m3_surface_inverse</item>
+        <item name="colorOnSurfaceInverse">@color/m3_on_surface_inverse</item>
+        <item name="colorPrimaryInverse">@color/m3_primary_inverse</item>
         <!-- Status bar color - matches window background for seamless edge-to-edge -->
         <item name="android:statusBarColor">@color/dark_windowBackground</item>
         <item name="android:windowLightStatusBar">false</item>
@@ -23,9 +44,10 @@
         <!-- Background colors -->
         <item name="android:windowBackground">@color/dark_windowBackground</item>
         <item name="android:colorBackground">@color/dark_windowBackground</item>
-        <!-- Surface colors -->
+        <!-- Surface colors (kept on the app's neutral surfaces, not tinted) -->
         <item name="colorSurface">@color/dark_surfaceColor</item>
         <item name="colorOnSurface">@color/dark_textColorPrimary</item>
+        <item name="colorOnBackground">@color/dark_textColorPrimary</item>
         <!-- Custom attributes -->
         <item name="keypadButtonColor">@color/dark_keypadButtonColor</item>
         <item name="keypadButtonTextColor">@color/dark_keypadButtonTextColor</item>
@@ -35,20 +57,20 @@
         <item name="toolbarStyle">@style/Widget.App.Toolbar.Dark</item>
         <!-- Icon tint -->
         <item name="colorControlNormal">@color/dark_iconTint</item>
-        <!-- Switch colors -->
-        <item name="colorControlActivated">#FFFFFF</item>
+        <!-- Switch colors (M3 primary role) -->
+        <item name="colorControlActivated">@color/m3_primary</item>
         <!-- Popup menu styling -->
         <item name="popupMenuStyle">@style/Widget.Numo.PopupMenu</item>
         <item name="android:popupMenuStyle">@style/Widget.Numo.PopupMenu</item>
     </style>
 
     <!-- Popup Menu Style -->
-    <style name="Widget.Numo.PopupMenu" parent="Widget.MaterialComponents.PopupMenu">
+    <style name="Widget.Numo.PopupMenu" parent="Widget.Material3.PopupMenu">
         <item name="android:popupBackground">@drawable/bg_popup_menu</item>
         <item name="android:popupElevation">0dp</item>
     </style>
 
-    <style name="Widget.App.Toolbar.Dark" parent="Widget.MaterialComponents.Toolbar.Primary">
+    <style name="Widget.App.Toolbar.Dark" parent="Widget.Material3.Toolbar">
         <item name="android:background">@color/dark_colorPrimary</item>
         <item name="titleTextColor">@color/dark_textColorPrimary</item>
         <item name="subtitleTextColor">@color/dark_textColorSecondary</item>
@@ -66,7 +88,7 @@
     </style>
     
     <!-- Bottom Sheet Theme (Dark Mode - only override nav bar) -->
-    <style name="Theme.Numo.BottomSheet" parent="Theme.MaterialComponents.DayNight.BottomSheetDialog">
+    <style name="Theme.Numo.BottomSheet" parent="Theme.Material3.DayNight.BottomSheetDialog">
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightNavigationBar">false</item>
         <item name="enableEdgeToEdge">true</item>

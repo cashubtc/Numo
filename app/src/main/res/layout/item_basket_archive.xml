@@ -122,7 +122,7 @@
             app:cornerRadius="@dimen/radius_m"
             app:rippleColor="@color/color_accent_blue"
             app:strokeWidth="0dp"
-            style="@style/Widget.MaterialComponents.Button.UnelevatedButton" />
+            style="@style/Widget.Material3.Button" />
 
     </LinearLayout>
 

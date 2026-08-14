@@ -4,8 +4,10 @@
     android:height="12dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <!-- Bold checkmark with thick rounded strokes -->
-    <path
-        android:fillColor="@color/white"
-        android:pathData="M9.55,18l-5.7,-5.7 2.15,-2.15 3.55,3.55 7.95,-7.95 2.15,2.15z" />
+    <group
+        android:scaleX="0.025"
+        android:scaleY="0.025"
+        android:translateY="24">
+        <path android:fillColor="@color/white" android:pathData="M400-304 240-464l56-56 104 104 264-264 56 56-320 320Z" />
+    </group>
 </vector>

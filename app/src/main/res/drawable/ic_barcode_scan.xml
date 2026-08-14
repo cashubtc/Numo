@@ -4,11 +4,10 @@
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <!-- Barcode scan icon -->
-    <path
-        android:fillColor="@color/black"
-        android:pathData="M2,4h4V2H2C0.9,2 0,2.9 0,4v4h2V4z M22,2h-4v2h4v4h2V4C24,2.9 23.1,2 22,2z M2,16H0v4c0,1.1 0.9,2 2,2h4v-2H2V16z M22,20h-4v2h4c1.1,0 2,-0.9 2,-2v-4h-2V20z"/>
-    <path
-        android:fillColor="@color/black"
-        android:pathData="M4,7h2v10H4V7z M8,7h1v10H8V7z M11,7h2v10h-2V7z M15,7h1v10h-1V7z M18,7h2v10h-2V7z"/>
+    <group
+        android:scaleX="0.025"
+        android:scaleY="0.025"
+        android:translateY="24">
+        <path android:fillColor="@color/black" android:pathData="M40-120v-200h80v120h120v80H40Zm680 0v-80h120v-120h80v200H720ZM160-240v-480h80v480h-80Zm120 0v-480h40v480h-40Zm120 0v-480h80v480h-80Zm120 0v-480h120v480H520Zm160 0v-480h40v480h-40Zm80 0v-480h40v480h-40ZM40-640v-200h200v80H120v120H40Zm800 0v-120H720v-80h200v200h-80Z" />
+    </group>
 </vector>

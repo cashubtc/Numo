@@ -1,15 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base Theme (Light Mode) -->
-    <style name="Theme.Numo" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/color_primary_green_light</item>
-        <item name="colorPrimaryVariant">@color/color_primary_green</item>
-        <item name="colorOnPrimary">@color/color_bg_white</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/color_primary_green_light</item>
-        <item name="colorSecondaryVariant">@color/color_primary_green</item>
-        <item name="colorOnSecondary">@color/color_bg_white</item>
+    <!-- Base Theme (Light Mode) — Material 3, brand palette from numo_green seed -->
+    <style name="Theme.Numo" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Material 3 color roles (tonal palette from numo_green seed) -->
+        <item name="colorPrimary">@color/m3_primary</item>
+        <item name="colorOnPrimary">@color/m3_on_primary</item>
+        <item name="colorPrimaryContainer">@color/m3_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/m3_on_primary_container</item>
+        <item name="colorSecondary">@color/m3_secondary</item>
+        <item name="colorOnSecondary">@color/m3_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/m3_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/m3_on_secondary_container</item>
+        <item name="colorTertiary">@color/m3_tertiary</item>
+        <item name="colorOnTertiary">@color/m3_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/m3_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/m3_on_tertiary_container</item>
+        <item name="colorError">@color/m3_error</item>
+        <item name="colorOnError">@color/m3_on_error</item>
+        <item name="colorErrorContainer">@color/m3_error_container</item>
+        <item name="colorOnErrorContainer">@color/m3_on_error_container</item>
+        <item name="colorSurfaceVariant">@color/m3_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/m3_on_surface_variant</item>
+        <item name="colorOutline">@color/m3_outline</item>
+        <item name="colorOutlineVariant">@color/m3_outline_variant</item>
+        <item name="colorSurfaceContainerLowest">@color/m3_surface_container_lowest</item>
+        <item name="colorSurfaceContainerLow">@color/m3_surface_container_low</item>
+        <item name="colorSurfaceContainer">@color/m3_surface_container</item>
+        <item name="colorSurfaceContainerHigh">@color/m3_surface_container_high</item>
+        <item name="colorSurfaceContainerHighest">@color/m3_surface_container_highest</item>
+        <item name="colorSurfaceInverse">@color/m3_surface_inverse</item>
+        <item name="colorOnSurfaceInverse">@color/m3_on_surface_inverse</item>
+        <item name="colorPrimaryInverse">@color/m3_primary_inverse</item>
         <!-- Status bar color - matches window background for seamless edge-to-edge -->
         <item name="android:statusBarColor">@color/color_bg_white</item>
         <item name="android:windowLightStatusBar">true</item>
@@ -23,15 +44,16 @@
         <!-- Background colors -->
         <item name="android:windowBackground">@color/color_bg_white</item>
         <item name="android:colorBackground">@color/color_bg_white</item>
-        <!-- Surface colors -->
+        <!-- Surface colors (kept on the app's neutral surfaces, not tinted) -->
         <item name="colorSurface">@color/color_bg_white</item>
         <item name="colorOnSurface">@color/color_text_primary</item>
+        <item name="colorOnBackground">@color/color_text_primary</item>
         <!-- Normalize MaterialButton height across all variants -->
         <item name="materialButtonStyle">@style/Widget.Numo.Button</item>
         <!-- Icon tint -->
         <item name="colorControlNormal">@color/color_text_secondary</item>
-        <!-- Switch/toggle active color -->
-        <item name="colorControlActivated">@color/color_success_green</item>
+        <!-- Switch/toggle active color (M3 primary role) -->
+        <item name="colorControlActivated">@color/m3_primary</item>
         <!-- Popup menu styling -->
         <item name="popupMenuStyle">@style/Widget.Numo.PopupMenu</item>
         <item name="android:popupMenuStyle">@style/Widget.Numo.PopupMenu</item>
@@ -41,11 +63,11 @@
     </style>
 
     <!-- Popup Menu Style -->
-    <style name="Widget.Numo.PopupMenu" parent="Widget.MaterialComponents.PopupMenu">
+    <style name="Widget.Numo.PopupMenu" parent="Widget.Material3.PopupMenu">
         <item name="android:popupBackground">@drawable/bg_popup_menu</item>
         <item name="android:popupElevation">0dp</item>
     </style>
-    
+
     <!-- Splash Screen Theme for Android 12+ -->
     <style name="Theme.Numo.Splash" parent="Theme.Numo">
         <!-- Splash screen background: Navy -->
@@ -63,7 +85,7 @@
     </style>
 
     <!-- Legacy Toolbar Style -->
-    <style name="Widget.App.Toolbar.Light" parent="Widget.MaterialComponents.Toolbar.Primary">
+    <style name="Widget.App.Toolbar.Light" parent="Widget.Material3.Toolbar">
         <item name="android:background">@color/color_bg_white</item>
         <item name="titleTextColor">@color/color_text_primary</item>
         <item name="subtitleTextColor">@color/color_text_secondary</item>
@@ -80,7 +102,7 @@
     </style>
 
     <!-- Google-style Centered Dialog Theme -->
-    <style name="Theme.Numo.Dialog" parent="Theme.MaterialComponents.Light.Dialog">
+    <style name="Theme.Numo.Dialog" parent="Theme.Material3.Light.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:backgroundDimAmount">0.5</item>
@@ -97,7 +119,7 @@
     </style>
     
     <!-- Bottom Sheet Fragment Theme (DayNight-aware) -->
-    <style name="Theme.Numo.BottomSheet" parent="Theme.MaterialComponents.DayNight.BottomSheetDialog">
+    <style name="Theme.Numo.BottomSheet" parent="Theme.Material3.DayNight.BottomSheetDialog">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:backgroundDimAmount">0.5</item>
@@ -112,7 +134,7 @@
     </style>
 
     <!-- Bottom Sheet Widget Style -->
-    <style name="Widget.Numo.BottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
+    <style name="Widget.Numo.BottomSheet" parent="Widget.Material3.BottomSheet.Modal">
         <item name="backgroundTint">@color/color_bg_white</item>
         <item name="shapeAppearance">@style/ShapeAppearance.Numo.BottomSheet</item>
         <item name="behavior_peekHeight">auto</item>
@@ -120,11 +142,11 @@
         <item name="android:elevation">16dp</item>
     </style>
     
-    <!-- Bottom Sheet Shape -->
-    <style name="ShapeAppearance.Numo.BottomSheet" parent="ShapeAppearance.MaterialComponents.LargeComponent">
+    <!-- Bottom Sheet Shape (Material 3 large component: 28dp top corners) -->
+    <style name="ShapeAppearance.Numo.BottomSheet" parent="ShapeAppearance.Material3.LargeComponent">
         <item name="cornerFamily">rounded</item>
-        <item name="cornerSizeTopLeft">20dp</item>
-        <item name="cornerSizeTopRight">20dp</item>
+        <item name="cornerSizeTopLeft">28dp</item>
+        <item name="cornerSizeTopRight">28dp</item>
         <item name="cornerSizeBottomLeft">0dp</item>
         <item name="cornerSizeBottomRight">0dp</item>
     </style>

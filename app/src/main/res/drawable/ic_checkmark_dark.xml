@@ -4,11 +4,10 @@
     android:height="14dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <path
-        android:pathData="M5,13l4,4L19,7"
-        android:strokeColor="@color/color_bg_white"
-        android:strokeWidth="2.5"
-        android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:fillColor="@android:color/transparent" />
+    <group
+        android:scaleX="0.025"
+        android:scaleY="0.025"
+        android:translateY="24">
+        <path android:fillColor="@color/color_bg_white" android:pathData="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+    </group>
 </vector>

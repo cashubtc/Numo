@@ -226,4 +226,38 @@
     <color name="color_theme_green">@color/numo_green</color>
     <color name="color_theme_white">@color/white</color>
     <color name="color_theme_text_dark">@color/numo_dark</color>
+
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <!-- Material 3 Color Roles (Light)                            -->
+    <!-- Tonal palette generated from the numo_green (#00C244)     -->
+    <!-- seed using HCT (Material Theme Builder / tonal spot).     -->
+    <!-- ══════════════════════════════════════════════════════════ -->
+    <color name="m3_primary">#006E23</color>
+    <color name="m3_on_primary">#FFFFFF</color>
+    <color name="m3_primary_container">#6DFF7E</color>
+    <color name="m3_on_primary_container">#002105</color>
+    <color name="m3_secondary">#466645</color>
+    <color name="m3_on_secondary">#FFFFFF</color>
+    <color name="m3_secondary_container">#C8ECC2</color>
+    <color name="m3_on_secondary_container">#032107</color>
+    <color name="m3_tertiary">#006972</color>
+    <color name="m3_on_tertiary">#FFFFFF</color>
+    <color name="m3_tertiary_container">#92F1FE</color>
+    <color name="m3_on_tertiary_container">#001F23</color>
+    <color name="m3_error">#BA1A1A</color>
+    <color name="m3_on_error">#FFFFFF</color>
+    <color name="m3_error_container">#FFDAD6</color>
+    <color name="m3_on_error_container">#410002</color>
+    <color name="m3_surface_variant">#DEE5D9</color>
+    <color name="m3_on_surface_variant">#424940</color>
+    <color name="m3_outline">#72796F</color>
+    <color name="m3_outline_variant">#C2C9BD</color>
+    <color name="m3_surface_container_lowest">#FFFFFF</color>
+    <color name="m3_surface_container_low">#F3F4EE</color>
+    <color name="m3_surface_container">#EDEEE8</color>
+    <color name="m3_surface_container_high">#E8E9E3</color>
+    <color name="m3_surface_container_highest">#E2E3DD</color>
+    <color name="m3_surface_inverse">#2F312D</color>
+    <color name="m3_on_surface_inverse">#F0F1EB</color>
+    <color name="m3_primary_inverse">#42E360</color>
 </resources>
