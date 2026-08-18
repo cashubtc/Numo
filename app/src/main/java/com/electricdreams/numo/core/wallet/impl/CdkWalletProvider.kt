@@ -425,11 +425,11 @@ internal class CdkTemporaryMintWallet(
 
     override suspend fun refreshKeysets(): WalletResult<List<KeysetInfo>> {
         return try {
-            val keysets = cdkWallet.refreshKeysets()
+            val keysets = cdkWallet.keysets(org.cashudevkit.KeysetLoadPolicy.REFRESH)
             val result = keysets.map { keyset ->
                 KeysetInfo(
                     id = keyset.id.toString(),
-                    active = keyset.active,
+                    active = keyset.active ?: false,
                     unit = keyset.unit.toString().lowercase()
                 )
             }

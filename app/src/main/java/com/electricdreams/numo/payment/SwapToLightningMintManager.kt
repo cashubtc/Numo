@@ -109,7 +109,7 @@ object SwapToLightningMintManager {
             Log.e(TAG, msg, t)
             return@withContext SwapResult.Failure(msg)
         }
-        val keysetsInfos = tempWallet.refreshKeysets()
+        tempWallet.keysets(org.cashudevkit.KeysetLoadPolicy.REFRESH)
 
         Log.d(TAG, "swapFromUnknownMint: temporary wallet created for mint=$unknownMintUrl")
 

@@ -661,8 +661,14 @@ object CashuPaymentHelper {
                 
                 // Fetch keysets so CDK can map short Keyset IDs to full IDs
                 val keysets = try {
-                    @Suppress("UNCHECKED_CAST")
-                    tempWallet.loadMintKeysets() as List<org.cashudevkit.KeySetInfo>
+                    tempWallet.keysets(org.cashudevkit.KeysetLoadPolicy.REFRESH).map { keyset ->
+                        org.cashudevkit.KeySetInfo(
+                            id = keyset.id,
+                            unit = keyset.unit,
+                            active = keyset.active ?: false,
+                            inputFeePpk = keyset.inputFeePpk
+                        )
+                    }
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to load keysets for unknown mint", e)
                     throw RedemptionException("Failed to fetch keysets for unknown mint: ${e.message}", e)
