@@ -21,6 +21,7 @@ class LanguageSettingsActivity : AppCompatActivity() {
     private lateinit var radioPortuguese: RadioButton
     private lateinit var radioKorean: RadioButton
     private lateinit var radioJapanese: RadioButton
+    private lateinit var radioGerman: RadioButton
     private lateinit var currentLanguageSummary: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +42,7 @@ class LanguageSettingsActivity : AppCompatActivity() {
         radioPortuguese = findViewById(R.id.radio_portuguese)
         radioKorean = findViewById(R.id.radio_korean)
         radioJapanese = findViewById(R.id.radio_japanese)
+        radioGerman = findViewById(R.id.radio_german)
         currentLanguageSummary = findViewById(R.id.current_language_summary)
 
         val appLocales = AppCompatDelegate.getApplicationLocales()
@@ -58,6 +60,7 @@ class LanguageSettingsActivity : AppCompatActivity() {
                 "pt" -> "pt"
                 "ko" -> "ko"
                 "ja" -> "ja"
+                "de" -> "de"
                 else -> "en"
             }
         }
@@ -67,6 +70,7 @@ class LanguageSettingsActivity : AppCompatActivity() {
             "pt" -> radioPortuguese.isChecked = true
             "ko" -> radioKorean.isChecked = true
             "ja" -> radioJapanese.isChecked = true
+            "de" -> radioGerman.isChecked = true
             else -> radioEnglish.isChecked = true
         }
 
@@ -78,6 +82,7 @@ class LanguageSettingsActivity : AppCompatActivity() {
                 R.id.radio_portuguese -> "pt"
                 R.id.radio_korean -> "ko"
                 R.id.radio_japanese -> "ja"
+                R.id.radio_german -> "de"
                 else -> "en"
             }
             applyLanguage(newCode)
@@ -92,6 +97,7 @@ class LanguageSettingsActivity : AppCompatActivity() {
             "pt" -> LocaleListCompat.forLanguageTags("pt")
             "ko" -> LocaleListCompat.forLanguageTags("ko")
             "ja" -> LocaleListCompat.forLanguageTags("ja")
+            "de" -> LocaleListCompat.forLanguageTags("de")
             else -> LocaleListCompat.forLanguageTags("en")
         }
         AppCompatDelegate.setApplicationLocales(locales)
@@ -103,6 +109,7 @@ class LanguageSettingsActivity : AppCompatActivity() {
             "pt" -> getString(R.string.language_settings_option_portuguese)
             "ko" -> getString(R.string.language_settings_option_korean)
             "ja" -> getString(R.string.language_settings_option_japanese)
+            "de" -> getString(R.string.language_settings_option_german)
             else -> getString(R.string.language_settings_option_english)
         }
         currentLanguageSummary.text = getString(R.string.language_settings_summary_current, name)
