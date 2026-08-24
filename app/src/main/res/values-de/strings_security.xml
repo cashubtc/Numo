@@ -1,0 +1,83 @@
+<resources>
+    <!-- Security &amp; Privacy screen: info card -->
+    <string name="security_settings_card_title">Schütze deine Wallet</string>
+    <string name="security_settings_card_body">Deine Seed-Phrase ist der einzige Weg, deine Wallet wiederherzustellen, wenn du den Zugriff auf dieses Gerät verlierst. Bewahre sie sicher auf und teile sie niemals mit jemandem.</string>
+
+    <!-- Security &amp; Privacy screen: sections -->
+    <string name="security_settings_section_backup">Wallet-Backup</string>
+    <string name="security_settings_section_recovery">Wallet-Wiederherstellung</string>
+
+    <!-- Security &amp; Privacy screen: backup mnemonic row -->
+    <string name="security_settings_backup_mnemonic_title">Seed-Phrase sichern</string>
+    <string name="security_settings_backup_mnemonic_subtitle">Zeige deine 12-Wörter-Seed-Phrase an</string>
+    <string name="security_settings_device_backup_title">Verschlüsseltes Geräte-Backup</string>
+    <string name="security_settings_device_backup_subtitle">Sichere Wiederherstellungsdaten in deinem Google-Konto</string>
+    <string name="security_settings_device_backup_enabled_subtitle">Aktiviert — verschlüsseltes Wiederherstellungs-Backup</string>
+    <string name="security_settings_device_backup_dialog_title">Verschlüsseltes Geräte-Backup aktivieren</string>
+    <string name="security_settings_device_backup_dialog_body">Wähle ein separates Wiederherstellungspasswort. Numo kann dieses Passwort nicht wiederherstellen. Android sichert die verschlüsselte Wiederherstellungsdatei nur, wenn Cloud-Backup und Displaysperre aktiviert sind.</string>
+    <string name="security_settings_device_backup_password_hint">Wiederherstellungspasswort (12+ Zeichen)</string>
+    <string name="security_settings_device_backup_confirm_hint">Wiederherstellungspasswort bestätigen</string>
+    <string name="security_settings_device_backup_enable">Backup aktivieren</string>
+    <string name="security_settings_device_backup_password_mismatch">Die Wiederherstellungspasswörter stimmen nicht überein.</string>
+    <string name="security_settings_device_backup_password_short">Verwende mindestens 12 Zeichen für das Wiederherstellungspasswort.</string>
+    <string name="security_settings_device_backup_enabled">Verschlüsseltes Geräte-Backup aktiviert</string>
+    <string name="security_settings_device_backup_error">Verschlüsseltes Geräte-Backup konnte nicht aktiviert werden</string>
+    <string name="security_settings_device_backup_success_title">Verschlüsseltes Backup ist aktiv</string>
+    <string name="security_settings_device_backup_success_body">Deine Wiederherstellungsdaten sind bereit für das Android-Cloud-Backup.</string>
+    <string name="security_settings_device_backup_done">Fertig</string>
+
+    <string name="restore_device_backup_title">Verschlüsseltes Geräte-Backup wiederherstellen</string>
+    <string name="restore_device_backup_button">Verschlüsseltes Geräte-Backup wiederherstellen</string>
+    <string name="restore_device_backup_body">Gib das Wiederherstellungspasswort ein, das bei der Aktivierung dieses Backups erstellt wurde.</string>
+    <string name="restore_device_backup_password_hint">Wiederherstellungspasswort</string>
+    <string name="restore_device_backup_continue">Backup entsperren</string>
+    <string name="restore_device_backup_missing">Von Android wurde kein verschlüsseltes Geräte-Backup wiederhergestellt.</string>
+    <string name="restore_device_backup_invalid_password">Falsches Wiederherstellungspasswort oder ungültiges Backup.</string>
+
+    <!-- Security &amp; Privacy screen: restore wallet row -->
+    <string name="security_settings_restore_wallet_title">Wallet wiederherstellen</string>
+    <string name="security_settings_restore_wallet_subtitle">Mit Seed-Phrase wiederherstellen</string>
+
+    <!-- Security &amp; Privacy screen: PIN protection section -->
+    <string name="security_settings_section_pin_protection">PIN-Schutz</string>
+    <string name="security_settings_pin_info_title">Mitarbeitermodus</string>
+    <string name="security_settings_pin_info_body">Lege eine PIN fest, damit Mitarbeiter Numo sicher nutzen können. Sie können Zahlungen annehmen und Transaktionen verwalten, aber keine Gelder abheben, auf Mints zugreifen, deine Seed-Phrase einsehen oder Artikelpreise ändern.</string>
+
+    <!-- Security &amp; Privacy screen: PIN setup row -->
+    <string name="security_settings_setup_pin_title">PIN einrichten</string>
+    <string name="security_settings_setup_pin_subtitle">Schütze sensible Funktionen</string>
+
+    <!-- Security &amp; Privacy screen: Change PIN row -->
+    <string name="security_settings_change_pin_title">PIN ändern</string>
+    <string name="security_settings_change_pin_subtitle">Aktualisiere deine Sicherheits-PIN</string>
+
+    <!-- Security &amp; Privacy screen: Remove PIN row -->
+    <string name="security_settings_remove_pin_title">PIN entfernen</string>
+    <string name="security_settings_remove_pin_subtitle">PIN-Schutz deaktivieren</string>
+
+    <!-- Security &amp; Privacy screen: dialogs & actions -->
+    <string name="security_settings_enter_pin_title">PIN eingeben</string>
+    <string name="security_settings_enter_pin_subtitle">Bestätige deine Identität, um fortzufahren</string>
+    <string name="security_settings_remove_pin_dialog_title">PIN entfernen?</string>
+    <string name="security_settings_remove_pin_dialog_message">Damit wird der PIN-Schutz deaktiviert. Jeder mit Zugriff auf dieses Gerät kann dann auf sensible Funktionen wie Geldabheben und Ansehen deiner Seed-Phrase zugreifen.</string>
+    <string name="security_settings_remove_pin_confirm">Entfernen</string>
+
+    <!-- Security: toast messages -->
+    <string name="security_toast_wallet_not_initialized">Wallet nicht initialisiert</string>
+    <string name="security_toast_copied">In die Zwischenablage kopiert</string>
+    <string name="security_toast_pin_set_success">PIN erfolgreich festgelegt</string>
+    <string name="security_toast_pin_must_be_digits">Die PIN muss aus 4–16 Ziffern bestehen</string>
+    <string name="security_toast_pin_dont_match">Die PINs stimmen nicht überein</string>
+    <string name="security_toast_pin_failed">PIN konnte nicht festgelegt werden</string>
+    <string name="security_toast_clipboard_empty">Zwischenablage ist leer</string>
+    <string name="security_toast_seed_invalid">Bitte füge eine gültige 12-Wörter-Seed-Phrase ein</string>
+    <string name="security_toast_seed_pasted">Seed-Phrase eingefügt</string>
+    <string name="security_toast_pin_removed">PIN entfernt</string>
+    <string name="security_toast_incorrect_pin">Falsche PIN</string>
+    <string name="security_toast_wait_seconds">Warte %.1fs</string>
+    <string name="security_settings_device_backup_hero_title">Deine Wallet, wiederherstellbar</string>
+    <string name="security_settings_device_backup_hero_body">Numo hält eine verschlüsselte Wiederherstellungsdatei für das Android-Cloud-Backup bereit.</string>
+    <string name="security_settings_device_backup_password_section">Wiederherstellungspasswort</string>
+    <string name="security_settings_device_backup_password_note">Bewahre dieses Passwort getrennt von deiner PIN auf. Es wird benötigt, um das Backup auf einem neuen Gerät zu öffnen.</string>
+    <string name="restore_device_backup_hero_title">Dein verschlüsseltes Backup ist bereit</string>
+</resources>

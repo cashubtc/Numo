@@ -1,0 +1,15 @@
+<resources>
+    <!-- Item selection: clear basket dialog -->
+    <string name="item_selection_dialog_clear_basket_title">Warenkorb leeren</string>
+    <string name="item_selection_dialog_clear_basket_message">Alle Artikel aus dem Warenkorb entfernen?</string>
+    <string name="item_selection_dialog_clear_basket_positive">Leeren</string>
+
+    <!-- Item selection: toasts -->
+    <string name="item_selection_toast_no_stock">Kein weiterer Bestand verfügbar</string>
+    <string name="item_selection_toast_enter_variation">Gib einen Variantennamen ein</string>
+
+    <!-- Item selection: save basket dialog -->
+    <string name="item_selection_save_basket">Warenkorb speichern</string>
+    <string name="item_selection_save_basket_message">Änderungen an diesem Warenkorb speichern?</string>
+    <string name="item_selection_discard">Verwerfen</string>
+</resources>

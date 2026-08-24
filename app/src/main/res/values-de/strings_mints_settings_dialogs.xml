@@ -1,0 +1,6 @@
+<resources>
+    <!-- Mints settings: remove mint dialog -->
+    <string name="mints_settings_dialog_remove_title">Mint entfernen</string>
+    <string name="mints_settings_dialog_remove_message">Möchtest du diesen Mint wirklich entfernen?&#x0A;&#x0A;%1$s</string>
+    <string name="mints_settings_dialog_remove_positive">Entfernen</string>
+</resources>

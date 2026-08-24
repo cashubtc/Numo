@@ -1,0 +1,23 @@
+<resources>
+    <!-- Item list: clear all items dialog + toasts -->
+    <string name="item_list_dialog_clear_all_title">Alle Artikel löschen</string>
+    <string name="item_list_dialog_clear_all_message">
+        Möchtest du wirklich ALLE Artikel aus deinem Katalog löschen? Dies kann nicht rückgängig gemacht werden.
+    </string>
+    <string name="item_list_dialog_clear_all_positive">Alles löschen</string>
+
+    <string name="item_list_toast_all_items_cleared">Alle Artikel gelöscht</string>
+    <string name="item_list_toast_failed_open_csv">CSV-Datei konnte nicht geöffnet werden</string>
+    <string name="item_list_toast_imported_items">%1$d Artikel importiert</string>
+    <string name="item_list_toast_no_items_imported">Keine Artikel aus der CSV importiert</string>
+    <string name="item_list_toast_error_importing_csv">Fehler beim Importieren der CSV-Datei: %1$s</string>
+
+    <!-- Item list: toast messages -->
+    <string name="item_list_toast_camera_permission">Die Kamera-Berechtigung wird benötigt, um Fotos aufzunehmen</string>
+    <string name="item_list_toast_error_creating_image">Fehler beim Erstellen der Bilddatei: %1$s</string>
+    <string name="item_list_toast_failed_load_image">Bild konnte nicht geladen werden</string>
+    <string name="item_list_toast_sku_not_unique">Diese SKU wird bereits von einem anderen Artikel verwendet</string>
+    <string name="item_list_toast_gtin_not_unique">Dieser Barcode wird bereits von einem anderen Artikel verwendet</string>
+    <string name="item_list_toast_failed_save_item">Speichern fehlgeschlagen — bitte prüfe das Formular und versuche es erneut</string>
+    <string name="item_list_toast_saved_without_image">Ohne Foto gespeichert — das Bild konnte nicht gesichert werden</string>
+</resources>

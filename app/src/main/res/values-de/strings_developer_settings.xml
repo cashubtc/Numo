@@ -1,0 +1,8 @@
+<resources>
+    <!-- Developer settings: restart onboarding dialog -->
+    <string name="developer_settings_restart_dialog_title">Onboarding neu starten</string>
+    <string name="developer_settings_restart_dialog_message">
+        Damit wird der Abschlussstatus des Onboardings gelöscht und du kehrst zum Willkommensbildschirm zurück. Möchtest du wirklich fortfahren?
+    </string>
+    <string name="developer_settings_restart_dialog_positive">Neu starten</string>
+</resources>

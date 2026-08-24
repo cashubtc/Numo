@@ -1056,4 +1056,38 @@
     <string name="btcpay_pos_no_apps">Keine Verkaufsstellen-Apps für diesen Store gefunden</string>
     <string name="btcpay_pos_load_error">Apps konnten nicht geladen werden: %1$s</string>
     <string name="btcpay_pos_items_error">BTCPay-Artikel konnten nicht geladen werden</string>
+
+    <!-- Mint discovery (Nostr) -->
+    <string name="mint_discovery_action">Auf Nostr entdecken</string>
+    <string name="mint_discovery_announced">Auf Nostr angekündigt</string>
+    <string name="mint_discovery_empty">Keine Mint-Empfehlungen gefunden. Prüfe deine Verbindung und versuche es erneut.</string>
+    <string name="mint_discovery_loading">Suche über Nostr-Relays…</string>
+    <string name="mint_discovery_no_matches">Keine Mints entsprechen deiner Suche.</string>
+    <string name="mint_discovery_rating">★ %1$s · %2$d Empfehlungen</string>
+    <string name="mint_discovery_retry">Erneut versuchen</string>
+    <string name="mint_discovery_search_hint">Mints suchen</string>
+    <string name="mint_discovery_select">Mint auswählen</string>
+    <string name="mint_discovery_subtitle">Community-Empfehlungen von Nostr. Prüfe den Betreiber, bevor du einem Mint Vertrauen schenkst.</string>
+    <string name="mint_discovery_title">Mints entdecken</string>
+
+    <!-- Base currency unit -->
+    <string name="mints_base_currency_unit_subtitle">Wenn der Mint andere Einheiten unterstützt, kannst du sie hier wechseln.</string>
+    <string name="mints_base_currency_unit_title">Basis-Währungseinheit</string>
+    <string name="mints_changed_base_unit_toast">Basiseinheit geändert zu %1$s</string>
+    <string name="mints_select_base_unit">Basiseinheit auswählen</string>
+    <string name="mints_unsupported_unit">Nicht unterstützte Einheit (%1$s)</string>
+
+    <!-- POS / settings misc -->
+    <string name="pos_error_pending_payment_different_unit">Diese ausstehende Zahlung gehört zu einer anderen Einheit und kann nicht fortgesetzt werden.</string>
+    <string name="settings_fiat_conversion_disabled_custom_unit">Die Fiat-Umrechnung ist bei Verwendung einer benutzerdefinierten Basiseinheit deaktiviert.</string>
+
+    <!-- Plurals: mint discovery -->
+    <plurals name="mint_discovery_count">
+        <item quantity="one">%d Mint gefunden</item>
+        <item quantity="other">%d Mints gefunden</item>
+    </plurals>
+    <plurals name="mint_discovery_recommendations">
+        <item quantity="one">%d Empfehlung</item>
+        <item quantity="other">%d Empfehlungen</item>
+    </plurals>
 </resources>

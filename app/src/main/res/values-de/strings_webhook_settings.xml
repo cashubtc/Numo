@@ -1,0 +1,46 @@
+<resources>
+    <string name="webhook_settings_title">Webhooks</string>
+    <string name="webhook_settings_description">Sendet bei jedem Zahlungseingang an diesem Terminal eine POST-Anfrage mit Zahlungs-Metadaten.</string>
+    <string name="webhook_settings_section_endpoints">Endpoints</string>
+    <string name="webhook_settings_section_actions">Aktionen</string>
+    <string name="webhook_settings_sync_all">Alle Transaktionen synchronisieren</string>
+    <string name="webhook_settings_sync_all_success">%1$d Transaktionen synchronisiert</string>
+    <string name="webhook_settings_sync_all_empty">Keine abgeschlossenen Transaktionen zu synchronisieren</string>
+    <string name="webhook_settings_syncing_progress">Synchronisiere %1$d von %2$d</string>
+    <string name="webhook_settings_sync_cancelled">Synchronisierung abgebrochen</string>
+    <string name="webhook_settings_empty">Noch keine Webhook-Endpunkte konfiguriert.</string>
+    <string name="webhook_settings_add_endpoint">Endpoint hinzufügen</string>
+    <string name="webhook_settings_dialog_continue">Weiter</string>
+    <string name="webhook_settings_auth_set">Auth-Schlüssel gesetzt</string>
+    <string name="webhook_settings_auth_not_set">Kein Auth-Schlüssel</string>
+    <string name="webhook_settings_edit_auth_key">Auth-Schlüssel bearbeiten</string>
+    <string name="webhook_settings_delete_endpoint">Endpoint löschen</string>
+
+    <string name="webhook_settings_add_dialog_title">Webhook-Endpoint hinzufügen</string>
+    <string name="webhook_settings_add_dialog_description">Gib die Webhook-URL ein oder scanne einen QR-Code.</string>
+    <string name="webhook_settings_add_dialog_hint">https://example.com/webhooks/numo</string>
+    <string name="webhook_settings_add_dialog_confirm">Hinzufügen</string>
+
+    <string name="webhook_settings_edit_dialog_title">Endpoint bearbeiten</string>
+    <string name="webhook_settings_edit_dialog_description">Aktualisiere das Ziel, an das Zahlungs-Metadaten gesendet werden.</string>
+
+    <string name="webhook_settings_auth_dialog_title">Auth-Schlüssel (optional)</string>
+    <string name="webhook_settings_auth_dialog_description">Falls gesetzt, wird dieser Wert als Authorization-Header gesendet.</string>
+    <string name="webhook_settings_auth_dialog_hint">Bearer dein-geheimschluessel</string>
+    <string name="webhook_settings_auth_dialog_helper">Leer lassen, um den Auth-Schlüssel für diesen Endpoint zu entfernen.</string>
+
+    <string name="webhook_settings_delete_dialog_title">Endpoint entfernen?</string>
+    <string name="webhook_settings_delete_dialog_message">Dieser Endpoint erhält keine Zahlungsereignisse mehr.\n\n%1$s</string>
+    <string name="webhook_settings_delete_dialog_confirm">Entfernen</string>
+
+    <string name="webhook_settings_add_success">Webhook-Endpoint hinzugefügt</string>
+    <string name="webhook_settings_edit_success">Webhook-Endpoint aktualisiert</string>
+    <string name="webhook_settings_auth_success">Auth-Schlüssel aktualisiert</string>
+    <string name="webhook_settings_delete_success">Webhook-Endpoint entfernt</string>
+    <string name="webhook_settings_error_invalid_url">Bitte gib eine gültige http(s)-URL ein</string>
+    <string name="webhook_settings_error_duplicate">Dieser Endpoint ist bereits konfiguriert</string>
+    <string name="webhook_settings_error_not_found">Endpoint existiert nicht mehr</string>
+
+    <string name="webhook_settings_scan_title">Webhook scannen</string>
+    <string name="webhook_settings_scan_instruction">Scanne einen QR-Code mit einer Webhook-URL oder JSON-Konfiguration.</string>
+</resources>

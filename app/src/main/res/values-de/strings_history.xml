@@ -1,0 +1,99 @@
+<resources>
+    <!-- Main menu -->
+    <string name="menu_toggle_theme_title">Design wechseln</string>
+    <string name="menu_history_title">Verlauf</string>
+
+    <!-- History list row titles & status -->
+    <string name="history_row_title_pending_payment">Ausstehende Zahlung</string>
+    <string name="history_row_title_lightning_payment">Lightning-Zahlung</string>
+    <string name="history_row_title_cashu_payment">Cashu-Zahlung</string>
+    <string name="history_row_title_cash_in">Einzahlen</string>
+    <string name="history_row_title_cash_out">Auszahlen</string>
+    <string name="history_row_title_payment_received">Zahlung erhalten</string>
+    <string name="history_row_title_withdrawal">Abhebung</string>
+    <string name="history_row_status_tap_to_resume">Zum Fortsetzen tippen</string>
+    <string name="history_row_status_expired">Abgelaufen</string>
+    <string name="history_row_status_failed">Fehlgeschlagen</string>
+
+    <!-- History: dialogs, toasts, chooser titles -->
+    <string name="history_open_with_title">Zahlung öffnen mit…</string>
+    <string name="history_toast_no_app">Keine Apps zur Verarbeitung dieser Zahlung verfügbar</string>
+    <string name="history_toast_token_copied">Token in die Zwischenablage kopiert</string>
+    <string name="history_toast_invoice_copied">Rechnung in die Zwischenablage kopiert</string>
+
+    <string name="history_dialog_delete_title">Zahlung löschen</string>
+    <string name="history_dialog_delete_message">Möchtest du diese Zahlung wirklich aus dem Verlauf löschen?</string>
+    <string name="history_dialog_delete_positive">Löschen</string>
+    <string name="history_dialog_delete_negative">Abbrechen</string>
+
+    <string name="history_dialog_clear_title">Verlauf leeren</string>
+    <string name="history_dialog_clear_message">Möchtest du den gesamten Zahlungsverlauf wirklich leeren? Diese Aktion kann nicht rückgängig gemacht werden.</string>
+    <string name="history_dialog_clear_positive">Alles löschen</string>
+    <string name="history_dialog_clear_negative">Abbrechen</string>
+
+    <!-- Transaction detail: types and mint info -->
+    <string name="transaction_detail_type_lightning_payment">Lightning-Zahlung</string>
+    <string name="transaction_detail_type_cashu_payment">Cashu-Zahlung</string>
+    <string name="transaction_detail_mint_from_name">Von %1$s</string>
+    <string name="transaction_detail_mint_unknown">Unbekannt</string>
+    <string name="transaction_detail_payment_type_lightning_value">Lightning</string>
+    <string name="transaction_detail_payment_type_cashu_value">Cashu</string>
+    <string name="transaction_detail_cashu_request_label">Cashu-Anfrage</string>
+
+    <!-- Transaction detail: tip label -->
+    <string name="transaction_detail_tip_added_label">Trinkgeld hinzugefügt</string>
+    <string name="transaction_detail_tip_added_with_percentage">Trinkgeld hinzugefügt (%1$d%%)</string>
+
+    <!-- History sharing -->
+    <string name="history_share_title">Transaktion teilen</string>
+    <string name="history_share_type_lightning">Lightning</string>
+    <string name="history_share_type_cashu">Cashu</string>
+    <string name="history_share_line_amount">Betrag: %1$s</string>
+    <string name="history_share_line_token">Token: %1$s</string>
+    <string name="history_share_line_invoice">Rechnung: %1$s</string>
+
+    <!-- Transaction detail: withdrawal -->
+    <string name="transaction_detail_type_withdrawal">Abhebung</string>
+    <string name="transaction_detail_sent_to_label">Gesendet an</string>
+    <string name="transaction_detail_destination_copied">Ziel in die Zwischenablage kopiert</string>
+
+    <!-- Transaction detail: redesigned screen -->
+    <string name="transaction_detail_overflow_menu">Weitere Optionen</string>
+    <string name="transaction_detail_exchange_rate_label">Wechselkurs</string>
+    <string name="transaction_detail_invoice_label">Rechnung</string>
+    <string name="transaction_detail_transaction_id_label">Transaktions-ID</string>
+    <string name="transaction_detail_print_receipt">Beleg</string>
+    <string name="transaction_detail_menu_label">Transaktion beschriften</string>
+    <string name="transaction_detail_menu_copy_id">Transaktions-ID kopieren</string>
+    <string name="transaction_detail_menu_delete">Transaktion löschen</string>
+    <string name="transaction_detail_toast_id_copied">Transaktions-ID in die Zwischenablage kopiert</string>
+
+    <!-- Transaction detail: label -->
+    <string name="transaction_detail_label_dialog_title">Transaktion beschriften</string>
+    <string name="transaction_detail_label_dialog_hint">Bezeichnung eingeben</string>
+    <string name="transaction_detail_label_dialog_save">Bezeichnung speichern</string>
+    <string name="transaction_detail_label_row_title">Bezeichnung</string>
+
+    <!-- Activity screen -->
+    <string name="history_total_balance_label">Gesamtguthaben</string>
+    <string name="history_menu_export_activity">Aktivität exportieren</string>
+    <string name="history_menu_filter">Transaktionen filtern</string>
+    <string name="history_menu_filter_paid">Abgeschlossen</string>
+    <string name="history_menu_filter_pending">Ausstehend</string>
+    <string name="history_menu_filter_all">Alle</string>
+    <string name="history_filter_date_all">Gesamter Zeitraum</string>
+    <string name="history_filter_date_today">Heute</string>
+    <string name="history_filter_date_week">Woche</string>
+    <string name="history_filter_date_month">Monat</string>
+    <string name="history_filter_date_custom">Benutzerdefinierter Zeitraum…</string>
+    <string name="history_filter_status_format">Status: %1$s</string>
+    <string name="history_filter_header_format">Filter: %1$s</string>
+    <string name="history_filter_date_format">Datum: %1$s</string>
+    <string name="history_filter_date_range_format">%1$s - %2$s</string>
+    <string name="history_filter_date_picker_title">Zeitraum auswählen</string>
+    <string name="history_export_success">Aktivität als CSV exportiert</string>
+    <string name="history_export_error">Fehler beim Exportieren der Aktivität</string>
+
+    <!-- Basket receipt -->
+    <string name="basket_receipt_title">Beleg</string>
+</resources>

@@ -1,0 +1,29 @@
+<resources>
+    <!-- Barcode scanner (item entry) -->
+    <string name="barcode_scanner_title">Barcode scannen</string>
+    <string name="barcode_scanner_instruction_position_barcode">Positioniere den Barcode im Rahmen</string>
+    <string name="barcode_scanner_error_camera_permission_required">Die Kamera-Berechtigung wird benötigt, um Barcodes zu scannen</string>
+
+    <!-- Checkout scanner (basket add items) -->
+    <string name="checkout_scanner_title">Zum Hinzufügen scannen</string>
+    <string name="checkout_scanner_done_button">Fertig</string>
+    <string name="checkout_scanner_instruction_scan_to_add">Barcode scannen, um Artikel hinzuzufügen</string>
+
+    <!-- Barcode format labels (for debugging / result data) -->
+    <string name="barcode_format_ean_13">EAN-13</string>
+    <string name="barcode_format_ean_8">EAN-8</string>
+    <string name="barcode_format_upc_a">UPC-A</string>
+    <string name="barcode_format_upc_e">UPC-E</string>
+    <string name="barcode_format_code_128">Code 128</string>
+    <string name="barcode_format_code_39">Code 39</string>
+    <string name="barcode_format_code_93">Code 93</string>
+    <string name="barcode_format_itf">ITF</string>
+    <string name="barcode_format_codabar">Codabar</string>
+    <string name="barcode_format_qr_code">QR-Code</string>
+    <string name="barcode_format_data_matrix">Data Matrix</string>
+    <string name="barcode_format_unknown">Unbekannt</string>
+
+    <!-- Barcode scanner: toasts -->
+    <string name="barcode_scanner_toast_gtin_not_unique">Dieser Barcode wird bereits von einem anderen Artikel verwendet</string>
+    <string name="barcode_scanner_toast_gtin_scanned">Barcode gescannt</string>
+</resources>

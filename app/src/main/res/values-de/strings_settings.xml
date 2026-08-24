@@ -1,0 +1,107 @@
+<resources>
+    <!-- Settings main screen -->
+    <string name="settings_title">Einstellungen</string>
+
+    <!-- Settings sections -->
+    <string name="settings_section_terminal">Terminal</string>
+    <string name="settings_section_payments">Zahlungen</string>
+    <string name="settings_section_security">Sicherheit &amp; Datenschutz</string>
+    <string name="settings_section_appearance">Darstellung</string>
+    <string name="settings_section_general">Allgemein</string>
+    <string name="settings_section_developer">Entwickler</string>
+
+    <!-- Settings items: language -->
+    <string name="settings_item_language_title">Sprache</string>
+    <string name="settings_item_language_subtitle">App-Sprache wählen</string>
+
+    <!-- Settings items: currency -->
+    <string name="settings_item_currency_title">Fiat-Währung</string>
+    <string name="settings_item_currency_subtitle">Wähle deine Standard-Fiatwährung</string>
+
+    <!-- Currency settings screen -->
+    <string name="currency_settings_search_hint">Währungen suchen</string>
+    <string name="currency_settings_no_results">Keine Währungen gefunden</string>
+    <string name="currency_settings_option_usd">US-Dollar (USD)</string>
+    <string name="currency_settings_option_eur">Euro (EUR)</string>
+    <string name="currency_settings_option_gbp">Britisches Pfund (GBP)</string>
+    <string name="currency_settings_option_jpy">Japanischer Yen (JPY)</string>
+    <string name="currency_settings_option_dkk">Dänische Krone (DKK)</string>
+    <string name="currency_settings_option_sek">Schwedische Krone (SEK)</string>
+    <string name="currency_settings_option_nok">Norwegische Krone (NOK)</string>
+    <string name="currency_settings_option_krw">Koreanischer Won (KRW)</string>
+
+    <!-- Settings items: mints -->
+    <string name="settings_item_mints_title">Mints</string>
+    <string name="settings_item_mints_subtitle">Cashu-Mints und Lightning-Einstellungen verwalten</string>
+
+    <!-- Settings items: webhooks -->
+    <string name="settings_item_webhooks_title">Webhooks</string>
+    <string name="settings_item_webhooks_subtitle">Verkaufsdaten an externe Dashboards senden</string>
+
+    <!-- Settings items: items catalog -->
+    <string name="settings_item_items_title">Artikel</string>
+    <string name="settings_item_items_subtitle">Katalogartikel erstellen und verwalten</string>
+
+    <!-- Settings items: tips -->
+    <string name="settings_item_tips_title">Trinkgeld</string>
+    <string name="settings_item_tips_subtitle">Trinkgeldoptionen für den Checkout konfigurieren</string>
+
+    <!-- Settings items: basket names -->
+    <string name="settings_item_basket_names_title">Korb-Namen</string>
+    <string name="settings_item_basket_names_subtitle">Voreingestellte Namen für das schnelle Speichern von Körben erstellen</string>
+
+    <!-- Settings items: theme -->
+    <string name="settings_item_theme_title">Design</string>
+    <string name="settings_item_theme_subtitle">Zwischen hellem und dunklem Modus wechseln</string>
+
+    <!-- Settings items: security -->
+    <string name="settings_item_security_title">Sicherheit &amp; Datenschutz</string>
+    <string name="settings_item_security_subtitle">Seed-Phrase sichern, Wallet wiederherstellen</string>
+
+    <!-- Settings items: developer -->
+    <string name="settings_item_developer_title">Entwicklereinstellungen</string>
+    <string name="settings_item_developer_subtitle">Erweiterte Einstellungen und Debugging-Werkzeuge</string>
+
+    <!-- Settings items: about -->
+    <string name="settings_item_about_title">Über</string>
+    <string name="settings_item_about_subtitle">Version, Bedingungen und Kontakt</string>
+
+    <!-- Settings sub-activity labels -->
+    <string name="settings_theme_title">Design</string>
+    <string name="settings_currency_title">Fiat-Währung</string>
+    <string name="settings_language_title">Sprache</string>
+    <string name="settings_mints_title">Mints</string>
+    <string name="settings_security_title">Sicherheit &amp; Datenschutz</string>
+
+    <!-- Settings PIN verification -->
+    <string name="settings_verify_pin_subtitle">Zum Zugriff auf die Einstellungen bestätigen</string>
+
+    <!-- Settings: About screen toasts & dialogs -->
+    <string name="settings_about_toast_developer_already_enabled">Der Entwicklermodus ist bereits aktiviert</string>
+    <string name="settings_about_toast_developer_enabled">Entwicklermodus aktiviert!</string>
+    <string name="settings_about_toast_developer_taps_remaining">%1$d weitere Tipps zum Aktivieren des Entwicklermodus</string>
+    <string name="settings_about_toast_link_error">Link konnte nicht geöffnet werden</string>
+    <string name="settings_about_toast_no_email">Keine E-Mail-App gefunden</string>
+    <string name="settings_about_dialog_terms_title">Nutzungsbedingungen</string>
+    <string name="settings_about_dialog_privacy_title">Datenschutzrichtlinie</string>
+
+    <!-- About Screen -->
+    <string name="about_title">Über</string>
+    <string name="about_device_info">Geräteinformationen</string>
+    <string name="about_app_version">App-Version</string>
+    <string name="about_build_number">Build-Nummer</string>
+    <string name="about_device">Gerät</string>
+    <string name="about_android_version">Android-Version</string>
+    <string name="about_about_us">Über uns</string>
+    <string name="about_terms_of_service">Nutzungsbedingungen</string>
+    <string name="about_privacy_policy">Datenschutzrichtlinie</string>
+    <string name="about_website">Webseite</string>
+    <string name="about_contact_us">Kontakt</string>
+    <string name="about_email_subject">Numo-Support</string>
+
+    <!-- Terms of Service Full Text -->
+    <string name="terms_of_service_full">"NUMO WALLET – NUTZUNGSBEDINGUNGEN\n\n1. ANNAHME\nMit der Nutzung dieser Wallet-Anwendung stimmst du diesen Bedingungen zu.\n\n2. ART DES DIENSTES\nDies ist eine Self-Custody-Bitcoin-Wallet auf Basis von Cashu-Ecash-Technologie. Du bist allein für deine Gelder und deine Seed-Phrase verantwortlich.\n\n3. SEED-PHRASE\nDeine 12-Wörter-Seed-Phrase ist der EINZIGE Weg, deine Wallet wiederherzustellen. Teile sie niemals mit jemandem. Bewahre sie sicher offline auf. Verlorene Seed-Phrasen können wir nicht wiederherstellen.\n\n4. KEINE GARANTIE\nDiese Software wird \"wie besehen\" und ohne jegliche Garantie bereitgestellt. Nutzung auf eigenes Risiko.\n\n5. HAFTUNGSBESCHRÄNKUNG\nWir haften nicht für Verluste von Geldern, gleich ob durch Softwarefehler, Bedienungsfehler oder Ausfälle von Drittanbieter-Mints.\n\n6. ECASH-MINTS\nEcash-Token werden von Mints Dritter verwahrt. Diese Mints können ausfallen oder nicht mehr verfügbar sein. Verteile dein Guthaben auf mehrere Mints.\n\n7. DATENSCHUTZ\nDiese Wallet erhebt keine persönlichen Daten. Transaktionen werden über Ecash-Mints abgewickelt, die eigene Datenschutzrichtlinien haben können.\n\n8. AKTUALISIERUNGEN\nDiese Bedingungen können aktualisiert werden. Die weitere Nutzung gilt als Zustimmung.\n\nZuletzt aktualisiert: November 2024"</string>
+
+    <!-- Privacy Policy Full Text -->
+    <string name="privacy_policy_full">"NUMO WALLET – DATENSCHUTZRICHTLINIE\n\n1. DATENERFASSUNG\nNumo erhebt, speichert oder überträgt keine persönlichen Daten. Die App läuft vollständig auf deinem Gerät.\n\n2. WALLET-DATEN\nDeine Seed-Phrase und deine Wallet-Daten werden lokal auf deinem Gerät gespeichert. Wir haben keinen Zugriff auf diese Informationen.\n\n3. NETZWERKKOMMUNIKATION\nDie App kommuniziert mit:\n• Cashu-Mints (zur Verwaltung von Ecash-Token)\n• Kurs-APIs (zum Abrufen von Wechselkursen)\n• Nostr-Relays (für optionale Backup-Funktionen)\n\nDiese Dienste können eigene Datenschutzrichtlinien haben.\n\n4. ANALYSE\nWir verwenden keine Analyse- oder Tracking-Dienste.\n\n5. MINTS DRITTER\nBei der Nutzung von Ecash-Mints kann der Mint-Betreiber Transaktionsbeträge und -zeitpunkte sehen. Wähle vertrauenswürdige Mints.\n\n6. BACKUP\nWenn du das Nostr-Backup aktivierst, werden verschlüsselte Wallet-Daten auf Nostr-Relays veröffentlicht. Nur du kannst diese Daten mit deiner Seed-Phrase entschlüsseln.\n\n7. KONTAKT\nFragen zum Datenschutz: numopay@proton.me\n\nZuletzt aktualisiert: November 2024"</string>
+</resources>

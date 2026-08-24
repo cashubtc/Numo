@@ -1,0 +1,7 @@
+<resources>
+    <!-- Payment: toast messages -->
+    <string name="payment_toast_hce_not_available">Host Card Emulation ist auf diesem Gerät nicht verfügbar</string>
+    <string name="payment_toast_failed_create_request">Zahlungsanfrage konnte nicht erstellt werden</string>
+    <string name="payment_toast_error_ndef_setup">Fehler beim Einrichten der NDEF-Zahlung: %1$s</string>
+    <string name="payment_toast_error_payment">Zahlungsfehler: %1$s</string>
+</resources>

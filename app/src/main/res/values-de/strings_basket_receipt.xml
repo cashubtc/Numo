@@ -1,0 +1,41 @@
+<resources>
+    <!-- Basket receipt screen -->
+    <string name="basket_receipt_print_content_description">Beleg drucken</string>
+    <string name="basket_receipt_subtotal_label">Zwischensumme (ohne MwSt.)</string>
+    <string name="basket_receipt_bitcoin_items_label">Bitcoin-Artikel</string>
+    <string name="basket_receipt_total_label">Gesamt</string>
+    <string name="basket_receipt_paid_label">Bezahlt</string>
+    <string name="basket_receipt_subtotal_amount_label">Betrag</string>
+    <string name="basket_receipt_amount_received_label">Erhaltener Betrag</string>
+    <string name="basket_receipt_details_header">Details</string>
+    <string name="basket_receipt_payment_type_label">Zahlungsart</string>
+    <string name="basket_receipt_mint_label">Mint</string>
+    <string name="basket_receipt_transaction_id_label">Transaktions-ID</string>
+    <string name="basket_receipt_print_button">Beleg drucken</string>
+    <string name="basket_receipt_type_lightning">Lightning</string>
+    <string name="basket_receipt_type_cashu">Cashu</string>
+    <string name="basket_receipt_type_payment">Zahlung</string>
+
+    <!-- Basket receipt hero VAT subtitle -->
+    <string name="basket_receipt_total_subtitle_with_vat">%1$s • inkl. %2$s MwSt.</string>
+    <string name="basket_receipt_total_subtitle_vat_only">inkl. %1$s MwSt.</string>
+
+    <!-- Basket receipt items header -->
+    <string name="basket_receipt_items_header_single">1 ARTIKEL</string>
+    <string name="basket_receipt_items_header_multiple">%1$d ARTIKEL</string>
+
+    <!-- Basket receipt item details -->
+    <string name="basket_receipt_vat_label">inkl. %1$d%% MwSt.</string>
+    <string name="basket_receipt_equivalent_label">entspricht</string>
+    <string name="basket_receipt_payment_item_label">Zahlung</string>
+    <string name="basket_receipt_paid_equivalent_label">bezahlt</string>
+
+    <!-- Basket receipt totals and tip -->
+    <string name="basket_receipt_fiat_subtotal_net_label">Fiat-Zwischensumme (netto)</string>
+    <string name="basket_receipt_fiat_items_label">Fiat-Artikel</string>
+    <string name="basket_receipt_item_each">%1$s pro Stück</string>
+    <string name="basket_receipt_total_paid_label">Gesamt bezahlt</string>
+    <string name="basket_receipt_tip_label">Trinkgeld</string>
+    <string name="basket_receipt_tip_label_with_percentage">Trinkgeld (%1$d%%)</string>
+    <string name="basket_receipt_vat_row_label">MwSt. (%1$d%%)</string>
+</resources>

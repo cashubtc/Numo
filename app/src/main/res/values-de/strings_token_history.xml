@@ -1,0 +1,16 @@
+<resources>
+    <!-- Token history: toolbar title & dialogs -->
+    <string name="token_history_toolbar_title">Token-Verlauf</string>
+
+    <string name="token_history_dialog_delete_title">Token löschen</string>
+    <string name="token_history_dialog_delete_message">Möchtest du diesen Token wirklich aus dem Verlauf löschen?</string>
+    <string name="token_history_dialog_delete_positive">Löschen</string>
+
+    <string name="token_history_dialog_clear_title">Verlauf leeren</string>
+    <string name="token_history_dialog_clear_message">Möchtest du den gesamten Token-Verlauf wirklich leeren? Diese Aktion kann nicht rückgängig gemacht werden.</string>
+    <string name="token_history_dialog_clear_positive">Alles löschen</string>
+
+    <!-- Token history: toast messages -->
+    <string name="token_history_toast_copied">Token in die Zwischenablage kopiert</string>
+    <string name="token_history_toast_no_app">Keine Apps zur Verarbeitung dieses Tokens verfügbar</string>
+</resources>

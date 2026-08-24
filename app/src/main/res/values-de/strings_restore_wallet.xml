@@ -1,0 +1,14 @@
+<resources>
+    <!-- Restore wallet: confirm dialog + summaries -->
+    <string name="restore_confirm_dialog_title">Wiederherstellung bestätigen</string>
+    <string name="restore_confirm_dialog_positive">Wiederherstellen</string>
+
+    <string name="restore_success_recovered_summary">%1$d Sats über %2$d Mint(s) wiederhergestellt</string>
+    <string name="restore_success_balance_changed_summary">Guthaben um %1$d Sats verändert</string>
+    <string name="restore_success_restored_with_balance_summary">Wallet mit insgesamt %1$d Sats wiederhergestellt</string>
+    <string name="restore_success_balance_change_line">%1$d → %2$d Sats</string>
+    <string name="restore_device_backup_found_title">Verschlüsseltes Geräte-Backup gefunden</string>
+    <string name="restore_device_backup_found_subtitle">%1$d Mint(s) aus diesem Geräte-Backup wiederhergestellt.</string>
+    <string name="restore_device_backup_card_title">Verschlüsseltes Backup wiederherstellen</string>
+    <string name="restore_device_backup_card_subtitle">Verwende das Backup, das durch dein Wiederherstellungspasswort geschützt ist.</string>
+</resources>
