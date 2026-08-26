@@ -191,7 +191,7 @@
     <string name="onboarding_add_mint_or">or</string>
     <string name="onboarding_add_mint_scan_qr">Scan</string>
     <string name="onboarding_add_mint_loading">Adding mint…</string>
-    <string name="mint_discovery_action">Discover on Nostr</string>
+    <string name="mint_discovery_action">Discover mints</string>
     <string name="mint_discovery_title">Discover mints</string>
     <string name="mint_discovery_subtitle">Community recommendations from Nostr. Check the operator before trusting a mint with funds.</string>
     <string name="mint_discovery_loading">Looking across Nostr relays…</string>
