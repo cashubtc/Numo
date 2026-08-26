@@ -39,6 +39,7 @@ class BtcPaySettingsActivity : AppCompatActivity() {
     private lateinit var posAppSubtitle: TextView
 
     private var connectionTestPassed = false
+    private var isTestingConnection = false
     private var isLoadingSettings = false
 
     companion object {
@@ -82,13 +83,17 @@ class BtcPaySettingsActivity : AppCompatActivity() {
             storeIdInput.text.toString().isNotBlank()
     }
 
-    private fun updateToggleEnabled() {
-        val canEnable = hasAllFields()
-        enableSwitch.isEnabled = canEnable
-        if (!canEnable && enableSwitch.isChecked) {
-            enableSwitch.isChecked = false
-            PreferenceStore.app(this).putBoolean(KEY_ENABLED, false)
+    private fun showIncompleteSetupGuidance() {
+        testConnectionStatus.text = getString(R.string.btcpay_test_fill_all_fields)
+        testConnectionStatus.setTextColor(ContextCompat.getColor(this, R.color.color_error))
+
+        val firstMissingInput = when {
+            serverUrlInput.text.isBlank() -> serverUrlInput
+            apiKeyInput.text.isBlank() -> apiKeyInput
+            else -> storeIdInput
         }
+        firstMissingInput.requestFocus()
+        Toast.makeText(this, R.string.btcpay_test_fill_all_fields, Toast.LENGTH_SHORT).show()
     }
 
     private fun updatePosVisibility() {
@@ -100,11 +105,16 @@ class BtcPaySettingsActivity : AppCompatActivity() {
     private fun setupListeners() {
         val enableToggleRow = findViewById<LinearLayout>(R.id.enable_toggle_row)
         enableToggleRow.setOnClickListener {
-            if (hasAllFields()) enableSwitch.toggle()
+            enableSwitch.toggle()
         }
 
         enableSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (isChecked && !connectionTestPassed) {
+            if (isChecked && !hasAllFields()) {
+                enableSwitch.isChecked = false
+                showIncompleteSetupGuidance()
+            } else if (isChecked && isTestingConnection) {
+                enableSwitch.isChecked = false
+            } else if (isChecked && !connectionTestPassed) {
                 enableSwitch.isChecked = false
                 testConnection(onSuccess = {
                     enableSwitch.isChecked = true
@@ -122,7 +132,7 @@ class BtcPaySettingsActivity : AppCompatActivity() {
             override fun afterTextChanged(s: Editable?) {
                 if (isLoadingSettings) return
                 connectionTestPassed = false
-                updateToggleEnabled()
+                if (enableSwitch.isChecked) enableSwitch.isChecked = false
                 // Clear POS selection — it belongs to a different server/store.
                 clearPosSelection()
             }
@@ -149,10 +159,9 @@ class BtcPaySettingsActivity : AppCompatActivity() {
         isLoadingSettings = false
 
         val alreadyEnabled = prefs.getBoolean(KEY_ENABLED, false)
-        if (alreadyEnabled && hasAllFields()) connectionTestPassed = true
-        val canEnable = hasAllFields() && connectionTestPassed
-        enableSwitch.isEnabled = canEnable
-        enableSwitch.isChecked = canEnable && alreadyEnabled
+        connectionTestPassed = alreadyEnabled && hasAllFields()
+        enableSwitch.isEnabled = true
+        enableSwitch.isChecked = connectionTestPassed
 
         val posAppName = prefs.getString(KEY_POS_APP_NAME, null)
         posAppSubtitle.text = posAppName ?: getString(R.string.btcpay_pos_app_subtitle_none)
@@ -248,11 +257,12 @@ class BtcPaySettingsActivity : AppCompatActivity() {
         val storeId = storeIdInput.text.toString().trim()
 
         if (serverUrl.isBlank() || apiKey.isBlank() || storeId.isBlank()) {
-            testConnectionStatus.text = getString(R.string.btcpay_test_fill_all_fields)
-            testConnectionStatus.setTextColor(ContextCompat.getColor(this, R.color.color_error))
+            showIncompleteSetupGuidance()
             return
         }
+        if (isTestingConnection) return
 
+        isTestingConnection = true
         testConnectionStatus.text = getString(R.string.btcpay_test_connecting)
         testConnectionStatus.setTextColor(ContextCompat.getColor(this, R.color.color_text_secondary))
 
@@ -284,9 +294,9 @@ class BtcPaySettingsActivity : AppCompatActivity() {
                 }
             }
 
+            isTestingConnection = false
             if (result.isSuccess) {
                 connectionTestPassed = true
-                updateToggleEnabled()
                 onSuccess?.invoke()
                 testConnectionStatus.text = getString(R.string.btcpay_test_success)
                 testConnectionStatus.setTextColor(ContextCompat.getColor(this@BtcPaySettingsActivity, R.color.color_success_green))
