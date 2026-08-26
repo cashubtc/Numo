@@ -341,7 +341,7 @@
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_price_fiat"
-                            style="?attr/materialButtonOutlinedStyle"
+                            style="@style/Widget.Numo.Button.Segmented"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
@@ -349,7 +349,7 @@
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btn_price_bitcoin"
-                            style="?attr/materialButtonOutlinedStyle"
+                            style="@style/Widget.Numo.Button.Segmented"
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
                             android:layout_weight="1"

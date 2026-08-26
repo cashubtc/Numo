@@ -236,6 +236,7 @@
         <item name="android:paddingStart">24dp</item>
         <item name="android:paddingEnd">24dp</item>
         <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@null</item>
     </style>
 
     <style name="Widget.Button.Secondary" parent="Widget.Material3.Button.OutlinedButton"/>
@@ -255,6 +256,22 @@
         <item name="strokeColor">@color/color_chip_border</item>
         <item name="strokeWidth">1dp</item>
         <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="rippleColor">@color/color_ripple</item>
+        <item name="elevation">0dp</item>
+    </style>
+
+    <style name="Widget.Numo.Button.Segmented" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textColor">@color/selector_segmented_button_text</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="backgroundTint">@color/selector_segmented_button_background</item>
+        <item name="strokeColor">@color/selector_segmented_button_stroke</item>
+        <item name="strokeWidth">1dp</item>
         <item name="rippleColor">@color/color_ripple</item>
         <item name="elevation">0dp</item>
     </style>
