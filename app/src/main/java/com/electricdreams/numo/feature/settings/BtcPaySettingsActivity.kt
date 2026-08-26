@@ -5,7 +5,6 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -20,6 +19,7 @@ import com.electricdreams.numo.core.payment.BtcPayAppsService
 import com.electricdreams.numo.core.payment.BtcPayPosApp
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
+import com.electricdreams.numo.ui.components.NumoTopBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -62,7 +62,7 @@ class BtcPaySettingsActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        findViewById<ImageButton>(R.id.back_button).setOnClickListener {
+        findViewById<NumoTopBar>(R.id.top_bar).onNavClick {
             onBackPressedDispatcher.onBackPressed()
         }
 
