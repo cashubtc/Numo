@@ -3,7 +3,7 @@ package com.electricdreams.numo.feature.items.handlers
 import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
-import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.materialswitch.MaterialSwitch
 
 /**
  * Handles inventory tracking UI and logic including:
@@ -12,10 +12,10 @@ import com.google.android.material.switchmaterial.SwitchMaterial
  * - Low stock alert settings
  */
 class InventoryHandler(
-    private val switchTrackInventory: SwitchMaterial,
+    private val switchTrackInventory: MaterialSwitch,
     private val inventoryFieldsContainer: LinearLayout,
     private val quantityInput: EditText,
-    private val alertCheckbox: SwitchMaterial,
+    private val alertCheckbox: MaterialSwitch,
     private val alertThresholdContainer: LinearLayout,
     private val alertThresholdInput: EditText
 ) {

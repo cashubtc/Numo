@@ -64,12 +64,10 @@
                     android:text="@string/tips_settings_enable_label"
                     android:textAppearance="@style/Text.RowTitle" />
 
-                <androidx.appcompat.widget.SwitchCompat
+                <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/tips_enabled_switch"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:thumbTint="@color/selector_switch_thumb"
-                    app:trackTint="@color/selector_switch_track" />
+                    android:layout_height="wrap_content" />
             </LinearLayout>
 
             <!-- Presets Section -->

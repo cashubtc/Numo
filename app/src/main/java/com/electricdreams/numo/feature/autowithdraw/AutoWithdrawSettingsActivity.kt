@@ -19,7 +19,7 @@ import android.widget.TextView
 
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SwitchCompat
+import com.google.android.material.materialswitch.MaterialSwitch
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -68,7 +68,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     // Toggle icon
 
     // Settings controls
-    private lateinit var enableSwitch: SwitchCompat
+    private lateinit var enableSwitch: MaterialSwitch
     private lateinit var enableToggleRow: LinearLayout
     private lateinit var lightningAddressInput: EditText
     private lateinit var lightningAddressValidation: TextView

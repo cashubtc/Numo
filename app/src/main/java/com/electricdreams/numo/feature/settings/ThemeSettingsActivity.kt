@@ -6,7 +6,7 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.appcompat.widget.SwitchCompat
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import androidx.core.view.ViewCompat
@@ -28,7 +28,7 @@ class ThemeSettingsActivity : AppCompatActivity() {
     private lateinit var radioBitcoinOrange: RadioButton
     private lateinit var radioGreen: RadioButton
     private lateinit var radioWhite: RadioButton
-    private lateinit var darkModeSwitch: SwitchCompat
+    private lateinit var darkModeSwitch: MaterialSwitch
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

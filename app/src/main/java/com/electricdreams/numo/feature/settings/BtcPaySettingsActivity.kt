@@ -11,7 +11,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SwitchCompat
+import com.google.android.material.materialswitch.MaterialSwitch
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.R
@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit
 
 class BtcPaySettingsActivity : AppCompatActivity() {
 
-    private lateinit var enableSwitch: SwitchCompat
+    private lateinit var enableSwitch: MaterialSwitch
     private lateinit var serverUrlInput: EditText
     private lateinit var apiKeyInput: EditText
     private lateinit var storeIdInput: EditText

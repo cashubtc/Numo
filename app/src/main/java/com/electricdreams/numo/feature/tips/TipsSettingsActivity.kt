@@ -9,7 +9,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SwitchCompat
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.electricdreams.numo.R
 import com.electricdreams.numo.ui.util.DialogHelper
 import androidx.core.view.ViewCompat
@@ -26,7 +26,7 @@ import androidx.core.view.WindowInsetsCompat
 class TipsSettingsActivity : AppCompatActivity() {
     
     private lateinit var tipsManager: TipsManager
-    private lateinit var tipsEnabledSwitch: SwitchCompat
+    private lateinit var tipsEnabledSwitch: MaterialSwitch
     private lateinit var presetsContainer: View
     private lateinit var presetsList: LinearLayout
     private lateinit var addPresetButton: View

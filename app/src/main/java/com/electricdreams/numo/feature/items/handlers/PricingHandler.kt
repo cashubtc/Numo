@@ -13,7 +13,7 @@ import com.electricdreams.numo.core.model.PriceType
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
-import com.google.android.material.switchmaterial.SwitchMaterial
+import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textfield.TextInputLayout
 
 /**
@@ -32,9 +32,9 @@ class PricingHandler(
     private val priceInput: EditText,
     private val satsInput: EditText,
     private val vatSectionCard: View,
-    private val switchVatEnabled: SwitchMaterial,
+    private val switchVatEnabled: MaterialSwitch,
     private val vatFieldsContainer: LinearLayout,
-    private val switchPriceIncludesVat: SwitchMaterial,
+    private val switchPriceIncludesVat: MaterialSwitch,
     private val vatRateInput: EditText,
     private val priceBreakdownContainer: LinearLayout,
     private val textNetPrice: TextView,

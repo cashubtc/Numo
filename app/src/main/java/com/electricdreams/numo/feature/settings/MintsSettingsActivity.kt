@@ -33,7 +33,7 @@ import com.electricdreams.numo.feature.onboarding.AddMintBottomSheet
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
 import com.electricdreams.numo.ui.components.MintListItem
 import com.electricdreams.numo.ui.util.DialogHelper
-import androidx.appcompat.widget.SwitchCompat
+import com.google.android.material.materialswitch.MaterialSwitch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -65,7 +65,7 @@ class MintsSettingsActivity : AppCompatActivity() {
     private lateinit var lightningMintBalance: TextView
     private lateinit var activeUnitRow: View
     private lateinit var activeUnitValue: TextView
-    private lateinit var swapUnknownMintsSwitch: SwitchCompat
+    private lateinit var swapUnknownMintsSwitch: MaterialSwitch
     private lateinit var allMintsHeader: TextView
     private lateinit var mintsContainer: LinearLayout
     private lateinit var addMintHeader: TextView
