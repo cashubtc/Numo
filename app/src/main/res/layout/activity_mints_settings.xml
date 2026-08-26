@@ -307,27 +307,15 @@
 
             </LinearLayout>
 
-            <!-- ==================== -->
-            <!-- ADD MINT SECTION -->
-            <!-- ==================== -->
-            <TextView
-                android:id="@+id/add_mint_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/section_gap"
-                android:paddingBottom="@dimen/row_padding_vertical"
-                android:text="@string/mints_add_section"
-                android:textAppearance="@style/Text.SectionHeader" />
-
             <Button
                 android:id="@+id/add_mint_button"
                 style="@style/Widget.Button.Secondary.Outlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                android:text="@string/action_add_new_mint"
-                android:gravity="center" />
+                android:layout_marginTop="@dimen/section_gap"
+                android:gravity="center"
+                android:text="@string/action_add_new_mint" />
 
         </LinearLayout>
     </ScrollView>

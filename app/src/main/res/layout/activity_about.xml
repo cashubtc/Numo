@@ -17,6 +17,7 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:fillViewport="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/top_bar">
 
@@ -30,33 +31,32 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
                 android:gravity="center"
-                android:paddingVertical="@dimen/space_2xl">
+                android:orientation="vertical"
+                android:paddingTop="@dimen/space_xl"
+                android:paddingBottom="@dimen/space_l">
 
                 <ImageView
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:src="@mipmap/ic_launcher"
-                    android:contentDescription="@string/desc_app_icon" />
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:contentDescription="@string/desc_app_icon"
+                    android:src="@mipmap/ic_launcher" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_l"
+                    android:layout_marginTop="@dimen/space_m"
                     android:text="@string/app_name"
-                    style="@style/Text.Heading1" />
+                    android:textAppearance="@style/Text.Heading1" />
 
                 <TextView
                     android:id="@+id/version_text"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_xs"
-                    android:text="Version 1.0.0"
-                    android:textAppearance="@style/Text.SecondaryButton"
-                    android:textColor="@color/color_text_secondary"
-                    android:padding="@dimen/space_s"
-                    android:background="?attr/selectableItemBackgroundBorderless" />
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:gravity="center"
+                    android:paddingHorizontal="@dimen/space_s"
+                    android:textAppearance="@style/Text.SecondaryButton" />
 
             </LinearLayout>
 
@@ -67,106 +67,113 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/settings_horizontal_padding"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
                 android:paddingTop="@dimen/space_s"
                 android:paddingBottom="@dimen/space_s"
                 android:text="@string/about_device_info"
-                style="@style/Text.SectionHeader" />
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginHorizontal="@dimen/space_xl"
-                android:padding="@dimen/space_l"
-                android:background="@drawable/bg_card_rounded">
+                android:orientation="vertical">
 
                 <!-- Version -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingVertical="@dimen/space_s">
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_weight="2"
                         android:text="@string/about_app_version"
-                        style="@style/Text.Body" />
+                        android:textAppearance="@style/Text.Body" />
 
                     <TextView
                         android:id="@+id/info_app_version"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="1.0.0"
-                        style="@style/Text.RowTitle" />
+                        android:layout_weight="3"
+                        android:gravity="end"
+                        android:textAppearance="@style/Text.BodyBold" />
                 </LinearLayout>
 
                 <!-- Build Number -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingVertical="@dimen/space_s">
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_weight="2"
                         android:text="@string/about_build_number"
-                        style="@style/Text.Body" />
+                        android:textAppearance="@style/Text.Body" />
 
                     <TextView
                         android:id="@+id/info_build_number"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="1"
-                        style="@style/Text.RowTitle" />
+                        android:layout_weight="3"
+                        android:gravity="end"
+                        android:textAppearance="@style/Text.BodyBold" />
                 </LinearLayout>
 
                 <!-- Device Model -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingVertical="@dimen/space_s">
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_weight="2"
                         android:text="@string/about_device"
-                        style="@style/Text.Body" />
+                        android:textAppearance="@style/Text.Body" />
 
                     <TextView
                         android:id="@+id/info_device"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Unknown"
-                        style="@style/Text.RowTitle" />
+                        android:layout_weight="3"
+                        android:gravity="end"
+                        android:maxLines="2"
+                        android:textAppearance="@style/Text.BodyBold" />
                 </LinearLayout>
 
                 <!-- Android Version -->
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
+                    android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingVertical="@dimen/space_s">
+                    android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_weight="2"
                         android:text="@string/about_android_version"
-                        style="@style/Text.Body" />
+                        android:textAppearance="@style/Text.Body" />
 
                     <TextView
                         android:id="@+id/info_android_version"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:text="Unknown"
-                        style="@style/Text.RowTitle" />
+                        android:layout_weight="3"
+                        android:gravity="end"
+                        android:maxLines="2"
+                        android:textAppearance="@style/Text.BodyBold" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -178,11 +185,11 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/settings_horizontal_padding"
-                android:paddingTop="@dimen/space_xl"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/section_gap"
                 android:paddingBottom="@dimen/space_s"
                 android:text="@string/about_about_us"
-                style="@style/Text.SectionHeader" />
+                android:textAppearance="@style/Text.SectionHeader" />
 
             <!-- Terms of Service -->
             <LinearLayout
@@ -194,7 +201,7 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="@dimen/settings_horizontal_padding">
+                android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
                     android:importantForAccessibility="no"
@@ -229,7 +236,7 @@
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="@dimen/settings_horizontal_padding">
+                android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
                     android:importantForAccessibility="no"
@@ -258,13 +265,13 @@
             <LinearLayout
                 android:id="@+id/website_item"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/settings_item_height"
+                android:layout_height="@dimen/list_row_height"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="@dimen/settings_horizontal_padding">
+                android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
                     android:importantForAccessibility="no"
@@ -305,13 +312,13 @@
             <LinearLayout
                 android:id="@+id/contact_item"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/settings_item_height"
+                android:layout_height="@dimen/list_row_height"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingHorizontal="@dimen/settings_horizontal_padding">
+                android:paddingHorizontal="@dimen/margin_screen_horizontal">
 
                 <ImageView
                     android:importantForAccessibility="no"

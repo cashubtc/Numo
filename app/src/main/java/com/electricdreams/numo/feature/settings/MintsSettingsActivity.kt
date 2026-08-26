@@ -68,7 +68,6 @@ class MintsSettingsActivity : AppCompatActivity() {
     private lateinit var swapUnknownMintsSwitch: MaterialSwitch
     private lateinit var allMintsHeader: TextView
     private lateinit var mintsContainer: LinearLayout
-    private lateinit var addMintHeader: TextView
     private lateinit var emptyState: View
     private lateinit var mintsScroll: ScrollView
 
@@ -177,7 +176,6 @@ class MintsSettingsActivity : AppCompatActivity() {
         swapUnknownMintsSwitch = findViewById(R.id.swap_unknown_mints_switch)
         allMintsHeader = findViewById(R.id.all_mints_header)
         mintsContainer = findViewById(R.id.mints_container)
-        addMintHeader = findViewById(R.id.add_mint_header)
         emptyState = findViewById(R.id.empty_state)
     }
 
