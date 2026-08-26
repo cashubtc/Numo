@@ -47,7 +47,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:fillViewport="true"
-        android:background="@color/color_bg_surface"
+        android:background="@color/color_bg_white"
         app:layout_constraintTop_toBottomOf="@id/top_bar"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -149,7 +149,7 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardBackgroundColor="@color/color_bg_white"
+                app:cardBackgroundColor="@color/color_bg_card"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp">
 
