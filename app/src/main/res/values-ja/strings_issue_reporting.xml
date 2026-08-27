@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="issue_report_title">問題を報告</string>
+    <string name="issue_report_description_label">何が起きましたか？</string>
+    <string name="issue_report_description_hint">何が起きたか、代わりに何を期待していたかを説明してください</string>
+    <string name="issue_report_privacy_disclosure">入力した説明と以下に表示される端末情報は、Numoサポートの非公開ワークスペースに投稿されます。報告には新しい一時的なIDが使用され、ウォレットやアプリのIDには関連付けられません。リレーやネットワーク事業者はIPアドレスや送信時刻を確認できる場合があります。</string>
+    <string name="issue_report_shared_information">含まれる情報</string>
+    <string name="issue_report_platform_value">プラットフォーム: %1$s</string>
+    <string name="issue_report_os_value">OSバージョン: %1$s</string>
+    <string name="issue_report_device_value">端末モデル: %1$s</string>
+    <string name="issue_report_app_version_value">アプリバージョン: %1$s</string>
+    <string name="issue_report_app_build_value">アプリビルド: %1$s</string>
+    <string name="issue_report_send">報告を送信</string>
+    <string name="issue_report_retry">再試行</string>
+    <string name="issue_report_sending">認証して送信中…</string>
+    <string name="issue_report_sent">Numoサポートに報告を送信しました。</string>
+    <string name="issue_report_failed">報告は受け付けられませんでした。入力内容は残っているため、再試行できます。</string>
+    <string name="issue_report_unavailable">現在、問題報告は利用できません。</string>
+    <string name="issue_report_required">問題の内容を入力してください。</string>
+    <string name="issue_report_too_large">説明が長すぎます。上限はUTF-8で8000バイトです。</string>
+    <string name="issue_report_invalid">報告内容を確認して、もう一度お試しください。</string>
+    <string name="issue_report_description_count">%1$d / 8000バイト</string>
+    <string name="issue_report_automatic_title">重大なエラー報告を自動送信</string>
+    <string name="issue_report_automatic_summary">初期設定で有効です。アプリが予期せず終了した場合、次回起動後にエラーの種類とアプリコード内の位置を含む報告をNumoサポートの非公開ワークスペースへ送信します。例外メッセージ、生ログ、ウォレットデータ、識別子は含まれません。いつでも無効にできます。</string>
+    <string name="about_report_issue">問題を報告</string>
+    <string name="about_report_issue_subtitle">Numoサポートに匿名の報告を送信</string>
+</resources>
