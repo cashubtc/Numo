@@ -31,7 +31,6 @@ import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.LightningAddressManager
 import com.electricdreams.numo.core.util.MintManager
-import com.electricdreams.numo.core.util.ur.UrBytesEncoder
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
 import com.electricdreams.numo.ui.components.WithdrawAddressCard
 import com.electricdreams.numo.ui.components.WithdrawInvoiceCard
@@ -356,7 +355,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
                     if (qrBitmap != null) {
                         tokenQrCode.setImageBitmap(qrBitmap)
                     } else {
-                        startAnimatedTokenQr(tokenString, qrForeground, qrBackground)
+                        startAnimatedTokenQr(token, qrForeground, qrBackground)
                     }
 
                     tokenText.text = tokenString
@@ -387,12 +386,23 @@ class WithdrawLightningActivity : AppCompatActivity() {
     }
 
     /**
-     * Displays the token as an animated QR code, cycling through `ur:bytes` frames
-     * (the format used by e.g. cashu.me) when it is too large for a single QR code.
+     * Displays the token as an animated QR code (NUT-16 `ur:bytes` frames, the format
+     * used by e.g. cashu.me) when it is too large for a single QR code. The CDK
+     * encoder is an unbounded fountain-coded stream, so frames are emitted until
+     * the job is cancelled.
      */
-    private fun startAnimatedTokenQr(tokenString: String, foregroundColor: Int, backgroundColor: Int) {
-        val encoder = UrBytesEncoder(tokenString.toByteArray(Charsets.UTF_8))
+    private fun startAnimatedTokenQr(
+        token: org.cashudevkit.Token,
+        foregroundColor: Int,
+        backgroundColor: Int
+    ) {
+        val encoder = token.urEncoder(null)
         animatedQrJob = lifecycleScope.launch {
+            tokenQrCaption.text = getString(
+                R.string.withdraw_animated_qr_caption,
+                encoder.fragmentCount().toInt()
+            )
+            tokenQrCaption.visibility = View.VISIBLE
             while (isActive) {
                 val frame = withContext(Dispatchers.Default) {
                     QrCodeGenerator.generate(
@@ -400,12 +410,6 @@ class WithdrawLightningActivity : AppCompatActivity() {
                     )
                 }
                 tokenQrCode.setImageBitmap(frame)
-                tokenQrCaption.text = getString(
-                    R.string.withdraw_animated_qr_caption,
-                    encoder.currentSeqNum,
-                    encoder.fragmentCount
-                )
-                tokenQrCaption.visibility = View.VISIBLE
                 delay(ANIMATED_QR_FRAME_INTERVAL_MS)
             }
         }
