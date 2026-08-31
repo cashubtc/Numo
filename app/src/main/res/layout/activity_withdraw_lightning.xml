@@ -308,6 +308,16 @@
                             android:layout_marginBottom="@dimen/space_l"/>
 
                         <TextView
+                            android:id="@+id/token_qr_caption"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:layout_marginBottom="@dimen/space_l"
+                            android:textSize="12sp"
+                            android:textColor="@color/color_text_secondary"
+                            android:visibility="gone" />
+
+                        <TextView
                             android:id="@+id/token_text"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"

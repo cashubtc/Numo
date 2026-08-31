@@ -31,12 +31,16 @@ import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.LightningAddressManager
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.util.ur.UrBytesEncoder
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
 import com.electricdreams.numo.ui.components.WithdrawAddressCard
 import com.electricdreams.numo.ui.components.WithdrawInvoiceCard
 import com.electricdreams.numo.ui.util.QrCodeGenerator
 import com.google.android.material.card.MaterialCardView
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.cashudevkit.CurrencyUnit
@@ -64,6 +68,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "WithdrawLightning"
         private const val FEE_BUFFER_PERCENT = 0.02 // 2% buffer for fees
+        private const val ANIMATED_QR_FRAME_INTERVAL_MS = 250L
     }
 
     private lateinit var mintUrl: String
@@ -93,8 +98,12 @@ class WithdrawLightningActivity : AppCompatActivity() {
     private lateinit var createTokenButton: Button
     private lateinit var tokenResultCard: View
     private lateinit var tokenQrCode: ImageView
+    private lateinit var tokenQrCaption: TextView
     private lateinit var tokenText: TextView
     private lateinit var copyTokenButton: Button
+
+    // Cycles through ur:bytes frames when a token is too large for a single QR
+    private var animatedQrJob: Job? = null
 
     // QR Scanner Launcher
     private val scanLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -169,6 +178,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
         createTokenButton = findViewById(R.id.create_token_button)
         tokenResultCard = findViewById(R.id.token_result_card)
         tokenQrCode = findViewById(R.id.token_qr_code)
+        tokenQrCaption = findViewById(R.id.token_qr_caption)
         tokenText = findViewById(R.id.token_text)
         copyTokenButton = findViewById(R.id.copy_token_button)
     }
@@ -267,6 +277,8 @@ class WithdrawLightningActivity : AppCompatActivity() {
             return
         }
 
+        animatedQrJob?.cancel()
+        animatedQrJob = null
         setLoading(true)
         
         lifecycleScope.launch {
@@ -328,20 +340,23 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 val qrForeground = if (isDarkTheme) Color.WHITE else Color.BLACK
                 val qrBackground = Color.TRANSPARENT
 
-                // Generate QR - handle potential size overflow gracefully
+                // Generate QR - fall back to an animated ur:bytes QR when the token
+                // is too large to fit in a single QR code
                 var qrBitmap: Bitmap? = null
                 try {
                     qrBitmap = QrCodeGenerator.generate(tokenString, 512, qrForeground, qrBackground)
                 } catch (e: Exception) {
-                    Log.e(TAG, "Failed to generate QR code for token (likely too large)", e)
+                    Log.d(TAG, "Token too large for a single QR code, using animated QR instead", e)
                 }
 
                 withContext(Dispatchers.Main) {
+                    animatedQrJob?.cancel()
+                    tokenQrCaption.visibility = View.GONE
+                    tokenQrCode.visibility = View.VISIBLE
                     if (qrBitmap != null) {
                         tokenQrCode.setImageBitmap(qrBitmap)
-                        tokenQrCode.visibility = View.VISIBLE
                     } else {
-                        tokenQrCode.visibility = View.GONE
+                        startAnimatedTokenQr(tokenString, qrForeground, qrBackground)
                     }
 
                     tokenText.text = tokenString
@@ -367,6 +382,31 @@ class WithdrawLightningActivity : AppCompatActivity() {
                         Toast.LENGTH_LONG
                     ).show()
                 }
+            }
+        }
+    }
+
+    /**
+     * Displays the token as an animated QR code, cycling through `ur:bytes` frames
+     * (the format used by e.g. cashu.me) when it is too large for a single QR code.
+     */
+    private fun startAnimatedTokenQr(tokenString: String, foregroundColor: Int, backgroundColor: Int) {
+        val encoder = UrBytesEncoder(tokenString.toByteArray(Charsets.UTF_8))
+        animatedQrJob = lifecycleScope.launch {
+            while (isActive) {
+                val frame = withContext(Dispatchers.Default) {
+                    QrCodeGenerator.generate(
+                        encoder.nextPart(), 512, foregroundColor, backgroundColor, roundedDots = false
+                    )
+                }
+                tokenQrCode.setImageBitmap(frame)
+                tokenQrCaption.text = getString(
+                    R.string.withdraw_animated_qr_caption,
+                    encoder.currentSeqNum,
+                    encoder.fragmentCount
+                )
+                tokenQrCaption.visibility = View.VISIBLE
+                delay(ANIMATED_QR_FRAME_INTERVAL_MS)
             }
         }
     }
