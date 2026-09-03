@@ -842,7 +842,9 @@
     <string name="withdraw_cashu_copy_token">Copy Token</string>
     <string name="withdraw_cashu_copied">Token copied to clipboard</string>
     <string name="withdraw_cashu_creating">Creating token...</string>
-    <string name="withdraw_animated_qr_caption">Animated QR code (%1$d frames). Scan with a wallet that supports animated QR codes.</string>
+    <string name="withdraw_animated_qr_speed_slow">Slow</string>
+    <string name="withdraw_animated_qr_speed_normal">Normal</string>
+    <string name="withdraw_animated_qr_speed_fast">Fast</string>
 
     
     <string name="qr_scanner_title">Scan QR Code</string>

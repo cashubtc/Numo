@@ -307,15 +307,40 @@
                             android:layout_height="200dp"
                             android:layout_marginBottom="@dimen/space_l"/>
 
-                        <TextView
-                            android:id="@+id/token_qr_caption"
+                        <com.google.android.material.button.MaterialButtonToggleGroup
+                            android:id="@+id/qr_speed_selector"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
+                            android:layout_height="48dp"
                             android:layout_marginBottom="@dimen/space_l"
-                            android:textSize="12sp"
-                            android:textColor="@color/color_text_secondary"
-                            android:visibility="gone" />
+                            android:visibility="gone"
+                            app:singleSelection="true"
+                            app:selectionRequired="true">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_qr_speed_slow"
+                                style="@style/Widget.Numo.Button.Segmented"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:text="@string/withdraw_animated_qr_speed_slow" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_qr_speed_normal"
+                                style="@style/Widget.Numo.Button.Segmented"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:text="@string/withdraw_animated_qr_speed_normal" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btn_qr_speed_fast"
+                                style="@style/Widget.Numo.Button.Segmented"
+                                android:layout_width="0dp"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:text="@string/withdraw_animated_qr_speed_fast" />
+
+                        </com.google.android.material.button.MaterialButtonToggleGroup>
 
                         <TextView
                             android:id="@+id/token_text"
@@ -367,6 +392,30 @@
             android:layout_gravity="center"
             android:indeterminate="true"
             android:indeterminateTint="@color/color_primary" />
+
+    </FrameLayout>
+
+    <!-- Full-screen QR Overlay -->
+    <FrameLayout
+        android:id="@+id/fullscreen_qr_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/color_bg_white"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/fullscreen_qr_code"
+            android:contentDescription="@string/cd_qr_code"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/space_xl"
+            android:scaleType="fitCenter" />
 
     </FrameLayout>
 

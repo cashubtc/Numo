@@ -20,6 +20,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -67,7 +68,9 @@ class WithdrawLightningActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "WithdrawLightning"
         private const val FEE_BUFFER_PERCENT = 0.02 // 2% buffer for fees
-        private const val ANIMATED_QR_FRAME_INTERVAL_MS = 250L
+        private const val ANIMATED_QR_INTERVAL_SLOW_MS = 250L
+        private const val ANIMATED_QR_INTERVAL_NORMAL_MS = 100L
+        private const val ANIMATED_QR_INTERVAL_FAST_MS = 50L
     }
 
     private lateinit var mintUrl: String
@@ -97,12 +100,18 @@ class WithdrawLightningActivity : AppCompatActivity() {
     private lateinit var createTokenButton: Button
     private lateinit var tokenResultCard: View
     private lateinit var tokenQrCode: ImageView
-    private lateinit var tokenQrCaption: TextView
+    private lateinit var qrSpeedSelector: com.google.android.material.button.MaterialButtonToggleGroup
+    private lateinit var fullscreenQrOverlay: View
+    private lateinit var fullscreenQrCode: ImageView
     private lateinit var tokenText: TextView
     private lateinit var copyTokenButton: Button
 
     // Cycles through ur:bytes frames when a token is too large for a single QR
     private var animatedQrJob: Job? = null
+
+    // Frame delay for the animated QR, adjustable via the speed selector
+    @Volatile
+    private var animatedQrIntervalMs = ANIMATED_QR_INTERVAL_NORMAL_MS
 
     // QR Scanner Launcher
     private val scanLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -177,7 +186,9 @@ class WithdrawLightningActivity : AppCompatActivity() {
         createTokenButton = findViewById(R.id.create_token_button)
         tokenResultCard = findViewById(R.id.token_result_card)
         tokenQrCode = findViewById(R.id.token_qr_code)
-        tokenQrCaption = findViewById(R.id.token_qr_caption)
+        qrSpeedSelector = findViewById(R.id.qr_speed_selector)
+        fullscreenQrOverlay = findViewById(R.id.fullscreen_qr_overlay)
+        fullscreenQrCode = findViewById(R.id.fullscreen_qr_code)
         tokenText = findViewById(R.id.token_text)
         copyTokenButton = findViewById(R.id.copy_token_button)
     }
@@ -246,6 +257,31 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 Toast.makeText(this, getString(R.string.withdraw_cashu_copied), Toast.LENGTH_SHORT).show()
             }
         }
+
+        // Animated QR speed selector
+        qrSpeedSelector.check(R.id.btn_qr_speed_normal)
+        qrSpeedSelector.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            animatedQrIntervalMs = when (checkedId) {
+                R.id.btn_qr_speed_slow -> ANIMATED_QR_INTERVAL_SLOW_MS
+                R.id.btn_qr_speed_fast -> ANIMATED_QR_INTERVAL_FAST_MS
+                else -> ANIMATED_QR_INTERVAL_NORMAL_MS
+            }
+        }
+
+        // Tap the QR to view it full-screen; tap the overlay to dismiss
+        tokenQrCode.setOnClickListener { toggleFullscreenQr() }
+        fullscreenQrOverlay.setOnClickListener { toggleFullscreenQr() }
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (fullscreenQrOverlay.visibility == View.VISIBLE) {
+                    fullscreenQrOverlay.visibility = View.GONE
+                } else {
+                    isEnabled = false
+                    onBackPressedDispatcher.onBackPressed()
+                }
+            }
+        })
     }
 
     private fun switchTab(isLightning: Boolean) {
@@ -350,7 +386,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
                 withContext(Dispatchers.Main) {
                     animatedQrJob?.cancel()
-                    tokenQrCaption.visibility = View.GONE
+                    qrSpeedSelector.visibility = View.GONE
                     tokenQrCode.visibility = View.VISIBLE
                     if (qrBitmap != null) {
                         tokenQrCode.setImageBitmap(qrBitmap)
@@ -398,11 +434,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
     ) {
         val encoder = token.urEncoder(null)
         animatedQrJob = lifecycleScope.launch {
-            tokenQrCaption.text = getString(
-                R.string.withdraw_animated_qr_caption,
-                encoder.fragmentCount().toInt()
-            )
-            tokenQrCaption.visibility = View.VISIBLE
+            qrSpeedSelector.visibility = View.VISIBLE
             while (isActive) {
                 val frame = withContext(Dispatchers.Default) {
                     QrCodeGenerator.generate(
@@ -410,8 +442,20 @@ class WithdrawLightningActivity : AppCompatActivity() {
                     )
                 }
                 tokenQrCode.setImageBitmap(frame)
-                delay(ANIMATED_QR_FRAME_INTERVAL_MS)
+                fullscreenQrCode.setImageBitmap(frame)
+                delay(animatedQrIntervalMs)
             }
+        }
+    }
+
+    private fun toggleFullscreenQr() {
+        if (fullscreenQrOverlay.visibility == View.VISIBLE) {
+            fullscreenQrOverlay.visibility = View.GONE
+        } else {
+            // Seed with the currently displayed frame; if the QR is animated the
+            // loop above keeps the full-screen view updated
+            fullscreenQrCode.setImageDrawable(tokenQrCode.drawable)
+            fullscreenQrOverlay.visibility = View.VISIBLE
         }
     }
 
