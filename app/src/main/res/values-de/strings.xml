@@ -123,7 +123,7 @@
     <!-- Explainer -->
     <string name="explainer_teaser_title">Tippe, um zu erfahren, wie Numo funktioniert.</string>
     <string name="explainer_slide1_title">Tippen und bezahlt werden</string>
-    <string name="explainer_slide1_body">Gib einen Betrag ein, tippe auf „Verlangen", und dein Kunde hält sein Telefon an deines. Die Zahlung landet sofort per NFC.</string>
+    <string name="explainer_slide1_body">Gib einen Betrag ein, tippe auf „Anfordern“, und dein Kunde hält sein Telefon an deines. Die Zahlung landet sofort per NFC.</string>
     <string name="explainer_slide2_title">Automatische Selbstverwahrung</string>
     <string name="explainer_slide2_body">Richte den automatischen Abzug ein, um eingehende Zahlungen direkt an dein eigenes Lightning-Wallet weiterzuleiten.</string>
     <string name="explainer_slide3_title">Keine Gebühren</string>
@@ -320,7 +320,7 @@
     <string name="dialog_pin_hint">PIN</string>
 
 
-    <string name="nfc_payment_error_enter_amount_first">Gib zuerst einen Betrag zum Verlangen ein</string>
+    <string name="nfc_payment_error_enter_amount_first">Gib zuerst einen Betrag zum Anfordern ein</string>
     <string name="nfc_payment_error_rescan_not_supported">Dieser Kartentyp wird noch nicht unterstützt</string>
     <string name="nfc_payment_error_insufficient_funds">Nicht genug Guthaben auf dieser Karte — bitte den Kunden bitten, aufzuladen oder eine andere Zahlungsmethode zu verwenden</string>
     <string name="nfc_payment_error_pin_flow_not_implemented">Diese Karte erfordert eine PIN, was noch nicht unterstützt wird</string>
@@ -407,7 +407,7 @@
     <string name="history_toolbar_title">Aktivität</string>
     <string name="history_section_payment_history">ZAHLUNGSVERLAUF</string>
     <string name="history_empty">Deine Zahlungen werden hier angezeigt</string>
-    <string name="history_empty_subtitle">Nach deiner ersten Verlangung siehst du eine Aufzeichnung aller erhaltenen Zahlungen.</string>
+    <string name="history_empty_subtitle">Nach deiner ersten Zahlungsanfrage siehst du eine Aufzeichnung aller erhaltenen Zahlungen.</string>
 
     <string name="transaction_row_copy">Kopieren</string>
     <string name="transaction_row_open">Öffnen</string>
@@ -614,11 +614,11 @@
     <string name="item_selection_basket_collapse">Warenkorb einklappen</string>
     <string name="item_selection_basket_item_count">%1$d Artikel</string>
     <string name="item_selection_basket_items_count">%1$d Artikel</string>
-    <string name="item_selection_charge_button">Verlangen</string>
-    <string name="item_selection_charge_button_default">Verlangen</string>
+    <string name="item_selection_charge_button">Anfordern</string>
+    <string name="item_selection_charge_button_default">Anfordern</string>
     <string name="pos_error_no_mints_configured">Füge mindestens einen Mint in Einstellungen → Mints hinzu, bevor du Kunden etwas in Rechnung stellst.</string>
     <string name="pos_error_no_network_pending_payment">Für ausstehende Zahlungen ist eine Netzwerkverbindung erforderlich.</string>
-    <string name="pos_error_no_network_charge">Für die Erstellung einer Verlangung ist eine Netzwerkverbindung erforderlich.</string>
+    <string name="pos_error_no_network_charge">Für die Erstellung einer Zahlungsanfrage ist eine Netzwerkverbindung erforderlich.</string>
 
     <string name="item_selection_save_button">Speichern</string>
     <string name="item_selection_saved_baskets_button">Gespeichert</string>
@@ -1001,7 +1001,7 @@
     <string name="insights_range_months">Letzte 7 Monate</string>
     <string name="insights_day_count_one">1 Transaktion</string>
     <string name="insights_day_count_other">%1$d Transaktionen</string>
-    <string name="insights_quick_charge">Schnelle Verlangung</string>
+    <string name="insights_quick_charge">Schnelle Zahlungsanfrage</string>
     <string name="insights_items_count_one">1 Artikel</string>
     <string name="insights_items_count_other">%1$d Artikel</string>
     <string name="insights_items_lead_with_more">%1$s · %2$s +%3$d mehr</string>
