@@ -101,6 +101,29 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <TextView
+                android:id="@+id/charge_unit_selector"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginTop="@dimen/space_s"
+                android:background="@drawable/bg_button_tertiary_dark"
+                android:clickable="true"
+                android:contentDescription="@string/pos_charge_unit_selector_description"
+                android:drawableEnd="@drawable/ic_chevron_down"
+                android:drawablePadding="@dimen/space_xs"
+                android:focusable="true"
+                android:gravity="center"
+                android:minWidth="96dp"
+                android:paddingHorizontal="@dimen/space_m"
+                android:textColor="@color/color_bg_white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                app:drawableTint="@color/color_bg_white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/error_message" />
+
             <!-- Amount Display -->
             <TextView
                 android:id="@+id/amount_display"
@@ -125,7 +148,7 @@
                 app:layout_constraintBottom_toTopOf="@+id/secondary_amount_container"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/error_message"
+                app:layout_constraintTop_toBottomOf="@+id/charge_unit_selector"
                 app:layout_constraintVertical_chainStyle="packed" />
 
             <!-- Secondary Amount Display with Swap Icon -->

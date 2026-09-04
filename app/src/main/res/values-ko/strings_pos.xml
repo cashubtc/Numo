@@ -24,5 +24,7 @@
     <string name="pos_nav_catalog_content_description">항목 목록</string>
     <string name="pos_charge_button_min_limit">최소: %1$d sats</string>
     <string name="pos_charge_button_max_limit">최대: %1$d sats</string>
+    <string name="pos_charge_button_min_limit_unit">최소: %1$s</string>
+    <string name="pos_charge_button_max_limit_unit">최대: %1$s</string>
     <string name="pos_charge_button_mint_disabled">발행 비활성화됨</string>
 </resources>

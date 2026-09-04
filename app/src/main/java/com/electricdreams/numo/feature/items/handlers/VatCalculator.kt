@@ -1,14 +1,25 @@
 package com.electricdreams.numo.feature.items.handlers
 
 import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.model.AtomicAmount
 import com.electricdreams.numo.core.model.Item
 import com.electricdreams.numo.core.model.PriceType
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 /**
  * Handles VAT calculations for both fiat and Bitcoin prices.
  * Provides methods for computing net, gross, and VAT amounts.
  */
 object VatCalculator {
+
+    data class AtomicVatAmounts(
+        val net: AtomicAmount,
+        val vat: AtomicAmount,
+        val gross: AtomicAmount,
+    )
 
     /**
      * Data class representing the results of a VAT calculation.
@@ -19,6 +30,65 @@ object VatCalculator {
         val vatAmount: String,
         val grossPrice: String
     )
+
+    /**
+     * Calculate VAT in atomic units with explicit rounding.
+     *
+     * Both NET and GROSS are returned because coarse custom units cannot always reconstruct the
+     * exact entered gross value from a rounded net value alone.
+     */
+    fun calculateAtomicAmounts(
+        enteredAmount: AtomicAmount,
+        vatRate: Int,
+        priceIncludesVat: Boolean,
+    ): AtomicVatAmounts {
+        require(vatRate >= 0) { "VAT rate cannot be negative" }
+        if (vatRate == 0) {
+            return AtomicVatAmounts(
+                net = enteredAmount,
+                vat = AtomicAmount.zero(enteredAmount.asset),
+                gross = enteredAmount,
+            )
+        }
+
+        val entered = BigDecimal.valueOf(enteredAmount.value)
+        val rateBase = BigDecimal.valueOf(100L + vatRate.toLong())
+        val hundred = BigDecimal.valueOf(100L)
+        val netValue: Long
+        val grossValue: Long
+        if (priceIncludesVat) {
+            grossValue = enteredAmount.value
+            netValue = entered.multiply(hundred)
+                .divide(rateBase, 0, RoundingMode.HALF_UP)
+                .longValueExact()
+        } else {
+            netValue = enteredAmount.value
+            grossValue = entered.multiply(rateBase)
+                .divide(hundred, 0, RoundingMode.HALF_UP)
+                .longValueExact()
+        }
+        val vatValue = Math.subtractExact(grossValue, netValue)
+        return AtomicVatAmounts(
+            net = AtomicAmount(netValue, enteredAmount.asset),
+            vat = AtomicAmount(vatValue, enteredAmount.asset),
+            gross = AtomicAmount(grossValue, enteredAmount.asset),
+        )
+    }
+
+    fun calculateAtomicBreakdown(
+        enteredAmount: AtomicAmount,
+        descriptor: UnitDescriptor,
+        vatRate: Int,
+        priceIncludesVat: Boolean,
+    ): VatBreakdown {
+        val amounts = calculateAtomicAmounts(enteredAmount, vatRate, priceIncludesVat)
+        return VatBreakdown(
+            netPrice = UnitAmountFormatter.format(amounts.net, descriptor),
+            vatLabel = "VAT ($vatRate%)",
+            vatAmount = UnitAmountFormatter.format(amounts.vat, descriptor),
+            grossPrice = UnitAmountFormatter.format(amounts.gross, descriptor),
+        )
+    }
 
     /**
      * Calculates VAT breakdown for a fiat price.

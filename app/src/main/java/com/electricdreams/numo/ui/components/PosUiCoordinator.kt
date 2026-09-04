@@ -21,6 +21,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.model.AssetId
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
@@ -47,6 +51,7 @@ class PosUiCoordinator(
     private lateinit var switchCurrencyButton: View
     private lateinit var inputModeContainer: ConstraintLayout
     private lateinit var errorMessage: TextView
+    private lateinit var chargeUnitSelector: TextView
 
     // Input state
     private val satoshiInput = StringBuilder()
@@ -61,6 +66,7 @@ class PosUiCoordinator(
     private lateinit var themeManager: ThemeManager
     private lateinit var nfcPaymentProcessor: NfcPaymentProcessor
     private lateinit var mintManager: MintManager
+    private var chargeAssets: List<AssetId> = emptyList()
 
     /** Initialize all UI components and managers */
     fun initialize() {
@@ -100,7 +106,9 @@ class PosUiCoordinator(
     }
 
     private fun loadMintLimits() {
-        val lightningMint = mintManager.getPreferredLightningMint()
+        val chargeAsset = amountDisplayManager.getChargeAsset()
+        val lightningMint = chargeAsset.issuerScope
+            ?: mintManager.getPreferredLightningMint(chargeAsset.unit.value)
         if (lightningMint != null) {
             activity.lifecycleScope.launch {
                 // Pre-load cache for ALL allowed mints when app opens
@@ -119,18 +127,26 @@ class PosUiCoordinator(
                 // Now get limits for the preferred mint
                 val isStale = mintManager.needsRefresh(lightningMint)
                 val limits = mintManager.getMintLimits(lightningMint, activity, forceRefresh = isStale, isFirstFetch = false)
+                if (amountDisplayManager.getChargeAsset() != chargeAsset) {
+                    return@launch
+                }
                 amountDisplayManager.setMintLimits(limits)
                 
                 // Update display to re-evaluate button state based on new limits
                 amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
             }
+        } else {
+            amountDisplayManager.setMintLimits(null)
         }
     }
     
     /** Reload mint limits - called when returning to POS (e.g., after changing lightning mint) */
     fun reloadMintLimits() {
         Log.d(TAG, "reloadMintLimits() called")
-        val lightningMint = mintManager.getPreferredLightningMint()
+        refreshChargeUnitOptions(clearAmountWhenChanged = true)
+        val chargeAsset = amountDisplayManager.getChargeAsset()
+        val lightningMint = chargeAsset.issuerScope
+            ?: mintManager.getPreferredLightningMint(chargeAsset.unit.value)
         Log.d(TAG, "Preferred mint: $lightningMint")
         if (lightningMint != null) {
             // Disable button while refreshing, but let AmountDisplayManager handle the text based on wallet state
@@ -145,11 +161,21 @@ class PosUiCoordinator(
                 Log.d(TAG, "Got limits: $limits")
                 
                 // Same behavior as onCreate - always set limits
+                if (amountDisplayManager.getChargeAsset() != chargeAsset) {
+                    return@launch
+                }
                 amountDisplayManager.setMintLimits(limits)
                 
                 // Update display to re-evaluate button state based on new limits
                 amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
             }
+        } else {
+            amountDisplayManager.setMintLimits(null)
+            amountDisplayManager.updateDisplay(
+                satoshiInput,
+                fiatInput,
+                AmountDisplayManager.AnimationType.NONE,
+            )
         }
     }
 
@@ -168,7 +194,11 @@ class PosUiCoordinator(
                     Log.d("PosUiCoordinator", "Auto-initiating payment flow for basket checkout with amount: $paymentAmount")
                     showChargeButtonSpinner()
                     val formattedAmount = amountDisplay.text.toString()
-                    paymentMethodHandler.showPaymentMethodDialog(amountDisplayManager.requestedAmount, formattedAmount)
+                    paymentMethodHandler.showPaymentMethodDialog(
+                        amount = amountDisplayManager.requestedAmount,
+                        formattedAmount = formattedAmount,
+                        chargeAsset = amountDisplayManager.getChargeAsset(),
+                    )
                 }
             }, 500)
         } else {
@@ -204,7 +234,7 @@ class PosUiCoordinator(
 
     /** Refresh the display when currency or other settings may have changed */
     fun refreshDisplay() {
-        // Force a display update to reflect any currency changes
+        refreshChargeUnitOptions(clearAmountWhenChanged = true)
         amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
     }
 
@@ -247,6 +277,14 @@ class PosUiCoordinator(
         val successIntent = android.content.Intent(activity, com.electricdreams.numo.PaymentReceivedActivity::class.java).apply {
             putExtra(com.electricdreams.numo.PaymentReceivedActivity.EXTRA_TOKEN, token)
             putExtra(com.electricdreams.numo.PaymentReceivedActivity.EXTRA_AMOUNT, amount)
+            val chargeAsset = amountDisplayManager.getChargeAsset()
+            putExtra(
+                com.electricdreams.numo.PaymentReceivedActivity.EXTRA_UNIT,
+                chargeAsset.unit.value,
+            )
+            chargeAsset.issuerScope?.let {
+                putExtra(com.electricdreams.numo.PaymentReceivedActivity.EXTRA_ISSUER_SCOPE, it)
+            }
         }
         activity.startActivity(successIntent)
     }
@@ -270,6 +308,7 @@ class PosUiCoordinator(
         submitButton = activity.findViewById(R.id.submit_button)
         submitButtonSpinner = activity.findViewById(R.id.submit_button_spinner)
         errorMessage = activity.findViewById(R.id.error_message)
+        chargeUnitSelector = activity.findViewById(R.id.charge_unit_selector)
         switchCurrencyButton = activity.findViewById(R.id.currency_switch_button)
         inputModeContainer = activity.findViewById(R.id.input_mode_container)
         
@@ -290,6 +329,7 @@ class PosUiCoordinator(
         amountDisplayManager = AmountDisplayManager(
             activity, amountDisplay, secondaryAmountDisplay, switchCurrencyButton, submitButton, bitcoinPriceWorker
         )
+        refreshChargeUnitOptions(clearAmountWhenChanged = false)
         amountDisplayManager.initializeInputMode()
 
         // Initialize keypad manager
@@ -372,7 +412,11 @@ class PosUiCoordinator(
             if (amountDisplayManager.requestedAmount > 0) {
                 showChargeButtonSpinner()
                 val formattedAmount = amountDisplay.text.toString()
-                paymentMethodHandler.showPaymentMethodDialog(amountDisplayManager.requestedAmount, formattedAmount)
+                paymentMethodHandler.showPaymentMethodDialog(
+                    amount = amountDisplayManager.requestedAmount,
+                    formattedAmount = formattedAmount,
+                    chargeAsset = amountDisplayManager.getChargeAsset(),
+                )
             } else {
                 showAmountRequiredError()
             }
@@ -386,6 +430,74 @@ class PosUiCoordinator(
             false
         }
         popup.show()
+    }
+
+    private fun refreshChargeUnitOptions(clearAmountWhenChanged: Boolean) {
+        val previous = if (::amountDisplayManager.isInitialized) {
+            amountDisplayManager.getChargeAsset()
+        } else {
+            null
+        }
+        chargeAssets = mintManager.getSupportedChargeAssets()
+        val preferredUnit = UnitId.ofOrNull(mintManager.getPreferredUnit()) ?: UnitId.SAT
+        val selected = previous?.takeIf { it in chargeAssets }
+            ?: chargeAssets.firstOrNull { it.unit == preferredUnit }
+            ?: chargeAssets.firstOrNull()
+            ?: AssetId.global(preferredUnit)
+
+        if (::amountDisplayManager.isInitialized && selected != previous) {
+            amountDisplayManager.setChargeAsset(selected)
+            if (clearAmountWhenChanged) {
+                satoshiInput.clear()
+                fiatInput.clear()
+                amountDisplayManager.resetRequestedAmount()
+            }
+        }
+
+        val satOnly = chargeAssets.size == 1 && chargeAssets.single().unit.isSat
+        chargeUnitSelector.visibility = if (satOnly) View.GONE else View.VISIBLE
+        chargeUnitSelector.text = chargeAssetLabel(selected)
+        chargeUnitSelector.setCompoundDrawablesRelativeWithIntrinsicBounds(
+            0,
+            0,
+            if (chargeAssets.size > 1) R.drawable.ic_chevron_down else 0,
+            0,
+        )
+        chargeUnitSelector.isClickable = chargeAssets.size > 1
+        chargeUnitSelector.isFocusable = chargeAssets.size > 1
+        chargeUnitSelector.setOnClickListener {
+            if (chargeAssets.size > 1) showChargeUnitDialog()
+        }
+    }
+
+    private fun showChargeUnitDialog() {
+        val labels = chargeAssets.map(::chargeAssetLabel).toTypedArray()
+        androidx.appcompat.app.AlertDialog.Builder(activity, R.style.Theme_Numo_Dialog)
+            .setTitle(R.string.pos_charge_unit_dialog_title)
+            .setItems(labels) { _, index ->
+                val selected = chargeAssets[index]
+                if (selected != amountDisplayManager.getChargeAsset()) {
+                    amountDisplayManager.setChargeAsset(selected)
+                    satoshiInput.clear()
+                    fiatInput.clear()
+                    amountDisplayManager.resetRequestedAmount()
+                    chargeUnitSelector.text = chargeAssetLabel(selected)
+                    amountDisplayManager.updateDisplay(
+                        satoshiInput,
+                        fiatInput,
+                        AmountDisplayManager.AnimationType.CURRENCY_SWITCH,
+                    )
+                    loadMintLimits()
+                }
+            }
+            .setNegativeButton(R.string.common_cancel, null)
+            .show()
+    }
+
+    private fun chargeAssetLabel(asset: AssetId): String {
+        val code = UnitDescriptor.defaultFor(asset.unit).displayCode
+        val issuer = asset.issuerScope ?: return code
+        return "$code · ${UnitAmountFormatter.issuerLabel(issuer)}"
     }
 
     /** Show spinner on charge button and disable it */

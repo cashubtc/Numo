@@ -16,6 +16,8 @@
     <string name="pos_charge_button_with_amount">%1$s berechnen</string>
     <string name="pos_charge_button_min_limit">Minimum: %1$d Sats</string>
     <string name="pos_charge_button_max_limit">Maximum: %1$d Sats</string>
+    <string name="pos_charge_button_min_limit_unit">Minimum: %1$s</string>
+    <string name="pos_charge_button_max_limit_unit">Maximum: %1$s</string>
     <string name="pos_charge_button_mint_disabled">Minting deaktiviert</string>
 
     <!-- POS main screen - secondary BTC label when no fiat price -->

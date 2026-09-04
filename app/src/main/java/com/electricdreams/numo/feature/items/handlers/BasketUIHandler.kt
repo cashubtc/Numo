@@ -3,17 +3,18 @@ package com.electricdreams.numo.feature.items.handlers
 import android.widget.Button
 import android.widget.TextView
 import com.electricdreams.numo.R
-import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.model.AssetId
+import com.electricdreams.numo.core.model.AtomicAmount
+import com.electricdreams.numo.core.model.UnitAmountFormatter
 import com.electricdreams.numo.core.util.BasketManager
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.util.NetworkUtils
 
 /**
  * Handles basket UI updates including total display and checkout button text.
  * Works with the unified basket card layout that animates height on expand/collapse.
  */
-import com.electricdreams.numo.core.util.NetworkUtils
-
 class BasketUIHandler(
     private val basketManager: BasketManager,
     private val currencyManager: CurrencyManager,
@@ -72,44 +73,19 @@ class BasketUIHandler(
      */
     fun updateBasketTotal() {
         val itemCount = basketManager.getTotalItemCount()
-        val fiatTotal = basketManager.getTotalPrice()
-        val satsTotal = basketManager.getTotalSatsDirectPrice()
-
-        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(basketTotalView.context).getPreferredUnit()
-        val isCustomUnit = preferredUnit.lowercase() != "sat"
-
-        val formattedTotal = if (itemCount > 0) {
-            val currencyCode = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(basketTotalView.context)
-            val currency = Amount.Currency.fromCode(currencyCode)
-
-            if (isCustomUnit) {
-                var total = 0.0
-                for (basketItem in basketManager.getBasketItems()) {
-                    if (basketItem.isSatsPrice()) {
-                        total += basketItem.item.getGrossSats().toDouble() * basketItem.quantity
-                    } else {
-                        total += basketItem.getTotalPrice()
-                    }
-                }
-                Amount.fromMajorUnits(total, currency).toString()
-            } else {
-                when {
-                    fiatTotal > 0 && satsTotal > 0 -> {
-                        val fiatAmount = Amount.fromMajorUnits(fiatTotal, currency)
-                        val satsAmount = Amount(satsTotal, Amount.Currency.BTC)
-                        "$fiatAmount + $satsAmount"
-                    }
-                    satsTotal > 0 -> Amount(satsTotal, Amount.Currency.BTC).toString()
-                    else -> Amount.fromMajorUnits(fiatTotal, currency).toString()
-                }
-            }
+        val formattedTotal = if (itemCount == 0) {
+            "0.00"
         } else {
-            if (isCustomUnit) {
-                val currency = Amount.Currency.fromCode(preferredUnit)
-                Amount.fromMajorUnits(0.0, currency).toStringWithoutSymbol()
-            } else {
-                "0.00"
-            }
+            runCatching {
+                val grouped = linkedMapOf<AssetId, AtomicAmount>()
+                basketManager.getPriceLines(currencyManager.getCurrentCurrency()).forEach { line ->
+                    val current = grouped[line.amount.asset] ?: AtomicAmount.zero(line.amount.asset)
+                    grouped[line.amount.asset] = current + line.amount
+                }
+                grouped.values.joinToString(" + ") { amount ->
+                    UnitAmountFormatter.formatAsset(amount)
+                }
+            }.getOrDefault("—")
         }
 
         // Update the header total display

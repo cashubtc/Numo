@@ -10,12 +10,16 @@
     <string name="pos_amount_placeholder_main">$0</string>
     <string name="pos_amount_placeholder_secondary">$0.00 USD</string>
     <string name="pos_currency_switch_content_description">Swap currency</string>
+    <string name="pos_charge_unit_selector_description">Select charge unit</string>
+    <string name="pos_charge_unit_dialog_title">Charge unit</string>
 
     <!-- POS main screen - charge button -->
     <string name="pos_charge_button">Charge</string>
     <string name="pos_charge_button_with_amount">Charge %1$s</string>
     <string name="pos_charge_button_min_limit">Minimum: %1$d sats</string>
     <string name="pos_charge_button_max_limit">Maximum: %1$d sats</string>
+    <string name="pos_charge_button_min_limit_unit">Minimum: %1$s</string>
+    <string name="pos_charge_button_max_limit_unit">Maximum: %1$s</string>
     <string name="pos_charge_button_mint_disabled">Minting disabled</string>
 
     <!-- POS main screen - secondary BTC label when no fiat price -->
@@ -35,6 +39,12 @@
     <!-- POS: toasts -->
     <string name="pos_toast_basket_empty">Your basket is empty</string>
     <string name="pos_toast_invalid_amount">Invalid payment amount</string>
+    <string name="checkout_charge_unit_title">Charge unit</string>
+    <string name="checkout_charge_unit_message">This basket can be charged in more than one unit. Choose what the customer will pay.</string>
+    <string name="checkout_unit_conversion_unavailable">This basket cannot be converted to any unit supported by your mints. Use items in one unit, add a compatible mint, or configure a conversion.</string>
+    <string name="checkout_unit_conversion_stale">The conversion price is out of date. Refresh the price and try again.</string>
+    <string name="checkout_unit_invalid_item_price">An item has an invalid unit or price. Edit the item before charging this basket.</string>
+    <string name="checkout_unit_amount_too_large">The basket total is too large to process safely.</string>
     <string name="pos_toast_no_stock">No more stock available</string>
     <string name="pos_charge_button_loading">Starting wallet...</string>
 </resources>

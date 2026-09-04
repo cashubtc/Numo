@@ -5,6 +5,8 @@ import android.widget.Button
 import android.widget.TextView
 import android.view.View
 import com.electricdreams.numo.R
+import com.electricdreams.numo.core.model.AssetId
+import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import org.junit.Before
@@ -216,5 +218,31 @@ class AmountDisplayManagerTest {
         // 1000 sats = 100 JPY (at 10M JPY/BTC)
         assert(fiatInput.toString() == "100")
         assert(manager.isUsdInputMode)
+    }
+
+    @Test
+    fun `direct custom charge keeps atomic amount and issuer`() {
+        manager = AmountDisplayManager(
+            mockContext,
+            amountDisplay,
+            secondaryAmountDisplay,
+            switchCurrencyButton,
+            submitButton,
+            bitcoinPriceWorker,
+        )
+        val points = AssetId.mintScoped(UnitId.of("points"), "https://mint.example")
+        manager.setChargeAsset(points)
+        manager.initializeInputMode()
+
+        manager.updateDisplay(
+            StringBuilder("42"),
+            StringBuilder(),
+            AmountDisplayManager.AnimationType.NONE,
+        )
+
+        verify(amountDisplay).text = "42 POINTS"
+        assert(manager.requestedAmount == 42L)
+        assert(manager.getChargeAsset() == points)
+        assert(!manager.canSwitchToUsd())
     }
 }

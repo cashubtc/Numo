@@ -10,6 +10,8 @@
     <string name="pos_currency_switch_content_description">Cambiar de moneda</string>
     <string name="pos_charge_button">Cobrar</string>
     <string name="pos_charge_button_with_amount">Cobrar %1$s</string>
+    <string name="pos_charge_button_min_limit_unit">Mínimo: %1$s</string>
+    <string name="pos_charge_button_max_limit_unit">Máximo: %1$s</string>
 
     <string name="pos_secondary_amount_btc_label">BTC</string>
     <string name="basket_charge_fiat_and_sats">Cobrar %1$s + %2$s</string>

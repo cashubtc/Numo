@@ -33,6 +33,7 @@ class BitcoinPriceWorker private constructor(context: Context) {
         private const val PREFS_NAME = "BitcoinPricePrefs"
         private const val KEY_PRICE_PREFIX = "btcPrice_"
         private const val KEY_LAST_UPDATE_TIME = "lastUpdateTime"
+        private const val KEY_LAST_UPDATE_TIME_PREFIX = "lastUpdateTime_"
         private const val UPDATE_INTERVAL_MINUTES = 1L // Update every minute
 
         @Volatile
@@ -82,8 +83,7 @@ class BitcoinPriceWorker private constructor(context: Context) {
             fetchPrice()
         } else {
             // Check how old the cached price is
-            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val lastUpdateTime = prefs.getLong(KEY_LAST_UPDATE_TIME, 0L)
+            val lastUpdateTime = getCurrentPriceTimestamp()
             val currentTime = System.currentTimeMillis()
             val elapsedMinutes = TimeUnit.MILLISECONDS.toMinutes(currentTime - lastUpdateTime)
 
@@ -156,6 +156,17 @@ class BitcoinPriceWorker private constructor(context: Context) {
     fun getCurrentPrice(): Double {
         val currency = currencyManager.getCurrentCurrency()
         return priceByCurrency[currency] ?: 0.0
+    }
+
+    /** Timestamp belonging to the currently selected currency's cached quote. */
+    fun getCurrentPriceTimestamp(): Long {
+        val currency = currencyManager.getCurrentCurrency()
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.getLong(
+            KEY_LAST_UPDATE_TIME_PREFIX + currency,
+            // Compatibility with caches written before timestamps were currency-scoped.
+            prefs.getLong(KEY_LAST_UPDATE_TIME, 0L),
+        )
     }
 
     /** Get the current BTC price in USD (for backward compatibility). */
@@ -254,10 +265,12 @@ class BitcoinPriceWorker private constructor(context: Context) {
 
     /** Cache the Bitcoin price for a specific currency in SharedPreferences. */
     private fun cachePrice(currency: String, price: Double) {
+        val cachedAt = System.currentTimeMillis()
         val editor: SharedPreferences.Editor =
             context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
         editor.putFloat(KEY_PRICE_PREFIX + currency, price.toFloat())
-        editor.putLong(KEY_LAST_UPDATE_TIME, System.currentTimeMillis())
+        editor.putLong(KEY_LAST_UPDATE_TIME, cachedAt)
+        editor.putLong(KEY_LAST_UPDATE_TIME_PREFIX + currency, cachedAt)
         editor.apply()
     }
 

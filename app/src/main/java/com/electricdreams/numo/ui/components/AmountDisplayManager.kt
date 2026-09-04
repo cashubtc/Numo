@@ -10,6 +10,10 @@ import android.widget.TextView
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import android.widget.Toast
 import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.model.AssetId
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.util.CurrencyManager
@@ -37,6 +41,21 @@ class AmountDisplayManager(
         private set
 
     private var currentMintLimits: CashuWalletManager.MintLimits? = null
+    private var chargeAsset: AssetId = AssetId.global(
+        UnitId.ofOrNull(MintManager.getInstance(context).getPreferredUnit()) ?: UnitId.SAT,
+    )
+
+    fun setChargeAsset(asset: AssetId) {
+        chargeAsset = asset
+        isUsdInputMode = if (asset.unit.isSat) {
+            PreferenceStore.app(context).getBoolean(KEY_INPUT_MODE, false)
+        } else {
+            false
+        }
+        currentMintLimits = null
+    }
+
+    fun getChargeAsset(): AssetId = chargeAsset
 
     fun setMintLimits(limits: CashuWalletManager.MintLimits?) {
         Log.d("AmountDisplayManager", "setMintLimits called with: $limits")
@@ -52,8 +71,7 @@ class AmountDisplayManager(
     /** Initialize input mode from preferences */
     fun initializeInputMode() {
         val prefs = PreferenceStore.app(context)
-        val preferredUnit = MintManager.getInstance(context).getPreferredUnit()
-        if (preferredUnit.lowercase() != "sat") {
+        if (!chargeAsset.unit.isSat) {
             isUsdInputMode = false
         } else {
             isUsdInputMode = prefs.getBoolean(KEY_INPUT_MODE, false)
@@ -62,8 +80,7 @@ class AmountDisplayManager(
 
     /** Check if we can switch to USD (need price data) */
     fun canSwitchToUsd(): Boolean {
-        val preferredUnit = MintManager.getInstance(context).getPreferredUnit()
-        if (preferredUnit.lowercase() != "sat") return false
+        if (!chargeAsset.unit.isSat) return false
 
         if (!isUsdInputMode) {
             val price = bitcoinPriceWorker?.getCurrentPrice() ?: 0.0
@@ -126,9 +143,9 @@ class AmountDisplayManager(
         fiatInput: StringBuilder,
         animationType: AnimationType
     ) {
-        val preferredUnit = MintManager.getInstance(context).getPreferredUnit()
-        val isCustomUnit = preferredUnit.lowercase() != "sat"
-        if (isCustomUnit) {
+        val chargeUnit = chargeAsset.unit
+        val isDirectNonSatUnit = !chargeUnit.isSat
+        if (isDirectNonSatUnit) {
             isUsdInputMode = false
         }
 
@@ -164,11 +181,11 @@ class AmountDisplayManager(
             // Input mode: satoshi, display sats as primary, fiat as secondary
             satsValue = if (currentInputStr.isEmpty()) 0L else currentInputStr.toLong()
             amountDisplayText = formatAmount(currentInputStr)
-            if (!isCustomUnit) {
+            if (!isDirectNonSatUnit) {
                 amountDisplayText = if (amountDisplayText.length > 9) Amount(satsValue, Amount.Currency.BTC).toShortString() else amountDisplayText
             }
             
-            if (hasBitcoinPrice && !isCustomUnit) {
+            if (hasBitcoinPrice && !isDirectNonSatUnit) {
                 // Show fiat conversion with swap icon
                 val fiatValue = bitcoinPriceWorker?.satoshisToFiat(satsValue) ?: 0.0
                 val currencyCode = CurrencyManager.getInstance(context).getCurrentCurrency()
@@ -177,8 +194,12 @@ class AmountDisplayManager(
                 secondaryDisplayText = Amount.fromMajorUnits(fiatValue, currency).toShortString()
                 switchCurrencyButton.visibility = View.VISIBLE
             } else {
-                // No price data or custom unit - just show unit name without swap icon
-                secondaryDisplayText = if (isCustomUnit) preferredUnit else context.getString(R.string.pos_secondary_amount_btc_label)
+                // Direct non-sat units have no implicit conversion.
+                secondaryDisplayText = if (isDirectNonSatUnit) {
+                    UnitDescriptor.defaultFor(chargeUnit).displayCode
+                } else {
+                    context.getString(R.string.pos_secondary_amount_btc_label)
+                }
                 switchCurrencyButton.visibility = View.GONE
             }
         }
@@ -206,16 +227,25 @@ class AmountDisplayManager(
             val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
             val isNetworkAvailable = NetworkUtils.isNetworkAvailable(context)
             if (isReady) {
-                val preferredUnit = MintManager.getInstance(context).getPreferredUnit()
-                val limitCheck = MintLimitChecker.checkMintLimits(satsValue, currentMintLimits, preferredUnit)
+                val limitCheck = MintLimitChecker.checkMintLimits(
+                    satsValue,
+                    currentMintLimits,
+                    chargeUnit.value,
+                )
                 if (limitCheck.isValid) {
                     submitButton.text = context.getString(R.string.pos_charge_button)
                     submitButton.isEnabled = isNetworkAvailable
                     submitButton.alpha = if (isNetworkAvailable) 1.0f else 0.5f
                 } else {
                     val buttonText = when (limitCheck.limitType) {
-                        MintLimitChecker.LimitType.MIN -> context.getString(R.string.pos_charge_button_min_limit, limitCheck.minAmount ?: 0)
-                        MintLimitChecker.LimitType.MAX -> context.getString(R.string.pos_charge_button_max_limit, limitCheck.maxAmount ?: 0)
+                        MintLimitChecker.LimitType.MIN -> context.getString(
+                            R.string.pos_charge_button_min_limit_unit,
+                            formatLimit(limitCheck.minAmount),
+                        )
+                        MintLimitChecker.LimitType.MAX -> context.getString(
+                            R.string.pos_charge_button_max_limit_unit,
+                            formatLimit(limitCheck.maxAmount),
+                        )
                         MintLimitChecker.LimitType.DISABLED -> context.getString(R.string.pos_charge_button_mint_disabled)
                         else -> context.getString(R.string.pos_charge_button)
                     }
@@ -266,30 +296,18 @@ class AmountDisplayManager(
         return (btcAmount * 100_000_000).toLong()
     }
 
-    /** Format amount using Amount class */
+    /** Format the raw atomic keypad value in the selected charge unit. */
     private fun formatAmount(amount: String): String = try {
         val value = if (amount.isEmpty()) 0L else amount.toLong()
-        val preferredUnit = MintManager.getInstance(context).getPreferredUnit()
-        val lowerUnit = preferredUnit.lowercase()
-        if (lowerUnit != "sat") {
-            val currency = Amount.Currency.fromCode(lowerUnit)
-            val fiatCents = if (currency.isZeroDecimal()) {
-                value * 100
-            } else {
-                value
-            }
-            if (currency.symbol != lowerUnit.uppercase()) {
-                Amount(fiatCents, currency).toString()
-            } else {
-                val formattedNum = Amount(fiatCents, currency).toStringWithoutSymbol()
-                "$formattedNum $preferredUnit"
-            }
-        } else {
-            Amount(value, Amount.Currency.BTC).toString()
-        }
+        UnitAmountFormatter.formatAtomic(value, UnitDescriptor.defaultFor(chargeAsset.unit))
     } catch (_: NumberFormatException) {
         ""
     }
+
+    private fun formatLimit(value: Long?): String = UnitAmountFormatter.formatAtomic(
+        value = value ?: 0L,
+        descriptor = UnitDescriptor.defaultFor(chargeAsset.unit),
+    )
 
     /** Animate currency switch transition */
     private fun animateCurrencySwitch(newText: String, isUp: Boolean) {
