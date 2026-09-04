@@ -886,6 +886,7 @@
     <string name="payment_request_tab_unified">통합</string>
     <string name="payment_request_default_description">%1$d 토요일 결제</string>
     <string name="payment_request_lightning_description">%1$d sats의 Numo POS 결제</string>
+    <string name="payment_request_lightning_description_unit">%1$s Numo POS 결제</string>
     <string name="onboarding_status_generating_seed">시드 구문 생성 중…</string>
     <string name="onboarding_status_setting_up_mints">기본 민트 설정 중…</string>
     <string name="onboarding_status_initializing_wallet">지갑 초기화 중…</string>
@@ -990,4 +991,5 @@
     <string name="settings_fiat_conversion_disabled_custom_unit">사용자 정의 기준 단위를 사용할 때는 법정 화폐 환율 변환이 비활성화됩니다.</string>
     <string name="mints_base_currency_unit_title">기준 통화 단위</string>
     <string name="mints_base_currency_unit_subtitle">민트가 다른 단위를 지원하는 경우 여기에서 전환할 수 있습니다.</string>
+    <string name="payment_request_error_unsupported_unit">이 결제 단위는 사용할 수 없습니다. 추가한 민트에서 지원하는 단위를 선택하세요.</string>
 </resources>

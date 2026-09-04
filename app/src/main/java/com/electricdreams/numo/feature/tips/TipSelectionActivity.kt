@@ -35,11 +35,18 @@ import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.Amount.Currency
+import com.electricdreams.numo.core.model.AssetId
+import com.electricdreams.numo.core.model.AtomicAmount
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
+import com.electricdreams.numo.core.model.TipAmountCalculator
 import com.electricdreams.numo.core.util.MintLimitChecker
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import android.widget.Toast
 import android.util.Log
+import java.math.BigDecimal
 import kotlin.math.roundToLong
 
 /**
@@ -54,6 +61,9 @@ class TipSelectionActivity : AppCompatActivity() {
     private var entryCurrency: Currency = Currency.USD
     private var enteredAmountFiat: Long = 0
     private var checkoutBasketJson: String? = null
+    private var paymentUnit: UnitId = UnitId.SAT
+    private var paymentIssuerScope: String? = null
+    private var savedBasketId: String? = null
 
     // State
     private var selectedTipSats: Long = 0
@@ -62,10 +72,8 @@ class TipSelectionActivity : AppCompatActivity() {
     private var bitcoinPrice: Double = 0.0
     private var presets: List<Int> = listOf()
 
-    private val isCustomUnit: Boolean by lazy {
-        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
-        preferredUnit.lowercase() != "sat"
-    }
+    private val isCustomUnit: Boolean
+        get() = !paymentUnit.isSat
 
     // Custom tip input state
     private var customInputIsBtc: Boolean = false
@@ -111,7 +119,10 @@ class TipSelectionActivity : AppCompatActivity() {
         vibrator = getVibrator()
 
         setupWindowSettings()
-        initializeFromIntent()
+        if (!initializeFromIntent()) {
+            finish()
+            return
+        }
         initializeViews()
         setupPresetButtons()
         setupCustomKeypad()
@@ -144,18 +155,35 @@ class TipSelectionActivity : AppCompatActivity() {
         }
     }
 
-    private fun initializeFromIntent() {
+    private fun initializeFromIntent(): Boolean {
         paymentAmountSats = intent.getLongExtra(EXTRA_PAYMENT_AMOUNT, 0)
         formattedAmount = intent.getStringExtra(EXTRA_FORMATTED_AMOUNT) ?: ""
         checkoutBasketJson = intent.getStringExtra(EXTRA_CHECKOUT_BASKET_JSON)
+        paymentIssuerScope = intent.getStringExtra(PaymentRequestActivity.EXTRA_PAYMENT_ISSUER_SCOPE)
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+        savedBasketId = intent.getStringExtra(PaymentRequestActivity.EXTRA_SAVED_BASKET_ID)
+        val rawPaymentUnit = intent.getStringExtra(EXTRA_PAYMENT_UNIT)
+            ?: MintManager.getInstance(this).getPreferredUnit()
+        val resolvedUnit = UnitId.ofOrNull(rawPaymentUnit)
+        if (resolvedUnit == null || resolvedUnit.isReserved) {
+            Log.e(TAG, "Invalid payment unit: $rawPaymentUnit")
+            Toast.makeText(this, R.string.payment_request_error_invalid_amount, Toast.LENGTH_SHORT)
+                .show()
+            return false
+        }
+        paymentUnit = resolvedUnit
 
         // Parse entry currency
-        val parsedAmount = Amount.parse(formattedAmount)
+        val parsedAmount = if (isCustomUnit) null else Amount.parse(formattedAmount)
         if (parsedAmount != null) {
             entryCurrency = parsedAmount.currency
             if (entryCurrency != Currency.BTC) {
                 enteredAmountFiat = parsedAmount.value
             }
+        } else if (isCustomUnit) {
+            entryCurrency = Currency.fromCode(paymentUnit.value)
+            enteredAmountFiat = paymentAmountSats
         } else {
             // Fallback parsing with current system currency if implicit parsing fails
             // (e.g. for ambiguous symbols like "kr")
@@ -173,8 +201,6 @@ class TipSelectionActivity : AppCompatActivity() {
         }
 
         // Set default for custom input based on entry currency
-        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
-        val isCustomUnit = preferredUnit.lowercase() != "sat"
         customInputIsBtc = (entryCurrency == Currency.BTC) || isCustomUnit
         customInputCurrency = entryCurrency
 
@@ -185,6 +211,7 @@ class TipSelectionActivity : AppCompatActivity() {
         // Get tip presets
         val tipsManager = TipsManager.getInstance(this)
         presets = tipsManager.getTipPresets()
+        return true
     }
 
     private fun initializeViews() {
@@ -211,8 +238,6 @@ class TipSelectionActivity : AppCompatActivity() {
     }
 
     private fun updateConvertedAmount() {
-        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
-        val isCustomUnit = preferredUnit.lowercase() != "sat"
         if (isCustomUnit) {
             convertedAmountDisplay.visibility = View.GONE
             return
@@ -299,8 +324,17 @@ class TipSelectionActivity : AppCompatActivity() {
         percentageText.text = getString(R.string.tip_percentage_format, percentage)
         
         // Calculate tip and total
-        val tipSats = (paymentAmountSats * percentage) / 100
-        val totalSats = paymentAmountSats + tipSats
+        val tipAndTotal = runCatching {
+            val tip = TipAmountCalculator.percentageTip(paymentAmountSats, percentage)
+            tip to TipAmountCalculator.total(paymentAmountSats, tip)
+        }.getOrNull()
+        if (tipAndTotal == null) {
+            totalText.text = "—"
+            button.isEnabled = false
+            button.alpha = 0.4f
+            return button
+        }
+        val (tipSats, totalSats) = tipAndTotal
         totalText.text = formatTotalAmount(totalSats)
         totalText.visibility = View.VISIBLE
 
@@ -315,7 +349,10 @@ class TipSelectionActivity : AppCompatActivity() {
 
     private fun formatTotalAmount(totalSats: Long): String {
         return if (isCustomUnit) {
-            Amount(totalSats, entryCurrency).toString()
+            UnitAmountFormatter.formatAtomic(
+                totalSats,
+                UnitDescriptor.defaultFor(paymentUnit),
+            )
         } else if (entryCurrency == Currency.BTC) {
             Amount(totalSats, Currency.BTC).toString()
         } else {
@@ -444,7 +481,8 @@ class TipSelectionActivity : AppCompatActivity() {
     private fun updateDecimalKeyVisibility() {
         decimalKeyButton?.let { button ->
             val keyText = button.findViewById<TextView>(R.id.key_text)
-            if (customInputIsBtc) {
+            val fractionDigits = maxInputFractionDigits()
+            if (fractionDigits == 0) {
                 // Hide decimal for Bitcoin (sats are whole numbers)
                 keyText.alpha = 0f
                 button.isClickable = false
@@ -466,10 +504,10 @@ class TipSelectionActivity : AppCompatActivity() {
                 }
             }
             "." -> {
-                // Only allow decimal for fiat, not for BTC (sats are whole numbers)
-                if (!customInputIsBtc && !customInputValue.contains(".") && customInputValue.isNotEmpty()) {
+                val allowsDecimal = maxInputFractionDigits() > 0
+                if (allowsDecimal && !customInputValue.contains(".") && customInputValue.isNotEmpty()) {
                     customInputValue += "."
-                } else if (!customInputIsBtc && customInputValue.isEmpty()) {
+                } else if (allowsDecimal && customInputValue.isEmpty()) {
                     customInputValue = "0."
                 }
             }
@@ -478,7 +516,7 @@ class TipSelectionActivity : AppCompatActivity() {
                 val decimalIndex = customInputValue.indexOf(".")
                 if (decimalIndex >= 0) {
                     val decimals = customInputValue.length - decimalIndex - 1
-                    val maxDecimals = 2 // Fiat has 2 decimals
+                    val maxDecimals = maxInputFractionDigits()
                     if (decimals >= maxDecimals) return
                 }
                 
@@ -491,6 +529,16 @@ class TipSelectionActivity : AppCompatActivity() {
 
         updateCustomAmountDisplay()
         calculateCustomTip()
+    }
+
+    private fun maxInputFractionDigits(): Int {
+        return if (isCustomUnit) {
+            UnitDescriptor.defaultFor(paymentUnit).fractionDigits
+        } else if (customInputIsBtc) {
+            0
+        } else {
+            2
+        }
     }
 
     private fun updateCustomAmountDisplay() {
@@ -514,11 +562,8 @@ class TipSelectionActivity : AppCompatActivity() {
     }
 
     private fun updateCustomCurrencyDisplay() {
-        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
-        val isCustomUnit = preferredUnit.lowercase() != "sat"
-        
         if (isCustomUnit) {
-            customCurrencyPrefix.text = ""
+            customCurrencyPrefix.text = UnitDescriptor.defaultFor(paymentUnit).symbol
             customCurrencyToggle.visibility = android.view.View.GONE
             return
         }
@@ -544,7 +589,13 @@ class TipSelectionActivity : AppCompatActivity() {
         try {
             val inputValue = customInputValue.toDouble()
             
-            selectedTipSats = if (customInputIsBtc) {
+            selectedTipSats = if (isCustomUnit) {
+                AtomicAmount.fromMajorUnits(
+                    value = BigDecimal(customInputValue),
+                    asset = AssetId.global(paymentUnit),
+                    descriptor = UnitDescriptor.defaultFor(paymentUnit),
+                ).value
+            } else if (customInputIsBtc) {
                 inputValue.toLong() // Direct sats
             } else {
                 if (bitcoinPrice > 0) {
@@ -556,7 +607,8 @@ class TipSelectionActivity : AppCompatActivity() {
             
             selectedTipPercentage = 0 // Custom tip has no percentage
             updateCustomConfirmButton(selectedTipSats > 0)
-        } catch (e: NumberFormatException) {
+        } catch (e: RuntimeException) {
+            Log.w(TAG, "Invalid custom tip amount: $customInputValue", e)
             selectedTipSats = 0
             selectedTipPercentage = 0
             updateCustomConfirmButton(false)
@@ -608,8 +660,6 @@ class TipSelectionActivity : AppCompatActivity() {
     }
 
     private fun toggleCustomCurrency() {
-        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
-        val isCustomUnit = preferredUnit.lowercase() != "sat"
         if (isCustomUnit) return
 
         customInputIsBtc = !customInputIsBtc
@@ -898,11 +948,21 @@ class TipSelectionActivity : AppCompatActivity() {
     }
 
     private fun proceedToPayment() {
-        val totalAmountSats = paymentAmountSats + selectedTipSats
+        val totalAmountSats = runCatching {
+            TipAmountCalculator.total(paymentAmountSats, selectedTipSats)
+        }.getOrElse { error ->
+            Log.e(TAG, "Payment total overflow", error)
+            Toast.makeText(
+                this,
+                R.string.checkout_unit_amount_too_large,
+                Toast.LENGTH_LONG,
+            ).show()
+            return
+        }
         
         // Validate total against mint limits (base + tip)
         val mintManager = MintManager.getInstance(this)
-        val preferredMint = mintManager.getPreferredLightningMint()
+        val preferredMint = mintManager.getPreferredLightningMint(paymentUnit.value)
         
         if (preferredMint != null) {
             // Get raw mint info and parse limits directly
@@ -936,12 +996,22 @@ class TipSelectionActivity : AppCompatActivity() {
 
     private fun handleLimitsCheckAndProceed(limits: CashuWalletManager.MintLimits?, totalAmountSats: Long) {
         if (limits != null) {
-            val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this@TipSelectionActivity).getPreferredUnit()
-            val limitCheck = MintLimitChecker.checkMintLimitsWithTip(paymentAmountSats, selectedTipSats, limits, preferredUnit)
+            val limitCheck = MintLimitChecker.checkMintLimitsWithTip(
+                paymentAmountSats,
+                selectedTipSats,
+                limits,
+                paymentUnit.value,
+            )
             if (!limitCheck.isValid) {
                 val errorMsg = when (limitCheck.limitType) {
-                    MintLimitChecker.LimitType.MAX -> getString(R.string.pos_charge_button_max_limit, limitCheck.maxAmount ?: 0)
-                    MintLimitChecker.LimitType.MIN -> getString(R.string.pos_charge_button_min_limit, limitCheck.minAmount ?: 0)
+                    MintLimitChecker.LimitType.MAX -> getString(
+                        R.string.pos_charge_button_max_limit_unit,
+                        formatPaymentAtomic(limitCheck.maxAmount ?: 0L),
+                    )
+                    MintLimitChecker.LimitType.MIN -> getString(
+                        R.string.pos_charge_button_min_limit_unit,
+                        formatPaymentAtomic(limitCheck.minAmount ?: 0L),
+                    )
                     else -> getString(R.string.pos_charge_button_mint_disabled)
                 }
                 Toast.makeText(this@TipSelectionActivity, errorMsg, Toast.LENGTH_LONG).show()
@@ -952,10 +1022,18 @@ class TipSelectionActivity : AppCompatActivity() {
         continuePaymentWithAmount(totalAmountSats)
     }
 
+    private fun formatPaymentAtomic(value: Long): String = UnitAmountFormatter.formatAtomic(
+        value,
+        UnitDescriptor.defaultFor(paymentUnit),
+    )
+
     private fun continuePaymentWithAmount(totalAmountSats: Long) {
         // Calculate new formatted amount (total)
         val newFormattedAmount = if (isCustomUnit) {
-            Amount(totalAmountSats, entryCurrency).toString()
+            UnitAmountFormatter.formatAtomic(
+                totalAmountSats,
+                UnitDescriptor.defaultFor(paymentUnit),
+            )
         } else if (entryCurrency == Currency.BTC) {
             Amount(totalAmountSats, Currency.BTC).toString()
         } else {
@@ -976,6 +1054,10 @@ class TipSelectionActivity : AppCompatActivity() {
 
         val intent = Intent(this, PaymentRequestActivity::class.java).apply {
             putExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, totalAmountSats)
+            putExtra(PaymentRequestActivity.EXTRA_PAYMENT_UNIT, paymentUnit.value)
+            paymentIssuerScope?.let {
+                putExtra(PaymentRequestActivity.EXTRA_PAYMENT_ISSUER_SCOPE, it)
+            }
             putExtra(PaymentRequestActivity.EXTRA_FORMATTED_AMOUNT, newFormattedAmount)
             putExtra(EXTRA_TIP_AMOUNT_SATS, selectedTipSats)
             putExtra(EXTRA_TIP_PERCENTAGE, selectedTipPercentage)
@@ -983,6 +1065,9 @@ class TipSelectionActivity : AppCompatActivity() {
             putExtra(EXTRA_BASE_FORMATTED_AMOUNT, formattedAmount)
             checkoutBasketJson?.let {
                 putExtra(PaymentRequestActivity.EXTRA_CHECKOUT_BASKET_JSON, it)
+            }
+            savedBasketId?.let {
+                putExtra(PaymentRequestActivity.EXTRA_SAVED_BASKET_ID, it)
             }
         }
         
@@ -1040,6 +1125,7 @@ class TipSelectionActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "TipSelectionActivity"
         const val EXTRA_PAYMENT_AMOUNT = "payment_amount"
+        const val EXTRA_PAYMENT_UNIT = "payment_unit"
         const val EXTRA_FORMATTED_AMOUNT = "formatted_amount"
         const val EXTRA_CHECKOUT_BASKET_JSON = "checkout_basket_json"
         const val EXTRA_TIP_AMOUNT_SATS = "tip_amount_sats"

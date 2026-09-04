@@ -958,6 +958,7 @@
     <string name="payment_request_default_method_set">%1$s als Standardzahlungsmethode festgelegt</string>
     <string name="payment_request_default_description">Zahlung von %1$d Sats</string>
     <string name="payment_request_lightning_description">Numo-POS-Zahlung von %1$d Sats</string>
+    <string name="payment_request_lightning_description_unit">Numo-POS-Zahlung über %1$s</string>
 
     <!-- Extracted from layout hardcoded strings -->
     <string name="basket_receipt_items_header_default">ARTIKEL</string>
@@ -1090,4 +1091,5 @@
         <item quantity="one">%d Empfehlung</item>
         <item quantity="other">%d Empfehlungen</item>
     </plurals>
+    <string name="payment_request_error_unsupported_unit">Diese Zahlungseinheit ist nicht verfügbar. Wähle eine Einheit, die von einer deiner hinzugefügten Mints unterstützt wird.</string>
 </resources>

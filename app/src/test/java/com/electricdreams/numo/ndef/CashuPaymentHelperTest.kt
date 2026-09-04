@@ -8,6 +8,7 @@ import com.google.gson.JsonParser
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -67,6 +68,57 @@ class CashuPaymentHelperTest {
         val token = extractCashuToken(text)
 
         assertNull(token)
+    }
+
+    @Test
+    fun `unit matching is exact canonical and rejects reserved unit`() {
+        assertTrue(CashuPaymentHelper.unitsMatch("SAT", "sats"))
+        assertTrue(CashuPaymentHelper.unitsMatch("Points", "points"))
+        assertFalse(CashuPaymentHelper.unitsMatch("sat", "points"))
+        assertFalse(CashuPaymentHelper.unitsMatch(null, "sat"))
+        assertFalse(CashuPaymentHelper.unitsMatch("auth", "auth"))
+    }
+
+    @Test
+    fun `payment request carries explicit custom unit amount and mints`() {
+        val generated = CashuPaymentHelper.createPaymentRequest(
+            amount = 42L,
+            unit = "POINTS",
+            description = "Arcade credit",
+            allowedMints = listOf("https://mint.example"),
+        )
+
+        assertNotNull(generated)
+        val encoded = generated?.original.orEmpty()
+        val payload = android.util.Base64.decode(
+            encoded.removePrefix("creqA"),
+            android.util.Base64.URL_SAFE or
+                android.util.Base64.NO_WRAP or
+                android.util.Base64.NO_PADDING,
+        )
+        val cbor = com.upokecenter.cbor.CBORObject.DecodeFromBytes(payload)
+        assertEquals("points", cbor["u"].AsString())
+        assertEquals(42L, cbor["a"].AsInt64())
+        assertEquals("https://mint.example", cbor["m"][0].AsString())
+    }
+
+    @Test
+    fun `reserved unit cannot create a payment request`() {
+        assertNull(
+            CashuPaymentHelper.createPaymentRequest(
+                amount = 1L,
+                unit = "auth",
+                description = null,
+                allowedMints = null,
+            ),
+        )
+    }
+
+    @Test
+    fun `unknown mint swap is disabled for custom units`() {
+        assertTrue(CashuPaymentHelper.supportsUnknownMintSwap("sat"))
+        assertFalse(CashuPaymentHelper.supportsUnknownMintSwap("points"))
+        assertFalse(CashuPaymentHelper.supportsUnknownMintSwap("auth"))
     }
 
 }

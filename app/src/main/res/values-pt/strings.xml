@@ -708,6 +708,7 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="payment_request_tab_unified">Unificado</string>
     <string name="payment_request_default_description">Pagamento de %1$d sats</string>
     <string name="payment_request_lightning_description">Pagamento Numo POS de %1$d sats</string>
+    <string name="payment_request_lightning_description_unit">Pagamento Numo POS de %1$s</string>
     <string name="onboarding_add_mint_url_hint">Insira a URL do mint</string>
     <string name="onboarding_mints_popular_section_title">Mints Populares</string>
     <string name="history_dialog_dont_show_again">Não mostrar no futuro</string>
@@ -827,4 +828,5 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="settings_fiat_conversion_disabled_custom_unit">A conversão de moeda fiduciária está desativada ao usar uma unidade base personalizada.</string>
     <string name="mints_base_currency_unit_title">Unidade Monetária Base</string>
     <string name="mints_base_currency_unit_subtitle">Se o mint suportar outras unidades, você pode alterá-lo aqui.</string>
+    <string name="payment_request_error_unsupported_unit">Esta unidade de pagamento não está disponível. Selecione uma unidade compatível com uma das suas mints adicionadas.</string>
 </resources>

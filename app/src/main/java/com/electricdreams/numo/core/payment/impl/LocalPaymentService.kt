@@ -4,6 +4,7 @@ import com.electricdreams.numo.core.payment.PaymentData
 import com.electricdreams.numo.core.payment.IPaymentService
 import com.electricdreams.numo.core.payment.PaymentState
 import com.electricdreams.numo.core.payment.RedeemResult
+import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.wallet.QuoteStatus
 import com.electricdreams.numo.core.wallet.Satoshis
@@ -19,15 +20,21 @@ import com.electricdreams.numo.core.wallet.WalletResult
  */
 class LocalPaymentService(
     private val walletProvider: WalletProvider,
-    private val mintManager: MintManager
+    private val mintManager: MintManager,
+    paymentUnit: String = mintManager.getPreferredUnit(),
+    private val issuerScope: String? = null,
 ) : IPaymentService {
+
+    private val paymentUnit = UnitId.of(paymentUnit).also {
+        require(!it.isReserved) { "Reserved unit cannot be used for payments" }
+    }
 
     override suspend fun createPayment(
         amountSats: Long,
         description: String?,
         posCartJson: String?,
     ): WalletResult<PaymentData> {
-        val mintUrl = mintManager.getPreferredLightningMint()
+        val mintUrl = resolvePaymentMint()
             ?: return WalletResult.Failure(
                 com.electricdreams.numo.core.wallet.WalletError.NotInitialized(
                     "No preferred Lightning mint configured"
@@ -50,7 +57,7 @@ class LocalPaymentService(
     }
 
     override suspend fun checkPaymentStatus(paymentId: String): WalletResult<PaymentState> {
-        val mintUrl = mintManager.getPreferredLightningMint()
+        val mintUrl = resolvePaymentMint()
             ?: return WalletResult.Failure(
                 com.electricdreams.numo.core.wallet.WalletError.NotInitialized(
                     "No preferred Lightning mint configured"
@@ -83,4 +90,15 @@ class LocalPaymentService(
     }
 
     override fun isReady(): Boolean = walletProvider.isReady()
+
+    private fun resolvePaymentMint(): String? {
+        val scopedMint = issuerScope?.trim()?.takeIf { it.isNotEmpty() }
+        if (scopedMint != null) {
+            return scopedMint.takeIf {
+                mintManager.isMintAllowed(it) &&
+                    mintManager.mintSupportsUnit(it, paymentUnit.value)
+            }
+        }
+        return mintManager.getPreferredLightningMint(paymentUnit.value)
+    }
 }

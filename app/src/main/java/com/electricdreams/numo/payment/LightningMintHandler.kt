@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.model.UnitId
+import com.electricdreams.numo.core.util.MintManager
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlinx.coroutines.CancellationException
@@ -50,8 +52,11 @@ class LightningMintHandler(
     private val allowedMints: List<String>,
     private val uiScope: CoroutineScope,
     // Allows injecting a mock dispatcher for testing
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    paymentUnit: String = MintManager.getInstance(context).getPreferredUnit(),
 ) {
+    private val paymentUnit = UnitId.of(paymentUnit).value
+
     // Secondary constructor to maintain compatibility
     constructor(
         context: Context,
@@ -148,20 +153,33 @@ class LightningMintHandler(
         mintJob?.cancel()
         mintJob = uiScope.launch(ioDispatcher) {
             try {
-                // CDK Amount is in minor units of wallet's CurrencyUnit (we constructed wallet in sats)
+                // CDK Amount is in atomic units of the captured payment unit.
                 val quoteAmount = CdkAmount(paymentAmount.toULong())
 
-                Log.d(TAG, "Requesting Lightning mint quote from ${mintUrl.url} for $paymentAmount sats")
-                val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
-        val unit = com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unitStr)
-        val mintWallet = wallet.getWallet(mintUrl, unit)
+                Log.d(
+                    TAG,
+                    "Requesting Lightning mint quote from ${mintUrl.url} for " +
+                        "$paymentAmount $paymentUnit",
+                )
+                val unit = CashuWalletManager.getCurrencyUnit(paymentUnit)
+                val mintWallet = wallet.getWallet(mintUrl, unit)
 
                 val nut04 = mintWallet.loadMintInfo().nuts.nut04
                 val supportsDescription = nut04?.methods?.any {
                     it.method == org.cashudevkit.PaymentMethod.Bolt11 && it.description == true
                 } == true
                 val description = if (supportsDescription) {
-                    context.getString(R.string.payment_request_lightning_description, paymentAmount)
+                    val formatted = com.electricdreams.numo.core.model.UnitAmountFormatter
+                        .formatAtomic(
+                            paymentAmount,
+                            com.electricdreams.numo.core.model.UnitDescriptor.defaultFor(
+                                UnitId.of(paymentUnit),
+                            ),
+                        )
+                    context.getString(
+                        R.string.payment_request_lightning_description_unit,
+                        formatted,
+                    )
                 } else {
                     null
                 }
@@ -499,8 +517,7 @@ class LightningMintHandler(
         }
 
         Log.d(TAG, "Mint quote $quoteId is paid (detected by $source), calling wallet.mint")
-        val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
-        val unit = com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unitStr)
+        val unit = CashuWalletManager.getCurrencyUnit(paymentUnit)
         val mintWallet = wallet.getWallet(mintUrl, unit)
         val proofs = mintWallet?.mint(quoteId, org.cashudevkit.SplitTarget.None, null)
             ?: run {
@@ -548,9 +565,8 @@ class LightningMintHandler(
                 Log.v(TAG, "Polling mint quote state for $quoteId")
                 
                 // Check quote state using checkMintQuote API
-                val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
-        val unit = com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unitStr)
-        val mintWallet = wallet.getWallet(mintUrl, unit)
+                val unit = CashuWalletManager.getCurrencyUnit(paymentUnit)
+                val mintWallet = wallet.getWallet(mintUrl, unit)
                     ?: throw Exception("Failed to get wallet for mint: ${mintUrl.url}")
                 
                 val quote = mintWallet.checkMintQuote( quoteId)

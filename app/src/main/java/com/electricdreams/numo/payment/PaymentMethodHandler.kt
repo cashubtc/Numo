@@ -7,6 +7,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.PaymentRequestActivity
 import com.electricdreams.numo.R
+import com.electricdreams.numo.core.model.AssetId
+import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.feature.tips.TipSelectionActivity
 import com.electricdreams.numo.feature.tips.TipsManager
@@ -21,11 +23,25 @@ class PaymentMethodHandler(
 ) {
 
     /** Show payment method dialog for the specified amount */
-    fun showPaymentMethodDialog(amount: Long, formattedAmount: String, checkoutBasketJson: String? = null) {
+    fun showPaymentMethodDialog(
+        amount: Long,
+        formattedAmount: String,
+        checkoutBasketJson: String? = null,
+        chargeAsset: AssetId = AssetId.global(
+            UnitId.of(MintManager.getInstance(activity).getPreferredUnit()),
+        ),
+    ) {
         val tipsManager = TipsManager.getInstance(activity)
-        
+
         val routing = PaymentRoutingCore.determinePaymentRoute(tipsManager.tipsEnabled)
-        val intent = routing.buildIntent(activity, amount, formattedAmount, checkoutBasketJson)
+        val intent = routing.buildIntent(
+            context = activity,
+            amount = amount,
+            paymentUnit = chargeAsset.unit.value,
+            formattedAmount = formattedAmount,
+            checkoutBasketJson = checkoutBasketJson,
+            paymentIssuerScope = chargeAsset.issuerScope,
+        )
         activity.startActivityForResultCompat(intent, REQUEST_CODE_PAYMENT)
     }
 
@@ -47,7 +63,12 @@ class PaymentMethodHandler(
         val mintsForPaymentRequest =
             if (mintManager.isSwapFromUnknownMintsEnabled()) null else allowedMints
 
-        val paymentRequest = CashuPaymentHelper.createPaymentRequest(amount, "Payment of $amount sats", mintsForPaymentRequest)?.original
+        val paymentRequest = CashuPaymentHelper.createPaymentRequest(
+            amount = amount,
+            unit = activeUnit,
+            description = "Payment of $amount $activeUnit",
+            allowedMints = mintsForPaymentRequest,
+        )?.original
             ?: run {
                 Toast.makeText(activity, R.string.payment_toast_failed_create_request, Toast.LENGTH_SHORT).show()
                 return

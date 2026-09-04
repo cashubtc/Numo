@@ -3,6 +3,8 @@ package com.electricdreams.numo.feature.autowithdraw
 import android.content.Context
 import android.util.Log
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.model.UnitFeaturePolicy
+import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintManager
 import com.google.gson.Gson
@@ -142,6 +144,20 @@ class AutoWithdrawManager private constructor(private val context: Context) {
      * @param lightningMintUrl The mint URL for Lightning payments (used when token is empty)
      */
     fun onPaymentReceived(token: String, lightningMintUrl: String?) {
+        onPaymentReceived(token, lightningMintUrl, mintManager.getPreferredUnit())
+    }
+
+    /**
+     * Unit-explicit entry point used by checkout. Custom units intentionally skip BOLT11-based
+     * automatic withdrawal until a payment-method-specific implementation exists.
+     */
+    fun onPaymentReceived(token: String, lightningMintUrl: String?, paymentUnit: String) {
+        val unit = UnitId.ofOrNull(paymentUnit)
+        if (unit == null || !UnitFeaturePolicy.supportsAutoWithdraw(unit)) {
+            Log.d(TAG, "Auto-withdraw is unavailable for payment unit: $paymentUnit")
+            return
+        }
+
         // Determine the mint URL
         val mintUrl: String? = if (token.isNotEmpty()) {
             try {
@@ -190,6 +206,12 @@ class AutoWithdrawManager private constructor(private val context: Context) {
 
         if (!settingsManager.isGloballyEnabled()) {
             Log.d(TAG, "Auto-withdraw is globally disabled, skipping")
+            return
+        }
+
+        val activeUnit = UnitId.ofOrNull(mintManager.getPreferredUnit())
+        if (activeUnit == null || !UnitFeaturePolicy.supportsAutoWithdraw(activeUnit)) {
+            Log.d(TAG, "Auto-withdraw is unavailable for active unit: $activeUnit")
             return
         }
         

@@ -265,6 +265,8 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             // Show beautiful bottom sheet
             val bottomSheet = MintSelectionBottomSheet.newInstance(
                 mintBalances = mintsWithBalance,
+                balanceUnit = MintManager.getInstance(this@AutoWithdrawSettingsActivity)
+                    .getPreferredUnit(),
                 listener = object : MintSelectionBottomSheet.OnMintSelectedListener {
                     override fun onMintSelected(mintUrl: String, balance: Long) {
                         openWithdrawScreen(mintUrl, balance)

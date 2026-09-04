@@ -886,6 +886,7 @@
     <string name="payment_request_tab_unified">統合された</string>
     <string name="payment_request_default_description">%1$d の支払い</string>
     <string name="payment_request_lightning_description">%1$d 衛星の Numo POS 支払い</string>
+    <string name="payment_request_lightning_description_unit">Numo POS 支払い: %1$s</string>
     <string name="onboarding_status_generating_seed">シードフレーズを生成しています…</string>
     <string name="onboarding_status_setting_up_mints">デフォルトのミントを設定しています…</string>
     <string name="onboarding_status_initializing_wallet">ウォレットを初期化しています…</string>
@@ -990,4 +991,5 @@
     <string name="settings_fiat_conversion_disabled_custom_unit">カスタムベース単位を使用している場合、法定通貨への変換は無効になります。</string>
     <string name="mints_base_currency_unit_title">基準通貨単位</string>
     <string name="mints_base_currency_unit_subtitle">ミントが他の単位をサポートしている場合は、ここで切り替えることができます。</string>
+    <string name="payment_request_error_unsupported_unit">この支払い単位は利用できません。追加済みのミントが対応している単位を選択してください。</string>
 </resources>

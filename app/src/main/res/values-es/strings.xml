@@ -694,6 +694,7 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="payment_request_tab_unified">Unificado</string>
     <string name="payment_request_default_description">Pago de %1$d sats</string>
     <string name="payment_request_lightning_description">Pago Numo POS de %1$d sats</string>
+    <string name="payment_request_lightning_description_unit">Pago Numo POS de %1$s</string>
     <string name="auto_withdraw_lightning_address_valid">Dirección Lightning válida</string>
     <string name="auto_withdraw_lightning_address_invalid">Dirección Lightning no válida</string>
     <!-- BTCMap Explainer -->
@@ -747,4 +748,5 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="settings_fiat_conversion_disabled_custom_unit">La conversión de moneda fiduciaria está deshabilitada cuando se usa una unidad base personalizada.</string>
     <string name="mints_base_currency_unit_title">Unidad de moneda base</string>
     <string name="mints_base_currency_unit_subtitle">Si la casa de la moneda admite otras unidades, puedes cambiarla aquí.</string>
+    <string name="payment_request_error_unsupported_unit">Esta unidad de pago no está disponible. Selecciona una unidad compatible con una de las casas de moneda añadidas.</string>
 </resources>
