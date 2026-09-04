@@ -14,6 +14,12 @@ import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.model.AssetId
+import com.electricdreams.numo.core.model.AtomicAmount
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
+import com.electricdreams.numo.core.model.UnitKind
 import com.electricdreams.numo.core.model.CheckoutBasket
 import com.electricdreams.numo.core.model.CheckoutBasketItem
 import com.electricdreams.numo.core.model.SavedBasket
@@ -70,6 +76,7 @@ class TransactionDetailActivity : AppCompatActivity() {
         val bitcoinPriceValue = intent.getDoubleExtra(EXTRA_TRANSACTION_BITCOIN_PRICE, -1.0)
         val bitcoinPrice = if (bitcoinPriceValue > 0) bitcoinPriceValue else null
         val mintUrl = intent.getStringExtra(EXTRA_TRANSACTION_MINT_URL)
+        val issuerScope = intent.getStringExtra(EXTRA_TRANSACTION_ISSUER_SCOPE)
         val paymentRequest = intent.getStringExtra(EXTRA_TRANSACTION_PAYMENT_REQUEST)
         position = intent.getIntExtra(EXTRA_TRANSACTION_POSITION, -1)
         paymentType = intent.getStringExtra(EXTRA_TRANSACTION_PAYMENT_TYPE)
@@ -99,6 +106,7 @@ class TransactionDetailActivity : AppCompatActivity() {
             paymentRequest = paymentRequest,
             tipAmountSats = tipAmountSats,
             tipPercentage = tipPercentage,
+            issuerScope = issuerScope,
         )
 
         setupViews()
@@ -166,19 +174,15 @@ class TransactionDetailActivity : AppCompatActivity() {
 
         // Use BASE amount (excluding tip) for display; use absolute value for withdrawals
         val entryUnit = entry.getEntryUnit()
-        val tokenUnit = entry.getUnit()
-        val lowerTokenUnit = tokenUnit.lowercase()
-        val isCustomUnit = lowerTokenUnit != "sat"
+        val tokenUnit = UnitId.ofOrNull(entry.getUnit())?.takeUnless { it.isReserved }
+            ?: UnitId.SAT
         val baseAmountSats = kotlin.math.abs(entry.getBaseAmountSats())
 
-        if (isCustomUnit) {
-            val currency = Amount.Currency.fromCode(lowerTokenUnit)
-            if (currency.symbol != lowerTokenUnit.uppercase()) {
-                val valueToFormat = if (currency.isZeroDecimal()) baseAmountSats * 100 else baseAmountSats
-                amountText.text = Amount(valueToFormat, currency).toString()
-            } else {
-                amountText.text = "$baseAmountSats ${tokenUnit.uppercase()}"
-            }
+        if (!tokenUnit.isSat) {
+            amountText.text = UnitAmountFormatter.formatAtomic(
+                baseAmountSats,
+                UnitDescriptor.defaultFor(tokenUnit),
+            )
             amountSubtitleText.visibility = View.GONE
             fiatEquivalentText.visibility = View.GONE
         } else {
@@ -336,22 +340,14 @@ class TransactionDetailActivity : AppCompatActivity() {
     }
 
     private fun displayItemsAndTotals() {
-        // Use saved basket data if available, otherwise fall back to checkoutBasketJson
-        val basketJsonToUse = if (savedBasket != null) {
-            convertSavedBasketToCheckoutBasket(savedBasket!!).toJson()
-        } else {
-            checkoutBasketJson
-        }
+        val basketJsonToUse = savedBasket
+            ?.let(::convertSavedBasketToCheckoutBasket)
+            ?.toJson()
+            ?: checkoutBasketJson
 
         val basket = CheckoutBasket.fromJson(basketJsonToUse)
-        if (basket == null || basket.items.isEmpty()) {
-            return
-        }
-
-        val enteredCurrency = entry.getEntryUnit() ?: com.electricdreams.numo.core.util.CurrencyManager.getInstance(this).getCurrentCurrency()
-        val currency = Amount.Currency.fromCode(basket.currency ?: enteredCurrency)
+        if (basket == null || basket.items.isEmpty()) return
         
-        // 1. Setup Views
         val itemsHeader: TextView = findViewById(R.id.items_header)
         val itemsContainer: LinearLayout = findViewById(R.id.items_container)
         val totalsContainer: LinearLayout = findViewById(R.id.totals_container)
@@ -360,8 +356,6 @@ class TransactionDetailActivity : AppCompatActivity() {
         val subtotalValue: TextView = findViewById(R.id.subtotal_value)
         val vatBreakdownContainer: LinearLayout = findViewById(R.id.vat_breakdown_container)
         val satsItemsRow: LinearLayout = findViewById(R.id.sats_items_row)
-        val satsItemsValue: TextView = findViewById(R.id.sats_items_value)
-        val satsItemsEquiv: TextView = findViewById(R.id.sats_items_equiv)
         val finalTotalValue: TextView = findViewById(R.id.final_total_value)
         val satsEquivalentText: TextView = findViewById(R.id.sats_equivalent)
 
@@ -369,35 +363,43 @@ class TransactionDetailActivity : AppCompatActivity() {
         itemsContainer.visibility = View.VISIBLE
         totalsContainer.visibility = View.VISIBLE
 
-        // 2. Display Items
         itemsContainer.removeAllViews()
         val itemCount = basket.getTotalItemCount()
-        itemsHeader.text = if (itemCount == 1) getString(R.string.basket_receipt_items_header_single) else getString(R.string.basket_receipt_items_header_multiple, itemCount)
+        itemsHeader.text = if (itemCount == 1) {
+            getString(R.string.basket_receipt_items_header_single)
+        } else {
+            getString(R.string.basket_receipt_items_header_multiple, itemCount)
+        }
 
         val inflater = android.view.LayoutInflater.from(this)
         basket.items.forEachIndexed { index, item ->
             val itemView = inflater.inflate(R.layout.item_receipt_line, itemsContainer, false)
-            
             val qtyText = itemView.findViewById<TextView>(R.id.item_quantity)
             val nameText = itemView.findViewById<TextView>(R.id.item_name)
             val unitPriceText = itemView.findViewById<TextView>(R.id.item_unit_price)
             val priceText = itemView.findViewById<TextView>(R.id.item_total)
+            val vatDetailRow = itemView.findViewById<LinearLayout>(R.id.vat_detail_row)
             
             qtyText.text = item.quantity.toString()
             nameText.text = item.displayName
-            
-            if (item.isFiatPrice()) {
-                val unitPrice = Amount(item.getGrossPricePerUnitCents(), currency)
-                unitPriceText.text = if (item.quantity > 1) getString(R.string.basket_receipt_item_each, unitPrice.toString()) else unitPrice.toString()
-                
-                val lineTotal = Amount(item.getGrossTotalCents(), currency)
-                priceText.text = lineTotal.toString()
+
+            val unitPrice = formatAtomicAmount(item.getGrossAtomicAmount())
+            unitPriceText.text = if (item.quantity > 1) {
+                getString(R.string.basket_receipt_item_each, unitPrice)
             } else {
-                val unitPrice = Amount(item.priceSats, Amount.Currency.BTC)
-                unitPriceText.text = if (item.quantity > 1) getString(R.string.basket_receipt_item_each, unitPrice.toString()) else unitPrice.toString()
-                
-                val directTotal = item.quantity * item.priceSats
-                priceText.text = Amount(directTotal, Amount.Currency.BTC).toString()
+                unitPrice
+            }
+            priceText.text = formatAtomicAmount(item.getGrossLineAtomicAmount())
+
+            if (item.vatEnabled && item.vatRate > 0) {
+                val vatAmount = item.getGrossLineAtomicAmount() - item.getNetLineAtomicAmount()
+                itemView.findViewById<TextView>(R.id.vat_label).text =
+                    getString(R.string.basket_receipt_vat_label, item.vatRate)
+                itemView.findViewById<TextView>(R.id.vat_amount).text =
+                    formatAtomicAmount(vatAmount)
+                vatDetailRow.visibility = View.VISIBLE
+            } else {
+                vatDetailRow.visibility = View.GONE
             }
 
             itemsContainer.addView(itemView)
@@ -406,7 +408,7 @@ class TransactionDetailActivity : AppCompatActivity() {
                 val divider = View(this).apply {
                     layoutParams = LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT,
-                        1 // 1px height
+                        1
                     ).apply {
                         setMargins(
                             (16 * resources.displayMetrics.density).toInt(),
@@ -421,115 +423,98 @@ class TransactionDetailActivity : AppCompatActivity() {
             }
         }
 
-        // 3. Display Totals
-        val hasVat = basket.hasVat()
-        val hasFiatItems = basket.getFiatItems().isNotEmpty()
-        val hasSatsItems = basket.getSatsItems().isNotEmpty()
+        val groupedItems = basket.items.groupBy { it.getNetAtomicAmount().asset }
+        vatBreakdownContainer.removeAllViews()
+        satsItemsRow.visibility = View.GONE
 
-        if (hasVat && hasFiatItems) {
-            val netTotal = basket.getFiatNetTotalCents()
-            subtotalLabel.text = getString(R.string.basket_receipt_fiat_subtotal_net_label)
-            subtotalValue.text = Amount(netTotal, currency).toString()
+        if (groupedItems.size == 1 && basket.hasVat()) {
+            val asset = groupedItems.keys.single()
+            val netTotal = basket.items.fold(AtomicAmount.zero(asset)) { total, item ->
+                total + item.getNetLineAtomicAmount()
+            }
+            subtotalLabel.text = getString(R.string.basket_receipt_subtotal_label)
+            subtotalValue.text = formatAtomicAmount(netTotal)
             subtotalRow.visibility = View.VISIBLE
-        } else if (hasFiatItems && hasSatsItems) {
-            subtotalLabel.text = getString(R.string.basket_receipt_fiat_items_label)
-            subtotalValue.text = Amount(basket.getFiatGrossTotalCents(), currency).toString()
-            subtotalRow.visibility = View.VISIBLE
+
+            basket.items
+                .filter { it.vatEnabled && it.vatRate > 0 }
+                .groupBy { it.vatRate }
+                .forEach { (rate, items) ->
+                    val vatTotal = items.fold(AtomicAmount.zero(asset)) { total, item ->
+                        total + (item.getGrossLineAtomicAmount() - item.getNetLineAtomicAmount())
+                    }
+                    addAtomicVatRow(vatBreakdownContainer, rate, vatTotal)
+                }
         } else {
             subtotalRow.visibility = View.GONE
         }
 
-        vatBreakdownContainer.removeAllViews()
-        if (hasVat && hasFiatItems) {
-            val vatBreakdown = basket.getVatBreakdown()
-            vatBreakdown.forEach { (rate, amountCents) ->
-                val row = LinearLayout(this).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    ).apply {
-                        topMargin = (8 * resources.displayMetrics.density).toInt()
-                    }
-                }
-
-                val label = TextView(this).apply {
-                    layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-                    text = getString(R.string.basket_receipt_vat_row_label, rate)
-                    textSize = 15f
-                    setTextColor(resources.getColor(R.color.color_text_secondary, theme))
-                }
-
-                val value = TextView(this).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    )
-                    text = Amount(amountCents, currency).toString()
-                    textSize = 15f
-                    setTextColor(resources.getColor(R.color.color_text_secondary, theme))
-                }
-
-                row.addView(label)
-                row.addView(value)
-                vatBreakdownContainer.addView(row)
-            }
+        val paymentUnit = UnitId.ofOrNull(entry.getUnit())?.takeUnless { it.isReserved }
+            ?: UnitId.SAT
+        val issuer = entry.issuerScope?.takeIf {
+            it.isNotBlank() && UnitDescriptor.defaultFor(paymentUnit).kind == UnitKind.CUSTOM
         }
-        
-        if (hasSatsItems) {
-            satsItemsValue.text = Amount(basket.getSatsDirectTotal(), Amount.Currency.BTC).toString()
-            
-            if (entry.bitcoinPrice != null && entry.bitcoinPrice!! > 0) {
-                val satsInFiat = ((basket.getSatsDirectTotal().toDouble() / 100_000_000.0) * entry.bitcoinPrice!! * 100).toLong()
-                satsItemsEquiv.text = "≈ ${Amount(satsInFiat, currency)}"
-                satsItemsEquiv.visibility = View.VISIBLE
-            } else {
-                satsItemsEquiv.visibility = View.GONE
-            }
-            satsItemsRow.visibility = View.VISIBLE
+        val paymentAsset = issuer?.let { AssetId.mintScoped(paymentUnit, it) }
+            ?: AssetId.global(paymentUnit)
+        val baseAmount = AtomicAmount(
+            kotlin.math.abs(entry.getBaseAmountAtomic()),
+            paymentAsset,
+        )
+        finalTotalValue.text = formatAtomicAmount(baseAmount)
+
+        val enteredUnit = UnitId.ofOrNull(entry.getEntryUnit())
+        if (paymentUnit.isSat && enteredUnit != null && !enteredUnit.isSat && entry.enteredAmount > 0) {
+            satsEquivalentText.text = "≈ " + UnitAmountFormatter.formatAtomic(
+                entry.enteredAmount,
+                UnitDescriptor.defaultFor(enteredUnit),
+            )
+            satsEquivalentText.visibility = View.VISIBLE
         } else {
-            satsItemsRow.visibility = View.GONE
-        }
-
-        val baseAmountSats = kotlin.math.abs(entry.getBaseAmountSats())
-        val isCustomUnit = enteredCurrency.lowercase() != "sat"
-        if (isCustomUnit) {
-            if (currency.symbol != enteredCurrency.uppercase()) {
-                val valueToFormat = if (currency.isZeroDecimal()) baseAmountSats * 100 else baseAmountSats
-                finalTotalValue.text = Amount(valueToFormat, currency).toString()
-            } else {
-                finalTotalValue.text = "$baseAmountSats ${enteredCurrency.uppercase()}"
-            }
             satsEquivalentText.visibility = View.GONE
-            satsItemsRow.visibility = View.GONE
-        } else {
-            val baseSats = basket.totalSatoshis - entry.tipAmountSats
-            val showSatsAsPrimary = basket.getFiatItems().isEmpty() || 
-                (basket.getFiatItems().isEmpty() && entry.enteredAmount == 0L)
-                
-            if (showSatsAsPrimary) {
-                finalTotalValue.text = Amount(baseSats, Amount.Currency.BTC).toString()
-                satsEquivalentText.visibility = View.GONE
-            } else {
-                val baseFiat = if (entry.enteredAmount > 0) {
-                    // Approximate tip in fiat if we have the entered amount
-                    val tipRatio = if (entry.amount > 0) entry.tipAmountSats.toDouble() / entry.amount.toDouble() else 0.0
-                    entry.enteredAmount - (entry.enteredAmount * tipRatio).toLong()
-                } else {
-                    basket.getFiatGrossTotalCents() + if (entry.bitcoinPrice != null && entry.bitcoinPrice!! > 0) {
-                        ((basket.getSatsDirectTotal().toDouble() / 100_000_000.0) * entry.bitcoinPrice!! * 100).toLong()
-                    } else 0L
-                }
-                finalTotalValue.text = Amount(baseFiat, currency).toString()
-                
-                if (baseSats > 0) {
-                    satsEquivalentText.text = "≈ ${Amount(baseSats, Amount.Currency.BTC)}"
-                    satsEquivalentText.visibility = View.VISIBLE
-                } else {
-                    satsEquivalentText.visibility = View.GONE
-                }
+        }
+    }
+
+    private fun formatAtomicAmount(amount: AtomicAmount): String {
+        val formatted = UnitAmountFormatter.format(
+            amount,
+            UnitDescriptor.defaultFor(amount.unit),
+        )
+        val issuer = amount.asset.issuerScope ?: return formatted
+        return "$formatted · ${issuer.substringAfter("://").substringBefore('/')}"
+    }
+
+    private fun addAtomicVatRow(
+        container: LinearLayout,
+        rate: Int,
+        amount: AtomicAmount,
+    ) {
+        val row = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+            ).apply {
+                topMargin = (8 * resources.displayMetrics.density).toInt()
             }
         }
+        val label = TextView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                1f,
+            )
+            text = getString(R.string.basket_receipt_vat_row_label, rate)
+            textSize = 15f
+            setTextColor(resources.getColor(R.color.color_text_secondary, theme))
+        }
+        val value = TextView(this).apply {
+            text = formatAtomicAmount(amount)
+            textSize = 15f
+            setTextColor(resources.getColor(R.color.color_text_secondary, theme))
+        }
+        row.addView(label)
+        row.addView(value)
+        container.addView(row)
     }
 
     /**
@@ -574,7 +559,9 @@ class TransactionDetailActivity : AppCompatActivity() {
             enteredAmount = entry.enteredAmount,
             enteredCurrency = enteredCurrency,
             tipAmountSats = entry.tipAmountSats,
-            tipPercentage = entry.tipPercentage
+            tipPercentage = entry.tipPercentage,
+            paymentUnit = entry.getUnit(),
+            paymentIssuerScope = entry.issuerScope,
         )
         receiptPrinter.printReceipt(receiptData)
     }
@@ -705,6 +692,7 @@ class TransactionDetailActivity : AppCompatActivity() {
         const val EXTRA_TRANSACTION_ENTERED_AMOUNT = "transaction_entered_amount"
         const val EXTRA_TRANSACTION_BITCOIN_PRICE = "transaction_bitcoin_price"
         const val EXTRA_TRANSACTION_MINT_URL = "transaction_mint_url"
+        const val EXTRA_TRANSACTION_ISSUER_SCOPE = "transaction_issuer_scope"
         const val EXTRA_TRANSACTION_PAYMENT_REQUEST = "transaction_payment_request"
         const val EXTRA_TRANSACTION_POSITION = "transaction_position"
         const val EXTRA_TRANSACTION_PAYMENT_TYPE = "transaction_payment_type"

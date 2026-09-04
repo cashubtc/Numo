@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.SavedBasket
+import com.electricdreams.numo.core.model.UnitAmountFormatter
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
@@ -205,11 +206,12 @@ class BasketDetailDialog(
             // Subtitle - show unit price if quantity > 1
             val subtitleView = itemView.findViewById<TextView>(R.id.item_subtitle)
             if (item.quantity > 1) {
-                val unitPrice = if (item.isSatsPrice()) {
-                    "₿${item.item.priceSats} each"
-                } else {
-                    "${currencyManager.formatCurrencyAmount(item.item.getGrossPrice())} each"
-                }
+                val unitPrice = runCatching {
+                    val amount = item.item.getGrossAtomicAmount(
+                        currencyManager.getCurrentCurrency(),
+                    )
+                    "${UnitAmountFormatter.formatAsset(amount)} each"
+                }.getOrDefault("—")
                 subtitleView?.text = unitPrice
                 subtitleView?.visibility = View.VISIBLE
             } else {
@@ -217,11 +219,11 @@ class BasketDetailDialog(
             }
             
             // Line total
-            val priceText = if (item.isSatsPrice()) {
-                "₿${item.getTotalSats()}"
-            } else {
-                currencyManager.formatCurrencyAmount(item.getTotalPrice())
-            }
+            val priceText = runCatching {
+                UnitAmountFormatter.formatAsset(
+                    item.getGrossAtomicAmount(currencyManager.getCurrentCurrency()),
+                )
+            }.getOrDefault("—")
             itemView.findViewById<TextView>(R.id.item_price)?.text = priceText
             
             itemsContainer?.addView(itemView)
@@ -242,14 +244,10 @@ class BasketDetailDialog(
     }
 
     private fun formatTotal(): String {
-        return if (basket.hasMixedPriceTypes()) {
-            val fiat = currencyManager.formatCurrencyAmount(basket.getTotalFiatPrice())
-            val sats = "₿${basket.getTotalSatsPrice()}"
-            "$fiat + $sats"
-        } else if (basket.getTotalSatsPrice() > 0) {
-            "₿${basket.getTotalSatsPrice()}"
-        } else {
-            currencyManager.formatCurrencyAmount(basket.getTotalFiatPrice())
-        }
+        return runCatching {
+            basket.getPriceTotals(currencyManager.getCurrentCurrency())
+                .joinToString(" + ") { UnitAmountFormatter.formatAsset(it) }
+                .ifEmpty { "—" }
+        }.getOrDefault("—")
     }
 }

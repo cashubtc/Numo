@@ -166,4 +166,53 @@ class ReceiptPrinterTest {
         assertTrue(html.contains("€5"))
         assertTrue(html.contains("NUMO POS"))
     }
+
+    @Test
+    fun `custom unit receipt never labels atomic amounts as sats`() {
+        val issuer = "https://rewards.example"
+        val item = CheckoutBasketItem(
+            itemId = "item-points",
+            uuid = "uuid-points",
+            name = "Reward",
+            quantity = 2,
+            priceType = "FIAT",
+            netPriceCents = 0,
+            priceSats = 0,
+            priceCurrency = "USD",
+            vatEnabled = false,
+            vatRate = 0,
+            priceUnit = "points",
+            netPriceAtomic = 25,
+            grossPriceAtomic = 25,
+            priceIssuerScope = issuer,
+        )
+        val basket = CheckoutBasket(
+            items = listOf(item),
+            currency = "USD",
+            totalSatoshis = 50,
+            chargeUnit = "points",
+            chargeAmountAtomic = 50,
+            chargeIssuerScope = issuer,
+        )
+        val data = ReceiptPrinter.ReceiptData(
+            basket = basket,
+            paymentType = "cashu",
+            paymentDate = Date(),
+            transactionId = "points-payment",
+            mintUrl = issuer,
+            bitcoinPrice = null,
+            totalSatoshis = 50,
+            paymentUnit = "points",
+            paymentIssuerScope = issuer,
+        )
+
+        val receipt = printer.generateTextReceipt(data)
+        val html = printer.generateHtmlReceipt(data)
+
+        assertTrue(receipt.contains("25 POINTS"))
+        assertTrue(receipt.contains("50 POINTS"))
+        assertTrue(!receipt.contains("50 sat"))
+        assertTrue(html.contains("50 POINTS"))
+        assertTrue(!html.contains("50 sat"))
+    }
 }

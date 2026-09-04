@@ -9,7 +9,13 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.core.content.FileProvider
 import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.model.AssetId
+import com.electricdreams.numo.core.model.AtomicAmount
 import com.electricdreams.numo.core.model.CheckoutBasket
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
+import com.electricdreams.numo.core.model.UnitKind
 import com.electricdreams.numo.core.util.CurrencyManager
 import java.io.File
 import java.io.FileOutputStream
@@ -58,7 +64,37 @@ class ReceiptPrinter(private val context: Context) {
         // Tip information
         val tipAmountSats: Long = 0,
         val tipPercentage: Int = 0,
+        val paymentUnit: String = "sat",
+        val paymentIssuerScope: String? = null,
     )
+
+    private fun resolvePaymentAsset(data: ReceiptData): AssetId {
+        val basketCharge = data.basket?.getChargeAmount()
+        val unit = basketCharge?.unit
+            ?: UnitId.ofOrNull(data.paymentUnit)?.takeUnless { it.isReserved }
+            ?: UnitId.SAT
+        val rawIssuer = basketCharge?.asset?.issuerScope ?: data.paymentIssuerScope
+        val issuer = rawIssuer?.takeIf {
+            it.isNotBlank() && UnitDescriptor.defaultFor(unit).kind == UnitKind.CUSTOM
+        }
+        return issuer?.let { AssetId.mintScoped(unit, it) } ?: AssetId.global(unit)
+    }
+
+    private fun resolvePaidAmount(data: ReceiptData): AtomicAmount {
+        val asset = resolvePaymentAsset(data)
+        val fallback = data.basket?.getChargeAmount()?.value ?: 0L
+        val value = data.totalSatoshis.takeIf { it > 0L } ?: fallback
+        return AtomicAmount(value, asset)
+    }
+
+    private fun formatAtomic(amount: AtomicAmount): String {
+        val formatted = UnitAmountFormatter.format(
+            amount,
+            UnitDescriptor.defaultFor(amount.unit),
+        )
+        val issuer = amount.asset.issuerScope ?: return formatted
+        return "$formatted · ${issuer.substringAfter("://").substringBefore('/')}"
+    }
 
     /**
      * Determine if the receipt should show sats as the primary amount.
@@ -119,7 +155,9 @@ class ReceiptPrinter(private val context: Context) {
         fun formatSats(sats: Long): String = Amount(sats, Amount.Currency.BTC).toString()
 
         val showSatsAsPrimary = shouldShowSatsAsPrimary(data)
-        val totalSats = data.basket?.totalSatoshis ?: data.totalSatoshis
+        val paidAmount = resolvePaidAmount(data)
+        val totalSats = paidAmount.value
+        val hasExplicitCharge = data.basket?.chargeUnit != null || !paidAmount.unit.isSat
 
         // ═══════════════════════════════════════════
         // HEADER
@@ -166,32 +204,18 @@ class ReceiptPrinter(private val context: Context) {
                     itemName
                 }
                 
-                // Show price in original currency (fiat or sats)
-                if (item.isFiatPrice()) {
-                    val unitPrice = formatFiat(item.getGrossPricePerUnitCents())
-                    val lineTotal = formatFiat(item.getGrossTotalCents())
-                    
-                    sb.appendLine(truncatedName)
-                    sb.appendLine(leftRight("  ${item.quantity} x $unitPrice", lineTotal))
-                    
-                    // VAT detail
-                    if (item.vatEnabled && item.vatRate > 0) {
-                        val vatAmount = formatFiat(item.getTotalVatCents())
-                        sb.appendLine("  (incl. ${item.vatRate}% VAT: $vatAmount)")
-                    }
-                } else {
-                    // Sats-priced item
-                    val unitPrice = formatSats(item.priceSats)
-                    val lineTotal = formatSats(item.getNetTotalSats())
-                    
-                    sb.appendLine(truncatedName)
-                    sb.appendLine(leftRight("  ${item.quantity} x $unitPrice", lineTotal))
-                    
-                    // Show fiat equivalent if we have bitcoin price
-                    if (data.bitcoinPrice != null && data.bitcoinPrice > 0) {
-                        val satsInFiat = ((item.getNetTotalSats().toDouble() / 100_000_000.0) * data.bitcoinPrice * 100).toLong()
-                        sb.appendLine("  (≈ ${formatFiat(satsInFiat)})")
-                    }
+                val unitPrice = formatAtomic(item.getGrossAtomicAmount())
+                val lineTotal = formatAtomic(item.getGrossLineAtomicAmount())
+
+                sb.appendLine(truncatedName)
+                sb.appendLine(leftRight("  ${item.quantity} x $unitPrice", lineTotal))
+
+                if (item.vatEnabled && item.vatRate > 0) {
+                    val vatAmount = item.getGrossLineAtomicAmount() -
+                        item.getNetLineAtomicAmount()
+                    sb.appendLine(
+                        "  (incl. ${item.vatRate}% VAT: ${formatAtomic(vatAmount)})",
+                    )
                 }
                 
                 sb.appendLine()
@@ -199,7 +223,10 @@ class ReceiptPrinter(private val context: Context) {
         } else {
             // No basket - single "Payment" line
             sb.appendLine("Payment")
-            if (data.enteredAmount > 0) {
+            if (!paidAmount.unit.isSat) {
+                val formatted = formatAtomic(paidAmount)
+                sb.appendLine(leftRight("  1 x $formatted", formatted))
+            } else if (data.enteredAmount > 0) {
                 sb.appendLine(leftRight("  1 x ${formatFiat(data.enteredAmount)}", formatFiat(data.enteredAmount)))
             } else {
                 sb.appendLine(leftRight("  1 x ${formatSats(totalSats)}", formatSats(totalSats)))
@@ -212,7 +239,7 @@ class ReceiptPrinter(private val context: Context) {
         // ───────────────────────────────────────────
         // TOTALS
         // ───────────────────────────────────────────
-        if (basket != null) {
+        if (basket != null && !hasExplicitCharge) {
             val hasVat = basket.hasVat()
             val hasFiatItems = basket.getFiatItems().isNotEmpty()
 
@@ -253,7 +280,13 @@ class ReceiptPrinter(private val context: Context) {
         val baseFiat = getTotalFiatIncludingSatsConversion(data) // enteredAmount is already base
         
         sb.appendLine()
-        if (showSatsAsPrimary || (basket == null && data.enteredAmount == 0L)) {
+        if (hasExplicitCharge) {
+            val baseAmount = AtomicAmount(
+                Math.subtractExact(totalSats, data.tipAmountSats),
+                paidAmount.asset,
+            )
+            sb.appendLine(leftRight("TOTAL:", formatAtomic(baseAmount)))
+        } else if (showSatsAsPrimary || (basket == null && data.enteredAmount == 0L)) {
             // Primary: Sats (base amount)
             sb.appendLine(leftRight("TOTAL:", formatSats(baseSats)))
             
@@ -278,8 +311,13 @@ class ReceiptPrinter(private val context: Context) {
             } else {
                 "Tip:"
             }
-            sb.appendLine(leftRight(tipLabel, formatSats(data.tipAmountSats)))
-            sb.appendLine(leftRight("TOTAL PAID:", formatSats(totalSats)))
+            sb.appendLine(
+                leftRight(
+                    tipLabel,
+                    formatAtomic(AtomicAmount(data.tipAmountSats, paidAmount.asset)),
+                ),
+            )
+            sb.appendLine(leftRight("TOTAL PAID:", formatAtomic(paidAmount)))
             sb.appendLine()
         }
 
@@ -314,8 +352,7 @@ class ReceiptPrinter(private val context: Context) {
         }
         sb.appendLine(leftRight("Payment:", paymentMethod))
         
-        val paidAmount = formatSats(totalSats)
-        sb.appendLine(leftRight("Paid:", paidAmount))
+        sb.appendLine(leftRight("Paid:", formatAtomic(paidAmount)))
         sb.appendLine(leftRight("Status:", "✓ PAID"))
 
         data.mintUrl?.let { url ->
@@ -364,51 +401,43 @@ class ReceiptPrinter(private val context: Context) {
         val hasVat = basket?.hasVat() ?: false
         val hasFiatItems = basket?.getFiatItems()?.isNotEmpty() ?: false
         val showSatsAsPrimary = shouldShowSatsAsPrimary(data)
-        val totalSats = basket?.totalSatoshis ?: data.totalSatoshis
+        val paidAmount = resolvePaidAmount(data)
+        val totalSats = paidAmount.value
+        val hasExplicitCharge = basket?.chargeUnit != null || !paidAmount.unit.isSat
         val totalFiat = getTotalFiatIncludingSatsConversion(data)
+        fun htmlEncode(value: String): String = android.text.TextUtils.htmlEncode(value)
         
         // Build items HTML
         val itemsHtml = if (basket != null && basket.items.isNotEmpty()) {
             basket.items.joinToString("") { item ->
-                if (item.isFiatPrice()) {
-                    val lineTotal = formatFiat(item.getGrossTotalCents())
-                    val unitPrice = formatFiat(item.getGrossPricePerUnitCents())
-                    val vatInfo = if (item.vatEnabled && item.vatRate > 0) {
-                        "<div class=\"vat-detail\">(incl. ${item.vatRate}% VAT: ${formatFiat(item.getTotalVatCents())})</div>"
-                    } else ""
-                    """
-                    <div class="item">
-                        <div class="row">
-                            <span class="item-name">${android.text.TextUtils.htmlEncode(item.displayName)}</span>
-                            <span class="bold">$lineTotal</span>
-                        </div>
-                        <div class="item-detail">${item.quantity} × $unitPrice</div>
-                        $vatInfo
-                    </div>
-                    """
+                val lineTotal = htmlEncode(formatAtomic(item.getGrossLineAtomicAmount()))
+                val unitPrice = htmlEncode(formatAtomic(item.getGrossAtomicAmount()))
+                val vatInfo = if (item.vatEnabled && item.vatRate > 0) {
+                    val vatAmount = item.getGrossLineAtomicAmount() -
+                        item.getNetLineAtomicAmount()
+                    "<div class=\"vat-detail\">(incl. ${item.vatRate}% VAT: " +
+                        "${htmlEncode(formatAtomic(vatAmount))})</div>"
                 } else {
-                    // Sats item
-                    val lineTotal = formatSats(item.getNetTotalSats())
-                    val unitPrice = formatSats(item.priceSats)
-                    val fiatEquiv = if (data.bitcoinPrice != null && data.bitcoinPrice > 0) {
-                        val satsInFiat = ((item.getNetTotalSats().toDouble() / 100_000_000.0) * data.bitcoinPrice * 100).toLong()
-                        "<div class=\"item-detail small\">(≈ ${formatFiat(satsInFiat)})</div>"
-                    } else ""
-                    """
-                    <div class="item">
-                        <div class="row">
-                            <span class="item-name">${android.text.TextUtils.htmlEncode(item.displayName)}</span>
-                            <span class="bold">$lineTotal</span>
-                        </div>
-                        <div class="item-detail">${item.quantity} × $unitPrice</div>
-                        $fiatEquiv
-                    </div>
-                    """
+                    ""
                 }
+                """
+                <div class="item">
+                    <div class="row">
+                        <span class="item-name">${htmlEncode(item.displayName)}</span>
+                        <span class="bold">$lineTotal</span>
+                    </div>
+                    <div class="item-detail">${item.quantity} × $unitPrice</div>
+                    $vatInfo
+                </div>
+                """
             }
         } else {
             // No basket - single Payment line
-            val amount = if (data.enteredAmount > 0) formatFiat(data.enteredAmount) else formatSats(totalSats)
+            val amount = when {
+                !paidAmount.unit.isSat -> formatAtomic(paidAmount)
+                data.enteredAmount > 0 -> formatFiat(data.enteredAmount)
+                else -> formatSats(totalSats)
+            }.let(::htmlEncode)
             """
             <div class="item">
                 <div class="row">
@@ -422,7 +451,7 @@ class ReceiptPrinter(private val context: Context) {
 
         // Build totals HTML
         val totalsHtml = buildString {
-            if (basket != null && hasVat && hasFiatItems) {
+            if (basket != null && !hasExplicitCharge && hasVat && hasFiatItems) {
                 append("""
                 <div class="row">
                     <span>Fiat Subtotal (net):</span>
@@ -441,7 +470,7 @@ class ReceiptPrinter(private val context: Context) {
                 """)
             }
             
-            if (basket != null && basket.getSatsItems().isNotEmpty()) {
+            if (basket != null && !hasExplicitCharge && basket.getSatsItems().isNotEmpty()) {
                 append("""
                 <div class="row">
                     <span>Bitcoin Items:</span>
@@ -470,7 +499,14 @@ class ReceiptPrinter(private val context: Context) {
         // Primary/secondary amount display (BASE amounts for accounting)
         val primaryTotal: String
         val secondaryTotal: String
-        if (showSatsAsPrimary || (basket == null && data.enteredAmount == 0L)) {
+        if (hasExplicitCharge) {
+            val baseAmount = AtomicAmount(
+                Math.subtractExact(totalSats, data.tipAmountSats),
+                paidAmount.asset,
+            )
+            primaryTotal = formatAtomic(baseAmount)
+            secondaryTotal = ""
+        } else if (showSatsAsPrimary || (basket == null && data.enteredAmount == 0L)) {
             primaryTotal = formatSats(baseSats)
             secondaryTotal = if (baseFiat > 0) "≈ ${formatFiat(baseFiat)}" else ""
         } else {
@@ -485,11 +521,11 @@ class ReceiptPrinter(private val context: Context) {
             <div class="divider"></div>
             <div class="row" style="color: #00C244; font-weight: bold;">
                 <span>$tipLabel:</span>
-                <span>${formatSats(data.tipAmountSats)}</span>
+                <span>${htmlEncode(formatAtomic(AtomicAmount(data.tipAmountSats, paidAmount.asset)))}</span>
             </div>
             <div class="row total-row">
                 <span>TOTAL PAID:</span>
-                <span>${formatSats(totalSats)}</span>
+                <span>${htmlEncode(formatAtomic(paidAmount))}</span>
             </div>
             """
         } else ""
@@ -596,12 +632,12 @@ class ReceiptPrinter(private val context: Context) {
     
     <div class="row total-row">
         <span>TOTAL:</span>
-        <span>$primaryTotal</span>
+        <span>${htmlEncode(primaryTotal)}</span>
     </div>
     ${if (secondaryTotal.isNotEmpty()) """
     <div class="row secondary-total">
         <span>&nbsp;&nbsp;${if (showSatsAsPrimary) "(equivalent):" else "(paid):"}</span>
-        <span>$secondaryTotal</span>
+        <span>${htmlEncode(secondaryTotal)}</span>
     </div>
     """ else ""}
     
@@ -639,7 +675,7 @@ class ReceiptPrinter(private val context: Context) {
     </div>
     <div class="row">
         <span>Paid:</span>
-        <span>${formatSats(totalSats)}</span>
+        <span>${htmlEncode(formatAtomic(paidAmount))}</span>
     </div>
     <div class="row">
         <span>Status:</span>
