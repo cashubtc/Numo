@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.backup.DeviceRecoveryBackup
+import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.dev.WalletLogger
@@ -46,12 +47,13 @@ object CashuWalletManager : MintManager.MintChangeListener {
     private const val DB_FILE_NAME = "cashu_wallet.db"
 
     fun getCurrencyUnit(unit: String): CurrencyUnit {
-        return when (unit.lowercase()) {
-            "sat" -> CurrencyUnit.Sat
-            "msat" -> CurrencyUnit.Msat
-            "usd" -> CurrencyUnit.Usd
-            "eur" -> CurrencyUnit.Eur
-            else -> CurrencyUnit.Custom(unit)
+        return when (val unitId = UnitId.of(unit)) {
+            UnitId.SAT -> CurrencyUnit.Sat
+            UnitId.MSAT -> CurrencyUnit.Msat
+            UnitId.AUTH -> CurrencyUnit.Auth
+            UnitId.of("usd") -> CurrencyUnit.Usd
+            UnitId.of("eur") -> CurrencyUnit.Eur
+            else -> CurrencyUnit.Custom(unitId.value)
         }
     }
 
@@ -62,7 +64,8 @@ object CashuWalletManager : MintManager.MintChangeListener {
             is CurrencyUnit.Usd -> "usd"
             is CurrencyUnit.Eur -> "eur"
             is CurrencyUnit.Custom -> this.unit
-            else -> "sat"
+            is CurrencyUnit.Auth -> "auth"
+            else -> throw IllegalArgumentException("Unsupported CDK currency unit: $this")
         }
     }
 
@@ -150,12 +153,14 @@ object CashuWalletManager : MintManager.MintChangeListener {
 
         val mintManager = MintManager.getInstance(appContext)
         val mints = mintManager.getAllowedMints()
+        val preferredUnit = UnitId.of(mintManager.getPreferredUnit()).value
         val balanceChanges = mutableMapOf<String, Pair<Long, Long>>()
 
-        // Get balances before restore
+        // The existing restore UI reports the selected display unit. Every advertised unit is
+        // still restored below; unlike amounts cannot be meaningfully summed into this map.
         val balancesBefore = mutableMapOf<String, Long>()
         for (mintUrl in mints) {
-            balancesBefore[mintUrl] = getBalanceForMint(mintUrl)
+            balancesBefore[mintUrl] = getBalanceForMint(mintUrl, preferredUnit)
         }
 
         // Delete existing database to start fresh
@@ -181,41 +186,67 @@ object CashuWalletManager : MintManager.MintChangeListener {
         // Create new wallet with restored mnemonic
         val newWallet = WalletRepository(newMnemonic, db)
 
-        // Add mints and restore each one
+        // Add every advertised mint/unit wallet and restore each independently. One broken
+        // keyset must not prevent recovery of other units at the same mint.
         for (mintUrl in mints) {
-            try {
-                onMintProgress(mintUrl, "Connecting...", balancesBefore[mintUrl] ?: 0L, 0L)
-                
-                val unitStr = mintManager.getPreferredUnit()
-                val unit = getCurrencyUnit(unitStr)
-                newWallet.createWallet(MintUrl(mintUrl), unit, 10u)
-                
-                onMintProgress(mintUrl, "Restoring proofs...", balancesBefore[mintUrl] ?: 0L, 0L)
-                
-                val mintWallet = newWallet.getWallet(MintUrl(mintUrl), unit)
-                val recoveredAmount = mintWallet?.restore()?.unspent?.value?.toLong() ?: 0L
-                if (recoveredAmount > 0) {
-                    WalletLogger.log("IN", recoveredAmount, mintUrl, "Mint restored")
+            val oldBalance = balancesBefore[mintUrl] ?: 0L
+            onMintProgress(mintUrl, "Connecting...", oldBalance, 0L)
+
+            val advertisedUnits = mintManager.getMintUnits(mintUrl)
+            val unitsToRestore = if (advertisedUnits.isEmpty()) {
+                listOf(preferredUnit)
+            } else {
+                advertisedUnits.map { it.value }
+            }
+            var preferredRecovered = 0L
+            var restoredUnitCount = 0
+            var lastFailure: Throwable? = null
+
+            unitsToRestore.forEach { unitString ->
+                try {
+                    val unit = getCurrencyUnit(unitString)
+                    newWallet.createWallet(MintUrl(mintUrl), unit, 10u)
+                    onMintProgress(
+                        mintUrl,
+                        "Restoring proofs ($unitString)...",
+                        oldBalance,
+                        preferredRecovered,
+                    )
+
+                    val mintWallet = newWallet.getWallet(MintUrl(mintUrl), unit)
+                        ?: throw IllegalStateException("Wallet not found for $mintUrl ($unitString)")
+                    val recoveredAmount = mintWallet.restore().unspent.value.toLong()
+                    if (recoveredAmount > 0) {
+                        WalletLogger.log(
+                            "IN",
+                            recoveredAmount,
+                            mintUrl,
+                            "Mint restored ($unitString)",
+                        )
+                    }
+                    if (unitString == preferredUnit) {
+                        preferredRecovered = recoveredAmount
+                    }
+                    restoredUnitCount++
+                    Log.d(TAG, "Restored mint $mintUrl ($unitString): $recoveredAmount")
+                } catch (t: Throwable) {
+                    lastFailure = t
+                    Log.e(TAG, "Failed to restore mint $mintUrl ($unitString)", t)
                 }
-                val oldBalance = balancesBefore[mintUrl] ?: 0L
-                val newBalance = recoveredAmount
-                
-                balanceChanges[mintUrl] = Pair(oldBalance, newBalance)
-                
-                onMintProgress(mintUrl, "Complete", oldBalance, newBalance)
-                
-                Log.d(TAG, "Restored mint $mintUrl: before=$oldBalance, after=$newBalance")
-            } catch (t: Throwable) {
-                Log.e(TAG, "Failed to restore mint $mintUrl", t)
-                val oldBalance = balancesBefore[mintUrl] ?: 0L
-                balanceChanges[mintUrl] = Pair(oldBalance, 0L)
-                onMintProgress(mintUrl, "Failed: ${t.message}", oldBalance, 0L)
+            }
+
+            balanceChanges[mintUrl] = oldBalance to preferredRecovered
+            if (restoredUnitCount > 0) {
+                onMintProgress(mintUrl, "Complete", oldBalance, preferredRecovered)
+            } else {
+                val message = lastFailure?.message ?: "No supported units"
+                onMintProgress(mintUrl, "Failed: $message", oldBalance, 0L)
             }
         }
 
-        //database = db
+        database = db
         wallet = newWallet
-            _walletState.value = WalletState.READY
+        _walletState.value = WalletState.READY
 
         Log.d(TAG, "Wallet restore complete. Restored ${mints.size} mints.")
         
@@ -239,6 +270,11 @@ object CashuWalletManager : MintManager.MintChangeListener {
      *    so it does not interfere with the persistent wallet database.
      */
     suspend fun getTemporaryWalletForMint(unknownMintUrl: String): Wallet {
+        val unit = MintManager.getInstance(appContext).getPreferredUnit()
+        return getTemporaryWalletForMint(unknownMintUrl, unit)
+    }
+
+    suspend fun getTemporaryWalletForMint(unknownMintUrl: String, unit: String): Wallet {
         if (!this::appContext.isInitialized) {
             throw IllegalStateException("CashuWalletManager not initialized")
         }
@@ -253,12 +289,11 @@ object CashuWalletManager : MintManager.MintChangeListener {
         val tempDbStore = WalletStore.Custom(tempDb)
 
         val config = WalletConfig(targetProofCount = 10u)
-        val unitStr = MintManager.getInstance(appContext).getPreferredUnit()
-        val unit = getCurrencyUnit(unitStr)
+        val currencyUnit = getCurrencyUnit(unit)
 
         return Wallet(
             unknownMintUrl,
-            unit,
+            currencyUnit,
             tempMnemonic,
             tempDbStore,
             config
@@ -281,7 +316,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
 
     // Lazy-initialized WalletProvider backed by this manager's wallet
     private val walletProviderInstance: CdkWalletProvider by lazy {
-        CdkWalletProvider { wallet }
+        CdkWalletProvider(walletProvider = { wallet })
     }
 
     /**
@@ -291,6 +326,21 @@ object CashuWalletManager : MintManager.MintChangeListener {
      */
     @JvmStatic
     fun getWalletProvider(): WalletProvider = walletProviderInstance
+
+    /**
+     * Return a wallet provider pinned to one captured payment unit.
+     *
+     * The legacy provider above follows the mutable UI preference. Payment flows must use this
+     * overload so a settings change cannot reinterpret an in-flight amount.
+     */
+    fun getWalletProvider(unit: String): WalletProvider {
+        val unitId = UnitId.of(unit)
+        require(!unitId.isReserved) { "Reserved unit cannot be used for wallet payments" }
+        return CdkWalletProvider(
+            walletProvider = { wallet },
+            currencyUnitProvider = { getCurrencyUnit(unitId.value) },
+        )
+    }
 
     /**
      * Get the TemporaryMintWalletFactory for creating temporary wallets.
@@ -303,15 +353,19 @@ object CashuWalletManager : MintManager.MintChangeListener {
      * Get the balance for a specific mint in satoshis.
      */
     suspend fun getBalanceForMint(mintUrl: String): Long {
+        val unit = MintManager.getInstance(appContext).getPreferredUnit()
+        return getBalanceForMint(mintUrl, unit)
+    }
+
+    suspend fun getBalanceForMint(mintUrl: String, unit: String): Long {
         val w = wallet ?: return 0L
-        val unitStr = MintManager.getInstance(appContext).getPreferredUnit()
-        val unit = getCurrencyUnit(unitStr)
+        val currencyUnit = getCurrencyUnit(unit)
         return try {
             val balances = w.getBalances()
             val normalizedInput = mintUrl.removeSuffix("/")
             for (entry in balances) {
                 val cdkUrl = entry.key.mintUrl.url.removeSuffix("/")
-                if (cdkUrl == normalizedInput && entry.key.unit == unit) {
+                if (cdkUrl == normalizedInput && entry.key.unit == currencyUnit) {
                     return entry.value.value.toLong()
                 }
             }
@@ -327,13 +381,17 @@ object CashuWalletManager : MintManager.MintChangeListener {
      * Returns a map of mint URL string to balance in satoshis.
      */
     suspend fun getAllMintBalances(): Map<String, Long> {
+        val unit = MintManager.getInstance(appContext).getPreferredUnit()
+        return getAllMintBalances(unit)
+    }
+
+    suspend fun getAllMintBalances(unit: String): Map<String, Long> {
         val w = wallet ?: return emptyMap()
-        val unitStr = MintManager.getInstance(appContext).getPreferredUnit()
-        val unit = getCurrencyUnit(unitStr)
+        val currencyUnit = getCurrencyUnit(unit)
         return try {
             val balanceMap = w.getBalances()
             balanceMap
-                .filter { it.key.unit == unit }
+                .filter { it.key.unit == currencyUnit }
                 .mapKeys { it.key.mintUrl.url.removeSuffix("/") }
                 .mapValues { it.value.value.toLong() }
         } catch (e: Exception) {
@@ -643,26 +701,40 @@ object CashuWalletManager : MintManager.MintChangeListener {
                 Log.i(TAG, "Loaded existing wallet mnemonic from preferences")
             }
 
-            // 3) Construct WalletRepository in sats.
+            // 3) Construct one repository and register every advertised unit for every mint.
             val newWallet = WalletRepository(mnemonic, db)
-            val unitStr = MintManager.getInstance(appContext).getPreferredUnit()
-        val unit = getCurrencyUnit(unitStr)
+            val mintManager = MintManager.getInstance(appContext)
+            val preferredUnit = mintManager.getPreferredUnit()
 
             // 4) Register allowed mints.
             for (url in mints) {
-                try {
-                    newWallet.createWallet(MintUrl(url), unit, 10u)
-                    
-                    // Recover incomplete sagas (e.g. pending melts or mints)
-                    val mintWallet = newWallet.getWallet(MintUrl(url), unit)
+                val advertisedUnits = mintManager.getMintUnits(url)
+                val unitsToRegister = if (advertisedUnits.isEmpty()) {
+                    listOf(preferredUnit)
+                } else {
+                    advertisedUnits.map { it.value }
+                }
+
+                for (unitString in unitsToRegister) {
                     try {
-                        Log.i(TAG, "Recovering incomplete sagas for mint: $url")
-                        mintWallet.recoverIncompleteSagas()
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Failed to recover incomplete sagas for mint: $url", e)
+                        val unit = getCurrencyUnit(unitString)
+                        newWallet.createWallet(MintUrl(url), unit, 10u)
+
+                        // Recover incomplete sagas (e.g. pending melts or mints)
+                        val mintWallet = newWallet.getWallet(MintUrl(url), unit)
+                        try {
+                            Log.i(TAG, "Recovering incomplete sagas for mint: $url ($unitString)")
+                            mintWallet.recoverIncompleteSagas()
+                        } catch (e: Exception) {
+                            Log.w(
+                                TAG,
+                                "Failed to recover incomplete sagas for mint: $url ($unitString)",
+                                e,
+                            )
+                        }
+                    } catch (t: Throwable) {
+                        Log.w(TAG, "Failed to add mint wallet: $url ($unitString)", t)
                     }
-                } catch (t: Throwable) {
-                    Log.w(TAG, "Failed to add mint to wallet: $url", t)
                 }
             }
 

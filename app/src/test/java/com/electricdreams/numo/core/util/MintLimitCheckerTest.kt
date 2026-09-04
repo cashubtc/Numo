@@ -216,4 +216,76 @@ class MintLimitCheckerTest {
         val result = MintLimitChecker.checkMintLimits(5000, mintLimits)
         assertTrue(result.isValid)
     }
+
+    @Test
+    fun `canonical unit aliases match without relabeling another unit`() {
+        val mintLimits = CashuWalletManager.MintLimits(
+            mintMethods = listOf(
+                CashuWalletManager.MintMethodSettings(
+                    method = "bolt11",
+                    unit = "sats",
+                    minAmount = 1,
+                    maxAmount = 10_000,
+                ),
+                CashuWalletManager.MintMethodSettings(
+                    method = "bolt11",
+                    unit = "points",
+                    minAmount = 500,
+                    maxAmount = 600,
+                ),
+            ),
+        )
+
+        val satResult = MintLimitChecker.checkMintLimits(100, mintLimits, "sat")
+        val pointsResult = MintLimitChecker.checkMintLimits(100, mintLimits, "POINTS")
+
+        assertTrue(satResult.isValid)
+        assertFalse(pointsResult.isValid)
+        assertEquals(MintLimitChecker.LimitType.MIN, pointsResult.limitType)
+    }
+
+    @Test
+    fun `amount plus tip overflow is rejected instead of wrapping negative`() {
+        val mintLimits = CashuWalletManager.MintLimits(
+            mintMethods = listOf(
+                CashuWalletManager.MintMethodSettings(
+                    method = "bolt11",
+                    unit = "sat",
+                    minAmount = null,
+                    maxAmount = null,
+                ),
+            ),
+        )
+
+        val result = MintLimitChecker.checkMintLimitsWithTip(
+            amount = Long.MAX_VALUE,
+            tipAmount = 1L,
+            mintLimits = mintLimits,
+            preferredUnit = "sat",
+        )
+
+        assertFalse(result.isValid)
+        assertTrue(result.isBolt11Supported)
+        assertEquals(MintLimitChecker.LimitType.MAX, result.limitType)
+    }
+
+    @Test
+    fun `reserved payment unit is rejected`() {
+        val mintLimits = CashuWalletManager.MintLimits(
+            mintMethods = listOf(
+                CashuWalletManager.MintMethodSettings(
+                    method = "bolt11",
+                    unit = "auth",
+                    minAmount = null,
+                    maxAmount = null,
+                ),
+            ),
+        )
+
+        val result = MintLimitChecker.checkMintLimits(1, mintLimits, "auth")
+
+        assertFalse(result.isValid)
+        assertFalse(result.isBolt11Supported)
+        assertEquals(MintLimitChecker.LimitType.DISABLED, result.limitType)
+    }
 }

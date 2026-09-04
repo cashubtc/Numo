@@ -80,6 +80,11 @@ class MintProfileServiceTest {
         server.enqueue(
             MockResponse()
                 .setResponseCode(200)
+                .setBody("{\"keysets\":[{\"id\":\"a\",\"unit\":\"sat\"},{\"id\":\"b\",\"unit\":\"POINTS\"}]}"),
+        )
+        server.enqueue(
+            MockResponse()
+                .setResponseCode(200)
                 .setBody(Buffer().write(iconBytes())),
         )
 
@@ -90,6 +95,11 @@ class MintProfileServiceTest {
         assertTrue(result.iconCached)
         assertEquals("Test Mint", mintManager.getMintDisplayName(mintUrl))
         assertNotNull(MintIconCache.getCachedIconFile(mintUrl))
+        assertEquals(setOf("points", "sat"), result.supportedUnits?.map { it.lowercase() }?.toSet())
+        assertEquals(
+            setOf("points", "sat"),
+            mintManager.getMintUnits(mintUrl).map { it.value }.toSet(),
+        )
     }
 
     @Test
@@ -116,6 +126,11 @@ class MintProfileServiceTest {
             MockResponse()
                 .setResponseCode(200)
                 .setBody("{}"),
+        )
+        server.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setBody("{\"keysets\":[{\"id\":\"a\",\"unit\":\"sat\"}]}"),
         )
 
         val result = mintProfileService.fetchAndStoreMintProfile(mintUrl)
