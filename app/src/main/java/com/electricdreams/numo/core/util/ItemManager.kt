@@ -32,6 +32,7 @@ class ItemManager private constructor(context: Context) {
         private const val TAG = "ItemManager"
         private const val PREFS_NAME = "ItemManagerPrefs"
         private const val KEY_ITEM_LIST = "items_list"
+        private const val CSV_COLUMN_COUNT = 32
 
         @Volatile
         private var instance: ItemManager? = null
@@ -60,78 +61,104 @@ class ItemManager private constructor(context: Context) {
     private fun loadItems() {
         items.clear()
         val itemsJson = prefs.getString(KEY_ITEM_LIST, "")
+        var migratedLegacyPrice = false
 
         if (!itemsJson.isNullOrEmpty()) {
             try {
                 val array = JSONArray(itemsJson)
                 for (i in 0 until array.length()) {
-                    val obj = array.getJSONObject(i)
-                    val item = Item().apply {
-                        id = obj.getString("id")
-                        name = obj.getString("name")
-                        price = obj.getDouble("price")
+                    try {
+                        val obj = array.getJSONObject(i)
+                        val item = Item().apply {
+                            id = obj.getString("id")
+                            name = obj.getString("name")
+                            price = obj.getDouble("price")
 
-                        // UUID - generate if missing (migration for old items)
-                        uuid = if (!obj.isNull("uuid")) {
-                            obj.getString("uuid")
-                        } else {
-                            UUID.randomUUID().toString()
-                        }
+                            // UUID - generate if missing (migration for old items)
+                            uuid = if (!obj.isNull("uuid")) {
+                                obj.getString("uuid")
+                            } else {
+                                UUID.randomUUID().toString()
+                            }
 
-                        if (!obj.isNull("variationName")) {
-                            variationName = obj.getString("variationName")
-                        }
-                        if (!obj.isNull("sku")) {
-                            sku = obj.getString("sku")
-                        }
-                        if (!obj.isNull("description")) {
-                            description = obj.getString("description")
-                        }
-                        if (!obj.isNull("category")) {
-                            category = obj.getString("category")
-                        }
-                        if (!obj.isNull("gtin")) {
-                            gtin = obj.getString("gtin")
-                        }
-                        if (!obj.isNull("quantity")) {
-                            quantity = obj.getInt("quantity")
-                        }
-                        if (!obj.isNull("alertEnabled")) {
-                            alertEnabled = obj.getBoolean("alertEnabled")
-                        }
-                        if (!obj.isNull("alertThreshold")) {
-                            alertThreshold = obj.getInt("alertThreshold")
-                        }
-                        if (!obj.isNull("imagePath")) {
-                            imagePath = obj.getString("imagePath")
-                        }
-                        // New fields for sats/fiat pricing
-                        if (!obj.isNull("priceSats")) {
-                            priceSats = obj.getLong("priceSats")
-                        }
-                        if (!obj.isNull("priceType")) {
-                            priceType = try {
-                                com.electricdreams.numo.core.model.PriceType.valueOf(obj.getString("priceType"))
-                            } catch (e: IllegalArgumentException) {
-                                com.electricdreams.numo.core.model.PriceType.FIAT
+                            if (!obj.isNull("variationName")) {
+                                variationName = obj.getString("variationName")
+                            }
+                            if (!obj.isNull("sku")) {
+                                sku = obj.getString("sku")
+                            }
+                            if (!obj.isNull("description")) {
+                                description = obj.getString("description")
+                            }
+                            if (!obj.isNull("category")) {
+                                category = obj.getString("category")
+                            }
+                            if (!obj.isNull("gtin")) {
+                                gtin = obj.getString("gtin")
+                            }
+                            if (!obj.isNull("quantity")) {
+                                quantity = obj.getInt("quantity")
+                            }
+                            if (!obj.isNull("alertEnabled")) {
+                                alertEnabled = obj.getBoolean("alertEnabled")
+                            }
+                            if (!obj.isNull("alertThreshold")) {
+                                alertThreshold = obj.getInt("alertThreshold")
+                            }
+                            if (!obj.isNull("imagePath")) {
+                                imagePath = obj.getString("imagePath")
+                            }
+                            // New fields for sats/fiat pricing
+                            if (!obj.isNull("priceSats")) {
+                                priceSats = obj.getLong("priceSats")
+                            }
+                            if (!obj.isNull("priceType")) {
+                                priceType = try {
+                                    com.electricdreams.numo.core.model.PriceType.valueOf(
+                                        obj.getString("priceType"),
+                                    )
+                                } catch (e: IllegalArgumentException) {
+                                    com.electricdreams.numo.core.model.PriceType.FIAT
+                                }
+                            }
+                            if (!obj.isNull("trackInventory")) {
+                                trackInventory = obj.getBoolean("trackInventory")
+                            }
+                            // VAT fields
+                            if (!obj.isNull("vatEnabled")) {
+                                vatEnabled = obj.getBoolean("vatEnabled")
+                            }
+                            if (!obj.isNull("vatRate")) {
+                                vatRate = obj.getInt("vatRate")
+                            }
+                            if (!obj.isNull("priceUnit")) {
+                                priceUnit = obj.getString("priceUnit")
+                            }
+                            if (!obj.isNull("priceAtomic")) {
+                                priceAtomic = obj.getLong("priceAtomic")
+                            }
+                            if (!obj.isNull("grossPriceAtomic")) {
+                                grossPriceAtomic = obj.getLong("grossPriceAtomic")
+                            }
+                            if (!obj.isNull("priceIssuerScope")) {
+                                priceIssuerScope = obj.getString("priceIssuerScope")
                             }
                         }
-                        if (!obj.isNull("trackInventory")) {
-                            trackInventory = obj.getBoolean("trackInventory")
-                        }
-                        // VAT fields
-                        if (!obj.isNull("vatEnabled")) {
-                            vatEnabled = obj.getBoolean("vatEnabled")
-                        }
-                        if (!obj.isNull("vatRate")) {
-                            vatRate = obj.getInt("vatRate")
-                        }
-                    }
 
-                    items.add(item)
+                        migratedLegacyPrice = item.ensureExplicitPrice(
+                            CurrencyManager.getInstance(context).getCurrentCurrency(),
+                        ) || migratedLegacyPrice
+                        items.add(item)
+                    } catch (e: RuntimeException) {
+                        Log.e(TAG, "Skipping invalid catalog item at index $i", e)
+                    }
                 }
 
                 Log.d(TAG, "Loaded ${items.size} items from storage")
+                if (migratedLegacyPrice) {
+                    saveItems()
+                    Log.d(TAG, "Migrated legacy item prices to explicit atomic units")
+                }
             } catch (e: JSONException) {
                 Log.e(TAG, "Error loading items: ${e.message}", e)
             }
@@ -166,6 +193,10 @@ class ItemManager private constructor(context: Context) {
                     put("priceSats", item.priceSats)
                     put("priceType", item.priceType.name)
                     put("trackInventory", item.trackInventory)
+                    put("priceUnit", item.priceUnit)
+                    put("priceAtomic", item.priceAtomic)
+                    put("grossPriceAtomic", item.grossPriceAtomic)
+                    item.priceIssuerScope?.let { put("priceIssuerScope", it) }
                     
                     // VAT fields
                     put("vatEnabled", item.vatEnabled)
@@ -267,6 +298,7 @@ class ItemManager private constructor(context: Context) {
             return false
         }
 
+        item.ensureExplicitPrice(CurrencyManager.getInstance(context).getCurrentCurrency())
         items.add(item)
         saveItems()
         return true
@@ -278,6 +310,7 @@ class ItemManager private constructor(context: Context) {
      * @return true if updated successfully, false if not found.
      */
     fun updateItem(item: Item): Boolean {
+        item.ensureExplicitPrice(CurrencyManager.getInstance(context).getCurrentCurrency())
         for (i in items.indices) {
             if (items[i].id == item.id) {
                 items[i] = item
@@ -415,11 +448,15 @@ class ItemManager private constructor(context: Context) {
                     }
                 }
 
-                // Parse Numo custom fields (index 24-27)
+                // Parse Numo custom fields (index 24-31)
                 var priceType = com.electricdreams.numo.core.model.PriceType.FIAT
                 var priceSats = 0L
                 var vatEnabled = false
                 var vatRate = 0
+                var priceUnit: String? = null
+                var priceAtomic: Long? = null
+                var priceIssuerScope: String? = null
+                var grossPriceAtomic: Long? = null
                 
                 if (values.size > 24 && values[24].isNotBlank()) {
                     try {
@@ -451,6 +488,22 @@ class ItemManager private constructor(context: Context) {
                     } catch (e: NumberFormatException) {}
                 }
 
+                if (values.size > 28 && values[28].isNotBlank()) {
+                    priceUnit = values[28]
+                }
+
+                if (values.size > 29 && values[29].isNotBlank()) {
+                    priceAtomic = values[29].toLongOrNull()
+                }
+
+                if (values.size > 30 && values[30].isNotBlank()) {
+                    priceIssuerScope = values[30]
+                }
+
+                if (values.size > 31 && values[31].isNotBlank()) {
+                    grossPriceAtomic = values[31].toLongOrNull()
+                }
+
                 // Create new item
                 val item = Item().apply {
                     id = UUID.randomUUID().toString()
@@ -469,7 +522,12 @@ class ItemManager private constructor(context: Context) {
                     this.vatRate = vatRate
                     this.alertEnabled = alertEnabled
                     this.alertThreshold = alertThreshold
+                    this.priceUnit = priceUnit
+                    this.priceAtomic = priceAtomic
+                    this.priceIssuerScope = priceIssuerScope
+                    this.grossPriceAtomic = grossPriceAtomic
                 }
+                item.ensureExplicitPrice(CurrencyManager.getInstance(context).getCurrentCurrency())
 
                 items.add(item)
                 importedCount++
@@ -505,7 +563,7 @@ class ItemManager private constructor(context: Context) {
             val writer = BufferedWriter(OutputStreamWriter(outputStream))
 
             // Write 5 header lines to match the Square template import expectations
-            val header = arrayOfNulls<String>(28)
+            val header = arrayOfNulls<String>(CSV_COLUMN_COUNT)
             header[0] = "Token"
             header[1] = "Item Name"
             header[2] = "Variation Name"
@@ -522,16 +580,20 @@ class ItemManager private constructor(context: Context) {
             header[25] = "Price Sats"
             header[26] = "VAT Enabled"
             header[27] = "VAT Rate"
+            header[28] = "Price Unit"
+            header[29] = "Price Atomic"
+            header[30] = "Price Issuer Scope"
+            header[31] = "Gross Price Atomic"
 
             val headerString = header.joinToString(",") { it ?: "" }
             writer.write(headerString + "\n")
-            writer.write(",,,,,,,,,,,,,,,,,,,,,,,,,,,\n")
-            writer.write(",,,,,,,,,,,,,,,,,,,,,,,,,,,\n")
-            writer.write(",,,,,,,,,,,,,,,,,,,,,,,,,,,\n")
-            writer.write(",,,,,,,,,,,,,,,,,,,,,,,,,,,\n")
+            repeat(4) {
+                writer.write(",".repeat(CSV_COLUMN_COUNT - 1) + "\n")
+            }
 
             for (item in items) {
-                val csvLine = arrayOfNulls<String>(28)
+                item.ensureExplicitPrice(CurrencyManager.getInstance(context).getCurrentCurrency())
+                val csvLine = arrayOfNulls<String>(CSV_COLUMN_COUNT)
                 csvLine[0] = "" // Token
                 csvLine[1] = item.name ?: ""
                 csvLine[2] = item.variationName ?: ""
@@ -563,6 +625,10 @@ class ItemManager private constructor(context: Context) {
                 csvLine[24] = item.priceType.name
                 csvLine[26] = if (item.vatEnabled) "Y" else "N"
                 csvLine[27] = item.vatRate.toString()
+                csvLine[28] = item.priceUnit.orEmpty()
+                csvLine[29] = item.priceAtomic?.toString().orEmpty()
+                csvLine[30] = item.priceIssuerScope.orEmpty()
+                csvLine[31] = item.grossPriceAtomic?.toString().orEmpty()
 
                 val formattedLine = csvLine.joinToString(",") { formatCsvField(it ?: "") }
                 writer.write(formattedLine + "\n")

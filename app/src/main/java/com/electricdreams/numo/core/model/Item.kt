@@ -1,10 +1,10 @@
 package com.electricdreams.numo.core.model
 
 import android.os.Parcelable
-import com.electricdreams.numo.core.util.CurrencyManager
 import kotlinx.parcelize.Parcelize
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.util.UUID
-import kotlin.math.roundToLong
 
 /**
  * Enum representing the price type for an item.
@@ -45,6 +45,14 @@ data class Item(
     var alertEnabled: Boolean = false,          // Whether stock alerts are enabled
     var alertThreshold: Int = 0,                // Threshold for stock alerts
     var imagePath: String? = null,              // Path to item image (can be null)
+    /** Canonical Cashu unit identifier. Null only for records created before unit migration. */
+    var priceUnit: String? = null,
+    /** NET price in the unit's atomic denomination. Null only for legacy records. */
+    var priceAtomic: Long? = null,
+    /** Stored GROSS price when rounding cannot be reconstructed from NET plus VAT. */
+    var grossPriceAtomic: Long? = null,
+    /** Mint URL for a custom unit that is not known to be fungible across issuers. */
+    var priceIssuerScope: String? = null,
 ) : Parcelable {
 
     /**
@@ -114,6 +122,103 @@ data class Item(
     }
 
     /**
+     * Resolve the economic asset represented by this item.
+     *
+     * [legacyFiatUnit] is used only for records saved before per-item units existed. It must be
+     * supplied by the caller so changing the global display preference can never relabel an
+     * already explicit item price.
+     */
+    fun resolvePriceAsset(legacyFiatUnit: String): AssetId {
+        val explicitUnit = UnitId.ofOrNull(priceUnit)?.takeUnless { it.isReserved }
+        val unit = explicitUnit ?: when (priceType) {
+            PriceType.SATS -> UnitId.SAT
+            PriceType.FIAT -> UnitId.of(legacyFiatUnit)
+        }
+        val issuer = priceIssuerScope
+            ?.trim()
+            ?.takeIf {
+                it.isNotEmpty() && UnitDescriptor.defaultFor(unit).kind == UnitKind.CUSTOM
+            }
+        return if (issuer == null) AssetId.global(unit) else AssetId.mintScoped(unit, issuer)
+    }
+
+    /** Return the NET price as a checked, unit-bearing atomic amount. */
+    fun getNetAtomicAmount(legacyFiatUnit: String): AtomicAmount {
+        val asset = resolvePriceAsset(legacyFiatUnit)
+        val explicitValue = priceAtomic
+        if (explicitValue != null) {
+            require(explicitValue >= 0) { "Item price cannot be negative" }
+            return AtomicAmount(explicitValue, asset)
+        }
+
+        return when (priceType) {
+            PriceType.SATS -> AtomicAmount(priceSats, asset)
+            PriceType.FIAT -> {
+                val descriptor = UnitDescriptor.defaultFor(asset.unit)
+                val atomicValue = BigDecimal.valueOf(price)
+                    .movePointRight(descriptor.fractionDigits)
+                    .setScale(0, RoundingMode.HALF_UP)
+                    .longValueExact()
+                AtomicAmount(atomicValue, asset)
+            }
+        }
+    }
+
+    /** Return the customer-facing price including VAT in the same asset as the NET price. */
+    fun getGrossAtomicAmount(legacyFiatUnit: String): AtomicAmount {
+        val net = getNetAtomicAmount(legacyFiatUnit)
+        if (!vatEnabled || vatRate <= 0) return net
+
+        grossPriceAtomic?.takeIf { it >= net.value }?.let { storedGross ->
+            return AtomicAmount(storedGross, net.asset)
+        }
+
+        val grossValue = BigDecimal.valueOf(net.value)
+            .multiply(BigDecimal.valueOf(100L + vatRate.toLong()))
+            .divide(BigDecimal.valueOf(100L), 0, RoundingMode.HALF_UP)
+            .longValueExact()
+        return AtomicAmount(grossValue, net.asset)
+    }
+
+    /**
+     * Materialize legacy pricing fields into the unit-aware schema.
+     *
+     * Returns true when the item changed and should be persisted.
+     */
+    fun ensureExplicitPrice(legacyFiatUnit: String): Boolean {
+        val canonicalExplicitUnit = UnitId.ofOrNull(priceUnit)?.takeUnless { it.isReserved }
+        val validExplicitAmount = priceAtomic?.takeIf { it >= 0 }
+        if (canonicalExplicitUnit != null && validExplicitAmount != null) {
+            val canonicalIssuer = priceIssuerScope
+                ?.trim()
+                ?.takeIf {
+                    it.isNotEmpty() &&
+                        UnitDescriptor.defaultFor(canonicalExplicitUnit).kind == UnitKind.CUSTOM
+                }
+            var changed = priceUnit != canonicalExplicitUnit.value ||
+                priceIssuerScope != canonicalIssuer
+            if (grossPriceAtomic?.let { it < validExplicitAmount } == true) {
+                grossPriceAtomic = null
+                changed = true
+            }
+            priceUnit = canonicalExplicitUnit.value
+            priceIssuerScope = canonicalIssuer
+            return changed
+        }
+
+        // Invalid or partial explicit data is not trusted. Derive both fields from the complete
+        // legacy representation so a corrupted unit cannot be paired with an unrelated amount.
+        priceUnit = null
+        priceAtomic = null
+        grossPriceAtomic = null
+        priceIssuerScope = null
+        val migrated = getNetAtomicAmount(legacyFiatUnit)
+        priceUnit = migrated.unit.value
+        priceAtomic = migrated.value
+        return true
+    }
+
+    /**
      * Get formatted price string for customer display (includes VAT if applicable).
      * Uses the Amount class for consistent currency-aware formatting:
      * - USD, GBP: period decimal (e.g., $4.20, £4.20)
@@ -122,54 +227,36 @@ data class Item(
      * - BTC: comma thousand separator (e.g., ₿1,000)
      */
     fun getFormattedPrice(currencyCode: String): String {
-        val lowerCurrency = currencyCode.lowercase()
-        val isCustomUnit = lowerCurrency != "sat"
-        
-        return if (isCustomUnit) {
-            val displayPrice = if (priceType == PriceType.FIAT) getGrossPrice() else priceSats.toDouble()
-            val currency = Amount.Currency.fromCode(lowerCurrency)
-            Amount.fromMajorUnits(displayPrice, currency).toString()
-        } else {
-            when (priceType) {
-                PriceType.SATS -> Amount(priceSats, Amount.Currency.BTC).toString()
-                PriceType.FIAT -> {
-                    // Use gross price (including VAT) for customer-facing display
-                    val displayPrice = getGrossPrice()
-                    val minorUnits = (displayPrice * 100).roundToLong()
-                    val currency = Amount.Currency.fromCode(currencyCode)
-                    Amount(minorUnits, currency).toString()
-                }
-            }
-        }
+        val amount = getGrossAtomicAmount(currencyCode)
+        return UnitAmountFormatter.format(amount, UnitDescriptor.defaultFor(amount.unit))
     }
 
     /**
      * Get formatted net price (excluding VAT).
      */
     fun getFormattedNetPrice(currencyCode: String): String {
-        if (priceType != PriceType.FIAT) return ""
-        val currency = Amount.Currency.fromCode(currencyCode)
-        return Amount.fromMajorUnits(price, currency).toString()
+        val amount = getNetAtomicAmount(currencyCode)
+        return UnitAmountFormatter.format(amount, UnitDescriptor.defaultFor(amount.unit))
     }
 
     /**
      * Get formatted VAT amount.
      */
     fun getFormattedVatAmount(currencyCode: String): String {
-        if (priceType != PriceType.FIAT || !vatEnabled) return ""
-        val vatAmount = getVatAmount()
-        val currency = Amount.Currency.fromCode(currencyCode)
-        return Amount.fromMajorUnits(vatAmount, currency).toString()
+        if (!vatEnabled) return ""
+        val net = getNetAtomicAmount(currencyCode)
+        val gross = getGrossAtomicAmount(currencyCode)
+        return UnitAmountFormatter.formatAtomic(
+            value = Math.subtractExact(gross.value, net.value),
+            descriptor = UnitDescriptor.defaultFor(net.unit),
+        )
     }
 
     /**
      * Get formatted gross price (including VAT).
      */
     fun getFormattedGrossPrice(currencyCode: String): String {
-        if (priceType != PriceType.FIAT) return ""
-        val grossPrice = getGrossPrice()
-        val currency = Amount.Currency.fromCode(currencyCode)
-        return Amount.fromMajorUnits(grossPrice, currency).toString()
+        return getFormattedPrice(currencyCode)
     }
 
     // Java interop helper for isAlertEnabled() to match original Java API

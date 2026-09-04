@@ -16,6 +16,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import org.json.JSONArray
+import org.json.JSONObject
 import org.robolectric.RobolectricTestRunner
 import java.lang.reflect.Field
 
@@ -33,6 +35,7 @@ class SavedBasketManagerTest {
         // Ensure clean state
         val prefs = context.getSharedPreferences("saved_baskets", Context.MODE_PRIVATE)
         prefs.edit().clear().apply()
+        CurrencyManager.getInstance(context).setPreferredCurrency(CurrencyManager.CURRENCY_USD)
         
         savedBasketManager = SavedBasketManager.getInstance(context)
     }
@@ -68,6 +71,22 @@ class SavedBasketManagerTest {
         val loaded = savedBasketManager.getBasket(saved.id)
         assertNotNull(loaded)
         assertEquals("Pizza", loaded?.items?.get(0)?.item?.name)
+    }
+
+    @Test
+    fun `saved basket takes an immutable unit aware item snapshot`() {
+        val basketManager = mock<BasketManager>()
+        val source = Item(name = "Coffee", price = 2.5)
+        whenever(basketManager.getBasketItems()).thenReturn(listOf(BasketItem(source, 1)))
+
+        val saved = savedBasketManager.saveCurrentBasket("Table", basketManager)
+        source.name = "Changed"
+        source.price = 99.0
+
+        val snapshot = saved.items.single().item
+        assertEquals("Coffee", snapshot.name)
+        assertEquals("usd", snapshot.priceUnit)
+        assertEquals(250L, snapshot.priceAtomic)
     }
 
     @Test
@@ -143,5 +162,83 @@ class SavedBasketManagerTest {
         
         assertEquals(1, newManager.getSavedBaskets().size)
         assertEquals("Persist", newManager.getSavedBaskets()[0].items[0].item.name)
+    }
+
+    @Test
+    fun `legacy saved basket price is pinned to currency during load`() {
+        val legacyItem = JSONObject()
+            .put("id", "item-1")
+            .put("name", "Coffee")
+            .put("price", 1.25)
+            .put("priceType", "FIAT")
+        val basket = JSONObject()
+            .put("id", "basket-1")
+            .put("createdAt", 1L)
+            .put("updatedAt", 1L)
+            .put("status", "ACTIVE")
+            .put(
+                "items",
+                JSONArray().put(
+                    JSONObject()
+                        .put("quantity", 1)
+                        .put("item", legacyItem),
+                ),
+            )
+        context.getSharedPreferences("saved_baskets", Context.MODE_PRIVATE)
+            .edit()
+            .putString("baskets", JSONArray().put(basket).toString())
+            .commit()
+
+        resetSingleton()
+        val loaded = SavedBasketManager.getInstance(context).getSavedBaskets().single()
+
+        assertEquals("usd", loaded.items.single().item.priceUnit)
+        assertEquals(125L, loaded.items.single().item.priceAtomic)
+        val persisted = context.getSharedPreferences("saved_baskets", Context.MODE_PRIVATE)
+            .getString("baskets", "")
+            .orEmpty()
+        assertTrue(persisted.contains("\"priceUnit\":\"usd\""))
+        assertTrue(persisted.contains("\"priceAtomic\":125"))
+    }
+
+    @Test
+    fun `one corrupt saved basket does not hide valid baskets`() {
+        fun basket(id: String, quantity: Int): JSONObject = JSONObject()
+            .put("id", id)
+            .put("createdAt", 1L)
+            .put("updatedAt", 1L)
+            .put("status", "ACTIVE")
+            .put(
+                "items",
+                JSONArray().put(
+                    JSONObject()
+                        .put("quantity", quantity)
+                        .put(
+                            "item",
+                            JSONObject()
+                                .put("id", "item-$id")
+                                .put("name", id)
+                                .put("price", 1.0)
+                                .put("priceType", "FIAT"),
+                        ),
+                ),
+            )
+
+        context.getSharedPreferences("saved_baskets", Context.MODE_PRIVATE)
+            .edit()
+            .putString(
+                "baskets",
+                JSONArray()
+                    .put(basket("invalid", 0))
+                    .put(basket("valid", 1))
+                    .toString(),
+            )
+            .commit()
+
+        resetSingleton()
+        val loaded = SavedBasketManager.getInstance(context).getSavedBaskets()
+
+        assertEquals(1, loaded.size)
+        assertEquals("valid", loaded.single().id)
     }
 }

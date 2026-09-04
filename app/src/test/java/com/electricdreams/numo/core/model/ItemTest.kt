@@ -78,5 +78,52 @@ class ItemTest {
 
         assertEquals(gross, backToGross, 0.0001)
     }
-}
 
+    @Test
+    fun `explicit custom price preserves unit issuer and atomic VAT rounding`() {
+        val item = Item(
+            name = "Reward",
+            priceType = PriceType.FIAT,
+            priceUnit = "POINTS",
+            priceAtomic = 5L,
+            priceIssuerScope = "https://rewards.example",
+            vatEnabled = true,
+            vatRate = 10,
+        )
+
+        assertTrue(item.ensureExplicitPrice("USD"))
+        assertEquals("points", item.priceUnit)
+        assertEquals(
+            AssetId.mintScoped(UnitId.of("points"), "https://rewards.example"),
+            item.resolvePriceAsset("USD"),
+        )
+        // 5 * 1.10 = 5.5, explicitly rounded half-up in the same atomic unit.
+        assertEquals(6L, item.getGrossAtomicAmount("USD").value)
+    }
+
+    @Test
+    fun `legacy prices migrate using their actual type rather than preferred charge unit`() {
+        val satsItem = Item(priceType = PriceType.SATS, priceSats = 1_234L)
+        val fiatItem = Item(priceType = PriceType.FIAT, price = 12.34)
+
+        satsItem.ensureExplicitPrice("EUR")
+        fiatItem.ensureExplicitPrice("EUR")
+
+        assertEquals("sat", satsItem.priceUnit)
+        assertEquals(1_234L, satsItem.priceAtomic)
+        assertEquals("eur", fiatItem.priceUnit)
+        assertEquals(1_234L, fiatItem.priceAtomic)
+    }
+
+    @Test
+    fun `explicit item unit is not relabeled by display fallback`() {
+        val item = Item(
+            priceType = PriceType.SATS,
+            priceSats = 500L,
+            priceUnit = "sat",
+            priceAtomic = 500L,
+        )
+
+        assertEquals(UnitId.SAT, item.getNetAtomicAmount("USD").unit)
+    }
+}

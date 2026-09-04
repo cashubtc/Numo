@@ -2,6 +2,7 @@ package com.electricdreams.numo.core.util
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import com.electricdreams.numo.core.model.BasketItem
 import com.electricdreams.numo.core.model.BasketStatus
 import com.electricdreams.numo.core.model.Item
@@ -15,16 +16,20 @@ import org.json.JSONObject
  * Uses SharedPreferences with JSON serialization.
  */
 class SavedBasketManager private constructor(context: Context) {
-    
-    private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+    private val appContext = context.applicationContext
+    private val prefs: SharedPreferences =
+        appContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val savedBaskets: MutableList<SavedBasket> = mutableListOf()
     private val archivedBaskets: MutableList<SavedBasket> = mutableListOf()
+    private var migratedPriceDuringLoad: Boolean = false
     
     // Currently editing basket ID (null if creating new)
     var currentEditingBasketId: String? = null
         private set
     
     companion object {
+        private const val TAG = "SavedBasketManager"
         private const val PREFS_NAME = "saved_baskets"
         private const val KEY_BASKETS = "baskets"
         private const val KEY_ARCHIVED = "archived_baskets"
@@ -49,6 +54,7 @@ class SavedBasketManager private constructor(context: Context) {
     private fun loadBaskets() {
         savedBaskets.clear()
         archivedBaskets.clear()
+        migratedPriceDuringLoad = false
         
         // Load active baskets
         val json = prefs.getString(KEY_BASKETS, null)
@@ -56,11 +62,15 @@ class SavedBasketManager private constructor(context: Context) {
             try {
                 val jsonArray = JSONArray(json)
                 for (i in 0 until jsonArray.length()) {
-                    val basketJson = jsonArray.getJSONObject(i)
-                    savedBaskets.add(deserializeBasket(basketJson))
+                    try {
+                        val basketJson = jsonArray.getJSONObject(i)
+                        savedBaskets.add(deserializeBasket(basketJson))
+                    } catch (e: RuntimeException) {
+                        Log.e(TAG, "Skipping invalid saved basket at index $i", e)
+                    }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "Could not load saved baskets", e)
             }
         }
         
@@ -70,12 +80,22 @@ class SavedBasketManager private constructor(context: Context) {
             try {
                 val jsonArray = JSONArray(archivedJson)
                 for (i in 0 until jsonArray.length()) {
-                    val basketJson = jsonArray.getJSONObject(i)
-                    archivedBaskets.add(deserializeBasket(basketJson))
+                    try {
+                        val basketJson = jsonArray.getJSONObject(i)
+                        archivedBaskets.add(deserializeBasket(basketJson))
+                    } catch (e: RuntimeException) {
+                        Log.e(TAG, "Skipping invalid archived basket at index $i", e)
+                    }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "Could not load archived baskets", e)
             }
+        }
+
+        if (migratedPriceDuringLoad) {
+            saveBaskets()
+            saveArchivedBaskets()
+            Log.d(TAG, "Migrated saved basket prices to explicit atomic units")
         }
     }
     
@@ -90,7 +110,7 @@ class SavedBasketManager private constructor(context: Context) {
             }
             prefs.edit().putString(KEY_BASKETS, jsonArray.toString()).apply()
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Could not save active baskets", e)
         }
     }
     
@@ -105,7 +125,7 @@ class SavedBasketManager private constructor(context: Context) {
             }
             prefs.edit().putString(KEY_ARCHIVED, jsonArray.toString()).apply()
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Could not save archived baskets", e)
         }
     }
     
@@ -148,7 +168,13 @@ class SavedBasketManager private constructor(context: Context) {
      * @return The saved basket
      */
     fun saveCurrentBasket(name: String?, basketManager: BasketManager): SavedBasket {
-        val items = basketManager.getBasketItems().map { it.copy() }
+        val legacyFiatUnit = CurrencyManager.getInstance(appContext).getCurrentCurrency()
+        val items = basketManager.getBasketItems().map { basketItem ->
+            require(basketItem.quantity > 0) { "Saved basket quantity must be positive" }
+            val itemSnapshot = basketItem.item.copy()
+            itemSnapshot.ensureExplicitPrice(legacyFiatUnit)
+            BasketItem(item = itemSnapshot, quantity = basketItem.quantity)
+        }
         
         val existingBasket = currentEditingBasketId?.let { getBasket(it) }
         
@@ -342,8 +368,10 @@ class SavedBasketManager private constructor(context: Context) {
     }
     
     private fun deserializeBasketItem(json: JSONObject): BasketItem {
+        val quantity = json.getInt("quantity")
+        require(quantity > 0) { "Saved basket quantity must be positive" }
         return BasketItem(
-            quantity = json.getInt("quantity"),
+            quantity = quantity,
             item = deserializeItem(json.getJSONObject("item"))
         )
     }
@@ -361,6 +389,10 @@ class SavedBasketManager private constructor(context: Context) {
             put("price", item.price)
             put("priceSats", item.priceSats)
             put("priceType", item.priceType.name)
+            put("priceUnit", item.priceUnit ?: JSONObject.NULL)
+            put("priceAtomic", item.priceAtomic ?: JSONObject.NULL)
+            put("grossPriceAtomic", item.grossPriceAtomic ?: JSONObject.NULL)
+            put("priceIssuerScope", item.priceIssuerScope ?: JSONObject.NULL)
             put("vatEnabled", item.vatEnabled)
             put("vatRate", item.vatRate)
             put("imagePath", item.imagePath ?: JSONObject.NULL)
@@ -368,7 +400,7 @@ class SavedBasketManager private constructor(context: Context) {
     }
     
     private fun deserializeItem(json: JSONObject): Item {
-        return Item(
+        val item = Item(
             id = if (json.isNull("id")) null else json.getString("id"),
             uuid = json.optString("uuid", java.util.UUID.randomUUID().toString()),
             name = if (json.isNull("name")) null else json.getString("name"),
@@ -380,9 +412,25 @@ class SavedBasketManager private constructor(context: Context) {
             price = json.optDouble("price", 0.0),
             priceSats = json.optLong("priceSats", 0L),
             priceType = try { PriceType.valueOf(json.optString("priceType", "FIAT")) } catch (e: Exception) { PriceType.FIAT },
+            priceUnit = if (json.isNull("priceUnit")) null else json.optString("priceUnit"),
+            priceAtomic = if (json.isNull("priceAtomic")) null else json.optLong("priceAtomic"),
+            grossPriceAtomic = if (json.isNull("grossPriceAtomic")) {
+                null
+            } else {
+                json.optLong("grossPriceAtomic")
+            },
+            priceIssuerScope = if (json.isNull("priceIssuerScope")) {
+                null
+            } else {
+                json.optString("priceIssuerScope")
+            },
             vatEnabled = json.optBoolean("vatEnabled", false),
             vatRate = json.optInt("vatRate", 0),
             imagePath = if (json.isNull("imagePath")) null else json.optString("imagePath")
         )
+        migratedPriceDuringLoad = item.ensureExplicitPrice(
+            CurrencyManager.getInstance(appContext).getCurrentCurrency(),
+        ) || migratedPriceDuringLoad
+        return item
     }
 }

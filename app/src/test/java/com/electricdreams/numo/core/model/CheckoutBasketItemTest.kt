@@ -132,4 +132,9 @@ class CheckoutBasketItemTest {
         assertFalse(fiatItem.isSatsPrice())
         assertTrue(fiatItem.isFiatPrice())
     }
+
+    @Test(expected = ArithmeticException::class)
+    fun `legacy line multiplication detects overflow`() {
+        createItem(quantity = 2, netPriceCents = Long.MAX_VALUE).getNetTotalCents()
+    }
 }

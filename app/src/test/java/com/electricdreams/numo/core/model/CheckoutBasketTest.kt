@@ -191,4 +191,50 @@ class CheckoutBasketTest {
     fun `fromJson returns null for invalid json`() {
         assertNull(CheckoutBasket.fromJson("{invalid-json"))
     }
+
+    @Test
+    fun `fromJson rejects partial explicit charge identity`() {
+        val basket = createBasket(listOf(createItem("1")))
+
+        val json = basket.toJson().replace(
+            "\"totalSatoshis\":1000",
+            "\"totalSatoshis\":1000,\"chargeUnit\":\"points\"",
+        )
+
+        assertNull(CheckoutBasket.fromJson(json))
+    }
+
+    @Test
+    fun `fromJson rejects negative quantity and atomic amounts`() {
+        val negativeQuantity = createBasket(listOf(createItem("1", quantity = -1))).toJson()
+        val negativeAmount = CheckoutBasket(
+            items = listOf(
+                createItem("1").copy(
+                    priceUnit = "points",
+                    netPriceAtomic = -1L,
+                ),
+            ),
+            currency = "USD",
+            totalSatoshis = 1,
+        ).toJson()
+
+        assertNull(CheckoutBasket.fromJson(negativeQuantity))
+        assertNull(CheckoutBasket.fromJson(negativeAmount))
+    }
+
+    @Test
+    fun `fromJson rejects overflowing line totals`() {
+        val basket = CheckoutBasket(
+            items = listOf(
+                createItem("1", quantity = 2).copy(
+                    priceUnit = "points",
+                    netPriceAtomic = Long.MAX_VALUE,
+                ),
+            ),
+            currency = "USD",
+            totalSatoshis = 1,
+        )
+
+        assertNull(CheckoutBasket.fromJson(basket.toJson()))
+    }
 }

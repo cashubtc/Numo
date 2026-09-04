@@ -107,6 +107,40 @@ class BasketManagerTest {
     }
 
     @Test
+    fun `price lines preserve custom units and issuer scope`() {
+        val custom = Item(
+            id = "custom",
+            name = "Custom",
+            priceType = PriceType.FIAT,
+            priceUnit = "points",
+            priceAtomic = 7L,
+            priceIssuerScope = "https://mint.example",
+        )
+        basketManager.addItem(custom, quantity = 3)
+
+        val amount = basketManager.getPriceLines("USD").single().amount
+
+        assertEquals(21L, amount.value)
+        assertEquals("points", amount.unit.value)
+        assertEquals("https://mint.example", amount.asset.issuerScope)
+    }
+
+    @Test
+    fun `legacy sat total fails closed for unconvertible custom basket`() {
+        basketManager.addItem(
+            Item(
+                id = "custom",
+                priceType = PriceType.FIAT,
+                priceUnit = "points",
+                priceAtomic = 10L,
+            ),
+            quantity = 1,
+        )
+
+        assertEquals(0L, basketManager.getTotalSatoshis(50_000.0))
+    }
+
+    @Test
     fun `updateItemQuantity changes quantity and totals`() {
         val item = createFiatItem("1", 2.5)
         basketManager.addItem(item, quantity = 1)

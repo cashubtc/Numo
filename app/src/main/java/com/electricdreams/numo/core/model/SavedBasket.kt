@@ -62,6 +62,23 @@ data class SavedBasket(
     fun getTotalSatsPrice(): Long {
         return items.filter { it.isSatsPrice() }.sumOf { it.getTotalSats() }
     }
+
+    /**
+     * Return gross totals grouped by full economic identity (unit plus custom-unit issuer).
+     * No conversion is attempted here: a saved basket is an inventory snapshot, not a quote.
+     */
+    fun getPriceTotals(legacyFiatUnit: String): List<AtomicAmount> {
+        val totals = linkedMapOf<AssetId, AtomicAmount>()
+        items.forEach { basketItem ->
+            val line = basketItem.getGrossAtomicAmount(legacyFiatUnit)
+            val current = totals[line.asset] ?: AtomicAmount.zero(line.asset)
+            totals[line.asset] = current + line
+        }
+        return totals.values.toList()
+    }
+
+    fun hasMixedPriceAssets(legacyFiatUnit: String): Boolean =
+        getPriceTotals(legacyFiatUnit).size > 1
     
     /**
      * Check if basket has mixed price types (fiat and sats).
