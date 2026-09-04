@@ -24,7 +24,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
-import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintIconCache
 import com.electricdreams.numo.core.util.MintManager
@@ -66,6 +67,7 @@ class MintsSettingsActivity : AppCompatActivity() {
     private lateinit var activeUnitRow: View
     private lateinit var activeUnitValue: TextView
     private lateinit var swapUnknownMintsSwitch: MaterialSwitch
+    private lateinit var swapUnknownMintsRow: View
     private lateinit var allMintsHeader: TextView
     private lateinit var mintsContainer: LinearLayout
     private lateinit var emptyState: View
@@ -174,6 +176,7 @@ class MintsSettingsActivity : AppCompatActivity() {
         activeUnitRow = findViewById(R.id.active_unit_row)
         activeUnitValue = findViewById(R.id.active_unit_value)
         swapUnknownMintsSwitch = findViewById(R.id.swap_unknown_mints_switch)
+        swapUnknownMintsRow = findViewById(R.id.swap_unknown_mints_row)
         allMintsHeader = findViewById(R.id.all_mints_header)
         mintsContainer = findViewById(R.id.mints_container)
         emptyState = findViewById(R.id.empty_state)
@@ -236,16 +239,9 @@ class MintsSettingsActivity : AppCompatActivity() {
     }
 
     private fun showUnitSelectorDialog() {
-        val mintUrl = selectedLightningMint ?: return
         lifecycleScope.launch {
-            val limits = mintManager.getMintLimits(mintUrl, this@MintsSettingsActivity)
-            val units = mutableSetOf<String>()
-            limits?.mintMethods?.forEach { units.add(it.unit.lowercase()) }
-            if (units.isEmpty()) {
-                units.add("sat")
-            }
-            
-            val items = units.toList().sorted()
+            val items = mintManager.getSupportedUnits().map { it.value }
+            if (items.size <= 1) return@launch
             val currentUnit = mintManager.getPreferredUnit().lowercase()
             var selectedIndex = items.indexOf(currentUnit)
             if (selectedIndex < 0) selectedIndex = 0
@@ -256,11 +252,13 @@ class MintsSettingsActivity : AppCompatActivity() {
                 val selectedUnit = items[which]
                 if (selectedUnit != currentUnit) {
                     mintManager.setPreferredUnit(selectedUnit)
+                    selectedLightningMint = mintManager.getPreferredLightningMint(selectedUnit)
                     // Trigger refresh
                     activeUnitValue.text = selectedUnit
                     // Let CashuWalletManager rebuild the wallet with the new unit
                     // Balance will be updated via broadcast
                     Toast.makeText(this@MintsSettingsActivity, getString(R.string.mints_changed_base_unit_toast, selectedUnit), Toast.LENGTH_SHORT).show()
+                    loadMintsAndBalances()
                 }
                 dialog.dismiss()
             }
@@ -411,22 +409,22 @@ class MintsSettingsActivity : AppCompatActivity() {
         lightningMintUrlText.text = shortUrl
         
         val preferredUnit = mintManager.getPreferredUnit()
-        val lowerUnit = preferredUnit.lowercase()
-        val isCustomUnit = lowerUnit != "sat"
-        
-        if (isCustomUnit) {
-            val currency = Amount.Currency.fromCode(lowerUnit)
-            if (currency.symbol != lowerUnit.uppercase()) {
-                val valueToFormat = if (currency.isZeroDecimal()) balance * 100 else balance
-                lightningMintBalance.text = Amount(valueToFormat, currency).toString()
-            } else {
-                lightningMintBalance.text = "$balance $preferredUnit"
-            }
-        } else {
-            lightningMintBalance.text = Amount(balance, Amount.Currency.BTC).toString()
-        }
-        
+        val unitId = com.electricdreams.numo.core.model.UnitId.of(preferredUnit)
+        lightningMintBalance.text = UnitAmountFormatter.formatAtomic(
+            balance,
+            UnitDescriptor.defaultFor(unitId),
+        )
+
         activeUnitValue.text = preferredUnit
+        val supportedUnits = mintManager.getSupportedUnits()
+        activeUnitRow.visibility = if (supportedUnits.size > 1) View.VISIBLE else View.GONE
+        swapUnknownMintsRow.visibility = if (
+            com.electricdreams.numo.ndef.CashuPaymentHelper.supportsUnknownMintSwap(preferredUnit)
+        ) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
         
         // Load icon
         loadLightningMintIcon(url)

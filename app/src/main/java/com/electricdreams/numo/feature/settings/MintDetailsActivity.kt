@@ -21,7 +21,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
-import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintIconCache
 import com.electricdreams.numo.core.util.MintManager
@@ -269,19 +271,11 @@ class MintDetailsActivity : AppCompatActivity() {
                 CashuWalletManager.getAllMintBalances()
             }
             val balance = balances[mintUrl] ?: 0L
-            val preferredUnit = mintManager.getPreferredUnit()
-            val lowerUnit = preferredUnit.lowercase()
-            if (lowerUnit != "sat") {
-                val currency = Amount.Currency.fromCode(lowerUnit)
-                if (currency.symbol != lowerUnit.uppercase()) {
-                    val valueToFormat = if (currency.isZeroDecimal()) balance * 100 else balance
-                    balanceText.text = Amount(valueToFormat, currency).toString()
-                } else {
-                    balanceText.text = "$balance $preferredUnit"
-                }
-            } else {
-                balanceText.text = Amount(balance, Amount.Currency.BTC).toString()
-            }
+            val unit = UnitId.of(mintManager.getPreferredUnit())
+            balanceText.text = UnitAmountFormatter.formatAtomic(
+                balance,
+                UnitDescriptor.defaultFor(unit),
+            )
         }
     }
 
