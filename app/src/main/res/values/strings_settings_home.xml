@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_checkout">Checkout</string>
+    <string name="settings_section_connections">Connections</string>
+    <string name="settings_search_hint">Search settings</string>
+    <string name="settings_search_empty">No settings found. Try a different word.</string>
+    <string name="settings_btcpay_enabled">Enabled · Payments use your server</string>
+    <string name="settings_btcpay_disabled">Connect your own payment server</string>
+    <string name="settings_unavailable_btcpay">Unavailable while BTCPay Server is enabled</string>
+    <string name="settings_security_description">PIN protection, wallet backup and recovery</string>
+    <string name="settings_mode_light">Light mode</string>
+    <string name="settings_mode_dark">Dark mode</string>
+    <string name="settings_theme_summary">%1$s · %2$s</string>
+</resources>
