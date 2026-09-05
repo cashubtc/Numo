@@ -160,8 +160,9 @@
         
         <activity android:name="com.electricdreams.numo.feature.settings.SettingsActivity"
             android:exported="false"
+            android:windowSoftInputMode="adjustResize"
             android:label="@string/settings_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".ModernPOSActivity">

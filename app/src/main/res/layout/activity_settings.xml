@@ -3,207 +3,270 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
+    android:focusableInTouchMode="true">
 
-    <!-- Top App Bar -->
-    <com.electricdreams.numo.ui.components.NumoTopBar
+    <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/top_bar"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        app:topBarTitle="@string/settings_title"
-        app:topBarNavIcon="@drawable/ic_close"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:minHeight="64dp"
+        android:background="@color/settings_background"
+        app:title="@string/settings_title"
+        app:titleTextAppearance="@style/Text.Heading1"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:navigationIconTint="?attr/colorOnSurface"
+        app:navigationContentDescription="@string/common_back"
+        app:layout_constraintWidth_max="720dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/search_input_layout"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp"
+        app:hintEnabled="false"
+        app:boxBackgroundColor="@color/color_bg_card"
+        app:boxCornerRadiusTopStart="28dp"
+        app:boxCornerRadiusTopEnd="28dp"
+        app:boxCornerRadiusBottomStart="28dp"
+        app:boxCornerRadiusBottomEnd="28dp"
+        app:boxStrokeWidth="0dp"
+        app:boxStrokeWidthFocused="1dp"
+        app:startIconDrawable="@drawable/ic_search"
+        app:endIconMode="clear_text"
+        app:layout_constraintWidth_max="688dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/top_bar">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/settings_search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="56dp"
+            android:hint="@string/settings_search_hint"
+            android:textColorHint="?attr/colorOnSurfaceVariant"
+            android:inputType="textCapSentences"
+            android:imeOptions="actionDone"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:textAppearance="@style/Text.Body" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/settings_scroll"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        app:layout_constraintWidth_max="720dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search_input_layout"
+        app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
             android:id="@+id/settings_content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="@dimen/space_2xl">
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="24dp">
 
-            <!-- ================ -->
-            <!-- TERMINAL SECTION -->
-            <!-- ================ -->
+            <LinearLayout
+                android:id="@+id/checkout_section"
+                style="@style/Widget.Numo.SettingsSection">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/space_l"
-                android:paddingBottom="@dimen/row_padding_vertical"
-                android:text="@string/settings_section_terminal"
-                android:textAppearance="@style/Text.SectionHeader" />
+                <TextView
+                    style="@style/Widget.Numo.SettingsSectionTitle"
+                    android:text="@string/settings_section_checkout" />
 
-            <com.electricdreams.numo.ui.components.SettingsRowView
-                android:id="@+id/items_settings_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:rowIcon="@drawable/ic_catalog"
-                app:rowTitle="@string/settings_item_items_title" />
+                <LinearLayout style="@style/Widget.Numo.SettingsGroup">
 
-            <com.electricdreams.numo.ui.components.SettingsRowView
-                android:id="@+id/tips_settings_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:rowIcon="@drawable/ic_tip"
-                app:rowTitle="@string/settings_item_tips_title" />
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/items_settings_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_catalog"
+                        app:rowTitle="@string/settings_item_items_title"
+                        app:rowSubtitle="@string/settings_item_items_subtitle" />
 
-            <com.electricdreams.numo.ui.components.SettingsRowView
-                android:id="@+id/basket_names_settings_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:rowIcon="@drawable/ic_shopping_bag"
-                app:rowTitle="@string/settings_item_basket_names_title" />
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/tips_settings_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_tip"
+                        app:rowTitle="@string/settings_item_tips_title"
+                        app:rowSubtitle="@string/settings_item_tips_subtitle" />
 
-            <!-- ================= -->
-            <!-- PAYMENTS SECTION -->
-            <!-- ================= -->
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/basket_names_settings_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_shopping_bag"
+                        app:rowTitle="@string/settings_item_basket_names_title"
+                        app:rowSubtitle="@string/settings_item_basket_names_subtitle" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/section_gap"
-                android:paddingBottom="@dimen/row_padding_vertical"
-                android:text="@string/settings_section_payments"
-                android:textAppearance="@style/Text.SectionHeader" />
+                </LinearLayout>
+            </LinearLayout>
 
-            <!-- Default Payment Method -->
-            <com.electricdreams.numo.ui.components.SettingsRowView
-                android:id="@+id/default_payment_method_settings_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:rowIcon="@drawable/ic_qr_code"
-                app:rowTitle="@string/settings_item_default_payment_method_title"
-                app:rowShowChevron="false" />
+            <LinearLayout
+                android:id="@+id/payments_section"
+                style="@style/Widget.Numo.SettingsSection">
 
-            <!-- Fiat Currency -->
-            <com.electricdreams.numo.ui.components.SettingsRowView
-                android:id="@+id/currency_settings_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:rowIcon="@drawable/ic_switch_currency"
-                app:rowTitle="@string/settings_item_currency_title" />
+                <TextView
+                    style="@style/Widget.Numo.SettingsSectionTitle"
+                    android:text="@string/settings_section_payments" />
 
-            <com.electricdreams.numo.ui.components.SettingsRowView
-                android:id="@+id/mints_settings_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:rowIcon="@drawable/ic_bank"
-                app:rowTitle="@string/settings_item_mints_title" />
+                <LinearLayout style="@style/Widget.Numo.SettingsGroup">
 
-            <com.electricdreams.numo.ui.components.SettingsRowView
-                android:id="@+id/webhooks_settings_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:rowIcon="@drawable/ic_link"
-                app:rowTitle="@string/settings_item_webhooks_title" />
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/default_payment_method_settings_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_qr_code"
+                        app:rowTitle="@string/settings_item_default_payment_method_title"
+                        app:rowSubtitle="@string/default_payment_method_option_unified" />
 
-            <com.electricdreams.numo.ui.components.SettingsRowView
-                android:id="@+id/withdrawals_settings_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:rowIcon="@drawable/ic_lightning_bolt"
-                app:rowTitle="@string/settings_item_withdrawals_title" />
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/currency_settings_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_switch_currency"
+                        app:rowTitle="@string/settings_item_currency_title"
+                        app:rowSubtitle="@string/settings_item_currency_subtitle" />
 
-            <!-- BTCPay Server -->
-            <com.electricdreams.numo.ui.components.SettingsRowView
-                android:id="@+id/btcpay_settings_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:rowIcon="@drawable/ic_settings"
-                app:rowTitle="@string/btcpay_settings_title" />
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/mints_settings_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_bank"
+                        app:rowTitle="@string/settings_item_mints_title"
+                        app:rowSubtitle="@string/settings_item_mints_subtitle" />
 
-            <!-- =========================== -->
-            <!-- SECURITY & PRIVACY SECTION -->
-            <!-- =========================== -->
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/withdrawals_settings_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_lightning_bolt"
+                        app:rowTitle="@string/settings_item_withdrawals_title"
+                        app:rowSubtitle="@string/settings_item_withdrawals_subtitle" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/section_gap"
-                android:paddingBottom="@dimen/row_padding_vertical"
-                android:text="@string/settings_section_security"
-                android:textAppearance="@style/Text.SectionHeader" />
+                </LinearLayout>
+            </LinearLayout>
 
-            <com.electricdreams.numo.ui.components.SettingsRowView
-                android:id="@+id/security_settings_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:rowIcon="@drawable/ic_shield"
-                app:rowTitle="@string/settings_item_security_title" />
+            <LinearLayout
+                android:id="@+id/connections_section"
+                style="@style/Widget.Numo.SettingsSection">
 
-            <!-- =============== -->
-            <!-- GENERAL SECTION -->
-            <!-- =============== -->
+                <TextView
+                    style="@style/Widget.Numo.SettingsSectionTitle"
+                    android:text="@string/settings_section_connections" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/section_gap"
-                android:paddingBottom="@dimen/row_padding_vertical"
-                android:text="@string/settings_section_general"
-                android:textAppearance="@style/Text.SectionHeader" />
+                <LinearLayout style="@style/Widget.Numo.SettingsGroup">
 
-            <com.electricdreams.numo.ui.components.SettingsRowView
-                android:id="@+id/language_settings_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:rowIcon="@drawable/ic_language"
-                app:rowTitle="@string/settings_item_language_title" />
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/btcpay_settings_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_link"
+                        app:rowTitle="@string/btcpay_settings_title"
+                        app:rowSubtitle="@string/settings_btcpay_disabled" />
 
-            <com.electricdreams.numo.ui.components.SettingsRowView
-                android:id="@+id/theme_settings_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:rowIcon="@drawable/ic_dark_mode"
-                app:rowTitle="@string/settings_item_theme_title" />
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/webhooks_settings_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_link"
+                        app:rowTitle="@string/settings_item_webhooks_title"
+                        app:rowSubtitle="@string/settings_item_webhooks_subtitle" />
 
-            <com.electricdreams.numo.ui.components.SettingsRowView
-                android:id="@+id/about_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:rowIcon="@drawable/ic_info"
-                app:rowTitle="@string/settings_item_about_title" />
+                </LinearLayout>
+            </LinearLayout>
 
-            <!-- ==================== -->
-            <!-- DEVELOPER SECTION (hidden by default) -->
-            <!-- ==================== -->
+            <LinearLayout
+                android:id="@+id/security_section"
+                style="@style/Widget.Numo.SettingsSection">
+
+                <TextView
+                    style="@style/Widget.Numo.SettingsSectionTitle"
+                    android:text="@string/settings_section_security" />
+
+                <LinearLayout style="@style/Widget.Numo.SettingsGroup">
+
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/security_settings_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_shield"
+                        app:rowTitle="@string/settings_item_security_title"
+                        app:rowSubtitle="@string/settings_security_description" />
+
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/general_section"
+                style="@style/Widget.Numo.SettingsSection">
+
+                <TextView
+                    style="@style/Widget.Numo.SettingsSectionTitle"
+                    android:text="@string/settings_section_general" />
+
+                <LinearLayout style="@style/Widget.Numo.SettingsGroup">
+
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/language_settings_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_language"
+                        app:rowTitle="@string/settings_item_language_title"
+                        app:rowSubtitle="@string/settings_item_language_subtitle" />
+
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/theme_settings_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_dark_mode"
+                        app:rowTitle="@string/settings_item_theme_title"
+                        app:rowSubtitle="@string/settings_item_theme_subtitle" />
+
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/about_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_info"
+                        app:rowTitle="@string/settings_item_about_title"
+                        app:rowSubtitle="@string/settings_item_about_subtitle" />
+
+                </LinearLayout>
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/developer_section"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
+                style="@style/Widget.Numo.SettingsSection"
                 android:visibility="gone">
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="@dimen/section_gap"
-                    android:paddingBottom="@dimen/row_padding_vertical"
-                    android:text="@string/settings_section_developer"
-                    android:textAppearance="@style/Text.SectionHeader" />
+                    style="@style/Widget.Numo.SettingsSectionTitle"
+                    android:text="@string/settings_section_developer" />
 
-                <com.electricdreams.numo.ui.components.SettingsRowView
-                    android:id="@+id/developer_settings_item"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:rowIcon="@drawable/ic_settings"
-                    app:rowTitle="@string/settings_item_developer_title" />
+                <LinearLayout style="@style/Widget.Numo.SettingsGroup">
 
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/developer_settings_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_settings"
+                        app:rowTitle="@string/settings_item_developer_title"
+                        app:rowSubtitle="@string/settings_item_developer_subtitle" />
+
+                </LinearLayout>
             </LinearLayout>
 
-        </LinearLayout>
-    </ScrollView>
+            <TextView
+                android:id="@+id/search_empty_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="48dp"
+                android:padding="24dp"
+                android:gravity="center"
+                android:text="@string/settings_search_empty"
+                android:textAppearance="@style/Text.Body"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:accessibilityLiveRegion="polite"
+                android:visibility="gone" />
 
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
