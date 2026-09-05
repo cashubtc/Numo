@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_checkout">お会計</string>
+    <string name="settings_section_connections">連携</string>
+    <string name="settings_search_hint">設定を検索</string>
+    <string name="settings_search_empty">設定が見つかりません。別の言葉で検索してください。</string>
+    <string name="settings_btcpay_enabled">有効 · お使いのサーバーで決済</string>
+    <string name="settings_btcpay_disabled">自分の決済サーバーに接続</string>
+    <string name="settings_unavailable_btcpay">BTCPay Serverが有効な間は利用できません</string>
+    <string name="settings_security_description">PIN保護、ウォレットのバックアップと復元</string>
+    <string name="settings_mode_light">ライトモード</string>
+    <string name="settings_mode_dark">ダークモード</string>
+    <string name="settings_theme_summary">%1$s · %2$s</string>
+</resources>

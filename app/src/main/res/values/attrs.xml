@@ -19,6 +19,7 @@
     <declare-styleable name="SettingsRowView">
         <attr name="rowIcon" format="reference" />
         <attr name="rowIconTint" format="color|reference" />
+        <attr name="rowIconBackground" format="reference" />
         <attr name="rowTitle" format="string|reference" />
         <attr name="rowTitleColor" format="color|reference" />
         <attr name="rowSubtitle" format="string|reference" />

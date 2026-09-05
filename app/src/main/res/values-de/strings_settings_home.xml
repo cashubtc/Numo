@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_checkout">Kasse</string>
+    <string name="settings_section_connections">Verbindungen</string>
+    <string name="settings_search_hint">Einstellungen durchsuchen</string>
+    <string name="settings_search_empty">Keine Einstellungen gefunden. Versuche ein anderes Wort.</string>
+    <string name="settings_btcpay_enabled">Aktiviert · Zahlungen über deinen Server</string>
+    <string name="settings_btcpay_disabled">Eigenen Zahlungsserver verbinden</string>
+    <string name="settings_unavailable_btcpay">Nicht verfügbar, solange BTCPay Server aktiviert ist</string>
+    <string name="settings_security_description">PIN-Schutz, Wallet-Sicherung und Wiederherstellung</string>
+    <string name="settings_mode_light">Heller Modus</string>
+    <string name="settings_mode_dark">Dunkler Modus</string>
+    <string name="settings_theme_summary">%1$s · %2$s</string>
+</resources>

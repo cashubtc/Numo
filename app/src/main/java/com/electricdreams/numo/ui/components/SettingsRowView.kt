@@ -11,7 +11,10 @@ import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
+import androidx.core.view.ViewCompat
+
 import com.electricdreams.numo.R
+import com.electricdreams.numo.databinding.ComponentSettingsRowBinding
 
 /**
  * Standard clickable settings row: optional leading icon, title, optional
@@ -63,18 +66,32 @@ class SettingsRowView @JvmOverloads constructor(
             setBackgroundResource(R.drawable.bg_row_ripple)
         }
 
-        LayoutInflater.from(context).inflate(R.layout.component_settings_row, this, true)
-        iconView = findViewById(R.id.row_icon)
-        titleView = findViewById(R.id.row_title)
-        subtitleView = findViewById(R.id.row_subtitle)
-        trailingTextView = findViewById(R.id.row_trailing_text)
-        trailingIconView = findViewById(R.id.row_trailing_icon)
+        val binding = ComponentSettingsRowBinding.inflate(LayoutInflater.from(context), this)
+        iconView = binding.rowIcon
+        titleView = binding.rowTitle
+        subtitleView = binding.rowSubtitle
+        trailingTextView = binding.rowTrailingText
+        trailingIconView = binding.rowTrailingIcon
+        ViewCompat.setScreenReaderFocusable(this, true)
 
         context.withStyledAttributes(attrs, R.styleable.SettingsRowView) {
             val iconRes = getResourceId(R.styleable.SettingsRowView_rowIcon, 0)
             if (iconRes != 0) {
                 iconView.setImageResource(iconRes)
                 iconView.visibility = View.VISIBLE
+            }
+
+            val iconBackground = getResourceId(R.styleable.SettingsRowView_rowIconBackground, 0)
+            if (iconBackground != 0) {
+                iconView.setBackgroundResource(iconBackground)
+                val size = resources.getDimensionPixelSize(R.dimen.settings_icon_container_size)
+                iconView.layoutParams = iconView.layoutParams.apply {
+                    width = size
+                    height = size
+                }
+                val padding = resources.getDimensionPixelSize(R.dimen.settings_icon_padding)
+                iconView.setPadding(padding, padding, padding, padding)
+                subtitleView.setTextColor(ContextCompat.getColor(context, R.color.m3_on_surface_variant))
             }
 
             val iconTintRes = getResourceId(R.styleable.SettingsRowView_rowIconTint, 0)
@@ -109,6 +126,10 @@ class SettingsRowView @JvmOverloads constructor(
         }
     }
 
+    /** Text currently presented to the user, including dynamic setting summaries. */
+    val searchableText: String
+        get() = listOf(titleView.text, subtitleView.text, trailingTextView.text).joinToString(" ")
+
     fun setIcon(@DrawableRes res: Int) {
         iconView.setImageResource(res)
         iconView.visibility = View.VISIBLE
@@ -123,19 +144,19 @@ class SettingsRowView @JvmOverloads constructor(
     }
 
     fun setSubtitle(text: CharSequence?) {
+        subtitleView.text = text
         if (text.isNullOrEmpty()) {
             subtitleView.visibility = View.GONE
         } else {
-            subtitleView.text = text
             subtitleView.visibility = View.VISIBLE
         }
     }
 
     fun setTrailingText(text: CharSequence?) {
+        trailingTextView.text = text
         if (text.isNullOrEmpty()) {
             trailingTextView.visibility = View.GONE
         } else {
-            trailingTextView.text = text
             trailingTextView.visibility = View.VISIBLE
         }
     }

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Numo.Settings" parent="Theme.Numo">
+        <item name="android:windowBackground">@color/settings_background</item>
+    </style>
+
+    <style name="Widget.Numo.SettingsRow" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">80dp</item>
+        <item name="rowIconBackground">@drawable/bg_settings_icon</item>
+        <item name="rowIconTint">@color/m3_primary</item>
+        <item name="rowShowChevron">true</item>
+    </style>
+
+    <style name="Widget.Numo.SettingsSection" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">24dp</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="Widget.Numo.SettingsSectionTitle" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:textAppearance">@style/Text.SettingsSection</item>
+    </style>
+
+    <style name="Text.SettingsSection" parent="Text.RowTitle">
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="Widget.Numo.SettingsGroup" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:background">@drawable/bg_settings_group</item>
+        <item name="android:clipToOutline">true</item>
+        <item name="android:showDividers">middle</item>
+        <item name="android:divider">@drawable/settings_divider</item>
+    </style>
+</resources>
