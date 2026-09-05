@@ -168,7 +168,7 @@ class SavedBasketManager private constructor(context: Context) {
      * @return The saved basket
      */
     fun saveCurrentBasket(name: String?, basketManager: BasketManager): SavedBasket {
-        val legacyFiatUnit = CurrencyManager.getInstance(appContext).getCurrentCurrency()
+        val legacyFiatUnit = MintManager.getActiveCurrencyCode(appContext)
         val items = basketManager.getBasketItems().map { basketItem ->
             require(basketItem.quantity > 0) { "Saved basket quantity must be positive" }
             val itemSnapshot = basketItem.item.copy()
@@ -429,7 +429,7 @@ class SavedBasketManager private constructor(context: Context) {
             imagePath = if (json.isNull("imagePath")) null else json.optString("imagePath")
         )
         migratedPriceDuringLoad = item.ensureExplicitPrice(
-            CurrencyManager.getInstance(appContext).getCurrentCurrency(),
+            MintManager.getActiveCurrencyCode(appContext),
         ) || migratedPriceDuringLoad
         return item
     }

@@ -464,10 +464,11 @@ class TransactionDetailActivity : AppCompatActivity() {
 
         val enteredUnit = UnitId.ofOrNull(entry.getEntryUnit())
         if (paymentUnit.isSat && enteredUnit != null && !enteredUnit.isSat && entry.enteredAmount > 0) {
-            satsEquivalentText.text = "≈ " + UnitAmountFormatter.formatAtomic(
+            // enteredAmount retains the legacy hundredths representation, including JPY/KRW.
+            satsEquivalentText.text = "≈ " + Amount(
                 entry.enteredAmount,
-                UnitDescriptor.defaultFor(enteredUnit),
-            )
+                Amount.Currency.fromCode(enteredUnit.value),
+            ).toString()
             satsEquivalentText.visibility = View.VISIBLE
         } else {
             satsEquivalentText.visibility = View.GONE
@@ -585,6 +586,9 @@ class TransactionDetailActivity : AppCompatActivity() {
             currency = currency,
             bitcoinPrice = entry.bitcoinPrice,
             totalSatoshis = entry.amount,
+            chargeUnit = entry.getUnit(),
+            chargeAmountAtomic = entry.getBaseAmountAtomic(),
+            chargeIssuerScope = entry.issuerScope,
         )
     }
 

@@ -8,6 +8,33 @@ import java.util.UUID
 
 class CheckoutBasketItemTest {
 
+    @Test
+    fun `legacy yen and won receipts rescale hundredths including VAT`() {
+        for (currency in listOf("JPY", "KRW")) {
+            val item = createItem(netPriceCents = 100_000, vatEnabled = true, vatRate = 10)
+                .copy(priceCurrency = currency, quantity = 2)
+            assertEquals(1_000L, item.getNetAtomicAmount().value)
+            assertEquals(1_100L, item.getGrossAtomicAmount().value)
+            assertEquals(2_200L, item.getGrossLineAtomicAmount().value)
+        }
+    }
+
+    @Test
+    fun `explicit yen receipt values are already atomic`() {
+        val item = createItem(netPriceCents = 100_000).copy(
+            priceCurrency = "JPY", priceUnit = "jpy",
+            netPriceAtomic = 1_000, grossPriceAtomic = 1_100,
+        )
+        assertEquals(1_000L, item.getNetAtomicAmount().value)
+        assertEquals(1_100L, item.getGrossAtomicAmount().value)
+    }
+
+    @Test
+    fun `legacy dollar receipt retains original VAT rounding`() {
+        val item = createItem(netPriceCents = 333, vatEnabled = true, vatRate = 20)
+        assertEquals(item.getGrossPricePerUnitCents(), item.getGrossAtomicAmount().value)
+    }
+
     private fun createItem(
         priceType: String = "FIAT",
         quantity: Int = 1,

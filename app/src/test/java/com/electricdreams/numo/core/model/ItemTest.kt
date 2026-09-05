@@ -7,6 +7,32 @@ import org.junit.Test
 class ItemTest {
 
     @Test
+    fun `legacy VAT inclusive gross price survives migration and receipt capture`() {
+        val item = Item(
+            price = Item.calculateNetFromGross(3.99, 20.0),
+            vatEnabled = true,
+            vatRate = 20,
+        )
+        assertEquals(399L, item.getGrossAtomicAmount("usd").value)
+        assertTrue(item.ensureExplicitPrice("usd"))
+        assertEquals(333L, item.priceAtomic)
+        assertEquals(399L, item.grossPriceAtomic)
+        assertEquals(399L, item.getGrossAtomicAmount("eur").value)
+        val receiptItem = CheckoutBasketItem.fromBasketItem(BasketItem(item, 2), "EUR")
+        assertEquals(798L, receiptItem.getGrossLineAtomicAmount().value)
+        assertEquals(UnitId.of("usd"), receiptItem.getGrossAtomicAmount().unit)
+        org.junit.Assert.assertFalse(item.ensureExplicitPrice("eur"))
+    }
+
+    @Test
+    fun `legacy sats VAT rounding survives migration`() {
+        val item = Item(priceType = PriceType.SATS, priceSats = 5, vatEnabled = true, vatRate = 10)
+        val original = item.getGrossSats()
+        item.ensureExplicitPrice("USD")
+        assertEquals(original, item.getGrossAtomicAmount("USD").value)
+    }
+
+    @Test
     fun `net and gross price with VAT disabled`() {
         val item = Item(
             id = "1",

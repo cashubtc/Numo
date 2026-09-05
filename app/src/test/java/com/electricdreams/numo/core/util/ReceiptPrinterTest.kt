@@ -17,6 +17,34 @@ import java.util.Date
 @RunWith(RobolectricTestRunner::class)
 class ReceiptPrinterTest {
 
+    @Test
+    fun `legacy yen receipt preserves line prices and explicit payment denomination`() {
+        val item = CheckoutBasketItem(
+            itemId = "yen", uuid = "yen", name = "Coffee",
+            quantity = 1, priceType = "FIAT", netPriceCents = 100_000,
+            priceSats = 0, priceCurrency = "JPY", vatEnabled = false, vatRate = 0,
+        )
+        val data = ReceiptPrinter.ReceiptData(
+            basket = CheckoutBasket(items = listOf(item), currency = "JPY", totalSatoshis = 1_000),
+            paymentType = "cashu", paymentDate = Date(), transactionId = "legacy",
+            mintUrl = null, bitcoinPrice = null, totalSatoshis = 1_000, paymentUnit = "jpy",
+        )
+        val expected = com.electricdreams.numo.core.model.UnitAmountFormatter.formatAtomic(
+            1_000, com.electricdreams.numo.core.model.UnitDescriptor.defaultFor(
+                com.electricdreams.numo.core.model.UnitId.of("jpy"),
+            ),
+        )
+        val receipt = printer.generateTextReceipt(data)
+        val html = printer.generateHtmlReceipt(data)
+        assertTrue(receipt.contains("1 x $expected"))
+        assertTrue(receipt.contains("Paid:"))
+        assertTrue(!receipt.contains("100,000"))
+        assertTrue(!receipt.contains("sat"))
+        assertTrue(html.contains(expected))
+        assertTrue(!html.contains("100,000"))
+        assertTrue(!html.contains("sat"))
+    }
+
     private lateinit var context: Context
     private lateinit var printer: ReceiptPrinter
 

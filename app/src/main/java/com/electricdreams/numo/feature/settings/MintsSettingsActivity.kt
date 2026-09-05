@@ -241,10 +241,9 @@ class MintsSettingsActivity : AppCompatActivity() {
     private fun showUnitSelectorDialog() {
         lifecycleScope.launch {
             val items = mintManager.getSupportedUnits().map { it.value }
-            if (items.size <= 1) return@launch
-            val currentUnit = mintManager.getPreferredUnit().lowercase()
-            var selectedIndex = items.indexOf(currentUnit)
-            if (selectedIndex < 0) selectedIndex = 0
+            val currentUnit = mintManager.getPreferredUnit()
+            if (items.isEmpty() || items.singleOrNull() == currentUnit) return@launch
+            val selectedIndex = items.indexOf(currentUnit)
             
             val builder = androidx.appcompat.app.AlertDialog.Builder(this@MintsSettingsActivity)
             builder.setTitle(getString(R.string.mints_select_base_unit))
@@ -417,7 +416,9 @@ class MintsSettingsActivity : AppCompatActivity() {
 
         activeUnitValue.text = preferredUnit
         val supportedUnits = mintManager.getSupportedUnits()
-        activeUnitRow.visibility = if (supportedUnits.size > 1) View.VISIBLE else View.GONE
+        activeUnitRow.visibility = if (
+            supportedUnits.any { it.value != preferredUnit }
+        ) View.VISIBLE else View.GONE
         swapUnknownMintsRow.visibility = if (
             com.electricdreams.numo.ndef.CashuPaymentHelper.supportsUnknownMintSwap(preferredUnit)
         ) {

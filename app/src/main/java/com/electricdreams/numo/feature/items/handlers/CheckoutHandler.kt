@@ -119,7 +119,6 @@ class CheckoutHandler(
         val labels = options.map { option -> formatOption(option.amount) }.toTypedArray()
         chargeUnitDialog = AlertDialog.Builder(activity, R.style.Theme_Numo_Dialog)
             .setTitle(R.string.checkout_charge_unit_title)
-            .setMessage(R.string.checkout_charge_unit_message)
             .setItems(labels) { dialog, index ->
                 dialog.dismiss()
                 continueCheckout(options[index], legacyFiatUnit)

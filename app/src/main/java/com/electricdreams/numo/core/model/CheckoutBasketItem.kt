@@ -152,7 +152,11 @@ data class CheckoutBasketItem(
         }?.let {
             AssetId.mintScoped(unit, it)
         } ?: AssetId.global(unit)
-        val value = netPriceAtomic ?: if (isSatsPrice()) priceSats else netPriceCents
+        val value = netPriceAtomic ?: if (isSatsPrice()) {
+            priceSats
+        } else {
+            legacyFiatAtomicValue(netPriceCents, unit)
+        }
         return AtomicAmount(value, asset)
     }
 
@@ -160,6 +164,13 @@ data class CheckoutBasketItem(
         val net = getNetAtomicAmount()
         val explicitGross = grossPriceAtomic
         if (explicitGross != null) return AtomicAmount(explicitGross, net.asset)
+        if (netPriceAtomic == null && isFiatPrice()) {
+            // Preserve the receipt's original VAT calculation before changing denomination.
+            return AtomicAmount(
+                legacyFiatAtomicValue(getGrossPricePerUnitCents(), net.unit),
+                net.asset,
+            )
+        }
         if (!vatEnabled || vatRate <= 0) return net
         val gross = BigDecimal.valueOf(net.value)
             .multiply(BigDecimal.valueOf(100L + vatRate.toLong()))
@@ -175,6 +186,12 @@ data class CheckoutBasketItem(
     fun getNetLineAtomicAmount(): AtomicAmount = getNetAtomicAmount() * quantity
 
     fun getGrossLineAtomicAmount(): AtomicAmount = getGrossAtomicAmount() * quantity
+
+    private fun legacyFiatAtomicValue(cents: Long, unit: UnitId): Long =
+        BigDecimal.valueOf(cents, 2)
+            .movePointRight(UnitDescriptor.defaultFor(unit).fractionDigits)
+            .setScale(0, RoundingMode.HALF_UP)
+            .longValueExact()
 
     companion object {
         /**

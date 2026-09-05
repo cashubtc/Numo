@@ -683,7 +683,7 @@ class BasketReceiptActivity : AppCompatActivity() {
 
     private fun resolvePaidAmount(): AtomicAmount {
         val basketCharge = basket?.getChargeAmount()
-        val unit = basketCharge?.unit ?: paymentUnit
+        val unit = basketCharge?.unit?.takeIf { basket?.chargeUnit != null } ?: paymentUnit
         val rawIssuer = basketCharge?.asset?.issuerScope ?: paymentIssuerScope
         val issuer = rawIssuer?.takeIf {
             it.isNotBlank() && UnitDescriptor.defaultFor(unit).kind == UnitKind.CUSTOM

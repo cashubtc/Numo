@@ -173,6 +173,24 @@ data class Item(
             return AtomicAmount(storedGross, net.asset)
         }
 
+        // Legacy fiat prices retained fractional cents after removing VAT. Round the original
+        // gross price only once, rather than applying VAT to an already rounded net price.
+        if (priceAtomic == null) {
+            val grossValue = when (priceType) {
+                PriceType.FIAT -> BigDecimal.valueOf(price)
+                    .multiply(BigDecimal.valueOf(100L + vatRate.toLong()))
+                    .movePointLeft(2)
+                    .movePointRight(UnitDescriptor.defaultFor(net.unit).fractionDigits)
+                    .setScale(0, RoundingMode.HALF_UP)
+                    .longValueExact()
+                PriceType.SATS -> BigDecimal.valueOf(priceSats)
+                    .multiply(BigDecimal.valueOf(100L + vatRate.toLong()))
+                    .divide(BigDecimal.valueOf(100L), 0, RoundingMode.DOWN)
+                    .longValueExact()
+            }
+            return AtomicAmount(grossValue, net.asset)
+        }
+
         val grossValue = BigDecimal.valueOf(net.value)
             .multiply(BigDecimal.valueOf(100L + vatRate.toLong()))
             .divide(BigDecimal.valueOf(100L), 0, RoundingMode.HALF_UP)
@@ -213,8 +231,10 @@ data class Item(
         grossPriceAtomic = null
         priceIssuerScope = null
         val migrated = getNetAtomicAmount(legacyFiatUnit)
+        val migratedGross = getGrossAtomicAmount(legacyFiatUnit)
         priceUnit = migrated.unit.value
         priceAtomic = migrated.value
+        grossPriceAtomic = migratedGross.value
         return true
     }
 

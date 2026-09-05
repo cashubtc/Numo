@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import com.electricdreams.numo.core.util.LightningAddressManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import java.math.BigInteger
 
 /**
  * Settings for automatic withdrawals for a specific mint.
@@ -211,6 +212,11 @@ class AutoWithdrawSettingsManager private constructor(private val context: Conte
      */
     fun calculateWithdrawAmount(mintUrl: String, currentBalance: Long): Long {
         val settings = getMintSettings(mintUrl)
-        return (currentBalance * settings.withdrawPercentage / 100)
+        require(currentBalance >= 0L) { "Withdrawal balance cannot be negative" }
+        require(settings.withdrawPercentage in MIN_WITHDRAW_PERCENTAGE..MAX_WITHDRAW_PERCENTAGE)
+        return BigInteger.valueOf(currentBalance)
+            .multiply(BigInteger.valueOf(settings.withdrawPercentage.toLong()))
+            .divide(BigInteger.valueOf(100L))
+            .longValueExact()
     }
 }

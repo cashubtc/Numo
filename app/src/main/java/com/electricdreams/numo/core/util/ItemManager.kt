@@ -146,7 +146,7 @@ class ItemManager private constructor(context: Context) {
                         }
 
                         migratedLegacyPrice = item.ensureExplicitPrice(
-                            CurrencyManager.getInstance(context).getCurrentCurrency(),
+                            MintManager.getActiveCurrencyCode(context),
                         ) || migratedLegacyPrice
                         items.add(item)
                     } catch (e: RuntimeException) {
@@ -298,7 +298,7 @@ class ItemManager private constructor(context: Context) {
             return false
         }
 
-        item.ensureExplicitPrice(CurrencyManager.getInstance(context).getCurrentCurrency())
+        item.ensureExplicitPrice(MintManager.getActiveCurrencyCode(context))
         items.add(item)
         saveItems()
         return true
@@ -310,7 +310,7 @@ class ItemManager private constructor(context: Context) {
      * @return true if updated successfully, false if not found.
      */
     fun updateItem(item: Item): Boolean {
-        item.ensureExplicitPrice(CurrencyManager.getInstance(context).getCurrentCurrency())
+        item.ensureExplicitPrice(MintManager.getActiveCurrencyCode(context))
         for (i in items.indices) {
             if (items[i].id == item.id) {
                 items[i] = item
@@ -527,7 +527,7 @@ class ItemManager private constructor(context: Context) {
                     this.priceIssuerScope = priceIssuerScope
                     this.grossPriceAtomic = grossPriceAtomic
                 }
-                item.ensureExplicitPrice(CurrencyManager.getInstance(context).getCurrentCurrency())
+                item.ensureExplicitPrice(MintManager.getActiveCurrencyCode(context))
 
                 items.add(item)
                 importedCount++
@@ -592,7 +592,7 @@ class ItemManager private constructor(context: Context) {
             }
 
             for (item in items) {
-                item.ensureExplicitPrice(CurrencyManager.getInstance(context).getCurrentCurrency())
+                item.ensureExplicitPrice(MintManager.getActiveCurrencyCode(context))
                 val csvLine = arrayOfNulls<String>(CSV_COLUMN_COUNT)
                 csvLine[0] = "" // Token
                 csvLine[1] = item.name ?: ""

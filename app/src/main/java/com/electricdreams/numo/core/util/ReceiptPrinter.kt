@@ -69,7 +69,7 @@ class ReceiptPrinter(private val context: Context) {
     )
 
     private fun resolvePaymentAsset(data: ReceiptData): AssetId {
-        val basketCharge = data.basket?.getChargeAmount()
+        val basketCharge = data.basket?.takeIf { it.chargeUnit != null }?.getChargeAmount()
         val unit = basketCharge?.unit
             ?: UnitId.ofOrNull(data.paymentUnit)?.takeUnless { it.isReserved }
             ?: UnitId.SAT

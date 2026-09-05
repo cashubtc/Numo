@@ -22,6 +22,28 @@ import java.lang.reflect.Field
 @RunWith(RobolectricTestRunner::class)
 class ItemManagerTest {
 
+    @Test
+    fun `legacy catalog migration preserves active ecash currency and gross price`() {
+        CurrencyManager.getInstance(context).setPreferredCurrency("EUR")
+        MintManager.getInstance(context).setPreferredUnit("usd")
+        val legacy = JSONObject()
+            .put("id", "legacy-usd").put("name", "Coffee")
+            .put("price", Item.calculateNetFromGross(3.99, 20.0))
+            .put("priceType", "FIAT").put("vatEnabled", true).put("vatRate", 20)
+        context.getSharedPreferences("ItemManagerPrefs", Context.MODE_PRIVATE).edit()
+            .putString("items_list", JSONArray().put(legacy).toString()).commit()
+        resetSingleton()
+        val migrated = ItemManager.getInstance(context).getAllItems().single()
+        assertEquals("usd", migrated.priceUnit)
+        assertEquals(399L, migrated.grossPriceAtomic)
+
+        MintManager.getInstance(context).setPreferredUnit("eur")
+        resetSingleton()
+        val reloaded = ItemManager.getInstance(context).getAllItems().single()
+        assertEquals("usd", reloaded.priceUnit)
+        assertEquals(399L, reloaded.grossPriceAtomic)
+    }
+
     private lateinit var context: Context
     private lateinit var itemManager: ItemManager
 
@@ -35,7 +57,8 @@ class ItemManagerTest {
         val prefs = context.getSharedPreferences("ItemManagerPrefs", Context.MODE_PRIVATE)
         prefs.edit().clear().apply()
 
-        // Legacy fiat items are migrated using the merchant's configured local currency.
+        MintManager.getInstance(context).setPreferredUnit("sat")
+        // Sat wallets use the local fiat currency for legacy catalog prices.
         CurrencyManager.getInstance(context).setPreferredCurrency(CurrencyManager.CURRENCY_USD)
         
         itemManager = ItemManager.getInstance(context)

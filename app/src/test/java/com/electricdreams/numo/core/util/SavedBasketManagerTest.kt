@@ -24,6 +24,35 @@ import java.lang.reflect.Field
 @RunWith(RobolectricTestRunner::class)
 class SavedBasketManagerTest {
 
+    @Test
+    fun `active and archived legacy baskets retain ecash unit and original gross price`() {
+        CurrencyManager.getInstance(context).setPreferredCurrency("EUR")
+        MintManager.getInstance(context).setPreferredUnit("usd")
+        val item = JSONObject().put("id", "coffee").put("name", "Coffee")
+            .put("price", Item.calculateNetFromGross(3.99, 20.0))
+            .put("priceType", "FIAT").put("vatEnabled", true).put("vatRate", 20)
+        fun basket(id: String, status: String) = JSONObject()
+            .put("id", id).put("status", status).put("createdAt", 1L).put("updatedAt", 1L)
+            .put("items", JSONArray().put(JSONObject().put("quantity", 2).put("item", item)))
+        context.getSharedPreferences("saved_baskets", Context.MODE_PRIVATE).edit()
+            .putString("baskets", JSONArray().put(basket("active", "ACTIVE")).toString())
+            .putString("archived_baskets", JSONArray().put(basket("paid", "PAID")).toString())
+            .commit()
+        resetSingleton()
+        val migrated = SavedBasketManager.getInstance(context)
+        for (saved in migrated.getSavedBaskets() + migrated.getArchivedBaskets()) {
+            assertEquals("usd", saved.items.single().item.priceUnit)
+            assertEquals(798L, saved.items.single().getGrossAtomicAmount("EUR").value)
+        }
+        MintManager.getInstance(context).setPreferredUnit("eur")
+        resetSingleton()
+        val reloaded = SavedBasketManager.getInstance(context)
+        for (saved in reloaded.getSavedBaskets() + reloaded.getArchivedBaskets()) {
+            assertEquals("usd", saved.items.single().item.priceUnit)
+            assertEquals(399L, saved.items.single().item.grossPriceAtomic)
+        }
+    }
+
     private lateinit var context: Context
     private lateinit var savedBasketManager: SavedBasketManager
 
@@ -36,6 +65,7 @@ class SavedBasketManagerTest {
         val prefs = context.getSharedPreferences("saved_baskets", Context.MODE_PRIVATE)
         prefs.edit().clear().apply()
         CurrencyManager.getInstance(context).setPreferredCurrency(CurrencyManager.CURRENCY_USD)
+        MintManager.getInstance(context).setPreferredUnit("sat")
         
         savedBasketManager = SavedBasketManager.getInstance(context)
     }
