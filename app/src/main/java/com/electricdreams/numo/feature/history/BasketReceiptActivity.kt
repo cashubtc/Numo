@@ -288,8 +288,13 @@ class BasketReceiptActivity : AppCompatActivity() {
                 Math.subtractExact(paidAmount.value, tipAmountSats),
                 paidAmount.asset,
             )
-            totalAmountText.text = formatAtomicAmount(baseAmount)
-            totalSubtitleText.visibility = View.GONE
+            totalAmountText.text = UnitAmountFormatter.format(
+                baseAmount, UnitDescriptor.defaultFor(baseAmount.unit),
+            )
+            val issuer = baseAmount.asset.issuerScope
+                ?.substringAfter("://")?.substringBefore('/')
+            totalSubtitleText.text = issuer
+            totalSubtitleText.visibility = if (issuer == null) View.GONE else View.VISIBLE
             val dateFormat = SimpleDateFormat("MMM d, yyyy 'at' h:mm a", Locale.getDefault())
             checkoutDateText.text = dateFormat.format(paymentDate)
             return
@@ -407,7 +412,11 @@ class BasketReceiptActivity : AppCompatActivity() {
         
         val unitPrice = formatAtomicAmount(item.getGrossAtomicAmount())
         unitPriceText.text = if (item.quantity > 1) "$unitPrice each" else unitPrice
-        totalText.text = formatAtomicAmount(item.getGrossLineAtomicAmount())
+        // The issuer remains in the unit-price detail, leaving the total easy to scan.
+        val lineTotal = item.getGrossLineAtomicAmount()
+        totalText.text = UnitAmountFormatter.format(
+            lineTotal, UnitDescriptor.defaultFor(lineTotal.unit),
+        )
 
         if (item.vatEnabled && item.vatRate > 0) {
             val vatLabel = view.findViewById<TextView>(R.id.vat_label)

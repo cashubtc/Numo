@@ -562,7 +562,7 @@
     <string name="item_entry_price_breakdown_total_label">Customer pays</string>
     <string name="item_entry_price_breakdown_total_value_default">$0.00</string>
 
-    <string name="item_entry_price_helper">Set a fixed price in your preferred currency. Bitcoin prices are in satoshis (sats).</string>
+    <string name="item_entry_price_helper">Choose a pricing unit for this item. Bitcoin prices use satoshis (sats).</string>
 
     <string name="item_entry_section_identification">BARCODE &amp; SKU</string>
     <string name="item_entry_label_gtin">Barcode</string>

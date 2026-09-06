@@ -204,8 +204,19 @@ class AmountDisplayManager(
             }
         }
 
+        // Direct units already appear in the amount and have no secondary conversion.
+        val secondaryVisibility = if (isDirectNonSatUnit) View.GONE else View.VISIBLE
+        secondaryAmountDisplay.visibility = secondaryVisibility
+        (secondaryAmountDisplay.parent as? View)
+            ?.takeIf { it.id == R.id.secondary_amount_container }
+            ?.let { container ->
+                container.visibility = secondaryVisibility
+                container.isClickable = !isDirectNonSatUnit
+                container.isFocusable = !isDirectNonSatUnit
+            }
+
         // Update secondary amount display with animation when switching currencies
-        if (animationType == AnimationType.CURRENCY_SWITCH) {
+        if (!isDirectNonSatUnit && animationType == AnimationType.CURRENCY_SWITCH) {
             // Animate secondary display in opposite direction of main display
             animateSecondaryCurrencySwitch(secondaryDisplayText, isUsdInputMode)
         } else {

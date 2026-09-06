@@ -3,6 +3,7 @@ package com.electricdreams.numo.ui.components
 import android.content.Context
 import android.widget.Button
 import android.widget.TextView
+import android.widget.LinearLayout
 import android.view.View
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.AssetId
@@ -10,6 +11,9 @@ import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import org.junit.Before
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -244,5 +248,34 @@ class AmountDisplayManagerTest {
         assert(manager.requestedAmount == 42L)
         assert(manager.getChargeAsset() == points)
         assert(!manager.canSwitchToUsd())
+    }
+
+    @Test
+    fun `secondary conversion row hides for custom units and returns for sats`() {
+        val secondary = TextView(realContext)
+        val container = LinearLayout(realContext).apply {
+            id = R.id.secondary_amount_container
+            addView(secondary)
+        }
+        manager = AmountDisplayManager(
+            mockContext, amountDisplay, secondary, switchCurrencyButton, submitButton,
+            bitcoinPriceWorker,
+        )
+        manager.setChargeAsset(AssetId.mintScoped(UnitId.of("points"), "https://mint.example"))
+        manager.updateDisplay(StringBuilder("42"), StringBuilder(), AmountDisplayManager.AnimationType.NONE)
+
+        assertEquals(View.GONE, container.visibility)
+        assertEquals(View.GONE, secondary.visibility)
+        assertFalse(container.isClickable)
+        assertFalse(container.isFocusable)
+
+        manager.setChargeAsset(AssetId.global(UnitId.SAT))
+        manager.updateDisplay(StringBuilder("1000"), StringBuilder(), AmountDisplayManager.AnimationType.NONE)
+
+        assertEquals(View.VISIBLE, container.visibility)
+        assertEquals(View.VISIBLE, secondary.visibility)
+        assertEquals("¥100", secondary.text.toString())
+        assertTrue(container.isClickable)
+        assertTrue(container.isFocusable)
     }
 }

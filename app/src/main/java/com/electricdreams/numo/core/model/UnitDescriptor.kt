@@ -30,6 +30,12 @@ data class UnitDescriptor(
     }
 
     companion object {
+        // Android's getInstance(String) also accepts unknown three-letter codes and assigns
+        // two fraction digits. Only the supported currency list identifies actual ISO units.
+        private val isoCurrencies by lazy {
+            Currency.getAvailableCurrencies().associateBy { it.currencyCode }
+        }
+
         private val stablecoinFractionDigits = mapOf(
             "usdt" to 2,
             "usdc" to 2,
@@ -75,9 +81,7 @@ data class UnitDescriptor(
         }
 
         private fun fromIso4217(unit: UnitId, locale: Locale): UnitDescriptor? {
-            val currency = runCatching {
-                Currency.getInstance(unit.value.uppercase(Locale.ROOT))
-            }.getOrNull() ?: return null
+            val currency = isoCurrencies[unit.value.uppercase(Locale.ROOT)] ?: return null
             val fractionDigits = currency.defaultFractionDigits.takeIf { it >= 0 } ?: return null
             return UnitDescriptor(
                 unit = unit,

@@ -509,7 +509,7 @@
     <string name="item_entry_price_breakdown_total_label">합계(부가세 포함)</string>
     <string name="item_entry_price_breakdown_total_value_default">$0.00</string>
 
-    <string name="item_entry_price_helper">원하는 통화로 고정 가격을 설정하세요. 비트코인 가격은 사토시(sat) 단위로 표시됩니다.</string>
+    <string name="item_entry_price_helper">이 상품의 가격 단위를 선택하세요. 비트코인 가격은 사토시(sats) 단위로 표시됩니다.</string>
 
     <string name="item_entry_section_identification">신분증</string>
     <string name="item_entry_label_gtin">GTIN</string>

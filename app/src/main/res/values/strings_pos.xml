@@ -1,4 +1,5 @@
 <resources>
+    <string name="pos_charge_unit_selected_description">Charge unit: %1$s</string>
     <!-- POS main screen - navigation content descriptions -->
     <string name="pos_nav_catalog_content_description">Item List</string>
     <string name="pos_nav_history_content_description">History</string>

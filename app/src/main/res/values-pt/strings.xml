@@ -412,7 +412,7 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="item_entry_price_breakdown_vat_value_default">$0.00</string>
     <string name="item_entry_price_breakdown_total_label">Total (com imposto)</string>
     <string name="item_entry_price_breakdown_total_value_default">$0.00</string>
-    <string name="item_entry_price_helper">Defina um preço fixo na sua moeda preferida. Preços em Bitcoin são em satoshis (sats).</string>
+    <string name="item_entry_price_helper">Escolha uma unidade de preço para este item. Os preços em Bitcoin são expressos em satoshis (sats).</string>
     <string name="item_entry_section_identification">IDENTIFICAÇÃO</string>
     <string name="item_entry_label_gtin">GTIN</string>
     <string name="item_entry_hint_gtin">Escaneie ou insira o código de barras</string>

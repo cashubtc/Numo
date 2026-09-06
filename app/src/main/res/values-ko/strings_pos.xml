@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
+    <string name="pos_charge_unit_selected_description">청구 단위: %1$s</string>
     <string name="item_selection_undo_button_short">실행 취소</string>
     <string name="pos_amount_placeholder_secondary">$0.00 USD</string>
     <string name="pos_charge_button_with_amount">%1$s 청구</string>

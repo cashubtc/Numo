@@ -509,7 +509,7 @@
     <string name="item_entry_price_breakdown_total_label">合計（VATを含む）</string>
     <string name="item_entry_price_breakdown_total_value_default">$0.00</string>
 
-    <string name="item_entry_price_helper">希望の通貨で固定価格を設定します。ビットコインの価格はサトシ（sats）で表されます。</string>
+    <string name="item_entry_price_helper">この商品の価格単位を選択してください。ビットコインの価格はサトシ（sats）で表示されます。</string>
 
     <string name="item_entry_section_identification">識別</string>
     <string name="item_entry_label_gtin">GTIN</string>

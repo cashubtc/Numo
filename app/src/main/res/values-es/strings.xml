@@ -407,7 +407,7 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="item_entry_price_breakdown_vat_value_default">$0.00</string>
     <string name="item_entry_price_breakdown_total_label">El cliente paga</string>
     <string name="item_entry_price_breakdown_total_value_default">$0.00</string>
-    <string name="item_entry_price_helper">Establece un precio fijo en tu moneda preferida. Los precios en Bitcoin son en satoshis (sats).</string>
+    <string name="item_entry_price_helper">Elige una unidad de precio para este artículo. Los precios en Bitcoin se expresan en satoshis (sats).</string>
     <string name="item_entry_hint_current_stock">0</string>
     <string name="item_entry_label_low_stock_alert">Alerta de stock bajo</string>
     <string name="item_entry_label_alert_when_below">Alertar cuando sea inferior a</string>

@@ -3,6 +3,7 @@ package com.electricdreams.numo.feature.history
 import android.app.Application
 import android.content.Context
 import android.content.Intent
+import android.view.View
 import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import com.electricdreams.numo.R
@@ -33,6 +34,40 @@ class ReceiptUnitIntegrationTest {
         currency = "JPY",
         totalSatoshis = 1_000,
     )
+
+    @Test
+    fun `custom receipt separates the amount from its issuer without losing either`() {
+        val issuer = "https://merchant-loyalty-rewards.example"
+        val item = CheckoutBasketItem(
+            itemId = "coffee", uuid = "coffee", name = "Coffee", quantity = 2,
+            priceType = "FIAT", netPriceCents = 0, priceSats = 0,
+            priceCurrency = "POINTS", vatEnabled = false, vatRate = 0,
+            priceUnit = "points", netPriceAtomic = 25, grossPriceAtomic = 25,
+            priceIssuerScope = issuer,
+        )
+        val basket = CheckoutBasket(
+            items = listOf(item), currency = "EUR", totalSatoshis = 50,
+            chargeUnit = "points", chargeAmountAtomic = 50, chargeIssuerScope = issuer,
+        )
+        val intent = Intent(context, BasketReceiptActivity::class.java)
+            .putExtra(BasketReceiptActivity.EXTRA_CHECKOUT_BASKET_JSON, basket.toJson())
+            .putExtra(BasketReceiptActivity.EXTRA_TOTAL_SATOSHIS, 50L)
+        val controller = Robolectric.buildActivity(BasketReceiptActivity::class.java, intent).setup()
+        try {
+            val activity = controller.get()
+            assertEquals("50 POINTS", activity.findViewById<TextView>(R.id.total_amount).text.toString())
+            val subtitle = activity.findViewById<TextView>(R.id.total_subtitle)
+            assertEquals("merchant-loyalty-rewards.example", subtitle.text.toString())
+            assertEquals(View.VISIBLE, subtitle.visibility)
+            assertEquals("50 POINTS", activity.findViewById<TextView>(R.id.item_total).text.toString())
+            assertEquals(
+                "25 POINTS · merchant-loyalty-rewards.example each",
+                activity.findViewById<TextView>(R.id.item_unit_price).text.toString(),
+            )
+        } finally {
+            controller.pause().stop().destroy()
+        }
+    }
 
     @Test
     fun `receipt screen honors a legacy payment unit when the basket has none`() {

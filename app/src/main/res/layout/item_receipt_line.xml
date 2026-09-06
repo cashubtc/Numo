@@ -60,8 +60,10 @@
         <TextView
             android:id="@+id/item_total"
             style="@style/Text.RowTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
             tools:text="$9.00" />
 
     </LinearLayout>
@@ -88,8 +90,10 @@
         <TextView
             android:id="@+id/vat_amount"
             style="@style/Text.Caption"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="end"
             tools:text="$1.50" />
 
     </LinearLayout>

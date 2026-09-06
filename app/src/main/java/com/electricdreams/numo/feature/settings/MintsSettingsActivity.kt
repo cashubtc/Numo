@@ -26,6 +26,8 @@ import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.UnitAmountFormatter
 import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
+import com.electricdreams.numo.ui.components.UnitPickerDialog
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintIconCache
 import com.electricdreams.numo.core.util.MintManager
@@ -245,24 +247,24 @@ class MintsSettingsActivity : AppCompatActivity() {
             if (items.isEmpty() || items.singleOrNull() == currentUnit) return@launch
             val selectedIndex = items.indexOf(currentUnit)
             
-            val builder = androidx.appcompat.app.AlertDialog.Builder(this@MintsSettingsActivity)
-            builder.setTitle(getString(R.string.mints_select_base_unit))
-            builder.setSingleChoiceItems(items.toTypedArray(), selectedIndex) { dialog, which ->
+            UnitPickerDialog.show(
+                context = this@MintsSettingsActivity,
+                title = R.string.mints_select_base_unit,
+                labels = items.map { UnitDescriptor.defaultFor(UnitId.of(it)).displayCode },
+                selectedIndex = selectedIndex,
+            ) { which ->
                 val selectedUnit = items[which]
                 if (selectedUnit != currentUnit) {
                     mintManager.setPreferredUnit(selectedUnit)
                     selectedLightningMint = mintManager.getPreferredLightningMint(selectedUnit)
                     // Trigger refresh
-                    activeUnitValue.text = selectedUnit
+                    activeUnitValue.text = UnitDescriptor.defaultFor(UnitId.of(selectedUnit)).displayCode
                     // Let CashuWalletManager rebuild the wallet with the new unit
                     // Balance will be updated via broadcast
                     Toast.makeText(this@MintsSettingsActivity, getString(R.string.mints_changed_base_unit_toast, selectedUnit), Toast.LENGTH_SHORT).show()
                     loadMintsAndBalances()
                 }
-                dialog.dismiss()
             }
-            builder.setNegativeButton(android.R.string.cancel, null)
-            builder.show()
         }
     }
 
@@ -414,7 +416,7 @@ class MintsSettingsActivity : AppCompatActivity() {
             UnitDescriptor.defaultFor(unitId),
         )
 
-        activeUnitValue.text = preferredUnit
+        activeUnitValue.text = UnitDescriptor.defaultFor(unitId).displayCode
         val supportedUnits = mintManager.getSupportedUnits()
         activeUnitRow.visibility = if (
             supportedUnits.any { it.value != preferredUnit }

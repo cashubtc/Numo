@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import com.electricdreams.numo.ui.components.UnitPickerDialog
 import com.electricdreams.numo.PaymentRequestActivity
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.AssetId
@@ -116,19 +117,12 @@ class CheckoutHandler(
     ) {
         if (activity.isFinishing || chargeUnitDialog?.isShowing == true) return
 
-        val labels = options.map { option -> formatOption(option.amount) }.toTypedArray()
-        chargeUnitDialog = AlertDialog.Builder(activity, R.style.Theme_Numo_Dialog)
-            .setTitle(R.string.checkout_charge_unit_title)
-            .setItems(labels) { dialog, index ->
-                dialog.dismiss()
-                continueCheckout(options[index], legacyFiatUnit)
-            }
-            .setNegativeButton(R.string.common_cancel, null)
-            .create()
-            .also { dialog ->
-                dialog.setOnDismissListener { chargeUnitDialog = null }
-                dialog.show()
-            }
+        chargeUnitDialog = UnitPickerDialog.show(
+            context = activity,
+            title = R.string.checkout_charge_unit_title,
+            labels = options.map { option -> formatOption(option.amount) },
+        ) { index -> continueCheckout(options[index], legacyFiatUnit) }
+        chargeUnitDialog?.setOnDismissListener { chargeUnitDialog = null }
     }
 
     private fun formatOption(amount: AtomicAmount): String {

@@ -456,7 +456,7 @@ class PosUiCoordinator(
 
         val satOnly = chargeAssets.size == 1 && chargeAssets.single().unit.isSat
         chargeUnitSelector.visibility = if (satOnly) View.GONE else View.VISIBLE
-        chargeUnitSelector.text = chargeAssetLabel(selected)
+        updateChargeUnitLabel(selected)
         chargeUnitSelector.setCompoundDrawablesRelativeWithIntrinsicBounds(
             0,
             0,
@@ -471,27 +471,37 @@ class PosUiCoordinator(
     }
 
     private fun showChargeUnitDialog() {
-        val labels = chargeAssets.map(::chargeAssetLabel).toTypedArray()
-        androidx.appcompat.app.AlertDialog.Builder(activity, R.style.Theme_Numo_Dialog)
-            .setTitle(R.string.pos_charge_unit_dialog_title)
-            .setItems(labels) { _, index ->
-                val selected = chargeAssets[index]
-                if (selected != amountDisplayManager.getChargeAsset()) {
-                    amountDisplayManager.setChargeAsset(selected)
-                    satoshiInput.clear()
-                    fiatInput.clear()
-                    amountDisplayManager.resetRequestedAmount()
-                    chargeUnitSelector.text = chargeAssetLabel(selected)
-                    amountDisplayManager.updateDisplay(
-                        satoshiInput,
-                        fiatInput,
-                        AmountDisplayManager.AnimationType.CURRENCY_SWITCH,
-                    )
-                    loadMintLimits()
-                }
+        // Capture the choices so a mint refresh cannot change what a visible row selects.
+        val options = chargeAssets.toList()
+        UnitPickerDialog.show(
+            context = activity,
+            title = R.string.pos_charge_unit_dialog_title,
+            labels = options.map(::chargeAssetLabel),
+            selectedIndex = options.indexOf(amountDisplayManager.getChargeAsset()),
+        ) { index ->
+            val selected = options[index]
+            if (selected != amountDisplayManager.getChargeAsset()) {
+                amountDisplayManager.setChargeAsset(selected)
+                satoshiInput.clear()
+                fiatInput.clear()
+                amountDisplayManager.resetRequestedAmount()
+                updateChargeUnitLabel(selected)
+                amountDisplayManager.updateDisplay(
+                    satoshiInput,
+                    fiatInput,
+                    AmountDisplayManager.AnimationType.CURRENCY_SWITCH,
+                )
+                loadMintLimits()
             }
-            .setNegativeButton(R.string.common_cancel, null)
-            .show()
+        }
+    }
+
+    private fun updateChargeUnitLabel(asset: AssetId) {
+        val label = chargeAssetLabel(asset)
+        chargeUnitSelector.text = label
+        chargeUnitSelector.contentDescription = activity.getString(
+            R.string.pos_charge_unit_selected_description, label,
+        )
     }
 
     private fun chargeAssetLabel(asset: AssetId): String {

@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
+    <string name="pos_charge_unit_selected_description">Unidade de cobrança: %1$s</string>
     <string name="pos_nav_catalog_content_description">Lista de itens</string>
     <string name="pos_nav_history_content_description">Histórico</string>
     <string name="pos_nav_settings_content_description">Configurações</string>

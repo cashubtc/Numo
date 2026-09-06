@@ -3,9 +3,11 @@ package com.electricdreams.numo.ui.theme
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
+import android.content.res.ColorStateList
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.widget.TextViewCompat
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.prefs.PreferenceStore
 
@@ -56,6 +58,14 @@ class ThemeManager(
         amountDisplay.setTextColor(textColor)
         secondaryAmountDisplay.setTextColor(textColor)
         errorMessage.setTextColor(textColor)
+
+        activity.findViewById<TextView>(R.id.charge_unit_selector)?.let { selector ->
+            selector.setTextColor(textColor)
+            TextViewCompat.setCompoundDrawableTintList(selector, ColorStateList.valueOf(textColor))
+            selector.setBackgroundResource(
+                if (isWhiteTheme) R.drawable.bg_unit_selector_light else R.drawable.bg_unit_selector_dark,
+            )
+        }
         
         // Update currency switch icon tint
         (switchCurrencyButton as? ImageButton)?.setColorFilter(textColor)

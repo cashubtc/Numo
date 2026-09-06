@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
+    <string name="pos_charge_unit_selected_description">請求単位：%1$s</string>
     <string name="item_selection_undo_button_short">元に戻す</string>
     <string name="pos_amount_placeholder_secondary">$0.00 USD</string>
     <string name="pos_charge_button_with_amount">%1$sを請求</string>

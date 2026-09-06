@@ -537,7 +537,7 @@
     <string name="item_entry_price_breakdown_total_label">Kunde zahlt</string>
     <string name="item_entry_price_breakdown_total_value_default">$0.00</string>
 
-    <string name="item_entry_price_helper">Lege einen Festpreis in deiner bevorzugten Währung fest. Bitcoin-Preise sind in Satoshis (Sats) angegeben.</string>
+    <string name="item_entry_price_helper">Wähle eine Preiseinheit für diesen Artikel. Bitcoin-Preise werden in Satoshis (Sats) angegeben.</string>
 
     <string name="item_entry_section_identification">STRICHCODE &amp; SKU</string>
     <string name="item_entry_label_gtin">Barcode</string>

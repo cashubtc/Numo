@@ -299,8 +299,8 @@ class PricingHandler(
     private fun refreshUnitAdapter() {
         priceUnitInput.setAdapter(
             ArrayAdapter(
-                priceInput.context,
-                android.R.layout.simple_dropdown_item_1line,
+                priceUnitInput.context,
+                R.layout.item_unit_dropdown,
                 priceUnitOptions.map { it.label },
             ),
         )
