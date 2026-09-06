@@ -75,8 +75,8 @@ class CheckoutHandler(
         val mintManager = MintManager.getInstance(activity)
         val targetAssets = createTargetAssets(mintManager)
         val results = targetAssets.map { target ->
-            // Older custom prices may have no issuer. Offer a separate, explicit choice for
-            // each compatible mint without treating scoped prices as interchangeable.
+            // Older custom prices may have no issuer. Resolve each compatible mint separately
+            // without treating scoped prices as interchangeable.
             val scopedLines = lines.map { line ->
                 line.copy(
                     amount = line.amount.copy(
@@ -95,10 +95,9 @@ class CheckoutHandler(
                     .thenBy { it.amount.asset.issuerScope.orEmpty() },
             )
 
-        val requiresIssuerChoice = lines.any { needsIssuer(it.amount.asset) }
         when {
             chargeableOptions.isEmpty() -> showNoChargeableUnit(results)
-            chargeableOptions.size == 1 && !requiresIssuerChoice -> continueCheckout(
+            chargeableOptions.size == 1 -> continueCheckout(
                 chargeableOptions.single(),
                 basketSnapshot,
             )
@@ -155,7 +154,11 @@ class CheckoutHandler(
 
         chargeUnitDialog = UnitPickerDialog.show(
             context = activity,
-            title = R.string.checkout_charge_unit_title,
+            title = if (options.map { it.amount.unit }.distinct().size == 1) {
+                R.string.mint_selection_title
+            } else {
+                R.string.checkout_charge_unit_title
+            },
             labels = options.map { option -> formatOption(option.amount) },
         ) { index -> continueCheckout(options[index], basketSnapshot) }
         chargeUnitDialog?.setOnDismissListener { chargeUnitDialog = null }

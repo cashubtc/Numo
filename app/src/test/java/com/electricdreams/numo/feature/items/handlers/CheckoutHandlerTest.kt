@@ -2,6 +2,7 @@ package com.electricdreams.numo.feature.items.handlers
 
 import android.app.Activity
 import android.app.Application
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import com.electricdreams.numo.PaymentRequestActivity
 import com.electricdreams.numo.R
@@ -74,6 +75,8 @@ class CheckoutHandlerTest {
         TipsManager.getInstance(activity).tipsEnabled = tipsEnabled
         handler.proceedToCheckout()
         val dialog = ShadowDialog.getLatestDialog() as AlertDialog
+        assertEquals(activity.getString(R.string.checkout_charge_unit_title),
+            dialog.findViewById<TextView>(androidx.appcompat.R.id.alertTitle)?.text.toString())
         assertNotNull(dialog.listView.parent)
         assertEquals(2, dialog.listView.adapter.count)
         assertEquals(1, basket.getTotalItemCount())
@@ -105,22 +108,27 @@ class CheckoutHandlerTest {
     }
 
     @Test
-    fun `unscoped custom item offers its mint and preserves integer price through tips`() {
+    fun `single custom charge option proceeds directly to tips`() {
+        verifyImpliedCustomCharge(tipsEnabled = true)
+    }
+
+    @Test
+    fun `single custom charge option proceeds directly to payment when tips are disabled`() {
+        verifyImpliedCustomCharge(tipsEnabled = false)
+    }
+
+    private fun verifyImpliedCustomCharge(tipsEnabled: Boolean) {
         val item = prepareCustomBasket()
-        TipsManager.getInstance(activity).tipsEnabled = true
+        TipsManager.getInstance(activity).tipsEnabled = tipsEnabled
 
         handler.proceedToCheckout()
 
-        val dialog = ShadowDialog.getLatestDialog() as AlertDialog
-        assertEquals(1, dialog.listView.adapter.count)
-        val label = dialog.listView.adapter.getItem(0).toString()
-        assertTrue(label.contains("BUX"))
-        assertTrue(label.contains("mint.example"))
-        assertNull(shadowOf(activity).nextStartedActivity)
-        dialog.listView.performItemClick(null, 0, 0)
-
+        assertNull(ShadowDialog.getLatestDialog())
         val intent = shadowOf(activity).nextStartedActivity
-        assertEquals(TipSelectionActivity::class.java.name, intent.component?.className)
+        assertEquals(
+            if (tipsEnabled) TipSelectionActivity::class.java.name else PaymentRequestActivity::class.java.name,
+            intent.component?.className,
+        )
         assertEquals("bux", intent.getStringExtra(PaymentRequestActivity.EXTRA_PAYMENT_UNIT))
         assertEquals(2500L, intent.getLongExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, 0))
         assertEquals("https://mint.example", intent.getStringExtra(
@@ -130,8 +138,30 @@ class CheckoutHandlerTest {
             intent.getStringExtra(PaymentRequestActivity.EXTRA_CHECKOUT_BASKET_JSON),
         ))
         assertEquals(snapshot.getChargeAmount(), snapshot.items.single().getGrossLineAtomicAmount())
-        assertNull("Choosing a checkout mint must not rewrite the catalog item", item.priceIssuerScope)
+        assertNull("Resolving a checkout mint must not rewrite the catalog item", item.priceIssuerScope)
         assertEquals(2500L, item.priceAtomic)
+        assertEquals(0, basket.getTotalItemCount())
+        assertTrue(activity.isFinishing)
+    }
+
+    @Test
+    fun `basket entirely priced in a nonconvertible unit skips the charge choice`() {
+        prepareCustomBasket()
+        basket.addItem(Item(id = "other", priceUnit = "bux", priceAtomic = 50), 2)
+        // Other accepted units do not create a choice without a conversion quote.
+        MintManager.getInstance(activity).setMintUnits("https://mint.example", listOf("bux", "sat", "usd"))
+
+        handler.proceedToCheckout()
+
+        assertNull(ShadowDialog.getLatestDialog())
+        val intent = shadowOf(activity).nextStartedActivity
+        val snapshot = requireNotNull(CheckoutBasket.fromJson(
+            intent.getStringExtra(PaymentRequestActivity.EXTRA_CHECKOUT_BASKET_JSON),
+        ))
+        assertEquals("bux", snapshot.getChargeAmount().unit.value)
+        assertEquals(2600L, snapshot.getChargeAmount().value)
+        assertEquals(2, snapshot.items.size)
+        assertTrue(snapshot.items.all { it.priceIssuerScope == "https://mint.example" })
     }
 
     @Test
@@ -146,6 +176,8 @@ class CheckoutHandlerTest {
 
         val dialog = ShadowDialog.getLatestDialog() as AlertDialog
         assertEquals(2, dialog.listView.adapter.count)
+        assertEquals(activity.getString(R.string.mint_selection_title),
+            dialog.findViewById<TextView>(androidx.appcompat.R.id.alertTitle)?.text.toString())
         assertTrue(dialog.listView.adapter.getItem(1).toString().contains("second.example"))
         dialog.listView.performItemClick(null, 1, 1)
         val intent = shadowOf(activity).nextStartedActivity
@@ -162,6 +194,9 @@ class CheckoutHandlerTest {
     @Test
     fun `cancelling custom issuer choice leaves the basket and its price unchanged`() {
         val item = prepareCustomBasket()
+        val mints = MintManager.getInstance(activity)
+        mints.addMint("https://second.example")
+        mints.setMintUnits("https://second.example", listOf("bux"))
         handler.proceedToCheckout()
         val dialog = ShadowDialog.getLatestDialog() as AlertDialog
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).performClick()
@@ -242,8 +277,7 @@ class CheckoutHandlerTest {
         }
         basket.updateItemQuantity("espresso", 3)
         handler.proceedToCheckout()
-        val dialog = ShadowDialog.getLatestDialog() as AlertDialog
-        dialog.listView.performItemClick(null, 0, 0)
+        assertNull(ShadowDialog.getLatestDialog())
 
         val intent = shadowOf(activity).nextStartedActivity
         val snapshot = requireNotNull(CheckoutBasket.fromJson(
