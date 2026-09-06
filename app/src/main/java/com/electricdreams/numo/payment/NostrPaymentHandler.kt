@@ -2,8 +2,11 @@ package com.electricdreams.numo.payment
 
 import android.content.Context
 import android.util.Log
+import com.electricdreams.numo.R
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.core.model.UnitId
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.ndef.CashuPaymentHelper
 import com.electricdreams.numo.nostr.Nip19
@@ -155,7 +158,12 @@ class NostrPaymentHandler(
         val request = CashuPaymentHelper.createPaymentRequestWithNostr(
             amount = paymentAmount,
             unit = paymentUnit,
-            description = "Payment of $paymentAmount $paymentUnit",
+            description = context.getString(
+                R.string.payment_request_default_description,
+                UnitAmountFormatter.formatAtomic(
+                    paymentAmount, UnitDescriptor.defaultFor(UnitId.of(paymentUnit)),
+                ),
+            ),
             allowedMints = mintsForPaymentRequest,
             nprofile = profile,
         )

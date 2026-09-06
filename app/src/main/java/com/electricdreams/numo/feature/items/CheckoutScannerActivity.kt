@@ -3,7 +3,6 @@ package com.electricdreams.numo.feature.items
 import android.Manifest
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

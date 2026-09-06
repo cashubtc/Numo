@@ -884,9 +884,8 @@
     <string name="pin_reset_paste_clipboard">클립보드에서 붙여넣기</string>
     <string name="pin_reset_button">PIN 재설정</string>
     <string name="payment_request_tab_unified">통합</string>
-    <string name="payment_request_default_description">%1$d 토요일 결제</string>
-    <string name="payment_request_lightning_description">%1$d sats의 Numo POS 결제</string>
-    <string name="payment_request_lightning_description_unit">%1$s Numo POS 결제</string>
+    <string name="payment_request_default_description">%1$s 결제</string>
+    <string name="payment_request_lightning_description">%1$s Numo POS 결제</string>
     <string name="onboarding_status_generating_seed">시드 구문 생성 중…</string>
     <string name="onboarding_status_setting_up_mints">기본 민트 설정 중…</string>
     <string name="onboarding_status_initializing_wallet">지갑 초기화 중…</string>
@@ -997,4 +996,10 @@
         <item quantity="other">소수점 이하 %1$d자리까지 입력하세요</item>
     </plurals>
     <string name="item_entry_error_price_whole_number">이 단위에는 정수를 입력하세요</string>
+    <string name="item_entry_price_unit">가격 단위</string>
+    <string name="item_entry_custom_unit_warning">사용자 정의 단위는 다른 단위와 함께 사용할 수 없습니다. 자금은 발행한 민트에 남습니다.</string>
+    <string name="item_entry_unsupported_unit_warning">추가된 민트 중 이 상품의 단위를 지원하는 민트가 없습니다. 청구하기 전에 호환되는 민트를 추가하세요.</string>
+    <string name="item_entry_local_currency_conversion_label">%1$s · 청구 시 환산</string>
+    <string name="item_entry_unscoped_unit_label">%1$s · 발행자 미지정</string>
+    <string name="item_entry_error_price_too_large">가격이 너무 큽니다</string>
 </resources>

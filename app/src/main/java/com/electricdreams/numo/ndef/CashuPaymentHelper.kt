@@ -19,7 +19,6 @@ import org.cashudevkit.MintUrl
 import org.cashudevkit.ReceiveOptions
 import org.cashudevkit.SplitTarget
 import org.cashudevkit.Token as CdkToken
-import java.math.BigInteger
 
 /**
  * Helper class for Cashu payment-related operations.
@@ -86,12 +85,6 @@ object CashuPaymentHelper {
             else -> return null
         }
         return UnitId.ofOrNull(value)
-    }
-
-    internal fun unitsMatch(actualUnit: String?, expectedUnit: String): Boolean {
-        val actual = UnitId.ofOrNull(actualUnit) ?: return false
-        val expected = UnitId.ofOrNull(expectedUnit) ?: return false
-        return !actual.isReserved && !expected.isReserved && actual == expected
     }
 
     private fun requireExpectedUnit(actualUnit: String?, expectedUnit: String, source: String): UnitId {

@@ -7,17 +7,13 @@ import com.electricdreams.numo.core.dev.WalletLogger
 import com.electricdreams.numo.core.model.UnitFeaturePolicy
 import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.util.MintManager
-import com.electricdreams.numo.nostr.Bech32
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.cashudevkit.Amount as CdkAmount
-import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.FinalizedMelt
 import org.cashudevkit.MeltQuote
 import org.cashudevkit.MintUrl
 import org.cashudevkit.QuoteState
-import java.security.MessageDigest
-import kotlin.math.roundToLong
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import org.cashudevkit.MeltConfirmOptions
 

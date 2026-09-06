@@ -11,8 +11,8 @@
     <string name="pos_currency_switch_content_description">Trocar moeda</string>
     <string name="pos_charge_button">Cobrar</string>
     <string name="pos_charge_button_with_amount">Cobrar %1$s</string>
-    <string name="pos_charge_button_min_limit_unit">Mínimo: %1$s</string>
-    <string name="pos_charge_button_max_limit_unit">Máximo: %1$s</string>
+    <string name="pos_charge_button_min_limit">Mínimo: %1$s</string>
+    <string name="pos_charge_button_max_limit">Máximo: %1$s</string>
 
     <string name="pos_secondary_amount_btc_label">BTC</string>
     <string name="basket_charge_fiat_and_sats">Cobrar %1$s + %2$s</string>
@@ -26,4 +26,10 @@
     <string name="pos_toast_invalid_amount">Valor de pagamento inválido</string>
     <string name="pos_toast_basket_empty">Sua cesta está vazia</string>
     <string name="pos_toast_no_stock">Não há mais estoque disponível</string>
+    <string name="pos_charge_unit_selector_description">Selecionar unidade de cobrança</string>
+    <string name="pos_charge_unit_dialog_title">Unidade de cobrança</string>
+    <string name="checkout_unit_conversion_unavailable">Este cesto não pode ser convertido para uma unidade suportada pelas suas mints. Use itens com a mesma unidade ou adicione uma mint compatível.</string>
+    <string name="checkout_unit_conversion_stale">A taxa de conversão está desatualizada. Atualize a taxa e tente novamente.</string>
+    <string name="checkout_unit_invalid_item_price">Um item tem uma unidade ou um preço inválido. Edite o item antes de cobrar este cesto.</string>
+    <string name="checkout_unit_amount_too_large">O total do cesto é demasiado elevado para ser processado em segurança.</string>
 </resources>

@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.text.TextUtils
 import android.util.Log
 import com.electricdreams.numo.core.model.Item
 import org.json.JSONArray
@@ -16,7 +15,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.FileReader
 import java.io.IOException
-import java.io.InputStream
 import java.io.OutputStream
 import java.io.OutputStreamWriter
 import java.util.UUID

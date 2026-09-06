@@ -79,8 +79,8 @@ class BasketUIHandler(
             runCatching {
                 val grouped = linkedMapOf<AssetId, AtomicAmount>()
                 basketManager.getPriceLines(currencyManager.getCurrentCurrency()).forEach { line ->
-                    val current = grouped[line.amount.asset] ?: AtomicAmount.zero(line.amount.asset)
-                    grouped[line.amount.asset] = current + line.amount
+                    val current = grouped[line.asset] ?: AtomicAmount.zero(line.asset)
+                    grouped[line.asset] = current + line
                 }
                 grouped.values.joinToString(" + ") { amount ->
                     UnitAmountFormatter.formatAsset(amount)

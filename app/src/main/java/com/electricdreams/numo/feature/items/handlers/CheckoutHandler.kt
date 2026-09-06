@@ -11,7 +11,6 @@ import com.electricdreams.numo.core.model.AssetId
 import com.electricdreams.numo.core.model.AtomicAmount
 import com.electricdreams.numo.core.model.BasketNormalizationFailureReason
 import com.electricdreams.numo.core.model.BasketNormalizationResult
-import com.electricdreams.numo.core.model.BasketPriceLine
 import com.electricdreams.numo.core.model.BasketPricingEngine
 import com.electricdreams.numo.core.model.CheckoutBasket
 import com.electricdreams.numo.core.model.UnitAmountFormatter
@@ -48,7 +47,7 @@ class CheckoutHandler(
 
         val legacyFiatUnit = currencyManager.getCurrentCurrency()
         val basketSnapshot: CheckoutBasket
-        val lines: List<BasketPriceLine>
+        val lines: List<AtomicAmount>
         try {
             basketSnapshot = CheckoutBasket.fromBasketManager(
                 basketManager = basketManager,
@@ -59,7 +58,7 @@ class CheckoutHandler(
                 totalSatoshis = 0L,
             )
             lines = basketSnapshot.items.map { item ->
-                BasketPriceLine(item.uuid, item.getGrossLineAtomicAmount())
+                item.getGrossLineAtomicAmount()
             }
         } catch (e: IllegalArgumentException) {
             Log.e(TAG, "Invalid unit-aware basket price", e)
@@ -73,15 +72,13 @@ class CheckoutHandler(
 
         val engine = BasketPricingEngine(createBitcoinRates(legacyFiatUnit))
         val mintManager = MintManager.getInstance(activity)
-        val targetAssets = createTargetAssets(mintManager)
+        val targetAssets = mintManager.getSupportedChargeAssets()
         val results = targetAssets.map { target ->
             // Older custom prices may have no issuer. Resolve each compatible mint separately
             // without treating scoped prices as interchangeable.
             val scopedLines = lines.map { line ->
                 line.copy(
-                    amount = line.amount.copy(
-                        asset = resolveUnscopedPriceAsset(line.amount.asset, target),
-                    ),
+                    asset = resolveUnscopedPriceAsset(line.asset, target),
                 )
             }
             engine.normalize(scopedLines, target)
@@ -131,19 +128,11 @@ class CheckoutHandler(
                 fiatUnit = fiatUnit,
                 fiatPerBitcoin = BigDecimal.valueOf(bitcoinPrice),
                 expiresAtMillis = expiresAt,
-                provider = "bitcoin-price-worker",
             )
         }.getOrElse { error ->
             Log.e(TAG, "Could not build Bitcoin conversion quote", error)
             emptyList()
         }
-    }
-
-    /** Build only targets backed by at least one currently added, compatible mint. */
-    private fun createTargetAssets(
-        mintManager: MintManager,
-    ): List<AssetId> {
-        return mintManager.getSupportedChargeAssets()
     }
 
     private fun showChargeUnitSelector(
@@ -157,15 +146,11 @@ class CheckoutHandler(
             title = if (options.map { it.amount.unit }.distinct().size == 1) {
                 R.string.mint_selection_title
             } else {
-                R.string.checkout_charge_unit_title
+                R.string.pos_charge_unit_dialog_title
             },
-            labels = options.map { option -> formatOption(option.amount) },
+            labels = options.map { option -> UnitAmountFormatter.formatAsset(option.amount) },
         ) { index -> continueCheckout(options[index], basketSnapshot) }
         chargeUnitDialog?.setOnDismissListener { chargeUnitDialog = null }
-    }
-
-    private fun formatOption(amount: AtomicAmount): String {
-        return UnitAmountFormatter.formatAsset(amount)
     }
 
     private fun showNoChargeableUnit(

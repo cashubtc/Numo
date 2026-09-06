@@ -23,9 +23,13 @@
     <string name="pos_toast_invalid_amount">잘못된 결제 금액</string>
     <string name="basket_charge_sats_only">%1$s 청구</string>
     <string name="pos_nav_catalog_content_description">항목 목록</string>
-    <string name="pos_charge_button_min_limit">최소: %1$d sats</string>
-    <string name="pos_charge_button_max_limit">최대: %1$d sats</string>
-    <string name="pos_charge_button_min_limit_unit">최소: %1$s</string>
-    <string name="pos_charge_button_max_limit_unit">최대: %1$s</string>
+    <string name="pos_charge_button_min_limit">최소: %1$s</string>
+    <string name="pos_charge_button_max_limit">최대: %1$s</string>
     <string name="pos_charge_button_mint_disabled">발행 비활성화됨</string>
+    <string name="pos_charge_unit_selector_description">청구 단위 선택</string>
+    <string name="pos_charge_unit_dialog_title">청구 단위</string>
+    <string name="checkout_unit_conversion_unavailable">이 장바구니를 민트가 지원하는 단위로 환산할 수 없습니다. 같은 단위의 상품을 사용하거나 호환되는 민트를 추가하세요.</string>
+    <string name="checkout_unit_conversion_stale">환산 가격이 오래되었습니다. 가격을 새로고침하고 다시 시도하세요.</string>
+    <string name="checkout_unit_invalid_item_price">상품의 단위 또는 가격이 올바르지 않습니다. 청구하기 전에 상품을 수정하세요.</string>
+    <string name="checkout_unit_amount_too_large">장바구니 합계가 너무 커서 안전하게 처리할 수 없습니다.</string>
 </resources>

@@ -77,9 +77,6 @@ data class SavedBasket(
         return totals.values.toList()
     }
 
-    fun hasMixedPriceAssets(legacyFiatUnit: String): Boolean =
-        getPriceTotals(legacyFiatUnit).size > 1
-    
     /**
      * Check if basket has mixed price types (fiat and sats).
      */

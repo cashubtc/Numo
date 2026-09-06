@@ -238,14 +238,7 @@ data class Item(
         return true
     }
 
-    /**
-     * Get formatted price string for customer display (includes VAT if applicable).
-     * Uses the Amount class for consistent currency-aware formatting:
-     * - USD, GBP: period decimal (e.g., $4.20, £4.20)
-     * - EUR: comma decimal (e.g., €4,20)
-     * - JPY: no decimals (e.g., ¥420)
-     * - BTC: comma thousand separator (e.g., ₿1,000)
-     */
+    /** Format the customer-facing gross price in the item’s own unit. */
     fun getFormattedPrice(currencyCode: String): String {
         val amount = getGrossAtomicAmount(currencyCode)
         return UnitAmountFormatter.format(amount, UnitDescriptor.defaultFor(amount.unit))

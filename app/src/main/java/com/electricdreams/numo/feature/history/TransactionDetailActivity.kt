@@ -1,7 +1,6 @@
 package com.electricdreams.numo.feature.history
 
 import android.content.*
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageButton
@@ -383,20 +382,20 @@ class TransactionDetailActivity : AppCompatActivity() {
             qtyText.text = item.quantity.toString()
             nameText.text = item.displayName
 
-            val unitPrice = formatAtomicAmount(item.getGrossAtomicAmount())
+            val unitPrice = UnitAmountFormatter.formatAsset(item.getGrossAtomicAmount())
             unitPriceText.text = if (item.quantity > 1) {
                 getString(R.string.basket_receipt_item_each, unitPrice)
             } else {
                 unitPrice
             }
-            priceText.text = formatAtomicAmount(item.getGrossLineAtomicAmount())
+            priceText.text = UnitAmountFormatter.formatAsset(item.getGrossLineAtomicAmount())
 
             if (item.vatEnabled && item.vatRate > 0) {
                 val vatAmount = item.getGrossLineAtomicAmount() - item.getNetLineAtomicAmount()
                 itemView.findViewById<TextView>(R.id.vat_label).text =
                     getString(R.string.basket_receipt_vat_label, item.vatRate)
                 itemView.findViewById<TextView>(R.id.vat_amount).text =
-                    formatAtomicAmount(vatAmount)
+                    UnitAmountFormatter.formatAsset(vatAmount)
                 vatDetailRow.visibility = View.VISIBLE
             } else {
                 vatDetailRow.visibility = View.GONE
@@ -433,7 +432,7 @@ class TransactionDetailActivity : AppCompatActivity() {
                 total + item.getNetLineAtomicAmount()
             }
             subtotalLabel.text = getString(R.string.basket_receipt_subtotal_label)
-            subtotalValue.text = formatAtomicAmount(netTotal)
+            subtotalValue.text = UnitAmountFormatter.formatAsset(netTotal)
             subtotalRow.visibility = View.VISIBLE
 
             basket.items
@@ -460,7 +459,7 @@ class TransactionDetailActivity : AppCompatActivity() {
             kotlin.math.abs(entry.getBaseAmountAtomic()),
             paymentAsset,
         )
-        finalTotalValue.text = formatAtomicAmount(baseAmount)
+        finalTotalValue.text = UnitAmountFormatter.formatAsset(baseAmount)
 
         val enteredUnit = UnitId.ofOrNull(entry.getEntryUnit())
         if (paymentUnit.isSat && enteredUnit != null && !enteredUnit.isSat && entry.enteredAmount > 0) {
@@ -473,15 +472,6 @@ class TransactionDetailActivity : AppCompatActivity() {
         } else {
             satsEquivalentText.visibility = View.GONE
         }
-    }
-
-    private fun formatAtomicAmount(amount: AtomicAmount): String {
-        val formatted = UnitAmountFormatter.format(
-            amount,
-            UnitDescriptor.defaultFor(amount.unit),
-        )
-        val issuer = amount.asset.issuerScope ?: return formatted
-        return "$formatted · ${issuer.substringAfter("://").substringBefore('/')}"
     }
 
     private fun addAtomicVatRow(
@@ -509,7 +499,7 @@ class TransactionDetailActivity : AppCompatActivity() {
             setTextColor(resources.getColor(R.color.color_text_secondary, theme))
         }
         val value = TextView(this).apply {
-            text = formatAtomicAmount(amount)
+            text = UnitAmountFormatter.formatAsset(amount)
             textSize = 15f
             setTextColor(resources.getColor(R.color.color_text_secondary, theme))
         }

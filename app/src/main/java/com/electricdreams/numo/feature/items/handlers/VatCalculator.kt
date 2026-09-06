@@ -3,7 +3,6 @@ package com.electricdreams.numo.feature.items.handlers
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.AtomicAmount
 import com.electricdreams.numo.core.model.Item
-import com.electricdreams.numo.core.model.PriceType
 import com.electricdreams.numo.core.model.UnitAmountFormatter
 import com.electricdreams.numo.core.model.UnitDescriptor
 import java.math.BigDecimal

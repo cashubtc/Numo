@@ -23,9 +23,13 @@
     <string name="pos_toast_invalid_amount">無効な支払い金額</string>
     <string name="basket_charge_sats_only">%1$sを請求</string>
     <string name="pos_nav_catalog_content_description">アイテムリスト</string>
-    <string name="pos_charge_button_min_limit">最小: %1$d sats</string>
-    <string name="pos_charge_button_max_limit">最大: %1$d sats</string>
-    <string name="pos_charge_button_min_limit_unit">最小: %1$s</string>
-    <string name="pos_charge_button_max_limit_unit">最大: %1$s</string>
+    <string name="pos_charge_button_min_limit">最小: %1$s</string>
+    <string name="pos_charge_button_max_limit">最大: %1$s</string>
     <string name="pos_charge_button_mint_disabled">ミントが無効になっています</string>
+    <string name="pos_charge_unit_selector_description">請求単位を選択</string>
+    <string name="pos_charge_unit_dialog_title">請求単位</string>
+    <string name="checkout_unit_conversion_unavailable">このカートはミントが対応する単位に換算できません。同じ単位の商品を使用するか、対応するミントを追加してください。</string>
+    <string name="checkout_unit_conversion_stale">換算レートが古くなっています。更新してからもう一度お試しください。</string>
+    <string name="checkout_unit_invalid_item_price">商品の単位または価格が無効です。請求する前に商品を編集してください。</string>
+    <string name="checkout_unit_amount_too_large">カートの合計が大きすぎるため、安全に処理できません。</string>
 </resources>

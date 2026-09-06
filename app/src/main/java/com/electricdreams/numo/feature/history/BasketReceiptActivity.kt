@@ -377,7 +377,7 @@ class BasketReceiptActivity : AppCompatActivity() {
 
             b.items.forEachIndexed { index, item ->
                 val itemView = inflater.inflate(R.layout.item_receipt_line, itemsContainer, false)
-                bindItemView(itemView, item, currency)
+                bindItemView(itemView, item)
                 itemsContainer.addView(itemView)
 
                 // Add divider between items (not after last)
@@ -396,7 +396,7 @@ class BasketReceiptActivity : AppCompatActivity() {
         }
     }
 
-    private fun bindItemView(view: View, item: CheckoutBasketItem, currency: Amount.Currency) {
+    private fun bindItemView(view: View, item: CheckoutBasketItem) {
         // Quantity badge
         val quantityText = view.findViewById<TextView>(R.id.item_quantity)
         quantityText.text = item.quantity.toString()
@@ -410,7 +410,7 @@ class BasketReceiptActivity : AppCompatActivity() {
         val totalText = view.findViewById<TextView>(R.id.item_total)
         val vatDetailRow = view.findViewById<LinearLayout>(R.id.vat_detail_row)
         
-        val unitPrice = formatAtomicAmount(item.getGrossAtomicAmount())
+        val unitPrice = UnitAmountFormatter.formatAsset(item.getGrossAtomicAmount())
         unitPriceText.text = if (item.quantity > 1) "$unitPrice each" else unitPrice
         // The issuer remains in the unit-price detail, leaving the total easy to scan.
         val lineTotal = item.getGrossLineAtomicAmount()
@@ -423,7 +423,7 @@ class BasketReceiptActivity : AppCompatActivity() {
             val vatAmountText = view.findViewById<TextView>(R.id.vat_amount)
             val itemVat = item.getGrossLineAtomicAmount() - item.getNetLineAtomicAmount()
             vatLabel.text = getString(R.string.basket_receipt_vat_label, item.vatRate)
-            vatAmountText.text = formatAtomicAmount(itemVat)
+            vatAmountText.text = UnitAmountFormatter.formatAsset(itemVat)
             vatDetailRow.visibility = View.VISIBLE
         } else {
             vatDetailRow.visibility = View.GONE
@@ -480,11 +480,11 @@ class BasketReceiptActivity : AppCompatActivity() {
                 Math.subtractExact(paidAmount.value, tipAmountSats),
                 paidAmount.asset,
             )
-            finalTotalValue.text = formatAtomicAmount(baseAmount)
+            finalTotalValue.text = UnitAmountFormatter.formatAsset(baseAmount)
             satsEquivalentText.visibility = View.GONE
             if (tipAmountSats > 0) {
-                addTipRow(Amount.Currency.BTC)
-                addTotalPaidRow(Amount.Currency.BTC, paidAmount.value)
+                addTipRow()
+                addTotalPaidRow(paidAmount.value)
             }
             return
         }
@@ -572,14 +572,14 @@ class BasketReceiptActivity : AppCompatActivity() {
 
         // Show tip as separate line AFTER total - it doesn't add to the Total for accounting
         if (tipAmountSats > 0) {
-            addTipRow(currency)
+            addTipRow()
             
             // Also add a "Total Paid" line showing the full amount with tip
-            addTotalPaidRow(currency, fullSats)
+            addTotalPaidRow(fullSats)
         }
     }
     
-    private fun addTotalPaidRow(currency: Amount.Currency, totalSats: Long) {
+    private fun addTotalPaidRow(totalSats: Long) {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(
@@ -603,7 +603,7 @@ class BasketReceiptActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            text = formatAtomicAmount(
+            text = UnitAmountFormatter.formatAsset(
                 AtomicAmount(totalSats, resolvePaidAmount().asset),
             )
             textSize = 15f
@@ -616,7 +616,7 @@ class BasketReceiptActivity : AppCompatActivity() {
         vatBreakdownContainer.addView(row)
     }
 
-    private fun addTipRow(currency: Amount.Currency) {
+    private fun addTipRow() {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             layoutParams = LinearLayout.LayoutParams(
@@ -640,7 +640,7 @@ class BasketReceiptActivity : AppCompatActivity() {
                 LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            text = formatAtomicAmount(
+            text = UnitAmountFormatter.formatAsset(
                 AtomicAmount(tipAmountSats, resolvePaidAmount().asset),
             )
             textSize = 15f
@@ -687,7 +687,7 @@ class BasketReceiptActivity : AppCompatActivity() {
     }
 
     private fun displayPaymentInfo() {
-        paidAmountText.text = formatAtomicAmount(resolvePaidAmount())
+        paidAmountText.text = UnitAmountFormatter.formatAsset(resolvePaidAmount())
     }
 
     private fun resolvePaidAmount(): AtomicAmount {
@@ -701,15 +701,6 @@ class BasketReceiptActivity : AppCompatActivity() {
         val fallbackBase = basketCharge?.value ?: 0L
         val fallbackPaid = Math.addExact(fallbackBase, tipAmountSats)
         return AtomicAmount(totalSatoshis.takeIf { it > 0L } ?: fallbackPaid, asset)
-    }
-
-    private fun formatAtomicAmount(amount: AtomicAmount): String {
-        val formatted = UnitAmountFormatter.format(
-            amount,
-            UnitDescriptor.defaultFor(amount.unit),
-        )
-        val issuer = amount.asset.issuerScope ?: return formatted
-        return "$formatted · ${issuer.substringAfter("://").substringBefore('/')}"
     }
 
     private fun addDivider(container: LinearLayout) {

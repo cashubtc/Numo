@@ -15,8 +15,8 @@ class BasketPricingEngineTest {
         val points = AssetId.mintScoped(UnitId.of("points"), "https://mint.example")
         val result = BasketPricingEngine(emptyList()).normalize(
             lines = listOf(
-                BasketPriceLine("one", AtomicAmount(40L, points)),
-                BasketPriceLine("two", AtomicAmount(2L, points)),
+                AtomicAmount(40L, points),
+                AtomicAmount(2L, points),
             ),
             target = points,
         )
@@ -24,7 +24,6 @@ class BasketPricingEngineTest {
         val chargeable = result as BasketNormalizationResult.Chargeable
         assertEquals(42L, chargeable.amount.value)
         assertEquals(points, chargeable.amount.asset)
-        assertTrue(chargeable.components.all { it.path.isEmpty() })
     }
 
     @Test
@@ -34,8 +33,8 @@ class BasketPricingEngineTest {
             fiatPerBitcoin = BigDecimal("50000"),
         )
         val lines = listOf(
-            BasketPriceLine("coffee", AtomicAmount(5_000L, usd)),
-            BasketPriceLine("tip", AtomicAmount(100_000L, sat)),
+            AtomicAmount(5_000L, usd),
+            AtomicAmount(100_000L, sat),
         )
         val engine = BasketPricingEngine(rates)
 
@@ -51,15 +50,14 @@ class BasketPricingEngineTest {
         val target = AssetId.global(UnitId.of("token"))
         val rate = UnitConversionRate(sat, target, BigDecimal("0.5"))
         val lines = listOf(
-            BasketPriceLine("a", AtomicAmount(1L, sat)),
-            BasketPriceLine("b", AtomicAmount(1L, sat)),
+            AtomicAmount(1L, sat),
+            AtomicAmount(1L, sat),
         )
 
         val result = BasketPricingEngine(listOf(rate)).normalize(lines, target)
             as BasketNormalizationResult.Chargeable
 
         assertEquals(1L, result.amount.value)
-        assertEquals(1, result.components.size)
     }
 
     @Test
@@ -67,8 +65,8 @@ class BasketPricingEngineTest {
         val points = AssetId.global(UnitId.of("points"))
         val result = BasketPricingEngine(emptyList()).normalize(
             listOf(
-                BasketPriceLine("points", AtomicAmount(10L, points)),
-                BasketPriceLine("sats", AtomicAmount(10L, sat)),
+                AtomicAmount(10L, points),
+                AtomicAmount(10L, sat),
             ),
             points,
         )
@@ -90,7 +88,7 @@ class BasketPricingEngineTest {
             expiresAtMillis = 99L,
         )
         val result = BasketPricingEngine(listOf(rate), nowMillis = 100L).normalize(
-            listOf(BasketPriceLine("line", AtomicAmount(10L, sat))),
+            listOf(AtomicAmount(10L, sat)),
             usd,
         )
 
@@ -106,7 +104,7 @@ class BasketPricingEngineTest {
         val issuerA = AssetId.mintScoped(UnitId.of("points"), "https://a.example")
         val issuerB = AssetId.mintScoped(UnitId.of("points"), "https://b.example")
         val result = BasketPricingEngine(emptyList()).normalize(
-            listOf(BasketPriceLine("line", AtomicAmount(10L, issuerA))),
+            listOf(AtomicAmount(10L, issuerA)),
             issuerB,
         )
 
@@ -122,20 +120,19 @@ class BasketPricingEngineTest {
                 UnitConversionRate(usd, eur, BigDecimal("3")),
             ),
         ).normalize(
-            listOf(BasketPriceLine("line", AtomicAmount(5L, sat))),
+            listOf(AtomicAmount(5L, sat)),
             eur,
         ) as BasketNormalizationResult.Chargeable
 
         assertEquals(30L, result.amount.value)
-        assertEquals(2, result.components.single().path.size)
     }
 
     @Test
     fun `overflow returns arithmetic failure instead of wrapping`() {
         val result = BasketPricingEngine(emptyList()).normalize(
             listOf(
-                BasketPriceLine("a", AtomicAmount(Long.MAX_VALUE, sat)),
-                BasketPriceLine("b", AtomicAmount(1L, sat)),
+                AtomicAmount(Long.MAX_VALUE, sat),
+                AtomicAmount(1L, sat),
             ),
             sat,
         )
@@ -143,14 +140,4 @@ class BasketPricingEngineTest {
         assertTrue(result is BasketNormalizationResult.ArithmeticFailure)
     }
 
-    @Test
-    fun `chargeable targets exclude unsupported candidates`() {
-        val points = AssetId.global(UnitId.of("points"))
-        val results = BasketPricingEngine(emptyList()).chargeableTargets(
-            lines = listOf(BasketPriceLine("line", AtomicAmount(1L, points))),
-            candidates = listOf(sat, points),
-        )
-
-        assertEquals(listOf(points), results.map { it.amount.asset })
-    }
 }

@@ -40,7 +40,6 @@ class PaymentReceivedActivity : AppCompatActivity() {
         const val EXTRA_TOKEN = "extra_token"
         const val EXTRA_AMOUNT = "extra_amount"
         const val EXTRA_UNIT = "extra_unit"
-        const val EXTRA_ISSUER_SCOPE = "extra_issuer_scope"
         const val EXTRA_FROM_NFC_ANIMATION = "extra_from_nfc_animation"
         private const val TAG = "PaymentReceivedActivity"
     }
@@ -56,7 +55,6 @@ class PaymentReceivedActivity : AppCompatActivity() {
     private var tokenString: String? = null
     private var amount: Long = 0
     private var unit: UnitId = UnitId.SAT
-    private var issuerScope: String? = null
     private var fromNfcAnimation: Boolean = false
     
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -107,9 +105,6 @@ class PaymentReceivedActivity : AppCompatActivity() {
         unit = UnitId.ofOrNull(intent.getStringExtra(EXTRA_UNIT) ?: legacyUnit)
             ?.takeUnless { it.isReserved }
             ?: UnitId.SAT
-        issuerScope = intent.getStringExtra(EXTRA_ISSUER_SCOPE)
-            ?.trim()
-            ?.takeIf { it.isNotEmpty() }
         
         // Parse token to extract amount and unit if provided
         tokenString?.takeIf { it.isNotBlank() }?.let(::parseToken)

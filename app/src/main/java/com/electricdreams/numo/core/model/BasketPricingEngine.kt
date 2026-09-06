@@ -10,7 +10,6 @@ data class UnitConversionRate(
     val target: AssetId,
     val targetAtomicPerSourceAtomic: BigDecimal,
     val expiresAtMillis: Long? = null,
-    val provider: String? = null,
 ) {
     init {
         require(source != target) { "A conversion rate must change the asset" }
@@ -31,7 +30,6 @@ data class UnitConversionRate(
             RoundingMode.HALF_EVEN,
         ),
         expiresAtMillis = expiresAtMillis,
-        provider = provider,
     )
 
     companion object {
@@ -45,7 +43,6 @@ data class UnitConversionRate(
             fiatUnit: UnitId,
             fiatPerBitcoin: BigDecimal,
             expiresAtMillis: Long? = null,
-            provider: String? = null,
         ): List<UnitConversionRate> {
             require(fiatPerBitcoin.signum() > 0) { "Bitcoin price must be positive" }
             val fiatDescriptor = UnitDescriptor.defaultFor(fiatUnit)
@@ -66,7 +63,6 @@ data class UnitConversionRate(
                 target = AssetId.global(fiatUnit),
                 targetAtomicPerSourceAtomic = fiatAtomicPerSat,
                 expiresAtMillis = expiresAtMillis,
-                provider = provider,
             )
             return listOf(satToFiat, satToFiat.inverse())
         }
@@ -74,11 +70,6 @@ data class UnitConversionRate(
         private const val SATS_PER_BITCOIN = 100_000_000L
     }
 }
-
-data class BasketPriceLine(
-    val reference: String,
-    val amount: AtomicAmount,
-)
 
 enum class BasketNormalizationFailureReason {
     MISSING_CONVERSION,
@@ -90,18 +81,11 @@ data class BasketNormalizationFailure(
     val reason: BasketNormalizationFailureReason,
 )
 
-data class AppliedBasketConversion(
-    val sourceAmount: AtomicAmount,
-    val targetAmount: AtomicAmount,
-    val path: List<UnitConversionRate>,
-)
-
 sealed interface BasketNormalizationResult {
     data object Empty : BasketNormalizationResult
 
     data class Chargeable(
         val amount: AtomicAmount,
-        val components: List<AppliedBasketConversion>,
     ) : BasketNormalizationResult
 
     data class Unsupported(
@@ -129,7 +113,7 @@ class BasketPricingEngine(
 ) {
 
     fun normalize(
-        lines: List<BasketPriceLine>,
+        lines: List<AtomicAmount>,
         target: AssetId,
     ): BasketNormalizationResult {
         if (lines.isEmpty()) return BasketNormalizationResult.Empty
@@ -163,19 +147,15 @@ class BasketPricingEngine(
         }
 
         return try {
-            val components = grouped.values.map { sourceAmount ->
+            val total = grouped.values.fold(AtomicAmount.zero(target)) { sum, sourceAmount ->
                 val path = if (sourceAmount.asset == target || sourceAmount.value == 0L) {
                     emptyList()
                 } else {
                     checkNotNull(findPath(sourceAmount.asset, target, usableRates))
                 }
-                val targetAmount = applyPath(sourceAmount, target, path)
-                AppliedBasketConversion(sourceAmount, targetAmount, path)
+                sum + applyPath(sourceAmount, target, path)
             }
-            val total = components.fold(AtomicAmount.zero(target)) { sum, component ->
-                sum + component.targetAmount
-            }
-            BasketNormalizationResult.Chargeable(total, components)
+            BasketNormalizationResult.Chargeable(total)
         } catch (e: ArithmeticException) {
             BasketNormalizationResult.ArithmeticFailure(
                 target = target,
@@ -184,20 +164,11 @@ class BasketPricingEngine(
         }
     }
 
-    fun chargeableTargets(
-        lines: List<BasketPriceLine>,
-        candidates: Collection<AssetId>,
-    ): List<BasketNormalizationResult.Chargeable> {
-        return candidates.distinct().mapNotNull { candidate ->
-            normalize(lines, candidate) as? BasketNormalizationResult.Chargeable
-        }
-    }
-
-    private fun groupLines(lines: List<BasketPriceLine>): LinkedHashMap<AssetId, AtomicAmount> {
+    private fun groupLines(lines: List<AtomicAmount>): LinkedHashMap<AssetId, AtomicAmount> {
         val grouped = linkedMapOf<AssetId, AtomicAmount>()
         lines.forEach { line ->
-            val current = grouped[line.amount.asset] ?: AtomicAmount.zero(line.amount.asset)
-            grouped[line.amount.asset] = current + line.amount
+            val current = grouped[line.asset] ?: AtomicAmount.zero(line.asset)
+            grouped[line.asset] = current + line
         }
         return grouped
     }

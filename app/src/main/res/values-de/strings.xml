@@ -557,7 +557,6 @@
     <string name="item_entry_error_price_whole_number">Gib für diese Einheit eine ganze Zahl ein</string>
     <string name="item_entry_error_sats_required">Gib einen Preis in Sats ein</string>
     <string name="item_entry_error_sats_positive">Sats dürfen nicht negativ sein</string>
-    <string name="item_entry_error_sats_whole_number">Sats müssen eine ganze Zahl sein</string>
     <string name="item_entry_error_quantity_positive">Lagerbestand darf nicht negativ sein</string>
     <string name="item_entry_error_threshold_positive">Schwellenwert darf nicht negativ sein</string>
 
@@ -960,9 +959,8 @@
     <string name="pin_reset_button">PIN zurücksetzen</string>
     <string name="payment_request_tab_unified">Unified</string>
     <string name="payment_request_default_method_set">%1$s als Standardzahlungsmethode festgelegt</string>
-    <string name="payment_request_default_description">Zahlung von %1$d Sats</string>
-    <string name="payment_request_lightning_description">Numo-POS-Zahlung von %1$d Sats</string>
-    <string name="payment_request_lightning_description_unit">Numo-POS-Zahlung über %1$s</string>
+    <string name="payment_request_default_description">Zahlung von %1$s</string>
+    <string name="payment_request_lightning_description">Numo-POS-Zahlung über %1$s</string>
 
     <!-- Extracted from layout hardcoded strings -->
     <string name="basket_receipt_items_header_default">ARTIKEL</string>
@@ -1096,4 +1094,10 @@
         <item quantity="other">%d Empfehlungen</item>
     </plurals>
     <string name="payment_request_error_unsupported_unit">Diese Zahlungseinheit ist nicht verfügbar. Wähle eine Einheit, die von einer deiner hinzugefügten Mints unterstützt wird.</string>
+    <string name="item_entry_price_unit">Preiseinheit</string>
+    <string name="item_entry_custom_unit_warning">Benutzerdefinierte Einheiten können nicht mit anderen Einheiten kombiniert werden. Das Guthaben bleibt bei der ausstellenden Mint.</string>
+    <string name="item_entry_unsupported_unit_warning">Keine hinzugefügte Mint unterstützt derzeit die Einheit dieses Artikels. Füge vor dem Bezahlen eine kompatible Mint hinzu.</string>
+    <string name="item_entry_local_currency_conversion_label">%1$s · Umrechnung beim Bezahlen</string>
+    <string name="item_entry_unscoped_unit_label">%1$s · Aussteller nicht angegeben</string>
+    <string name="item_entry_error_price_too_large">Der Preis ist zu hoch</string>
 </resources>

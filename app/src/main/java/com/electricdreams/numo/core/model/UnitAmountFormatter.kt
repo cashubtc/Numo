@@ -77,4 +77,20 @@ object UnitAmountFormatter {
             ?.takeIf { it.isNotBlank() }
             ?: normalized.removePrefix("https://").removePrefix("http://").substringBefore('/')
     }
+
+    /** Custom balances belong to their issuers and must never be summed across mints. */
+    fun formatBalances(
+        balances: Map<String, Long>,
+        unit: UnitId,
+        locale: Locale = Locale.getDefault(),
+    ): String {
+        val descriptor = UnitDescriptor.defaultFor(unit, locale)
+        if (descriptor.kind == UnitKind.CUSTOM && balances.isNotEmpty()) {
+            return balances.toSortedMap().entries.joinToString(" + ") { (mint, value) ->
+                formatAsset(AtomicAmount(value, AssetId.mintScoped(unit, mint)), locale)
+            }
+        }
+        val total = balances.values.fold(0L) { sum, value -> Math.addExact(sum, value) }
+        return formatAtomic(total, descriptor, locale)
+    }
 }

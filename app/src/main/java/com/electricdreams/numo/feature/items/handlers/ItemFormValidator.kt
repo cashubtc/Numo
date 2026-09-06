@@ -62,82 +62,42 @@ class ItemFormValidator(
             return ValidationResult(false)
         }
 
-        // Validate and get price based on type
-        var fiatPrice = 0.0
-        var satsPrice = 0L
-
-        when (pricingHandler.getCurrentPriceType()) {
-            PriceType.FIAT -> {
-                val priceInput = pricingHandler.getPriceInput()
-                val priceStr = priceInput.text.toString().trim()
-                if (priceStr.isEmpty()) {
-                    priceInput.error = activity.getString(R.string.item_entry_error_price_required)
-                    priceInput.requestFocus()
-                    return ValidationResult(false)
-                }
-
-                // Normalize decimal separator: replace comma with period for parsing
-                val normalizedPriceStr = priceStr.replace(",", ".")
-                val enteredPrice = normalizedPriceStr.toDoubleOrNull() ?: 0.0
-                if (enteredPrice < 0 || !enteredPrice.isFinite()) {
-                    priceInput.error = activity.getString(R.string.item_entry_error_price_positive)
-                    priceInput.requestFocus()
-                    return ValidationResult(false)
-                }
-
-                // Validate the selected unit's precision, including integer-only custom units.
-                if (!pricingHandler.isValidFiatPrice(priceStr)) {
-                    pricingHandler.showPricePrecisionError()
-                    priceInput.requestFocus()
-                    return ValidationResult(false)
-                }
-
-                fiatPrice = enteredPrice
+        val isSats = pricingHandler.getCurrentPriceType() == PriceType.SATS
+        val priceInput = if (isSats) pricingHandler.getSatsInput() else pricingHandler.getPriceInput()
+        val price = priceInput.text.toString().trim()
+        val inputError = when {
+            price.isEmpty() -> if (isSats) {
+                R.string.item_entry_error_sats_required
+            } else {
+                R.string.item_entry_error_price_required
             }
-            PriceType.SATS -> {
-                val satsInput = pricingHandler.getSatsInput()
-                val satsStr = satsInput.text.toString().trim()
-                if (satsStr.isEmpty()) {
-                    satsInput.error = activity.getString(R.string.item_entry_error_sats_required)
-                    satsInput.requestFocus()
-                    return ValidationResult(false)
-                }
-
-                satsPrice = satsStr.toLongOrNull() ?: 0L
-                if (satsPrice < 0) {
-                    satsInput.error = activity.getString(R.string.item_entry_error_sats_positive)
-                    satsInput.requestFocus()
-                    return ValidationResult(false)
-                }
-
-                // Validate it's an integer (no decimals)
-                if (satsStr.contains(".") || satsStr.contains(",")) {
-                    satsInput.error = activity.getString(R.string.item_entry_error_sats_whole_number)
-                    satsInput.requestFocus()
-                    return ValidationResult(false)
-                }
+            price.startsWith("-") -> if (isSats) {
+                R.string.item_entry_error_sats_positive
+            } else {
+                R.string.item_entry_error_price_positive
             }
+            else -> null
+        }
+        if (inputError != null) {
+            priceInput.error = activity.getString(inputError)
+            priceInput.requestFocus()
+            return ValidationResult(false)
+        }
+        if (!pricingHandler.isValidFiatPrice(price)) {
+            pricingHandler.showPricePrecisionError()
+            priceInput.requestFocus()
+            return ValidationResult(false)
         }
 
         val enteredAtomic = try {
             pricingHandler.getEnteredAtomicAmount()
         } catch (e: ArithmeticException) {
-            val input = if (pricingHandler.getCurrentPriceType() == PriceType.SATS) {
-                pricingHandler.getSatsInput()
-            } else {
-                pricingHandler.getPriceInput()
-            }
-            input.error = activity.getString(R.string.item_entry_error_price_too_large)
-            input.requestFocus()
+            priceInput.error = activity.getString(R.string.item_entry_error_price_too_large)
+            priceInput.requestFocus()
             return ValidationResult(false)
         } catch (e: IllegalArgumentException) {
-            val input = if (pricingHandler.getCurrentPriceType() == PriceType.SATS) {
-                pricingHandler.getSatsInput()
-            } else {
-                pricingHandler.getPriceInput()
-            }
             pricingHandler.showPricePrecisionError()
-            input.requestFocus()
+            priceInput.requestFocus()
             return ValidationResult(false)
         }
         val vatAmounts = try {
@@ -147,23 +107,13 @@ class ItemFormValidator(
                 priceIncludesVat = pricingHandler.isPriceIncludesVat(),
             )
         } catch (e: ArithmeticException) {
-            val input = if (pricingHandler.getCurrentPriceType() == PriceType.SATS) {
-                pricingHandler.getSatsInput()
-            } else {
-                pricingHandler.getPriceInput()
-            }
-            input.error = activity.getString(R.string.item_entry_error_price_too_large)
-            input.requestFocus()
+            priceInput.error = activity.getString(R.string.item_entry_error_price_too_large)
+            priceInput.requestFocus()
             return ValidationResult(false)
         }
-        if (enteredAtomic.unit.isSat) {
-            satsPrice = vatAmounts.net.value
-            fiatPrice = 0.0
-        } else {
-            fiatPrice = vatAmounts.net
-                .toMajorUnits(pricingHandler.getSelectedUnitDescriptor())
-                .toDouble()
-            satsPrice = 0L
+        val satsPrice = if (isSats) vatAmounts.net.value else 0L
+        val fiatPrice = if (isSats) 0.0 else {
+            vatAmounts.net.toMajorUnits(pricingHandler.getSelectedUnitDescriptor()).toDouble()
         }
 
         // Validate inventory if tracking enabled

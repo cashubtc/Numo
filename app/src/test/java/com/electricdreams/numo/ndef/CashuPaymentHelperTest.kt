@@ -71,15 +71,6 @@ class CashuPaymentHelperTest {
     }
 
     @Test
-    fun `unit matching is exact canonical and rejects reserved unit`() {
-        assertTrue(CashuPaymentHelper.unitsMatch("SAT", "sats"))
-        assertTrue(CashuPaymentHelper.unitsMatch("Points", "points"))
-        assertFalse(CashuPaymentHelper.unitsMatch("sat", "points"))
-        assertFalse(CashuPaymentHelper.unitsMatch(null, "sat"))
-        assertFalse(CashuPaymentHelper.unitsMatch("auth", "auth"))
-    }
-
-    @Test
     fun `payment request carries explicit custom unit amount and mints`() {
         val generated = CashuPaymentHelper.createPaymentRequest(
             amount = 42L,

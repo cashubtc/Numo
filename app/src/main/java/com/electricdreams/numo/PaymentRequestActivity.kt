@@ -912,7 +912,10 @@ class PaymentRequestActivity : AppCompatActivity() {
             val generatedHce = CashuPaymentHelper.createPaymentRequest(
                 amount = paymentAmount,
                 unit = activeUnit,
-                description = "Payment of $paymentAmount $activeUnit",
+                description = getString(
+                    R.string.payment_request_default_description,
+                    formatPaymentAmountFallback(paymentAmount, paymentUnit),
+                ),
                 allowedMints = mintsForPaymentRequest,
             )
             hcePaymentRequest = generatedHce?.original

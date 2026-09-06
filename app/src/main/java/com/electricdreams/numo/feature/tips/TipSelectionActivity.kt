@@ -1,7 +1,5 @@
 package com.electricdreams.numo.feature.tips
 
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
@@ -962,7 +960,8 @@ class TipSelectionActivity : AppCompatActivity() {
         
         // Validate total against mint limits (base + tip)
         val mintManager = MintManager.getInstance(this)
-        val preferredMint = mintManager.getPreferredLightningMint(paymentUnit.value)
+        val preferredMint = paymentIssuerScope
+            ?: mintManager.getPreferredLightningMint(paymentUnit.value)
         
         if (preferredMint != null) {
             // Get raw mint info and parse limits directly
@@ -1005,11 +1004,11 @@ class TipSelectionActivity : AppCompatActivity() {
             if (!limitCheck.isValid) {
                 val errorMsg = when (limitCheck.limitType) {
                     MintLimitChecker.LimitType.MAX -> getString(
-                        R.string.pos_charge_button_max_limit_unit,
+                        R.string.pos_charge_button_max_limit,
                         formatPaymentAtomic(limitCheck.maxAmount ?: 0L),
                     )
                     MintLimitChecker.LimitType.MIN -> getString(
-                        R.string.pos_charge_button_min_limit_unit,
+                        R.string.pos_charge_button_min_limit,
                         formatPaymentAtomic(limitCheck.minAmount ?: 0L),
                     )
                     else -> getString(R.string.pos_charge_button_mint_disabled)

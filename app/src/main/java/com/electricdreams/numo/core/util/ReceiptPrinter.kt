@@ -1,5 +1,4 @@
 package com.electricdreams.numo.core.util
-import com.electricdreams.numo.R
 
 import android.content.Context
 import android.content.Intent
@@ -85,15 +84,6 @@ class ReceiptPrinter(private val context: Context) {
         val fallback = data.basket?.getChargeAmount()?.value ?: 0L
         val value = data.totalSatoshis.takeIf { it > 0L } ?: fallback
         return AtomicAmount(value, asset)
-    }
-
-    private fun formatAtomic(amount: AtomicAmount): String {
-        val formatted = UnitAmountFormatter.format(
-            amount,
-            UnitDescriptor.defaultFor(amount.unit),
-        )
-        val issuer = amount.asset.issuerScope ?: return formatted
-        return "$formatted · ${issuer.substringAfter("://").substringBefore('/')}"
     }
 
     /**
@@ -204,8 +194,8 @@ class ReceiptPrinter(private val context: Context) {
                     itemName
                 }
                 
-                val unitPrice = formatAtomic(item.getGrossAtomicAmount())
-                val lineTotal = formatAtomic(item.getGrossLineAtomicAmount())
+                val unitPrice = UnitAmountFormatter.formatAsset(item.getGrossAtomicAmount())
+                val lineTotal = UnitAmountFormatter.formatAsset(item.getGrossLineAtomicAmount())
 
                 sb.appendLine(truncatedName)
                 sb.appendLine(leftRight("  ${item.quantity} x $unitPrice", lineTotal))
@@ -214,7 +204,7 @@ class ReceiptPrinter(private val context: Context) {
                     val vatAmount = item.getGrossLineAtomicAmount() -
                         item.getNetLineAtomicAmount()
                     sb.appendLine(
-                        "  (incl. ${item.vatRate}% VAT: ${formatAtomic(vatAmount)})",
+                        "  (incl. ${item.vatRate}% VAT: ${UnitAmountFormatter.formatAsset(vatAmount)})",
                     )
                 }
                 
@@ -224,7 +214,7 @@ class ReceiptPrinter(private val context: Context) {
             // No basket - single "Payment" line
             sb.appendLine("Payment")
             if (!paidAmount.unit.isSat) {
-                val formatted = formatAtomic(paidAmount)
+                val formatted = UnitAmountFormatter.formatAsset(paidAmount)
                 sb.appendLine(leftRight("  1 x $formatted", formatted))
             } else if (data.enteredAmount > 0) {
                 sb.appendLine(leftRight("  1 x ${formatFiat(data.enteredAmount)}", formatFiat(data.enteredAmount)))
@@ -285,7 +275,7 @@ class ReceiptPrinter(private val context: Context) {
                 Math.subtractExact(totalSats, data.tipAmountSats),
                 paidAmount.asset,
             )
-            sb.appendLine(leftRight("TOTAL:", formatAtomic(baseAmount)))
+            sb.appendLine(leftRight("TOTAL:", UnitAmountFormatter.formatAsset(baseAmount)))
         } else if (showSatsAsPrimary || (basket == null && data.enteredAmount == 0L)) {
             // Primary: Sats (base amount)
             sb.appendLine(leftRight("TOTAL:", formatSats(baseSats)))
@@ -314,10 +304,10 @@ class ReceiptPrinter(private val context: Context) {
             sb.appendLine(
                 leftRight(
                     tipLabel,
-                    formatAtomic(AtomicAmount(data.tipAmountSats, paidAmount.asset)),
+                    UnitAmountFormatter.formatAsset(AtomicAmount(data.tipAmountSats, paidAmount.asset)),
                 ),
             )
-            sb.appendLine(leftRight("TOTAL PAID:", formatAtomic(paidAmount)))
+            sb.appendLine(leftRight("TOTAL PAID:", UnitAmountFormatter.formatAsset(paidAmount)))
             sb.appendLine()
         }
 
@@ -352,7 +342,7 @@ class ReceiptPrinter(private val context: Context) {
         }
         sb.appendLine(leftRight("Payment:", paymentMethod))
         
-        sb.appendLine(leftRight("Paid:", formatAtomic(paidAmount)))
+        sb.appendLine(leftRight("Paid:", UnitAmountFormatter.formatAsset(paidAmount)))
         sb.appendLine(leftRight("Status:", "✓ PAID"))
 
         data.mintUrl?.let { url ->
@@ -410,13 +400,13 @@ class ReceiptPrinter(private val context: Context) {
         // Build items HTML
         val itemsHtml = if (basket != null && basket.items.isNotEmpty()) {
             basket.items.joinToString("") { item ->
-                val lineTotal = htmlEncode(formatAtomic(item.getGrossLineAtomicAmount()))
-                val unitPrice = htmlEncode(formatAtomic(item.getGrossAtomicAmount()))
+                val lineTotal = htmlEncode(UnitAmountFormatter.formatAsset(item.getGrossLineAtomicAmount()))
+                val unitPrice = htmlEncode(UnitAmountFormatter.formatAsset(item.getGrossAtomicAmount()))
                 val vatInfo = if (item.vatEnabled && item.vatRate > 0) {
                     val vatAmount = item.getGrossLineAtomicAmount() -
                         item.getNetLineAtomicAmount()
                     "<div class=\"vat-detail\">(incl. ${item.vatRate}% VAT: " +
-                        "${htmlEncode(formatAtomic(vatAmount))})</div>"
+                        "${htmlEncode(UnitAmountFormatter.formatAsset(vatAmount))})</div>"
                 } else {
                     ""
                 }
@@ -434,7 +424,7 @@ class ReceiptPrinter(private val context: Context) {
         } else {
             // No basket - single Payment line
             val amount = when {
-                !paidAmount.unit.isSat -> formatAtomic(paidAmount)
+                !paidAmount.unit.isSat -> UnitAmountFormatter.formatAsset(paidAmount)
                 data.enteredAmount > 0 -> formatFiat(data.enteredAmount)
                 else -> formatSats(totalSats)
             }.let(::htmlEncode)
@@ -504,7 +494,7 @@ class ReceiptPrinter(private val context: Context) {
                 Math.subtractExact(totalSats, data.tipAmountSats),
                 paidAmount.asset,
             )
-            primaryTotal = formatAtomic(baseAmount)
+            primaryTotal = UnitAmountFormatter.formatAsset(baseAmount)
             secondaryTotal = ""
         } else if (showSatsAsPrimary || (basket == null && data.enteredAmount == 0L)) {
             primaryTotal = formatSats(baseSats)
@@ -521,11 +511,11 @@ class ReceiptPrinter(private val context: Context) {
             <div class="divider"></div>
             <div class="row" style="color: #00C244; font-weight: bold;">
                 <span>$tipLabel:</span>
-                <span>${htmlEncode(formatAtomic(AtomicAmount(data.tipAmountSats, paidAmount.asset)))}</span>
+                <span>${htmlEncode(UnitAmountFormatter.formatAsset(AtomicAmount(data.tipAmountSats, paidAmount.asset)))}</span>
             </div>
             <div class="row total-row">
                 <span>TOTAL PAID:</span>
-                <span>${htmlEncode(formatAtomic(paidAmount))}</span>
+                <span>${htmlEncode(UnitAmountFormatter.formatAsset(paidAmount))}</span>
             </div>
             """
         } else ""
@@ -675,7 +665,7 @@ class ReceiptPrinter(private val context: Context) {
     </div>
     <div class="row">
         <span>Paid:</span>
-        <span>${htmlEncode(formatAtomic(paidAmount))}</span>
+        <span>${htmlEncode(UnitAmountFormatter.formatAsset(paidAmount))}</span>
     </div>
     <div class="row">
         <span>Status:</span>

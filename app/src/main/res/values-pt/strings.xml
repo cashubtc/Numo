@@ -706,9 +706,8 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="pin_reset_paste_clipboard">Colar da área de transferência</string>
     <string name="pin_reset_button">Redefinir PIN</string>
     <string name="payment_request_tab_unified">Unificado</string>
-    <string name="payment_request_default_description">Pagamento de %1$d sats</string>
-    <string name="payment_request_lightning_description">Pagamento Numo POS de %1$d sats</string>
-    <string name="payment_request_lightning_description_unit">Pagamento Numo POS de %1$s</string>
+    <string name="payment_request_default_description">Pagamento de %1$s</string>
+    <string name="payment_request_lightning_description">Pagamento Numo POS de %1$s</string>
     <string name="onboarding_add_mint_url_hint">Insira a URL do mint</string>
     <string name="onboarding_mints_popular_section_title">Mints Populares</string>
     <string name="history_dialog_dont_show_again">Não mostrar no futuro</string>
@@ -836,4 +835,10 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
         <item quantity="other">Use até %1$d casas decimais</item>
     </plurals>
     <string name="item_entry_error_price_whole_number">Introduza um número inteiro para esta unidade</string>
+    <string name="item_entry_price_unit">Unidade do preço</string>
+    <string name="item_entry_custom_unit_warning">As unidades personalizadas não podem ser combinadas com outras unidades. Os fundos permanecem na mint emissora.</string>
+    <string name="item_entry_unsupported_unit_warning">Nenhuma mint adicionada suporta atualmente a unidade deste item. Adicione uma mint compatível antes de cobrar.</string>
+    <string name="item_entry_local_currency_conversion_label">%1$s · convertido ao cobrar</string>
+    <string name="item_entry_unscoped_unit_label">%1$s · emissor não especificado</string>
+    <string name="item_entry_error_price_too_large">O preço é demasiado elevado</string>
 </resources>

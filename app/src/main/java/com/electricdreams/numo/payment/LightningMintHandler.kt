@@ -22,7 +22,6 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import org.cashudevkit.Amount as CdkAmount
-import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.MintQuote
 import org.cashudevkit.MintUrl
 import org.cashudevkit.PaymentMethod
@@ -177,7 +176,7 @@ class LightningMintHandler(
                             ),
                         )
                     context.getString(
-                        R.string.payment_request_lightning_description_unit,
+                        R.string.payment_request_lightning_description,
                         formatted,
                     )
                 } else {

@@ -1,16 +1,15 @@
 package com.electricdreams.numo.payment
 
-import android.content.Context
 import android.content.Intent
 import com.electricdreams.numo.util.startActivityForResultCompat
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.electricdreams.numo.PaymentRequestActivity
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.AssetId
 import com.electricdreams.numo.core.model.UnitId
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
 import com.electricdreams.numo.core.util.MintManager
-import com.electricdreams.numo.feature.tips.TipSelectionActivity
 import com.electricdreams.numo.feature.tips.TipsManager
 import com.electricdreams.numo.ndef.CashuPaymentHelper
 import com.electricdreams.numo.ndef.NdefHostCardEmulationService
@@ -66,7 +65,12 @@ class PaymentMethodHandler(
         val paymentRequest = CashuPaymentHelper.createPaymentRequest(
             amount = amount,
             unit = activeUnit,
-            description = "Payment of $amount $activeUnit",
+            description = activity.getString(
+                R.string.payment_request_default_description,
+                UnitAmountFormatter.formatAtomic(
+                    amount, UnitDescriptor.defaultFor(UnitId.of(activeUnit)),
+                ),
+            ),
             allowedMints = mintsForPaymentRequest,
         )?.original
             ?: run {

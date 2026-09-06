@@ -162,7 +162,6 @@ class SavedBasketTest {
         assertEquals(2, totals.size)
         assertEquals(25L, totals.single { it.asset.issuerScope?.contains("mint-a") == true }.value)
         assertEquals(7L, totals.single { it.asset.issuerScope?.contains("mint-b") == true }.value)
-        assertTrue(basket.hasMixedPriceAssets("usd"))
     }
 
     @Test(expected = ArithmeticException::class)

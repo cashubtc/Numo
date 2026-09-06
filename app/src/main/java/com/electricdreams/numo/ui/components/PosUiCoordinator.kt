@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.os.Vibrator
 import com.electricdreams.numo.util.getVibrator
 import com.electricdreams.numo.util.vibrateCompat
 import android.view.View
@@ -282,9 +281,6 @@ class PosUiCoordinator(
                 com.electricdreams.numo.PaymentReceivedActivity.EXTRA_UNIT,
                 chargeAsset.unit.value,
             )
-            chargeAsset.issuerScope?.let {
-                putExtra(com.electricdreams.numo.PaymentReceivedActivity.EXTRA_ISSUER_SCOPE, it)
-            }
         }
         activity.startActivity(successIntent)
     }

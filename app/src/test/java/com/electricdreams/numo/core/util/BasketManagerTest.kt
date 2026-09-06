@@ -118,7 +118,7 @@ class BasketManagerTest {
         )
         basketManager.addItem(custom, quantity = 3)
 
-        val amount = basketManager.getPriceLines("USD").single().amount
+        val amount = basketManager.getPriceLines("USD").single()
 
         assertEquals(21L, amount.value)
         assertEquals("points", amount.unit.value)

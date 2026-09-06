@@ -537,7 +537,7 @@
     <string name="item_entry_price_type_fiat">Local Currency</string>
     <string name="item_entry_price_type_bitcoin">Bitcoin</string>
     <string name="item_entry_price_unit">Price unit</string>
-    <string name="item_entry_custom_unit_warning">Custom units cannot be mixed with other units unless a conversion is configured. Funds remain at the issuing mint.</string>
+    <string name="item_entry_custom_unit_warning">Custom units cannot be mixed with other units. Funds remain at the issuing mint.</string>
     <string name="item_entry_unsupported_unit_warning">No added mint currently supports this item’s unit. Add a compatible mint before charging it.</string>
     <string name="item_entry_local_currency_conversion_label">%1$s · converted at checkout</string>
     <string name="item_entry_unscoped_unit_label">%1$s · issuer not specified</string>
@@ -582,7 +582,6 @@
     <string name="item_entry_error_price_whole_number">Enter a whole number for this unit</string>
     <string name="item_entry_error_sats_required">Enter a price in sats</string>
     <string name="item_entry_error_sats_positive">Sats can\'t be negative</string>
-    <string name="item_entry_error_sats_whole_number">Sats must be a whole number</string>
     <string name="item_entry_error_quantity_positive">Stock can\'t be negative</string>
     <string name="item_entry_error_threshold_positive">Threshold can\'t be negative</string>
 
@@ -985,9 +984,8 @@
     <string name="pin_reset_button">Reset PIN</string>
     <string name="payment_request_tab_unified">Unified</string>
     <string name="payment_request_default_method_set">%1$s set as default payment method</string>
-    <string name="payment_request_default_description">Payment of %1$d sats</string>
-    <string name="payment_request_lightning_description">Numo POS payment of %1$d sats</string>
-    <string name="payment_request_lightning_description_unit">Numo POS payment of %1$s</string>
+    <string name="payment_request_default_description">Payment of %1$s</string>
+    <string name="payment_request_lightning_description">Numo POS payment of %1$s</string>
 
     <!-- Extracted from layout hardcoded strings -->
     <string name="basket_receipt_items_header_default">ITEMS</string>

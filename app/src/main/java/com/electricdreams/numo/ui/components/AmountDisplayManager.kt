@@ -8,7 +8,6 @@ import com.electricdreams.numo.ui.util.shake
 import android.widget.Button
 import android.widget.TextView
 import com.electricdreams.numo.core.cashu.CashuWalletManager
-import android.widget.Toast
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.AssetId
 import com.electricdreams.numo.core.model.UnitAmountFormatter
@@ -250,11 +249,11 @@ class AmountDisplayManager(
                 } else {
                     val buttonText = when (limitCheck.limitType) {
                         MintLimitChecker.LimitType.MIN -> context.getString(
-                            R.string.pos_charge_button_min_limit_unit,
+                            R.string.pos_charge_button_min_limit,
                             formatLimit(limitCheck.minAmount),
                         )
                         MintLimitChecker.LimitType.MAX -> context.getString(
-                            R.string.pos_charge_button_max_limit_unit,
+                            R.string.pos_charge_button_max_limit,
                             formatLimit(limitCheck.maxAmount),
                         )
                         MintLimitChecker.LimitType.DISABLED -> context.getString(R.string.pos_charge_button_mint_disabled)

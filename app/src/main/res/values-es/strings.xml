@@ -692,9 +692,8 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="pin_reset_paste_clipboard">Pegar del portapapeles</string>
     <string name="pin_reset_button">Restablecer PIN</string>
     <string name="payment_request_tab_unified">Unificado</string>
-    <string name="payment_request_default_description">Pago de %1$d sats</string>
-    <string name="payment_request_lightning_description">Pago Numo POS de %1$d sats</string>
-    <string name="payment_request_lightning_description_unit">Pago Numo POS de %1$s</string>
+    <string name="payment_request_default_description">Pago de %1$s</string>
+    <string name="payment_request_lightning_description">Pago Numo POS de %1$s</string>
     <string name="auto_withdraw_lightning_address_valid">Dirección Lightning válida</string>
     <string name="auto_withdraw_lightning_address_invalid">Dirección Lightning no válida</string>
     <!-- BTCMap Explainer -->
@@ -756,4 +755,10 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
         <item quantity="other">Usa como máximo %1$d decimales</item>
     </plurals>
     <string name="item_entry_error_price_whole_number">Introduce un número entero para esta unidad</string>
+    <string name="item_entry_price_unit">Unidad del precio</string>
+    <string name="item_entry_custom_unit_warning">Las unidades personalizadas no se pueden combinar con otras unidades. Los fondos permanecen en la mint emisora.</string>
+    <string name="item_entry_unsupported_unit_warning">Ninguna mint añadida admite actualmente la unidad de este artículo. Añade una mint compatible antes de cobrarlo.</string>
+    <string name="item_entry_local_currency_conversion_label">%1$s · se convierte al cobrar</string>
+    <string name="item_entry_unscoped_unit_label">%1$s · emisor no especificado</string>
+    <string name="item_entry_error_price_too_large">El precio es demasiado alto</string>
 </resources>

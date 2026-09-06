@@ -2,6 +2,7 @@ package com.electricdreams.numo.feature.items.handlers
 
 import android.app.Application
 import android.text.InputType
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.AssetId
@@ -131,6 +132,25 @@ class PricingHandlerTest {
         assertEquals("2500", binding.itemPriceInput.text.toString())
         assertEquals(AtomicAmount(2500, bux), handler.getEnteredAtomicAmount())
         assertEquals(2500L, validator.validate().priceAtomic)
+    }
+
+    @Test
+    fun `VAT overflow shows an error while editing and rejects saving`() {
+        handler.setSelectedPriceAsset(bux)
+        handler.setVatFields(true, 20, false)
+        binding.itemPriceInput.setText(Long.MAX_VALUE.toString())
+
+        assertEquals(View.GONE, binding.priceBreakdownContainer.visibility)
+        assertEquals(
+            controller.get().getString(R.string.item_entry_error_price_too_large),
+            binding.fiatPriceLayout.error.toString(),
+        )
+        assertFalse(validator.validate().isValid)
+
+        binding.itemPriceInput.setText("100")
+        assertEquals(View.VISIBLE, binding.priceBreakdownContainer.visibility)
+        assertNull(binding.fiatPriceLayout.error)
+        assertEquals(120L, validator.validate().grossPriceAtomic)
     }
 
     @Test

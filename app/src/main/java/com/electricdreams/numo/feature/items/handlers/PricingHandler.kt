@@ -5,6 +5,7 @@ import android.text.InputFilter
 import android.text.InputType
 import android.text.TextWatcher
 import android.text.method.DigitsKeyListener
+import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.EditText
@@ -17,6 +18,7 @@ import com.electricdreams.numo.core.model.PriceType
 import com.electricdreams.numo.core.model.UnitDescriptor
 import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.model.UnitKind
+import com.electricdreams.numo.core.model.UnitAmountFormatter
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.util.MintManager
 import com.google.android.material.button.MaterialButton
@@ -74,8 +76,6 @@ class PricingHandler(
     }
 
     fun getCurrentPriceType(): PriceType = currentPriceType
-
-    fun getSelectedPriceAsset(): AssetId = selectedPriceAsset
 
     fun getSelectedUnitDescriptor(): UnitDescriptor =
         UnitDescriptor.defaultFor(selectedPriceAsset.unit)
@@ -258,7 +258,7 @@ class PricingHandler(
                     priceUnitOptions.add(
                         PriceUnitOption(
                             asset = AssetId.mintScoped(unit, mintUrl),
-                            label = "${descriptor.displayCode} · ${issuerLabel(mintUrl)}",
+                            label = "${descriptor.displayCode} · ${UnitAmountFormatter.issuerLabel(mintUrl)}",
                             directlyChargeable = true,
                         ),
                     )
@@ -359,12 +359,9 @@ class PricingHandler(
         return if (issuer == null) {
             context.getString(R.string.item_entry_unscoped_unit_label, code)
         } else {
-            "$code · ${issuerLabel(issuer)}"
+            "$code · ${UnitAmountFormatter.issuerLabel(issuer)}"
         }
     }
-
-    private fun issuerLabel(mintUrl: String): String =
-        mintUrl.substringAfter("://").substringBefore('/')
 
     private fun setupPriceTypeToggle() {
         if (!unitAwareMode) {
@@ -443,6 +440,9 @@ class PricingHandler(
     }
 
     private fun updatePriceBreakdown() {
+        val layout = if (currentPriceType == PriceType.SATS) satsPriceLayout else fiatPriceLayout
+        val overflowError = priceInput.context.getString(R.string.item_entry_error_price_too_large)
+        if (layout.error == overflowError) layout.error = null
         if (!switchVatEnabled.isChecked) {
             priceBreakdownContainer.visibility = View.GONE
             return
@@ -451,12 +451,19 @@ class PricingHandler(
 
         val enteredAmount = runCatching { getEnteredAtomicAmount() }
             .getOrElse { AtomicAmount.zero(selectedPriceAsset) }
-        val breakdown = VatCalculator.calculateAtomicBreakdown(
-            enteredAmount = enteredAmount,
-            descriptor = getSelectedUnitDescriptor(),
-            vatRate = getVatRate(),
-            priceIncludesVat = switchPriceIncludesVat.isChecked,
-        )
+        val breakdown = try {
+            VatCalculator.calculateAtomicBreakdown(
+                enteredAmount = enteredAmount,
+                descriptor = getSelectedUnitDescriptor(),
+                vatRate = getVatRate(),
+                priceIncludesVat = switchPriceIncludesVat.isChecked,
+            )
+        } catch (e: ArithmeticException) {
+            Log.w(TAG, "VAT preview exceeds the supported amount", e)
+            layout.error = overflowError
+            priceBreakdownContainer.visibility = View.GONE
+            return
+        }
         textNetPrice.text = breakdown.netPrice
         textVatLabel.text = breakdown.vatLabel
         textVatAmount.text = breakdown.vatAmount
@@ -523,5 +530,9 @@ class PricingHandler(
     private fun formatMajorPrice(price: BigDecimal): String {
         val fractionDigits = getSelectedUnitDescriptor().fractionDigits
         return price.setScale(fractionDigits, java.math.RoundingMode.HALF_UP).toPlainString()
+    }
+
+    companion object {
+        private const val TAG = "PricingHandler"
     }
 }

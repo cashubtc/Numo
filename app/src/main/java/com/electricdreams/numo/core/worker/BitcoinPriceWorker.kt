@@ -32,7 +32,6 @@ class BitcoinPriceWorker private constructor(context: Context) {
         private const val TAG = "BitcoinPriceWorker"
         private const val PREFS_NAME = "BitcoinPricePrefs"
         private const val KEY_PRICE_PREFIX = "btcPrice_"
-        private const val KEY_LAST_UPDATE_TIME = "lastUpdateTime"
         private const val KEY_LAST_UPDATE_TIME_PREFIX = "lastUpdateTime_"
         private const val UPDATE_INTERVAL_MINUTES = 1L // Update every minute
 
@@ -164,8 +163,8 @@ class BitcoinPriceWorker private constructor(context: Context) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         return prefs.getLong(
             KEY_LAST_UPDATE_TIME_PREFIX + currency,
-            // Compatibility with caches written before timestamps were currency-scoped.
-            prefs.getLong(KEY_LAST_UPDATE_TIME, 0L),
+            // A legacy global timestamp cannot establish this currency's freshness.
+            0L,
         )
     }
 
@@ -269,7 +268,6 @@ class BitcoinPriceWorker private constructor(context: Context) {
         val editor: SharedPreferences.Editor =
             context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
         editor.putFloat(KEY_PRICE_PREFIX + currency, price.toFloat())
-        editor.putLong(KEY_LAST_UPDATE_TIME, cachedAt)
         editor.putLong(KEY_LAST_UPDATE_TIME_PREFIX + currency, cachedAt)
         editor.apply()
     }

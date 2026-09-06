@@ -101,14 +101,4 @@ class AtomicAmountTest {
         assertEquals(BigDecimal("1500"), AtomicAmount(1500, asset).toMajorUnits(defaultDescriptor))
     }
 
-    @Test
-    fun `ulong conversion refuses values outside signed storage range`() {
-        assertEquals(
-            AtomicAmount(Long.MAX_VALUE, sat),
-            AtomicAmount.fromULong(Long.MAX_VALUE.toULong(), sat),
-        )
-        assertThrows(IllegalArgumentException::class.java) {
-            AtomicAmount.fromULong(Long.MAX_VALUE.toULong() + 1u, sat)
-        }
-    }
 }

@@ -175,9 +175,13 @@ class MintManager private constructor(context: Context) {
 
     /** Union of spendable units advertised by all mints the user has added. */
     fun getSupportedUnits(): List<UnitId> {
-        val units = allowedMints.flatMapTo(linkedSetOf()) { getMintUnits(it) }
-        if (units.isEmpty()) {
-            units.add(UnitId.ofOrNull(preferredUnit) ?: UnitId.SAT)
+        val units = allowedMints.flatMapTo(linkedSetOf()) { mintUrl ->
+            val advertised = getMintUnits(mintUrl)
+            if (advertised.isEmpty() && !hasMintUnitCache(mintUrl)) {
+                setOf(UnitId.SAT)
+            } else {
+                advertised
+            }
         }
         return units.sortedBy { it.value }
     }

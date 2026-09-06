@@ -884,9 +884,8 @@
     <string name="pin_reset_paste_clipboard">クリップボードから貼り付け</string>
     <string name="pin_reset_button">PINのリセット</string>
     <string name="payment_request_tab_unified">統合された</string>
-    <string name="payment_request_default_description">%1$d の支払い</string>
-    <string name="payment_request_lightning_description">%1$d 衛星の Numo POS 支払い</string>
-    <string name="payment_request_lightning_description_unit">Numo POS 支払い: %1$s</string>
+    <string name="payment_request_default_description">%1$sの支払い</string>
+    <string name="payment_request_lightning_description">Numo POS 支払い: %1$s</string>
     <string name="onboarding_status_generating_seed">シードフレーズを生成しています…</string>
     <string name="onboarding_status_setting_up_mints">デフォルトのミントを設定しています…</string>
     <string name="onboarding_status_initializing_wallet">ウォレットを初期化しています…</string>
@@ -997,4 +996,10 @@
         <item quantity="other">小数点以下は%1$d桁まで入力できます</item>
     </plurals>
     <string name="item_entry_error_price_whole_number">この単位には整数を入力してください</string>
+    <string name="item_entry_price_unit">価格の単位</string>
+    <string name="item_entry_custom_unit_warning">カスタム単位は他の単位と混在できません。資金は発行元のミントに残ります。</string>
+    <string name="item_entry_unsupported_unit_warning">追加済みのミントはこの商品の単位に対応していません。請求する前に対応するミントを追加してください。</string>
+    <string name="item_entry_local_currency_conversion_label">%1$s · 請求時に換算</string>
+    <string name="item_entry_unscoped_unit_label">%1$s · 発行元未指定</string>
+    <string name="item_entry_error_price_too_large">価格が大きすぎます</string>
 </resources>

@@ -20,9 +20,6 @@ data class AssetId(
         }
     }
 
-    val isMintScoped: Boolean
-        get() = issuerScope != null
-
     companion object {
         @JvmStatic
         fun global(unit: UnitId): AssetId = AssetId(unit)
@@ -94,12 +91,6 @@ data class AtomicAmount(
         @JvmStatic
         fun zero(asset: AssetId): AtomicAmount = AtomicAmount(0, asset)
 
-        @JvmStatic
-        fun fromULong(value: ULong, asset: AssetId): AtomicAmount {
-            require(value <= Long.MAX_VALUE.toULong()) { "Atomic amount exceeds Long.MAX_VALUE" }
-            return AtomicAmount(value.toLong(), asset)
-        }
-
         /**
          * Convert an exact major-unit input into its atomic representation.
          *
@@ -123,18 +114,5 @@ data class AtomicAmount(
                 .longValueExact()
             return AtomicAmount(atomicValue, asset)
         }
-    }
-}
-
-/** Unit-bearing signed value for accounting ledgers. */
-data class SignedAtomicAmount(
-    val value: Long,
-    val asset: AssetId,
-) {
-    operator fun plus(other: SignedAtomicAmount): SignedAtomicAmount {
-        require(asset == other.asset) {
-            "Cannot combine amounts in $asset and ${other.asset}"
-        }
-        return copy(value = Math.addExact(value, other.value))
     }
 }

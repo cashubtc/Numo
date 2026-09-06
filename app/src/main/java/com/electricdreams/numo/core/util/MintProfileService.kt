@@ -290,7 +290,7 @@ class MintProfileService private constructor(context: Context) {
                 if (body.isBlank()) return null
 
                 val root = JSONObject(body)
-                val keysets = root.optJSONArray("keysets") ?: return emptySet()
+                val keysets = root.optJSONArray("keysets") ?: return null
                 buildSet {
                     for (index in 0 until keysets.length()) {
                         val unit = keysets.optJSONObject(index)

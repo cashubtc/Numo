@@ -103,6 +103,20 @@ class MintProfileServiceTest {
     }
 
     @Test
+    fun `malformed keysets response falls back to keys without clearing known units`() = runBlocking {
+        val mintUrl = server.url("/").toString().removeSuffix("/")
+        mintManager.setMintUnits(mintUrl, listOf("sat"))
+        server.enqueue(MockResponse().setBody("{}"))
+        server.enqueue(MockResponse().setBody("{}"))
+        server.enqueue(MockResponse().setBody("{\"keysets\":[{\"unit\":\"sat\"}]}"))
+
+        val result = mintProfileService.fetchAndStoreMintProfile(mintUrl)
+
+        assertEquals(setOf("sat"), result.supportedUnits)
+        assertTrue(mintManager.mintSupportsUnit(mintUrl, "sat"))
+    }
+
+    @Test
     fun `validateMintUrl rejects malformed URL`() = runBlocking {
         val result = mintProfileService.validateMintUrl("not a valid url")
 

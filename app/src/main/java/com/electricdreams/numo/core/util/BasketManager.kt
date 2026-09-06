@@ -3,7 +3,7 @@ package com.electricdreams.numo.core.util
 import com.electricdreams.numo.core.model.BasketItem
 import com.electricdreams.numo.core.model.AssetId
 import com.electricdreams.numo.core.model.BasketNormalizationResult
-import com.electricdreams.numo.core.model.BasketPriceLine
+import com.electricdreams.numo.core.model.AtomicAmount
 import com.electricdreams.numo.core.model.BasketPricingEngine
 import com.electricdreams.numo.core.model.Item
 import com.electricdreams.numo.core.model.UnitConversionRate
@@ -221,17 +221,11 @@ class BasketManager private constructor() {
     }
 
     /** Snapshot all gross basket lines without dropping their unit or issuer identity. */
-    fun getPriceLines(legacyFiatUnit: String): List<BasketPriceLine> {
-        return basketItems.mapIndexed { index, basketItem ->
-            BasketPriceLine(
-                reference = basketItem.item.uuid.ifBlank { "basket-line-$index" },
-                amount = basketItem.getGrossAtomicAmount(legacyFiatUnit),
-            )
+    fun getPriceLines(legacyFiatUnit: String): List<AtomicAmount> {
+        return basketItems.map { basketItem ->
+            basketItem.getGrossAtomicAmount(legacyFiatUnit)
         }
     }
-
-    fun getPriceAssets(legacyFiatUnit: String): Set<AssetId> =
-        getPriceLines(legacyFiatUnit).mapTo(linkedSetOf()) { it.amount.asset }
 
     /**
      * Calculate the total price in satoshis (combining fiat and sats priced items).
@@ -281,8 +275,4 @@ class BasketManager private constructor() {
         
         return false
     }
-
-    /** True when checkout contains more than one economic asset, including issuer scope. */
-    fun hasMixedPriceAssets(legacyFiatUnit: String): Boolean =
-        getPriceAssets(legacyFiatUnit).size > 1
 }

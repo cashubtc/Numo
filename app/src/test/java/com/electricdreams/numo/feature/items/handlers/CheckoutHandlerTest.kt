@@ -75,7 +75,7 @@ class CheckoutHandlerTest {
         TipsManager.getInstance(activity).tipsEnabled = tipsEnabled
         handler.proceedToCheckout()
         val dialog = ShadowDialog.getLatestDialog() as AlertDialog
-        assertEquals(activity.getString(R.string.checkout_charge_unit_title),
+        assertEquals(activity.getString(R.string.pos_charge_unit_dialog_title),
             dialog.findViewById<TextView>(androidx.appcompat.R.id.alertTitle)?.text.toString())
         assertNotNull(dialog.listView.parent)
         assertEquals(2, dialog.listView.adapter.count)
@@ -202,7 +202,7 @@ class CheckoutHandlerTest {
         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).performClick()
 
         assertEquals(1, basket.getTotalItemCount())
-        assertEquals(2500L, basket.getPriceLines("USD").single().amount.value)
+        assertEquals(2500L, basket.getPriceLines("USD").single().value)
         assertNull(item.priceIssuerScope)
         assertNull(shadowOf(activity).nextStartedActivity)
         assertFalse(activity.isFinishing)

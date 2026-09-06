@@ -53,6 +53,16 @@ class UnitAmountFormatterTest {
     }
 
     @Test
+    fun `custom balances keep identically named assets separate by issuer`() {
+        val balances = mapOf("https://mint-b.example" to 7L, "https://mint-a.example" to 25L)
+        assertEquals(
+            "25 POINTS · mint-a.example + 7 POINTS · mint-b.example",
+            UnitAmountFormatter.formatBalances(balances, UnitId.of("points"), Locale.US),
+        )
+        assertEquals("$0.32", UnitAmountFormatter.formatBalances(balances, UnitId.of("usd"), Locale.US))
+    }
+
+    @Test
     fun `asset formatter does not add issuer text for a global unit`() {
         val amount = AtomicAmount(42, AssetId.global(UnitId.of("points")))
 

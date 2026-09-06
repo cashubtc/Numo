@@ -142,6 +142,24 @@ class MintManagerTest {
     }
 
     @Test
+    fun `discovering custom units preserves offline legacy sat mints`() {
+        val customMint = "https://custom.example"
+        mintManager.addMint(customMint)
+        mintManager.setMintUnits(customMint, listOf("points"))
+
+        assertTrue(mintManager.getSupportedUnits().contains(UnitId.SAT))
+        assertTrue(mintManager.getSupportedChargeAssets().contains(AssetId.global(UnitId.SAT)))
+    }
+
+    @Test
+    fun `an explicitly empty unit list does not advertise the preferred unit`() {
+        mintManager.getAllowedMints().forEach { mintManager.setMintUnits(it, emptyList()) }
+
+        assertTrue(mintManager.getSupportedUnits().isEmpty())
+        assertTrue(mintManager.getSupportedChargeAssets().isEmpty())
+    }
+
+    @Test
     fun `unknown metadata only uses legacy sat fallback`() {
         val mint = "https://unknown-metadata.example"
         mintManager.addMint(mint)
