@@ -101,14 +101,14 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/charge_unit_selector"
+                style="@style/Widget.Numo.Button.Charge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:minHeight="@dimen/icon_size_large"
                 android:layout_marginHorizontal="@dimen/space_xl"
                 android:layout_marginTop="@dimen/space_s"
-                android:background="@drawable/bg_unit_selector_dark"
                 android:clickable="true"
                 android:contentDescription="@string/pos_charge_unit_selector_description"
                 android:drawableEnd="@drawable/ic_chevron_down"
@@ -120,9 +120,6 @@
                 android:ellipsize="end"
                 android:paddingHorizontal="@dimen/space_l"
                 android:paddingVertical="@dimen/space_s"
-                android:textColor="@color/color_bg_white"
-                android:textSize="16sp"
-                android:textStyle="bold"
                 android:visibility="gone"
                 app:drawableTint="@color/color_bg_white"
                 app:layout_constrainedWidth="true"

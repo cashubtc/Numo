@@ -5,7 +5,6 @@ import android.content.Intent
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import com.electricdreams.numo.ui.components.UnitPickerDialog
 import com.electricdreams.numo.PaymentRequestActivity
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.AssetId
@@ -19,12 +18,14 @@ import com.electricdreams.numo.core.model.UnitAmountFormatter
 import com.electricdreams.numo.core.model.UnitConversionRate
 import com.electricdreams.numo.core.model.UnitDescriptor
 import com.electricdreams.numo.core.model.UnitId
+import com.electricdreams.numo.core.model.UnitKind
 import com.electricdreams.numo.core.util.BasketManager
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.feature.tips.TipSelectionActivity
 import com.electricdreams.numo.feature.tips.TipsManager
+import com.electricdreams.numo.ui.components.UnitPickerDialog
 import java.math.BigDecimal
 
 /** Handles unit-aware basket normalization and navigation to payment. */
@@ -46,8 +47,20 @@ class CheckoutHandler(
         }
 
         val legacyFiatUnit = currencyManager.getCurrentCurrency()
-        val lines = try {
-            basketManager.getPriceLines(legacyFiatUnit)
+        val basketSnapshot: CheckoutBasket
+        val lines: List<BasketPriceLine>
+        try {
+            basketSnapshot = CheckoutBasket.fromBasketManager(
+                basketManager = basketManager,
+                currency = legacyFiatUnit,
+                bitcoinPrice = bitcoinPriceWorker.getCurrentPrice().takeIf {
+                    it > 0.0 && it.isFinite()
+                },
+                totalSatoshis = 0L,
+            )
+            lines = basketSnapshot.items.map { item ->
+                BasketPriceLine(item.uuid, item.getGrossLineAtomicAmount())
+            }
         } catch (e: IllegalArgumentException) {
             Log.e(TAG, "Invalid unit-aware basket price", e)
             showError(R.string.checkout_unit_invalid_item_price)
@@ -61,7 +74,19 @@ class CheckoutHandler(
         val engine = BasketPricingEngine(createBitcoinRates(legacyFiatUnit))
         val mintManager = MintManager.getInstance(activity)
         val targetAssets = createTargetAssets(mintManager)
-        val chargeableOptions = engine.chargeableTargets(lines, targetAssets)
+        val results = targetAssets.map { target ->
+            // Older custom prices may have no issuer. Offer a separate, explicit choice for
+            // each compatible mint without treating scoped prices as interchangeable.
+            val scopedLines = lines.map { line ->
+                line.copy(
+                    amount = line.amount.copy(
+                        asset = resolveUnscopedPriceAsset(line.amount.asset, target),
+                    ),
+                )
+            }
+            engine.normalize(scopedLines, target)
+        }
+        val chargeableOptions = results.filterIsInstance<BasketNormalizationResult.Chargeable>()
             .filter { it.amount.value > 0L }
             .sortedWith(
                 compareBy<BasketNormalizationResult.Chargeable> {
@@ -70,15 +95,26 @@ class CheckoutHandler(
                     .thenBy { it.amount.asset.issuerScope.orEmpty() },
             )
 
+        val requiresIssuerChoice = lines.any { needsIssuer(it.amount.asset) }
         when {
-            chargeableOptions.isEmpty() -> showNoChargeableUnit(engine, lines, targetAssets)
-            chargeableOptions.size == 1 -> continueCheckout(
+            chargeableOptions.isEmpty() -> showNoChargeableUnit(results)
+            chargeableOptions.size == 1 && !requiresIssuerChoice -> continueCheckout(
                 chargeableOptions.single(),
-                legacyFiatUnit,
+                basketSnapshot,
             )
-            else -> showChargeUnitSelector(chargeableOptions, legacyFiatUnit)
+            else -> showChargeUnitSelector(chargeableOptions, basketSnapshot)
         }
     }
+
+    private fun needsIssuer(asset: AssetId): Boolean =
+        asset.issuerScope == null && UnitDescriptor.defaultFor(asset.unit).kind == UnitKind.CUSTOM
+
+    private fun resolveUnscopedPriceAsset(source: AssetId, target: AssetId): AssetId =
+        if (needsIssuer(source) && source.unit == target.unit && target.issuerScope != null) {
+            target
+        } else {
+            source
+        }
 
     private fun createBitcoinRates(legacyFiatUnit: String): List<UnitConversionRate> {
         val bitcoinPrice = bitcoinPriceWorker.getCurrentPrice()
@@ -113,7 +149,7 @@ class CheckoutHandler(
 
     private fun showChargeUnitSelector(
         options: List<BasketNormalizationResult.Chargeable>,
-        legacyFiatUnit: String,
+        basketSnapshot: CheckoutBasket,
     ) {
         if (activity.isFinishing || chargeUnitDialog?.isShowing == true) return
 
@@ -121,7 +157,7 @@ class CheckoutHandler(
             context = activity,
             title = R.string.checkout_charge_unit_title,
             labels = options.map { option -> formatOption(option.amount) },
-        ) { index -> continueCheckout(options[index], legacyFiatUnit) }
+        ) { index -> continueCheckout(options[index], basketSnapshot) }
         chargeUnitDialog?.setOnDismissListener { chargeUnitDialog = null }
     }
 
@@ -130,11 +166,8 @@ class CheckoutHandler(
     }
 
     private fun showNoChargeableUnit(
-        engine: BasketPricingEngine,
-        lines: List<BasketPriceLine>,
-        targets: List<AssetId>,
+        results: List<BasketNormalizationResult>,
     ) {
-        val results = targets.map { engine.normalize(lines, it) }
         val hasOverflow = results.any { it is BasketNormalizationResult.ArithmeticFailure }
         val hasStaleConversion = results
             .filterIsInstance<BasketNormalizationResult.Unsupported>()
@@ -150,7 +183,7 @@ class CheckoutHandler(
 
     private fun continueCheckout(
         normalization: BasketNormalizationResult.Chargeable,
-        legacyFiatUnit: String,
+        basketSnapshot: CheckoutBasket,
     ) {
         val chargeAmount = normalization.amount
         if (chargeAmount.value <= 0L) {
@@ -162,15 +195,17 @@ class CheckoutHandler(
             chargeAmount,
             UnitDescriptor.defaultFor(chargeAmount.unit),
         )
-        val bitcoinPrice = bitcoinPriceWorker.getCurrentPrice().takeIf { it > 0.0 }
-        val checkoutBasket = CheckoutBasket.fromBasketManager(
-            basketManager = basketManager,
-            currency = legacyFiatUnit,
-            bitcoinPrice = bitcoinPrice,
+        val checkoutBasket = basketSnapshot.copy(
+            items = basketSnapshot.items.map { item ->
+                val asset = resolveUnscopedPriceAsset(item.getNetAtomicAmount().asset, chargeAmount.asset)
+                item.copy(priceIssuerScope = asset.issuerScope)
+            },
             // Kept populated for backward-compatible receipt readers. New readers use
             // chargeAmountAtomic and chargeUnit.
             totalSatoshis = chargeAmount.value,
-            chargeAmount = chargeAmount,
+            chargeAmountAtomic = chargeAmount.value,
+            chargeUnit = chargeAmount.unit.value,
+            chargeIssuerScope = chargeAmount.asset.issuerScope,
         )
         val checkoutBasketJson = checkoutBasket.toJson()
 

@@ -21,6 +21,61 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class UnitLayoutTest {
     @Test
+    fun `standard basket retains upstream row and header styling`() = verifyStandardBasketLayout()
+
+    @Test
+    @Config(qualifiers = "w360dp-h800dp-night")
+    fun `standard basket retains upstream row and header styling in dark mode`() =
+        verifyStandardBasketLayout()
+
+    private fun verifyStandardBasketLayout() {
+        val controller = Robolectric.buildActivity(Activity::class.java).setup()
+        val activity = controller.get().apply { setTheme(R.style.Theme_Numo) }
+        try {
+            val row = LayoutInflater.from(activity).inflate(R.layout.item_basket_compact, null)
+            val name = row.findViewById<TextView>(R.id.item_name)
+            val price = row.findViewById<TextView>(R.id.item_total)
+            name.text = "Cappuccino"
+            price.text = "€2.50"
+            val body = TextView(activity, Robolectric.buildAttributeSet()
+                .addAttribute(android.R.attr.textAppearance, "@style/Text.Body")
+                .build())
+            assertEquals(body.textSize, price.textSize)
+            assertEquals(body.currentTextColor, price.currentTextColor)
+            assertEquals(row, price.parent)
+            val density = activity.resources.displayMetrics.density
+            val width = (360 * density).toInt()
+            row.measure(
+                View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+            )
+            row.layout(0, 0, width, row.measuredHeight)
+            assertEquals(0, name.layout.getEllipsisCount(0))
+            assertEquals(1, price.lineCount)
+            val textContent = row.findViewById<View>(R.id.text_content)
+            val remove = row.findViewById<View>(R.id.remove_button)
+            assertTrue(price.left > textContent.right)
+            assertEquals(remove.left, price.right)
+            assertTrue(kotlin.math.abs(price.top + price.height / 2 - row.height / 2) <= 1)
+            assertEquals((72 * density).toInt(), row.height)
+
+            val screen = LayoutInflater.from(activity).inflate(R.layout.activity_item_selection, null)
+            val header = screen.findViewById<View>(R.id.basket_header)
+            (header.parent as ViewGroup).removeView(header)
+            header.findViewById<TextView>(R.id.basket_item_count).text = "1 item"
+            header.findViewById<TextView>(R.id.basket_total).text = "€2.50"
+            header.measure(
+                View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+            )
+            assertEquals(activity.resources.getDimensionPixelSize(R.dimen.top_bar_height),
+                header.measuredHeight)
+        } finally {
+            controller.pause().stop().destroy()
+        }
+    }
+
+    @Test
     fun `long custom amounts leave item names readable on narrow screens`() {
         val controller = Robolectric.buildActivity(Activity::class.java).setup()
         val activity = controller.get().apply { setTheme(R.style.Theme_Numo) }
