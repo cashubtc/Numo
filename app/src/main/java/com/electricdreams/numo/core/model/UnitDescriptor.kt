@@ -14,8 +14,8 @@ enum class UnitKind {
 /**
  * Display metadata for an atomic Cashu unit.
  *
- * This metadata never participates in amount equality. In particular, changing a custom unit's
- * label or display precision must not change already stored atomic values.
+ * This metadata never participates in amount equality. Fully custom units use whole atomic
+ * values until standardized Cashu unit metadata is supported; their precision is not configurable.
  */
 data class UnitDescriptor(
     val unit: UnitId,
@@ -27,6 +27,9 @@ data class UnitDescriptor(
     init {
         require(displayCode.isNotBlank()) { "Display code cannot be blank" }
         require(fractionDigits in 0..18) { "Fraction digits must be between 0 and 18" }
+        require(kind != UnitKind.CUSTOM || fractionDigits == 0) {
+            "Custom units must use whole numbers until standardized unit metadata is supported"
+        }
     }
 
     companion object {
@@ -50,13 +53,7 @@ data class UnitDescriptor(
                 UnitId.MSAT -> UnitDescriptor(unit, "msat", "msat", 0, UnitKind.BITCOIN)
                 UnitId.BTC -> UnitDescriptor(unit, "BTC", "BTC", 8, UnitKind.BITCOIN)
                 UnitId.AUTH -> UnitDescriptor(unit, "auth", "auth", 0, UnitKind.RESERVED)
-                else -> fromStablecoin(unit) ?: fromIso4217(unit, locale) ?: UnitDescriptor(
-                    unit = unit,
-                    displayCode = unit.value.uppercase(Locale.ROOT),
-                    symbol = unit.value.uppercase(Locale.ROOT),
-                    fractionDigits = 0,
-                    kind = UnitKind.CUSTOM,
-                )
+                else -> fromStablecoin(unit) ?: fromIso4217(unit, locale) ?: custom(unit)
             }
         }
 
@@ -65,12 +62,11 @@ data class UnitDescriptor(
             unit: UnitId,
             displayCode: String = unit.value.uppercase(Locale.ROOT),
             symbol: String = displayCode,
-            fractionDigits: Int = 0,
         ): UnitDescriptor = UnitDescriptor(
             unit = unit,
             displayCode = displayCode,
             symbol = symbol,
-            fractionDigits = fractionDigits,
+            fractionDigits = 0,
             kind = UnitKind.CUSTOM,
         )
 

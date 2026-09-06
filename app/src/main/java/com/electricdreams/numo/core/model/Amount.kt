@@ -34,12 +34,10 @@ data class Amount(
             val practicalZeroDecimal = setOf("COP", "VND", "IDR", "CLP", "ARS", "VES", "LBP", "UGX", "ZWL", "GNF", "PYG")
             if (name in practicalZeroDecimal) return true
             
-            return runCatching {
-                JavaCurrency.getInstance(name).defaultFractionDigits == 0
-            }.getOrElse {
-                // Unrecognized custom units (e.g., "points") default to zero decimals
-                true
-            }
+            // Share the unit policy with payment entry. Android's Currency lookup accepts
+            // unknown three-letter codes and incorrectly gives custom units two decimals.
+            val unit = UnitId.ofOrNull(name) ?: return true
+            return UnitDescriptor.defaultFor(unit).fractionDigits == 0
         }
 
         /**

@@ -84,11 +84,10 @@ class AtomicAmountTest {
     }
 
     @Test
-    fun `custom units default to atomic integers and can opt into display precision`() {
+    fun `custom amounts accept whole units and reject fractional inputs`() {
         val unit = UnitId.of("points")
         val asset = AssetId.mintScoped(unit, "https://mint.example")
         val defaultDescriptor = UnitDescriptor.defaultFor(unit)
-        val decimalDescriptor = UnitDescriptor.custom(unit, fractionDigits = 3)
 
         assertEquals(UnitKind.CUSTOM, defaultDescriptor.kind)
         assertEquals(0, defaultDescriptor.fractionDigits)
@@ -97,8 +96,9 @@ class AtomicAmountTest {
         }
         assertEquals(
             AtomicAmount(1500, asset),
-            AtomicAmount.fromMajorUnits(BigDecimal("1.500"), asset, decimalDescriptor),
+            AtomicAmount.fromMajorUnits(BigDecimal("1500"), asset, defaultDescriptor),
         )
+        assertEquals(BigDecimal("1500"), AtomicAmount(1500, asset).toMajorUnits(defaultDescriptor))
     }
 
     @Test

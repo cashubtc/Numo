@@ -829,4 +829,11 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="mints_base_currency_unit_title">Unidade Monetária Base</string>
     <string name="mints_base_currency_unit_subtitle">Se o mint suportar outras unidades, você pode alterá-lo aqui.</string>
     <string name="payment_request_error_unsupported_unit">Esta unidade de pagamento não está disponível. Selecione uma unidade compatível com uma das suas mints adicionadas.</string>
+
+    <plurals name="item_entry_error_price_decimals">
+        <item quantity="one">Use até %1$d casa decimal</item>
+        <item quantity="many">Use até %1$d casas decimais</item>
+        <item quantity="other">Use até %1$d casas decimais</item>
+    </plurals>
+    <string name="item_entry_error_price_whole_number">Introduza um número inteiro para esta unidade</string>
 </resources>

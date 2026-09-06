@@ -4,6 +4,7 @@ import android.text.Editable
 import android.text.InputFilter
 import android.text.InputType
 import android.text.TextWatcher
+import android.text.method.DigitsKeyListener
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.EditText
@@ -214,6 +215,22 @@ class PricingHandler(
         return pattern.matches(price)
     }
 
+    fun showPricePrecisionError() {
+        val layout = if (currentPriceType == PriceType.SATS) satsPriceLayout else fiatPriceLayout
+        layout.error = getPricePrecisionError()
+    }
+
+    private fun getPricePrecisionError(): String {
+        val fractionDigits = getSelectedUnitDescriptor().fractionDigits
+        return if (fractionDigits == 0) {
+            priceInput.context.getString(R.string.item_entry_error_price_whole_number)
+        } else {
+            priceInput.resources.getQuantityString(
+                R.plurals.item_entry_error_price_decimals, fractionDigits, fractionDigits,
+            )
+        }
+    }
+
     fun getPriceInput(): EditText = priceInput
 
     fun getSatsInput(): EditText = satsInput
@@ -390,8 +407,14 @@ class PricingHandler(
             View.GONE
         }
         val descriptor = getSelectedUnitDescriptor()
-        priceInput.inputType = InputType.TYPE_CLASS_NUMBER or
-            if (descriptor.fractionDigits > 0) InputType.TYPE_NUMBER_FLAG_DECIMAL else 0
+        // Preserve pasted decimal separators for validation instead of turning 12.5 into 125.
+        // Request an integer keypad for units without a fractional denomination.
+        priceInput.keyListener = DigitsKeyListener.getInstance("0123456789.,")
+        priceInput.setRawInputType(
+            InputType.TYPE_CLASS_NUMBER or
+                if (descriptor.fractionDigits > 0) InputType.TYPE_NUMBER_FLAG_DECIMAL else 0,
+        )
+        updateWholeNumberError()
     }
 
     private fun setupVatSection() {
@@ -451,13 +474,17 @@ class PricingHandler(
                 if (s.toString() == current) return
                 priceInput.removeTextChangedListener(this)
                 val original = s.toString()
-                val sanitized = truncateFraction(original, getSelectedUnitDescriptor().fractionDigits)
+                val fractionDigits = getSelectedUnitDescriptor().fractionDigits
+                val sanitized = if (fractionDigits == 0) original else {
+                    truncateFraction(original, fractionDigits)
+                }
                 if (sanitized != original) {
                     priceInput.setText(sanitized)
                     priceInput.setSelection(sanitized.length)
                 }
                 current = priceInput.text.toString()
                 priceInput.addTextChangedListener(this)
+                updateWholeNumberError()
                 updatePriceBreakdown()
             }
         })
@@ -473,6 +500,16 @@ class PricingHandler(
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
             override fun afterTextChanged(s: Editable?) = updatePriceBreakdown()
         })
+    }
+
+    private fun updateWholeNumberError() {
+        fiatPriceLayout.error = if (getSelectedUnitDescriptor().fractionDigits == 0 &&
+            priceInput.text.any { it == '.' || it == ',' }
+        ) {
+            getPricePrecisionError()
+        } else {
+            null
+        }
     }
 
     private fun truncateFraction(value: String, fractionDigits: Int): String {

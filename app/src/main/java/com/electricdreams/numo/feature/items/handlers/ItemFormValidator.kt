@@ -85,9 +85,9 @@ class ItemFormValidator(
                     return ValidationResult(false)
                 }
 
-                // Validate max 2 decimal places (accepting both . and , as separators)
+                // Validate the selected unit's precision, including integer-only custom units.
                 if (!pricingHandler.isValidFiatPrice(priceStr)) {
-                    priceInput.error = activity.getString(R.string.item_entry_error_price_decimals)
+                    pricingHandler.showPricePrecisionError()
                     priceInput.requestFocus()
                     return ValidationResult(false)
                 }
@@ -136,7 +136,7 @@ class ItemFormValidator(
             } else {
                 pricingHandler.getPriceInput()
             }
-            input.error = activity.getString(R.string.item_entry_error_price_decimals)
+            pricingHandler.showPricePrecisionError()
             input.requestFocus()
             return ValidationResult(false)
         }

@@ -992,4 +992,9 @@
     <string name="mints_base_currency_unit_title">基準通貨単位</string>
     <string name="mints_base_currency_unit_subtitle">ミントが他の単位をサポートしている場合は、ここで切り替えることができます。</string>
     <string name="payment_request_error_unsupported_unit">この支払い単位は利用できません。追加済みのミントが対応している単位を選択してください。</string>
+
+    <plurals name="item_entry_error_price_decimals">
+        <item quantity="other">小数点以下は%1$d桁まで入力できます</item>
+    </plurals>
+    <string name="item_entry_error_price_whole_number">この単位には整数を入力してください</string>
 </resources>

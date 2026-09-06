@@ -749,4 +749,11 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="mints_base_currency_unit_title">Unidad de moneda base</string>
     <string name="mints_base_currency_unit_subtitle">Si la casa de la moneda admite otras unidades, puedes cambiarla aquí.</string>
     <string name="payment_request_error_unsupported_unit">Esta unidad de pago no está disponible. Selecciona una unidad compatible con una de las casas de moneda añadidas.</string>
+
+    <plurals name="item_entry_error_price_decimals">
+        <item quantity="one">Usa como máximo %1$d decimal</item>
+        <item quantity="many">Usa como máximo %1$d decimales</item>
+        <item quantity="other">Usa como máximo %1$d decimales</item>
+    </plurals>
+    <string name="item_entry_error_price_whole_number">Introduce un número entero para esta unidad</string>
 </resources>

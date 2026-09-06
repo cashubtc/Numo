@@ -575,7 +575,11 @@
     <string name="item_entry_error_name_required">Give your item a name</string>
     <string name="item_entry_error_price_required">Enter a price</string>
     <string name="item_entry_error_price_positive">Price can\'t be negative</string>
-    <string name="item_entry_error_price_decimals">Use up to 2 decimal places</string>
+    <plurals name="item_entry_error_price_decimals">
+        <item quantity="one">Use up to %1$d decimal place</item>
+        <item quantity="other">Use up to %1$d decimal places</item>
+    </plurals>
+    <string name="item_entry_error_price_whole_number">Enter a whole number for this unit</string>
     <string name="item_entry_error_sats_required">Enter a price in sats</string>
     <string name="item_entry_error_sats_positive">Sats can\'t be negative</string>
     <string name="item_entry_error_sats_whole_number">Sats must be a whole number</string>

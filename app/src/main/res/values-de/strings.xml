@@ -550,7 +550,11 @@
     <string name="item_entry_error_name_required">Gib deinem Artikel einen Namen</string>
     <string name="item_entry_error_price_required">Gib einen Preis ein</string>
     <string name="item_entry_error_price_positive">Preis darf nicht negativ sein</string>
-    <string name="item_entry_error_price_decimals">Maximal 2 Dezimalstellen</string>
+    <plurals name="item_entry_error_price_decimals">
+        <item quantity="one">Maximal %1$d Dezimalstelle</item>
+        <item quantity="other">Maximal %1$d Dezimalstellen</item>
+    </plurals>
+    <string name="item_entry_error_price_whole_number">Gib für diese Einheit eine ganze Zahl ein</string>
     <string name="item_entry_error_sats_required">Gib einen Preis in Sats ein</string>
     <string name="item_entry_error_sats_positive">Sats dürfen nicht negativ sein</string>
     <string name="item_entry_error_sats_whole_number">Sats müssen eine ganze Zahl sein</string>
