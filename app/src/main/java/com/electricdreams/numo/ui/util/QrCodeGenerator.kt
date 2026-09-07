@@ -23,15 +23,19 @@ object QrCodeGenerator {
      * @param size The desired size of the output bitmap in pixels
      * @param foregroundColor The color of the QR dots
      * @param backgroundColor The color of the background
-     * @return A bitmap containing the QR code with rounded dots
+     * @param roundedDots When true (default) modules are drawn as rounded dots; when false
+     *   plain square modules are used, which scan more reliably for dense codes such as
+     *   animated QR frames
+     * @return A bitmap containing the QR code
      * @throws Exception if encoding fails
      */
     @Throws(Exception::class)
     fun generate(
-        text: String, 
-        size: Int, 
-        foregroundColor: Int = 0xFF000000.toInt(), 
-        backgroundColor: Int = 0xFFFFFFFF.toInt()
+        text: String,
+        size: Int,
+        foregroundColor: Int = 0xFF000000.toInt(),
+        backgroundColor: Int = 0xFFFFFFFF.toInt(),
+        roundedDots: Boolean = true
     ): Bitmap {
         val hints: MutableMap<EncodeHintType, Any> = mutableMapOf()
         hints[EncodeHintType.ERROR_CORRECTION] = ErrorCorrectionLevel.L
@@ -61,9 +65,15 @@ object QrCodeGenerator {
         for (x in 0 until matrixWidth) {
             for (y in 0 until matrixHeight) {
                 if (rawMatrix[x, y]) {
-                    val cx = x * scale + radius
-                    val cy = y * scale + radius
-                    canvas.drawCircle(cx, cy, radius, paint)
+                    if (roundedDots) {
+                        val cx = x * scale + radius
+                        val cy = y * scale + radius
+                        canvas.drawCircle(cx, cy, radius, paint)
+                    } else {
+                        val left = (x * scale).toFloat()
+                        val top = (y * scale).toFloat()
+                        canvas.drawRect(left, top, left + scale, top + scale, paint)
+                    }
                 }
             }
         }
