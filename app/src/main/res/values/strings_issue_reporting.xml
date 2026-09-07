@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="issue_report_title">Report an issue</string>
+    <string name="issue_report_description_label">What happened?</string>
+    <string name="issue_report_description_hint">Describe what happened and what you expected instead</string>
+    <string name="issue_report_privacy_disclosure">Your description and the device information shown below will be posted to the private Numo support workspace. The report uses a fresh temporary identity and is not linked to your wallet or app identity. The relay and network providers may observe your IP address and submission time.</string>
+    <string name="issue_report_shared_information">Information included</string>
+    <string name="issue_report_platform_value">Platform: %1$s</string>
+    <string name="issue_report_os_value">OS version: %1$s</string>
+    <string name="issue_report_device_value">Device model: %1$s</string>
+    <string name="issue_report_app_version_value">App version: %1$s</string>
+    <string name="issue_report_app_build_value">App build: %1$s</string>
+    <string name="issue_report_send">Send report</string>
+    <string name="issue_report_retry">Retry</string>
+    <string name="issue_report_sending">Authenticating and sending…</string>
+    <string name="issue_report_sent">Report sent to Numo support.</string>
+    <string name="issue_report_failed">The report was not accepted. Your text is still here; you can retry.</string>
+    <string name="issue_report_unavailable">Issue reporting is temporarily unavailable.</string>
+    <string name="issue_report_required">Please describe the issue.</string>
+    <string name="issue_report_too_large">The description is too long. Maximum: 8,000 UTF-8 bytes.</string>
+    <string name="issue_report_invalid">Check the report information and try again.</string>
+    <string name="issue_report_description_count">%1$d / 8,000 bytes</string>
+    <string name="issue_report_automatic_title">Send severe error reports automatically</string>
+    <string name="issue_report_automatic_summary">Enabled by default. If the app terminates unexpectedly, it sends a report to the private Numo support workspace after the next launch containing the error category and app code locations. Exception messages, raw logs, wallet data, and identifiers are never included. Turn this off at any time.</string>
+    <string name="about_report_issue">Report an issue</string>
+    <string name="about_report_issue_subtitle">Send an anonymous report to Numo support</string>
+</resources>
