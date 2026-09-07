@@ -97,7 +97,6 @@
                         app:tint="?attr/colorPrimary"
                         android:layout_marginTop="12dp"
                         android:padding="12dp"
-                        android:background="@drawable/bg_settings_icon"
                         android:importantForAccessibility="no" />
 
                     <TextView

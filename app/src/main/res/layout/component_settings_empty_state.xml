@@ -11,12 +11,11 @@
     android:background="@drawable/bg_settings_group"
     android:padding="24dp">
 
-    <!-- Rounded square icon container -->
+    <!-- Icon -->
 
     <FrameLayout
         android:layout_width="@dimen/icon_size_hero"
-        android:layout_height="@dimen/top_bar_height"
-        android:background="@drawable/bg_settings_icon">
+        android:layout_height="@dimen/top_bar_height">
 
         <ImageView
             android:id="@+id/empty_state_icon"

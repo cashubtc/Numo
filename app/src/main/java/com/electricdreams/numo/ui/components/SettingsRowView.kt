@@ -81,19 +81,6 @@ class SettingsRowView @JvmOverloads constructor(
                 iconView.visibility = View.VISIBLE
             }
 
-            val iconBackground = getResourceId(R.styleable.SettingsRowView_rowIconBackground, 0)
-            if (iconBackground != 0) {
-                iconView.setBackgroundResource(iconBackground)
-                val size = resources.getDimensionPixelSize(R.dimen.settings_icon_container_size)
-                iconView.layoutParams = iconView.layoutParams.apply {
-                    width = size
-                    height = size
-                }
-                val padding = resources.getDimensionPixelSize(R.dimen.settings_icon_padding)
-                iconView.setPadding(padding, padding, padding, padding)
-                subtitleView.setTextColor(ContextCompat.getColor(context, R.color.m3_on_surface_variant))
-            }
-
             val iconTintRes = getResourceId(R.styleable.SettingsRowView_rowIconTint, 0)
             if (iconTintRes != 0) {
                 iconView.imageTintList = ContextCompat.getColorStateList(context, iconTintRes)
