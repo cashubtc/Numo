@@ -4,6 +4,11 @@
         <item name="android:windowBackground">@color/settings_background</item>
     </style>
 
+    <style name="Theme.Numo.SettingsInput" parent="Theme.Numo.BottomSheet">
+        <item name="colorPrimary">@color/m3_primary</item>
+        <item name="colorOnPrimary">@color/m3_on_primary</item>
+    </style>
+
     <style name="Widget.Numo.SettingsRow" parent="">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -42,5 +47,46 @@
         <item name="android:clipToOutline">true</item>
         <item name="android:showDividers">middle</item>
         <item name="android:divider">@drawable/settings_divider</item>
+    </style>
+
+    <style name="Text.SettingsPageTitle" parent="Text.Heading1">
+        <item name="android:gravity">start</item>
+    </style>
+
+    <style name="Text.SettingsBody" parent="Text.Body">
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+    </style>
+
+    <style name="Text.SettingsCaption" parent="Text.RowSubtitle">
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+    </style>
+
+    <style name="Widget.Numo.SettingsCard" parent="Widget.Material3.CardView.Filled">
+        <item name="cardBackgroundColor">@color/color_bg_card</item>
+        <item name="cardCornerRadius">24dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeWidth">0dp</item>
+    </style>
+
+    <style name="Widget.Numo.SettingsChoice" parent="Widget.Material3.CompoundButton.RadioButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minHeight">64dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">16dp</item>
+        <item name="android:background">@drawable/bg_settings_choice</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textAppearance">@style/Text.RowTitle</item>
+        <item name="useMaterialThemeColors">true</item>
+    </style>
+
+    <style name="Widget.Numo.SettingsTextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxBackgroundColor">@color/color_bg_card</item>
+        <item name="boxCornerRadiusTopStart">16dp</item>
+        <item name="boxCornerRadiusTopEnd">16dp</item>
+        <item name="boxCornerRadiusBottomStart">16dp</item>
+        <item name="boxCornerRadiusBottomEnd">16dp</item>
     </style>
 </resources>

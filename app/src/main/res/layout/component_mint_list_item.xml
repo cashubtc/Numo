@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 
-    Clean mint list item without selection indicators.
-    Tapping opens mint details (no selection behavior).
--->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mint_item_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <!-- Main Row Content -->
+
     <LinearLayout
         android:id="@+id/mint_item_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="@dimen/margin_screen_horizontal"
-        android:paddingVertical="@dimen/row_padding_vertical"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="16dp"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
-        android:focusable="true">
+        android:focusable="true"
+        android:minHeight="88dp">
 
         <!-- Mint Icon (circular avatar) -->
+
         <FrameLayout
             android:id="@+id/icon_container"
             android:layout_width="44dp"
@@ -44,6 +44,7 @@
         </FrameLayout>
 
         <!-- Text Content -->
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -54,11 +55,11 @@
 
             <TextView
                 android:id="@+id/mint_name"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Mint Name"
                 android:textAppearance="@style/Text.RowTitle"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:ellipsize="end" />
 
             <TextView
@@ -67,23 +68,26 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:text="mint.example.com"
-                style="@style/Text.RowSubtitle"
-                android:maxLines="1"
-                android:ellipsize="end" />
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:textAppearance="@style/Text.SettingsCaption" />
+
+            <TextView
+                android:id="@+id/balance_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="₿0"
+                android:textAppearance="@style/Text.BodyBold"
+                android:textColor="@color/color_text_primary"
+                android:layout_marginEnd="@dimen/space_s"
+                android:layout_marginTop="4dp" />
 
         </LinearLayout>
 
         <!-- Balance -->
-        <TextView
-            android:id="@+id/balance_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="₿0"
-            android:textAppearance="@style/Text.BodyBold"
-            android:textColor="@color/color_text_secondary"
-            android:layout_marginEnd="@dimen/space_s" />
 
         <!-- Chevron -->
+
         <ImageView
             android:id="@+id/chevron"
             android:layout_width="18dp"

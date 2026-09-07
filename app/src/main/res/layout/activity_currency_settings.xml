@@ -1,91 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
+    android:layout_height="match_parent">
 
-    <!-- Top App Bar -->
-    <com.electricdreams.numo.ui.components.NumoTopBar
-        android:id="@+id/top_bar"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        app:topBarTitle="@string/settings_currency_title"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent">
 
-    <!-- Search Bar -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/search_card"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="16dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="0dp"
-        app:strokeWidth="1dp"
-        app:strokeColor="@color/color_divider"
-        app:layout_constraintTop_toBottomOf="@id/top_bar">
+        <!-- Top App Bar -->
 
-        <LinearLayout
-            android:id="@+id/currency_content"
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp">
+            android:layout_height="wrap_content"
+            app:topBarTitle="@string/settings_currency_title"
+            app:layout_constraintTop_toTopOf="parent"
+            android:minHeight="64dp"
+            app:topBarSettingsStyle="true" />
 
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@android:drawable/ic_menu_search"
-                app:tint="@color/color_text_secondary" />
+        <!-- Search Bar -->
 
-            <EditText
-                android:id="@+id/currency_search_input"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_marginStart="12dp"
-                android:background="@null"
-                android:hint="@string/currency_settings_search_hint"
-                android:inputType="textNoSuggestions"
-                android:maxLines="1"
-                android:textAppearance="@style/Text.Body"
-                android:textColorHint="@color/color_text_secondary" />
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/search_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@id/top_bar"
+            style="@style/Widget.Numo.SettingsCard"
+            android:layout_marginHorizontal="16dp"
+            app:cardCornerRadius="28dp">
 
-            <ImageButton
-                android:id="@+id/clear_search_button"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@android:drawable/ic_menu_close_clear_cancel"
-                app:tint="@color/color_text_secondary"
-                android:visibility="gone" />
+            <LinearLayout
+                android:id="@+id/currency_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="16dp"
+                android:minHeight="56dp">
 
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_search"
+                    app:tint="@color/color_text_secondary"
+                    android:importantForAccessibility="no" />
 
-    <!-- Currency RecyclerView -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/currency_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="@dimen/space_m"
-        android:clipToPadding="false"
-        android:paddingBottom="32dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/search_card" />
+                <EditText
+                    android:id="@+id/currency_search_input"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:background="@null"
+                    android:hint="@string/currency_settings_search_hint"
+                    android:inputType="textNoSuggestions"
+                    android:maxLines="1"
+                    android:textAppearance="@style/Text.Body"
+                    android:textColorHint="@color/color_text_secondary"
+                    android:minHeight="56dp" />
 
-    <TextView
-        android:id="@+id/empty_state_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:gravity="center"
-        android:text="@string/currency_settings_no_results"
-        android:textAppearance="@style/Text.Body"
-        android:textColor="@color/color_text_secondary"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/search_card" />
+                <ImageButton
+                    android:id="@+id/clear_search_button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_close"
+                    app:tint="@color/color_text_secondary"
+                    android:visibility="gone"
+                    android:padding="12dp"
+                    android:contentDescription="@string/settings_clear_search" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Currency RecyclerView -->
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/currency_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/space_m"
+            android:clipToPadding="false"
+            android:paddingBottom="32dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/search_card"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="8dp" />
+
+        <TextView
+            android:id="@+id/empty_state_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:gravity="center"
+            android:text="@string/currency_settings_no_results"
+            android:textAppearance="@style/Text.Body"
+            android:textColor="@color/color_text_secondary"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/search_card" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

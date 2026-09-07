@@ -1,168 +1,192 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/root_layout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
+    android:layout_height="match_parent">
 
-    <!-- Top Bar -->
-    <com.electricdreams.numo.ui.components.NumoTopBar
-        android:id="@+id/top_bar"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/root_layout"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        app:topBarTitle="@string/auto_withdraw_settings_title"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent">
 
-    <!-- Scrollable Content -->
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:fillViewport="true"
-        app:layout_constraintTop_toBottomOf="@id/top_bar"
-        app:layout_constraintBottom_toBottomOf="parent">
+        <!-- Top Bar -->
 
-        <LinearLayout
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/space_2xl">
+            app:topBarTitle="@string/auto_withdraw_settings_title"
+            app:layout_constraintTop_toTopOf="parent"
+            android:minHeight="64dp"
+            app:topBarSettingsStyle="true" />
 
-            <!-- Hero Section -->
+        <!-- Scrollable Content -->
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:fillViewport="true"
+            app:layout_constraintTop_toBottomOf="@id/top_bar"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:clipToPadding="false">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/space_l"
-                android:paddingBottom="@dimen/space_xl">
+                android:paddingBottom="24dp"
+                android:paddingHorizontal="16dp">
 
-                <!-- Hero Card -->
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/hero_card"
+                <!-- Hero Section -->
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="@dimen/radius_card"
-                    app:cardElevation="0dp">
+                    android:orientation="vertical"
+                    android:paddingTop="@dimen/space_l"
+                    android:paddingBottom="@dimen/space_xl">
 
-                    <FrameLayout
-                        android:id="@+id/hero_bg"
+                    <!-- Hero Card -->
+
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/hero_card"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/bg_hero_gradient_green"
-                        android:clipChildren="false">
+                        style="@style/Widget.Numo.SettingsCard">
 
-                        <!-- Decorative background lightning bolt with fade -->
                         <FrameLayout
-                            android:layout_width="140dp"
-                            android:layout_height="140dp"
-                            android:layout_gravity="bottom|end"
-                            android:layout_marginEnd="-30dp"
-                            android:layout_marginBottom="-30dp">
+                            android:id="@+id/hero_bg"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_hero_gradient_green"
+                            android:clipChildren="false">
 
-                            <ImageView
-                                android:id="@+id/hero_bolt"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:alpha="0.06"
-                                android:rotation="-15"
-                                android:importantForAccessibility="no"
-                                android:src="@drawable/ic_lightning_bolt"
-                                app:tint="@color/color_success_green" />
+                            <!-- Decorative background lightning bolt with fade -->
 
-                            <View
-                                android:id="@+id/hero_bolt_fade"
+                            <FrameLayout
+                                android:layout_width="140dp"
+                                android:layout_height="140dp"
+                                android:layout_gravity="bottom|end"
+                                android:layout_marginEnd="-30dp"
+                                android:layout_marginBottom="-30dp">
+
+                                <ImageView
+                                    android:id="@+id/hero_bolt"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:alpha="0.06"
+                                    android:rotation="-15"
+                                    android:importantForAccessibility="no"
+                                    android:src="@drawable/ic_lightning_bolt"
+                                    app:tint="@color/color_success_green" />
+
+                                <View
+                                    android:id="@+id/hero_bolt_fade"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:background="@drawable/bg_hero_bolt_fade_green" />
+
+                            </FrameLayout>
+
+                            <!-- Content -->
+
+                            <androidx.constraintlayout.widget.ConstraintLayout
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:background="@drawable/bg_hero_bolt_fade_green" />
+                                android:layout_height="wrap_content"
+                                android:padding="@dimen/space_xl">
+
+                                <!-- Status badge (top-left) -->
+
+                                <LinearLayout
+                                    android:id="@+id/status_container"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:background="@drawable/bg_status_pill_success"
+                                    android:gravity="center"
+                                    android:orientation="horizontal"
+                                    android:paddingHorizontal="@dimen/space_m"
+                                    android:paddingVertical="@dimen/space_xs"
+                                    app:layout_constraintTop_toTopOf="parent"
+                                    app:layout_constraintStart_toStartOf="parent">
+
+                                    <View
+                                        android:id="@+id/status_dot"
+                                        android:layout_width="8dp"
+                                        android:layout_height="8dp"
+                                        android:layout_marginEnd="@dimen/space_s"
+                                        android:background="@drawable/bg_notification_dot"
+                                        android:backgroundTint="@color/color_success_green" />
+
+                                    <TextView
+                                        android:id="@+id/status_text"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:textAppearance="@style/Text.Badge"
+                                        android:text="@string/auto_withdraw_status_inactive"
+                                        android:textColor="@color/color_success_green" />
+
+                                </LinearLayout>
+
+                                <!-- Title Row -->
+
+                                <LinearLayout
+                                    android:id="@+id/hero_content_row"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="@dimen/space_m"
+                                    android:orientation="vertical"
+                                    app:layout_constraintEnd_toEndOf="parent"
+                                    app:layout_constraintStart_toStartOf="parent"
+                                    app:layout_constraintTop_toBottomOf="@id/status_container">
+
+                                    <TextView
+                                        android:id="@+id/hero_title"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:textAppearance="@style/Text.RowTitle"
+                                        android:text="@string/auto_withdraw_hero_title"
+                                        android:letterSpacing="-0.012" />
+
+                                    <TextView
+                                        android:id="@+id/hero_subtitle"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:layout_marginTop="2dp"
+                                        android:textAppearance="@style/Text.SettingsCaption"
+                                        android:text="@string/auto_withdraw_hero_subtitle"
+                                        android:textColor="@color/color_text_secondary" />
+
+                                </LinearLayout>
+
+                            </androidx.constraintlayout.widget.ConstraintLayout>
 
                         </FrameLayout>
 
-                        <!-- Content -->
-                        <androidx.constraintlayout.widget.ConstraintLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:padding="@dimen/space_xl">
+                    </androidx.cardview.widget.CardView>
 
-                            <!-- Status badge (top-left) -->
-                            <LinearLayout
-                                android:id="@+id/status_container"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:background="@drawable/bg_status_pill_success"
-                                android:gravity="center"
-                                android:orientation="horizontal"
-                                android:paddingHorizontal="@dimen/space_m"
-                                android:paddingVertical="@dimen/space_xs"
-                                app:layout_constraintTop_toTopOf="parent"
-                                app:layout_constraintStart_toStartOf="parent">
-                                <View
-                                    android:id="@+id/status_dot"
-                                    android:layout_width="8dp"
-                                    android:layout_height="8dp"
-                                    android:layout_marginEnd="@dimen/space_s"
-                                    android:background="@drawable/bg_notification_dot"
-                                    android:backgroundTint="@color/color_success_green" />
-                                <TextView
-                                    android:id="@+id/status_text"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:textAppearance="@style/Text.Badge"
-                                    android:text="@string/auto_withdraw_status_inactive"
-                                    android:textColor="@color/color_success_green" />
-                            </LinearLayout>
+                </LinearLayout>
 
-                            <!-- Title Row -->
-                            <LinearLayout
-                                android:id="@+id/hero_content_row"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/space_m"
-                                android:orientation="vertical"
-                                app:layout_constraintEnd_toEndOf="parent"
-                                app:layout_constraintStart_toStartOf="parent"
-                                app:layout_constraintTop_toBottomOf="@id/status_container">
+                <!-- ==================== -->
 
-                                <TextView
-                                    android:id="@+id/hero_title"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:textAppearance="@style/Text.RowTitle"
-                                    android:text="@string/auto_withdraw_hero_title"
-                                    android:letterSpacing="-0.012" />
-                                <TextView
-                                    android:id="@+id/hero_subtitle"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
-                                    android:textAppearance="@style/Text.Caption"
-                                    android:text="@string/auto_withdraw_hero_subtitle"
-                                    android:textColor="@color/color_text_secondary" />
+                <!-- MAIN TOGGLE ROW -->
 
-                            </LinearLayout>
+                <!-- ==================== -->
 
-                        </androidx.constraintlayout.widget.ConstraintLayout>
-                    </FrameLayout>
-                </androidx.cardview.widget.CardView>
-
-            </LinearLayout>
-
-            <!-- ==================== -->
-            <!-- MAIN TOGGLE ROW -->
-            <!-- ==================== -->
                 <LinearLayout
                     android:id="@+id/enable_toggle_row"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_row_ripple"
+                    android:background="@drawable/bg_settings_group"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingVertical="@dimen/row_padding_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal">
+                    android:clipToOutline="true"
+                    android:padding="16dp"
+                    android:minHeight="72dp"
+                    android:screenReaderFocusable="true">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -181,20 +205,25 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text="@string/auto_withdraw_enable_subtitle"
-                            android:textAppearance="@style/Text.RowSubtitle" />
+                            android:textAppearance="@style/Text.SettingsCaption" />
 
                     </LinearLayout>
 
                     <com.google.android.material.materialswitch.MaterialSwitch
                         android:id="@+id/enable_switch"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:contentDescription="@string/auto_withdraw_enable_title" />
 
                 </LinearLayout>
 
                 <!-- ==================== -->
+
                 <!-- AUTO-WITHDRAW CONFIG (hidden when toggle off) -->
+
                 <!-- ==================== -->
+
                 <LinearLayout
                     android:id="@+id/auto_withdraw_config_container"
                     android:layout_width="match_parent"
@@ -202,116 +231,127 @@
                     android:orientation="vertical"
                     android:visibility="gone">
 
-                <!-- ==================== -->
-                <!-- DESTINATION SECTION -->
-                <!-- ==================== -->
-                <TextView
-                    style="@style/Text.SectionHeader"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="@dimen/section_gap"
-                    android:paddingBottom="@dimen/row_padding_vertical"
-                    android:text="@string/auto_withdraw_section_destination" />
+                    <!-- ==================== -->
 
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                    app:cardBackgroundColor="@color/color_bg_white"
-                    app:cardCornerRadius="@dimen/radius_card"
-                    app:cardElevation="0dp">
+                    <!-- DESTINATION SECTION -->
 
-                    <LinearLayout
+                    <!-- ==================== -->
+
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="@dimen/margin_screen_horizontal">
+                        android:text="@string/auto_withdraw_section_destination"
+                        android:textAppearance="@style/Text.SettingsSection"
+                        android:textAllCaps="false"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginBottom="12dp"
+                        android:accessibilityHeading="true" />
 
-                        <!-- Lightning Address Label -->
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/space_m"
-                            android:text="@string/auto_withdraw_lightning_address_label"
-                            style="@style/Text.RowTitle" />
-
-                        <!-- Input Field -->
-                        <com.google.android.material.textfield.TextInputLayout
-                            style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/lightning_address_input"
-                                android:layout_width="match_parent"
-                                android:layout_height="@dimen/settings_item_height"
-                                android:fontFamily="sans-serif"
-                                android:hint="@string/auto_withdraw_lightning_address_hint"
-                                android:inputType="textEmailAddress"
-                                android:textAppearance="@style/Text.Body"
-                                android:textColor="@color/color_text_primary"
-                                android:textColorHint="@color/color_text_tertiary" />
-
-                        </com.google.android.material.textfield.TextInputLayout>
-                        
-                        <!-- Validation Label -->
-                        <TextView
-                            android:id="@+id/lightning_address_validation"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/space_s"
-                            android:textAppearance="@style/Text.Helper"
-                            android:visibility="gone"
-                            tools:text="@string/auto_withdraw_lightning_address_valid" />
-
-                        <!-- Helper Text -->
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/space_s"
-                            android:alpha="0.7"
-                            android:text="@string/auto_withdraw_lightning_address_helper"
-                            android:textAppearance="@style/Text.Helper" />
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
-
-                <!-- ==================== -->
-                <!-- TRIGGER SETTINGS -->
-                <!-- ==================== -->
-                <TextView
-                    style="@style/Text.SectionHeader"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="@dimen/section_gap"
-                    android:paddingBottom="@dimen/row_padding_vertical"
-                    android:text="@string/auto_withdraw_section_trigger" />
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                    app:cardBackgroundColor="@color/color_bg_white"
-                    app:cardCornerRadius="@dimen/radius_card"
-                    app:cardElevation="0dp">
-
-                    <LinearLayout
+                    <androidx.cardview.widget.CardView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:divider="@drawable/bg_divider_inset"
-                        android:showDividers="middle">
+                        style="@style/Widget.Numo.SettingsCard">
 
-                        <!-- Threshold Row -->
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
+                            android:orientation="vertical"
                             android:padding="@dimen/margin_screen_horizontal">
+
+                            <!-- Lightning Address Label -->
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="@dimen/space_m"
+                                android:text="@string/auto_withdraw_lightning_address_label"
+                                style="@style/Text.RowTitle" />
+
+                            <!-- Input Field -->
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                style="@style/Widget.Numo.SettingsTextInput"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/lightning_address_input"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="@dimen/settings_item_height"
+                                    android:fontFamily="sans-serif"
+                                    android:hint="@string/auto_withdraw_lightning_address_hint"
+                                    android:inputType="textEmailAddress"
+                                    android:textAppearance="@style/Text.Body"
+                                    android:textColor="@color/color_text_primary"
+                                    android:textColorHint="?attr/colorOnSurfaceVariant" />
+
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <!-- Validation Label -->
+
+                            <TextView
+                                android:id="@+id/lightning_address_validation"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/space_s"
+                                android:textAppearance="@style/Text.SettingsCaption"
+                                android:visibility="gone"
+                                tools:text="@string/auto_withdraw_lightning_address_valid" />
+
+                            <!-- Helper Text -->
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/space_s"
+                                android:alpha="0.7"
+                                android:text="@string/auto_withdraw_lightning_address_helper"
+                                android:textAppearance="@style/Text.SettingsCaption" />
+
+                        </LinearLayout>
+
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- ==================== -->
+
+                    <!-- TRIGGER SETTINGS -->
+
+                    <!-- ==================== -->
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/auto_withdraw_section_trigger"
+                        android:textAppearance="@style/Text.SettingsSection"
+                        android:textAllCaps="false"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginBottom="12dp"
+                        android:accessibilityHeading="true" />
+
+                    <androidx.cardview.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.Numo.SettingsCard">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:divider="@drawable/bg_divider_inset"
+                            android:showDividers="middle">
+
+                            <!-- Threshold Row -->
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:padding="@dimen/margin_screen_horizontal">
 
                                 <LinearLayout
                                     android:layout_width="0dp"
@@ -330,12 +370,13 @@
                                         android:layout_height="wrap_content"
                                         android:layout_marginTop="2dp"
                                         android:text="@string/auto_withdraw_threshold_subtitle"
-                                        android:textAppearance="@style/Text.RowSubtitle"
+                                        android:textAppearance="@style/Text.SettingsCaption"
                                         android:textColor="@color/color_text_secondary" />
 
                                 </LinearLayout>
 
-                                <!-- Amount Display with ₿ symbol -->
+                                <!-- Amount Display with &#8383; symbol -->
+
                                 <TextView
                                     android:id="@+id/threshold_display"
                                     android:layout_width="wrap_content"
@@ -349,129 +390,141 @@
                                     android:clickable="true"
                                     android:focusable="true" />
 
-                        </LinearLayout>
+                            </LinearLayout>
 
-                        <!-- Percentage Row -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="@dimen/margin_screen_horizontal">
+                            <!-- Percentage Row -->
 
                             <LinearLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:gravity="center_vertical"
-                                android:orientation="horizontal">
+                                android:orientation="vertical"
+                                android:padding="@dimen/margin_screen_horizontal">
 
                                 <LinearLayout
-                                    android:layout_width="0dp"
+                                    android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:orientation="vertical">
+                                    android:gravity="center_vertical"
+                                    android:orientation="horizontal">
+
+                                    <LinearLayout
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:orientation="vertical">
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:textAppearance="@style/Text.RowTitle"
+                                            android:text="@string/auto_withdraw_percentage_title" />
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginTop="2dp"
+                                            android:text="@string/auto_withdraw_percentage_subtitle"
+                                            android:textAppearance="@style/Text.SettingsCaption"
+                                            android:textColor="@color/color_text_secondary" />
+
+                                    </LinearLayout>
+
+                                    <!-- Percentage Badge -->
 
                                     <TextView
+                                        android:id="@+id/percentage_badge"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:textAppearance="@style/Text.RowTitle"
-                                        android:text="@string/auto_withdraw_percentage_title" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginTop="2dp"
-                                        android:text="@string/auto_withdraw_percentage_subtitle"
-                                        android:textAppearance="@style/Text.RowSubtitle"
-                                        android:textColor="@color/color_text_secondary" />
+                                        android:background="@drawable/bg_pill_badge"
+                                        android:fontFamily="sans-serif-medium"
+                                        android:minWidth="64dp"
+                                        android:paddingHorizontal="@dimen/space_l"
+                                        android:paddingVertical="@dimen/space_m"
+                                        android:text="95%"
+                                        android:textAlignment="center"
+                                        android:textAppearance="@style/Text.RowTitle" />
 
                                 </LinearLayout>
 
-                                <!-- Percentage Badge -->
-                                <TextView
-                                    android:id="@+id/percentage_badge"
-                                    android:layout_width="wrap_content"
+                                <!-- Slider -->
+
+                                <com.google.android.material.slider.Slider
+                                    android:id="@+id/percentage_slider"
+                                    android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:background="@drawable/bg_pill_badge"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:minWidth="64dp"
-                                    android:paddingHorizontal="@dimen/space_l"
-                                    android:paddingVertical="@dimen/space_m"
-                                    android:text="95%"
-                                    android:textAlignment="center"
-                                    android:textAppearance="@style/Text.RowTitle" />
+                                    android:layout_marginTop="@dimen/space_l"
+                                    android:stepSize="1"
+                                    android:valueFrom="50"
+                                    android:valueTo="98"
+                                    app:haloColor="@color/color_bitcoin_orange"
+                                    app:haloRadius="24dp"
+                                    app:thumbColor="@color/color_bitcoin_orange"
+                                    app:thumbRadius="12dp"
+                                    app:tickVisible="false"
+                                    app:trackColorActive="@color/color_bitcoin_orange"
+                                    app:trackColorInactive="@color/color_bg_tertiary"
+                                    app:trackHeight="6dp" />
 
-                            </LinearLayout>
+                                <!-- Range Labels -->
 
-                            <!-- Slider -->
-                            <com.google.android.material.slider.Slider
-                                android:id="@+id/percentage_slider"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/space_l"
-                                android:stepSize="1"
-                                android:valueFrom="50"
-                                android:valueTo="98"
-                                app:haloColor="@color/color_bitcoin_orange"
-                                app:haloRadius="24dp"
-                                app:thumbColor="@color/color_bitcoin_orange"
-                                app:thumbRadius="12dp"
-                                app:tickVisible="false"
-                                app:trackColorActive="@color/color_bitcoin_orange"
-                                app:trackColorInactive="@color/color_bg_tertiary"
-                                app:trackHeight="6dp" />
-
-                            <!-- Range Labels -->
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal">
-
-                                <TextView
-                                    android:layout_width="0dp"
+                                <LinearLayout
+                                    android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:text="@string/auto_withdraw_percentage_min"
-                                    android:textAppearance="@style/Text.Caption" />
+                                    android:orientation="horizontal">
 
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/auto_withdraw_percentage_max"
-                                    android:textAppearance="@style/Text.Caption" />
+                                    <TextView
+                                        android:layout_width="0dp"
+                                        android:layout_height="wrap_content"
+                                        android:layout_weight="1"
+                                        android:text="@string/auto_withdraw_percentage_min"
+                                        android:textAppearance="@style/Text.SettingsCaption" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/auto_withdraw_percentage_max"
+                                        android:textAppearance="@style/Text.SettingsCaption" />
+
+                                </LinearLayout>
 
                             </LinearLayout>
 
                         </LinearLayout>
 
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
+                    </androidx.cardview.widget.CardView>
 
                 </LinearLayout>
 
                 <!-- ==================== -->
+
                 <!-- MANUAL WITHDRAW SECTION -->
+
                 <!-- ==================== -->
+
                 <TextView
-                    style="@style/Text.SectionHeader"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="@dimen/section_gap"
-                    android:paddingBottom="@dimen/row_padding_vertical"
-                    android:text="@string/manual_withdraw_section_title" />
+                    android:text="@string/manual_withdraw_section_title"
+                    android:textAppearance="@style/Text.SettingsSection"
+                    android:textAllCaps="false"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="12dp"
+                    android:accessibilityHeading="true" />
 
                 <LinearLayout
                     android:id="@+id/manual_withdraw_row"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_row_ripple"
+                    android:background="@drawable/bg_settings_group"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:paddingVertical="@dimen/row_padding_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal">
+                    android:clipToOutline="true"
+                    android:padding="16dp"
+                    android:minHeight="72dp"
+                    android:screenReaderFocusable="true">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -490,7 +543,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
                             android:text="@string/manual_withdraw_subtitle"
-                            android:textAppearance="@style/Text.RowSubtitle" />
+                            android:textAppearance="@style/Text.SettingsCaption" />
 
                     </LinearLayout>
 
@@ -504,8 +557,11 @@
                 </LinearLayout>
 
                 <!-- ==================== -->
+
                 <!-- HISTORY SECTION -->
+
                 <!-- ==================== -->
+
                 <LinearLayout
                     android:id="@+id/history_section_header"
                     android:layout_width="match_parent"
@@ -517,11 +573,17 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        style="@style/Text.SectionHeader"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/auto_withdraw_section_history" />
+                        android:text="@string/auto_withdraw_section_history"
+                        android:textAppearance="@style/Text.SettingsSection"
+                        android:textAllCaps="false"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginBottom="12dp"
+                        android:accessibilityHeading="true" />
 
                     <TextView
                         android:id="@+id/see_all_button"
@@ -544,17 +606,16 @@
                     android:id="@+id/history_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                    app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="@dimen/radius_card"
-                    app:cardElevation="0dp">
+                    style="@style/Widget.Numo.SettingsCard">
 
                     <!-- Empty State -->
+
                     <include
                         android:id="@+id/history_empty_container"
-                        layout="@layout/component_empty_state" />
+                        layout="@layout/component_settings_empty_state" />
 
                     <!-- History List -->
+
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/history_recycler_view"
                         android:layout_width="match_parent"
@@ -567,7 +628,10 @@
 
                 </androidx.cardview.widget.CardView>
 
-        </LinearLayout>
-    </ScrollView>
+            </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        </ScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

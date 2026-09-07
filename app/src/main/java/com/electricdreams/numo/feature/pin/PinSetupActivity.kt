@@ -10,18 +10,22 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.electricdreams.numo.R
-import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.google.android.material.button.MaterialButton
+
+import com.electricdreams.numo.R
+import com.electricdreams.numo.databinding.ActivityPinSetupBinding
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 /**
  * Activity for setting up a new PIN or changing an existing PIN.
- * 
+ *
  * Two-step flow:
  * 1. Enter new PIN (4-16 digits)
  * 2. Confirm PIN by re-entering
  */
 class PinSetupActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityPinSetupBinding
 
     companion object {
         const val EXTRA_MODE = "extra_mode"
@@ -54,8 +58,9 @@ class PinSetupActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdgeWithPill(this)
-        setContentView(R.layout.activity_pin_setup)
+        binding = ActivityPinSetupBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
         pinManager = PinManager.getInstance(this)
         mode = intent.getStringExtra(EXTRA_MODE) ?: MODE_CREATE
@@ -66,16 +71,16 @@ class PinSetupActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        pinDots = findViewById(R.id.pin_dots)
-        pinKeypad = findViewById(R.id.pin_keypad)
-        titleText = findViewById(R.id.title)
-        subtitleText = findViewById(R.id.subtitle)
-        pinLengthLabel = findViewById(R.id.pin_length_label)
-        errorMessage = findViewById(R.id.error_message)
-        continueButton = findViewById(R.id.continue_button)
-        backButton = findViewById(R.id.back_button)
-        step1Indicator = findViewById(R.id.step1_indicator)
-        step2Indicator = findViewById(R.id.step2_indicator)
+        pinDots = binding.pinDots
+        pinKeypad = binding.pinKeypad
+        titleText = binding.title
+        subtitleText = binding.subtitle
+        pinLengthLabel = binding.pinLengthLabel
+        errorMessage = binding.errorMessage
+        continueButton = binding.continueButton
+        backButton = binding.backButton
+        step1Indicator = binding.step1Indicator
+        step2Indicator = binding.step2Indicator
     }
 
     private fun setupListeners() {
@@ -125,14 +130,14 @@ class PinSetupActivity : AppCompatActivity() {
             Step.ENTER_PIN -> {
                 titleText.text = if (mode == MODE_CHANGE) getString(R.string.pin_setup_new_pin_title) else getString(R.string.pin_setup_create_title)
                 subtitleText.text = getString(R.string.pin_setup_create_subtitle)
-                
+
                 step1Indicator.background = ContextCompat.getDrawable(this, R.drawable.bg_pin_dot_filled)
                 step2Indicator.background = ContextCompat.getDrawable(this, R.drawable.bg_pin_dot_empty)
             }
             Step.CONFIRM_PIN -> {
                 titleText.text = getString(R.string.pin_setup_confirm_title)
                 subtitleText.text = getString(R.string.pin_setup_confirm_subtitle)
-                
+
                 step1Indicator.background = ContextCompat.getDrawable(this, R.drawable.bg_pin_dot_filled)
                 step2Indicator.background = ContextCompat.getDrawable(this, R.drawable.bg_pin_dot_filled)
             }
@@ -145,7 +150,7 @@ class PinSetupActivity : AppCompatActivity() {
         val isValid = enteredPin.length >= PinManager.MIN_PIN_LENGTH
         continueButton.isEnabled = isValid
         continueButton.alpha = if (isValid) 1f else 0.4f
-        
+
         continueButton.text = when (currentStep) {
             Step.ENTER_PIN -> getString(R.string.pin_setup_continue)
             Step.CONFIRM_PIN -> getString(R.string.pin_setup_set_pin)
@@ -160,7 +165,7 @@ class PinSetupActivity : AppCompatActivity() {
             length < minLength -> getString(R.string.pin_setup_more_needed, length, if (length > 1) "s" else "", minLength - length)
             else -> getString(R.string.pin_setup_digits, length)
         }
-        
+
         pinLengthLabel.setTextColor(
             ContextCompat.getColor(
                 this,
@@ -176,7 +181,7 @@ class PinSetupActivity : AppCompatActivity() {
                     showError(getString(R.string.security_toast_pin_must_be_digits))
                     return
                 }
-                
+
                 firstPin = enteredPin.toString()
                 currentStep = Step.CONFIRM_PIN
                 enteredPin.clear()
@@ -195,7 +200,7 @@ class PinSetupActivity : AppCompatActivity() {
                     }, 500)
                     return
                 }
-                
+
                 // PINs match - save it
                 if (pinManager.setPin(firstPin)) {
                     pinDots.showSuccess()

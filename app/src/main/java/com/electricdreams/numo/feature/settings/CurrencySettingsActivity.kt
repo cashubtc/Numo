@@ -13,49 +13,47 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.electricdreams.numo.R
-import com.electricdreams.numo.core.util.CurrencyManager
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.Currency
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
-import java.util.Currency
+
+import com.electricdreams.numo.core.util.CurrencyManager
+import com.electricdreams.numo.databinding.ActivityCurrencySettingsBinding
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 class CurrencySettingsActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityCurrencySettingsBinding
+
     private lateinit var currencyManager: CurrencyManager
     private lateinit var adapter: CurrencyAdapter
-    
+
     private lateinit var recyclerView: RecyclerView
     private lateinit var searchInput: EditText
     private lateinit var clearButton: ImageButton
     private lateinit var emptyStateText: TextView
-    
+
     private var allCurrencies: List<CurrencyWrapper> = emptyList()
     private var hasScrolledToSelection = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_currency_settings)
+        binding = ActivityCurrencySettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
-
-        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
+        binding.topBar.onNavClick { finish() }
 
         currencyManager = CurrencyManager.getInstance(this)
 
-        recyclerView = findViewById(R.id.currency_recycler_view)
-        searchInput = findViewById(R.id.currency_search_input)
-        clearButton = findViewById(R.id.clear_search_button)
-        emptyStateText = findViewById(R.id.empty_state_text)
+        recyclerView = binding.currencyRecyclerView
+        searchInput = binding.currencySearchInput
+        clearButton = binding.clearSearchButton
+        emptyStateText = binding.emptyStateText
 
         setupRecyclerView()
         loadCurrencies()
@@ -68,7 +66,7 @@ class CurrencySettingsActivity : AppCompatActivity() {
             // Update UI to show selection
             adapter.submitList(getFilteredCurrencies(searchInput.text.toString()), currency.code)
         }
-        
+
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
     }
@@ -76,26 +74,26 @@ class CurrencySettingsActivity : AppCompatActivity() {
     private fun loadCurrencies() {
         val prefs = getSharedPreferences("CurrencySettings", Context.MODE_PRIVATE)
         val cachedCurrencies = prefs.getStringSet("cached_supported_currencies", null)
-        
+
         val initialSupportedCodes = cachedCurrencies ?: setOf(
-            CurrencyManager.CURRENCY_USD, CurrencyManager.CURRENCY_EUR, 
-            CurrencyManager.CURRENCY_GBP, CurrencyManager.CURRENCY_JPY, 
-            CurrencyManager.CURRENCY_DKK, CurrencyManager.CURRENCY_SEK, 
+            CurrencyManager.CURRENCY_USD, CurrencyManager.CURRENCY_EUR,
+            CurrencyManager.CURRENCY_GBP, CurrencyManager.CURRENCY_JPY,
+            CurrencyManager.CURRENCY_DKK, CurrencyManager.CURRENCY_SEK,
             CurrencyManager.CURRENCY_NOK, CurrencyManager.CURRENCY_KRW
         )
-        
+
         // Show cached or default immediately
         val standardCurrencies = Currency.getAvailableCurrencies()
             .filter { initialSupportedCodes.contains(it.currencyCode) }
             .map { CurrencyWrapper(it.currencyCode, it) }
-            
+
         // Inject LATAM currencies directly (supported via Yadio API instead of Coinbase to bypass blacklists)
         val latamWrappers = CurrencyManager.LATAM_CURRENCIES.map { code ->
             CurrencyWrapper(code, runCatching { Currency.getInstance(code) }.getOrNull())
         }
         val currentCodes = standardCurrencies.map { it.code }.toSet()
         allCurrencies = standardCurrencies + latamWrappers.filter { it.code !in currentCodes }
-            
+
         val currentList = getFilteredCurrencies(searchInput.text.toString())
         adapter.submitList(currentList, currencyManager.getCurrentCurrency())
         scrollToSelectedCurrencyOnce(currentList)
@@ -118,26 +116,26 @@ class CurrencySettingsActivity : AppCompatActivity() {
                         val currencyObj = dataArray.getJSONObject(i)
                         supported.add(currencyObj.getString("id"))
                     }
-                    
+
                     // Always ensure our custom API fallback currencies are included
                     supported.add(CurrencyManager.CURRENCY_KRW)
                     supported.add(CurrencyManager.CURRENCY_JPY)
                     supported.addAll(CurrencyManager.LATAM_CURRENCIES)
-                    
+
                     withContext(Dispatchers.Main) {
                         prefs.edit().putStringSet("cached_supported_currencies", supported).apply()
-                        
+
                         val newStandardCurrencies = Currency.getAvailableCurrencies()
                             .filter { supported.contains(it.currencyCode) }
                             .map { CurrencyWrapper(it.currencyCode, it) }
-                            
+
                         // Inject LATAM currencies directly (supported via Yadio API instead of Coinbase to bypass blacklists)
                         val latamWrappers = CurrencyManager.LATAM_CURRENCIES.map { code ->
                             CurrencyWrapper(code, runCatching { Currency.getInstance(code) }.getOrNull())
                         }
                         val currentNewCodes = newStandardCurrencies.map { it.code }.toSet()
                         allCurrencies = newStandardCurrencies + latamWrappers.filter { it.code !in currentNewCodes }
-                            
+
                         val currentList = getFilteredCurrencies(searchInput.text.toString())
                         adapter.submitList(currentList, currencyManager.getCurrentCurrency())
                         scrollToSelectedCurrencyOnce(currentList)
@@ -155,14 +153,14 @@ class CurrencySettingsActivity : AppCompatActivity() {
         searchInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            
+
             override fun afterTextChanged(s: Editable?) {
                 val query = s?.toString() ?: ""
                 clearButton.visibility = if (query.isNotEmpty()) View.VISIBLE else View.GONE
-                
+
                 val filtered = getFilteredCurrencies(query)
                 adapter.submitList(filtered, currencyManager.getCurrentCurrency())
-                
+
                 if (filtered.isEmpty()) {
                     recyclerView.visibility = View.GONE
                     emptyStateText.visibility = View.VISIBLE
@@ -177,10 +175,10 @@ class CurrencySettingsActivity : AppCompatActivity() {
             searchInput.text = null
         }
     }
-    
+
     private fun getFilteredCurrencies(query: String): List<CurrencyWrapper> {
         val currentCode = currencyManager.getCurrentCurrency()
-        
+
         val filtered = if (query.isEmpty()) {
             allCurrencies
         } else {
@@ -190,7 +188,7 @@ class CurrencySettingsActivity : AppCompatActivity() {
                 it.displayName.lowercase().contains(lowerQuery)
             }
         }
-        
+
         // Sort alphabetically
         return filtered.sortedWith { c1, c2 ->
             c1.code.compareTo(c2.code)
@@ -199,7 +197,7 @@ class CurrencySettingsActivity : AppCompatActivity() {
 
     private fun scrollToSelectedCurrencyOnce(list: List<CurrencyWrapper>) {
         if (hasScrolledToSelection || searchInput.text.toString().isNotEmpty()) return
-        
+
         val currentCode = currencyManager.getCurrentCurrency()
         val index = list.indexOfFirst { it.code == currentCode }
         if (index != -1) {

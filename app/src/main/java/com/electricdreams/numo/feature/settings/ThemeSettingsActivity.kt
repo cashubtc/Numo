@@ -1,18 +1,20 @@
 package com.electricdreams.numo.feature.settings
 
 import android.os.Bundle
-import android.view.View
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.google.android.material.materialswitch.MaterialSwitch
+
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.prefs.PreferenceStore
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.electricdreams.numo.databinding.ActivityThemeSettingsBinding
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 class ThemeSettingsActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityThemeSettingsBinding
 
     companion object {
         const val PREF_THEME = "app_theme"
@@ -32,18 +34,14 @@ class ThemeSettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_theme_settings)
+        binding = ActivityThemeSettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
-
-        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
+        binding.topBar.onNavClick { finish() }
 
         // Initialize dark mode switch
-        darkModeSwitch = findViewById(R.id.dark_mode_switch)
+        darkModeSwitch = binding.darkModeSwitch
         val prefs = PreferenceStore.app(this)
         val isDarkMode = prefs.getBoolean(KEY_DARK_MODE, false)
         darkModeSwitch.isChecked = isDarkMode
@@ -56,11 +54,11 @@ class ThemeSettingsActivity : AppCompatActivity() {
         }
 
         // Initialize theme radio buttons
-        themeRadioGroup = findViewById(R.id.theme_radio_group)
-        radioObsidian = findViewById(R.id.radio_obsidian)
-        radioBitcoinOrange = findViewById(R.id.radio_bitcoin_orange)
-        radioGreen = findViewById(R.id.radio_green)
-        radioWhite = findViewById(R.id.radio_white)
+        themeRadioGroup = binding.themeRadioGroup
+        radioObsidian = binding.radioObsidian
+        radioBitcoinOrange = binding.radioBitcoinOrange
+        radioGreen = binding.radioGreen
+        radioWhite = binding.radioWhite
 
         setSelectedTheme(getCurrentTheme())
 

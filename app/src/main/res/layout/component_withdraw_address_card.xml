@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="@dimen/margin_screen_horizontal">
+    android:padding="16dp">
 
     <!-- Lightning Address Label -->
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -15,8 +17,9 @@
         style="@style/Text.RowTitle" />
 
     <!-- Address Input -->
+
     <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
+        style="@style/Widget.Numo.SettingsTextInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -28,12 +31,13 @@
             android:hint="@string/withdraw_lightning_address_hint_value"
             android:inputType="textEmailAddress"
             android:textColor="@color/color_text_primary"
-            android:textColorHint="@color/color_text_tertiary"
+            android:textColorHint="?attr/colorOnSurfaceVariant"
             android:textSize="16sp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Amount Label -->
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -43,8 +47,9 @@
         style="@style/Text.RowTitle" />
 
     <!-- Amount Input -->
+
     <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
+        style="@style/Widget.Numo.SettingsTextInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -56,21 +61,23 @@
             android:hint="@string/withdraw_amount_placeholder"
             android:inputType="number"
             android:textColor="@color/color_text_primary"
-            android:textColorHint="@color/color_text_tertiary"
+            android:textColorHint="?attr/colorOnSurfaceVariant"
             android:textSize="16sp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Continue Button -->
+
     <Button
         android:id="@+id/continue_button"
         style="@style/Widget.Button.Primary.Green"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/button_height"
+        android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/space_l"
         android:enabled="false"
         android:text="@string/withdraw_continue_button"
         android:textAllCaps="false"
-        android:textSize="17sp" />
+        android:textSize="17sp"
+        android:minHeight="56dp" />
 
 </LinearLayout>

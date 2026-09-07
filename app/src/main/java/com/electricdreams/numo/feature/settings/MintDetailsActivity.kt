@@ -19,6 +19,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
@@ -26,15 +30,13 @@ import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintIconCache
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.util.MintProfileService
+import com.electricdreams.numo.databinding.ActivityMintDetailsBinding
 import com.electricdreams.numo.ui.util.DialogHelper
-import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 /**
  * Premium mint details screen inspired by cashu-me MintDetailsPage.
- * 
+ *
  * Features:
  * - Instant loading from cached mint info
  * - Async refresh with error handling
@@ -43,6 +45,8 @@ import kotlinx.coroutines.withContext
  * - Beautiful animations
  */
 class MintDetailsActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMintDetailsBinding
 
     companion object {
         const val EXTRA_MINT_URL = "mint_url"
@@ -69,7 +73,7 @@ class MintDetailsActivity : AppCompatActivity() {
     private lateinit var descriptionText: TextView
     private lateinit var motdSection: LinearLayout
     private lateinit var motdText: TextView
-    
+
     // Details section
     private lateinit var detailsSection: LinearLayout
     private lateinit var urlRow: View
@@ -80,7 +84,7 @@ class MintDetailsActivity : AppCompatActivity() {
     private lateinit var versionValue: TextView
     private lateinit var contactSection: LinearLayout
     private lateinit var contactContainer: LinearLayout
-    
+
     // Actions
     private lateinit var setLightningButton: LinearLayout
     private lateinit var copyUrlButton: LinearLayout
@@ -92,7 +96,7 @@ class MintDetailsActivity : AppCompatActivity() {
     private var mintUrl: String = ""
     private var isLightningMint: Boolean = false
     private var hasFetchError: Boolean = false
-    
+
     // Balance refresh broadcast receiver
     private val balanceRefreshReceiver: BroadcastReceiver = BalanceRefreshBroadcast.createReceiver { reason ->
         // Refresh balance when we receive a broadcast (e.g., from withdrawal success)
@@ -107,10 +111,11 @@ class MintDetailsActivity : AppCompatActivity() {
     )
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_mint_details)
+        binding = ActivityMintDetailsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
         // Consistent edge-to-edge so nav pill floats above this detail sheet-style screen
-        enableEdgeToEdgeWithPill(this, lightNavIcons = true)
 
         mintUrl = intent.getStringExtra(EXTRA_MINT_URL) ?: run {
             finish()
@@ -126,19 +131,19 @@ class MintDetailsActivity : AppCompatActivity() {
         setupListeners()
         loadMintDetails()
     }
-    
+
     override fun onStart() {
         super.onStart()
         // Register for balance refresh broadcasts
         BalanceRefreshBroadcast.register(this, balanceRefreshReceiver)
     }
-    
+
     override fun onStop() {
         super.onStop()
         // Unregister balance refresh receiver
         BalanceRefreshBroadcast.unregister(this, balanceRefreshReceiver)
     }
-    
+
     override fun onResume() {
         super.onResume()
         // Reload balance when returning to this screen
@@ -146,62 +151,62 @@ class MintDetailsActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        topBar = findViewById(R.id.top_bar)
-        errorBanner = findViewById(R.id.error_banner)
-        errorText = findViewById(R.id.error_text)
-        errorRetryButton = findViewById(R.id.error_retry_button)
-        iconContainer = findViewById(R.id.icon_container)
-        mintIcon = findViewById(R.id.mint_icon)
-        mintName = findViewById(R.id.mint_name)
-        mintUrlText = findViewById(R.id.mint_url)
-        balanceText = findViewById(R.id.balance_text)
-        lightningBadge = findViewById(R.id.lightning_badge)
-        
-        descriptionSection = findViewById(R.id.description_section)
-        descriptionText = findViewById(R.id.description_text)
-        motdSection = findViewById(R.id.motd_section)
-        motdText = findViewById(R.id.motd_text)
-        
-        detailsSection = findViewById(R.id.details_section)
-        urlRow = findViewById(R.id.url_row)
-        urlValue = findViewById(R.id.url_value)
-        softwareRow = findViewById(R.id.software_row)
-        softwareValue = findViewById(R.id.software_value)
-        versionRow = findViewById(R.id.version_row)
-        versionValue = findViewById(R.id.version_value)
-        contactSection = findViewById(R.id.contact_section)
-        contactContainer = findViewById(R.id.contact_container)
-        
-        setLightningButton = findViewById(R.id.set_lightning_button)
-        copyUrlButton = findViewById(R.id.copy_url_button)
-        deleteButton = findViewById(R.id.delete_button)
+        topBar = binding.topBar
+        errorBanner = binding.errorBanner
+        errorText = binding.errorText
+        errorRetryButton = binding.errorRetryButton
+        iconContainer = binding.iconContainer
+        mintIcon = binding.mintIcon
+        mintName = binding.mintName
+        mintUrlText = binding.mintUrl
+        balanceText = binding.balanceText
+        lightningBadge = binding.lightningBadge
+
+        descriptionSection = binding.descriptionSection
+        descriptionText = binding.descriptionText
+        motdSection = binding.motdSection
+        motdText = binding.motdText
+
+        detailsSection = binding.detailsSection
+        urlRow = binding.urlRow
+        urlValue = binding.urlValue
+        softwareRow = binding.softwareRow
+        softwareValue = binding.softwareValue
+        versionRow = binding.versionRow
+        versionValue = binding.versionValue
+        contactSection = binding.contactSection
+        contactContainer = binding.contactContainer
+
+        setLightningButton = binding.setLightningButton
+        copyUrlButton = binding.copyUrlButton
+        deleteButton = binding.deleteButton
     }
 
     private fun setupListeners() {
         topBar.onNavClick { finish() }
-        
+
         errorRetryButton.setOnClickListener {
             animateButtonTap(it) {
                 refreshMintInfo()
             }
         }
-        
+
         urlRow.setOnClickListener {
             copyToClipboard(mintUrl)
         }
-        
+
         setLightningButton.setOnClickListener {
             animateButtonTap(it) {
                 setAsLightningMint()
             }
         }
-        
+
         copyUrlButton.setOnClickListener {
             animateButtonTap(it) {
                 copyToClipboard(mintUrl)
             }
         }
-        
+
         deleteButton.setOnClickListener {
             animateButtonTap(it) {
                 showDeleteConfirmation()
@@ -213,23 +218,23 @@ class MintDetailsActivity : AppCompatActivity() {
         // Basic info (always available)
         val displayName = mintManager.getMintDisplayName(mintUrl)
         val shortUrl = mintUrl.removePrefix("https://").removePrefix("http://")
-        
+
         mintName.text = displayName
         mintUrlText.text = shortUrl
         urlValue.text = shortUrl
-        
+
         // Update lightning badge visibility
         updateLightningBadge()
-        
+
         // Load icon
         loadMintIcon()
-        
+
         // Load balance
         loadBalance()
-        
+
         // Load cached mint info first (instant)
         loadCachedMintInfo()
-        
+
         // Then refresh from network (async)
         refreshMintInfo()
     }
@@ -258,7 +263,7 @@ class MintDetailsActivity : AppCompatActivity() {
                 // Fall through to default
             }
         }
-        
+
         mintIcon.setImageResource(R.drawable.ic_bitcoin)
         mintIcon.setColorFilter(getColor(R.color.color_primary))
     }
@@ -327,7 +332,7 @@ class MintDetailsActivity : AppCompatActivity() {
         val versionInfo = info.versionInfo
         val hasSoftware = !versionInfo?.name.isNullOrBlank()
         val hasVersion = !versionInfo?.version.isNullOrBlank()
-        
+
         if (hasSoftware) {
             softwareRow.visibility = View.VISIBLE
             softwareValue.text = versionInfo?.name
@@ -341,28 +346,28 @@ class MintDetailsActivity : AppCompatActivity() {
         } else {
             versionRow.visibility = View.GONE
         }
-        
+
         // Contact info from cached data
         displayContactInfo(info.contact)
     }
-    
+
     private fun displayContactInfo(contacts: List<CashuWalletManager.CachedContactInfo>) {
         if (contacts.isEmpty()) {
             contactSection.visibility = View.GONE
             return
         }
-        
+
         contactSection.visibility = View.VISIBLE
         contactContainer.removeAllViews()
-        
+
         contacts.forEachIndexed { index, contact ->
             val contactView = layoutInflater.inflate(R.layout.item_mint_contact, contactContainer, false)
-            
+
             val iconView = contactView.findViewById<ImageView>(R.id.contact_icon)
             val methodView = contactView.findViewById<TextView>(R.id.contact_method)
             val infoView = contactView.findViewById<TextView>(R.id.contact_info)
             val copyButton = contactView.findViewById<ImageView>(R.id.copy_button)
-            
+
             // Set icon based on method
             val iconRes = when (contact.method.lowercase()) {
                 "nostr" -> R.drawable.ic_contact_nostr
@@ -372,18 +377,18 @@ class MintDetailsActivity : AppCompatActivity() {
                 else -> R.drawable.ic_link
             }
             iconView.setImageResource(iconRes)
-            
+
             // Set method label (title case, matching Details row labels)
             methodView.text = contact.method.replaceFirstChar { it.uppercase() }
-            
+
             // Set info text
             infoView.text = contact.info
-            
+
             // Copy button
             copyButton.setOnClickListener {
                 copyToClipboard(contact.info)
             }
-            
+
             contactContainer.addView(contactView)
         }
     }
@@ -411,7 +416,6 @@ class MintDetailsActivity : AppCompatActivity() {
         }
     }
 
-
     private fun showError() {
         hasFetchError = true
         errorBanner.visibility = View.VISIBLE
@@ -424,7 +428,6 @@ class MintDetailsActivity : AppCompatActivity() {
             .setInterpolator(DecelerateInterpolator())
             .start()
     }
-
 
     private fun hideError() {
         if (hasFetchError) {
@@ -443,7 +446,7 @@ class MintDetailsActivity : AppCompatActivity() {
     private fun setAsLightningMint() {
         isLightningMint = true
         updateLightningBadge()
-        
+
         // Animate the badge appearance
         lightningBadge.alpha = 0f
         lightningBadge.scaleX = 0.8f
@@ -455,14 +458,14 @@ class MintDetailsActivity : AppCompatActivity() {
             .setDuration(300)
             .setInterpolator(OvershootInterpolator(2f))
             .start()
-        
+
         // Set result for parent activity
         val resultIntent = Intent().apply {
             putExtra(EXTRA_MINT_URL, mintUrl)
             putExtra(EXTRA_SET_AS_LIGHTNING, true)
         }
         setResult(RESULT_OK, resultIntent)
-        
+
         Toast.makeText(this, R.string.mints_lightning_changed, Toast.LENGTH_SHORT).show()
     }
 
@@ -475,7 +478,7 @@ class MintDetailsActivity : AppCompatActivity() {
 
     private fun showDeleteConfirmation() {
         val displayName = mintManager.getMintDisplayName(mintUrl)
-        
+
         DialogHelper.showConfirmation(
             context = this,
             config = DialogHelper.ConfirmationConfig(
@@ -490,16 +493,16 @@ class MintDetailsActivity : AppCompatActivity() {
 
     private fun deleteMint() {
         mintManager.removeMint(mintUrl)
-        
+
         // Broadcast that a mint was removed so other activities can refresh
         BalanceRefreshBroadcast.send(this, BalanceRefreshBroadcast.REASON_MINT_REMOVED)
-        
+
         val resultIntent = Intent().apply {
             putExtra(EXTRA_MINT_URL, mintUrl)
             putExtra(EXTRA_DELETED, true)
         }
         setResult(RESULT_OK, resultIntent)
-        
+
         Toast.makeText(this, getString(R.string.mints_removed_toast), Toast.LENGTH_SHORT).show()
         finish()
     }

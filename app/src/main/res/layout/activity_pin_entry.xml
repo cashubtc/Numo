@@ -1,172 +1,215 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
+    android:layout_height="match_parent">
 
-    <!-- Header -->
-    <ImageButton
-        android:id="@+id/back_button"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Back"
-        android:src="@drawable/ic_chevron_back"
-        app:tint="@color/color_text_primary"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Lock Icon — start of vertical chain that fills space above the keypad -->
-    <ImageView
-        android:id="@+id/lock_icon"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:src="@drawable/ic_lock"
-        app:tint="@color/color_text_primary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/back_button"
-        app:layout_constraintBottom_toTopOf="@id/title"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintVertical_bias="0.3" />
-
-    <!-- Title -->
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/pin_entry_title"
-        android:textSize="24sp"
-        android:textColor="@color/color_text_primary"
-        android:fontFamily="sans-serif-medium"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/lock_icon" />
-
-    <!-- Subtitle -->
-    <TextView
-        android:id="@+id/subtitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/pin_entry_subtitle"
-        android:textSize="15sp"
-        android:textColor="@color/color_text_secondary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title" />
-
-    <!-- PIN Dots -->
-    <com.electricdreams.numo.feature.pin.PinDotsView
-        android:id="@+id/pin_dots"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/subtitle" />
-
-    <!-- Error Message — closes the chain to the keypad top -->
-    <TextView
-        android:id="@+id/error_message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text=""
-        android:textSize="14sp"
-        android:textColor="@color/color_warning_red"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/pin_dots"
-        app:layout_constraintBottom_toTopOf="@id/pin_keypad" />
-
-    <!-- Keypad - fixed 320dp height like POS -->
-    <com.electricdreams.numo.feature.pin.PinKeypadView
-        android:id="@+id/pin_keypad"
-        android:layout_width="0dp"
-        android:layout_height="320dp"
-        android:layout_marginHorizontal="32dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@id/forgot_pin_button"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <!-- Forgot PIN Button -->
-    <TextView
-        android:id="@+id/forgot_pin_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
-        android:padding="12dp"
-        android:text="@string/pin_entry_forgot"
-        android:textSize="15sp"
-        android:textColor="@color/color_accent_blue"
-        android:fontFamily="sans-serif-medium"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <!-- Lockout Overlay -->
     <FrameLayout
-        android:id="@+id/lockout_overlay"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/color_bg_white"
-        android:visibility="gone">
+        android:layout_height="match_parent">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:orientation="vertical"
-            android:padding="32dp">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <ImageView
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:src="@drawable/ic_lock"
-                app:tint="@color/color_warning_red" />
-
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="@string/pin_entry_too_many_attempts"
-                android:textSize="22sp"
-                android:textColor="@color/color_text_primary"
-                android:fontFamily="sans-serif-medium" />
+                android:minHeight="64dp"
+                android:padding="8dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/lockout_message"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/pin_entry_try_again_minutes"
-                android:textSize="15sp"
-                android:textColor="@color/color_text_secondary"
-                android:gravity="center" />
+                <ImageButton
+                    android:id="@+id/back_button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/common_back"
+                    android:src="@drawable/ic_arrow_back"
+                    app:tint="@color/color_text_primary" />
 
-            <TextView
-                android:id="@+id/lockout_reset_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:padding="12dp"
-                android:text="@string/pin_entry_reset_recovery"
-                android:textSize="15sp"
-                android:textColor="@color/color_accent_blue"
-                android:fontFamily="sans-serif-medium"
-                android:background="?attr/selectableItemBackgroundBorderless" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/settings_security_title"
+                    android:textAppearance="@style/Text.SettingsPageTitle"
+                    android:maxLines="2"
+                    android:ellipsize="end"
+                    android:accessibilityHeading="true" />
+
+            </LinearLayout>
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:clipToPadding="false">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingBottom="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal"
+                        android:padding="20dp"
+                        android:background="@drawable/bg_settings_group">
+
+                        <ImageView
+                            android:id="@+id/lock_icon"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:src="@drawable/ic_lock"
+                            app:tint="?attr/colorPrimary"
+                            android:layout_marginTop="12dp"
+                            android:padding="12dp"
+                            android:background="@drawable/bg_settings_icon"
+                            android:importantForAccessibility="no" />
+
+                        <TextView
+                            android:id="@+id/title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/pin_entry_title"
+                            android:textSize="24sp"
+                            android:textColor="@color/color_text_primary"
+                            android:fontFamily="sans-serif-medium"
+                            android:layout_marginTop="12dp"
+                            android:gravity="center"
+                            android:textAppearance="@style/Text.Heading1" />
+
+                        <TextView
+                            android:id="@+id/subtitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/pin_entry_subtitle"
+                            android:textSize="15sp"
+                            android:textColor="@color/color_text_secondary"
+                            android:layout_marginTop="12dp"
+                            android:gravity="center" />
+
+                        <com.electricdreams.numo.feature.pin.PinDotsView
+                            android:id="@+id/pin_dots"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp" />
+
+                        <TextView
+                            android:id="@+id/error_message"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textSize="14sp"
+                            android:textColor="@color/color_warning_red"
+                            android:visibility="invisible"
+                            android:layout_marginTop="12dp"
+                            android:gravity="center"
+                            android:accessibilityLiveRegion="polite" />
+
+                    </LinearLayout>
+
+                    <com.electricdreams.numo.feature.pin.PinKeypadView
+                        android:id="@+id/pin_keypad"
+                        android:layout_width="match_parent"
+                        android:layout_height="320dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/bg_settings_group"
+                        android:padding="8dp" />
+
+                    <TextView
+                        android:id="@+id/forgot_pin_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="12dp"
+                        android:text="@string/pin_entry_forgot"
+                        android:textSize="15sp"
+                        android:textColor="?attr/colorPrimary"
+                        android:fontFamily="sans-serif-medium"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:minHeight="56dp"
+                        android:layout_marginTop="12dp"
+                        android:gravity="center" />
+
+                </LinearLayout>
+
+            </ScrollView>
 
         </LinearLayout>
 
+        <FrameLayout
+            android:id="@+id/lockout_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/settings_background"
+            android:visibility="gone">
+
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:fillViewport="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="32dp">
+
+                    <ImageView
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:src="@drawable/ic_lock"
+                        app:tint="@color/color_warning_red"
+                        android:importantForAccessibility="no" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:text="@string/pin_entry_too_many_attempts"
+                        android:textSize="22sp"
+                        android:textColor="@color/color_text_primary"
+                        android:fontFamily="sans-serif-medium" />
+
+                    <TextView
+                        android:id="@+id/lockout_message"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/pin_entry_try_again_minutes"
+                        android:textSize="15sp"
+                        android:textColor="@color/color_text_secondary"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:id="@+id/lockout_reset_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="32dp"
+                        android:padding="12dp"
+                        android:text="@string/pin_entry_reset_recovery"
+                        android:textSize="15sp"
+                        android:textColor="@color/color_accent_blue"
+                        android:fontFamily="sans-serif-medium"
+                        android:background="?attr/selectableItemBackgroundBorderless" />
+
+                </LinearLayout>
+
+            </ScrollView>
+
+        </FrameLayout>
+
     </FrameLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

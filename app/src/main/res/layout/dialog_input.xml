@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -12,6 +13,7 @@
         android:orientation="vertical">
 
         <!-- Close Button (top-left) -->
+
         <ImageButton
             android:id="@+id/close_button"
             android:layout_width="@dimen/icon_size_large"
@@ -25,6 +27,7 @@
             app:tint="@color/color_text_secondary" />
 
         <!-- Title -->
+
         <TextView
             android:id="@+id/dialog_title"
             style="@style/Text.DialogTitle"
@@ -36,6 +39,7 @@
             tools:text="Edit Threshold" />
 
         <!-- Description (optional) -->
+
         <TextView
             android:id="@+id/dialog_description"
             style="@style/Text.DialogSubtitle"
@@ -50,6 +54,7 @@
             tools:text="Auto-withdraw triggers when balance exceeds this." />
 
         <!-- Divider -->
+
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
@@ -58,6 +63,7 @@
             android:background="@color/color_divider" />
 
         <!-- Content Section -->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -66,6 +72,7 @@
             android:paddingTop="@dimen/margin_screen_horizontal">
 
             <!-- Input Field Container -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -74,11 +81,11 @@
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/input_container"
-                    style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
+                    style="@style/Widget.Numo.SettingsTextInput"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    app:prefixText="&#8383;"
+                    app:prefixText="₿"
                     app:prefixTextAppearance="@style/Text.InputAffix"
                     app:suffixText="%"
                     app:suffixTextAppearance="@style/Text.InputAffix"
@@ -87,7 +94,7 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/dialog_input"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/button_height"
+                        android:layout_height="wrap_content"
                         android:hint="@string/hint_enter_value"
                         android:textAppearance="@style/Text.Body"
                         android:textColor="@color/color_text_primary"
@@ -95,11 +102,13 @@
                         android:inputType="text"
                         android:maxLines="1"
                         android:imeOptions="actionDone"
-                        tools:text="50000" />
+                        tools:text="50000"
+                        android:minHeight="56dp" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Optional Scan Button -->
+
                 <ImageButton
                     android:id="@+id/input_scan_button"
                     android:contentDescription="@string/cd_scan_qr"
@@ -116,6 +125,7 @@
             </LinearLayout>
 
             <!-- Helper Text (optional) -->
+
             <TextView
                 android:id="@+id/dialog_helper"
                 android:layout_width="match_parent"
@@ -130,15 +140,18 @@
         </LinearLayout>
 
         <!-- Save Button -->
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/save_button"
             style="@style/Widget.Numo.Button.Dialog.Confirm"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/button_height"
+            android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
             android:layout_marginTop="@dimen/margin_screen_horizontal"
             android:layout_marginBottom="@dimen/space_xl"
-            android:text="@string/common_save" />
+            android:text="@string/common_save"
+            android:minHeight="56dp" />
 
     </LinearLayout>
+
 </androidx.core.widget.NestedScrollView>

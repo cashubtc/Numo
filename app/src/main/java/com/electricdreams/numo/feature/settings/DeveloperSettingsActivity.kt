@@ -3,13 +3,13 @@ package com.electricdreams.numo.feature.settings
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+
 import com.electricdreams.numo.R
-import com.electricdreams.numo.databinding.ActivityDeveloperSettingsBinding
-import com.electricdreams.numo.ui.util.DialogHelper
-import com.electricdreams.numo.feature.onboarding.OnboardingActivity
 import com.electricdreams.numo.core.prefs.PreferenceStore
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.electricdreams.numo.databinding.ActivityDeveloperSettingsBinding
+import com.electricdreams.numo.feature.onboarding.OnboardingActivity
+import com.electricdreams.numo.ui.util.DialogHelper
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 class DeveloperSettingsActivity : AppCompatActivity() {
 
@@ -19,12 +19,7 @@ class DeveloperSettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityDeveloperSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+        applySettingsWindowInsets(this, binding.root)
 
         binding.topBar.onNavClick { finish() }
 

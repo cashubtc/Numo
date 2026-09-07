@@ -1,65 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
+    android:layout_height="match_parent">
 
-    <!-- Top App Bar -->
-    <com.electricdreams.numo.ui.components.NumoTopBar
-        android:id="@+id/top_bar"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        app:topBarTitle="@string/withdraw_melt_title"
-        app:topBarNavContentDescription="@string/withdraw_melt_toolbar_back"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent">
 
-    <ScrollView
-        android:id="@+id/confirmation_scroll"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/confirm_button"
-        app:layout_constraintTop_toBottomOf="@id/top_bar">
+        <!-- Top App Bar -->
 
-        <LinearLayout
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/space_2xl">
+            app:topBarTitle="@string/withdraw_melt_title"
+            app:topBarNavContentDescription="@string/withdraw_melt_toolbar_back"
+            app:layout_constraintTop_toTopOf="parent"
+            android:minHeight="64dp"
+            app:topBarSettingsStyle="true" />
 
-            <!-- Summary Text -->
-            <TextView
-                android:id="@+id/summary_text"
+        <ScrollView
+            android:id="@+id/confirmation_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@id/confirm_button"
+            app:layout_constraintTop_toBottomOf="@id/top_bar"
+            android:clipToPadding="false">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                android:layout_marginTop="@dimen/space_xl"
-                android:gravity="center"
-                android:text="@string/withdraw_melt_summary"
-                android:textAppearance="@style/Text.Body" />
+                android:orientation="vertical"
+                android:paddingBottom="24dp"
+                android:paddingHorizontal="16dp">
 
-            <!-- Destination Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                android:layout_marginTop="@dimen/space_xl"
-                app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="@dimen/radius_card"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
+                <!-- Summary Text -->
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/summary_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/margin_screen_horizontal">
+                    android:layout_marginTop="@dimen/space_xl"
+                    android:gravity="center"
+                    android:text="@string/withdraw_melt_summary"
+                    android:textAppearance="@style/Text.Body" />
+
+                <!-- Destination Card -->
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_xl"
+                    style="@style/Widget.Numo.SettingsCard">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="@dimen/margin_screen_horizontal">
 
                         <TextView
-                            style="@style/Text.SectionHeader"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/withdraw_melt_destination_label" />
+                            android:text="@string/withdraw_melt_destination_label"
+                            android:textAppearance="@style/Text.SettingsSection"
+                            android:textAllCaps="false"
+                            android:layout_marginStart="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_marginTop="24dp"
+                            android:layout_marginBottom="12dp"
+                            android:accessibilityHeading="true" />
 
                         <TextView
                             android:id="@+id/destination_text"
@@ -69,415 +81,427 @@
                             android:text="@string/withdraw_melt_destination_placeholder"
                             style="@style/Text.RowTitle" />
 
-                </LinearLayout>
+                    </LinearLayout>
 
-            </com.google.android.material.card.MaterialCardView>
+                </com.google.android.material.card.MaterialCardView>
 
-            <!-- Amount Details Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                android:layout_marginTop="@dimen/space_l"
-                app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="@dimen/radius_card"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
+                <!-- Amount Details Card -->
 
-                <LinearLayout
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/margin_screen_horizontal">
+                    android:layout_marginTop="@dimen/space_l"
+                    style="@style/Widget.Numo.SettingsCard">
 
-                    <!-- Amount Row -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:orientation="vertical"
+                        android:padding="@dimen/margin_screen_horizontal">
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/withdraw_melt_amount_label"
-                            android:textAppearance="@style/Text.Body" />
+                        <!-- Amount Row -->
 
-                        <TextView
-                            android:id="@+id/amount_text"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="₿0"
-                            style="@style/Text.RowTitle" />
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/withdraw_melt_amount_label"
+                                android:textAppearance="@style/Text.Body" />
+
+                            <TextView
+                                android:id="@+id/amount_text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="₿0"
+                                style="@style/Text.RowTitle" />
+
+                        </LinearLayout>
+
+                        <!-- Fee Row -->
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/space_m"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/withdraw_melt_fee_label"
+                                android:textAppearance="@style/Text.Body" />
+
+                            <TextView
+                                android:id="@+id/fee_text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="₿0"
+                                style="@style/Text.RowTitle" />
+
+                        </LinearLayout>
+
+                        <!-- Divider -->
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginVertical="@dimen/space_l"
+                            android:background="@color/color_divider" />
+
+                        <!-- Total Row -->
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/withdraw_melt_total_label"
+                                style="@style/Text.RowTitle" />
+
+                            <TextView
+                                android:id="@+id/total_text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="₿0"
+                                android:textAppearance="@style/Text.RowTitle" />
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
-                    <!-- Fee Row -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_m"
-                        android:orientation="horizontal">
+                </com.google.android.material.card.MaterialCardView>
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/withdraw_melt_fee_label"
-                            android:textAppearance="@style/Text.Body" />
+                <!-- Info Text -->
 
-                        <TextView
-                            android:id="@+id/fee_text"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="₿0"
-                            style="@style/Text.RowTitle" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_l"
+                    android:gravity="center"
+                    android:text="@string/withdraw_melt_fee_note"
+                    android:textAppearance="@style/Text.SettingsCaption"
+                    android:textColor="@color/color_text_secondary" />
 
-                    </LinearLayout>
+            </LinearLayout>
 
-                    <!-- Divider -->
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="@dimen/space_l"
-                        android:background="@color/color_divider" />
+        </ScrollView>
 
-                    <!-- Total Row -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+        <!-- Confirm Button -->
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="@string/withdraw_melt_total_label"
-                            style="@style/Text.RowTitle" />
-
-                        <TextView
-                            android:id="@+id/total_text"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="₿0"
-                            android:textAppearance="@style/Text.RowTitle" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Info Text -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                android:layout_marginTop="@dimen/space_l"
-                android:gravity="center"
-                android:text="@string/withdraw_melt_fee_note"
-                android:textAppearance="@style/Text.Caption"
-                android:textColor="@color/color_text_secondary" />
-
-        </LinearLayout>
-
-    </ScrollView>
-
-    <!-- Confirm Button -->
-    <Button
-        android:id="@+id/confirm_button"
-        style="@style/Widget.Button.Primary.Green"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/button_height"
-        android:layout_marginHorizontal="@dimen/space_2xl"
-        android:layout_marginBottom="@dimen/space_xl"
-        android:text="@string/withdraw_melt_title"
-        android:textAllCaps="false"
-        app:layout_constraintBottom_toBottomOf="parent" />
-
-    <!-- Processing Container (replaces confirmation content via container swap) -->
-    <ScrollView
-        android:id="@+id/processing_container"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_bar">
-
-        <LinearLayout
+        <Button
+            android:id="@+id/confirm_button"
+            style="@style/Widget.Button.Primary.Green"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/space_2xl">
+            android:layout_marginHorizontal="@dimen/space_2xl"
+            android:layout_marginBottom="@dimen/space_xl"
+            android:text="@string/withdraw_melt_title"
+            android:textAllCaps="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:minHeight="56dp" />
 
-            <!-- Lightning Icon -->
-            <FrameLayout
-                android:layout_width="@dimen/icon_size_large"
-                android:layout_height="@dimen/icon_size_large"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/space_3xl"
-                android:background="@drawable/bg_processing_step_active">
+        <!-- Processing Container (replaces confirmation content via container swap) -->
 
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_lightning_small"
-                    android:tint="@color/color_bg_white" />
+        <ScrollView
+            android:id="@+id/processing_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/top_bar"
+            android:clipToPadding="false">
 
-            </FrameLayout>
-
-            <!-- Title -->
-            <TextView
-                android:id="@+id/processing_title"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_l"
-                android:gravity="center"
-                android:text="@string/withdraw_processing_title"
-                android:textAppearance="@style/Text.Title"
-                android:textColor="@color/color_text_primary" />
+                android:orientation="vertical"
+                android:paddingBottom="24dp"
+                android:paddingHorizontal="16dp">
 
-            <!-- Subtitle -->
-            <TextView
-                android:id="@+id/processing_subtitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_s"
-                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                android:gravity="center"
-                android:text="@string/withdraw_processing_subtitle"
-                android:textAppearance="@style/Text.Body"
-                android:textColor="@color/color_text_secondary" />
+                <!-- Lightning Icon -->
 
-            <!-- Info Card: Amount + Destination -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                android:layout_marginTop="@dimen/space_xl"
-                app:cardBackgroundColor="@color/color_bg_card"
-                app:cardCornerRadius="@dimen/radius_card"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
+                <FrameLayout
+                    android:layout_width="@dimen/icon_size_large"
+                    android:layout_height="@dimen/icon_size_large"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="@dimen/space_3xl"
+                    android:background="@drawable/bg_processing_step_active">
 
-                <LinearLayout
+                    <ImageView
+                        android:importantForAccessibility="no"
+                        android:layout_width="@dimen/icon_size_small"
+                        android:layout_height="@dimen/icon_size_small"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_lightning_small"
+                        app:tint="@color/color_bg_white" />
+
+                </FrameLayout>
+
+                <!-- Title -->
+
+                <TextView
+                    android:id="@+id/processing_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="@dimen/margin_screen_horizontal">
+                    android:layout_marginTop="@dimen/space_l"
+                    android:gravity="center"
+                    android:text="@string/withdraw_processing_title"
+                    android:textAppearance="@style/Text.Title"
+                    android:textColor="@color/color_text_primary" />
 
-                    <!-- Amount Column -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                <!-- Subtitle -->
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/withdraw_processing_amount_label"
-                            android:textAppearance="@style/Text.Caption"
-                            android:textColor="@color/color_text_tertiary" />
-
-                        <TextView
-                            android:id="@+id/processing_amount_value"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/space_xs"
-                            style="@style/Text.RowTitle" />
-
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginHorizontal="@dimen/space_l"
-                        android:background="@color/color_divider" />
-
-                    <!-- Destination Column -->
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/withdraw_processing_destination_label"
-                            android:textAppearance="@style/Text.Caption"
-                            android:textColor="@color/color_text_tertiary" />
-
-                        <TextView
-                            android:id="@+id/processing_destination_value"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/space_xs"
-                            style="@style/Text.RowTitle" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Progress Card: Spinner + Step Indicators -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                android:layout_marginTop="@dimen/space_l"
-                app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="@dimen/radius_card"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
+                <TextView
+                    android:id="@+id/processing_subtitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="@dimen/margin_screen_horizontal"
-                    android:animateLayoutChanges="true">
+                    android:layout_marginTop="@dimen/space_s"
+                    android:gravity="center"
+                    android:text="@string/withdraw_processing_subtitle"
+                    android:textAppearance="@style/Text.Body"
+                    android:textColor="@color/color_text_secondary" />
 
-                    <!-- Spinner + Status -->
+                <!-- Info Card: Amount + Destination -->
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_xl"
+                    style="@style/Widget.Numo.SettingsCard">
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:padding="@dimen/margin_screen_horizontal">
 
-                        <ProgressBar
-                            android:id="@+id/processing_progress"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:indeterminate="true"
-                            android:indeterminateTint="@color/color_primary" />
+                        <!-- Amount Column -->
 
-                        <TextView
-                            android:id="@+id/processing_status_text"
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="@dimen/space_l"
                             android:layout_weight="1"
-                            android:text="@string/withdraw_processing_status_preparing"
-                            android:textAppearance="@style/Text.BodyBold"
-                            android:textColor="@color/color_text_primary" />
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/withdraw_processing_amount_label"
+                                android:textAppearance="@style/Text.SettingsCaption"
+                                android:textColor="@color/color_text_tertiary" />
+
+                            <TextView
+                                android:id="@+id/processing_amount_value"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/space_xs"
+                                style="@style/Text.RowTitle" />
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginHorizontal="@dimen/space_l"
+                            android:background="@color/color_divider" />
+
+                        <!-- Destination Column -->
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/withdraw_processing_destination_label"
+                                android:textAppearance="@style/Text.SettingsCaption"
+                                android:textColor="@color/color_text_tertiary" />
+
+                            <TextView
+                                android:id="@+id/processing_destination_value"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/space_xs"
+                                style="@style/Text.RowTitle" />
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
-                    <!-- Divider -->
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginVertical="@dimen/space_l"
-                        android:background="@color/color_divider" />
+                </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Step Indicators -->
+                <!-- Progress Card: Spinner + Step Indicators -->
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_l"
+                    style="@style/Widget.Numo.SettingsCard">
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:orientation="vertical"
+                        android:padding="@dimen/margin_screen_horizontal"
+                        android:animateLayoutChanges="true">
 
-                        <!-- Preparing -->
+                        <!-- Spinner + Status -->
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:paddingVertical="@dimen/space_s">
+                            android:orientation="horizontal">
 
-                            <View
-                                android:id="@+id/processing_step_preparing_indicator"
-                                android:layout_width="12dp"
-                                android:layout_height="12dp"
-                                android:background="@drawable/bg_processing_step_active" />
+                            <ProgressBar
+                                android:id="@+id/processing_progress"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:indeterminate="true"
+                                android:indeterminateTint="@color/color_primary" />
 
                             <TextView
-                                android:id="@+id/processing_step_preparing_label"
-                                android:layout_width="wrap_content"
+                                android:id="@+id/processing_status_text"
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="@dimen/space_m"
-                                android:text="@string/withdraw_processing_step_preparing"
-                                android:textAppearance="@style/Text.Body"
+                                android:layout_marginStart="@dimen/space_l"
+                                android:layout_weight="1"
+                                android:text="@string/withdraw_processing_status_preparing"
+                                android:textAppearance="@style/Text.BodyBold"
                                 android:textColor="@color/color_text_primary" />
 
                         </LinearLayout>
 
-                        <!-- Contacting -->
+                        <!-- Divider -->
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginVertical="@dimen/space_l"
+                            android:background="@color/color_divider" />
+
+                        <!-- Step Indicators -->
+
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:paddingVertical="@dimen/space_s">
+                            android:orientation="vertical">
 
-                            <View
-                                android:id="@+id/processing_step_contacting_indicator"
-                                android:layout_width="12dp"
-                                android:layout_height="12dp"
-                                android:background="@drawable/bg_processing_step_inactive" />
+                            <!-- Preparing -->
 
-                            <TextView
-                                android:id="@+id/processing_step_contacting_label"
-                                android:layout_width="wrap_content"
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="@dimen/space_m"
-                                android:text="@string/withdraw_processing_step_contacting"
-                                android:textAppearance="@style/Text.Body"
-                                android:textColor="@color/color_text_secondary"
-                                android:alpha="0.6" />
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingVertical="@dimen/space_s">
 
-                        </LinearLayout>
+                                <View
+                                    android:id="@+id/processing_step_preparing_indicator"
+                                    android:layout_width="12dp"
+                                    android:layout_height="12dp"
+                                    android:background="@drawable/bg_processing_step_active" />
 
-                        <!-- Settling -->
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal"
-                            android:paddingVertical="@dimen/space_s">
+                                <TextView
+                                    android:id="@+id/processing_step_preparing_label"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="@dimen/space_m"
+                                    android:text="@string/withdraw_processing_step_preparing"
+                                    android:textAppearance="@style/Text.Body"
+                                    android:textColor="@color/color_text_primary" />
 
-                            <View
-                                android:id="@+id/processing_step_settling_indicator"
-                                android:layout_width="12dp"
-                                android:layout_height="12dp"
-                                android:background="@drawable/bg_processing_step_inactive" />
+                            </LinearLayout>
 
-                            <TextView
-                                android:id="@+id/processing_step_settling_label"
-                                android:layout_width="wrap_content"
+                            <!-- Contacting -->
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="@dimen/space_m"
-                                android:text="@string/withdraw_processing_step_settling"
-                                android:textAppearance="@style/Text.Body"
-                                android:textColor="@color/color_text_secondary"
-                                android:alpha="0.6" />
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingVertical="@dimen/space_s">
+
+                                <View
+                                    android:id="@+id/processing_step_contacting_indicator"
+                                    android:layout_width="12dp"
+                                    android:layout_height="12dp"
+                                    android:background="@drawable/bg_processing_step_inactive" />
+
+                                <TextView
+                                    android:id="@+id/processing_step_contacting_label"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="@dimen/space_m"
+                                    android:text="@string/withdraw_processing_step_contacting"
+                                    android:textAppearance="@style/Text.Body"
+                                    android:textColor="@color/color_text_secondary"
+                                    android:alpha="0.6" />
+
+                            </LinearLayout>
+
+                            <!-- Settling -->
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:paddingVertical="@dimen/space_s">
+
+                                <View
+                                    android:id="@+id/processing_step_settling_indicator"
+                                    android:layout_width="12dp"
+                                    android:layout_height="12dp"
+                                    android:background="@drawable/bg_processing_step_inactive" />
+
+                                <TextView
+                                    android:id="@+id/processing_step_settling_label"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginStart="@dimen/space_m"
+                                    android:text="@string/withdraw_processing_step_settling"
+                                    android:textAppearance="@style/Text.Body"
+                                    android:textColor="@color/color_text_secondary"
+                                    android:alpha="0.6" />
+
+                            </LinearLayout>
 
                         </LinearLayout>
 
                     </LinearLayout>
 
-                </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-            </com.google.android.material.card.MaterialCardView>
+                <!-- Hint Text -->
 
-            <!-- Hint Text -->
-            <TextView
-                android:id="@+id/processing_hint_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                android:layout_marginTop="@dimen/space_l"
-                android:gravity="center"
-                android:text="@string/withdraw_processing_hint"
-                android:textAppearance="@style/Text.Caption"
-                android:textColor="@color/color_text_secondary" />
+                <TextView
+                    android:id="@+id/processing_hint_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_l"
+                    android:gravity="center"
+                    android:text="@string/withdraw_processing_hint"
+                    android:textAppearance="@style/Text.SettingsCaption"
+                    android:textColor="@color/color_text_secondary" />
 
-        </LinearLayout>
+            </LinearLayout>
 
-    </ScrollView>
+        </ScrollView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

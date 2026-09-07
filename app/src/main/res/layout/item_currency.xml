@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="56dp"
-    android:background="?attr/selectableItemBackground"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_settings_group"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingHorizontal="24dp">
+    android:paddingHorizontal="16dp"
+    android:clipToOutline="true"
+    android:minHeight="72dp"
+    android:layout_marginBottom="8dp"
+    android:paddingVertical="12dp"
+    android:foreground="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
 
     <FrameLayout
         android:layout_width="@dimen/row_icon_size"
@@ -35,6 +43,7 @@
             android:textColor="@color/color_text_secondary"
             android:textSize="11sp"
             android:visibility="gone" />
+
     </FrameLayout>
 
     <TextView
@@ -46,10 +55,11 @@
 
     <ImageView
         android:id="@+id/currency_check_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:src="?android:attr/listChoiceIndicatorSingle"
-        android:tint="@color/color_primary_green"
-        android:visibility="invisible" />
+        android:visibility="invisible"
+        android:layout_marginStart="12dp"
+        app:tint="?attr/colorPrimary" />
 
 </LinearLayout>

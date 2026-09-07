@@ -13,21 +13,24 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.electricdreams.numo.R
-import com.electricdreams.numo.core.data.model.ErrorLogEntry
-import com.electricdreams.numo.core.dev.ErrorLogStore
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+
+import com.electricdreams.numo.R
+import com.electricdreams.numo.core.data.model.ErrorLogEntry
+import com.electricdreams.numo.core.dev.ErrorLogStore
+import com.electricdreams.numo.databinding.ActivityErrorLogsBinding
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 /**
  * Developer-facing screen that displays persisted error logs and allows
  * copying or sharing them for debugging purposes.
  */
 class ErrorLogsActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityErrorLogsBinding
 
     private lateinit var adapter: ErrorLogsAdapter
     private lateinit var dateFilterValue: TextView
@@ -39,35 +42,31 @@ class ErrorLogsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_error_logs)
+        binding = ActivityErrorLogsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+        binding.topBar.onNavClick { finish() }
 
-        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
+        dateFilterValue = binding.dateFilterValue
+        emptyView = binding.emptyView
 
-        dateFilterValue = findViewById(R.id.date_filter_value)
-        emptyView = findViewById(R.id.empty_view)
-
-        val recyclerView: RecyclerView = findViewById(R.id.error_logs_recycler_view)
+        val recyclerView: RecyclerView = binding.errorLogsRecyclerView
         adapter = ErrorLogsAdapter { entry ->
             showEntryDetails(entry)
         }
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
-        findViewById<View>(R.id.date_filter_row).setOnClickListener {
+        binding.dateFilterRow.setOnClickListener {
             showDatePicker()
         }
 
-        findViewById<View>(R.id.copy_all_button).setOnClickListener {
+        binding.copyAllButton.setOnClickListener {
             copyAllToClipboard()
         }
 
-        findViewById<View>(R.id.share_button).setOnClickListener {
+        binding.shareButton.setOnClickListener {
             shareLogs()
         }
 

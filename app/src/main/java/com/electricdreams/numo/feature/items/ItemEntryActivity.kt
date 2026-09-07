@@ -6,22 +6,28 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
+
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.Item
 import com.electricdreams.numo.core.model.PriceType
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.util.ItemManager
-import com.electricdreams.numo.feature.items.handlers.*
-import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
+import com.electricdreams.numo.databinding.ActivityItemEntryBinding
+import com.electricdreams.numo.feature.items.handlers.CategoryTagHandler
+import com.electricdreams.numo.feature.items.handlers.GtinHandler
+import com.electricdreams.numo.feature.items.handlers.ImageHandler
+import com.electricdreams.numo.feature.items.handlers.InventoryHandler
+import com.electricdreams.numo.feature.items.handlers.ItemBuilder
+import com.electricdreams.numo.feature.items.handlers.ItemFormValidator
+import com.electricdreams.numo.feature.items.handlers.PricingHandler
+import com.electricdreams.numo.feature.items.handlers.SkuHandler
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 /**
  * Activity for adding or editing catalog items.
@@ -36,6 +42,8 @@ import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
  * - ItemBuilder: item object construction
  */
 class ItemEntryActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityItemEntryBinding
 
     // UI Elements - Basic Info
     private lateinit var nameInput: EditText
@@ -84,10 +92,9 @@ class ItemEntryActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_item_entry)
-
-        // Match AutoWithdrawSettingsActivity: draw under system bars so nav pill floats
-        enableEdgeToEdgeWithPill(this, lightNavIcons = true)
+        binding = ActivityItemEntryBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
         initializeManagers()
         initializeViews()
@@ -109,10 +116,10 @@ class ItemEntryActivity : AppCompatActivity() {
     }
 
     private fun initializeViews() {
-        nameInput = findViewById(R.id.item_name_input)
-        variationInput = findViewById(R.id.item_variation_input)
-        categoryInput = findViewById(R.id.item_category_input)
-        descriptionInput = findViewById(R.id.item_description_input)
+        nameInput = binding.itemNameInput
+        variationInput = binding.itemVariationInput
+        categoryInput = binding.itemCategoryInput
+        descriptionInput = binding.itemDescriptionInput
     }
 
     private fun initializeHandlers() {
@@ -128,11 +135,11 @@ class ItemEntryActivity : AppCompatActivity() {
     private fun initializeCategoryHandler() {
         categoryTagHandler = CategoryTagHandler(
             context = this,
-            categoryTagsContainer = findViewById(R.id.category_tags_container),
-            newCategoryContainer = findViewById(R.id.new_category_container),
-            newCategoryInput = findViewById(R.id.new_category_input),
-            btnConfirmCategory = findViewById(R.id.btn_confirm_category),
-            btnCancelCategory = findViewById(R.id.btn_cancel_category),
+            categoryTagsContainer = binding.categoryTagsContainer,
+            newCategoryContainer = binding.newCategoryContainer,
+            newCategoryInput = binding.newCategoryInput,
+            btnConfirmCategory = binding.btnConfirmCategory,
+            btnCancelCategory = binding.btnCancelCategory,
             categoryInput = categoryInput,
             itemManager = itemManager
         )
@@ -141,23 +148,23 @@ class ItemEntryActivity : AppCompatActivity() {
 
     private fun initializePricingHandler() {
         pricingHandler = PricingHandler(
-            priceTypeToggle = findViewById(R.id.price_type_toggle),
-            btnPriceFiat = findViewById(R.id.btn_price_fiat),
-            btnPriceBitcoin = findViewById(R.id.btn_price_bitcoin),
-            fiatPriceLayout = findViewById(R.id.fiat_price_layout),
-            satsPriceLayout = findViewById(R.id.sats_price_layout),
-            priceInput = findViewById(R.id.item_price_input),
-            satsInput = findViewById(R.id.item_sats_input),
-            vatSectionCard = findViewById(R.id.vat_section_card),
-            switchVatEnabled = findViewById(R.id.switch_vat_enabled),
-            vatFieldsContainer = findViewById(R.id.vat_fields_container),
-            switchPriceIncludesVat = findViewById(R.id.switch_price_includes_vat),
-            vatRateInput = findViewById(R.id.vat_rate_input),
-            priceBreakdownContainer = findViewById(R.id.price_breakdown_container),
-            textNetPrice = findViewById(R.id.text_net_price),
-            textVatLabel = findViewById(R.id.text_vat_label),
-            textVatAmount = findViewById(R.id.text_vat_amount),
-            textGrossPrice = findViewById(R.id.text_gross_price),
+            priceTypeToggle = binding.priceTypeToggle,
+            btnPriceFiat = binding.btnPriceFiat,
+            btnPriceBitcoin = binding.btnPriceBitcoin,
+            fiatPriceLayout = binding.fiatPriceLayout,
+            satsPriceLayout = binding.satsPriceLayout,
+            priceInput = binding.itemPriceInput,
+            satsInput = binding.itemSatsInput,
+            vatSectionCard = binding.vatSectionCard,
+            switchVatEnabled = binding.switchVatEnabled,
+            vatFieldsContainer = binding.vatFieldsContainer,
+            switchPriceIncludesVat = binding.switchPriceIncludesVat,
+            vatRateInput = binding.vatRateInput,
+            priceBreakdownContainer = binding.priceBreakdownContainer,
+            textNetPrice = binding.textNetPrice,
+            textVatLabel = binding.textVatLabel,
+            textVatAmount = binding.textVatAmount,
+            textGrossPrice = binding.textGrossPrice,
             currencyManager = currencyManager
         )
         pricingHandler.initialize()
@@ -165,12 +172,12 @@ class ItemEntryActivity : AppCompatActivity() {
 
     private fun initializeInventoryHandler() {
         inventoryHandler = InventoryHandler(
-            switchTrackInventory = findViewById(R.id.switch_track_inventory),
-            inventoryFieldsContainer = findViewById(R.id.inventory_fields_container),
-            quantityInput = findViewById(R.id.item_quantity_input),
-            alertCheckbox = findViewById(R.id.item_alert_checkbox),
-            alertThresholdContainer = findViewById(R.id.alert_threshold_container),
-            alertThresholdInput = findViewById(R.id.item_alert_threshold_input)
+            switchTrackInventory = binding.switchTrackInventory,
+            inventoryFieldsContainer = binding.inventoryFieldsContainer,
+            quantityInput = binding.itemQuantityInput,
+            alertCheckbox = binding.itemAlertCheckbox,
+            alertThresholdContainer = binding.alertThresholdContainer,
+            alertThresholdInput = binding.itemAlertThresholdInput
         )
         inventoryHandler.initialize()
     }
@@ -178,10 +185,10 @@ class ItemEntryActivity : AppCompatActivity() {
     private fun initializeImageHandler() {
         imageHandler = ImageHandler(
             activity = this,
-            itemImageView = findViewById(R.id.item_image_view),
-            imagePlaceholder = findViewById(R.id.item_image_placeholder),
-            addImageButton = findViewById(R.id.item_add_image_button),
-            removeImageButton = findViewById(R.id.item_remove_image_button),
+            itemImageView = binding.itemImageView,
+            imagePlaceholder = binding.itemImagePlaceholder,
+            addImageButton = binding.itemAddImageButton,
+            removeImageButton = binding.itemRemoveImageButton,
             itemManager = itemManager,
             selectGalleryLauncher = selectGalleryLauncher,
             takePictureLauncher = takePictureLauncher
@@ -192,10 +199,10 @@ class ItemEntryActivity : AppCompatActivity() {
     private fun initializeGtinHandler() {
         gtinHandler = GtinHandler(
             activity = this,
-            gtinInput = findViewById(R.id.item_gtin_input),
-            gtinContainer = findViewById(R.id.gtin_container),
-            gtinErrorText = findViewById(R.id.gtin_error_text),
-            scanBarcodeButton = findViewById(R.id.btn_scan_barcode),
+            gtinInput = binding.itemGtinInput,
+            gtinContainer = binding.gtinContainer,
+            gtinErrorText = binding.gtinErrorText,
+            scanBarcodeButton = binding.btnScanBarcode,
             itemManager = itemManager,
             barcodeScanLauncher = barcodeScanLauncher
         )
@@ -205,9 +212,9 @@ class ItemEntryActivity : AppCompatActivity() {
 
     private fun initializeSkuHandler() {
         skuHandler = SkuHandler(
-            skuInput = findViewById(R.id.item_sku_input),
-            skuContainer = findViewById(R.id.sku_container),
-            skuErrorText = findViewById(R.id.sku_error_text),
+            skuInput = binding.itemSkuInput,
+            skuContainer = binding.skuContainer,
+            skuErrorText = binding.skuErrorText,
             itemManager = itemManager
         )
         skuHandler.setEditItemId(editItemId)
@@ -226,14 +233,14 @@ class ItemEntryActivity : AppCompatActivity() {
     }
 
     private fun setupClickListeners() {
-        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
-        findViewById<Button>(R.id.item_save_button).setOnClickListener { saveItem() }
-        findViewById<Button>(R.id.item_cancel_button).setOnClickListener {
+        binding.topBar.onNavClick { finish() }
+        binding.itemSaveButton.setOnClickListener { saveItem() }
+        binding.itemCancelButton.setOnClickListener {
             showDeleteConfirmationDialog()
         }
 
         // More Details expand/collapse
-        findViewById<View>(R.id.more_details_toggle).setOnClickListener {
+        binding.moreDetailsToggle.setOnClickListener {
             toggleMoreDetails()
         }
 
@@ -243,8 +250,8 @@ class ItemEntryActivity : AppCompatActivity() {
 
     private fun toggleMoreDetails() {
         moreDetailsExpanded = !moreDetailsExpanded
-        val container = findViewById<LinearLayout>(R.id.more_details_container)
-        val chevron = findViewById<ImageView>(R.id.more_details_chevron)
+        val container = binding.moreDetailsContainer
+        val chevron = binding.moreDetailsChevron
 
         if (moreDetailsExpanded) {
             container.visibility = View.VISIBLE
@@ -267,9 +274,9 @@ class ItemEntryActivity : AppCompatActivity() {
     }
 
     private fun setupEditMode() {
-        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).setTitle(getString(R.string.item_entry_title_edit))
+        binding.topBar.setTitle(getString(R.string.item_entry_title_edit))
         // Show the dedicated delete button
-        findViewById<Button>(R.id.item_cancel_button).visibility = View.VISIBLE
+        binding.itemCancelButton.visibility = View.VISIBLE
         // Auto-expand more details in edit mode so all fields are visible
         if (!moreDetailsExpanded) {
             toggleMoreDetails()

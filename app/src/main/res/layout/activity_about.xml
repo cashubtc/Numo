@@ -1,372 +1,449 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
+    android:layout_height="match_parent">
 
-    <!-- Top App Bar -->
-    <com.electricdreams.numo.ui.components.NumoTopBar
-        android:id="@+id/top_bar"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        app:topBarTitle="@string/about_title"
-        app:topBarNavContentDescription="@string/desc_back"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:fillViewport="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_bar">
+        <!-- Top App Bar -->
 
-        <LinearLayout
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/space_2xl">
+            app:topBarTitle="@string/about_title"
+            app:topBarNavContentDescription="@string/desc_back"
+            app:layout_constraintTop_toTopOf="parent"
+            android:minHeight="64dp"
+            app:topBarSettingsStyle="true" />
 
-            <!-- App Logo and Name -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:fillViewport="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/top_bar"
+            android:clipToPadding="false">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center"
                 android:orientation="vertical"
-                android:paddingTop="@dimen/space_xl"
-                android:paddingBottom="@dimen/space_l">
+                android:paddingBottom="24dp"
+                android:paddingHorizontal="16dp">
 
-                <ImageView
-                    android:layout_width="72dp"
-                    android:layout_height="72dp"
-                    android:contentDescription="@string/desc_app_icon"
-                    android:src="@mipmap/ic_launcher" />
+                <!-- App Logo and Name -->
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_m"
-                    android:text="@string/app_name"
-                    android:textAppearance="@style/Text.Heading1" />
-
-                <TextView
-                    android:id="@+id/version_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="48dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
                     android:gravity="center"
-                    android:paddingHorizontal="@dimen/space_s"
-                    android:textAppearance="@style/Text.SecondaryButton" />
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_settings_group"
+                    android:clipToOutline="true"
+                    android:padding="16dp">
 
-            </LinearLayout>
-
-            <!-- ================ -->
-            <!-- DEVICE INFO SECTION -->
-            <!-- ================ -->
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/space_s"
-                android:paddingBottom="@dimen/space_s"
-                android:text="@string/about_device_info"
-                android:textAppearance="@style/Text.SectionHeader" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <!-- Version -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal">
+                    <ImageView
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:contentDescription="@string/desc_app_icon"
+                        android:src="@mipmap/ic_launcher" />
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:text="@string/about_app_version"
-                        android:textAppearance="@style/Text.Body" />
+                        android:layout_marginTop="@dimen/space_m"
+                        android:text="@string/app_name"
+                        android:textAppearance="@style/Text.Heading1" />
 
                     <TextView
-                        android:id="@+id/info_app_version"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="3"
-                        android:gravity="end"
-                        android:textAppearance="@style/Text.BodyBold" />
+                        android:id="@+id/version_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="48dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:gravity="center"
+                        android:paddingHorizontal="@dimen/space_s"
+                        android:textAppearance="@style/Text.SecondaryButton" />
+
                 </LinearLayout>
 
-                <!-- Build Number -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal">
+                <!-- ================ -->
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:text="@string/about_build_number"
-                        android:textAppearance="@style/Text.Body" />
+                <!-- DEVICE INFO SECTION -->
 
-                    <TextView
-                        android:id="@+id/info_build_number"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="3"
-                        android:gravity="end"
-                        android:textAppearance="@style/Text.BodyBold" />
-                </LinearLayout>
-
-                <!-- Device Model -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:text="@string/about_device"
-                        android:textAppearance="@style/Text.Body" />
-
-                    <TextView
-                        android:id="@+id/info_device"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="3"
-                        android:gravity="end"
-                        android:maxLines="2"
-                        android:textAppearance="@style/Text.BodyBold" />
-                </LinearLayout>
-
-                <!-- Android Version -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="2"
-                        android:text="@string/about_android_version"
-                        android:textAppearance="@style/Text.Body" />
-
-                    <TextView
-                        android:id="@+id/info_android_version"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="3"
-                        android:gravity="end"
-                        android:maxLines="2"
-                        android:textAppearance="@style/Text.BodyBold" />
-                </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- ================ -->
-            <!-- ABOUT US SECTION -->
-            <!-- ================ -->
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/section_gap"
-                android:paddingBottom="@dimen/space_s"
-                android:text="@string/about_about_us"
-                android:textAppearance="@style/Text.SectionHeader" />
-
-            <!-- Terms of Service -->
-            <LinearLayout
-                android:id="@+id/terms_item"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/settings_item_height"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/space_l"
-                    android:src="@drawable/ic_document"
-                    app:tint="@color/color_icon_secondary" />
+                <!-- ================ -->
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/about_terms_of_service"
-                    android:textAppearance="@style/Text.RowTitle" />
+                    android:text="@string/about_device_info"
+                    android:textAppearance="@style/Text.SettingsSection"
+                    android:textAllCaps="false"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="12dp"
+                    android:accessibilityHeading="true" />
 
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
-            </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_settings_group"
+                    android:clipToOutline="true"
+                    android:padding="16dp">
 
-            <!-- Privacy Policy -->
-            <LinearLayout
-                android:id="@+id/privacy_item"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/settings_item_height"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
+                    <!-- Version -->
 
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/space_l"
-                    android:src="@drawable/ic_shield"
-                    app:tint="@color/color_icon_secondary" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:minHeight="64dp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:paddingVertical="12dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/about_app_version"
+                            android:textAppearance="@style/Text.SettingsCaption"
+                            android:gravity="start" />
+
+                        <TextView
+                            android:id="@+id/info_app_version"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:textAppearance="@style/Text.BodyBold"
+                            android:layout_marginTop="4dp" />
+
+                    </LinearLayout>
+
+                    <!-- Build Number -->
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:minHeight="64dp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:paddingVertical="12dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/about_build_number"
+                            android:textAppearance="@style/Text.SettingsCaption"
+                            android:gravity="start" />
+
+                        <TextView
+                            android:id="@+id/info_build_number"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:textAppearance="@style/Text.BodyBold"
+                            android:layout_marginTop="4dp" />
+
+                    </LinearLayout>
+
+                    <!-- Device Model -->
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:minHeight="64dp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:paddingVertical="12dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/about_device"
+                            android:textAppearance="@style/Text.SettingsCaption"
+                            android:gravity="start" />
+
+                        <TextView
+                            android:id="@+id/info_device"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:textAppearance="@style/Text.BodyBold"
+                            android:layout_marginTop="4dp" />
+
+                    </LinearLayout>
+
+                    <!-- Android Version -->
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:minHeight="64dp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:paddingVertical="12dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/about_android_version"
+                            android:textAppearance="@style/Text.SettingsCaption"
+                            android:gravity="start" />
+
+                        <TextView
+                            android:id="@+id/info_android_version"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="start"
+                            android:textAppearance="@style/Text.BodyBold"
+                            android:layout_marginTop="4dp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- ================ -->
+
+                <!-- ABOUT US SECTION -->
+
+                <!-- ================ -->
 
                 <TextView
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/about_privacy_policy"
-                    android:textAppearance="@style/Text.RowTitle" />
+                    android:text="@string/about_about_us"
+                    android:textAppearance="@style/Text.SettingsSection"
+                    android:textAllCaps="false"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="12dp"
+                    android:accessibilityHeading="true" />
 
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
-            </LinearLayout>
-
-            <!-- Website -->
-            <LinearLayout
-                android:id="@+id/website_item"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/list_row_height"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/space_l"
-                    android:src="@drawable/ic_link"
-                    app:tint="@color/color_icon_secondary" />
+                <!-- Terms of Service -->
 
                 <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    style="@style/Widget.Numo.SettingsGroup">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:id="@+id/terms_item"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/about_website"
-                        android:textAppearance="@style/Text.RowTitle" />
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:minHeight="@dimen/settings_item_height"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:screenReaderFocusable="true">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                        <ImageView
+                            android:importantForAccessibility="no"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="@dimen/space_l"
+                            android:src="@drawable/ic_document"
+                            app:tint="?attr/colorPrimary"
+                            android:padding="10dp"
+                            android:background="@drawable/bg_settings_icon" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/about_terms_of_service"
+                            android:textAppearance="@style/Text.RowTitle" />
+
+                        <ImageView
+                            android:importantForAccessibility="no"
+                            android:layout_width="@dimen/icon_size_small"
+                            android:layout_height="@dimen/icon_size_small"
+                            android:src="@drawable/ic_chevron_forward"
+                            app:tint="@color/color_icon_secondary" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/privacy_item"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/about_website_url"
-                        android:textAppearance="@style/Text.RowSubtitle" />
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:minHeight="@dimen/settings_item_height"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        android:screenReaderFocusable="true">
+
+                        <ImageView
+                            android:importantForAccessibility="no"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="@dimen/space_l"
+                            android:src="@drawable/ic_shield"
+                            app:tint="?attr/colorPrimary"
+                            android:padding="10dp"
+                            android:background="@drawable/bg_settings_icon" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/about_privacy_policy"
+                            android:textAppearance="@style/Text.RowTitle" />
+
+                        <ImageView
+                            android:importantForAccessibility="no"
+                            android:layout_width="@dimen/icon_size_small"
+                            android:layout_height="@dimen/icon_size_small"
+                            android:src="@drawable/ic_chevron_forward"
+                            app:tint="@color/color_icon_secondary" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/website_item"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/list_row_height"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:screenReaderFocusable="true">
+
+                        <ImageView
+                            android:importantForAccessibility="no"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="@dimen/space_l"
+                            android:src="@drawable/ic_link"
+                            app:tint="?attr/colorPrimary"
+                            android:padding="10dp"
+                            android:background="@drawable/bg_settings_icon" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/about_website"
+                                android:textAppearance="@style/Text.RowTitle" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/about_website_url"
+                                android:textAppearance="@style/Text.SettingsCaption" />
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:importantForAccessibility="no"
+                            android:layout_width="@dimen/icon_size_small"
+                            android:layout_height="@dimen/icon_size_small"
+                            android:src="@drawable/ic_open_external"
+                            app:tint="@color/color_icon_secondary" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/contact_item"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/list_row_height"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:screenReaderFocusable="true">
+
+                        <ImageView
+                            android:importantForAccessibility="no"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="@dimen/space_l"
+                            android:src="@drawable/ic_email"
+                            app:tint="?attr/colorPrimary"
+                            android:padding="10dp"
+                            android:background="@drawable/bg_settings_icon" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/about_contact_us"
+                                android:textAppearance="@style/Text.RowTitle" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/about_contact_email"
+                                android:textAppearance="@style/Text.SettingsCaption" />
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:importantForAccessibility="no"
+                            android:layout_width="@dimen/icon_size_small"
+                            android:layout_height="@dimen/icon_size_small"
+                            android:src="@drawable/ic_open_external"
+                            app:tint="@color/color_icon_secondary" />
+
+                    </LinearLayout>
+
                 </LinearLayout>
 
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:src="@drawable/ic_open_external"
-                    app:tint="@color/color_icon_secondary" />
-            </LinearLayout>
+                <!-- Developer Mode Toast Message (hidden) -->
 
-            <!-- Contact Us -->
-            <LinearLayout
-                android:id="@+id/contact_item"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/list_row_height"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/space_l"
-                    android:src="@drawable/ic_email"
-                    app:tint="@color/color_icon_secondary" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
+                <TextView
+                    android:id="@+id/dev_mode_hint"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:layout_gravity="center"
+                    android:layout_marginTop="@dimen/space_2xl"
+                    android:text=""
+                    android:textAppearance="@style/Text.SettingsCaption"
+                    android:visibility="gone" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/about_contact_us"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/about_contact_email"
-                        android:textAppearance="@style/Text.RowSubtitle" />
-                </LinearLayout>
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:src="@drawable/ic_open_external"
-                    app:tint="@color/color_icon_secondary" />
             </LinearLayout>
 
-            <!-- Developer Mode Toast Message (hidden) -->
-            <TextView
-                android:id="@+id/dev_mode_hint"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="@dimen/space_2xl"
-                android:text=""
-                android:textAppearance="@style/Text.Caption"
-                android:visibility="gone" />
+        </ScrollView>
 
-        </LinearLayout>
-    </ScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

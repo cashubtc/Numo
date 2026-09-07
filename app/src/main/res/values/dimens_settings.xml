@@ -2,4 +2,7 @@
 <resources>
     <dimen name="settings_icon_container_size">40dp</dimen>
     <dimen name="settings_icon_padding">10dp</dimen>
+    <dimen name="settings_content_max_width">720dp</dimen>
+    <dimen name="settings_page_margin">16dp</dimen>
+    <dimen name="settings_card_radius">24dp</dimen>
 </resources>

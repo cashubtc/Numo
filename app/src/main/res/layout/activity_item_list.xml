@@ -1,167 +1,188 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_bg_white"
-    android:fitsSystemWindows="true">
+    android:layout_height="match_parent">
 
-    <!-- Top App Bar (hidden when showing empty state) -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/top_bar"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        android:background="@color/color_bg_white"
-        android:elevation="0dp"
-        android:paddingHorizontal="@dimen/space_l">
-
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="@dimen/icon_size_large"
-            android:layout_height="@dimen/icon_size_large"
-            android:padding="@dimen/space_m"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/item_list_toolbar_back"
-            android:src="@drawable/ic_chevron_back"
-            app:tint="@color/color_text_primary"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/toolbar_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/item_list_toolbar_title"
-            android:textAppearance="@style/Text.Title"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <!-- Add Item Button (shown when items exist, in normal mode) -->
-        <ImageButton
-            android:id="@+id/fab_add_item"
-            android:layout_width="@dimen/icon_size_large"
-            android:layout_height="@dimen/icon_size_large"
-            android:padding="@dimen/space_m"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/item_list_add_item"
-            android:src="@drawable/ic_add"
-            android:visibility="gone"
-            app:tint="@color/color_primary_green"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="visible" />
-
-        <!-- Done Button (shown in reordering mode) -->
-        <ImageButton
-            android:id="@+id/done_reorder_button"
-            android:layout_width="@dimen/icon_size_large"
-            android:layout_height="@dimen/icon_size_large"
-            android:padding="@dimen/space_m"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/item_list_done_reordering"
-            android:src="@drawable/ic_check"
-            app:tint="@color/color_primary_green"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- Divider under header (hidden for UI refresh) -->
-    <View
-        android:id="@+id/header_divider"
-        android:layout_width="match_parent"
-        android:layout_height="0.5dp"
-        android:background="@color/color_divider"
-        android:visibility="gone"
-        app:layout_anchor="@id/top_bar"
-        app:layout_anchorGravity="bottom" />
-
-    <!-- Regular Content: Items List (shown when items exist) -->
-    <LinearLayout
-        android:id="@+id/items_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="@dimen/top_bar_height"
-        android:orientation="vertical"
-        android:visibility="gone"
-        tools:visibility="visible">
+        android:fitsSystemWindows="true">
 
-        <!-- Items RecyclerView -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/items_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:clipToPadding="false"
-            android:overScrollMode="never"
-            tools:listitem="@layout/item_product" />
+        <!-- Top App Bar (hidden when showing empty state) -->
 
-        <!-- Bottom Actions Section (only shown when items exist) -->
-        <LinearLayout
-            android:id="@+id/bottom_actions"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingHorizontal="@dimen/margin_screen_horizontal"
-            android:paddingTop="@dimen/space_m"
-            android:paddingBottom="@dimen/space_xl"
-            android:background="@color/color_bg_white">
+            android:background="@color/settings_background"
+            android:elevation="0dp"
+            android:paddingHorizontal="@dimen/space_l"
+            android:minHeight="64dp"
+            android:padding="8dp"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <!-- Top divider (hidden for UI refresh) -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0.5dp"
-                android:layout_marginBottom="@dimen/space_l"
-                android:background="@color/color_divider"
-                android:visibility="gone" />
+            <ImageButton
+                android:id="@+id/back_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="@dimen/space_m"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/item_list_toolbar_back"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="@color/color_text_primary"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Import from CSV Button -->
-            <Button
-                android:id="@+id/import_csv_button"
-                style="@style/Widget.Button.Secondary.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/item_list_import_from_csv" />
-
-            <!-- Export to CSV Button -->
-            <Button
-                android:id="@+id/export_csv_button"
-                style="@style/Widget.Button.Secondary.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_s"
-                android:text="@string/item_list_export_to_csv" />
-
-            <!-- Clear All Items Link -->
             <TextView
-                android:id="@+id/clear_items_button"
-                android:layout_width="wrap_content"
+                android:id="@+id/toolbar_title"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/space_l"
-                android:background="?attr/selectableItemBackground"
-                android:padding="@dimen/space_s"
-                android:text="@string/item_list_clear_all"
-                android:textAppearance="@style/Text.Link"
-                android:textColor="@color/color_warning_red" />
+                android:text="@string/item_list_toolbar_title"
+                android:textAppearance="@style/Text.SettingsPageTitle"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:gravity="start"
+                android:maxLines="2"
+                android:layout_marginStart="8dp"
+                app:layout_constraintStart_toEndOf="@id/back_button"
+                app:layout_constraintEnd_toStartOf="@id/fab_add_item" />
+
+            <!-- Add Item Button (shown when items exist, in normal mode) -->
+
+            <ImageButton
+                android:id="@+id/fab_add_item"
+                android:layout_width="@dimen/icon_size_large"
+                android:layout_height="@dimen/icon_size_large"
+                android:padding="@dimen/space_m"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/item_list_add_item"
+                android:src="@drawable/ic_add"
+                android:visibility="gone"
+                app:tint="@color/color_primary_green"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:visibility="visible" />
+
+            <!-- Done Button (shown in reordering mode) -->
+
+            <ImageButton
+                android:id="@+id/done_reorder_button"
+                android:layout_width="@dimen/icon_size_large"
+                android:layout_height="@dimen/icon_size_large"
+                android:padding="@dimen/space_m"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/item_list_done_reordering"
+                android:src="@drawable/ic_check"
+                app:tint="@color/color_primary_green"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- Divider under header (hidden for UI refresh) -->
+
+        <!-- Regular Content: Items List (shown when items exist) -->
+
+        <LinearLayout
+            android:id="@+id/items_content"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible"
+            app:layout_constraintTop_toBottomOf="@id/top_bar"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <!-- Items RecyclerView -->
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/items_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:clipToPadding="false"
+                android:overScrollMode="never"
+                tools:listitem="@layout/item_product"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp" />
+
+            <!-- Bottom Actions Section (only shown when items exist) -->
+
+            <LinearLayout
+                android:id="@+id/bottom_actions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                android:paddingTop="@dimen/space_m"
+                android:paddingBottom="@dimen/space_xl"
+                android:background="@color/settings_background">
+
+                <!-- Top divider (hidden for UI refresh) -->
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:layout_marginBottom="@dimen/space_l"
+                    android:background="@color/color_divider"
+                    android:visibility="gone" />
+
+                <!-- Import from CSV Button -->
+
+                <Button
+                    android:id="@+id/import_csv_button"
+                    style="@style/Widget.Button.Secondary.Outlined"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/item_list_import_from_csv" />
+
+                <!-- Export to CSV Button -->
+
+                <Button
+                    android:id="@+id/export_csv_button"
+                    style="@style/Widget.Button.Secondary.Outlined"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:text="@string/item_list_export_to_csv" />
+
+                <!-- Clear All Items Link -->
+
+                <TextView
+                    android:id="@+id/clear_items_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="@dimen/space_l"
+                    android:background="?attr/selectableItemBackground"
+                    android:padding="@dimen/space_s"
+                    android:text="@string/item_list_clear_all"
+                    android:textAppearance="@style/Text.Link"
+                    android:textColor="@color/color_warning_red" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+        <!-- Empty State (Full Screen - NO margin, positioned at root level) -->
 
-    <!-- Empty State (Full Screen - NO margin, positioned at root level) -->
-    <include
-        android:id="@+id/empty_view"
-        layout="@layout/layout_empty_state_items"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="visible" />
+        <include
+            android:id="@+id/empty_view"
+            layout="@layout/layout_settings_empty_items"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:visibility="visible"
+            app:layout_constraintTop_toBottomOf="@id/top_bar"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

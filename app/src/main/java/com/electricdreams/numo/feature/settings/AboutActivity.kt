@@ -4,35 +4,33 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+
 import com.electricdreams.numo.BuildConfig
 import com.electricdreams.numo.R
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.electricdreams.numo.databinding.ActivityAboutBinding
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 /**
  * About screen showing app information, device info, and links.
- * 
+ *
  * Easter egg: Tap the version number 5 times to enable Developer Settings.
  */
 class AboutActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityAboutBinding
 
     private var versionTapCount = 0
     private var lastTapTime = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_about)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+        binding = ActivityAboutBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
         setupViews()
         populateDeviceInfo()
@@ -40,19 +38,19 @@ class AboutActivity : AppCompatActivity() {
     }
 
     private fun setupViews() {
-        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
+        binding.topBar.onNavClick { finish() }
 
         // Set version text
-        val versionText = findViewById<TextView>(R.id.version_text)
+        val versionText = binding.versionText
         versionText.text = "Version ${BuildConfig.VERSION_NAME}"
     }
 
     private fun populateDeviceInfo() {
         // App Version
-        findViewById<TextView>(R.id.info_app_version).text = BuildConfig.VERSION_NAME
+        binding.infoAppVersion.text = BuildConfig.VERSION_NAME
 
         // Build Number
-        findViewById<TextView>(R.id.info_build_number).text = BuildConfig.VERSION_CODE.toString()
+        binding.infoBuildNumber.text = BuildConfig.VERSION_CODE.toString()
 
         // Device Model
         val manufacturer = Build.MANUFACTURER.replaceFirstChar { it.uppercase() }
@@ -62,43 +60,43 @@ class AboutActivity : AppCompatActivity() {
         } else {
             "$manufacturer $model"
         }
-        findViewById<TextView>(R.id.info_device).text = deviceName
+        binding.infoDevice.text = deviceName
 
         // Android Version
-        findViewById<TextView>(R.id.info_android_version).text = 
+        binding.infoAndroidVersion.text =
             "Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})"
     }
 
     private fun setupListeners() {
         // Version tap for developer mode
-        findViewById<TextView>(R.id.version_text).setOnClickListener {
+        binding.versionText.setOnClickListener {
             handleVersionTap()
         }
 
         // Terms of Service
-        findViewById<View>(R.id.terms_item).setOnClickListener {
+        binding.termsItem.setOnClickListener {
             showTermsDialog()
         }
 
         // Privacy Policy
-        findViewById<View>(R.id.privacy_item).setOnClickListener {
+        binding.privacyItem.setOnClickListener {
             showPrivacyDialog()
         }
 
         // Website
-        findViewById<View>(R.id.website_item).setOnClickListener {
+        binding.websiteItem.setOnClickListener {
             openUrl("https://numopay.org")
         }
 
         // Contact
-        findViewById<View>(R.id.contact_item).setOnClickListener {
+        binding.contactItem.setOnClickListener {
             sendEmail("numopay@proton.me")
         }
     }
 
     private fun handleVersionTap() {
         val now = System.currentTimeMillis()
-        
+
         // Reset counter if more than 2 seconds since last tap
         if (now - lastTapTime > 2000) {
             versionTapCount = 0

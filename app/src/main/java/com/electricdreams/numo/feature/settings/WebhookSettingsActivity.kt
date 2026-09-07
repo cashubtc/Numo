@@ -6,6 +6,7 @@ import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -15,32 +16,31 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.electricdreams.numo.R
-import com.electricdreams.numo.ui.components.EmptyStateHelper
-import com.electricdreams.numo.core.util.WebhookSettingsManager
-import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
-import com.electricdreams.numo.feature.scanner.QRScannerActivity
-import com.electricdreams.numo.payment.PaymentWebhookDispatcher
-import com.electricdreams.numo.ui.util.DialogHelper
 import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import android.widget.ImageView
-import java.util.concurrent.TimeUnit
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+
+import com.electricdreams.numo.R
+import com.electricdreams.numo.core.util.WebhookSettingsManager
+import com.electricdreams.numo.databinding.ActivityWebhookSettingsBinding
+import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
+import com.electricdreams.numo.feature.scanner.QRScannerActivity
+import com.electricdreams.numo.payment.PaymentWebhookDispatcher
+import com.electricdreams.numo.ui.components.EmptyStateHelper
+import com.electricdreams.numo.ui.util.DialogHelper
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 /**
  * Settings screen for configuring payment-received webhooks.
  */
 class WebhookSettingsActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityWebhookSettingsBinding
 
     private lateinit var webhookSettingsManager: WebhookSettingsManager
     private lateinit var endpointsList: LinearLayout
@@ -58,13 +58,9 @@ class WebhookSettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_webhook_settings)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+        binding = ActivityWebhookSettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
         webhookSettingsManager = WebhookSettingsManager.getInstance(this)
 
@@ -79,12 +75,12 @@ class WebhookSettingsActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
-        findViewById<View>(R.id.add_endpoint_button).setOnClickListener { showAddEndpointDialog() }
-        findViewById<View>(R.id.sync_all_button).setOnClickListener { syncAllTransactions() }
+        binding.topBar.onNavClick { finish() }
+        binding.addEndpointButton.setOnClickListener { showAddEndpointDialog() }
+        binding.syncAllButton.setOnClickListener { syncAllTransactions() }
 
-        endpointsList = findViewById(R.id.endpoints_list)
-        emptyStateText = findViewById(R.id.empty_state_text)
+        endpointsList = binding.endpointsList
+        emptyStateText = binding.emptyStateText.root
 
         refreshEndpoints()
     }
@@ -95,7 +91,7 @@ class WebhookSettingsActivity : AppCompatActivity() {
         val endpoints = webhookSettingsManager.getEndpoints()
         val isEmpty = endpoints.isEmpty()
         emptyStateText.visibility = if (isEmpty) View.VISIBLE else View.GONE
-        findViewById<View>(R.id.add_endpoint_button).visibility = if (isEmpty) View.GONE else View.VISIBLE
+        binding.addEndpointButton.visibility = if (isEmpty) View.GONE else View.VISIBLE
         if (isEmpty) {
             EmptyStateHelper.bind(
                 emptyStateText,
@@ -187,23 +183,23 @@ class WebhookSettingsActivity : AppCompatActivity() {
 
     private fun syncAllTransactions() {
         if (isSyncing) return
-        
+
         if (webhookSettingsManager.getEndpoints().isEmpty()) {
             Toast.makeText(this, R.string.webhook_settings_empty, Toast.LENGTH_SHORT).show()
             return
         }
 
         isSyncing = true
-        val syncButton = findViewById<View>(R.id.sync_all_button)
+        val syncButton = binding.syncAllButton
         syncButton.alpha = 0.5f
 
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_sync_progress, null)
         val progressBar = dialogView.findViewById<ProgressBar>(R.id.sync_progress_bar)
         val progressMessage = dialogView.findViewById<TextView>(R.id.sync_progress_message)
-        
+
         progressBar.isIndeterminate = true
         progressMessage.text = getString(R.string.webhook_settings_syncing_progress, 0, 0)
-        
+
         val progressDialog = AlertDialog.Builder(this)
             .setView(dialogView)
             .setCancelable(false)
@@ -214,7 +210,7 @@ class WebhookSettingsActivity : AppCompatActivity() {
                 Toast.makeText(this, R.string.webhook_settings_sync_cancelled, Toast.LENGTH_SHORT).show()
             }
             .create()
-            
+
         progressDialog.show()
 
         syncJob = lifecycleScope.launch {
@@ -234,10 +230,10 @@ class WebhookSettingsActivity : AppCompatActivity() {
                     ).show()
                     return@launch
                 }
-                
+
                 progressMessage.text = getString(
-                    R.string.webhook_settings_syncing_progress, 
-                    completedTransactions.size, 
+                    R.string.webhook_settings_syncing_progress,
+                    completedTransactions.size,
                     completedTransactions.size
                 )
                 progressBar.isIndeterminate = false

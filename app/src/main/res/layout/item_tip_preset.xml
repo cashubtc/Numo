@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/top_bar_height"
+    android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:paddingStart="@dimen/space_l"
     android:paddingEnd="@dimen/space_s"
-    android:background="?attr/selectableItemBackground"
+    android:background="@drawable/bg_settings_group"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    android:clipToOutline="true"
+    android:minHeight="72dp">
 
     <!-- Tip icon -->
+
     <ImageView
         android:importantForAccessibility="no"
         android:layout_width="@dimen/icon_size_small"
@@ -21,6 +25,7 @@
         app:tint="@color/color_icon_secondary" />
 
     <!-- Percentage text -->
+
     <TextView
         android:id="@+id/preset_percentage"
         android:layout_width="0dp"
@@ -31,13 +36,15 @@
         android:textColor="@color/color_text_primary" />
 
     <!-- Delete button -->
+
     <ImageButton
         android:id="@+id/delete_button"
-        android:layout_width="@dimen/icon_size_large"
-        android:layout_height="@dimen/icon_size_large"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_delete"
         android:contentDescription="@string/desc_remove_preset"
-        app:tint="@color/color_text_tertiary" />
+        app:tint="@color/color_text_tertiary"
+        android:padding="12dp" />
 
 </LinearLayout>

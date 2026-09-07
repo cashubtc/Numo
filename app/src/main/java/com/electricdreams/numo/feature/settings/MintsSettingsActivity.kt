@@ -7,21 +7,20 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.animation.DecelerateInterpolator
-import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
-import android.widget.ScrollView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.materialswitch.MaterialSwitch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
@@ -29,18 +28,16 @@ import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintIconCache
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.util.MintProfileService
+import com.electricdreams.numo.databinding.ActivityMintsSettingsBinding
 import com.electricdreams.numo.feature.onboarding.AddMintBottomSheet
 import com.electricdreams.numo.feature.scanner.QRScannerActivity
 import com.electricdreams.numo.ui.components.MintListItem
 import com.electricdreams.numo.ui.util.DialogHelper
-import com.google.android.material.materialswitch.MaterialSwitch
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 /**
  * Premium Apple/Google-like mint management screen.
- * 
+ *
  * Features:
  * - Lightning Mint hero card for primary receive mint
  * - Clean list with total balance header
@@ -48,6 +45,8 @@ import kotlinx.coroutines.withContext
  * - Smooth micro-animations
  */
 class MintsSettingsActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMintsSettingsBinding
 
     companion object {
         private const val TAG = "MintsSettings"
@@ -77,7 +76,7 @@ class MintsSettingsActivity : AppCompatActivity() {
     private var mintBalances = mutableMapOf<String, Long>()
     private var selectedLightningMint: String? = null
     private val mintItems = mutableMapOf<String, MintListItem>()
-    
+
     // Balance refresh broadcast receiver
     private val balanceRefreshReceiver: BroadcastReceiver = BalanceRefreshBroadcast.createReceiver { reason ->
         // Refresh balances when we receive a broadcast (e.g., from withdrawal success)
@@ -104,7 +103,7 @@ class MintsSettingsActivity : AppCompatActivity() {
             val changedMint = result.data?.getStringExtra(MintDetailsActivity.EXTRA_MINT_URL)
             val isDeleted = result.data?.getBooleanExtra(MintDetailsActivity.EXTRA_DELETED, false) ?: false
             val isLightningMint = result.data?.getBooleanExtra(MintDetailsActivity.EXTRA_SET_AS_LIGHTNING, false) ?: false
-            
+
             if (isDeleted && changedMint != null) {
                 handleMintDeleted(changedMint)
             } else if (isLightningMint && changedMint != null) {
@@ -117,15 +116,11 @@ class MintsSettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_mints_settings)
+        binding = ActivityMintsSettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
         // Apply window insets to handle edge-to-edge correctly (especially for API 35+)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, 0)
-            windowInsets
-        }
-
 
         MintIconCache.initialize(this)
         mintManager = MintManager.getInstance(this)
@@ -137,7 +132,6 @@ class MintsSettingsActivity : AppCompatActivity() {
         // Initialize swap-from-unknown-mints toggle from MintManager
         // (view binding happens in initViews())
         initViews()
-        setupInsetHandling()
         swapUnknownMintsSwitch.isChecked = mintManager.isSwapFromUnknownMintsEnabled()
 
         setupListeners()
@@ -149,7 +143,7 @@ class MintsSettingsActivity : AppCompatActivity() {
         // Register for balance refresh broadcasts
         BalanceRefreshBroadcast.register(this, balanceRefreshReceiver)
     }
-    
+
     override fun onStop() {
         super.onStop()
         // Unregister balance refresh receiver
@@ -162,48 +156,27 @@ class MintsSettingsActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        topBar = findViewById(R.id.top_bar)
-        mintsScroll = findViewById(R.id.mints_scroll)
-        lightningMintSection = findViewById(R.id.lightning_mint_section)
-        lightningMintCard = findViewById(R.id.lightning_mint_card)
-        lightningIconContainer = findViewById(R.id.lightning_icon_container)
-        lightningMintIcon = findViewById(R.id.lightning_mint_icon)
-        lightningMintName = findViewById(R.id.lightning_mint_name)
-        lightningMintUrlText = findViewById(R.id.lightning_mint_url)
-        lightningMintBalance = findViewById(R.id.lightning_mint_balance)
-        activeUnitRow = findViewById(R.id.active_unit_row)
-        activeUnitValue = findViewById(R.id.active_unit_value)
-        swapUnknownMintsSwitch = findViewById(R.id.swap_unknown_mints_switch)
-        allMintsHeader = findViewById(R.id.all_mints_header)
-        mintsContainer = findViewById(R.id.mints_container)
-        emptyState = findViewById(R.id.empty_state)
-    }
-
-    /**
-     * Ensure the scroll container adds bottom padding equal to the larger of
-     * system navigation bars and the on-screen keyboard (IME). This guarantees
-     * that the Add Mint input is never obscured, even on small screens.
-     */
-    private fun setupInsetHandling() {
-        ViewCompat.setOnApplyWindowInsetsListener(mintsScroll) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
-            val bottomInset = maxOf(systemBars.bottom, imeInsets.bottom)
-
-            view.setPadding(
-                view.paddingLeft,
-                view.paddingTop,
-                view.paddingRight,
-                bottomInset,
-            )
-            insets
-        }
+        topBar = binding.topBar
+        mintsScroll = binding.mintsScroll
+        lightningMintSection = binding.lightningMintSection
+        lightningMintCard = binding.lightningMintCard
+        lightningIconContainer = binding.lightningIconContainer
+        lightningMintIcon = binding.lightningMintIcon
+        lightningMintName = binding.lightningMintName
+        lightningMintUrlText = binding.lightningMintUrl
+        lightningMintBalance = binding.lightningMintBalance
+        activeUnitRow = binding.activeUnitRow
+        activeUnitValue = binding.activeUnitValue
+        swapUnknownMintsSwitch = binding.swapUnknownMintsSwitch
+        allMintsHeader = binding.allMintsHeader
+        mintsContainer = binding.mintsContainer
+        emptyState = binding.emptyState
     }
 
     private fun setupListeners() {
         topBar.onNavClick { finish() }
         topBar.onActionClick { showResetConfirmation() }
-        
+
         activeUnitRow.setOnClickListener {
             showUnitSelectorDialog()
         }
@@ -212,7 +185,7 @@ class MintsSettingsActivity : AppCompatActivity() {
             mintManager.setSwapFromUnknownMintsEnabled(isChecked)
         }
 
-        val addMintButton = findViewById<Button>(R.id.add_mint_button)
+        val addMintButton = binding.addMintButton
         addMintButton.setOnClickListener {
             val sheet = AddMintBottomSheet.newInstance(object : AddMintBottomSheet.Listener {
                 override fun onAddMintUrl(url: String) {
@@ -244,12 +217,12 @@ class MintsSettingsActivity : AppCompatActivity() {
             if (units.isEmpty()) {
                 units.add("sat")
             }
-            
+
             val items = units.toList().sorted()
             val currentUnit = mintManager.getPreferredUnit().lowercase()
             var selectedIndex = items.indexOf(currentUnit)
             if (selectedIndex < 0) selectedIndex = 0
-            
+
             val builder = androidx.appcompat.app.AlertDialog.Builder(this@MintsSettingsActivity)
             builder.setTitle(getString(R.string.mints_select_base_unit))
             builder.setSingleChoiceItems(items.toTypedArray(), selectedIndex) { dialog, which ->
@@ -271,7 +244,7 @@ class MintsSettingsActivity : AppCompatActivity() {
 
     private fun loadMintsAndBalances() {
         val mints = mintManager.getAllowedMints()
-        
+
         if (mints.isEmpty()) {
             showEmptyState()
             return
@@ -284,13 +257,13 @@ class MintsSettingsActivity : AppCompatActivity() {
             }
             mintBalances.clear()
             mintBalances.putAll(balances)
-            
+
             // Auto-select lightning mint if none selected
             if (selectedLightningMint == null || !mints.contains(selectedLightningMint)) {
                 val highestBalanceMint = mints.maxByOrNull { mintBalances[it] ?: 0L }
                 highestBalanceMint?.let { setLightningMint(it, animate = false) }
             }
-            
+
             // Build UI
             buildMintList(mints)
             updateLightningMintCard()
@@ -336,14 +309,14 @@ class MintsSettingsActivity : AppCompatActivity() {
 
         // Sort by balance (highest first)
         val sortedMints = listMints.sortedByDescending { mintBalances[it] ?: 0L }
-        
+
         sortedMints.forEachIndexed { index, mintUrl ->
             val item = MintListItem(this)
             val balance = mintBalances[mintUrl] ?: 0L
             val isLast = index == sortedMints.lastIndex
 
             item.bind(mintUrl, balance, isLast)
-            
+
             item.setOnMintItemListener(object : MintListItem.OnMintItemListener {
                 override fun onMintTapped(url: String) {
                     openMintDetails(url)
@@ -365,14 +338,13 @@ class MintsSettingsActivity : AppCompatActivity() {
         mintManager.setPreferredLightningMint(mintUrl)
         // Update hero card and rebuild the list so the newly-active mint is hidden
         // from "All Mints" while the previously-active one reappears.
-        
+
         // Notify other activities (like POS) to reload mint info
         BalanceRefreshBroadcast.send(this, BalanceRefreshBroadcast.REASON_LIGHTNING_MINT_CHANGED)
-        
+
         // Update hero card
         updateLightningMintCard()
         buildMintList(mintManager.getAllowedMints())
-
 
         if (animate) {
             // Animate lightning card update
@@ -389,7 +361,7 @@ class MintsSettingsActivity : AppCompatActivity() {
                         .start()
                 }
                 .start()
-            
+
             Toast.makeText(this, R.string.mints_lightning_changed, Toast.LENGTH_SHORT).show()
         }
     }
@@ -400,20 +372,20 @@ class MintsSettingsActivity : AppCompatActivity() {
             lightningMintSection.visibility = View.GONE
             return
         }
-        
+
         lightningMintSection.visibility = View.VISIBLE
-        
+
         val displayName = mintManager.getMintDisplayName(url)
         val shortUrl = url.removePrefix("https://").removePrefix("http://")
         val balance = mintBalances[url] ?: 0L
-        
+
         lightningMintName.text = displayName
         lightningMintUrlText.text = shortUrl
-        
+
         val preferredUnit = mintManager.getPreferredUnit()
         val lowerUnit = preferredUnit.lowercase()
         val isCustomUnit = lowerUnit != "sat"
-        
+
         if (isCustomUnit) {
             val currency = Amount.Currency.fromCode(lowerUnit)
             if (currency.symbol != lowerUnit.uppercase()) {
@@ -425,9 +397,9 @@ class MintsSettingsActivity : AppCompatActivity() {
         } else {
             lightningMintBalance.text = Amount(balance, Amount.Currency.BTC).toString()
         }
-        
+
         activeUnitValue.text = preferredUnit
-        
+
         // Load icon
         loadLightningMintIcon(url)
     }
@@ -446,7 +418,7 @@ private fun loadLightningMintIcon(url: String) {
                 // Fall through to default
             }
         }
-        
+
         lightningMintIcon.setImageResource(R.drawable.ic_bitcoin)
         lightningMintIcon.setColorFilter(getColor(R.color.color_primary))
     }
@@ -462,14 +434,14 @@ private fun loadLightningMintIcon(url: String) {
     private fun handleMintDeleted(mintUrl: String) {
         mintBalances.remove(mintUrl)
         mintItems.remove(mintUrl)
-        
+
         // If deleted mint was Lightning mint, MintManager.removeMint() (called from
         // MintDetailsActivity) will already have updated its preferred Lightning mint.
         // We just re-sync our local selection to match MintManager.
         if (selectedLightningMint == mintUrl) {
             selectedLightningMint = mintManager.getPreferredLightningMint()
         }
-        
+
         if (mintManager.getAllowedMints().isEmpty()) {
             showEmptyState()
         } else {
@@ -565,10 +537,10 @@ private fun loadLightningMintIcon(url: String) {
         // After reset, MintManager sets its own preferred Lightning mint
         selectedLightningMint = mintManager.getPreferredLightningMint()
         loadMintsAndBalances()
-        
+
         // Broadcast that mints were reset so other activities can refresh
         BalanceRefreshBroadcast.send(this, BalanceRefreshBroadcast.REASON_MINT_RESET)
-        
+
         Toast.makeText(this, getString(R.string.mints_reset_toast), Toast.LENGTH_SHORT).show()
     }
 

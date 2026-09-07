@@ -7,14 +7,14 @@
     <uses-permission android:name="android.permission.HOST_CARD_EMULATION" />
     <uses-feature android:name="android.hardware.nfc" android:required="true" />
     <uses-feature android:name="android.hardware.nfc.hce" android:required="true" />
-    
+
     <!-- Permission for network access -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    
+
     <!-- Permission for vibration -->
     <uses-permission android:name="android.permission.VIBRATE" />
-    
+
     <!-- Permission for camera and storage -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
@@ -121,7 +121,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.electricdreams.numo.ModernPOSActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.history.PaymentsHistoryActivity"
             android:exported="false"
             android:label="@string/history_toolbar_title"
@@ -145,7 +145,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.history.PaymentsHistoryActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.history.TransactionDetailActivity"
             android:exported="false"
             android:label="@string/transaction_detail_toolbar_title"
@@ -157,7 +157,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.history.PaymentsHistoryActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.settings.SettingsActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize"
@@ -170,14 +170,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ModernPOSActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.settings.ThemeSettingsActivity"
             android:exported="false"
             android:label="@string/settings_theme_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SettingsActivity">
+            android:parentActivityName=".feature.settings.SettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
@@ -186,22 +187,24 @@
         <activity android:name="com.electricdreams.numo.feature.settings.DefaultPaymentMethodSettingsActivity"
             android:exported="false"
             android:label="@string/settings_item_default_payment_method_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SettingsActivity">
+            android:parentActivityName=".feature.settings.SettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.settings.CurrencySettingsActivity"
             android:exported="false"
             android:label="@string/settings_currency_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SettingsActivity">
+            android:parentActivityName=".feature.settings.SettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
@@ -210,10 +213,11 @@
         <activity android:name="com.electricdreams.numo.feature.settings.WebhookSettingsActivity"
             android:exported="false"
             android:label="@string/webhook_settings_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SettingsActivity">
+            android:parentActivityName=".feature.settings.SettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
@@ -222,7 +226,7 @@
         <activity android:name="com.electricdreams.numo.feature.settings.MintsSettingsActivity"
             android:exported="false"
             android:label="@string/settings_mints_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
@@ -235,10 +239,11 @@
         <activity android:name="com.electricdreams.numo.feature.settings.MintDetailsActivity"
             android:exported="false"
             android:label="@string/mint_details_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.MintsSettingsActivity">
+            android:parentActivityName=".feature.settings.MintsSettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.MintsSettingsActivity" />
@@ -246,10 +251,11 @@
         <activity android:name="com.electricdreams.numo.feature.settings.SecuritySettingsActivity"
             android:exported="false"
             android:label="@string/settings_security_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SettingsActivity">
+            android:parentActivityName=".feature.settings.SettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
@@ -258,68 +264,75 @@
         <activity android:name="com.electricdreams.numo.feature.settings.DeviceBackupRestoreActivity"
             android:exported="false"
             android:label="@string/restore_device_backup_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
-            android:parentActivityName=".feature.settings.RestoreWalletActivity" />
+            android:parentActivityName=".feature.settings.RestoreWalletActivity"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity android:name="com.electricdreams.numo.feature.settings.DeviceBackupSetupActivity"
             android:exported="false"
             android:label="@string/security_settings_device_backup_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
-            android:parentActivityName=".feature.settings.SecuritySettingsActivity" />
+            android:parentActivityName=".feature.settings.SecuritySettingsActivity"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity android:name="com.electricdreams.numo.feature.settings.LanguageSettingsActivity"
             android:exported="false"
             android:label="@string/language_settings_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SettingsActivity">
+            android:parentActivityName=".feature.settings.SettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
         </activity>
-        
+
         <!-- PIN Security Activities -->
         <activity android:name="com.electricdreams.numo.feature.pin.PinEntryActivity"
             android:exported="false"
             android:label="Enter PIN"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden" />
-        
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:windowSoftInputMode="adjustResize" />
+
         <activity android:name="com.electricdreams.numo.feature.pin.PinSetupActivity"
             android:exported="false"
             android:label="Set Up PIN"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SecuritySettingsActivity">
+            android:parentActivityName=".feature.settings.SecuritySettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SecuritySettingsActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.pin.PinResetActivity"
             android:exported="false"
             android:label="Reset PIN"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.pin.PinEntryActivity">
+            android:parentActivityName=".feature.pin.PinEntryActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.pin.PinEntryActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.settings.AboutActivity"
             android:exported="false"
             android:label="About"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SettingsActivity">
+            android:parentActivityName=".feature.settings.SettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
@@ -331,14 +344,15 @@
             android:theme="@style/Theme.Numo"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden" />
-        
+
         <activity android:name="com.electricdreams.numo.feature.settings.DeveloperSettingsActivity"
             android:exported="false"
             android:label="@string/developer_settings_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SettingsActivity">
+            android:parentActivityName=".feature.settings.SettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
@@ -347,10 +361,11 @@
         <activity android:name="com.electricdreams.numo.feature.settings.ErrorLogsActivity"
             android:exported="false"
             android:label="@string/developer_error_logs_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.DeveloperSettingsActivity">
+            android:parentActivityName=".feature.settings.DeveloperSettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.DeveloperSettingsActivity" />
@@ -359,10 +374,11 @@
         <activity android:name="com.electricdreams.numo.feature.settings.WalletLogsActivity"
             android:exported="false"
             android:label="@string/developer_wallet_logs_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.DeveloperSettingsActivity">
+            android:parentActivityName=".feature.settings.DeveloperSettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.DeveloperSettingsActivity" />
@@ -371,69 +387,74 @@
         <activity android:name="com.electricdreams.numo.feature.settings.SeedPhraseActivity"
             android:exported="false"
             android:label="@string/seed_phrase_toolbar_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SecuritySettingsActivity">
+            android:parentActivityName=".feature.settings.SecuritySettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SecuritySettingsActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.settings.RestoreWalletActivity"
             android:exported="false"
             android:label="@string/restore_progress_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SecuritySettingsActivity">
+            android:parentActivityName=".feature.settings.SecuritySettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SecuritySettingsActivity" />
         </activity>
-        
+
         <!-- Withdraw Activities -->
         <activity android:name="com.electricdreams.numo.feature.settings.WithdrawLightningActivity"
             android:exported="false"
             android:label="Withdraw"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.MintsSettingsActivity">
+            android:parentActivityName=".feature.settings.MintsSettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.MintsSettingsActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.settings.WithdrawMeltQuoteActivity"
             android:exported="false"
             android:label="Confirm Withdrawal"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.WithdrawLightningActivity">
+            android:parentActivityName=".feature.settings.WithdrawLightningActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.WithdrawLightningActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.settings.WithdrawSuccessActivity"
             android:exported="false"
             android:label="Withdrawal Complete"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".ModernPOSActivity">
+            android:parentActivityName=".ModernPOSActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ModernPOSActivity" />
         </activity>
-        
+
         <!-- Item Management Activities -->
         <activity android:name="com.electricdreams.numo.feature.items.ItemEntryActivity"
             android:exported="false"
             android:label="Add Item"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:windowSoftInputMode="adjustResize"
@@ -442,7 +463,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.items.ItemListActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.items.BarcodeScannerActivity"
             android:exported="false"
             android:label="@string/barcode_scanner_title"
@@ -453,38 +474,40 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.items.ItemEntryActivity" />
         </activity>
-        
+
         <!-- Reusable QR Code Scanner -->
         <activity android:name="com.electricdreams.numo.feature.scanner.QRScannerActivity"
             android:exported="false"
             android:label="@string/qr_scanner_title"
             android:theme="@style/Theme.Numo.Fullscreen"
             android:screenOrientation="portrait" />
-        
+
         <activity android:name="com.electricdreams.numo.feature.items.ItemListActivity"
             android:exported="false"
             android:label="Items"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SettingsActivity">
+            android:parentActivityName=".feature.settings.SettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.tips.TipsSettingsActivity"
             android:exported="false"
             android:label="Tips"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SettingsActivity">
+            android:parentActivityName=".feature.settings.SettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.tips.TipSelectionActivity"
             android:exported="false"
             android:label="Add a Tip"
@@ -496,7 +519,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ModernPOSActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.items.ItemSelectionActivity"
             android:exported="false"
             android:label="Checkout"
@@ -508,7 +531,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ModernPOSActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.items.CheckoutScannerActivity"
             android:exported="false"
             android:label="@string/checkout_scanner_title"
@@ -519,7 +542,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.items.ItemSelectionActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.baskets.SavedBasketsActivity"
             android:exported="false"
             android:label="@string/saved_baskets_title"
@@ -531,7 +554,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.items.ItemSelectionActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.baskets.BasketArchiveActivity"
             android:exported="false"
             android:label="@string/basket_archive_title"
@@ -543,25 +566,27 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.baskets.SavedBasketsActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.baskets.BasketNamesSettingsActivity"
             android:exported="false"
             android:label="@string/basket_names_settings_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SettingsActivity">
+            android:parentActivityName=".feature.settings.SettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
         </activity>
-        
+
         <activity android:name="com.electricdreams.numo.feature.settings.BtcPaySettingsActivity"
             android:exported="false"
             android:label="@string/btcpay_settings_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SettingsActivity">
+            android:parentActivityName=".feature.settings.SettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
@@ -570,15 +595,16 @@
         <activity android:name="com.electricdreams.numo.feature.autowithdraw.AutoWithdrawSettingsActivity"
             android:exported="false"
             android:label="@string/auto_withdraw_title"
-            android:theme="@style/Theme.Numo"
+            android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SettingsActivity">
+            android:parentActivityName=".feature.settings.SettingsActivity"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".feature.settings.SettingsActivity" />
         </activity>
-        
+
         <!-- HCE Service for NDEF tag emulation -->
         <service android:name=".ndef.NdefHostCardEmulationService"
             android:exported="true"
@@ -591,7 +617,7 @@
                 android:name="android.nfc.cardemulation.host_apdu_service"
                 android:resource="@xml/aid_list" />
         </service>
-        
+
         <!-- FileProvider for camera image capture -->
         <provider
             android:name="androidx.core.content.FileProvider"
