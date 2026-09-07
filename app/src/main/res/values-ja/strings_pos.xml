@@ -28,6 +28,7 @@
     <string name="pos_charge_button_mint_disabled">ミントが無効になっています</string>
     <string name="pos_charge_unit_selector_description">請求単位を選択</string>
     <string name="pos_charge_unit_dialog_title">請求単位</string>
+    <string name="unit_picker_mints_description">追加したミントが対応している単位です。</string>
     <string name="checkout_unit_conversion_unavailable">このカートはミントが対応する単位に換算できません。同じ単位の商品を使用するか、対応するミントを追加してください。</string>
     <string name="checkout_unit_conversion_stale">換算レートが古くなっています。更新してからもう一度お試しください。</string>
     <string name="checkout_unit_invalid_item_price">商品の単位または価格が無効です。請求する前に商品を編集してください。</string>

@@ -40,6 +40,7 @@
     <string name="pos_charge_button_loading">Wallet wird gestartet…</string>
     <string name="pos_charge_unit_selector_description">Zahlungseinheit auswählen</string>
     <string name="pos_charge_unit_dialog_title">Zahlungseinheit</string>
+    <string name="unit_picker_mints_description">Einheiten, die deine hinzugefügten Mints unterstützen.</string>
     <string name="checkout_unit_conversion_unavailable">Dieser Warenkorb kann nicht in eine von deinen Mints unterstützte Einheit umgerechnet werden. Verwende Artikel in einer Einheit oder füge eine kompatible Mint hinzu.</string>
     <string name="checkout_unit_conversion_stale">Der Umrechnungskurs ist veraltet. Aktualisiere ihn und versuche es erneut.</string>
     <string name="checkout_unit_invalid_item_price">Ein Artikel hat eine ungültige Einheit oder einen ungültigen Preis. Bearbeite den Artikel vor dem Bezahlen.</string>

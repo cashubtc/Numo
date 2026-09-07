@@ -28,6 +28,7 @@
     <string name="pos_toast_no_stock">No hay más stock disponible</string>
     <string name="pos_charge_unit_selector_description">Seleccionar unidad de cobro</string>
     <string name="pos_charge_unit_dialog_title">Unidad de cobro</string>
+    <string name="unit_picker_mints_description">Unidades admitidas por los mints que has añadido.</string>
     <string name="checkout_unit_conversion_unavailable">Esta cesta no se puede convertir a ninguna unidad admitida por tus mints. Usa artículos de una sola unidad o añade una mint compatible.</string>
     <string name="checkout_unit_conversion_stale">El tipo de cambio está desactualizado. Actualízalo e inténtalo de nuevo.</string>
     <string name="checkout_unit_invalid_item_price">Un artículo tiene una unidad o un precio no válido. Edita el artículo antes de cobrar esta cesta.</string>

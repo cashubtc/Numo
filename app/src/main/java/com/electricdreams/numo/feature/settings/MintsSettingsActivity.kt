@@ -249,6 +249,7 @@ class MintsSettingsActivity : AppCompatActivity() {
                 title = R.string.mints_select_base_unit,
                 labels = items.map { UnitDescriptor.defaultFor(UnitId.of(it)).displayCode },
                 selectedIndex = selectedIndex,
+                description = R.string.unit_picker_mints_description,
             ) { which ->
                 val selectedUnit = items[which]
                 if (selectedUnit != currentUnit) {

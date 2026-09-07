@@ -13,6 +13,7 @@
     <string name="pos_currency_switch_content_description">Swap currency</string>
     <string name="pos_charge_unit_selector_description">Select charge unit</string>
     <string name="pos_charge_unit_dialog_title">Charge unit</string>
+    <string name="unit_picker_mints_description">Units supported by the mints you’ve added.</string>
 
     <!-- POS main screen - charge button -->
     <string name="pos_charge_button">Charge</string>

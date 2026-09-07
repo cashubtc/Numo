@@ -474,6 +474,7 @@ class PosUiCoordinator(
             title = R.string.pos_charge_unit_dialog_title,
             labels = options.map(::chargeAssetLabel),
             selectedIndex = options.indexOf(amountDisplayManager.getChargeAsset()),
+            description = R.string.unit_picker_mints_description,
         ) { index ->
             val selected = options[index]
             if (selected != amountDisplayManager.getChargeAsset()) {
