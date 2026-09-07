@@ -3,6 +3,7 @@ package com.electricdreams.numo.feature.items
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -17,6 +18,8 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -44,6 +47,7 @@ class ItemListActivity : AppCompatActivity() {
     private lateinit var topBar: View
     private lateinit var adapter: ItemAdapter
     private lateinit var itemTouchHelper: ItemTouchHelper
+    private var emptyStateAnimator: EmptyStateAnimator? = null
 
     // Reordering mode state
     private var isReorderingMode = false
@@ -151,6 +155,11 @@ class ItemListActivity : AppCompatActivity() {
         refreshItems()
     }
 
+    override fun onPause() {
+        super.onPause()
+        emptyStateAnimator?.stop()
+    }
+
     private fun setupEmptyStateButtons() {
         binding.emptyView.emptyStateAddButton.setOnClickListener {
             addItemLauncher.launch(Intent(this, ItemEntryActivity::class.java))
@@ -158,6 +167,12 @@ class ItemListActivity : AppCompatActivity() {
         binding.emptyView.emptyStateImportButton.setOnClickListener {
             csvPickerLauncher.launch(arrayOf("*/*"))
         }
+        binding.emptyView.emptyStateCloseButton.visibility = View.GONE
+        binding.emptyView.emptyStateBackButton.apply {
+            visibility = View.VISIBLE
+            setOnClickListener { finish() }
+        }
+        emptyStateAnimator = EmptyStateAnimator(this, binding.emptyView.ribbonContainer)
     }
 
     private fun refreshItems() {
@@ -170,7 +185,24 @@ class ItemListActivity : AppCompatActivity() {
         emptyView.visibility = if (hasItems) View.GONE else View.VISIBLE
         itemsContent.visibility = if (hasItems) View.VISIBLE else View.GONE
         fabAddItem.visibility = if (hasItems) View.VISIBLE else View.GONE
-        topBar.visibility = View.VISIBLE
+        topBar.visibility = if (hasItems) View.VISIBLE else View.GONE
+        binding.catalogContent.visibility = if (hasItems) View.VISIBLE else View.GONE
+
+        val background = if (hasItems) R.color.settings_background else R.color.empty_state_background
+        binding.root.setBackgroundResource(background)
+        window.navigationBarColor = ContextCompat.getColor(this, background)
+        val darkSurface = !hasItems || resources.configuration.uiMode and
+            Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = !darkSurface
+            isAppearanceLightNavigationBars = !darkSurface
+        }
+
+        if (hasItems) {
+            emptyStateAnimator?.stop()
+        } else {
+            emptyStateAnimator?.start()
+        }
     }
 
     private fun showClearAllDialog() {

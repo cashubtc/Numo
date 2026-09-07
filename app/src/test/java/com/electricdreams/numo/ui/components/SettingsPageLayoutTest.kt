@@ -121,7 +121,7 @@ class SettingsPageLayoutTest {
             R.layout.activity_wallet_logs,
         )
         layouts.forEach { layout ->
-            val page = LayoutInflater.from(context).inflate(layout, null) as SettingsPageLayout
+            val page = LayoutInflater.from(context).inflate(layout, null)
             measure(page, 360)
             assertEquals(context.resources.getResourceEntryName(layout), 360, page.measuredWidth)
         }
