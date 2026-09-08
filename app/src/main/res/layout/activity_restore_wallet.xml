@@ -232,8 +232,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="24dp"
-                android:background="@color/settings_background"
-                android:elevation="8dp">
+                android:background="@color/settings_background">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/continue_button"
@@ -420,8 +419,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="24dp"
-                android:background="@color/settings_background"
-                android:elevation="8dp">
+                android:background="@color/settings_background">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/start_restore_button"
