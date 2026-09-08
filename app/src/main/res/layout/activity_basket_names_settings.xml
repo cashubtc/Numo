@@ -47,7 +47,7 @@
 
                     <!-- Description -->
 
-                    <TextView android:paddingHorizontal="@dimen/settings_row_padding"
+                    <TextView android:paddingHorizontal="0dp"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/basket_names_settings_description"
@@ -119,7 +119,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_xl"
-                    android:paddingHorizontal="@dimen/settings_row_padding"
+                    android:paddingHorizontal="0dp"
                     android:text="@string/basket_names_settings_examples"
                     android:textAppearance="@style/Text.SettingsCaption" />
 

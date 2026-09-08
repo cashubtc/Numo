@@ -27,8 +27,8 @@
     <style name="Widget.Numo.SettingsSectionTitle" parent="">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginStart">@dimen/settings_row_padding</item>
-        <item name="android:layout_marginEnd">@dimen/settings_row_padding</item>
+        <item name="android:layout_marginStart">0dp</item>
+        <item name="android:layout_marginEnd">0dp</item>
         <item name="android:layout_marginBottom">@dimen/settings_section_title_gap</item>
         <item name="android:textAppearance">@style/Text.SettingsSection</item>
         <item name="android:accessibilityHeading">true</item>
@@ -74,8 +74,8 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:minHeight">@dimen/settings_row_height</item>
-        <item name="android:paddingStart">@dimen/settings_row_padding</item>
-        <item name="android:paddingEnd">@dimen/settings_row_padding</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
         <item name="android:paddingTop">@dimen/settings_row_padding</item>
         <item name="android:paddingBottom">@dimen/settings_row_padding</item>
         <item name="android:background">@drawable/bg_settings_choice</item>

@@ -72,7 +72,7 @@
                         android:focusable="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="@dimen/settings_row_padding"
+                        android:paddingHorizontal="0dp"
                         android:paddingVertical="@dimen/space_m"
                         android:screenReaderFocusable="true">
 

@@ -92,7 +92,7 @@
                     android:id="@+id/current_language_summary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/settings_row_padding"
+                    android:paddingHorizontal="0dp"
                     android:paddingTop="@dimen/space_l"
                     android:textAppearance="@style/Text.SettingsBody"
                     android:textColor="?attr/colorOnSurfaceVariant" />

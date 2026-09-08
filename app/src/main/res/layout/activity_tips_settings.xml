@@ -41,7 +41,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/settings_row_padding"
+                    android:paddingHorizontal="0dp"
                     android:paddingTop="@dimen/space_l"
                     android:paddingBottom="@dimen/space_s"
                     android:text="@string/tips_settings_description"
@@ -61,7 +61,8 @@
                     android:gravity="center_vertical"
                     android:background="@drawable/bg_settings_group"
                     android:clipToOutline="true"
-                    android:padding="@dimen/settings_row_padding"
+                    android:paddingHorizontal="0dp"
+                    android:paddingVertical="@dimen/settings_row_padding"
                     android:minHeight="@dimen/settings_switch_height">
 
                     <ImageView
@@ -110,7 +111,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingHorizontal="@dimen/settings_row_padding"
+                        android:paddingHorizontal="0dp"
                         android:paddingBottom="@dimen/space_m"
                         android:text="@string/tips_settings_presets_description"
                         android:textAppearance="@style/Text.SettingsCaption" />
@@ -158,7 +159,8 @@
                         android:background="@drawable/bg_settings_group"
                         android:clipToOutline="true"
                     android:foreground="?attr/selectableItemBackground"
-                        android:padding="@dimen/settings_row_padding"
+                        android:paddingHorizontal="0dp"
+                        android:paddingVertical="@dimen/settings_row_padding"
                         android:minHeight="64dp"
                         android:screenReaderFocusable="true">
 

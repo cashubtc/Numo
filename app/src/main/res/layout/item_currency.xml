@@ -7,7 +7,7 @@
     android:background="@drawable/bg_settings_group"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingHorizontal="@dimen/settings_page_margin"
+    android:paddingHorizontal="0dp"
     android:clipToOutline="true"
     android:minHeight="@dimen/settings_switch_height"
     android:layout_marginBottom="8dp"

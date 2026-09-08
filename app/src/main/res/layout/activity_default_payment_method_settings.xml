@@ -78,7 +78,8 @@
                     android:layout_marginTop="24dp"
                     android:background="@drawable/bg_settings_group"
                     android:orientation="horizontal"
-                    android:padding="@dimen/settings_row_padding"
+                    android:paddingHorizontal="0dp"
+                    android:paddingVertical="@dimen/settings_row_padding"
                     android:clipToOutline="true">
 
                     <ImageView

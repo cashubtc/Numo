@@ -56,9 +56,9 @@ class SettingsRowView @JvmOverloads constructor(
         isBaselineAligned = false
         gravity = android.view.Gravity.CENTER_VERTICAL
         setPaddingRelative(
+            0,
             resources.getDimensionPixelSize(R.dimen.settings_row_padding),
-            resources.getDimensionPixelSize(R.dimen.settings_row_padding),
-            resources.getDimensionPixelSize(R.dimen.settings_row_padding),
+            0,
             resources.getDimensionPixelSize(R.dimen.settings_row_padding),
         )
         isClickable = true

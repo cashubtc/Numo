@@ -97,7 +97,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="start"
                         android:orientation="vertical"
-                        android:paddingHorizontal="@dimen/settings_row_padding"
+                        android:paddingHorizontal="0dp"
                         android:minHeight="64dp"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
@@ -127,7 +127,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="start"
                         android:orientation="vertical"
-                        android:paddingHorizontal="@dimen/settings_row_padding"
+                        android:paddingHorizontal="0dp"
                         android:minHeight="64dp"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
@@ -157,7 +157,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="start"
                         android:orientation="vertical"
-                        android:paddingHorizontal="@dimen/settings_row_padding"
+                        android:paddingHorizontal="0dp"
                         android:minHeight="64dp"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
@@ -187,7 +187,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="start"
                         android:orientation="vertical"
-                        android:paddingHorizontal="@dimen/settings_row_padding"
+                        android:paddingHorizontal="0dp"
                         android:minHeight="64dp"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
@@ -239,7 +239,7 @@
                         android:focusable="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="@dimen/settings_row_padding"
+                        android:paddingHorizontal="0dp"
                         android:minHeight="@dimen/settings_item_height"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
@@ -279,7 +279,7 @@
                         android:focusable="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="@dimen/settings_row_padding"
+                        android:paddingHorizontal="0dp"
                         android:minHeight="@dimen/settings_item_height"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
@@ -319,7 +319,7 @@
                         android:focusable="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="@dimen/settings_row_padding"
+                        android:paddingHorizontal="0dp"
                         android:screenReaderFocusable="true">
 
                         <ImageView
@@ -369,7 +369,7 @@
                         android:focusable="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="@dimen/settings_row_padding"
+                        android:paddingHorizontal="0dp"
                         android:screenReaderFocusable="true">
 
                         <ImageView

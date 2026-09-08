@@ -186,6 +186,37 @@ class SettingsPageLayoutTest {
         assertTrue(navigated)
     }
 
+    @Test
+    fun `settings rows and form borders share the page gutter`() {
+        val context = ContextThemeWrapper(
+            ApplicationProvider.getApplicationContext<Context>(), R.style.Theme_Numo_Settings
+        )
+        val gutter = context.resources.getDimensionPixelSize(R.dimen.settings_page_margin)
+        val layouts = listOf(
+            R.layout.activity_settings to R.id.items_settings_item,
+            R.layout.activity_theme_settings to R.id.dark_mode_switch,
+            R.layout.activity_tips_settings to R.id.enable_tips_row,
+            R.layout.activity_btcpay_settings to R.id.btcpay_server_url_input,
+        )
+        layouts.forEach { (layout, id) ->
+            val page = LayoutInflater.from(context).inflate(layout, null) as android.view.ViewGroup
+            measure(page, (360 * context.resources.displayMetrics.density).toInt())
+            var content = page.findViewById<View>(id)
+            if (id == R.id.btcpay_server_url_input) {
+                // Compare the field border, preserving padding for text inside the field.
+                content = content.parent.parent as View
+            }
+            val bounds = android.graphics.Rect(0, 0, content.width, content.height)
+            page.offsetDescendantRectToMyCoords(content, bounds)
+            assertEquals("Left gutter for $id", gutter, bounds.left)
+            assertEquals("Right gutter for $id", gutter, page.width - bounds.right)
+            if (id != R.id.btcpay_server_url_input) {
+                assertEquals("No nested left inset for $id", 0, content.paddingLeft)
+                assertEquals("No nested right inset for $id", 0, content.paddingRight)
+            }
+        }
+    }
+
     private fun measure(page: View, width: Int) {
         page.measure(
             View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY),

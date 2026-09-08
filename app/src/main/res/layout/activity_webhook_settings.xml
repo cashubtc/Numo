@@ -35,7 +35,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/settings_row_padding"
+                    android:paddingHorizontal="0dp"
                     android:paddingTop="@dimen/space_l"
                     android:paddingBottom="@dimen/space_s"
                     android:text="@string/webhook_settings_description"

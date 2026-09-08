@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingVertical="@dimen/row_padding_vertical"
-    android:paddingHorizontal="@dimen/settings_row_padding"
+    android:paddingHorizontal="0dp"
     android:background="@drawable/bg_settings_group"
     android:clipToOutline="true"
     android:minHeight="@dimen/settings_switch_height">
