@@ -16,9 +16,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:topBarTitle="@string/mints_explore_title"
-            app:topBarActionIcon="@drawable/ic_refresh"
-            app:topBarActionContentDescription="@string/mints_reset_description"
-            app:topBarActionTint="@color/color_text_tertiary"
+            app:topBarActionIcon="@drawable/ic_more_vert"
+            app:topBarActionContentDescription="@string/mints_more_options"
+            app:topBarActionTint="@color/color_text_primary"
             app:layout_constraintTop_toTopOf="parent"
             android:minHeight="64dp"
             app:topBarSettingsStyle="true" />
@@ -72,104 +72,14 @@
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="0dp"
                         android:orientation="vertical"
-                        android:paddingHorizontal="@dimen/space_s"
-                        android:paddingVertical="@dimen/space_m"
-                        android:background="@drawable/bg_settings_group"
-                        android:clipToOutline="true">
+                        android:paddingHorizontal="0dp"
+                        android:paddingVertical="0dp"
+                        android:clipChildren="false">
 
-                        <!-- Top Row: Icon + Name/URL -->
-
-                        <LinearLayout
+                        <com.electricdreams.numo.ui.components.MintListItem
+                            android:id="@+id/lightning_mint_row"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/space_l"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
-
-                            <!-- Icon Container (circular avatar) -->
-
-                            <FrameLayout
-                                android:id="@+id/lightning_icon_container"
-                                android:layout_width="52dp"
-                                android:layout_height="@dimen/button_height"
-                                android:layout_marginEnd="@dimen/space_l">
-
-                                <com.google.android.material.imageview.ShapeableImageView
-                                    android:id="@+id/lightning_mint_icon"
-                                    android:layout_width="52dp"
-                                    android:layout_height="@dimen/button_height"
-                                    android:layout_gravity="center"
-                                    android:scaleType="centerCrop"
-                                    android:background="@color/color_bg_tertiary"
-                                    android:src="@drawable/ic_bitcoin"
-                                    app:shapeAppearanceOverlay="@style/ShapeAppearance.Circle"
-                                    app:strokeColor="@color/color_bg_white"
-                                    app:strokeWidth="2dp"
-                                    android:contentDescription="@string/cd_mint_icon" />
-
-                            </FrameLayout>
-
-                            <!-- Text Content -->
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:id="@+id/lightning_mint_name"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="Lightning Mint"
-                                    android:textAppearance="@style/Text.RowTitle"
-                                    android:maxLines="1"
-                                    android:ellipsize="end" />
-
-                                <TextView
-                                    android:id="@+id/lightning_mint_url"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="@dimen/settings_row_subtitle_gap"
-                                    android:text="mint.example.com"
-                                    android:textAppearance="@style/Text.SettingsCaption"
-                                    android:maxLines="1"
-                                    android:ellipsize="end" />
-
-                            </LinearLayout>
-
-                        </LinearLayout>
-
-                        <!-- Divider -->
-
-                        <!-- Balance Row -->
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:paddingVertical="@dimen/space_xs">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/mints_total_balance"
-                                android:textAppearance="@style/Text.SettingsCaption" />
-
-                            <View
-                                android:layout_width="0dp"
-                                android:layout_height="0dp"
-                                android:layout_weight="1" />
-
-                            <TextView
-                                android:id="@+id/lightning_mint_balance"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="₿0"
-                                android:textAppearance="@style/Text.RowTitle" />
-
-                        </LinearLayout>
+                            android:layout_height="wrap_content" />
 
                         <!-- Active Unit Row -->
 
@@ -177,7 +87,8 @@
                             android:id="@+id/active_unit_row"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/space_m"
+                            android:paddingVertical="@dimen/settings_row_padding"
+                            android:minHeight="48dp"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
                             android:background="?attr/selectableItemBackground"
@@ -196,14 +107,6 @@
                                     android:layout_height="wrap_content"
                                     android:text="@string/mints_base_currency_unit_title"
                                     style="@style/Text.RowTitle" />
-
-                                <TextView
-                                    android:id="@+id/active_unit_subtitle"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="@dimen/settings_row_subtitle_gap"
-                                    android:text="@string/mints_base_currency_unit_subtitle"
-                                    android:textAppearance="@style/Text.SettingsCaption" />
 
                             </LinearLayout>
 
@@ -231,38 +134,20 @@
                             android:id="@+id/swap_unknown_mints_row"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/space_l"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical">
-
-                            <LinearLayout
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:orientation="vertical">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/mints_swap_unknown_mints_title"
-                                    style="@style/Text.RowTitle" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="@dimen/settings_row_subtitle_gap"
-                                    android:text="@string/mints_swap_unknown_mints_subtitle"
-                                    android:textAppearance="@style/Text.SettingsCaption" />
-
-                            </LinearLayout>
+                            android:orientation="vertical">
 
                             <com.google.android.material.materialswitch.MaterialSwitch
                                 android:id="@+id/swap_unknown_mints_switch"
-                                android:layout_width="wrap_content"
+                                style="@style/Widget.Numo.SettingsSwitch"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:minHeight="48dp"
-                                android:contentDescription="@string/mints_swap_unknown_mints_title" />
+                                android:text="@string/mints_swap_unknown_mints_title" />
 
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/mints_swap_unknown_mints_subtitle"
+                                android:textAppearance="@style/Text.SettingsCaption" />
                         </LinearLayout>
 
                     </LinearLayout>
@@ -277,7 +162,7 @@
 
                 <TextView
                     android:id="@+id/all_mints_header"
-                    android:text="@string/mints_all_mints"
+                    android:text="@string/mints_other_mints"
                     style="@style/Widget.Numo.SettingsSectionTitle"
                     android:textAllCaps="false"
                     android:layout_marginTop="@dimen/settings_section_gap"
@@ -329,14 +214,14 @@
 
                 </LinearLayout>
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/add_mint_button"
-                    style="@style/Widget.Button.Secondary.Outlined"
+                    style="@style/Widget.Numo.SettingsAddButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/section_gap"
                     android:gravity="center"
-                    android:text="@string/action_add_new_mint" />
+                    android:text="@string/mints_add_button" />
 
             </LinearLayout>
 

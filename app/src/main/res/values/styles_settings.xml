@@ -122,4 +122,10 @@
         <item name="cornerRadius">@dimen/radius_button</item>
         <item name="android:minHeight">@dimen/button_height</item>
     </style>
+    <style name="Widget.Numo.SettingsSwitch" parent="Widget.Material3.CompoundButton.MaterialSwitch">
+        <item name="android:minHeight">@dimen/settings_switch_height</item>
+        <item name="android:textAppearance">@style/Text.RowTitle</item>
+        <item name="android:paddingHorizontal">0dp</item>
+        <item name="android:paddingVertical">@dimen/settings_row_padding</item>
+    </style>
 </resources>

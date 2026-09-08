@@ -894,7 +894,7 @@
     <string name="mints_lightning_changed">Lightning mint updated</string>
 
     
-    <string name="mints_swap_unknown_mints_title">Accept payments from unknown mints</string>
+    <string name="mints_swap_unknown_mints_title">Accept unknown mints</string>
     <string name="mints_swap_unknown_mints_subtitle">
         When enabled, tokens from unknown mints are automatically swapped into your Lightning mint.
     </string>
@@ -1085,7 +1085,9 @@
     <string name="mints_select_base_unit">Select Base Unit</string>
     <string name="mints_changed_base_unit_toast">Changed base unit to %1$s</string>
     <string name="settings_fiat_conversion_disabled_custom_unit">Fiat currency conversion is disabled when using a custom base unit.</string>
-    <string name="mints_base_currency_unit_title">Base Currency Unit</string>
+    <string name="mints_base_currency_unit_title">Currency unit</string>
     <string name="mints_base_currency_unit_subtitle">If the mint supports other units, you can switch it here.</string>
     <string name="item_entry_add_category">Add category</string>
+    <string name="mints_other_mints">Other mints</string>
+    <string name="mints_more_options">More options</string>
 </resources>

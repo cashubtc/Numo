@@ -2,14 +2,12 @@ package com.electricdreams.numo.feature.settings
 
 import android.content.BroadcastReceiver
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.animation.DecelerateInterpolator
-import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
@@ -23,7 +21,6 @@ import kotlinx.coroutines.withContext
 
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
-import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintIconCache
 import com.electricdreams.numo.core.util.MintManager
@@ -57,11 +54,7 @@ class MintsSettingsActivity : AppCompatActivity() {
     private lateinit var topBar: com.electricdreams.numo.ui.components.NumoTopBar
     private lateinit var lightningMintSection: View
     private lateinit var lightningMintCard: View
-    private lateinit var lightningIconContainer: FrameLayout
-    private lateinit var lightningMintIcon: ImageView
-    private lateinit var lightningMintName: TextView
-    private lateinit var lightningMintUrlText: TextView
-    private lateinit var lightningMintBalance: TextView
+    private lateinit var lightningMintRow: MintListItem
     private lateinit var activeUnitRow: View
     private lateinit var activeUnitValue: TextView
     private lateinit var swapUnknownMintsSwitch: MaterialSwitch
@@ -160,11 +153,7 @@ class MintsSettingsActivity : AppCompatActivity() {
         mintsScroll = binding.mintsScroll
         lightningMintSection = binding.lightningMintSection
         lightningMintCard = binding.lightningMintCard
-        lightningIconContainer = binding.lightningIconContainer
-        lightningMintIcon = binding.lightningMintIcon
-        lightningMintName = binding.lightningMintName
-        lightningMintUrlText = binding.lightningMintUrl
-        lightningMintBalance = binding.lightningMintBalance
+        lightningMintRow = binding.lightningMintRow
         activeUnitRow = binding.activeUnitRow
         activeUnitValue = binding.activeUnitValue
         swapUnknownMintsSwitch = binding.swapUnknownMintsSwitch
@@ -175,7 +164,20 @@ class MintsSettingsActivity : AppCompatActivity() {
 
     private fun setupListeners() {
         topBar.onNavClick { finish() }
-        topBar.onActionClick { showResetConfirmation() }
+        topBar.onActionClick {
+            PopupMenu(this, topBar.actionView).apply {
+                menu.add(R.string.mints_reset_title).setOnMenuItemClickListener {
+                    showResetConfirmation()
+                    true
+                }
+                show()
+            }
+        }
+        lightningMintRow.setOnMintItemListener(object : MintListItem.OnMintItemListener {
+            override fun onMintTapped(mintUrl: String) {
+                openMintDetails(mintUrl)
+            }
+        })
 
         activeUnitRow.setOnClickListener {
             showUnitSelectorDialog()
@@ -317,8 +319,8 @@ class MintsSettingsActivity : AppCompatActivity() {
             item.bind(mintUrl, balance)
 
             item.setOnMintItemListener(object : MintListItem.OnMintItemListener {
-                override fun onMintTapped(url: String) {
-                    openMintDetails(url)
+                override fun onMintTapped(mintUrl: String) {
+                    openMintDetails(mintUrl)
                 }
             })
 
@@ -374,52 +376,8 @@ class MintsSettingsActivity : AppCompatActivity() {
 
         lightningMintSection.visibility = View.VISIBLE
 
-        val displayName = mintManager.getMintDisplayName(url)
-        val shortUrl = url.removePrefix("https://").removePrefix("http://")
-        val balance = mintBalances[url] ?: 0L
-
-        lightningMintName.text = displayName
-        lightningMintUrlText.text = shortUrl
-
-        val preferredUnit = mintManager.getPreferredUnit()
-        val lowerUnit = preferredUnit.lowercase()
-        val isCustomUnit = lowerUnit != "sat"
-
-        if (isCustomUnit) {
-            val currency = Amount.Currency.fromCode(lowerUnit)
-            if (currency.symbol != lowerUnit.uppercase()) {
-                val valueToFormat = if (currency.isZeroDecimal()) balance * 100 else balance
-                lightningMintBalance.text = Amount(valueToFormat, currency).toString()
-            } else {
-                lightningMintBalance.text = "$balance $preferredUnit"
-            }
-        } else {
-            lightningMintBalance.text = Amount(balance, Amount.Currency.BTC).toString()
-        }
-
-        activeUnitValue.text = preferredUnit
-
-        // Load icon
-        loadLightningMintIcon(url)
-    }
-
-private fun loadLightningMintIcon(url: String) {
-        val cachedFile = MintIconCache.getCachedIconFile(url)
-        if (cachedFile != null) {
-            try {
-                val bitmap = BitmapFactory.decodeFile(cachedFile.absolutePath)
-                if (bitmap != null) {
-                    lightningMintIcon.setImageBitmap(bitmap)
-                    lightningMintIcon.clearColorFilter()
-                    return
-                }
-            } catch (e: Exception) {
-                // Fall through to default
-            }
-        }
-
-        lightningMintIcon.setImageResource(R.drawable.ic_bitcoin)
-        lightningMintIcon.setColorFilter(getColor(R.color.color_primary))
+        lightningMintRow.bind(url, mintBalances[url] ?: 0L)
+        activeUnitValue.text = mintManager.getPreferredUnit()
     }
 
     private fun openMintDetails(mintUrl: String) {

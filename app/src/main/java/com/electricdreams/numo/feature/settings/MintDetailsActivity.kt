@@ -12,7 +12,6 @@ import android.view.View
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -60,7 +59,7 @@ class MintDetailsActivity : AppCompatActivity() {
     private lateinit var topBar: com.electricdreams.numo.ui.components.NumoTopBar
     private lateinit var errorBanner: LinearLayout
     private lateinit var errorText: TextView
-    private lateinit var errorRetryButton: ImageButton
+    private lateinit var errorRetryButton: View
     private lateinit var iconContainer: FrameLayout
     private lateinit var mintIcon: com.google.android.material.imageview.ShapeableImageView
     private lateinit var mintName: TextView
@@ -87,7 +86,6 @@ class MintDetailsActivity : AppCompatActivity() {
 
     // Actions
     private lateinit var setLightningButton: LinearLayout
-    private lateinit var copyUrlButton: LinearLayout
     private lateinit var deleteButton: LinearLayout
 
     // State
@@ -178,7 +176,6 @@ class MintDetailsActivity : AppCompatActivity() {
         contactContainer = binding.contactContainer
 
         setLightningButton = binding.setLightningButton
-        copyUrlButton = binding.copyUrlButton
         deleteButton = binding.deleteButton
     }
 
@@ -198,12 +195,6 @@ class MintDetailsActivity : AppCompatActivity() {
         setLightningButton.setOnClickListener {
             animateButtonTap(it) {
                 setAsLightningMint()
-            }
-        }
-
-        copyUrlButton.setOnClickListener {
-            animateButtonTap(it) {
-                copyToClipboard(mintUrl)
             }
         }
 

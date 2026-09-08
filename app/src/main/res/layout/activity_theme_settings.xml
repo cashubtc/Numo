@@ -57,6 +57,7 @@
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/dark_mode_switch"
+                    style="@style/Widget.Numo.SettingsSwitch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="@dimen/settings_switch_height"
