@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="onboarding_tour_secondary">#B5C4D3</color>
+    <color name="onboarding_tour_surface">#FFFFFF</color>
+    <color name="onboarding_tour_border">#E4E8EC</color>
+    <color name="onboarding_tour_accent">#008935</color>
+    <color name="onboarding_tour_panel_text">#111111</color>
+    <color name="onboarding_tour_panel_secondary">#6F6F73</color>
+
+    <style name="Text.Onboarding.Headline" parent="Text.DisplayLarge">
+        <item name="android:textColor">@color/color_text_on_dark</item>
+        <item name="android:letterSpacing">-0.01</item>
+        <item name="lineHeight">34sp</item>
+    </style>
+    <style name="Text.Onboarding.Body" parent="Text.Body">
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:lineHeight">24sp</item>
+        <item name="lineHeight">24sp</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textColor">@color/onboarding_tour_secondary</item>
+    </style>
+    <style name="Text.Onboarding.Action" parent="Text.Button">
+        <item name="android:textSize">17sp</item>
+        <item name="lineHeight">22sp</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+    <style name="Text.Onboarding.Legal" parent="Text.Caption">
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:lineHeight">17sp</item>
+        <item name="lineHeight">17sp</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:textColor">@color/onboarding_tour_secondary</item>
+    </style>
+
+    <string name="onboarding_tour_welcome_title">Welcome to Numo</string>
+    <string name="onboarding_tour_welcome_body">Accept bitcoin for everything you sell.</string>
+    <string name="onboarding_tour_tap_title">A tap. A payment.</string>
+    <string name="onboarding_tour_tap_body">Let customers pay with a tap from a compatible bitcoin wallet.</string>
+    <string name="onboarding_tour_withdraw_title">Your sales. Your wallet.</string>
+    <string name="onboarding_tour_withdraw_body">Set up auto-withdraw to send your sales to your own self-custodial wallet.</string>
+    <string name="onboarding_tour_sales_title">See your day add up.</string>
+    <string name="onboarding_tour_sales_body">Follow your sales, spot your busiest hours, and see what sells.</string>
+    <string name="onboarding_tour_next">Next</string>
+    <string name="onboarding_tour_start">Get started</string>
+    <string name="onboarding_tour_coffee">Coffee</string>
+    <string name="onboarding_tour_shirt">T-shirt</string>
+    <string name="onboarding_tour_tote">Tote bag</string>
+    <string name="onboarding_tour_add_item">Add item</string>
+    <string name="onboarding_tour_paid">Payment received</string>
+    <string name="onboarding_tour_auto_withdraw">Auto-withdraw</string>
+    <string name="onboarding_tour_to_wallet">To your wallet</string>
+    <string name="onboarding_tour_sent">Sent</string>
+    <string name="onboarding_tour_today">Today’s sales</string>
+    <plurals name="onboarding_tour_payments">
+        <item quantity="one">%1$d payment</item>
+        <item quantity="other">%1$d payments</item>
+    </plurals>
+    <string name="onboarding_tour_sats">%1$s sats</string>
+</resources>

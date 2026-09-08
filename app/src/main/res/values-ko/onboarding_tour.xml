@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_tour_welcome_title">Numo에 오신 것을 환영해요</string>
+    <string name="onboarding_tour_welcome_body">판매하는 모든 상품의 결제를 비트코인으로 받으세요.</string>
+    <string name="onboarding_tour_tap_title">탭 한 번으로 결제.</string>
+    <string name="onboarding_tour_tap_body">고객이 호환되는 비트코인 지갑으로 탭하여 결제할 수 있어요.</string>
+    <string name="onboarding_tour_withdraw_title">매출은 내 지갑으로.</string>
+    <string name="onboarding_tour_withdraw_body">자동 출금을 설정해 매출을 직접 관리하는 내 지갑으로 보내세요.</string>
+    <string name="onboarding_tour_sales_title">하루 매출을 한눈에.</string>
+    <string name="onboarding_tour_sales_body">매출과 바쁜 시간대를 파악하고 잘 팔리는 상품을 확인하세요.</string>
+    <string name="onboarding_tour_next">다음</string>
+    <string name="onboarding_tour_start">시작하기</string>
+    <string name="onboarding_tour_coffee">커피</string>
+    <string name="onboarding_tour_shirt">티셔츠</string>
+    <string name="onboarding_tour_tote">에코백</string>
+    <string name="onboarding_tour_paid">결제 받음</string>
+    <string name="onboarding_tour_auto_withdraw">자동 출금</string>
+    <string name="onboarding_tour_to_wallet">내 지갑으로</string>
+    <string name="onboarding_tour_sent">전송됨</string>
+    <string name="onboarding_tour_today">오늘 매출</string>
+    <string name="onboarding_tour_sats">%1$s sats</string>
+    <plurals name="onboarding_tour_payments">
+        <item quantity="one">결제 %1$d건</item>
+        <item quantity="other">결제 %1$d건</item>
+    </plurals>
+    <string name="onboarding_tour_add_item">상품 추가</string>
+</resources>
