@@ -88,7 +88,7 @@ class OnboardingRenderTest {
                         layout(root)
                         val scene = descendants(root).filterIsInstance<OnboardingSceneView>()
                             .first { it.page == 1 }
-                        for (time in listOf(2200L, 3800L, 5250L, 7100L)) {
+                        for (time in listOf(2200L, 3500L, 4180L, 4900L, 5950L, 7100L)) {
                             scene.timeMillis = time
                             save(draw(root), "tap-$time")
                         }

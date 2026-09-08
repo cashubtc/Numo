@@ -151,9 +151,9 @@ class OnboardingSceneView @JvmOverloads constructor(
 
     private fun drawTap(canvas: Canvas) {
         val screens = checkoutPreview ?: CheckoutPreviewScreens(context).also { checkoutPreview = it }
-        val enter = ease(timeMillis, 0, 650)
-        val charge = ease(timeMillis, 2600, 380)
-        val paid = ease(timeMillis, 5500, 380)
+        val enter = ease(timeMillis, 0, 240)
+        val charge = ease(timeMillis, 2600, 220)
+        val paid = ease(timeMillis, 5930, 220)
         val keyStage = when {
             timeMillis < 1050 -> 0
             timeMillis < 1550 -> 1
@@ -161,12 +161,12 @@ class OnboardingSceneView @JvmOverloads constructor(
             else -> 3
         }
         val save = canvas.saveLayerAlpha(0f, 0f, 360f, 380f, (enter * 255).toInt())
-        canvas.translate(0f, (1f - enter) * 12f)
+        // The terminal stays anchored; only the customer's handset moves to make the tap.
         handset(canvas, 180f, -8f, 398f) {
             canvas.drawColor(white)
-            screenImage(canvas, screens.keypad[keyStage], 1f - charge, -24f * charge)
-            screenImage(canvas, screens.waiting, charge * (1f - paid), 24f * (1f - charge))
-            screenImage(canvas, screens.received, paid, 20f * (1f - paid))
+            screenImage(canvas, screens.keypad[keyStage], 1f - charge)
+            screenImage(canvas, screens.waiting, charge * (1f - paid))
+            screenImage(canvas, screens.received, paid)
             if (charge < 1f) {
                 val pressStart = when {
                     timeMillis in 900..1199 -> 900L
@@ -182,14 +182,17 @@ class OnboardingSceneView @JvmOverloads constructor(
                 }
             }
         }
-        val approach = move(timeMillis, 4350, 750)
-        val departure = move(timeMillis, 5850, 750)
+        val approach = tapArrival.getInterpolation(segment(timeMillis, 3900, 640))
+        val departure = tapDeparture.getInterpolation(segment(timeMillis, 5660, 520))
         val contact = approach * (1f - departure)
         if (contact > 0f) {
-            val cx = 422f - contact * 172f
+            // One diagonal approach, a still read interval, then a quicker withdrawal.
+            // Keep the shallow grip angle fixed instead of rotating the phone into contact.
+            val cx = 464f - contact * 202f
+            val y = -64f + contact * 58f
             val customer = canvas.save()
-            canvas.rotate(-18f * contact, cx, 165f)
-            customerHandset(canvas, cx, 12f, 326f)
+            canvas.rotate(-5f, cx, y + 48f)
+            customerHandset(canvas, cx, y, 366f)
             canvas.restoreToCount(customer)
         }
         canvas.restoreToCount(save)
@@ -247,10 +250,10 @@ class OnboardingSceneView @JvmOverloads constructor(
         canvas.restoreToCount(save)
     }
 
-    private fun screenImage(canvas: Canvas, bitmap: Bitmap, alpha: Float, offset: Float) {
+    private fun screenImage(canvas: Canvas, bitmap: Bitmap, alpha: Float) {
         if (alpha <= 0f) return
         paint.alpha = (alpha * 255).toInt()
-        rect.set(215f, 180f + offset, 809f, 1388f + offset)
+        rect.set(215f, 180f, 809f, 1388f)
         canvas.drawBitmap(bitmap, null, rect, paint)
         paint.alpha = 255
     }
@@ -501,6 +504,8 @@ class OnboardingSceneView @JvmOverloads constructor(
             return 1f - exp(-8f * progress) *
                 (cos(13f * progress) + (8f / 13f) * sin(13f * progress))
         }
+        private val tapArrival = PathInterpolator(.18f, .72f, .22f, 1f)
+        private val tapDeparture = PathInterpolator(.55f, 0f, .8f, .35f)
         private val easeInOut = PathInterpolator(.77f, 0f, .175f, 1f)
         private val easeOut = PathInterpolator(.23f, 1f, .32f, 1f)
         private fun segment(time: Long, delay: Long, duration: Long) =

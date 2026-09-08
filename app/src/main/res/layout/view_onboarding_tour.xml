@@ -13,8 +13,8 @@
             android:paddingTop="24dp">
 
             <ImageView
-                android:layout_width="88dp"
-                android:layout_height="38dp"
+                android:layout_width="120dp"
+                android:layout_height="54dp"
                 android:layout_gravity="center"
                 android:importantForAccessibility="no"
                 android:src="@drawable/ic_numo_wordmark_white" />
