@@ -32,43 +32,41 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingVertical="@dimen/space_xl"
+                android:id="@+id/item_form_content"
+                android:paddingTop="@dimen/space_l"
                 android:paddingHorizontal="@dimen/settings_page_margin"
                 android:paddingBottom="24dp">
-
-                <!-- ==================== IMAGE SECTION ==================== -->
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/space_l"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="120dp"
-                        android:layout_height="120dp"
-                        android:layout_marginBottom="@dimen/space_m"
-                        style="@style/Widget.Numo.SettingsCard">
+                    <FrameLayout
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:layout_marginEnd="@dimen/space_m"
+                        android:background="@drawable/bg_item_photo_preview"
+                        android:clipToOutline="true">
 
                         <ImageView
                             android:id="@+id/item_image_view"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:background="@android:color/transparent"
                             android:contentDescription="@string/item_entry_image_description"
                             android:scaleType="centerCrop" />
 
                         <ImageView
                             android:id="@+id/item_image_placeholder"
-                            android:layout_width="36dp"
-                            android:layout_height="36dp"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
                             android:layout_gravity="center"
-                            android:contentDescription="@string/item_entry_image_placeholder"
+                            android:importantForAccessibility="no"
                             android:src="@drawable/ic_camera"
-                            app:tint="@color/color_icon_secondary" />
-
-                    </androidx.cardview.widget.CardView>
+                            app:tint="?attr/colorOnSurfaceVariant" />
+                    </FrameLayout>
 
                     <Button
                         android:id="@+id/item_add_image_button"
@@ -76,10 +74,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/item_entry_button_add_photo"
-                        android:textColor="@color/color_primary_green"
-                        android:textSize="15sp"
-                        android:textAllCaps="false"
-                        android:minHeight="56dp" />
+                        android:textColor="?attr/colorPrimary"
+                        android:minHeight="48dp" />
 
                     <Button
                         android:id="@+id/item_remove_image_button"
@@ -87,33 +83,16 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/item_entry_button_remove_photo"
-                        android:textColor="@color/color_warning_red"
-                        android:textSize="13sp"
-                        android:textAllCaps="false"
+                        android:textColor="?attr/colorError"
                         android:visibility="gone"
-                        android:minHeight="56dp" />
-
+                        android:minHeight="48dp" />
                 </LinearLayout>
 
-                <!-- ==================== BASIC INFO SECTION ==================== -->
-
-                <TextView
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/item_entry_section_basic_information"
-                    android:textAppearance="@style/Text.SettingsSection"
-                    android:textAllCaps="false"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
-                    android:accessibilityHeading="true" />
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/space_xl"
-                    style="@style/Widget.Numo.SettingsCard">
+                    android:layout_marginBottom="0dp"
+                    android:orientation="vertical">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -128,7 +107,7 @@
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
                             android:minHeight="50dp"
-                            android:paddingHorizontal="@dimen/settings_page_margin"
+                            android:paddingHorizontal="0dp"
                             android:paddingVertical="8dp">
 
                             <com.google.android.material.textfield.TextInputLayout
@@ -144,7 +123,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:inputType="textCapWords"
-                                    android:textAppearance="@style/Text.Body"
+                                    android:textAppearance="@style/Text.SettingsInput"
                                     android:textColorHint="?attr/colorOnSurfaceVariant"
                                     android:minHeight="56dp" />
 
@@ -152,188 +131,9 @@
 
                         </LinearLayout>
 
-                        <!-- Variation (moved before Category) -->
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:minHeight="50dp"
-                            android:paddingHorizontal="@dimen/settings_page_margin"
-                            android:paddingVertical="8dp">
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                style="@style/Widget.Numo.SettingsTextInput"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:hint="@string/item_entry_label_variation"
-                                app:placeholderText="@string/item_entry_hint_variation">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/item_variation_input"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="textCapWords"
-                                    android:textAppearance="@style/Text.Body"
-                                    android:textColorHint="?attr/colorOnSurfaceVariant"
-                                    android:minHeight="56dp" />
-
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                        </LinearLayout>
-
-                        <!-- Description -->
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="top"
-                            android:minHeight="80dp"
-                            android:paddingHorizontal="@dimen/settings_page_margin"
-                            android:paddingVertical="8dp">
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                style="@style/Widget.Numo.SettingsTextInput"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:hint="@string/item_entry_label_description"
-                                app:placeholderText="@string/item_entry_hint_description">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/item_description_input"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:inputType="textCapSentences|textMultiLine"
-                                    android:minLines="2"
-                                    android:textAppearance="@style/Text.Body"
-                                    android:textColorHint="?attr/colorOnSurfaceVariant"
-                                    android:minHeight="56dp"
-                                    android:gravity="top|start" />
-
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                        </LinearLayout>
-
                     </LinearLayout>
 
-                </androidx.cardview.widget.CardView>
-
-                <!-- ==================== CATEGORY SECTION (Tag-based) ==================== -->
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/item_entry_section_category"
-                    android:textAppearance="@style/Text.SettingsSection"
-                    android:textAllCaps="false"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
-                    android:accessibilityHeading="true" />
-
-                <androidx.cardview.widget.CardView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/space_s"
-                    style="@style/Widget.Numo.SettingsCard">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <!-- Category Tags Flow Layout -->
-
-                        <com.google.android.flexbox.FlexboxLayout
-                            android:id="@+id/category_tags_container"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            app:flexWrap="wrap"
-                            app:alignItems="flex_start"
-                            app:justifyContent="flex_start">
-
-                            <!-- Tags will be added programmatically -->
-
-                        </com.google.android.flexbox.FlexboxLayout>
-
-                        <!-- New Category Input (hidden by default) -->
-
-                        <LinearLayout
-                            android:id="@+id/new_category_container"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:gravity="center_vertical"
-                            android:layout_marginTop="@dimen/space_m"
-                            android:visibility="gone">
-
-                            <com.google.android.material.textfield.TextInputLayout
-                                style="@style/Widget.Numo.SettingsTextInput"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1">
-
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/new_category_input"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:hint="@string/item_entry_hint_new_category"
-                                    android:inputType="textCapWords"
-                                    android:textSize="15sp"
-                                    android:textColorHint="?attr/colorOnSurfaceVariant"
-                                    android:minHeight="56dp"
-                                    android:paddingTop="16dp"
-                                    android:paddingBottom="16dp" />
-
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <ImageButton
-                                android:id="@+id/btn_confirm_category"
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
-                                android:layout_marginStart="@dimen/space_s"
-                                android:background="@drawable/bg_circle_green"
-                                android:contentDescription="@string/item_entry_category_confirm"
-                                android:src="@drawable/ic_check"
-                                app:tint="@color/color_bg_white" />
-
-                            <ImageButton
-                                android:id="@+id/btn_cancel_category"
-                                android:layout_width="48dp"
-                                android:layout_height="48dp"
-                                android:layout_marginStart="@dimen/space_s"
-                                android:background="?attr/selectableItemBackgroundBorderless"
-                                android:contentDescription="@string/item_entry_category_cancel"
-                                android:src="@drawable/ic_close"
-                                app:tint="@color/color_text_secondary" />
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                </androidx.cardview.widget.CardView>
-
-                <!-- Hidden category input for handler compatibility -->
-
-                <EditText
-                    android:id="@+id/item_category_input"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:visibility="gone"
-                    android:importantForAccessibility="no" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/space_xl"
-                    android:text="@string/item_entry_category_helper"
-                    android:textAppearance="@style/Text.SettingsCaption" />
+                </LinearLayout>
 
                 <!-- ==================== PRICING SECTION ==================== -->
 
@@ -343,23 +143,23 @@
                     android:text="@string/item_entry_section_pricing"
                     android:textAppearance="@style/Text.SettingsSection"
                     android:textAllCaps="false"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginEnd="0dp"
+                    android:layout_marginTop="@dimen/settings_section_gap"
+                    android:layout_marginBottom="@dimen/settings_section_title_gap"
                     android:accessibilityHeading="true" />
 
-                <androidx.cardview.widget.CardView
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/space_s"
-                    style="@style/Widget.Numo.SettingsCard">
+                    android:orientation="vertical">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="0dp">
 
                         <!-- Price Type Toggle -->
 
@@ -404,14 +204,15 @@
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/item_price_input"
-                                android:layout_width="match_parent"
+                                android:textAppearance="@style/Text.SettingsInput"
+                                    android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:hint="@string/item_entry_hint_price_fiat"
                                 android:inputType="numberDecimal"
                                 android:textSize="18sp"
                                 android:textColor="@color/color_text_primary"
                                 android:textColorHint="?attr/colorOnSurfaceVariant"
-                                android:fontFamily="sans-serif-medium" />
+                                android:fontFamily="sans-serif" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -428,37 +229,36 @@
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/item_sats_input"
-                                android:layout_width="match_parent"
+                                android:textAppearance="@style/Text.SettingsInput"
+                                    android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:hint="@string/item_entry_hint_price_sats"
                                 android:inputType="number"
                                 android:textSize="18sp"
                                 android:textColor="@color/color_text_primary"
                                 android:textColorHint="?attr/colorOnSurfaceVariant"
-                                android:fontFamily="sans-serif-medium" />
+                                android:fontFamily="sans-serif" />
 
                         </com.google.android.material.textfield.TextInputLayout>
 
                     </LinearLayout>
 
-                </androidx.cardview.widget.CardView>
+                </LinearLayout>
 
                 <!-- VAT Section (available for both Fiat and Bitcoin) -->
 
-                <androidx.cardview.widget.CardView
+                <LinearLayout
                     android:id="@+id/vat_section_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="@dimen/space_s"
                     android:visibility="visible"
-                    style="@style/Widget.Numo.SettingsCard">
+                    android:orientation="vertical">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:divider="@drawable/divider_horizontal"
-                        android:showDividers="middle">
+                        android:orientation="vertical">
 
                         <!-- Apply VAT Toggle -->
 
@@ -467,7 +267,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                            android:paddingHorizontal="0dp"
                             android:minHeight="50dp">
 
                             <TextView
@@ -493,9 +293,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
-                            android:visibility="gone"
-                            android:divider="@drawable/divider_horizontal"
-                            android:showDividers="middle">
+                            android:visibility="gone">
 
                             <!-- Price includes VAT toggle -->
 
@@ -504,7 +302,7 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:gravity="center_vertical"
-                                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                                android:paddingHorizontal="0dp"
                                 android:minHeight="50dp">
 
                                 <TextView
@@ -531,7 +329,7 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:gravity="center_vertical"
-                                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                                android:paddingHorizontal="0dp"
                                 android:minHeight="50dp">
 
                                 <TextView
@@ -582,7 +380,7 @@
 
                     </LinearLayout>
 
-                </androidx.cardview.widget.CardView>
+                </LinearLayout>
 
                 <!-- Price Breakdown (shown when VAT enabled) -->
 
@@ -656,14 +454,6 @@
 
                     </LinearLayout>
 
-                    <!-- Divider -->
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/color_divider"
-                        android:layout_marginBottom="@dimen/space_m" />
-
                     <!-- Gross Price Row (Total) -->
 
                     <LinearLayout
@@ -691,20 +481,112 @@
 
                 </LinearLayout>
 
+                <!-- ==================== CATEGORY SECTION (Tag-based) ==================== -->
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="@dimen/space_xl"
-                    android:text="@string/item_entry_price_helper"
-                    android:textAppearance="@style/Text.SettingsCaption" />
+                    android:text="@string/item_entry_section_category"
+                    android:textAppearance="@style/Text.SettingsSection"
+                    android:textAllCaps="false"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginEnd="0dp"
+                    android:layout_marginTop="@dimen/settings_section_gap"
+                    android:layout_marginBottom="@dimen/settings_section_title_gap"
+                    android:accessibilityHeading="true" />
 
-                <!-- Divider before optional sections -->
-
-                <View
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/divider_height"
-                    android:layout_marginTop="@dimen/space_l"
-                    android:background="@color/color_divider" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/space_s"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="0dp">
+
+                        <!-- Category Tags Flow Layout -->
+
+                        <com.google.android.flexbox.FlexboxLayout
+                            android:id="@+id/category_tags_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:flexWrap="wrap"
+                            app:alignItems="flex_start"
+                            app:justifyContent="flex_start">
+
+                            <!-- Tags will be added programmatically -->
+
+                        </com.google.android.flexbox.FlexboxLayout>
+
+                        <!-- New Category Input (hidden by default) -->
+
+                        <LinearLayout
+                            android:id="@+id/new_category_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginTop="@dimen/space_m"
+                            android:visibility="gone">
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                style="@style/Widget.Numo.SettingsTextInput"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/new_category_input"
+                                    android:textAppearance="@style/Text.SettingsInput"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:hint="@string/item_entry_hint_new_category"
+                                    android:inputType="textCapWords"
+                                    android:textSize="15sp"
+                                    android:textColorHint="?attr/colorOnSurfaceVariant"
+                                    android:minHeight="56dp"
+                                    android:paddingTop="16dp"
+                                    android:paddingBottom="16dp" />
+
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <ImageButton
+                                android:id="@+id/btn_confirm_category"
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:layout_marginStart="@dimen/space_s"
+                                android:background="@drawable/bg_circle_green"
+                                android:contentDescription="@string/item_entry_category_confirm"
+                                android:src="@drawable/ic_check"
+                                app:tint="@color/color_bg_white" />
+
+                            <ImageButton
+                                android:id="@+id/btn_cancel_category"
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:layout_marginStart="@dimen/space_s"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:contentDescription="@string/item_entry_category_cancel"
+                                android:src="@drawable/ic_close"
+                                app:tint="@color/color_text_secondary" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Hidden category input for handler compatibility -->
+
+                <EditText
+                    android:id="@+id/item_category_input"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:visibility="gone"
+                    android:importantForAccessibility="no" />
 
                 <!-- ==================== MORE DETAILS TOGGLE ==================== -->
 
@@ -714,7 +596,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                    android:paddingHorizontal="0dp"
                     android:paddingVertical="@dimen/space_l"
                     android:background="?attr/selectableItemBackground"
                     android:clickable="true"
@@ -748,6 +630,79 @@
                     android:orientation="vertical"
                     android:visibility="gone">
 
+                    <TextView
+                        style="@style/Widget.Numo.SettingsSectionTitle"
+                        android:layout_marginTop="@dimen/settings_section_gap"
+                        android:text="@string/item_entry_section_basic_information" />
+
+                    <!-- Variation -->
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:minHeight="50dp"
+                        android:paddingHorizontal="0dp"
+                        android:paddingVertical="8dp">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.Numo.SettingsTextInput"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/item_entry_label_variation"
+                            app:placeholderText="@string/item_entry_hint_variation">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/item_variation_input"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textCapWords"
+                                android:textAppearance="@style/Text.SettingsInput"
+                                android:textColorHint="?attr/colorOnSurfaceVariant"
+                                android:minHeight="56dp" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
+
+                    <!-- Description -->
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="top"
+                        android:minHeight="80dp"
+                        android:paddingHorizontal="0dp"
+                        android:paddingVertical="8dp">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.Numo.SettingsTextInput"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/item_entry_label_description"
+                            app:placeholderText="@string/item_entry_hint_description">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/item_description_input"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textCapSentences|textMultiLine"
+                                android:minLines="2"
+                                android:textAppearance="@style/Text.SettingsInput"
+                                android:textColorHint="?attr/colorOnSurfaceVariant"
+                                android:minHeight="56dp"
+                                android:gravity="top|start" />
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
+
+
+
                     <!-- ==================== IDENTIFICATION SECTION ==================== -->
 
                     <TextView
@@ -756,17 +711,17 @@
                         android:text="@string/item_entry_section_identification"
                         android:textAppearance="@style/Text.SettingsSection"
                         android:textAllCaps="false"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginTop="24dp"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginStart="0dp"
+                        android:layout_marginEnd="0dp"
+                        android:layout_marginTop="@dimen/settings_section_gap"
+                        android:layout_marginBottom="@dimen/settings_section_title_gap"
                         android:accessibilityHeading="true" />
 
-                    <androidx.cardview.widget.CardView
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/space_s"
-                        style="@style/Widget.Numo.SettingsCard">
+                        android:orientation="vertical">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -782,7 +737,7 @@
                                 android:orientation="horizontal"
                                 android:gravity="center_vertical"
                                 android:minHeight="50dp"
-                                android:paddingHorizontal="@dimen/settings_page_margin"
+                                android:paddingHorizontal="0dp"
                                 android:paddingVertical="8dp">
 
                                 <com.google.android.material.textfield.TextInputLayout
@@ -798,7 +753,7 @@
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
                                         android:inputType="text"
-                                        android:textAppearance="@style/Text.Body"
+                                        android:textAppearance="@style/Text.SettingsInput"
                                         android:textColorHint="?attr/colorOnSurfaceVariant"
                                         android:minHeight="56dp" />
 
@@ -824,7 +779,7 @@
                                 android:orientation="horizontal"
                                 android:gravity="center_vertical"
                                 android:minHeight="50dp"
-                                android:paddingHorizontal="@dimen/settings_page_margin"
+                                android:paddingHorizontal="0dp"
                                 android:paddingVertical="8dp">
 
                                 <com.google.android.material.textfield.TextInputLayout
@@ -840,7 +795,7 @@
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
                                         android:inputType="text"
-                                        android:textAppearance="@style/Text.Body"
+                                        android:textAppearance="@style/Text.SettingsInput"
                                         android:textColorHint="?attr/colorOnSurfaceVariant"
                                         android:minHeight="56dp" />
 
@@ -850,7 +805,7 @@
 
                         </LinearLayout>
 
-                    </androidx.cardview.widget.CardView>
+                    </LinearLayout>
 
                     <!-- GTIN Error Message -->
 
@@ -858,7 +813,7 @@
                         android:id="@+id/gtin_error_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                        android:layout_marginHorizontal="0dp"
                         android:layout_marginBottom="@dimen/space_l"
                         android:text="@string/item_entry_error_gtin_exists"
                         android:textAppearance="@style/Text.SettingsCaption"
@@ -871,7 +826,7 @@
                         android:id="@+id/sku_error_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                        android:layout_marginHorizontal="0dp"
                         android:layout_marginBottom="@dimen/space_s"
                         android:text="@string/item_entry_error_sku_exists"
                         android:textAppearance="@style/Text.SettingsCaption"
@@ -881,7 +836,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                        android:layout_marginHorizontal="0dp"
                         android:layout_marginBottom="@dimen/space_xl"
                         android:text="@string/item_entry_identification_helper"
                         android:textAppearance="@style/Text.SettingsCaption" />
@@ -894,24 +849,22 @@
                         android:text="@string/item_entry_section_inventory"
                         android:textAppearance="@style/Text.SettingsSection"
                         android:textAllCaps="false"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginTop="24dp"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginStart="0dp"
+                        android:layout_marginEnd="0dp"
+                        android:layout_marginTop="@dimen/settings_section_gap"
+                        android:layout_marginBottom="@dimen/settings_section_title_gap"
                         android:accessibilityHeading="true" />
 
-                    <androidx.cardview.widget.CardView
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="@dimen/space_s"
-                        style="@style/Widget.Numo.SettingsCard">
+                        android:orientation="vertical">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:divider="@drawable/divider_horizontal"
-                            android:showDividers="middle">
+                            android:orientation="vertical">
 
                             <!-- Track Inventory Toggle -->
 
@@ -920,7 +873,7 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:gravity="center_vertical"
-                                android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                                android:paddingHorizontal="0dp"
                                 android:minHeight="50dp">
 
                                 <TextView
@@ -956,7 +909,7 @@
                                     android:orientation="horizontal"
                                     android:gravity="center_vertical"
                                     android:minHeight="50dp"
-                                    android:paddingHorizontal="@dimen/settings_page_margin"
+                                    android:paddingHorizontal="0dp"
                                     android:paddingVertical="8dp">
 
                                     <com.google.android.material.textfield.TextInputLayout
@@ -972,7 +925,7 @@
                                             android:layout_width="match_parent"
                                             android:layout_height="wrap_content"
                                             android:inputType="number"
-                                            android:textAppearance="@style/Text.Body"
+                                            android:textAppearance="@style/Text.SettingsInput"
                                             android:textColorHint="?attr/colorOnSurfaceVariant"
                                             android:minHeight="56dp" />
 
@@ -987,7 +940,7 @@
                                     android:layout_height="wrap_content"
                                     android:orientation="horizontal"
                                     android:gravity="center_vertical"
-                                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                                    android:paddingHorizontal="0dp"
                                     android:minHeight="50dp">
 
                                     <TextView
@@ -1016,7 +969,7 @@
                                     android:gravity="center_vertical"
                                     android:minHeight="50dp"
                                     android:visibility="gone"
-                                    android:paddingHorizontal="@dimen/settings_page_margin"
+                                    android:paddingHorizontal="0dp"
                                     android:paddingVertical="8dp">
 
                                     <com.google.android.material.textfield.TextInputLayout
@@ -1032,7 +985,7 @@
                                             android:layout_width="match_parent"
                                             android:layout_height="wrap_content"
                                             android:inputType="number"
-                                            android:textAppearance="@style/Text.Body"
+                                            android:textAppearance="@style/Text.SettingsInput"
                                             android:textColorHint="?attr/colorOnSurfaceVariant"
                                             android:minHeight="56dp" />
 
@@ -1044,12 +997,12 @@
 
                         </LinearLayout>
 
-                    </androidx.cardview.widget.CardView>
+                    </LinearLayout>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                        android:layout_marginHorizontal="0dp"
                         android:layout_marginBottom="@dimen/space_xl"
                         android:text="@string/item_entry_inventory_helper"
                         android:textAppearance="@style/Text.SettingsCaption" />
@@ -1085,17 +1038,12 @@
             android:orientation="vertical"
             android:background="@color/settings_background">
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/divider_height"
-                android:background="@color/color_divider" />
-
             <Button
                 android:id="@+id/item_save_button"
                 style="@style/Widget.Button.Primary.Green"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                android:layout_marginHorizontal="@dimen/settings_page_margin"
                 android:layout_marginTop="@dimen/space_m"
                 android:layout_marginBottom="@dimen/space_xl"
                 android:text="@string/item_entry_button_save"

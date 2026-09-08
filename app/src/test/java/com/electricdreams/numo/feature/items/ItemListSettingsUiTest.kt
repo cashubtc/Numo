@@ -148,6 +148,38 @@ class ItemListSettingsUiTest {
     }
 
     @Test
+    fun `optional details and new categories are preserved when saving`() {
+        ActivityScenario.launch(ItemEntryActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val variation = activity.findViewById<EditText>(R.id.item_variation_input)
+                assertTrue(!variation.isShown)
+                activity.findViewById<View>(R.id.more_details_toggle).performClick()
+                assertTrue(variation.isShown)
+                variation.setText("Large")
+                activity.findViewById<EditText>(R.id.item_description_input).setText("Fresh coffee")
+
+                activity.findViewById<View>(R.id.add_category_button).performClick()
+                assertEquals(View.VISIBLE,
+                    activity.findViewById<View>(R.id.new_category_container).visibility)
+                activity.findViewById<EditText>(R.id.new_category_input).setText("Drinks")
+                activity.findViewById<View>(R.id.btn_confirm_category).performClick()
+                assertEquals(View.GONE,
+                    activity.findViewById<View>(R.id.new_category_container).visibility)
+                assertEquals("Drinks",
+                    activity.findViewById<EditText>(R.id.item_category_input).text.toString())
+
+                activity.findViewById<EditText>(R.id.item_name_input).setText("Coffee")
+                activity.findViewById<EditText>(R.id.item_price_input).setText("3.50")
+                activity.findViewById<View>(R.id.item_save_button).performClick()
+            }
+        }
+        val saved = ItemManager.getInstance(context).getAllItems().single()
+        assertEquals("Large", saved.variationName)
+        assertEquals("Fresh coffee", saved.description)
+        assertEquals("Drinks", saved.category)
+    }
+
+    @Test
     fun `labeled editor fields save a new item and update it in edit mode`() {
         ActivityScenario.launch(ItemEntryActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->

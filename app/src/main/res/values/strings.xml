@@ -1087,4 +1087,5 @@
     <string name="settings_fiat_conversion_disabled_custom_unit">Fiat currency conversion is disabled when using a custom base unit.</string>
     <string name="mints_base_currency_unit_title">Base Currency Unit</string>
     <string name="mints_base_currency_unit_subtitle">If the mint supports other units, you can switch it here.</string>
+    <string name="item_entry_add_category">Add category</string>
 </resources>
