@@ -44,8 +44,6 @@
         <item name="android:orientation">vertical</item>
         <item name="android:background">@drawable/bg_settings_group</item>
         <item name="android:clipToOutline">true</item>
-        <item name="android:showDividers">middle</item>
-        <item name="android:divider">@drawable/settings_divider</item>
     </style>
 
     <style name="Text.SettingsPageTitle" parent="Text.Heading1">
@@ -61,7 +59,7 @@
     </style>
 
     <style name="Widget.Numo.SettingsCard" parent="Widget.Material3.CardView.Filled">
-        <item name="cardBackgroundColor">@color/color_bg_card</item>
+        <item name="cardBackgroundColor">@color/settings_background</item>
         <item name="cardCornerRadius">24dp</item>
         <item name="cardElevation">0dp</item>
         <item name="strokeWidth">0dp</item>

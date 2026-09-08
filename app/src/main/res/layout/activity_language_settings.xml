@@ -57,8 +57,7 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_settings_group"
                     android:clipToOutline="true"
-                    android:divider="@drawable/settings_divider"
-                    android:showDividers="middle">
+                    android:showDividers="none">
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/radio_english"
