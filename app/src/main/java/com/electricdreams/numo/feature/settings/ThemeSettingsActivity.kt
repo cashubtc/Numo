@@ -61,10 +61,12 @@ class ThemeSettingsActivity : AppCompatActivity() {
         radioWhite = binding.radioWhite
 
         setSelectedTheme(getCurrentTheme())
+        binding.themePreview.setTheme(getSelectedTheme(), animate = false)
 
         themeRadioGroup.setOnCheckedChangeListener { _, _ ->
             val selectedTheme = getSelectedTheme()
             saveTheme(selectedTheme)
+            binding.themePreview.setTheme(selectedTheme)
         }
 
     }

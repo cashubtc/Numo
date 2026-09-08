@@ -77,6 +77,44 @@ class SettingsPreferencesUiTest {
         }
     }
 
+    @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
+    @Test
+    fun `preview follows every theme and restores selection after recreation`() {
+        ActivityScenario.launch(ThemeSettingsActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val preview = activity.findViewById<com.electricdreams.numo.ui.components.ThemePreviewView>(
+                    R.id.theme_preview)
+                val amount = preview.findViewById<android.widget.TextView>(R.id.amount_display)
+                assertTrue("Sample amount must have visible bounds",
+                    amount.width > 0 && amount.height > 0)
+                assertTrue(amount.text.isNotBlank())
+                val choices = listOf(
+                    R.id.radio_white to ThemeSettingsActivity.THEME_WHITE,
+                    R.id.radio_obsidian to ThemeSettingsActivity.THEME_OBSIDIAN,
+                    R.id.radio_green to ThemeSettingsActivity.THEME_GREEN,
+                    R.id.radio_bitcoin_orange to ThemeSettingsActivity.THEME_BITCOIN_ORANGE
+                )
+                choices.forEach { (id, theme) ->
+                    activity.findViewById<MaterialRadioButton>(id).performClick()
+                    org.robolectric.Shadows.shadowOf(android.os.Looper.getMainLooper())
+                        .idleFor(java.time.Duration.ofSeconds(1))
+                    val bitmap = android.graphics.Bitmap.createBitmap(
+                        preview.width, preview.height, android.graphics.Bitmap.Config.ARGB_8888)
+                    preview.draw(android.graphics.Canvas(bitmap))
+                    assertEquals(com.electricdreams.numo.ui.theme.ThemeManager
+                        .resolveBackgroundColor(activity, theme),
+                        bitmap.getPixel(preview.width / 2, preview.height / 10))
+                    bitmap.recycle()
+                }
+            }
+            scenario.recreate()
+            scenario.onActivity { activity ->
+                assertTrue(activity.findViewById<MaterialRadioButton>(R.id.radio_bitcoin_orange)
+                    .isChecked)
+            }
+        }
+    }
+
     @Test
     fun `language choices apply the selected app locale`() {
         ActivityScenario.launch(LanguageSettingsActivity::class.java).use { scenario ->

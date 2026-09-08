@@ -7,4 +7,5 @@
     <string name="theme_settings_option_bitcoin_orange">Bitcoin Orange</string>
     <string name="theme_settings_option_green">Green</string>
     <string name="theme_settings_option_white">White</string>
+    <string name="theme_settings_preview_description">Home screen preview with a sample amount, keypad, and Charge button</string>
 </resources>

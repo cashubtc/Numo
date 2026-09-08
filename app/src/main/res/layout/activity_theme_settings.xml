@@ -35,6 +35,15 @@
                 android:paddingBottom="24dp"
                 android:paddingHorizontal="@dimen/settings_page_margin">
 
+                <com.electricdreams.numo.ui.components.ThemePreviewView
+                    android:id="@+id/theme_preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="264dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_theme_preview"
+                    android:contentDescription="@string/theme_settings_preview_description"
+                    android:importantForAccessibility="yes" />
+
                 <!-- Mode Section Header -->
 
                 <TextView
@@ -79,26 +88,22 @@
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/radio_obsidian"
                         android:text="@string/theme_settings_option_obsidian"
-                        style="@style/Widget.Numo.SettingsChoice"
-                        android:drawableEnd="@drawable/settings_swatch_obsidian" />
+                        style="@style/Widget.Numo.SettingsChoice" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/radio_bitcoin_orange"
                         android:text="@string/theme_settings_option_bitcoin_orange"
-                        style="@style/Widget.Numo.SettingsChoice"
-                        android:drawableEnd="@drawable/settings_swatch_bitcoin_orange" />
+                        style="@style/Widget.Numo.SettingsChoice" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/radio_green"
                         android:text="@string/theme_settings_option_green"
-                        style="@style/Widget.Numo.SettingsChoice"
-                        android:drawableEnd="@drawable/settings_swatch_green" />
+                        style="@style/Widget.Numo.SettingsChoice" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
                         android:id="@+id/radio_white"
                         android:text="@string/theme_settings_option_white"
-                        style="@style/Widget.Numo.SettingsChoice"
-                        android:drawableEnd="@drawable/settings_swatch_white" />
+                        style="@style/Widget.Numo.SettingsChoice" />
 
                 </RadioGroup>
 

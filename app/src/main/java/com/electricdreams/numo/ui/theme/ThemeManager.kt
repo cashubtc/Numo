@@ -123,7 +123,7 @@ class ThemeManager(
             return resolveBackgroundColor(activity, theme)
         }
 
-        private fun resolveBackgroundColor(context: android.content.Context, theme: String): Int {
+        fun resolveBackgroundColor(context: android.content.Context, theme: String): Int {
             return when (theme) {
                 "obsidian" -> ContextCompat.getColor(context, R.color.color_theme_obsidian)
                 "bitcoin_orange" -> ContextCompat.getColor(context, R.color.color_theme_bitcoin_orange)
