@@ -9,14 +9,17 @@ import android.provider.Settings
 import android.view.View
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import com.electricdreams.numo.ModernPOSActivity
 import com.electricdreams.numo.R
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.Shadows.shadowOf
@@ -90,6 +93,81 @@ class OnboardingTourTest {
                 assertTrue(activity.isFinishing)
                 assertTrue(OnboardingActivity.isOnboardingComplete(context))
             }
+        }
+    }
+
+    @Test
+    fun `fresh install continues into wallet setup even with the preview extra`() {
+        val intent = Intent(context, OnboardingActivity::class.java)
+            .putExtra("preview_onboarding", true)
+        ActivityScenario.launch<OnboardingActivity>(intent).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.findViewById<View>(R.id.accept_button).performClick()
+
+                assertFalse(activity.isFinishing)
+                assertTrue(activity.findViewById<View>(R.id.create_wallet_button).isShown)
+                assertTrue(activity.findViewById<View>(R.id.restore_wallet_button).isShown)
+                assertFalse(OnboardingActivity.isOnboardingComplete(context))
+            }
+        }
+    }
+
+    @Test
+    fun `get started enters existing setup from any scene without completing onboarding`() {
+        for (page in 0..3) {
+            ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+                scenario.onActivity { activity ->
+                    val tour = activity.findViewById<OnboardingTourView>(R.id.welcome_tour)
+                    repeat(page) { tour.advancePage() }
+                    activity.findViewById<View>(R.id.accept_button).performClick()
+
+                    assertTrue(activity.findViewById<View>(R.id.create_wallet_button).isShown)
+                    assertTrue(activity.findViewById<View>(R.id.restore_wallet_button).isShown)
+                    assertFalse(tour.isPlaybackRunning)
+                    assertFalse(OnboardingActivity.isOnboardingComplete(context))
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `reopening unfinished setup returns to the welcome screen`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.findViewById<View>(R.id.accept_button).performClick()
+                activity.findViewById<View>(R.id.restore_wallet_button).performClick()
+                assertTrue(activity.findViewById<View>(R.id.enter_seed_container).isShown)
+            }
+        }
+
+        assertFalse(OnboardingActivity.isOnboardingComplete(context))
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                assertTrue(activity.findViewById<View>(R.id.welcome_container).isShown)
+                assertFalse(activity.findViewById<View>(R.id.enter_seed_container).isShown)
+                assertEquals(0, activity.findViewById<OnboardingTourView>(R.id.welcome_tour).currentPage)
+            }
+        }
+    }
+
+    @Test
+    fun `completed setup skips the welcome and opens checkout on normal launch`() {
+        OnboardingActivity.setOnboardingComplete(context, true)
+        val controller = Robolectric.buildActivity(OnboardingActivity::class.java).create()
+        try {
+            val activity = controller.get()
+            val destination = shadowOf(activity).nextStartedActivity
+
+            assertTrue(activity.isFinishing)
+            assertNull(activity.findViewById<View>(R.id.welcome_container))
+            assertEquals(ModernPOSActivity::class.java.name, destination?.component?.className)
+            assertEquals(
+                Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK,
+                destination?.flags,
+            )
+            assertTrue(OnboardingActivity.isOnboardingComplete(context))
+        } finally {
+            controller.destroy()
         }
     }
 

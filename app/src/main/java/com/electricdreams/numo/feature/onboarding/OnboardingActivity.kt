@@ -230,9 +230,11 @@ class OnboardingActivity : AppCompatActivity() {
         
         super.onCreate(savedInstanceState)
 
-        // Debug preview never changes completion, wallet state, or payment settings.
-        previewOnly = BuildConfig.DEBUG && intent.getBooleanExtra("preview_onboarding", false)
-        if (isOnboardingComplete(this) && !previewOnly) {
+        // Preview protects an existing setup; unfinished onboarding always follows the real flow.
+        val onboardingComplete = isOnboardingComplete(this)
+        previewOnly = BuildConfig.DEBUG && onboardingComplete &&
+            intent.getBooleanExtra("preview_onboarding", false)
+        if (onboardingComplete && !previewOnly) {
             val intent = Intent(this, ModernPOSActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)

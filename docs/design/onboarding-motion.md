@@ -2,6 +2,10 @@
 
 The first welcome screen is now a four-scene introduction, followed by the existing create/restore flow. It loops automatically through all four scenes. Get started remains available throughout, with manual swiping and no visible playback controls or progress indicators. The centered wordmark anchors the top; the illustration and copy form one centered group above the fixed footer.
 
+## First-run navigation
+
+Get started on any scene opens the existing **Set Up Your Wallet** screen, keeping both **Create New Wallet** and **Restore From Backup** before mint selection. Watching the tour or tapping Get started does not complete onboarding. Closing the app before setup is complete returns to the welcome on the next launch. Once setup is complete, normal launches skip the welcome and open checkout directly.
+
 ## Story and motion
 
 | Scene | Copy | Illustration | Duration |
@@ -37,7 +41,7 @@ adb shell am start -n com.electricdreams.numo/.feature.onboarding.OnboardingActi
   --ez preview_onboarding true
 ```
 
-The extra is honored only in debug builds. Get started exits this preview. Normal first-run onboarding still opens the existing create/restore step.
+The extra is honored only in debug builds with completed onboarding. Get started exits this preview to protect the existing wallet. If setup is incomplete, the extra has no effect: Get started opens the existing create/restore step. To verify normal launch behavior on a configured device, omit the extra; do not clear its wallet data or onboarding preference.
 
 ## Verification
 
@@ -55,3 +59,5 @@ The revised tour has native Skia render fixtures for each scene, the keypad/wait
 The final revision was installed and recorded on the USB-connected Pixel 7a. Hardware captures verify visible keypad entry, waiting, settled handset contact, received payment, all four scenes, and automatic return to the first scene. A separate hardware pass covered all four pages at 200% system text with animations disabled, including vertical scrolling on the longer tap page; original font and animation settings were restored, leaving the normal preview loop open. No emulator was used.
 
 The delivery build’s 32-second debug recording reported 6 missed frame deadlines across 2,917 rendered frames (0.21%). This is one screen-recorded debug run, not a release performance guarantee. Manual TalkBack speech and wider-device coverage remain unchecked. All 25 focused tests and `assembleDebug` pass. The native scene render test also passes after enlarging the wordmark; the final contrast and axis-label corrections compile in the delivery build. Android Lint completes but the repository still reports 209 existing errors; none are in the new tour implementation. Local native render artifacts are generated under `app/build/onboarding-previews/`; final USB captures and the video are in `/private/tmp/numo-onboarding-qa/delivery/`. The independent review confirmed the supplied wallet screenshot is pixel-identical to its lossless WebP asset.
+
+The subsequent first-run routing check adds coverage for Get started from every scene, reopening unfinished setup, completed setup bypassing the welcome, and the preview extra on a fresh install. All 21 tests in `OnboardingActivityTest` and `OnboardingTourTest`, plus `assembleDebug`, pass. The update is installed on the USB Pixel 7a; its existing completed setup opens checkout on normal launch. The phone is left in normal mode with its wallet and onboarding preferences preserved. Fresh-install and interrupted-setup routes are verified with Robolectric rather than resetting that wallet.
