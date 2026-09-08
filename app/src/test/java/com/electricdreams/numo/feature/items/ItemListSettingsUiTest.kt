@@ -121,9 +121,28 @@ class ItemListSettingsUiTest {
                 assertEquals(View.GONE, activity.findViewById<View>(R.id.empty_view).visibility)
                 assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.items_content).visibility)
                 assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.top_bar).visibility)
-                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.fab_add_item).visibility)
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.top_bar_action).visibility)
                 assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.import_csv_button).visibility)
                 assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.export_csv_button).visibility)
+            }
+        }
+    }
+
+    @Test
+    fun `shared toolbar exits reordering before opening the add item flow`() {
+        ItemManager.getInstance(context).addItem(Item(name = "Coffee", price = 3.0))
+        ActivityScenario.launch(ItemListActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val action = activity.findViewById<View>(R.id.top_bar_action)
+                activity.enterReorderingMode()
+                assertEquals(activity.getString(R.string.item_list_done_reordering),
+                    action.contentDescription)
+                action.performClick()
+                assertEquals(activity.getString(R.string.item_list_add_item),
+                    action.contentDescription)
+                action.performClick()
+                assertEquals(ItemEntryActivity::class.java.name,
+                    shadowOf(activity).nextStartedActivity.component?.className)
             }
         }
     }

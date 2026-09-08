@@ -47,7 +47,6 @@ class MintListItem @JvmOverloads constructor(
     
     private var mintUrl: String = ""
     private var listener: OnMintItemListener? = null
-    private var isLastItem: Boolean = false
 
     init {
         LayoutInflater.from(context).inflate(R.layout.component_mint_list_item, this, true)
@@ -70,9 +69,8 @@ class MintListItem @JvmOverloads constructor(
         }
     }
 
-    fun bind(url: String, balance: Long, isLast: Boolean = false) {
+    fun bind(url: String, balance: Long) {
         mintUrl = url
-        isLastItem = isLast
         
         // Get mint info
         val mintManager = MintManager.getInstance(context)
@@ -107,31 +105,8 @@ class MintListItem @JvmOverloads constructor(
         // Load icon
         loadIcon(url)
         
-        // Add divider if not last item
-        updateDivider()
     }
 
-    private fun updateDivider() {
-        // Remove any existing divider
-        val existingDivider = findViewById<View>(R.id.item_divider)
-        existingDivider?.let { (parent as? FrameLayout)?.removeView(it) }
-        
-        if (!isLastItem) {
-            // Add divider view
-            val divider = View(context).apply {
-                id = R.id.item_divider
-                layoutParams = LayoutParams(
-                    LayoutParams.MATCH_PARENT,
-                    resources.getDimensionPixelSize(R.dimen.divider_height)
-                ).apply {
-                    marginStart = resources.getDimensionPixelSize(R.dimen.mint_item_divider_margin)
-                    gravity = android.view.Gravity.BOTTOM
-                }
-                setBackgroundColor(context.getColor(R.color.color_divider))
-            }
-            addView(divider)
-        }
-    }
 
     private fun loadIcon(url: String) {
         val cachedFile = MintIconCache.getCachedIconFile(url)

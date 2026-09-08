@@ -102,7 +102,7 @@ class BtcPaySettingsActivity : AppCompatActivity() {
     private fun setupListeners() {
         val enableToggleRow = binding.enableToggleRow
         enableToggleRow.setOnClickListener {
-            if (hasAllFields()) enableSwitch.toggle()
+            if (hasAllFields()) enableSwitch.performClick()
         }
 
         enableSwitch.setOnCheckedChangeListener { _, isChecked ->

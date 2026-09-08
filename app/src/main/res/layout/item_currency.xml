@@ -7,9 +7,9 @@
     android:background="@drawable/bg_settings_group"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingHorizontal="16dp"
+    android:paddingHorizontal="@dimen/settings_page_margin"
     android:clipToOutline="true"
-    android:minHeight="72dp"
+    android:minHeight="@dimen/settings_switch_height"
     android:layout_marginBottom="8dp"
     android:paddingVertical="12dp"
     android:foreground="?attr/selectableItemBackground"
@@ -19,7 +19,7 @@
     <FrameLayout
         android:layout_width="@dimen/row_icon_size"
         android:layout_height="@dimen/row_icon_size"
-        android:layout_marginEnd="@dimen/row_icon_gap">
+        android:layout_marginEnd="@dimen/settings_row_icon_gap">
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/currency_flag_image"
@@ -40,7 +40,7 @@
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
             android:maxLines="1"
-            android:textColor="@color/color_text_secondary"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="11sp"
             android:visibility="gone" />
 

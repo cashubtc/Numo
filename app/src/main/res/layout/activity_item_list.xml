@@ -14,82 +14,21 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:fitsSystemWindows="true">
+>
 
             <!-- Top App Bar (hidden when showing empty state) -->
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <com.electricdreams.numo.ui.components.NumoTopBar
                 android:id="@+id/top_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/settings_background"
-                android:elevation="0dp"
-                android:paddingHorizontal="@dimen/space_l"
                 android:minHeight="64dp"
-                android:padding="8dp"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <ImageButton
-                    android:id="@+id/back_button"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-                    android:padding="@dimen/space_m"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/item_list_toolbar_back"
-                    android:src="@drawable/ic_arrow_back"
-                    app:tint="@color/color_text_primary"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/toolbar_title"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/item_list_toolbar_title"
-                    android:textAppearance="@style/Text.SettingsPageTitle"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    android:gravity="start"
-                    android:maxLines="2"
-                    android:layout_marginStart="8dp"
-                    app:layout_constraintStart_toEndOf="@id/back_button"
-                    app:layout_constraintEnd_toStartOf="@id/fab_add_item" />
-
-                <!-- Add Item Button (shown when items exist, in normal mode) -->
-
-                <ImageButton
-                    android:id="@+id/fab_add_item"
-                    android:layout_width="@dimen/icon_size_large"
-                    android:layout_height="@dimen/icon_size_large"
-                    android:padding="@dimen/space_m"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/item_list_add_item"
-                    android:src="@drawable/ic_add"
-                    android:visibility="gone"
-                    app:tint="@color/color_primary_green"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:visibility="visible" />
-
-                <!-- Done Button (shown in reordering mode) -->
-
-                <ImageButton
-                    android:id="@+id/done_reorder_button"
-                    android:layout_width="@dimen/icon_size_large"
-                    android:layout_height="@dimen/icon_size_large"
-                    android:padding="@dimen/space_m"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:contentDescription="@string/item_list_done_reordering"
-                    android:src="@drawable/ic_check"
-                    app:tint="@color/color_primary_green"
-                    android:visibility="gone"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                app:topBarTitle="@string/item_list_toolbar_title"
+                app:topBarSettingsStyle="true"
+                app:topBarActionIcon="@drawable/ic_add"
+                app:topBarActionTint="@color/m3_primary"
+                app:topBarActionContentDescription="@string/item_list_add_item"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <!-- Regular Content: Items List (shown when items exist) -->
 
@@ -113,7 +52,7 @@
                     android:clipToPadding="false"
                     android:overScrollMode="never"
                     tools:listitem="@layout/item_product"
-                    android:paddingHorizontal="16dp"
+                    android:paddingHorizontal="@dimen/settings_page_margin"
                     android:paddingTop="16dp"
                     android:paddingBottom="16dp" />
 
@@ -124,7 +63,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                    android:paddingHorizontal="@dimen/settings_page_margin"
                     android:paddingTop="@dimen/space_m"
                     android:paddingBottom="@dimen/space_xl"
                     android:background="@color/settings_background">

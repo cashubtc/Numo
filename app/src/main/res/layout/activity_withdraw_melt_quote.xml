@@ -34,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingBottom="24dp"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
                 <!-- Summary Text -->
 
@@ -226,7 +226,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingBottom="24dp"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
                 <!-- Lightning Icon -->
 

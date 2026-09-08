@@ -14,24 +14,24 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="16dp"
+        android:paddingHorizontal="@dimen/settings_row_padding"
+        android:paddingVertical="@dimen/settings_row_padding"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
         android:focusable="true"
-        android:minHeight="88dp">
+        android:minHeight="@dimen/settings_detail_row_height">
 
         <!-- Mint Icon (circular avatar) -->
 
         <FrameLayout
             android:id="@+id/icon_container"
-            android:layout_width="44dp"
-            android:layout_height="44dp">
+            android:layout_width="@dimen/settings_row_icon_size"
+            android:layout_height="@dimen/settings_row_icon_size">
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/mint_icon"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="@dimen/settings_row_icon_size"
+                android:layout_height="@dimen/settings_row_icon_size"
                 android:layout_gravity="center"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_bitcoin"
@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_marginStart="@dimen/row_icon_gap"
+            android:layout_marginStart="@dimen/settings_row_icon_gap"
             android:layout_marginEnd="@dimen/space_m">
 
             <TextView
@@ -66,7 +66,7 @@
                 android:id="@+id/mint_url"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="@dimen/settings_row_subtitle_gap"
                 android:text="mint.example.com"
                 android:maxLines="2"
                 android:ellipsize="end"

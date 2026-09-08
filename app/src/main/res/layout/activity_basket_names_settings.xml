@@ -34,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingBottom="24dp"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
                 <!-- Hero Section -->
 
@@ -42,17 +42,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingTop="@dimen/margin_screen_horizontal"
-                    android:paddingBottom="@dimen/margin_screen_horizontal">
+                    android:paddingTop="@dimen/settings_row_padding"
+                    android:paddingBottom="@dimen/settings_row_padding">
 
                     <!-- Description -->
 
-                    <TextView
+                    <TextView android:paddingHorizontal="@dimen/settings_row_padding"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/basket_names_settings_description"
-                        android:textAppearance="@style/Text.SettingsCaption"
-                        android:lineSpacingMultiplier="1.3" />
+                        android:textAppearance="@style/Text.SettingsBody" />
 
                 </LinearLayout>
 
@@ -68,17 +67,12 @@
 
                     <TextView
                         android:id="@+id/names_header"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
                         android:text="@string/basket_names_settings_presets_header"
-                        android:textAppearance="@style/Text.SettingsSection"
+                        style="@style/Widget.Numo.SettingsSectionTitle"
                         android:visibility="gone"
                         tools:visibility="visible"
                         android:textAllCaps="false"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginTop="24dp"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginTop="@dimen/settings_section_gap"
                         android:accessibilityHeading="true" />
 
                     <!-- Names List -->
@@ -111,15 +105,13 @@
 
                 <!-- Add Name Button -->
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/add_name_button"
-                    style="@style/Widget.Button.Secondary.Outlined"
+                    style="@style/Widget.Numo.SettingsAddButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_m"
-                    android:text="@string/basket_names_settings_add_name"
-                    android:drawableStart="@drawable/ic_add"
-                    android:drawablePadding="@dimen/space_s" />
+                    android:text="@string/basket_names_settings_add_name" />
 
                 <!-- Example suggestions -->
 
@@ -127,10 +119,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_xl"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                    android:paddingHorizontal="@dimen/settings_row_padding"
                     android:text="@string/basket_names_settings_examples"
-                    android:textAppearance="@style/Text.SettingsCaption"
-                    android:lineSpacingMultiplier="1.4" />
+                    android:textAppearance="@style/Text.SettingsCaption" />
 
                 <!-- Clear All Button (only shown when items exist) -->
 

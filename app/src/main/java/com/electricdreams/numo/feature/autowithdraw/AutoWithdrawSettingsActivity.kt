@@ -47,7 +47,7 @@ import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 /**
  * Premium Apple-like settings screen for automatic withdrawals.
  *
- * Features a beautiful hero section, card-based settings groups,
+ * Uses shared settings surfaces and explicit status indicators,
  * smooth animations, and a clean transaction history with expandable
  * error details for failed withdrawals.
  */
@@ -59,9 +59,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     private lateinit var autoWithdrawManager: AutoWithdrawManager
 
     // Hero section
-    private lateinit var heroBg: FrameLayout
-    private lateinit var heroBolt: ImageView
-    private lateinit var heroBoltFade: View
     private lateinit var statusContainer: LinearLayout
     private lateinit var statusDot: View
     private lateinit var statusText: TextView
@@ -122,9 +119,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         }
 
         // Hero section
-        heroBg = binding.heroBg
-        heroBolt = binding.heroBolt
-        heroBoltFade = binding.heroBoltFade
         statusContainer = binding.statusContainer
         statusDot = binding.statusDot
         statusText = binding.statusText
@@ -160,7 +154,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     private fun setupListeners() {
         // Toggle row click (toggles switch)
         enableToggleRow.setOnClickListener {
-            enableSwitch.toggle()
+            enableSwitch.performClick()
         }
 
         // Enable switch
@@ -168,7 +162,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             if (!isUpdatingUI) {
                 settingsManager.setGloballyEnabled(isChecked)
                 updateStatusIndicator(isChecked)
-                updateHeroGradient(isChecked, animate = true)
                 animateConfigContainer(isChecked)
                 animateStatusChange(isChecked)
                 if (isChecked) {
@@ -332,7 +325,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         val enabled = settingsManager.isGloballyEnabled()
         enableSwitch.isChecked = enabled
         updateStatusIndicator(enabled)
-        updateHeroGradient(enabled, animate = false)
         configContainer.visibility = if (enabled) View.VISIBLE else View.GONE
 
         lightningAddressInput.setText(settingsManager.getDefaultLightningAddress())
@@ -368,17 +360,6 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             statusText.setTextColor(ContextCompat.getColor(this, R.color.color_text_tertiary))
             statusContainer.background = ContextCompat.getDrawable(this, R.drawable.bg_pill_badge)
         }
-    }
-
-    private fun updateHeroGradient(enabled: Boolean, animate: Boolean) {
-        val gradientRes = if (enabled) R.drawable.bg_hero_gradient_active else R.drawable.bg_hero_gradient_green
-        val fadeRes = if (enabled) R.drawable.bg_hero_bolt_fade_active else R.drawable.bg_hero_bolt_fade_green
-
-        heroBg.setBackgroundResource(gradientRes)
-        val boltColor = if (enabled) R.color.color_bitcoin_orange else R.color.color_success_green
-        heroBolt.setColorFilter(ContextCompat.getColor(this, boltColor))
-        heroBoltFade.setBackgroundResource(fadeRes)
-
     }
 
     private fun fetchMinThreshold(address: String) {

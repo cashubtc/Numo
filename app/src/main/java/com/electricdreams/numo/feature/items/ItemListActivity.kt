@@ -10,7 +10,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -42,8 +41,6 @@ class ItemListActivity : AppCompatActivity() {
     private lateinit var emptyView: View
     private lateinit var itemsContent: View
     private lateinit var bottomActions: LinearLayout
-    private lateinit var fabAddItem: ImageButton
-    private lateinit var doneReorderButton: ImageButton
     private lateinit var topBar: View
     private lateinit var adapter: ItemAdapter
     private lateinit var itemTouchHelper: ItemTouchHelper
@@ -95,7 +92,7 @@ class ItemListActivity : AppCompatActivity() {
         applySettingsWindowInsets(this, binding.root)
 
         // Set up back button
-        binding.backButton.setOnClickListener {
+        binding.topBar.onNavClick {
             if (isReorderingMode) {
                 exitReorderingMode()
             } else {
@@ -107,8 +104,6 @@ class ItemListActivity : AppCompatActivity() {
         emptyView = binding.emptyView.root
         itemsContent = binding.itemsContent
         bottomActions = binding.bottomActions
-        fabAddItem = binding.fabAddItem
-        doneReorderButton = binding.doneReorderButton
         topBar = binding.topBar
         val importCsvButton: Button = binding.importCsvButton
         val exportCsvButton: Button = binding.exportCsvButton
@@ -128,13 +123,12 @@ class ItemListActivity : AppCompatActivity() {
 
         updateEmptyViewVisibility()
 
-        fabAddItem.setOnClickListener {
-            val intent = Intent(this, ItemEntryActivity::class.java)
-            addItemLauncher.launch(intent)
-        }
-
-        doneReorderButton.setOnClickListener {
-            exitReorderingMode()
+        binding.topBar.onActionClick {
+            if (isReorderingMode) {
+                exitReorderingMode()
+            } else {
+                addItemLauncher.launch(Intent(this, ItemEntryActivity::class.java))
+            }
         }
 
         importCsvButton.setOnClickListener {
@@ -184,7 +178,6 @@ class ItemListActivity : AppCompatActivity() {
         val hasItems = adapter.itemCount > 0
         emptyView.visibility = if (hasItems) View.GONE else View.VISIBLE
         itemsContent.visibility = if (hasItems) View.VISIBLE else View.GONE
-        fabAddItem.visibility = if (hasItems) View.VISIBLE else View.GONE
         topBar.visibility = if (hasItems) View.VISIBLE else View.GONE
         binding.catalogContent.visibility = if (hasItems) View.VISIBLE else View.GONE
 
@@ -284,20 +277,8 @@ class ItemListActivity : AppCompatActivity() {
         if (isReorderingMode) return
         isReorderingMode = true
 
-        // Swap buttons with cross-fade animation
-        fabAddItem.animate()
-            .alpha(0f)
-            .setDuration(150)
-            .withEndAction {
-                fabAddItem.visibility = View.GONE
-                doneReorderButton.visibility = View.VISIBLE
-                doneReorderButton.alpha = 0f
-                doneReorderButton.animate()
-                    .alpha(1f)
-                    .setDuration(150)
-                    .start()
-            }
-            .start()
+        binding.topBar.setActionIcon(R.drawable.ic_check)
+        binding.topBar.actionView.contentDescription = getString(R.string.item_list_done_reordering)
 
         // Hide bottom actions during reordering
         bottomActions.animate()
@@ -319,20 +300,8 @@ class ItemListActivity : AppCompatActivity() {
         if (!isReorderingMode) return
         isReorderingMode = false
 
-        // Swap buttons with cross-fade animation
-        doneReorderButton.animate()
-            .alpha(0f)
-            .setDuration(150)
-            .withEndAction {
-                doneReorderButton.visibility = View.GONE
-                fabAddItem.visibility = View.VISIBLE
-                fabAddItem.alpha = 0f
-                fabAddItem.animate()
-                    .alpha(1f)
-                    .setDuration(150)
-                    .start()
-            }
-            .start()
+        binding.topBar.setActionIcon(R.drawable.ic_add)
+        binding.topBar.actionView.contentDescription = getString(R.string.item_list_add_item)
 
         // Show bottom actions again
         bottomActions.visibility = View.VISIBLE

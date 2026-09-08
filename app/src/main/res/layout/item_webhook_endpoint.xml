@@ -9,19 +9,21 @@
     android:focusable="true"
     android:gravity="center_vertical"
     android:orientation="horizontal"
-    android:paddingVertical="12dp"
-    android:paddingHorizontal="16dp"
+    android:paddingVertical="@dimen/settings_row_padding"
+    android:paddingHorizontal="@dimen/settings_row_padding"
     android:clipToOutline="true"
+    android:foreground="?attr/selectableItemBackground"
     android:minHeight="72dp"
     android:layout_marginBottom="8dp">
 
     <ImageView
         android:importantForAccessibility="no"
-        android:layout_width="@dimen/icon_size_small"
-        android:layout_height="@dimen/icon_size_small"
-        android:layout_marginEnd="@dimen/row_icon_gap"
+        android:layout_width="@dimen/settings_row_icon_size"
+        android:layout_height="@dimen/settings_row_icon_size"
+        android:layout_marginEnd="@dimen/settings_row_icon_gap"
         android:src="@drawable/ic_link"
-        app:tint="@color/color_icon_secondary" />
+        android:padding="@dimen/settings_icon_padding"
+        app:tint="?attr/colorPrimary" />
 
     <LinearLayout
         android:layout_width="0dp"

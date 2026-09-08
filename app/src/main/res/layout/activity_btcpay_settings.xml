@@ -31,7 +31,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingBottom="24dp"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
                 <LinearLayout
                     android:id="@+id/enable_toggle_row"
@@ -44,8 +44,9 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
                     android:clipToOutline="true"
-                    android:padding="16dp"
-                    android:minHeight="72dp"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:padding="@dimen/settings_row_padding"
+                    android:minHeight="@dimen/settings_switch_height"
                     android:screenReaderFocusable="true">
 
                     <LinearLayout
@@ -63,7 +64,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/row_subtitle_gap"
+                            android:layout_marginTop="@dimen/settings_row_subtitle_gap"
                             android:text="@string/btcpay_enable_subtitle"
                             android:textAppearance="@style/Text.SettingsCaption" />
 
@@ -79,15 +80,10 @@
                 </LinearLayout>
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:text="@string/btcpay_section_connection"
-                    android:textAppearance="@style/Text.SettingsSection"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
                     android:textAllCaps="false"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginTop="@dimen/settings_section_gap"
                     android:accessibilityHeading="true" />
 
                 <LinearLayout
@@ -96,7 +92,7 @@
                     android:orientation="vertical"
                     android:background="@drawable/bg_settings_group"
                     android:clipToOutline="true"
-                    android:padding="16dp">
+                    android:padding="@dimen/settings_row_padding">
 
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.Numo.SettingsTextInput"
@@ -113,11 +109,11 @@
                             android:inputType="textUri"
                             android:textColor="@color/color_text_primary"
                             android:textColorHint="?attr/colorOnSurfaceVariant"
-                            android:textSize="16sp"
+                            android:textAppearance="@style/Text.SettingsInput"
                             android:minHeight="56dp"
                             android:paddingTop="16dp"
                             android:paddingBottom="16dp"
-                            android:padding="16dp" />
+                            android:padding="@dimen/settings_row_padding" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -137,11 +133,11 @@
                             android:inputType="textPassword"
                             android:textColor="@color/color_text_primary"
                             android:textColorHint="?attr/colorOnSurfaceVariant"
-                            android:textSize="16sp"
+                            android:textAppearance="@style/Text.SettingsInput"
                             android:minHeight="56dp"
                             android:paddingTop="16dp"
                             android:paddingBottom="16dp"
-                            android:padding="16dp" />
+                            android:padding="@dimen/settings_row_padding" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -160,26 +156,21 @@
                             android:inputType="text"
                             android:textColor="@color/color_text_primary"
                             android:textColorHint="?attr/colorOnSurfaceVariant"
-                            android:textSize="16sp"
+                            android:textAppearance="@style/Text.SettingsInput"
                             android:minHeight="56dp"
                             android:paddingTop="16dp"
                             android:paddingBottom="16dp"
-                            android:padding="16dp" />
+                            android:padding="@dimen/settings_row_padding" />
 
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:text="@string/btcpay_section_test"
-                    android:textAppearance="@style/Text.SettingsSection"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
                     android:textAllCaps="false"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginTop="@dimen/settings_section_gap"
                     android:accessibilityHeading="true" />
 
                 <LinearLayout
@@ -192,18 +183,19 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
                     android:clipToOutline="true"
-                    android:padding="16dp"
-                    android:minHeight="72dp"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:padding="@dimen/settings_row_padding"
+                    android:minHeight="@dimen/settings_switch_height"
                     android:screenReaderFocusable="true">
 
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:layout_marginEnd="@dimen/row_icon_gap"
+                        android:layout_marginEnd="@dimen/settings_row_icon_gap"
                         android:importantForAccessibility="no"
                         android:src="@drawable/ic_link"
                         app:tint="?attr/colorPrimary"
-                        android:padding="10dp" />
+                        android:padding="@dimen/settings_icon_padding" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -221,7 +213,7 @@
                             android:id="@+id/test_connection_status"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/row_subtitle_gap"
+                            android:layout_marginTop="@dimen/settings_row_subtitle_gap"
                             android:text="@string/btcpay_test_connection_subtitle"
                             android:textAppearance="@style/Text.SettingsCaption" />
 
@@ -238,16 +230,11 @@
 
                 <TextView
                     android:id="@+id/pos_section_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:text="@string/btcpay_section_pos"
-                    android:textAppearance="@style/Text.SettingsSection"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
                     android:visibility="gone"
                     android:textAllCaps="false"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginTop="@dimen/settings_section_gap"
                     android:accessibilityHeading="true" />
 
                 <LinearLayout
@@ -258,8 +245,8 @@
                     android:visibility="gone"
                     android:background="@drawable/bg_settings_group"
                     android:clipToOutline="true"
-                    android:padding="16dp"
-                    android:minHeight="72dp">
+                    android:padding="0dp"
+                    android:minHeight="@dimen/settings_switch_height">
 
                     <LinearLayout
                         android:id="@+id/pos_app_row"
@@ -270,18 +257,18 @@
                         android:focusable="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:paddingHorizontal="@dimen/settings_row_padding"
                         android:paddingVertical="@dimen/row_padding_vertical"
                         android:screenReaderFocusable="true">
 
                         <ImageView
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:layout_marginEnd="@dimen/row_icon_gap"
+                            android:layout_marginEnd="@dimen/settings_row_icon_gap"
                             android:importantForAccessibility="no"
                             android:src="@drawable/ic_shopping_bag"
                             app:tint="?attr/colorPrimary"
-                            android:padding="10dp" />
+                            android:padding="@dimen/settings_icon_padding" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -299,7 +286,7 @@
                                 android:id="@+id/pos_app_subtitle"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/row_subtitle_gap"
+                                android:layout_marginTop="@dimen/settings_row_subtitle_gap"
                                 android:text="@string/btcpay_pos_app_subtitle_none"
                                 android:textAppearance="@style/Text.SettingsCaption" />
 

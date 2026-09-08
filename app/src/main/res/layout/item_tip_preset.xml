@@ -12,17 +12,19 @@
     android:clickable="true"
     android:focusable="true"
     android:clipToOutline="true"
-    android:minHeight="72dp">
+                    android:foreground="?attr/selectableItemBackground"
+    android:minHeight="@dimen/settings_switch_height">
 
     <!-- Tip icon -->
 
     <ImageView
         android:importantForAccessibility="no"
-        android:layout_width="@dimen/icon_size_small"
-        android:layout_height="@dimen/icon_size_small"
-        android:layout_marginEnd="@dimen/space_l"
+        android:layout_width="@dimen/settings_row_icon_size"
+        android:layout_height="@dimen/settings_row_icon_size"
+        android:layout_marginEnd="@dimen/settings_row_icon_gap"
+                        android:padding="@dimen/settings_icon_padding"
         android:src="@drawable/ic_tip"
-        app:tint="@color/color_icon_secondary" />
+        app:tint="?attr/colorPrimary" />
 
     <!-- Percentage text -->
 
@@ -32,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="10%"
-        android:textAppearance="@style/Text.Body"
+        android:textAppearance="@style/Text.RowTitle"
         android:textColor="@color/color_text_primary" />
 
     <!-- Delete button -->

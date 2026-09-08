@@ -33,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingBottom="24dp"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
                 <!-- ==================== -->
 
@@ -42,15 +42,10 @@
                 <!-- ==================== -->
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:text="@string/security_settings_section_backup"
-                    android:textAppearance="@style/Text.SettingsSection"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
                     android:textAllCaps="false"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginTop="@dimen/settings_section_gap"
                     android:accessibilityHeading="true" />
 
                 <!-- Security Info Card -->
@@ -60,7 +55,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:layout_marginBottom="@dimen/space_s"
-                    android:padding="@dimen/margin_screen_horizontal"
+                    android:padding="@dimen/settings_row_padding"
                     android:background="@drawable/bg_settings_warning">
 
                     <LinearLayout
@@ -90,9 +85,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/space_s"
                         android:text="@string/security_settings_card_body"
-                        android:textAppearance="@style/Text.Body"
-                        android:textColor="@color/color_text_secondary"
-                        android:lineSpacingMultiplier="1.3" />
+                        android:textAppearance="@style/Text.SettingsBody"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
 
                 </LinearLayout>
 
@@ -124,15 +118,10 @@
                 <!-- ===================== -->
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:text="@string/security_settings_section_pin_protection"
-                    android:textAppearance="@style/Text.SettingsSection"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
                     android:textAllCaps="false"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginTop="@dimen/settings_section_gap"
                     android:accessibilityHeading="true" />
 
                 <!-- PIN Info Card -->
@@ -174,8 +163,7 @@
                         android:layout_marginTop="@dimen/space_s"
                         android:text="@string/security_settings_pin_info_body"
                         android:textAppearance="@style/Text.SettingsCaption"
-                        android:textColor="@color/color_text_secondary"
-                        android:lineSpacingMultiplier="1.3" />
+                        android:textColor="?attr/colorOnSurfaceVariant" />
 
                 </LinearLayout>
 
@@ -223,15 +211,10 @@
                 <!-- Wallet Recovery Section -->
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:text="@string/security_settings_section_recovery"
-                    android:textAppearance="@style/Text.SettingsSection"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
                     android:textAllCaps="false"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginTop="@dimen/settings_section_gap"
                     android:accessibilityHeading="true" />
 
                 <LinearLayout

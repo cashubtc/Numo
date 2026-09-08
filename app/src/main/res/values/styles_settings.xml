@@ -12,7 +12,7 @@
     <style name="Widget.Numo.SettingsRow" parent="">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:minHeight">80dp</item>
+        <item name="android:minHeight">@dimen/settings_detail_row_height</item>
         <item name="rowIconTint">@color/m3_primary</item>
         <item name="rowShowChevron">true</item>
     </style>
@@ -20,17 +20,18 @@
     <style name="Widget.Numo.SettingsSection" parent="">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginTop">24dp</item>
+        <item name="android:layout_marginTop">@dimen/settings_section_gap</item>
         <item name="android:orientation">vertical</item>
     </style>
 
     <style name="Widget.Numo.SettingsSectionTitle" parent="">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginStart">8dp</item>
-        <item name="android:layout_marginEnd">8dp</item>
-        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:layout_marginStart">@dimen/settings_row_padding</item>
+        <item name="android:layout_marginEnd">@dimen/settings_row_padding</item>
+        <item name="android:layout_marginBottom">@dimen/settings_section_title_gap</item>
         <item name="android:textAppearance">@style/Text.SettingsSection</item>
+        <item name="android:accessibilityHeading">true</item>
     </style>
 
     <style name="Text.SettingsSection" parent="Text.RowTitle">
@@ -51,16 +52,20 @@
     </style>
 
     <style name="Text.SettingsBody" parent="Text.Body">
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
         <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
     </style>
 
     <style name="Text.SettingsCaption" parent="Text.RowSubtitle">
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
         <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
     </style>
 
     <style name="Widget.Numo.SettingsCard" parent="Widget.Material3.CardView.Filled">
         <item name="cardBackgroundColor">@color/settings_background</item>
-        <item name="cardCornerRadius">24dp</item>
+        <item name="cardCornerRadius">@dimen/settings_card_radius</item>
         <item name="cardElevation">0dp</item>
         <item name="strokeWidth">0dp</item>
     </style>
@@ -68,11 +73,11 @@
     <style name="Widget.Numo.SettingsChoice" parent="Widget.Material3.CompoundButton.RadioButton">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:minHeight">64dp</item>
-        <item name="android:paddingStart">16dp</item>
-        <item name="android:paddingEnd">16dp</item>
-        <item name="android:paddingTop">16dp</item>
-        <item name="android:paddingBottom">16dp</item>
+        <item name="android:minHeight">@dimen/settings_row_height</item>
+        <item name="android:paddingStart">@dimen/settings_row_padding</item>
+        <item name="android:paddingEnd">@dimen/settings_row_padding</item>
+        <item name="android:paddingTop">@dimen/settings_row_padding</item>
+        <item name="android:paddingBottom">@dimen/settings_row_padding</item>
         <item name="android:background">@drawable/bg_settings_choice</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:textAppearance">@style/Text.RowTitle</item>
@@ -80,10 +85,41 @@
     </style>
 
     <style name="Widget.Numo.SettingsTextInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
-        <item name="boxBackgroundColor">@color/color_bg_card</item>
-        <item name="boxCornerRadiusTopStart">16dp</item>
-        <item name="boxCornerRadiusTopEnd">16dp</item>
-        <item name="boxCornerRadiusBottomStart">16dp</item>
-        <item name="boxCornerRadiusBottomEnd">16dp</item>
+        <item name="boxBackgroundColor">@color/settings_background</item>
+        <item name="boxCornerRadiusTopStart">@dimen/radius_input</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/radius_input</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/radius_input</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/radius_input</item>
+    </style>
+    <style name="Text.SettingsInput" parent="Text.Body">
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+    <style name="Widget.Numo.SettingsSearch" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="hintEnabled">false</item>
+        <item name="boxBackgroundColor">@color/settings_background</item>
+        <item name="boxCornerRadiusTopStart">@dimen/radius_search</item>
+        <item name="boxCornerRadiusTopEnd">@dimen/radius_search</item>
+        <item name="boxCornerRadiusBottomStart">@dimen/radius_search</item>
+        <item name="boxCornerRadiusBottomEnd">@dimen/radius_search</item>
+        <item name="boxStrokeWidth">0dp</item>
+        <item name="boxStrokeWidthFocused">1dp</item>
+        <item name="startIconDrawable">@drawable/ic_search</item>
+        <item name="startIconTint">?attr/colorOnSurfaceVariant</item>
+        <item name="endIconMode">clear_text</item>
+        <item name="endIconContentDescription">@string/settings_clear_search</item>
+    </style>
+
+    <style name="Widget.Numo.SettingsAddButton" parent="Widget.Button.Secondary.Outlined">
+        <item name="android:textAppearance">@style/Text.Button</item>
+        <item name="android:textSize">@dimen/text_button</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="icon">@drawable/ic_add</item>
+        <item name="iconTint">?attr/colorPrimary</item>
+        <item name="iconGravity">textStart</item>
+        <item name="cornerRadius">@dimen/radius_button</item>
+        <item name="android:minHeight">@dimen/button_height</item>
     </style>
 </resources>

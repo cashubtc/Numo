@@ -34,40 +34,44 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingBottom="24dp"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
                 <!-- Description -->
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/settings_horizontal_padding"
+                    android:paddingHorizontal="@dimen/settings_row_padding"
                     android:paddingTop="@dimen/space_l"
                     android:paddingBottom="@dimen/space_s"
                     android:text="@string/tips_settings_description"
-                    android:textAppearance="@style/Text.Body"
-                    android:textColor="@color/color_text_secondary"
-                    android:lineSpacingExtra="2dp" />
+                    android:textAppearance="@style/Text.SettingsBody"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
                 <!-- Enable Tips Switch -->
 
                 <LinearLayout
+                    android:id="@+id/enable_tips_row"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:background="@drawable/bg_settings_group"
                     android:clipToOutline="true"
-                    android:padding="16dp"
-                    android:minHeight="72dp">
+                    android:padding="@dimen/settings_row_padding"
+                    android:minHeight="@dimen/settings_switch_height">
 
                     <ImageView
                         android:importantForAccessibility="no"
-                        android:layout_width="@dimen/icon_size_small"
-                        android:layout_height="@dimen/icon_size_small"
-                        android:layout_marginEnd="@dimen/space_l"
+                        android:layout_width="@dimen/settings_row_icon_size"
+                        android:layout_height="@dimen/settings_row_icon_size"
+                        android:layout_marginEnd="@dimen/settings_row_icon_gap"
+                        android:padding="@dimen/settings_icon_padding"
                         android:src="@drawable/ic_tip"
-                        app:tint="@color/color_primary_green" />
+                        app:tint="?attr/colorPrimary" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -97,21 +101,16 @@
                     <!-- Section Header -->
 
                     <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
                         android:text="@string/tips_settings_presets_header"
-                        android:textAppearance="@style/Text.SettingsSection"
+                        style="@style/Widget.Numo.SettingsSectionTitle"
                         android:textAllCaps="false"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginTop="24dp"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginTop="@dimen/settings_section_gap"
                         android:accessibilityHeading="true" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingHorizontal="@dimen/settings_horizontal_padding"
+                        android:paddingHorizontal="@dimen/settings_row_padding"
                         android:paddingBottom="@dimen/space_m"
                         android:text="@string/tips_settings_presets_description"
                         android:textAppearance="@style/Text.SettingsCaption" />
@@ -121,7 +120,6 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/space_l"
                         android:orientation="vertical"
                         android:background="@drawable/bg_settings_group"
                         android:clipToOutline="true">
@@ -138,39 +136,13 @@
 
                     <!-- Add Preset Button -->
 
-                    <LinearLayout
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/add_preset_button"
+                        style="@style/Widget.Numo.SettingsAddButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_s"
-                        android:layout_marginHorizontal="@dimen/space_l"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:background="@drawable/bg_settings_group"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:clipToOutline="true"
-                        android:padding="16dp"
-                        android:minHeight="64dp"
-                        android:screenReaderFocusable="true">
-
-                        <ImageView
-                            android:importantForAccessibility="no"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_marginEnd="@dimen/space_l"
-                            android:src="@drawable/ic_add"
-                            app:tint="?attr/colorPrimary"
-                            android:padding="10dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/tips_settings_add_preset"
-                            android:textAppearance="@style/Text.Button"
-                            android:textColor="@color/color_primary_green" />
-
-                    </LinearLayout>
+                        android:layout_marginTop="@dimen/space_m"
+                        android:text="@string/tips_settings_add_preset" />
 
                     <!-- Reset to Defaults -->
 
@@ -185,7 +157,8 @@
                         android:focusable="true"
                         android:background="@drawable/bg_settings_group"
                         android:clipToOutline="true"
-                        android:padding="16dp"
+                    android:foreground="?attr/selectableItemBackground"
+                        android:padding="@dimen/settings_row_padding"
                         android:minHeight="64dp"
                         android:screenReaderFocusable="true">
 
@@ -193,8 +166,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/tips_settings_reset_defaults"
-                            android:textAppearance="@style/Text.Body"
-                            android:textColor="@color/color_text_secondary" />
+                            android:textAppearance="@style/Text.SettingsBody"
+                            android:textColor="?attr/colorOnSurfaceVariant" />
 
                     </LinearLayout>
 

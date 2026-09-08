@@ -83,11 +83,10 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
                 emptyState,
                 R.drawable.ic_label,
                 getString(R.string.basket_names_settings_empty_title),
-                getString(R.string.basket_names_settings_empty_subtitle),
-                "+ Add Name"
-            ) { showAddNameDialog() }
+                getString(R.string.basket_names_settings_empty_subtitle)
+            )
             clearAllButton.visibility = View.GONE
-            addNameButton.visibility = View.GONE
+            addNameButton.visibility = View.VISIBLE
         } else {
             // Show names list
             namesHeader.visibility = View.VISIBLE
@@ -101,11 +100,6 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
                 val itemView = inflater.inflate(R.layout.item_basket_name_preset, namesList, false)
                 bindNameItem(itemView, index, name)
                 namesList.addView(itemView)
-
-                // Add divider between items (not after last)
-                if (index < names.size - 1) {
-                    addDivider()
-                }
             }
 
             // Show add button only when items exist and can add more
@@ -128,18 +122,6 @@ class BasketNamesSettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun addDivider() {
-        val divider = View(this).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                (0.5f * resources.displayMetrics.density).toInt()
-            ).apply {
-                marginStart = (16 * resources.displayMetrics.density).toInt()
-            }
-            setBackgroundColor(resources.getColor(R.color.color_divider, theme))
-        }
-        namesList.addView(divider)
-    }
 
     private fun showAddNameDialog() {
         DialogHelper.showInput(this, DialogHelper.InputConfig(

@@ -7,7 +7,6 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.EditText
-import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -34,7 +33,6 @@ class CurrencySettingsActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var searchInput: EditText
-    private lateinit var clearButton: ImageButton
     private lateinit var emptyStateText: TextView
 
     private var allCurrencies: List<CurrencyWrapper> = emptyList()
@@ -52,7 +50,6 @@ class CurrencySettingsActivity : AppCompatActivity() {
 
         recyclerView = binding.currencyRecyclerView
         searchInput = binding.currencySearchInput
-        clearButton = binding.clearSearchButton
         emptyStateText = binding.emptyStateText
 
         setupRecyclerView()
@@ -156,7 +153,6 @@ class CurrencySettingsActivity : AppCompatActivity() {
 
             override fun afterTextChanged(s: Editable?) {
                 val query = s?.toString() ?: ""
-                clearButton.visibility = if (query.isNotEmpty()) View.VISIBLE else View.GONE
 
                 val filtered = getFilteredCurrencies(query)
                 adapter.submitList(filtered, currencyManager.getCurrentCurrency())
@@ -171,9 +167,6 @@ class CurrencySettingsActivity : AppCompatActivity() {
             }
         })
 
-        clearButton.setOnClickListener {
-            searchInput.text = null
-        }
     }
 
     private fun getFilteredCurrencies(query: String): List<CurrencyWrapper> {

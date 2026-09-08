@@ -37,7 +37,8 @@ class BasketNamesSettingsUiTest {
     fun `shared input sheet adds and edits a preset name`() {
         ActivityScenario.launch(BasketNamesSettingsActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                activity.findViewById<View>(R.id.empty_state_action).performClick()
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.add_name_button).visibility)
+                activity.findViewById<View>(R.id.add_name_button).performClick()
                 val add = inputSheet(activity)
                 add.findViewById<EditText>(R.id.dialog_input).setText(" Table 1 ")
                 add.findViewById<View>(R.id.save_button).performClick()
@@ -60,6 +61,7 @@ class BasketNamesSettingsUiTest {
         manager.addPresetName("Table 1")
         ActivityScenario.launch(BasketNamesSettingsActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.add_name_button).visibility)
                 activity.findViewById<View>(R.id.add_name_button).performClick()
                 val sheet = inputSheet(activity)
                 val input = sheet.findViewById<EditText>(R.id.dialog_input)
@@ -80,7 +82,8 @@ class BasketNamesSettingsUiTest {
     fun `input and save remain visible when the keyboard reduces the sheet viewport`() {
         ActivityScenario.launch(BasketNamesSettingsActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
-                activity.findViewById<View>(R.id.empty_state_action).performClick()
+                assertEquals(View.VISIBLE, activity.findViewById<View>(R.id.add_name_button).visibility)
+                activity.findViewById<View>(R.id.add_name_button).performClick()
                 val sheet = inputSheet(activity) as ViewGroup
                 val density = activity.resources.displayMetrics.density
                 ViewCompat.dispatchApplyWindowInsets(sheet, WindowInsetsCompat.Builder()

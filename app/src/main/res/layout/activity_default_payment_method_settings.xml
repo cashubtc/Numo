@@ -32,22 +32,17 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingBottom="24dp"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
                 <!-- Explainer Card -->
 
                 <!-- Options Section Header -->
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginTop="@dimen/settings_section_gap"
                     android:text="@string/default_payment_method_section_options"
-                    android:textAppearance="@style/Text.SettingsSection"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
                     android:textAllCaps="false"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
                     android:accessibilityHeading="true" />
 
                 <!-- Options Radio Group -->
@@ -83,7 +78,7 @@
                     android:layout_marginTop="24dp"
                     android:background="@drawable/bg_settings_group"
                     android:orientation="horizontal"
-                    android:padding="16dp"
+                    android:padding="@dimen/settings_row_padding"
                     android:clipToOutline="true">
 
                     <ImageView
@@ -112,8 +107,7 @@
                             android:layout_marginTop="4dp"
                             android:text="@string/default_payment_method_explainer_body"
                             android:textSize="14sp"
-                            android:textColor="@color/color_text_secondary"
-                            android:lineSpacingExtra="2dp" />
+                            android:textColor="?attr/colorOnSurfaceVariant" />
 
                     </LinearLayout>
 

@@ -46,7 +46,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingHorizontal="16dp"
+                    android:paddingHorizontal="@dimen/settings_page_margin"
                     android:paddingBottom="24dp">
 
                     <!-- Encrypted Device Backup -->
@@ -328,7 +328,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingHorizontal="16dp"
+                    android:paddingHorizontal="@dimen/settings_page_margin"
                     android:paddingBottom="24dp">
 
                     <!-- Backup Status Card -->
@@ -461,7 +461,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:orientation="vertical"
-                    android:paddingHorizontal="16dp"
+                    android:paddingHorizontal="@dimen/settings_page_margin"
                     android:paddingVertical="48dp"
                     android:gravity="center"
                     android:paddingBottom="24dp">
@@ -535,7 +535,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingHorizontal="16dp"
+                    android:paddingHorizontal="@dimen/settings_page_margin"
                     android:paddingTop="48dp"
                     android:paddingBottom="24dp"
                     android:gravity="center_horizontal">

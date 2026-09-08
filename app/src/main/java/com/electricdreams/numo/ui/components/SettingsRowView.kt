@@ -53,12 +53,13 @@ class SettingsRowView @JvmOverloads constructor(
 
     init {
         orientation = HORIZONTAL
+        isBaselineAligned = false
         gravity = android.view.Gravity.CENTER_VERTICAL
         setPaddingRelative(
-            resources.getDimensionPixelSize(R.dimen.margin_screen_horizontal),
-            resources.getDimensionPixelSize(R.dimen.row_padding_vertical),
-            resources.getDimensionPixelSize(R.dimen.margin_screen_horizontal),
-            resources.getDimensionPixelSize(R.dimen.row_padding_vertical),
+            resources.getDimensionPixelSize(R.dimen.settings_row_padding),
+            resources.getDimensionPixelSize(R.dimen.settings_row_padding),
+            resources.getDimensionPixelSize(R.dimen.settings_row_padding),
+            resources.getDimensionPixelSize(R.dimen.settings_row_padding),
         )
         isClickable = true
         isFocusable = true

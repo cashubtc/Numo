@@ -38,7 +38,7 @@
                 android:clipToPadding="false"
                 android:clipChildren="false"
                 android:paddingBottom="24dp"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
                 <!-- Balance Hero Section -->
 

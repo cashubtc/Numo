@@ -91,6 +91,7 @@ class SettingsPageLayoutTest {
             ApplicationProvider.getApplicationContext<Context>(), R.style.Theme_Numo_Settings
         )
         val layouts = listOf(
+            R.layout.activity_settings,
             R.layout.activity_theme_settings,
             R.layout.activity_language_settings,
             R.layout.activity_default_payment_method_settings,
@@ -124,6 +125,40 @@ class SettingsPageLayoutTest {
             val page = LayoutInflater.from(context).inflate(layout, null)
             measure(page, 360)
             assertEquals(context.resources.getResourceEntryName(layout), 360, page.measuredWidth)
+        }
+    }
+
+    @Test
+    fun `large multiline row content fits inside its padding`() {
+        val base: Context = ApplicationProvider.getApplicationContext()
+        val configuration = Configuration(base.resources.configuration).apply { fontScale = 2f }
+        val context = ContextThemeWrapper(
+            base.createConfigurationContext(configuration), R.style.Theme_Numo_Settings
+        )
+        val page = LayoutInflater.from(context).inflate(R.layout.activity_settings, null)
+        val row = page.findViewById<SettingsRowView>(R.id.basket_names_settings_item)
+        row.setSubtitle("Create preset names for quick basket saving with a longer translated description")
+        measure(page, (320 * context.resources.displayMetrics.density).toInt())
+        val text = row.findViewById<View>(R.id.row_text_container)
+        assertTrue("Text must respect top padding", text.top >= row.paddingTop)
+        assertTrue("Text must respect bottom padding", text.bottom <= row.height - row.paddingBottom)
+    }
+
+    @Test
+    fun `both search fields expose a working clear action`() {
+        val context = ContextThemeWrapper(
+            ApplicationProvider.getApplicationContext<Context>(), R.style.Theme_Numo_Settings
+        )
+        listOf(
+            R.layout.activity_settings to R.id.search_input_layout,
+            R.layout.activity_currency_settings to R.id.search_card,
+        ).forEach { (layout, searchId) ->
+            val page = LayoutInflater.from(context).inflate(layout, null)
+            val search = page.findViewById<com.google.android.material.textfield.TextInputLayout>(searchId)
+            val input = requireNotNull(search.editText)
+            input.setText("EUR")
+            search.findViewById<View>(com.google.android.material.R.id.text_input_end_icon).performClick()
+            assertEquals("", input.text.toString())
         }
     }
 

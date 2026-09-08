@@ -33,20 +33,15 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingBottom="24dp"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
                 <!-- Section Header -->
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:text="@string/language_settings_section_app_language"
-                    android:textAppearance="@style/Text.SettingsSection"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
                     android:textAllCaps="false"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginTop="@dimen/settings_section_gap"
                     android:accessibilityHeading="true" />
 
                 <!-- Language Radio Group -->
@@ -97,10 +92,10 @@
                     android:id="@+id/current_language_summary"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                    android:paddingHorizontal="@dimen/settings_row_padding"
                     android:paddingTop="@dimen/space_l"
-                    android:textAppearance="@style/Text.Body"
-                    android:textColor="@color/color_text_secondary" />
+                    android:textAppearance="@style/Text.SettingsBody"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
             </LinearLayout>
 

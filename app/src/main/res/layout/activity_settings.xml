@@ -5,17 +5,16 @@
     android:layout_height="match_parent"
     android:focusableInTouchMode="true">
 
-    <com.google.android.material.appbar.MaterialToolbar
+    <com.electricdreams.numo.ui.components.NumoTopBar
         android:id="@+id/top_bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:minHeight="64dp"
         android:background="@color/settings_background"
-        app:title="@string/settings_title"
-        app:titleTextAppearance="@style/Text.Heading1"
-        app:navigationIcon="@drawable/ic_arrow_back"
-        app:navigationIconTint="?attr/colorOnSurface"
-        app:navigationContentDescription="@string/common_back"
+        app:topBarTitle="@string/settings_title"
+        app:topBarSettingsStyle="true"
+        app:topBarNavIcon="@drawable/ic_arrow_back"
+        app:topBarNavContentDescription="@string/common_back"
         app:layout_constraintWidth_max="720dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -23,21 +22,11 @@
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/search_input_layout"
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        style="@style/Widget.Numo.SettingsSearch"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="8dp"
-        app:hintEnabled="false"
-        app:boxBackgroundColor="@color/color_bg_card"
-        app:boxCornerRadiusTopStart="28dp"
-        app:boxCornerRadiusTopEnd="28dp"
-        app:boxCornerRadiusBottomStart="28dp"
-        app:boxCornerRadiusBottomEnd="28dp"
-        app:boxStrokeWidth="0dp"
-        app:boxStrokeWidthFocused="1dp"
-        app:startIconDrawable="@drawable/ic_search"
-        app:endIconMode="clear_text"
+        android:layout_marginTop="@dimen/space_s"
         app:layout_constraintWidth_max="688dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -54,7 +43,7 @@
             android:imeOptions="actionDone"
             android:maxLines="1"
             android:singleLine="true"
-            android:textAppearance="@style/Text.Body" />
+            android:textAppearance="@style/Text.SettingsInput" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -74,7 +63,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="16dp"
+            android:paddingHorizontal="@dimen/settings_page_margin"
             android:paddingBottom="24dp">
 
             <LinearLayout
@@ -262,7 +251,7 @@
                 android:padding="24dp"
                 android:gravity="center"
                 android:text="@string/settings_search_empty"
-                android:textAppearance="@style/Text.Body"
+                android:textAppearance="@style/Text.SettingsBody"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:accessibilityLiveRegion="polite"
                 android:visibility="gone" />

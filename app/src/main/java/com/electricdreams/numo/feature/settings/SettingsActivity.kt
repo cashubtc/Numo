@@ -161,7 +161,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() = with(binding) {
-        topBar.setNavigationOnClickListener { finish() }
+        topBar.onNavClick { finish() }
         itemsSettingsItem.setOnClickListener { openProtectedActivity(ItemListActivity::class.java) }
         tipsSettingsItem.setOnClickListener { openActivity(TipsSettingsActivity::class.java) }
         basketNamesSettingsItem.setOnClickListener { openActivity(BasketNamesSettingsActivity::class.java) }

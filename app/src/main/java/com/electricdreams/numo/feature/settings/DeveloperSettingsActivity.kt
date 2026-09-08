@@ -48,7 +48,7 @@ class DeveloperSettingsActivity : AppCompatActivity() {
         }
 
         binding.delayLightningInvoiceItem.setOnClickListener {
-            binding.delayLightningInvoiceSwitch.toggle()
+            binding.delayLightningInvoiceSwitch.performClick()
         }
     }
 

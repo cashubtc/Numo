@@ -108,7 +108,7 @@
             style="@style/Widget.Button.Primary.Green"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
+            android:layout_marginHorizontal="@dimen/settings_page_margin"
             android:layout_marginBottom="@dimen/space_xl"
             android:text="@string/withdraw_success_close"
             app:layout_constraintBottom_toBottomOf="parent"

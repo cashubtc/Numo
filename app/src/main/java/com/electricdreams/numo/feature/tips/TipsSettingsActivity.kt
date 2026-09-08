@@ -52,6 +52,7 @@ class TipsSettingsActivity : AppCompatActivity() {
 
         // Tips enabled switch
         tipsEnabledSwitch = binding.tipsEnabledSwitch
+        binding.enableTipsRow.setOnClickListener { tipsEnabledSwitch.performClick() }
         tipsEnabledSwitch.setOnCheckedChangeListener { _, isChecked ->
             tipsManager.tipsEnabled = isChecked
             updatePresetsVisibility(isChecked)
@@ -94,11 +95,6 @@ class TipsSettingsActivity : AppCompatActivity() {
             val itemView = inflater.inflate(R.layout.item_tip_preset, presetsList, false)
             bindPresetItem(itemView, index, percentage, presets.size)
             presetsList.addView(itemView)
-
-            // Add divider between items (not after last)
-            if (index < presets.size - 1) {
-                addDivider()
-            }
         }
 
         // Update add button visibility
@@ -121,18 +117,6 @@ class TipsSettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun addDivider() {
-        val divider = View(this).apply {
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                (0.5f * resources.displayMetrics.density).toInt()
-            ).apply {
-                marginStart = (56 * resources.displayMetrics.density).toInt()
-            }
-            setBackgroundColor(resources.getColor(R.color.color_divider, theme))
-        }
-        presetsList.addView(divider)
-    }
 
     private fun showAddPresetDialog() {
         DialogHelper.showInput(

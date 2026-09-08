@@ -47,7 +47,7 @@
             android:paddingBottom="16dp"
             app:layout_constraintTop_toBottomOf="@id/section_header"
             app:layout_constraintBottom_toTopOf="@id/action_bar"
-            android:paddingHorizontal="16dp" />
+            android:paddingHorizontal="@dimen/settings_page_margin" />
 
         <!-- Empty View -->
 

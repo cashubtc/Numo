@@ -40,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingBottom="24dp"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
                 <!-- ==================== -->
 
@@ -58,15 +58,10 @@
                     <!-- Section Header -->
 
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
                         android:text="@string/mints_lightning_mint"
-                        android:textAppearance="@style/Text.SettingsSection"
+                        style="@style/Widget.Numo.SettingsSectionTitle"
                         android:textAllCaps="false"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginTop="24dp"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginTop="@dimen/settings_section_gap"
                         android:accessibilityHeading="true" />
 
                     <!-- Lightning Mint (plain, no surrounding card) -->
@@ -75,7 +70,7 @@
                         android:id="@+id/lightning_mint_card"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
+                        android:layout_marginHorizontal="@dimen/settings_row_padding"
                         android:orientation="vertical"
                         android:paddingHorizontal="@dimen/space_s"
                         android:paddingVertical="@dimen/space_m"
@@ -135,7 +130,7 @@
                                     android:id="@+id/lightning_mint_url"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
+                                    android:layout_marginTop="@dimen/settings_row_subtitle_gap"
                                     android:text="mint.example.com"
                                     android:textAppearance="@style/Text.SettingsCaption"
                                     android:maxLines="1"
@@ -146,13 +141,6 @@
                         </LinearLayout>
 
                         <!-- Divider -->
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginTop="@dimen/space_l"
-                            android:layout_marginBottom="@dimen/row_icon_gap"
-                            android:background="@color/color_divider" />
 
                         <!-- Balance Row -->
 
@@ -213,7 +201,7 @@
                                     android:id="@+id/active_unit_subtitle"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
+                                    android:layout_marginTop="@dimen/settings_row_subtitle_gap"
                                     android:text="@string/mints_base_currency_unit_subtitle"
                                     android:textAppearance="@style/Text.SettingsCaption" />
 
@@ -262,7 +250,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
+                                    android:layout_marginTop="@dimen/settings_row_subtitle_gap"
                                     android:text="@string/mints_swap_unknown_mints_subtitle"
                                     android:textAppearance="@style/Text.SettingsCaption" />
 
@@ -289,15 +277,10 @@
 
                 <TextView
                     android:id="@+id/all_mints_header"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:text="@string/mints_all_mints"
-                    android:textAppearance="@style/Text.SettingsSection"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
                     android:textAllCaps="false"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginTop="@dimen/settings_section_gap"
                     android:accessibilityHeading="true" />
 
                 <!-- Mint List Container (plain, no surrounding card) -->
@@ -335,7 +318,7 @@
                         android:layout_marginTop="@dimen/space_l"
                         android:text="@string/mints_empty_title"
                         android:textAppearance="@style/Text.RowTitle"
-                        android:textColor="@color/color_text_secondary" />
+                        android:textColor="?attr/colorOnSurfaceVariant" />
 
                     <TextView
                         android:layout_width="wrap_content"

@@ -310,12 +310,11 @@ class MintsSettingsActivity : AppCompatActivity() {
         // Sort by balance (highest first)
         val sortedMints = listMints.sortedByDescending { mintBalances[it] ?: 0L }
 
-        sortedMints.forEachIndexed { index, mintUrl ->
+        sortedMints.forEach { mintUrl ->
             val item = MintListItem(this)
             val balance = mintBalances[mintUrl] ?: 0L
-            val isLast = index == sortedMints.lastIndex
 
-            item.bind(mintUrl, balance, isLast)
+            item.bind(mintUrl, balance)
 
             item.setOnMintItemListener(object : MintListItem.OnMintItemListener {
                 override fun onMintTapped(url: String) {

@@ -103,7 +103,7 @@ class WebhookSettingsActivity : AppCompatActivity() {
         }
 
         val inflater = LayoutInflater.from(this)
-        endpoints.forEachIndexed { index, endpoint ->
+        endpoints.forEach { endpoint ->
             val item = inflater.inflate(R.layout.item_webhook_endpoint, endpointsList, false)
             val endpointText = item.findViewById<TextView>(R.id.endpoint_url_text)
             val authStatusText = item.findViewById<TextView>(R.id.endpoint_auth_status_text)
@@ -159,27 +159,9 @@ class WebhookSettingsActivity : AppCompatActivity() {
             }
 
             endpointsList.addView(item)
-            addDividerIfNeeded(endpointsList, index < endpoints.lastIndex)
         }
     }
 
-    private fun addDividerIfNeeded(container: LinearLayout, shouldAdd: Boolean) {
-        if (!shouldAdd) {
-            return
-        }
-
-        val divider = View(this).apply {
-            val dividerHeightPx = maxOf(1, (0.5f * resources.displayMetrics.density).toInt())
-            layoutParams = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                dividerHeightPx,
-            ).apply {
-                marginStart = (52 * resources.displayMetrics.density).toInt()
-            }
-            setBackgroundColor(resources.getColor(R.color.color_divider, theme))
-        }
-        container.addView(divider)
-    }
 
     private fun syncAllTransactions() {
         if (isSyncing) return

@@ -34,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingBottom="24dp"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
                 <!-- App Logo and Name -->
 
@@ -44,8 +44,7 @@
                     android:gravity="center"
                     android:orientation="vertical"
                     android:background="@drawable/bg_settings_group"
-                    android:clipToOutline="true"
-                    android:padding="16dp">
+                    android:clipToOutline="true">
 
                     <ImageView
                         android:layout_width="72dp"
@@ -78,15 +77,10 @@
                 <!-- ================ -->
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:text="@string/about_device_info"
-                    android:textAppearance="@style/Text.SettingsSection"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
                     android:textAllCaps="false"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginTop="@dimen/settings_section_gap"
                     android:accessibilityHeading="true" />
 
                 <LinearLayout
@@ -94,8 +88,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:background="@drawable/bg_settings_group"
-                    android:clipToOutline="true"
-                    android:padding="16dp">
+                    android:clipToOutline="true">
 
                     <!-- Version -->
 
@@ -104,7 +97,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="start"
                         android:orientation="vertical"
-                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:paddingHorizontal="@dimen/settings_row_padding"
                         android:minHeight="64dp"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
@@ -134,7 +127,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="start"
                         android:orientation="vertical"
-                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:paddingHorizontal="@dimen/settings_row_padding"
                         android:minHeight="64dp"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
@@ -164,7 +157,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="start"
                         android:orientation="vertical"
-                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:paddingHorizontal="@dimen/settings_row_padding"
                         android:minHeight="64dp"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
@@ -194,7 +187,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="start"
                         android:orientation="vertical"
-                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:paddingHorizontal="@dimen/settings_row_padding"
                         android:minHeight="64dp"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
@@ -226,15 +219,10 @@
                 <!-- ================ -->
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:text="@string/about_about_us"
-                    android:textAppearance="@style/Text.SettingsSection"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
                     android:textAllCaps="false"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginTop="@dimen/settings_section_gap"
                     android:accessibilityHeading="true" />
 
                 <!-- Terms of Service -->
@@ -251,7 +239,7 @@
                         android:focusable="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:paddingHorizontal="@dimen/settings_row_padding"
                         android:minHeight="@dimen/settings_item_height"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
@@ -264,7 +252,7 @@
                             android:layout_marginEnd="@dimen/space_l"
                             android:src="@drawable/ic_document"
                             app:tint="?attr/colorPrimary"
-                            android:padding="10dp" />
+                            android:padding="@dimen/settings_icon_padding" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -291,7 +279,7 @@
                         android:focusable="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:paddingHorizontal="@dimen/settings_row_padding"
                         android:minHeight="@dimen/settings_item_height"
                         android:paddingTop="12dp"
                         android:paddingBottom="12dp"
@@ -304,7 +292,7 @@
                             android:layout_marginEnd="@dimen/space_l"
                             android:src="@drawable/ic_shield"
                             app:tint="?attr/colorPrimary"
-                            android:padding="10dp" />
+                            android:padding="@dimen/settings_icon_padding" />
 
                         <TextView
                             android:layout_width="0dp"
@@ -331,7 +319,7 @@
                         android:focusable="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:paddingHorizontal="@dimen/settings_row_padding"
                         android:screenReaderFocusable="true">
 
                         <ImageView
@@ -341,7 +329,7 @@
                             android:layout_marginEnd="@dimen/space_l"
                             android:src="@drawable/ic_link"
                             app:tint="?attr/colorPrimary"
-                            android:padding="10dp" />
+                            android:padding="@dimen/settings_icon_padding" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -381,7 +369,7 @@
                         android:focusable="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:paddingHorizontal="@dimen/settings_row_padding"
                         android:screenReaderFocusable="true">
 
                         <ImageView
@@ -391,7 +379,7 @@
                             android:layout_marginEnd="@dimen/space_l"
                             android:src="@drawable/ic_email"
                             app:tint="?attr/colorPrimary"
-                            android:padding="10dp" />
+                            android:padding="@dimen/settings_icon_padding" />
 
                         <LinearLayout
                             android:layout_width="0dp"

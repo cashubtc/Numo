@@ -6,10 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingVertical="@dimen/row_padding_vertical"
-    android:paddingHorizontal="@dimen/margin_screen_horizontal"
+    android:paddingHorizontal="@dimen/settings_row_padding"
     android:background="@drawable/bg_settings_group"
     android:clipToOutline="true"
-    android:minHeight="72dp">
+    android:minHeight="@dimen/settings_switch_height">
 
     <!-- Name Text -->
 
@@ -33,7 +33,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_close"
+        android:src="@drawable/ic_delete"
         android:contentDescription="@string/common_delete"
         android:padding="12dp"
         app:tint="@color/color_icon_tertiary"

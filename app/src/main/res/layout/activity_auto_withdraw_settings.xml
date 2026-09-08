@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingBottom="24dp"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
                 <!-- Hero Section -->
 
@@ -60,42 +60,19 @@
                             android:id="@+id/hero_bg"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/bg_hero_gradient_green"
+                            android:background="@color/settings_background"
                             android:clipChildren="false">
 
                             <!-- Decorative background lightning bolt with fade -->
 
-                            <FrameLayout
-                                android:layout_width="140dp"
-                                android:layout_height="140dp"
-                                android:layout_gravity="bottom|end"
-                                android:layout_marginEnd="-30dp"
-                                android:layout_marginBottom="-30dp">
 
-                                <ImageView
-                                    android:id="@+id/hero_bolt"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:alpha="0.06"
-                                    android:rotation="-15"
-                                    android:importantForAccessibility="no"
-                                    android:src="@drawable/ic_lightning_bolt"
-                                    app:tint="@color/color_success_green" />
-
-                                <View
-                                    android:id="@+id/hero_bolt_fade"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:background="@drawable/bg_hero_bolt_fade_green" />
-
-                            </FrameLayout>
 
                             <!-- Content -->
 
                             <androidx.constraintlayout.widget.ConstraintLayout
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:padding="@dimen/space_xl">
+                                android:padding="@dimen/settings_row_padding">
 
                                 <!-- Status badge (top-left) -->
 
@@ -153,10 +130,10 @@
                                         android:id="@+id/hero_subtitle"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:layout_marginTop="2dp"
+                                        android:layout_marginTop="@dimen/settings_row_subtitle_gap"
                                         android:textAppearance="@style/Text.SettingsCaption"
                                         android:text="@string/auto_withdraw_hero_subtitle"
-                                        android:textColor="@color/color_text_secondary" />
+                                        android:textColor="?attr/colorOnSurfaceVariant" />
 
                                 </LinearLayout>
 
@@ -184,8 +161,9 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
                     android:clipToOutline="true"
-                    android:padding="16dp"
-                    android:minHeight="72dp"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:padding="@dimen/settings_row_padding"
+                    android:minHeight="@dimen/settings_switch_height"
                     android:screenReaderFocusable="true">
 
                     <LinearLayout
@@ -203,7 +181,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
+                            android:layout_marginTop="@dimen/settings_row_subtitle_gap"
                             android:text="@string/auto_withdraw_enable_subtitle"
                             android:textAppearance="@style/Text.SettingsCaption" />
 
@@ -238,15 +216,10 @@
                     <!-- ==================== -->
 
                     <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
                         android:text="@string/auto_withdraw_section_destination"
-                        android:textAppearance="@style/Text.SettingsSection"
+                        style="@style/Widget.Numo.SettingsSectionTitle"
                         android:textAllCaps="false"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginTop="24dp"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginTop="@dimen/settings_section_gap"
                         android:accessibilityHeading="true" />
 
                     <androidx.cardview.widget.CardView
@@ -258,7 +231,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
-                            android:padding="@dimen/margin_screen_horizontal">
+                            android:padding="@dimen/settings_row_padding">
 
                             <!-- Lightning Address Label -->
 
@@ -279,11 +252,12 @@
                                 <com.google.android.material.textfield.TextInputEditText
                                     android:id="@+id/lightning_address_input"
                                     android:layout_width="match_parent"
-                                    android:layout_height="@dimen/settings_item_height"
+                                    android:layout_height="wrap_content"
+                                    android:minHeight="56dp"
                                     android:fontFamily="sans-serif"
                                     android:hint="@string/auto_withdraw_lightning_address_hint"
                                     android:inputType="textEmailAddress"
-                                    android:textAppearance="@style/Text.Body"
+                                    android:textAppearance="@style/Text.SettingsInput"
                                     android:textColor="@color/color_text_primary"
                                     android:textColorHint="?attr/colorOnSurfaceVariant" />
 
@@ -321,15 +295,10 @@
                     <!-- ==================== -->
 
                     <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
                         android:text="@string/auto_withdraw_section_trigger"
-                        android:textAppearance="@style/Text.SettingsSection"
+                        style="@style/Widget.Numo.SettingsSectionTitle"
                         android:textAllCaps="false"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginTop="24dp"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginTop="@dimen/settings_section_gap"
                         android:accessibilityHeading="true" />
 
                     <androidx.cardview.widget.CardView
@@ -341,8 +310,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
-                            android:divider="@drawable/bg_divider_inset"
-                            android:showDividers="middle">
+                            android:showDividers="none">
 
                             <!-- Threshold Row -->
 
@@ -351,7 +319,7 @@
                                 android:layout_height="wrap_content"
                                 android:gravity="center_vertical"
                                 android:orientation="horizontal"
-                                android:padding="@dimen/margin_screen_horizontal">
+                                android:padding="@dimen/settings_row_padding">
 
                                 <LinearLayout
                                     android:layout_width="0dp"
@@ -368,10 +336,10 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:layout_marginTop="2dp"
+                                        android:layout_marginTop="@dimen/settings_row_subtitle_gap"
                                         android:text="@string/auto_withdraw_threshold_subtitle"
                                         android:textAppearance="@style/Text.SettingsCaption"
-                                        android:textColor="@color/color_text_secondary" />
+                                        android:textColor="?attr/colorOnSurfaceVariant" />
 
                                 </LinearLayout>
 
@@ -398,7 +366,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical"
-                                android:padding="@dimen/margin_screen_horizontal">
+                                android:padding="@dimen/settings_row_padding">
 
                                 <LinearLayout
                                     android:layout_width="match_parent"
@@ -421,10 +389,10 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:layout_marginTop="2dp"
+                                            android:layout_marginTop="@dimen/settings_row_subtitle_gap"
                                             android:text="@string/auto_withdraw_percentage_subtitle"
                                             android:textAppearance="@style/Text.SettingsCaption"
-                                            android:textColor="@color/color_text_secondary" />
+                                            android:textColor="?attr/colorOnSurfaceVariant" />
 
                                     </LinearLayout>
 
@@ -501,15 +469,10 @@
                 <!-- ==================== -->
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:text="@string/manual_withdraw_section_title"
-                    android:textAppearance="@style/Text.SettingsSection"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
                     android:textAllCaps="false"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginTop="@dimen/settings_section_gap"
                     android:accessibilityHeading="true" />
 
                 <LinearLayout
@@ -522,8 +485,9 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
                     android:clipToOutline="true"
-                    android:padding="16dp"
-                    android:minHeight="72dp"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:padding="@dimen/settings_row_padding"
+                    android:minHeight="@dimen/settings_switch_height"
                     android:screenReaderFocusable="true">
 
                     <LinearLayout
@@ -541,7 +505,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
+                            android:layout_marginTop="@dimen/settings_row_subtitle_gap"
                             android:text="@string/manual_withdraw_subtitle"
                             android:textAppearance="@style/Text.SettingsCaption" />
 
@@ -566,23 +530,18 @@
                     android:id="@+id/history_section_header"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                    android:paddingHorizontal="@dimen/settings_row_padding"
                     android:paddingTop="@dimen/section_gap"
                     android:paddingBottom="@dimen/row_padding_vertical"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
                     <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/auto_withdraw_section_history"
-                        android:textAppearance="@style/Text.SettingsSection"
+                        style="@style/Widget.Numo.SettingsSectionTitle"
                         android:textAllCaps="false"
-                        android:layout_marginStart="8dp"
-                        android:layout_marginEnd="8dp"
-                        android:layout_marginTop="24dp"
-                        android:layout_marginBottom="12dp"
+                        android:layout_marginTop="@dimen/settings_section_gap"
                         android:accessibilityHeading="true" />
 
                     <TextView

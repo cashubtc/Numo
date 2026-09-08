@@ -32,20 +32,15 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingBottom="24dp"
-                android:paddingHorizontal="16dp">
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
                 <!-- Debugging Section -->
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
                     android:text="@string/developer_settings_section_debugging"
-                    android:textAppearance="@style/Text.SettingsSection"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
                     android:textAllCaps="false"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="24dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginTop="@dimen/settings_section_gap"
                     android:accessibilityHeading="true" />
 
                 <!-- Restart Onboarding -->
@@ -53,125 +48,31 @@
                 <LinearLayout
                     style="@style/Widget.Numo.SettingsGroup">
 
-                    <LinearLayout
+                    <com.electricdreams.numo.ui.components.SettingsRowView
                         android:id="@+id/restart_onboarding_item"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="@dimen/settings_horizontal_padding"
-                        android:minHeight="72dp"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp"
-                        android:screenReaderFocusable="true">
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_restore"
+                        app:rowTitle="@string/developer_settings_restart_onboarding_title"
+                        app:rowSubtitle="@string/developer_settings_restart_onboarding_subtitle" />
 
-                        <ImageView
-                            android:importantForAccessibility="no"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_marginEnd="@dimen/space_l"
-                            android:src="@drawable/ic_restore"
-                            app:tint="?attr/colorPrimary"
-                            android:padding="10dp" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/developer_settings_restart_onboarding_title"
-                                android:textAppearance="@style/Text.RowTitle" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/developer_settings_restart_onboarding_subtitle"
-                                android:textAppearance="@style/Text.SettingsCaption"
-                                android:layout_marginTop="2dp" />
-
-                        </LinearLayout>
-
-                        <ImageView
-                            android:importantForAccessibility="no"
-                            android:layout_width="@dimen/icon_size_small"
-                            android:layout_height="@dimen/icon_size_small"
-                            android:src="@drawable/ic_chevron_forward"
-                            app:tint="@color/color_icon_secondary" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
+                    <com.electricdreams.numo.ui.components.SettingsRowView
                         android:id="@+id/btcmap_reset"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="@dimen/settings_horizontal_padding"
-                        android:minHeight="72dp"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp"
-                        android:screenReaderFocusable="true">
-
-                        <ImageView
-                            android:importantForAccessibility="no"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_marginEnd="@dimen/space_l"
-                            android:src="@drawable/ic_btcmap_logo"
-                            app:tint="?attr/colorPrimary"
-                            android:padding="10dp" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/developer_settings_reset_btcmap_promo_title"
-                                android:textAppearance="@style/Text.RowTitle" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/developer_settings_reset_btcmap_promo_subtitle"
-                                android:textAppearance="@style/Text.SettingsCaption"
-                                android:layout_marginTop="2dp" />
-
-                        </LinearLayout>
-
-                        <ImageView
-                            android:importantForAccessibility="no"
-                            android:layout_width="@dimen/icon_size_small"
-                            android:layout_height="@dimen/icon_size_small"
-                            android:src="@drawable/ic_chevron_forward"
-                            app:tint="@color/color_icon_secondary" />
-
-                    </LinearLayout>
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_btcmap_logo"
+                        app:rowTitle="@string/developer_settings_reset_btcmap_promo_title"
+                        app:rowSubtitle="@string/developer_settings_reset_btcmap_promo_subtitle" />
 
                     <LinearLayout
                         android:id="@+id/delay_lightning_invoice_item"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:minHeight="72dp"
+                        android:minHeight="@dimen/settings_switch_height"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
                         android:focusable="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingHorizontal="@dimen/settings_horizontal_padding"
+                        android:paddingHorizontal="@dimen/settings_row_padding"
                         android:paddingVertical="@dimen/space_m"
                         android:screenReaderFocusable="true">
 
@@ -182,7 +83,7 @@
                             android:src="@drawable/ic_lightning_bolt"
                             app:tint="?attr/colorPrimary"
                             android:contentDescription="@null"
-                            android:padding="10dp" />
+                            android:padding="@dimen/settings_icon_padding" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -202,7 +103,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="@string/developer_settings_lightning_invoice_subtitle"
                                 android:textAppearance="@style/Text.SettingsCaption"
-                                android:layout_marginTop="2dp" />
+                                android:layout_marginTop="@dimen/settings_row_subtitle_gap" />
 
                         </LinearLayout>
 
@@ -215,113 +116,19 @@
 
                     </LinearLayout>
 
-                    <LinearLayout
+                    <com.electricdreams.numo.ui.components.SettingsRowView
                         android:id="@+id/error_logs_item"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="@dimen/settings_horizontal_padding"
-                        android:minHeight="72dp"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp"
-                        android:screenReaderFocusable="true">
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_warning"
+                        app:rowTitle="@string/developer_error_logs_title"
+                        app:rowSubtitle="@string/developer_error_logs_subtitle" />
 
-                        <ImageView
-                            android:importantForAccessibility="no"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_marginEnd="@dimen/space_l"
-                            android:src="@drawable/ic_warning"
-                            app:tint="?attr/colorPrimary"
-                            android:padding="10dp" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/developer_error_logs_title"
-                                android:textAppearance="@style/Text.RowTitle" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/developer_error_logs_subtitle"
-                                android:textAppearance="@style/Text.SettingsCaption"
-                                android:layout_marginTop="2dp" />
-
-                        </LinearLayout>
-
-                        <ImageView
-                            android:importantForAccessibility="no"
-                            android:layout_width="@dimen/icon_size_small"
-                            android:layout_height="@dimen/icon_size_small"
-                            android:src="@drawable/ic_chevron_forward"
-                            app:tint="@color/color_icon_secondary" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
+                    <com.electricdreams.numo.ui.components.SettingsRowView
                         android:id="@+id/wallet_logs_item"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackground"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="@dimen/settings_horizontal_padding"
-                        android:minHeight="72dp"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp"
-                        android:screenReaderFocusable="true">
-
-                        <ImageView
-                            android:importantForAccessibility="no"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:layout_marginEnd="@dimen/space_l"
-                            android:src="@drawable/ic_history"
-                            app:tint="?attr/colorPrimary"
-                            android:padding="10dp" />
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/developer_wallet_logs_title"
-                                android:textAppearance="@style/Text.RowTitle" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/developer_wallet_logs_subtitle"
-                                android:textAppearance="@style/Text.SettingsCaption"
-                                android:layout_marginTop="2dp" />
-
-                        </LinearLayout>
-
-                        <ImageView
-                            android:importantForAccessibility="no"
-                            android:layout_width="@dimen/icon_size_small"
-                            android:layout_height="@dimen/icon_size_small"
-                            android:src="@drawable/ic_chevron_forward"
-                            app:tint="@color/color_icon_secondary" />
-
-                    </LinearLayout>
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_history"
+                        app:rowTitle="@string/developer_wallet_logs_title"
+                        app:rowSubtitle="@string/developer_wallet_logs_subtitle" />
 
                 </LinearLayout>
 
@@ -330,7 +137,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/settings_horizontal_padding"
+                    android:paddingHorizontal="@dimen/settings_row_padding"
                     android:paddingTop="@dimen/space_l"
                     android:text="@string/developer_settings_warning"
                     android:textAppearance="@style/Text.SettingsCaption"
