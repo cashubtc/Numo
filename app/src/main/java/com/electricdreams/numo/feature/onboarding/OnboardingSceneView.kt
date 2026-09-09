@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.PathMeasure
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.util.AttributeSet
@@ -53,6 +54,9 @@ class OnboardingSceneView @JvmOverloads constructor(
     private val green = color(R.color.onboarding_tour_accent)
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val path = Path()
+    private val chartSegment = Path()
+    private val chartMeasure = PathMeasure()
+    private val chartTip = FloatArray(2)
     private val rect = RectF()
     private val notchRadii = floatArrayOf(0f, 0f, 0f, 0f, 32f, 32f, 32f, 32f)
     private val regular = Typeface.create("sans-serif", Typeface.NORMAL)
@@ -130,6 +134,9 @@ class OnboardingSceneView @JvmOverloads constructor(
             val y = if (index < 2) 25f else 167f
             val save = canvas.saveLayerAlpha(0f, 0f, 360f, 320f, (enter * 255).toInt())
             canvas.translate(x, y + (1f - enter) * 18f)
+            // Cards arrive with a little body, not just a slide: scale from the card's center.
+            val grow = .965f + .035f * enter
+            canvas.scale(grow, grow, 82f, 63f)
             rounded(canvas, 0f, 0f, 164f, 126f, 19f, surface)
             outline(canvas, 0f, 0f, 164f, 126f, 19f, border)
             if (index < 3) {
@@ -177,19 +184,25 @@ class OnboardingSceneView @JvmOverloads constructor(
                 }
                 if (pressStart >= 0) {
                     val key = when (pressStart) { 900L -> "3"; 1400L -> "5"; else -> "0" }
-                    val target = if (pressStart == 2370L) screens.chargeBounds else screens.keyBounds[key]
-                    target?.let { keyPress(canvas, it, segment(timeMillis, pressStart, 280)) }
+                    val isCharge = pressStart == 2370L
+                    val target = if (isCharge) screens.chargeBounds else screens.keyBounds[key]
+                    target?.let { keyPress(canvas, it, segment(timeMillis, pressStart, 280), isCharge) }
                 }
             }
         }
-        val approach = tapArrival.getInterpolation(segment(timeMillis, 3900, 640))
-        val departure = tapDeparture.getInterpolation(segment(timeMillis, 5660, 520))
-        val contact = approach * (1f - departure)
-        if (contact > 0f) {
-            // One diagonal approach, a still read interval, then a quicker withdrawal.
+        val arrival = segment(timeMillis, 3900, 720)
+        val exitAcross = tapDeparture.getInterpolation(segment(timeMillis, 5660, 520))
+        val exitLift = tapDeparture.getInterpolation(segment(timeMillis, 5660, 420))
+        if (arrival > 0f && exitAcross < 1f) {
+            // The two axes ease differently, so the straight segment becomes a placing arc:
+            // a fast horizontal glide first, then a late, nearly vertical landing, finished
+            // with a brief press-in dab — the contact the payment responds to.
             // Keep the shallow grip angle fixed instead of rotating the phone into contact.
-            val cx = 464f - contact * 202f
-            val y = -64f + contact * 58f
+            val across = tapAcross.getInterpolation(arrival) * (1f - exitAcross)
+            val descend = tapDescend.getInterpolation(arrival) * (1f - exitLift)
+            val press = sin(Math.PI * segment(timeMillis, 4620, 480)).toFloat()
+            val cx = 464f - across * 202f
+            val y = -64f + descend * 58f + press * 2.6f
             val customer = canvas.save()
             canvas.rotate(-5f, cx, y + 48f)
             customerHandset(canvas, cx, y, 366f)
@@ -258,11 +271,12 @@ class OnboardingSceneView @JvmOverloads constructor(
         paint.alpha = 255
     }
 
-    private fun keyPress(canvas: Canvas, bounds: RectF, progress: Float) {
+    private fun keyPress(canvas: Canvas, bounds: RectF, progress: Float, isCharge: Boolean) {
         val scaleX = 594f / CheckoutPreviewScreens.WIDTH
         val scaleY = 1208f / CheckoutPreviewScreens.HEIGHT
-        val opacity = sin(progress * Math.PI).toFloat() * .22f
-        paint.color = white
+        // Keys sit on a white screen, so presses darken; the black charge button lightens.
+        val opacity = sin(progress * Math.PI).toFloat() * if (isCharge) .30f else .10f
+        paint.color = if (isCharge) white else Color.BLACK
         paint.alpha = (opacity * 255).toInt()
         rect.set(
             215f + bounds.left * scaleX, 180f + bounds.top * scaleY,
@@ -317,8 +331,6 @@ class OnboardingSceneView @JvmOverloads constructor(
         val morph = move(timeMillis, 2800, 1600)
         for (i in 0..2) line(canvas, 30f, 157f + i * 43f, 330f, 157f + i * 43f, border, .6f)
         path.reset()
-        val chartSave = canvas.save()
-        canvas.clipRect(28f, 138f, 28f + chartReveal * 309f, 248f)
         for (i in chartStart.indices) {
             val x = 30f + chartTimes[i] * 300f
             val value = chartStart[i] + (chartEnd[i] - chartStart[i]) * morph
@@ -332,15 +344,22 @@ class OnboardingSceneView @JvmOverloads constructor(
                 path.cubicTo(prevX + bend, prevY, x - bend, y, x, y)
             }
         }
-        paint.color = green
-        paint.style = Paint.Style.STROKE
-        paint.strokeWidth = 2.5f
-        paint.strokeCap = Paint.Cap.ROUND
-        canvas.drawPath(path, paint)
-        paint.style = Paint.Style.FILL
-        val lastValue = chartStart.last() + (chartEnd.last() - chartStart.last()) * morph
-        canvas.drawCircle(330f, 244f - lastValue * 98f, 3.5f, paint)
-        canvas.restoreToCount(chartSave)
+        // The line draws itself along its own length, the dot riding the pen tip,
+        // rather than a rectangular wipe uncovering a finished chart.
+        if (chartReveal > 0f) {
+            chartMeasure.setPath(path, false)
+            val drawnLength = chartMeasure.length * chartReveal
+            chartSegment.reset()
+            chartMeasure.getSegment(0f, drawnLength, chartSegment, true)
+            paint.color = green
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = 2.5f
+            paint.strokeCap = Paint.Cap.ROUND
+            canvas.drawPath(chartSegment, paint)
+            paint.style = Paint.Style.FILL
+            chartMeasure.getPosTan(drawnLength, chartTip, null)
+            canvas.drawCircle(chartTip[0], chartTip[1], 3.5f * min(1f, chartReveal / .06f), paint)
+        }
         label(canvas, "09:00", 30f, 265f, 10f, panelSecondary)
         label(canvas, "12:00", 130f, 265f, 10f, panelSecondary, center = true)
         label(canvas, "18:00", 330f, 265f, 10f, panelSecondary, right = true)
@@ -499,12 +518,14 @@ class OnboardingSceneView @JvmOverloads constructor(
     private fun color(id: Int) = ContextCompat.getColor(context, id)
 
     companion object {
+        // Damping ratio ~0.66: one soft ~6% overshoot, calmer than a toy bounce.
         private fun spring(progress: Float): Float {
             if (progress <= 0f || progress >= 1f) return progress
-            return 1f - exp(-8f * progress) *
-                (cos(13f * progress) + (8f / 13f) * sin(13f * progress))
+            return 1f - exp(-11.5f * progress) *
+                (cos(13f * progress) + (11.5f / 13f) * sin(13f * progress))
         }
-        private val tapArrival = PathInterpolator(.18f, .72f, .22f, 1f)
+        private val tapAcross = PathInterpolator(.16f, .84f, .28f, 1f)
+        private val tapDescend = PathInterpolator(.6f, 0f, .15f, 1f)
         private val tapDeparture = PathInterpolator(.55f, 0f, .8f, .35f)
         private val easeInOut = PathInterpolator(.77f, 0f, .175f, 1f)
         private val easeOut = PathInterpolator(.23f, 1f, .32f, 1f)

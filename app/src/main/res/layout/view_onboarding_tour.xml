@@ -44,6 +44,7 @@
                 android:letterSpacing="0"
                 android:textAllCaps="false"
                 android:textColor="@color/numo_navy"
+                android:stateListAnimator="@animator/onboarding_button_press"
                 app:backgroundTint="@color/color_text_on_dark"
                 app:cornerRadius="30dp"
                 app:elevation="0dp" />

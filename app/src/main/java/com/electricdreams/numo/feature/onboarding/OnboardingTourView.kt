@@ -13,6 +13,7 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityManager
 import android.view.animation.LinearInterpolator
+import android.view.animation.PathInterpolator
 import android.widget.FrameLayout
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -46,6 +47,7 @@ class OnboardingTourView @JvmOverloads constructor(
     private var automaticPageChange = false
     private var fadeEntrance = true
     private var motionEnabled = motionAllowed()
+    private val entranceEase = PathInterpolator(.23f, 1f, .32f, 1f)
     private val accessibilityListener = AccessibilityManager.TouchExplorationStateChangeListener {
         updatePlayback()
     }
@@ -178,7 +180,10 @@ class OnboardingTourView @JvmOverloads constructor(
     private fun render() {
         holders.forEach { it.binding.tourScene.timeMillis = sceneTime(it.page) }
         binding.tourPager.alpha = if (!motionEnabled || scrolling || touching) 1f else {
-            val entering = if (fadeEntrance) (elapsed / 220f).coerceIn(0f, 1f) else 1f
+            // Asymmetric crossfade: eased, slightly longer entrance; brisk linear exit.
+            val entering = if (fadeEntrance) {
+                entranceEase.getInterpolation((elapsed / 260f).coerceIn(0f, 1f))
+            } else 1f
             val leaving = ((durations[currentPage] - elapsed) / 220f).coerceIn(0f, 1f)
             minOf(entering, leaving)
         }
