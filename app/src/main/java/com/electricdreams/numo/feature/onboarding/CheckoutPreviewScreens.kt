@@ -6,6 +6,13 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.RectF
+import android.graphics.Typeface
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
+import android.text.style.TypefaceSpan
 import android.util.DisplayMetrics
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
@@ -118,10 +125,31 @@ internal class CheckoutPreviewScreens(context: Context) {
 
     private fun createReceivedScreen(): Bitmap {
         val binding = ActivityPaymentReceivedBinding.inflate(inflater)
-        binding.amountReceivedText.text = previewContext.getString(R.string.onboarding_tour_paid) +
-            "\n" + format.format(3.5)
+        // The amount is the news; the label is context. A quiet medium gray line sits
+        // above a large bold figure instead of two identical 28sp bold lines.
+        val label = previewContext.getString(R.string.onboarding_tour_paid)
+        val amount = format.format(3.5)
+        val text = SpannableString(label + "\n" + amount)
+        val amountStart = text.length - amount.length
+        text.setSpan(RelativeSizeSpan(2.5f), amountStart, text.length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        text.setSpan(TypefaceSpan("sans-serif"), amountStart, text.length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        text.setSpan(StyleSpan(Typeface.BOLD), amountStart, text.length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        text.setSpan(
+            ForegroundColorSpan(previewContext.getColor(R.color.color_text_primary)),
+            amountStart, text.length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE,
+        )
+        binding.amountReceivedText.apply {
+            setTextColor(previewContext.getColor(R.color.color_text_secondary))
+            textSize = 16f
+            typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+            setLineSpacing(6f, 1f)
+            setText(text)
+        }
         binding.checkmarkCircle.visibility = View.VISIBLE
         binding.checkmarkIcon.visibility = View.VISIBLE
+        // Plain ImageView ignores the layout's AppCompat app:tint outside an Activity
+        // inflater, so the shipping screen's white check renders black here without this.
+        binding.checkmarkIcon.setColorFilter(Color.WHITE)
         // The shipping screen styles Close as a gray secondary, which reads as a disabled
         // primary at illustration scale; the tour presents it as the black next-sale action.
         binding.closeButton.setBackgroundResource(R.drawable.bg_button_black)
