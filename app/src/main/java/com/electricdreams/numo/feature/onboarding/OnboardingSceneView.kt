@@ -173,6 +173,29 @@ class OnboardingSceneView @JvmOverloads constructor(
             canvas.drawColor(white)
             screenImage(canvas, screens.keypad[keyStage], 1f - charge)
             screenImage(canvas, screens.waiting, charge * (1f - paid))
+            // The tap is acknowledged before it succeeds: once the customer phone presses
+            // in, the terminal fades to a processing state with a rotating arc for about a
+            // second, so confirmation lands as a result rather than a slide change.
+            val processing = ease(timeMillis, 4880, 240)
+            if (processing > 0f) {
+                paint.color = white
+                paint.alpha = (processing * 250).toInt()
+                rect.set(215f, 180f, 809f, 1388f)
+                canvas.drawRect(rect, paint)
+                paint.style = Paint.Style.STROKE
+                paint.strokeWidth = 11f
+                paint.strokeCap = Paint.Cap.ROUND
+                rect.set(452f, 724f, 572f, 844f)
+                paint.color = border
+                paint.alpha = (processing * (1f - paid) * 255).toInt()
+                canvas.drawArc(rect, 0f, 360f, false, paint)
+                paint.color = green
+                paint.alpha = (processing * (1f - paid) * 255).toInt()
+                val rotation = (timeMillis - 4880) / 900f * 360f - 90f
+                canvas.drawArc(rect, rotation, 100f, false, paint)
+                paint.style = Paint.Style.FILL
+                paint.alpha = 255
+            }
             screenImage(canvas, screens.received, paid)
             if (charge < 1f) {
                 val pressStart = when {
