@@ -122,6 +122,10 @@ internal class CheckoutPreviewScreens(context: Context) {
             "\n" + format.format(3.5)
         binding.checkmarkCircle.visibility = View.VISIBLE
         binding.checkmarkIcon.visibility = View.VISIBLE
+        // The shipping screen styles Close as a gray secondary, which reads as a disabled
+        // primary at illustration scale; the tour presents it as the black next-sale action.
+        binding.closeButton.setBackgroundResource(R.drawable.bg_button_black)
+        binding.closeButton.setTextColor(Color.WHITE)
         return render(binding.root)
     }
 
