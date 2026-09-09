@@ -17,8 +17,10 @@ import android.util.DisplayMetrics
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.GridLayout
+import androidx.core.view.updateLayoutParams
 import com.electricdreams.numo.R
 import com.electricdreams.numo.databinding.ActivityModernPosBinding
 import com.electricdreams.numo.databinding.ActivityPaymentReceivedBinding
@@ -120,6 +122,15 @@ internal class CheckoutPreviewScreens(context: Context) {
         }
         binding.paymentStatusText.visibility = View.VISIBLE
         binding.nfcAnimationContainer.visibility = View.GONE
+        // Words, not logos: at illustration scale the method switcher's icons are
+        // unreadable chips, so every tab shows its name and wraps to its word.
+        binding.unifiedTabIcon.visibility = View.GONE
+        binding.cashuTabIcon.visibility = View.GONE
+        binding.lightningTabIcon.visibility = View.GONE
+        listOf(binding.unifiedTabText, binding.cashuTabText, binding.lightningTabText).forEach {
+            it.visibility = View.VISIBLE
+            it.updateLayoutParams { width = ViewGroup.LayoutParams.WRAP_CONTENT }
+        }
         return render(binding.root)
     }
 
