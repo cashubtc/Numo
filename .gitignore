@@ -45,3 +45,6 @@ opencode.json
 skills/
 skills-lock.json
 btcpay_env.properties
+
+# Impeccable design-tool session artifacts
+.impeccable/
