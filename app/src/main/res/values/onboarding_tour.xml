@@ -7,17 +7,21 @@
     <color name="onboarding_tour_panel_text">#111111</color>
     <color name="onboarding_tour_panel_secondary">#6F6F73</color>
 
+    <!-- Display scale for four short marketing lines; tracking tightens with size. -->
     <style name="Text.Onboarding.Headline" parent="Text.DisplayLarge">
         <item name="android:textColor">@color/color_text_on_dark</item>
-        <item name="android:letterSpacing">-0.01</item>
-        <item name="lineHeight">34sp</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:lineHeight">38sp</item>
+        <item name="lineHeight">38sp</item>
     </style>
+    <!-- Light-on-dark body reads tighter than dark-on-light; a whisper of tracking restores the air. -->
     <style name="Text.Onboarding.Body" parent="Text.Body">
         <item name="fontFamily">sans-serif</item>
         <item name="android:textSize">16sp</item>
         <item name="android:lineHeight">24sp</item>
         <item name="lineHeight">24sp</item>
-        <item name="android:letterSpacing">0</item>
+        <item name="android:letterSpacing">0.01</item>
         <item name="android:textColor">@color/onboarding_tour_secondary</item>
     </style>
     <style name="Text.Onboarding.Action" parent="Text.Button">

@@ -420,7 +420,10 @@ class OnboardingActivity : AppCompatActivity() {
 
                         override fun updateDrawState(ds: TextPaint) {
                             ds.isUnderlineText = false
-                            ds.isFakeBoldText = true
+                            // Real medium, not fake bold: synthetic bolding smears Roboto at 12sp.
+                            ds.typeface = android.graphics.Typeface.create(
+                                "sans-serif-medium", android.graphics.Typeface.NORMAL,
+                            )
                         }
                     }
                     spannableString.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
