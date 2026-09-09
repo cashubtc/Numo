@@ -902,7 +902,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             val mintsForPaymentRequest =
                 if (
                     mintManager.isSwapFromUnknownMintsEnabled() &&
-                    CashuPaymentHelper.supportsUnknownMintSwap(activeUnit)
+                    CashuPaymentHelper.supportsUnknownMintSwap(this, activeUnit)
                 ) {
                     null
                 } else {
@@ -934,16 +934,17 @@ class PaymentRequestActivity : AppCompatActivity() {
         nostrHandler = NostrPaymentHandler(this, allowedMints, activeUnit)
         startNostrPaymentFlow()
 
-        // Check mint limits for the preferred mint to see if lightning bolt11 is supported
+        // Show Lightning when an allowed issuer advertises BOLT11 minting for this unit.
         uiScope.launch {
-            val mintUrlToUse = preferredLightningMint ?: allowedMints.firstOrNull()
-            
-            if (mintUrlToUse != null) {
-                val limits = mintManager.getMintLimits(mintUrlToUse, this@PaymentRequestActivity)
-                val checkResult = MintLimitChecker.checkMintLimits(paymentAmount, limits, activeUnit)
-                isBolt11Supported = checkResult.isBolt11Supported
-            }
-            
+            val lightningRoute = mintManager.findPaymentMint(
+                paymentUnit,
+                com.electricdreams.numo.core.util.MintOperation.MINT,
+                com.electricdreams.numo.core.util.MintCapabilities.BOLT11,
+                allowedMints,
+                preferredLightningMint,
+            )
+            isBolt11Supported = lightningRoute != null
+
             if (!isBolt11Supported) {
                 Log.d(TAG, "Mint does not support bolt11. Bypassing Lightning tab and showing BIP321 Cashu request.")
                 // Bypass lightning entirely

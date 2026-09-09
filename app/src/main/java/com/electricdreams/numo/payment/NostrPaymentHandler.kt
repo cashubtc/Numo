@@ -147,7 +147,7 @@ class NostrPaymentHandler(
         val mintsForPaymentRequest =
             if (
                 mintManager.isSwapFromUnknownMintsEnabled() &&
-                CashuPaymentHelper.supportsUnknownMintSwap(paymentUnit)
+                CashuPaymentHelper.supportsUnknownMintSwap(context, paymentUnit)
             ) {
                 null
             } else {

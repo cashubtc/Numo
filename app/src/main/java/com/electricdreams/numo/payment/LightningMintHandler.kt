@@ -6,6 +6,8 @@ import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.util.MintCapabilities
+import com.electricdreams.numo.core.util.MintOperation
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import kotlinx.coroutines.CancellationException
@@ -40,8 +42,8 @@ import kotlin.coroutines.resumeWithException
  * - Subscribing to quote state updates via WebSocket
  * - Minting proofs once the invoice is paid
  *
- * @param preferredMint Optional preferred mint URL for Lightning payments. If null or invalid,
- *                      falls back to the first allowed mint.
+ * @param preferredMint Preferred mint URL. Falls back to an allowed mint advertising BOLT11
+ *                      minting for the payment unit.
  * @param allowedMints List of allowed mint URLs (used as fallback if preferredMint is invalid)
  * @param uiScope Coroutine scope for UI callbacks
  */
@@ -123,35 +125,23 @@ class LightningMintHandler(
             return
         }
 
-        // Use preferred mint if set and valid, otherwise fall back to first allowed mint
-        val mintUrlStr = if (preferredMint != null && (allowedMints.isEmpty() || allowedMints.contains(preferredMint))) {
-            preferredMint
-        } else {
-            allowedMints.firstOrNull() ?: run {
-                Log.e(TAG, "No valid mint available for Lightning")
-                callback.onError("No mints configured")
-                return
-            }
-        }
-        
-        Log.d(TAG, "Using mint for Lightning: $mintUrlStr (preferred: $preferredMint)")
-        
-        val mintUrl = try {
-            MintUrl(mintUrlStr)
-        } catch (t: Throwable) {
-            Log.e(TAG, "Invalid mint URL for Lightning mint: $mintUrlStr", t)
-            callback.onError("Invalid mint URL")
-            return
-        }
-
-        currentMintUrl = mintUrlStr
-
         // Reset the mint-called flag for this new payment
         mintCalled.set(false)
 
         mintJob?.cancel()
         mintJob = uiScope.launch(ioDispatcher) {
             try {
+                val route = requireNotNull(MintManager.getInstance(context).findPaymentMint(
+                    UnitId.of(paymentUnit), MintOperation.MINT, MintCapabilities.BOLT11,
+                    allowedMints, preferredMint,
+                )) { "No allowed mint supports BOLT11 minting for $paymentUnit" }
+                require(route.allowsAmount(paymentAmount)) {
+                    "Payment amount is outside the mint's BOLT11 limits"
+                }
+                val mintUrlStr = route.mintUrl
+                val mintUrl = MintUrl(mintUrlStr)
+                currentMintUrl = mintUrlStr
+
                 // CDK Amount is in atomic units of the captured payment unit.
                 val quoteAmount = CdkAmount(paymentAmount.toULong())
 
@@ -165,7 +155,8 @@ class LightningMintHandler(
 
                 val nut04 = mintWallet.loadMintInfo().nuts.nut04
                 val supportsDescription = nut04?.methods?.any {
-                    it.method == org.cashudevkit.PaymentMethod.Bolt11 && it.description == true
+                    it.method == PaymentMethod.Bolt11 && it.unit == unit &&
+                        it.description == true && !nut04.disabled
                 } == true
                 val description = if (supportsDescription) {
                     val formatted = com.electricdreams.numo.core.model.UnitAmountFormatter

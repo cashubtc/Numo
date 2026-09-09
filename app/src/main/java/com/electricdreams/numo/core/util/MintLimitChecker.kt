@@ -66,15 +66,11 @@ object MintLimitChecker {
             )
         }
 
-        val bolt11Method = mintLimits.mintMethods.find { method ->
-            val methodStr = method.method
-            val methodMatch = methodStr.equals("bolt11", ignoreCase = true) ||
-                methodStr.contains("Bolt11") || methodStr.contains("bolt11")
-            val unitMatch = UnitId.ofOrNull(method.unit) == expectedUnit
-            methodMatch && unitMatch
-        }
+        val bolt11Method = MintCapabilities("", mintLimits).find(
+            expectedUnit, MintOperation.MINT, MintCapabilities.BOLT11,
+        )
 
-        if (bolt11Method == null || bolt11Method.disabled) {
+        if (bolt11Method == null) {
             return LimitCheckResult(
                 isValid = true,
                 minAmount = null,

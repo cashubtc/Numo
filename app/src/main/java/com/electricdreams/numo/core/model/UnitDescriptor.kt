@@ -32,6 +32,9 @@ data class UnitDescriptor(
         }
     }
 
+    val requiresIssuerScope: Boolean
+        get() = kind == UnitKind.CUSTOM
+
     companion object {
         // Android's getInstance(String) also accepts unknown three-letter codes and assigns
         // two fraction digits. Only the supported currency list identifies actual ISO units.

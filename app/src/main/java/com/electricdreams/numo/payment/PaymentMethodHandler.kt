@@ -60,7 +60,9 @@ class PaymentMethodHandler(
         // preference, which would prevent them from paying with other mints
         // even though the POS will accept them via swap.
         val mintsForPaymentRequest =
-            if (mintManager.isSwapFromUnknownMintsEnabled()) null else allowedMints
+            if (mintManager.isSwapFromUnknownMintsEnabled() &&
+                CashuPaymentHelper.supportsUnknownMintSwap(activity, activeUnit)
+            ) null else allowedMints
 
         val paymentRequest = CashuPaymentHelper.createPaymentRequest(
             amount = amount,

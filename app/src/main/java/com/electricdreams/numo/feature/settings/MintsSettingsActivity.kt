@@ -420,7 +420,7 @@ class MintsSettingsActivity : AppCompatActivity() {
             supportedUnits.any { it.value != preferredUnit }
         ) View.VISIBLE else View.GONE
         swapUnknownMintsRow.visibility = if (
-            com.electricdreams.numo.ndef.CashuPaymentHelper.supportsUnknownMintSwap(preferredUnit)
+            com.electricdreams.numo.ndef.CashuPaymentHelper.supportsUnknownMintSwap(this, preferredUnit)
         ) {
             View.VISIBLE
         } else {

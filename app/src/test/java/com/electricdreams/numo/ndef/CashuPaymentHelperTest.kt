@@ -1,5 +1,8 @@
 package com.electricdreams.numo.ndef
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.ndef.CashuPaymentHelper.extractCashuToken
 import com.electricdreams.numo.ndef.CashuPaymentHelper.isCashuPaymentRequest
 import com.electricdreams.numo.ndef.CashuPaymentHelper.isCashuToken
@@ -106,10 +109,24 @@ class CashuPaymentHelperTest {
     }
 
     @Test
-    fun `unknown mint swap is disabled for custom units`() {
-        assertTrue(CashuPaymentHelper.supportsUnknownMintSwap("sat"))
-        assertFalse(CashuPaymentHelper.supportsUnknownMintSwap("points"))
-        assertFalse(CashuPaymentHelper.supportsUnknownMintSwap("auth"))
+    fun `unknown mint acceptance requires a compatible destination and an unscoped asset`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val manager = MintManager.getInstance(context)
+        manager.setMintChangeListener(null)
+        manager.getAllowedMints().toList().forEach { manager.removeMint(it) }
+        val mint = "https://destination.example"
+        manager.addMint(mint)
+        manager.setMintUnits(mint, listOf("sat", "points"))
+        manager.setMintInfo(mint, """{"nuts":{"4":{"methods":[
+            {"method":"bolt12","unit":"sat"}, {"method":"bolt11","unit":"points"}
+        ]}}}""")
+        assertFalse(CashuPaymentHelper.supportsUnknownMintSwap(context, "sat"))
+        assertFalse(CashuPaymentHelper.supportsUnknownMintSwap(context, "points"))
+        manager.setMintInfo(mint, """{"nuts":{"4":{"methods":[
+            {"method":"bolt11","unit":"sat"}
+        ]}}}""")
+        assertTrue(CashuPaymentHelper.supportsUnknownMintSwap(context, "sat"))
+        assertFalse(CashuPaymentHelper.supportsUnknownMintSwap(context, "auth"))
     }
 
 }

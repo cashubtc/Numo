@@ -107,6 +107,8 @@ class AutoWithdrawUnitTest {
         quoteAtomic: ULong,
         feeAtomic: ULong,
     ) {
+        val unitId = with(CashuWalletManager) { unit.toUnitString() }
+        advertiseCapabilities(unitId)
         whenever(repository.getBalances()).thenReturn(mapOf(
             WalletKey(MintUrl(mintUrl), unit) to Amount(balanceAtomic),
             WalletKey(MintUrl("https://other.example"), CurrencyUnit.Sat) to Amount(900_000uL),
@@ -130,6 +132,90 @@ class AutoWithdrawUnitTest {
             quoteId = "melt-quote", state = QuoteState.PAID, preimage = "preimage",
             change = emptyList(), amount = Amount(quoteAtomic), feePaid = Amount(feeAtomic),
         ))
+    }
+
+    private fun advertiseCapabilities(
+        unit: String,
+        mintMethod: String = "bolt11",
+        meltMethod: String = "bolt11",
+        meltDisabled: Boolean = false,
+        mintMax: Long? = null,
+        meltMax: Long? = null,
+    ) {
+        mints.setMintInfo(mintUrl, """{"nuts":{
+            "4":{"methods":[{"method":"$mintMethod","unit":"$unit","max_amount":$mintMax}]},
+            "5":{"disabled":$meltDisabled,"methods":[{
+                "method":"$meltMethod","unit":"$unit","max_amount":$meltMax
+            }]}
+        }}""")
+    }
+
+    @Test
+    fun `custom unit can withdraw when its issuer supports both required bolt11 operations`() = runTest {
+        stubWallet(CurrencyUnit.Custom("points"), 10_000uL, 9_500uL, 1uL)
+
+        manager().checkAndTriggerWithdrawals(mintUrl, "points")
+
+        verify(prepared).confirm()
+        verify(wallet).mintQuote(PaymentMethod.Bolt11, Amount(10_000uL), null, null)
+    }
+
+    @Test
+    fun `sat withdrawal only needs melt support`() = runTest {
+        stubWallet(CurrencyUnit.Sat, 100_000uL, 95_000uL, 1uL)
+        advertiseCapabilities("sat", mintMethod = "bolt12")
+
+        manager().checkAndTriggerWithdrawals(mintUrl, "sat")
+
+        verify(prepared).confirm()
+        verify(wallet, never()).mintQuote(any(), any(), any(), any())
+    }
+
+    @Test
+    fun `bolt11 minting does not authorize bolt12-only melting`() = runTest {
+        stubWallet(CurrencyUnit.Usd, 10_000uL, 9_500uL, 1uL)
+        advertiseCapabilities("usd", meltMethod = "bolt12")
+
+        manager().checkAndTriggerWithdrawals(mintUrl, "usd")
+
+        verify(wallet, never()).mintQuote(any(), any(), any(), any())
+        verify(wallet, never()).meltLightningAddressQuote(any(), any())
+        verify(prepared, never()).confirm()
+    }
+
+    @Test
+    fun `fiat valuation requires mint support for the same method and unit`() = runTest {
+        stubWallet(CurrencyUnit.Usd, 10_000uL, 9_500uL, 1uL)
+        advertiseCapabilities("usd", mintMethod = "bolt12")
+        manager().checkAndTriggerWithdrawals(mintUrl, "usd")
+        advertiseCapabilities("sat")
+        manager().checkAndTriggerWithdrawals(mintUrl, "usd")
+
+        verify(wallet, never()).mintQuote(any(), any(), any(), any())
+        verify(wallet, never()).meltLightningAddressQuote(any(), any())
+    }
+
+    @Test
+    fun `disabled melting or out of range valuation cannot start withdrawal`() = runTest {
+        stubWallet(CurrencyUnit.Usd, 10_000uL, 9_500uL, 1uL)
+        advertiseCapabilities("usd", meltDisabled = true)
+        manager().checkAndTriggerWithdrawals(mintUrl, "usd")
+        advertiseCapabilities("usd", mintMax = 9_999)
+        manager().checkAndTriggerWithdrawals(mintUrl, "usd")
+
+        verify(wallet, never()).mintQuote(any(), any(), any(), any())
+        verify(wallet, never()).meltLightningAddressQuote(any(), any())
+    }
+
+    @Test
+    fun `melt amount outside advertised limits is not spent`() = runTest {
+        stubWallet(CurrencyUnit.Sat, 100_000uL, 95_000uL, 1uL)
+        advertiseCapabilities("sat", meltMax = 94_999)
+
+        manager().checkAndTriggerWithdrawals(mintUrl, "sat")
+
+        verify(wallet).meltLightningAddressQuote(any(), any())
+        verify(prepared, never()).confirm()
     }
 
     @Test

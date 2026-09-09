@@ -6,7 +6,9 @@ import android.util.Log
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.dev.WalletLogger
 import com.electricdreams.numo.core.model.UnitId
-import com.electricdreams.numo.core.model.UnitFeaturePolicy
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.util.MintCapabilities
+import com.electricdreams.numo.core.util.MintOperation
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.payment.SwapToLightningMintManager
 import com.google.gson.*
@@ -641,7 +643,7 @@ object CashuPaymentHelper {
             }
         } else {
             Log.w(TAG, "Token mint is not in allowed list: $mintUrl")
-            requireUnknownMintSwapSupport(expectedUnitId)
+            requireUnscopedAsset(expectedUnitId)
             val mintManager = MintManager.getInstance(appContext)
             if (!mintManager.isSwapFromUnknownMintsEnabled()) {
                 Log.w(TAG, "Token from unknown mint encountered but swap-to-Lightning-mint is disabled - rejecting payment")
@@ -762,7 +764,7 @@ object CashuPaymentHelper {
                 val cdkToken = result.token
                 val unknownMintUrl = cdkToken.mintUrl().url
 
-                requireUnknownMintSwapSupport(expectedUnitId)
+                requireUnscopedAsset(expectedUnitId)
 
                 Log.i(TAG, "Token from unknown mint detected - fetching keysets and extracting proofs")
 
@@ -907,16 +909,19 @@ object CashuPaymentHelper {
     }
 
     @JvmStatic
-    fun supportsUnknownMintSwap(unit: String): Boolean {
+    fun supportsUnknownMintSwap(context: Context, unit: String): Boolean {
         val unitId = UnitId.ofOrNull(unit) ?: return false
-        return UnitFeaturePolicy.supportsUnknownMintSwap(unitId)
+        if (unitId.isReserved || UnitDescriptor.defaultFor(unitId).requiresIssuerScope) return false
+        val manager = MintManager.getInstance(context)
+        return manager.getMintsSupportingUnit(unitId.value).any { mintUrl ->
+            manager.getCachedCapabilities(mintUrl)
+                .find(unitId, MintOperation.MINT, MintCapabilities.BOLT11) != null
+        }
     }
 
-    private fun requireUnknownMintSwapSupport(unit: UnitId) {
-        if (!supportsUnknownMintSwap(unit.value)) {
-            throw RedemptionException(
-                "Payments from unknown mints are not supported for unit $unit",
-            )
+    private fun requireUnscopedAsset(unit: UnitId) {
+        if (unit.isReserved || UnitDescriptor.defaultFor(unit).requiresIssuerScope) {
+            throw RedemptionException("This asset must be paid by its configured issuer")
         }
     }
 

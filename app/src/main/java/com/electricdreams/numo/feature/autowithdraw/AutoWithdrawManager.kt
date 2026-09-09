@@ -3,7 +3,9 @@ package com.electricdreams.numo.feature.autowithdraw
 import android.content.Context
 import android.util.Log
 import com.electricdreams.numo.core.cashu.CashuWalletManager
-import com.electricdreams.numo.core.model.UnitFeaturePolicy
+import com.electricdreams.numo.core.util.MintCapabilities
+import com.electricdreams.numo.core.util.MintCapability
+import com.electricdreams.numo.core.util.MintOperation
 import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintManager
@@ -155,12 +157,11 @@ class AutoWithdrawManager internal constructor(
     }
 
     /**
-     * Unit-explicit entry point used by checkout. Custom units intentionally skip BOLT11-based
-     * automatic withdrawal until a payment-method-specific implementation exists.
+     * Unit-explicit entry point used by checkout. Capabilities are checked on each source mint.
      */
     fun onPaymentReceived(token: String, lightningMintUrl: String?, paymentUnit: String) {
         val unit = UnitId.ofOrNull(paymentUnit)
-        if (unit == null || !UnitFeaturePolicy.supportsAutoWithdraw(unit)) {
+        if (unit == null || unit.isReserved) {
             Log.d(TAG, "Auto-withdraw is unavailable for payment unit: $paymentUnit")
             return
         }
@@ -222,7 +223,7 @@ class AutoWithdrawManager internal constructor(
         }
 
         val activeUnit = UnitId.ofOrNull(paymentUnit)
-        if (activeUnit == null || !UnitFeaturePolicy.supportsAutoWithdraw(activeUnit)) {
+        if (activeUnit == null || activeUnit.isReserved) {
             Log.d(TAG, "Auto-withdraw is unavailable for active unit: $activeUnit")
             return
         }
@@ -250,6 +251,18 @@ class AutoWithdrawManager internal constructor(
                 if (balanceAtomic <= 0 || !settingsManager.isEnabledForMint(mintUrl)) continue
                 if (settingsManager.getMintSettings(mintUrl).lightningAddress.isBlank()) continue
                 try {
+                    val capabilities = mintManager.getMintCapabilities(mintUrl)
+                    val meltCapability = capabilities.find(
+                        activeUnit, MintOperation.MELT, MintCapabilities.BOLT11,
+                    ) ?: continue
+                    val needsValuation = activeUnit != UnitId.SAT &&
+                        activeUnit != UnitId.MSAT && activeUnit != UnitId.BTC
+                    if (needsValuation) {
+                        val valuationCapability = capabilities.find(
+                            activeUnit, MintOperation.MINT, MintCapabilities.BOLT11,
+                        ) ?: continue
+                        if (!valuationCapability.allowsAmount(balanceAtomic)) continue
+                    }
                     // Retain the wallet and unit for the entire withdrawal.
                     val mintWallet = withContext(Dispatchers.IO) {
                         repository.getWallet(
@@ -261,7 +274,9 @@ class AutoWithdrawManager internal constructor(
                         balanceInSats(mintWallet, balanceAtomic, activeUnit)
                     }
                     if (settingsManager.shouldTriggerWithdrawal(mintUrl, balanceSats)) {
-                        executeWithdrawal(mintUrl, balanceAtomic, balanceSats, activeUnit, mintWallet)
+                        executeWithdrawal(
+                            mintUrl, balanceAtomic, balanceSats, activeUnit, mintWallet, meltCapability,
+                        )
                         return
                     }
                 } catch (e: CancellationException) {
@@ -319,6 +334,7 @@ class AutoWithdrawManager internal constructor(
         currentBalanceSats: Long,
         paymentUnit: UnitId,
         mintWallet: Wallet,
+        meltCapability: MintCapability,
     ) {
         if (isWithdrawInProgress) {
             Log.w(TAG, "executeWithdrawal called but already in progress, skipping")
@@ -376,6 +392,9 @@ class AutoWithdrawManager internal constructor(
 
             require(meltQuote.unit == CashuWalletManager.getCurrencyUnit(paymentUnit.value)) {
                 "Melt quote has a different unit than the withdrawal wallet"
+            }
+            require(meltCapability.allowsAmount(meltQuote.amount.value.toLongExactAmount())) {
+                "Withdrawal amount is outside the source mint's BOLT11 melt limits"
             }
             val quoteAmount = meltQuote.amount.value.toLongExactAmount()
             require(quoteAmount > 0L) { "Melt quote amount must be positive" }
