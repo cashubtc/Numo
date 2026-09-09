@@ -131,7 +131,7 @@ internal class CheckoutPreviewScreens(context: Context) {
         val amount = format.format(3.5)
         val text = SpannableString(label + "\n" + amount)
         val amountStart = text.length - amount.length
-        text.setSpan(RelativeSizeSpan(2.5f), amountStart, text.length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+        text.setSpan(RelativeSizeSpan(2.1f), amountStart, text.length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
         text.setSpan(TypefaceSpan("sans-serif"), amountStart, text.length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
         text.setSpan(StyleSpan(Typeface.BOLD), amountStart, text.length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
         text.setSpan(
@@ -140,7 +140,9 @@ internal class CheckoutPreviewScreens(context: Context) {
         )
         binding.amountReceivedText.apply {
             setTextColor(previewContext.getColor(R.color.color_text_secondary))
-            textSize = 16f
+            // The terminal is drawn small in the scene, so the label needs more size
+            // than the real screen would use to stay legible at illustration scale.
+            textSize = 23f
             typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
             setLineSpacing(6f, 1f)
             setText(text)
