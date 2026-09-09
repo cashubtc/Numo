@@ -8,7 +8,6 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,7 +16,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.Item
-import com.electricdreams.numo.core.model.PriceType
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.util.ItemManager
 import com.electricdreams.numo.feature.items.handlers.*
@@ -144,6 +142,9 @@ class ItemEntryActivity : AppCompatActivity() {
             priceTypeToggle = findViewById(R.id.price_type_toggle),
             btnPriceFiat = findViewById(R.id.btn_price_fiat),
             btnPriceBitcoin = findViewById(R.id.btn_price_bitcoin),
+            priceUnitLayout = findViewById(R.id.price_unit_layout),
+            priceUnitInput = findViewById(R.id.price_unit_input),
+            priceUnitWarning = findViewById(R.id.price_unit_warning),
             fiatPriceLayout = findViewById(R.id.fiat_price_layout),
             satsPriceLayout = findViewById(R.id.sats_price_layout),
             priceInput = findViewById(R.id.item_price_input),
@@ -296,14 +297,13 @@ class ItemEntryActivity : AppCompatActivity() {
     }
 
     private fun loadPricingData(item: Item) {
-        pricingHandler.setCurrentPriceType(item.priceType)
-        when (item.priceType) {
-            PriceType.FIAT -> {
-                val displayPrice = if (item.vatEnabled) item.getGrossPrice() else item.price
-                pricingHandler.setFiatPrice(displayPrice)
-            }
-            PriceType.SATS -> pricingHandler.setSatsPrice(item.priceSats)
+        val fiatUnit = currencyManager.getCurrentCurrency()
+        val displayAmount = if (item.vatEnabled) {
+            item.getGrossAtomicAmount(fiatUnit)
+        } else {
+            item.getNetAtomicAmount(fiatUnit)
         }
+        pricingHandler.setAtomicPrice(displayAmount)
         pricingHandler.setVatFields(item.vatEnabled, item.vatRate, true)
     }
 

@@ -1,4 +1,5 @@
 <resources>
+    <string name="pos_charge_unit_selected_description">Zahlungseinheit: %1$s</string>
     <!-- POS main screen - navigation content descriptions -->
     <string name="pos_nav_catalog_content_description">Artikelliste</string>
     <string name="pos_nav_history_content_description">Verlauf</string>
@@ -14,8 +15,8 @@
     <!-- POS main screen - charge button -->
     <string name="pos_charge_button">Berechnen</string>
     <string name="pos_charge_button_with_amount">%1$s berechnen</string>
-    <string name="pos_charge_button_min_limit">Minimum: %1$d Sats</string>
-    <string name="pos_charge_button_max_limit">Maximum: %1$d Sats</string>
+    <string name="pos_charge_button_min_limit">Minimum: %1$s</string>
+    <string name="pos_charge_button_max_limit">Maximum: %1$s</string>
     <string name="pos_charge_button_mint_disabled">Minting deaktiviert</string>
 
     <!-- POS main screen - secondary BTC label when no fiat price -->
@@ -37,4 +38,11 @@
     <string name="pos_toast_invalid_amount">Ungültiger Zahlungsbetrag</string>
     <string name="pos_toast_no_stock">Kein weiterer Bestand verfügbar</string>
     <string name="pos_charge_button_loading">Wallet wird gestartet…</string>
+    <string name="pos_charge_unit_selector_description">Zahlungseinheit auswählen</string>
+    <string name="pos_charge_unit_dialog_title">Zahlungseinheit</string>
+    <string name="unit_picker_mints_description">Einheiten, die deine hinzugefügten Mints unterstützen.</string>
+    <string name="checkout_unit_conversion_unavailable">Dieser Warenkorb kann nicht in eine von deinen Mints unterstützte Einheit umgerechnet werden. Verwende Artikel in einer Einheit oder füge eine kompatible Mint hinzu.</string>
+    <string name="checkout_unit_conversion_stale">Der Umrechnungskurs ist veraltet. Aktualisiere ihn und versuche es erneut.</string>
+    <string name="checkout_unit_invalid_item_price">Ein Artikel hat eine ungültige Einheit oder einen ungültigen Preis. Bearbeite den Artikel vor dem Bezahlen.</string>
+    <string name="checkout_unit_amount_too_large">Der Warenkorbwert ist zu hoch, um sicher verarbeitet zu werden.</string>
 </resources>

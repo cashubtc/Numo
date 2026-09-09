@@ -127,4 +127,52 @@ class SavedBasketTest {
         val basket = createBasket(emptyList())
         assertEquals("", basket.getItemsSummary())
     }
+
+    @Test
+    fun `price totals group matching assets and preserve custom issuer identity`() {
+        val points = UnitId.of("points")
+        val mintA = Item(
+            name = "A",
+            priceUnit = points.value,
+            priceAtomic = 10,
+            priceIssuerScope = "https://mint-a.example",
+        )
+        val sameMint = Item(
+            name = "B",
+            priceUnit = points.value,
+            priceAtomic = 5,
+            priceIssuerScope = "https://mint-a.example",
+        )
+        val mintB = Item(
+            name = "C",
+            priceUnit = points.value,
+            priceAtomic = 7,
+            priceIssuerScope = "https://mint-b.example",
+        )
+        val basket = createBasket(
+            listOf(
+                BasketItem(mintA, 2),
+                BasketItem(sameMint, 1),
+                BasketItem(mintB, 1),
+            ),
+        )
+
+        val totals = basket.getPriceTotals("usd")
+
+        assertEquals(2, totals.size)
+        assertEquals(25L, totals.single { it.asset.issuerScope?.contains("mint-a") == true }.value)
+        assertEquals(7L, totals.single { it.asset.issuerScope?.contains("mint-b") == true }.value)
+    }
+
+    @Test(expected = ArithmeticException::class)
+    fun `price totals reject line multiplication overflow`() {
+        val item = Item(
+            name = "Too large",
+            priceUnit = "points",
+            priceAtomic = Long.MAX_VALUE,
+            priceIssuerScope = "https://mint.example",
+        )
+
+        createBasket(listOf(BasketItem(item, 2))).getPriceTotals("usd")
+    }
 }

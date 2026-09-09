@@ -2,140 +2,235 @@ package com.electricdreams.numo.feature.items.handlers
 
 import android.app.Activity
 import android.content.Intent
+import android.util.Log
 import android.widget.Toast
-import com.electricdreams.numo.R
+import androidx.appcompat.app.AlertDialog
 import com.electricdreams.numo.PaymentRequestActivity
-import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.R
+import com.electricdreams.numo.core.model.AssetId
+import com.electricdreams.numo.core.model.AtomicAmount
+import com.electricdreams.numo.core.model.BasketNormalizationFailureReason
+import com.electricdreams.numo.core.model.BasketNormalizationResult
+import com.electricdreams.numo.core.model.BasketPricingEngine
 import com.electricdreams.numo.core.model.CheckoutBasket
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitConversionRate
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
+import com.electricdreams.numo.core.model.UnitKind
 import com.electricdreams.numo.core.util.BasketManager
 import com.electricdreams.numo.core.util.CurrencyManager
+import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.feature.tips.TipSelectionActivity
 import com.electricdreams.numo.feature.tips.TipsManager
+import com.electricdreams.numo.ui.components.UnitPickerDialog
+import java.math.BigDecimal
 
-/**
- * Handles checkout logic and navigation to payment screen.
- */
+/** Handles unit-aware basket normalization and navigation to payment. */
 class CheckoutHandler(
     private val activity: Activity,
     private val basketManager: BasketManager,
     private val currencyManager: CurrencyManager,
-    private val bitcoinPriceWorker: BitcoinPriceWorker
+    private val bitcoinPriceWorker: BitcoinPriceWorker,
 ) {
-    
-    // Optional saved basket ID to associate with payment
+
     var savedBasketId: String? = null
 
-    /**
-     * Proceed to checkout if basket is valid.
-     * Calculates totals, formats the amount, and navigates to PaymentRequestActivity.
-     * Captures a snapshot of the basket for receipt documentation.
-     */
+    private var chargeUnitDialog: AlertDialog? = null
+
     fun proceedToCheckout() {
         if (basketManager.getTotalItemCount() == 0) {
             Toast.makeText(activity, R.string.pos_toast_basket_empty, Toast.LENGTH_SHORT).show()
             return
         }
 
-        val fiatTotal = basketManager.getTotalPrice()
-        val satsTotal = basketManager.getTotalSatsDirectPrice()
-        val btcPrice = bitcoinPriceWorker.getCurrentPrice()
-
-        // Calculate total in satoshis
-        val totalSatoshis = basketManager.getTotalSatoshis(btcPrice, activity)
-
-        if (totalSatoshis <= 0) {
-            Toast.makeText(activity, R.string.pos_toast_invalid_amount, Toast.LENGTH_SHORT).show()
+        val legacyFiatUnit = currencyManager.getCurrentCurrency()
+        val basketSnapshot: CheckoutBasket
+        val lines: List<AtomicAmount>
+        try {
+            basketSnapshot = CheckoutBasket.fromBasketManager(
+                basketManager = basketManager,
+                currency = legacyFiatUnit,
+                bitcoinPrice = bitcoinPriceWorker.getCurrentPrice().takeIf {
+                    it > 0.0 && it.isFinite()
+                },
+                totalSatoshis = 0L,
+            )
+            lines = basketSnapshot.items.map { item ->
+                item.getGrossLineAtomicAmount()
+            }
+        } catch (e: IllegalArgumentException) {
+            Log.e(TAG, "Invalid unit-aware basket price", e)
+            showError(R.string.checkout_unit_invalid_item_price)
+            return
+        } catch (e: ArithmeticException) {
+            Log.e(TAG, "Basket price overflow", e)
+            showError(R.string.checkout_unit_amount_too_large)
             return
         }
 
-        // Determine how to format the amount for PaymentRequestActivity
-        val formattedAmount = formatPaymentAmount(fiatTotal, satsTotal)
-
-        // Create a snapshot of the basket BEFORE clearing it
-        // This preserves the checkout data for receipt generation
-        val checkoutBasket = CheckoutBasket.fromBasketManager(
-            basketManager = basketManager,
-            currency = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(activity),
-            bitcoinPrice = if (btcPrice > 0) btcPrice else null,
-            totalSatoshis = totalSatoshis,
-        )
-        val checkoutBasketJson = checkoutBasket.toJson()
-        
-        android.util.Log.d("CheckoutHandler", "Captured basket with ${checkoutBasket.items.size} items, total: $totalSatoshis sats")
-        android.util.Log.d("CheckoutHandler", "Basket JSON size: ${checkoutBasketJson.length} chars")
-
-        // Clear basket before navigating away so UI state is clean when we return
-        basketManager.clearBasket()
-
-        // Decide whether to show tip selection first or go directly to payment request
-        val tipsManager = TipsManager.getInstance(activity)
-        if (tipsManager.tipsEnabled) {
-            // Route through beautiful tip selection screen first
-            val intent = Intent(activity, TipSelectionActivity::class.java).apply {
-                putExtra(TipSelectionActivity.EXTRA_PAYMENT_AMOUNT, totalSatoshis)
-                putExtra(TipSelectionActivity.EXTRA_FORMATTED_AMOUNT, formattedAmount)
-                putExtra(TipSelectionActivity.EXTRA_CHECKOUT_BASKET_JSON, checkoutBasketJson)
-                // Preserve saved basket association all the way through to PaymentRequestActivity
-                savedBasketId?.let { putExtra(PaymentRequestActivity.EXTRA_SAVED_BASKET_ID, it) }
+        val engine = BasketPricingEngine(createBitcoinRates(legacyFiatUnit))
+        val mintManager = MintManager.getInstance(activity)
+        val targetAssets = mintManager.getSupportedChargeAssets()
+        val results = targetAssets.map { target ->
+            // Older custom prices may have no issuer. Resolve each compatible mint separately
+            // without treating scoped prices as interchangeable.
+            val scopedLines = lines.map { line ->
+                line.copy(
+                    asset = resolveUnscopedPriceAsset(line.asset, target),
+                )
             }
-            activity.startActivity(intent)
+            engine.normalize(scopedLines, target)
+        }
+        val chargeableOptions = results.filterIsInstance<BasketNormalizationResult.Chargeable>()
+            .filter { it.amount.value > 0L }
+            .sortedWith(
+                compareBy<BasketNormalizationResult.Chargeable> {
+                    if (it.amount.unit.value == mintManager.getPreferredUnit()) 0 else 1
+                }.thenBy { it.amount.unit.value }
+                    .thenBy { it.amount.asset.issuerScope.orEmpty() },
+            )
+
+        when {
+            chargeableOptions.isEmpty() -> showNoChargeableUnit(results)
+            chargeableOptions.size == 1 -> continueCheckout(
+                chargeableOptions.single(),
+                basketSnapshot,
+            )
+            else -> showChargeUnitSelector(chargeableOptions, basketSnapshot)
+        }
+    }
+
+    private fun needsIssuer(asset: AssetId): Boolean =
+        asset.issuerScope == null && UnitDescriptor.defaultFor(asset.unit).kind == UnitKind.CUSTOM
+
+    private fun resolveUnscopedPriceAsset(source: AssetId, target: AssetId): AssetId =
+        if (needsIssuer(source) && source.unit == target.unit && target.issuerScope != null) {
+            target
         } else {
-            // Go directly to payment request without tips
-            val intent = Intent(activity, PaymentRequestActivity::class.java).apply {
-                putExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, totalSatoshis)
-                putExtra(PaymentRequestActivity.EXTRA_FORMATTED_AMOUNT, formattedAmount)
-                putExtra(PaymentRequestActivity.EXTRA_CHECKOUT_BASKET_JSON, checkoutBasketJson)
-                savedBasketId?.let { putExtra(PaymentRequestActivity.EXTRA_SAVED_BASKET_ID, it) }
-            }
-            activity.startActivity(intent)
+            source
         }
 
+    private fun createBitcoinRates(legacyFiatUnit: String): List<UnitConversionRate> {
+        val bitcoinPrice = bitcoinPriceWorker.getCurrentPrice()
+        val fiatUnit = UnitId.ofOrNull(legacyFiatUnit) ?: return emptyList()
+        if (bitcoinPrice <= 0.0 || !bitcoinPrice.isFinite()) return emptyList()
+
+        val timestamp = bitcoinPriceWorker.getCurrentPriceTimestamp()
+        val expiresAt = if (timestamp > 0L) {
+            runCatching { Math.addExact(timestamp, BITCOIN_QUOTE_MAX_AGE_MS) }.getOrNull()
+        } else {
+            0L
+        }
+        return runCatching {
+            UnitConversionRate.fromBitcoinPrice(
+                fiatUnit = fiatUnit,
+                fiatPerBitcoin = BigDecimal.valueOf(bitcoinPrice),
+                expiresAtMillis = expiresAt,
+            )
+        }.getOrElse { error ->
+            Log.e(TAG, "Could not build Bitcoin conversion quote", error)
+            emptyList()
+        }
+    }
+
+    private fun showChargeUnitSelector(
+        options: List<BasketNormalizationResult.Chargeable>,
+        basketSnapshot: CheckoutBasket,
+    ) {
+        if (activity.isFinishing || chargeUnitDialog?.isShowing == true) return
+
+        chargeUnitDialog = UnitPickerDialog.show(
+            context = activity,
+            title = if (options.map { it.amount.unit }.distinct().size == 1) {
+                R.string.mint_selection_title
+            } else {
+                R.string.pos_charge_unit_dialog_title
+            },
+            labels = options.map { option -> UnitAmountFormatter.formatAsset(option.amount) },
+        ) { index -> continueCheckout(options[index], basketSnapshot) }
+        chargeUnitDialog?.setOnDismissListener { chargeUnitDialog = null }
+    }
+
+    private fun showNoChargeableUnit(
+        results: List<BasketNormalizationResult>,
+    ) {
+        val hasOverflow = results.any { it is BasketNormalizationResult.ArithmeticFailure }
+        val hasStaleConversion = results
+            .filterIsInstance<BasketNormalizationResult.Unsupported>()
+            .flatMap { it.failures }
+            .any { it.reason == BasketNormalizationFailureReason.STALE_CONVERSION }
+        val message = when {
+            hasOverflow -> R.string.checkout_unit_amount_too_large
+            hasStaleConversion -> R.string.checkout_unit_conversion_stale
+            else -> R.string.checkout_unit_conversion_unavailable
+        }
+        showError(message)
+    }
+
+    private fun continueCheckout(
+        normalization: BasketNormalizationResult.Chargeable,
+        basketSnapshot: CheckoutBasket,
+    ) {
+        val chargeAmount = normalization.amount
+        if (chargeAmount.value <= 0L) {
+            showError(R.string.pos_toast_invalid_amount)
+            return
+        }
+
+        val formattedAmount = UnitAmountFormatter.format(
+            chargeAmount,
+            UnitDescriptor.defaultFor(chargeAmount.unit),
+        )
+        val checkoutBasket = basketSnapshot.copy(
+            items = basketSnapshot.items.map { item ->
+                val asset = resolveUnscopedPriceAsset(item.getNetAtomicAmount().asset, chargeAmount.asset)
+                item.copy(priceIssuerScope = asset.issuerScope)
+            },
+            // Kept populated for backward-compatible receipt readers. New readers use
+            // chargeAmountAtomic and chargeUnit.
+            totalSatoshis = chargeAmount.value,
+            chargeAmountAtomic = chargeAmount.value,
+            chargeUnit = chargeAmount.unit.value,
+            chargeIssuerScope = chargeAmount.asset.issuerScope,
+        )
+        val checkoutBasketJson = checkoutBasket.toJson()
+
+        Log.d(
+            TAG,
+            "Captured ${checkoutBasket.items.size} basket items; charge=" +
+                "${chargeAmount.value} ${chargeAmount.unit}",
+        )
+
+        // Clear only after normalization and, where needed, an explicit unit choice succeeded.
+        basketManager.clearBasket()
+
+        val destination = if (TipsManager.getInstance(activity).tipsEnabled) {
+            TipSelectionActivity::class.java
+        } else {
+            PaymentRequestActivity::class.java
+        }
+        val intent = Intent(activity, destination).apply {
+            putExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, chargeAmount.value)
+            putExtra(PaymentRequestActivity.EXTRA_PAYMENT_UNIT, chargeAmount.unit.value)
+            chargeAmount.asset.issuerScope?.let {
+                putExtra(PaymentRequestActivity.EXTRA_PAYMENT_ISSUER_SCOPE, it)
+            }
+            putExtra(PaymentRequestActivity.EXTRA_FORMATTED_AMOUNT, formattedAmount)
+            putExtra(PaymentRequestActivity.EXTRA_CHECKOUT_BASKET_JSON, checkoutBasketJson)
+            savedBasketId?.let { putExtra(PaymentRequestActivity.EXTRA_SAVED_BASKET_ID, it) }
+        }
+        activity.startActivity(intent)
         activity.finish()
     }
 
-    /**
-     * Format the payment amount based on pricing type.
-     * - Pure fiat: Display as fiat currency
-     * - Pure sats: Display as BTC/sats
-     * - Mixed: Treat as pure sats (display as BTC)
-     */
-    private fun formatPaymentAmount(fiatTotal: Double, satsTotal: Long): String {
-        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(activity).getPreferredUnit()
-        val isCustomUnit = preferredUnit.lowercase() != "sat"
-        
-        if (isCustomUnit) {
-            val currencyCode = preferredUnit.uppercase()
-            val currency = Amount.Currency.fromCode(currencyCode)
-            var total = 0.0
-            for (basketItem in basketManager.getBasketItems()) {
-                if (basketItem.isSatsPrice()) {
-                    total += basketItem.item.getGrossSats().toDouble() * basketItem.quantity
-                } else {
-                    total += basketItem.getTotalPrice()
-                }
-            }
-            return Amount.fromMajorUnits(total, currency).toString()
-        }
+    private fun showError(message: Int) {
+        Toast.makeText(activity, message, Toast.LENGTH_LONG).show()
+    }
 
-        return when {
-            // Pure fiat (no sats items) - display as fiat
-            satsTotal == 0L && fiatTotal > 0 -> {
-                val currencyCode = currencyManager.getCurrentCurrency()
-                val currency = Amount.Currency.fromCode(currencyCode)
-                val fiatCents = (fiatTotal * 100).toLong()
-                Amount(fiatCents, currency).toString()
-            }
-            // Pure sats (no fiat items) - display as BTC/sats
-            fiatTotal == 0.0 && satsTotal > 0 -> {
-                Amount(satsTotal, Amount.Currency.BTC).toString()
-            }
-            // Mixed fiat + sats - treat as pure sats (display as BTC)
-            else -> {
-                val btcPrice = bitcoinPriceWorker.getCurrentPrice()
-                val totalSatoshis = basketManager.getTotalSatoshis(btcPrice, activity)
-                Amount(totalSatoshis, Amount.Currency.BTC).toString()
-            }
-        }
+    companion object {
+        private const val TAG = "CheckoutHandler"
+        private const val BITCOIN_QUOTE_MAX_AGE_MS = 5 * 60 * 1_000L
     }
 }

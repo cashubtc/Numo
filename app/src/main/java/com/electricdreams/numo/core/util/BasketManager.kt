@@ -1,7 +1,14 @@
 package com.electricdreams.numo.core.util
 
 import com.electricdreams.numo.core.model.BasketItem
+import com.electricdreams.numo.core.model.AssetId
+import com.electricdreams.numo.core.model.BasketNormalizationResult
+import com.electricdreams.numo.core.model.AtomicAmount
+import com.electricdreams.numo.core.model.BasketPricingEngine
 import com.electricdreams.numo.core.model.Item
+import com.electricdreams.numo.core.model.UnitConversionRate
+import com.electricdreams.numo.core.model.UnitId
+import java.math.BigDecimal
 
 /**
  * Manager class for handling the customer's basket.
@@ -213,49 +220,40 @@ class BasketManager private constructor() {
         return total
     }
 
+    /** Snapshot all gross basket lines without dropping their unit or issuer identity. */
+    fun getPriceLines(legacyFiatUnit: String): List<AtomicAmount> {
+        return basketItems.map { basketItem ->
+            basketItem.getGrossAtomicAmount(legacyFiatUnit)
+        }
+    }
+
     /**
      * Calculate the total price in satoshis (combining fiat and sats priced items).
      * @param btcPrice Current BTC price in fiat.
      * @param context Android context for preferred unit resolution.
      */
+    @Deprecated("Use getPriceLines and BasketPricingEngine so failures remain explicit")
     fun getTotalSatoshis(btcPrice: Double, context: android.content.Context? = null): Long {
-        val preferredUnit = if (context != null) {
-            MintManager.getInstance(context).getPreferredUnit()
+        val fiatUnit = UnitId.of(
+            context?.let { CurrencyManager.getInstance(it).getCurrentCurrency() } ?: "usd",
+        )
+        val rates = if (btcPrice > 0.0) {
+            UnitConversionRate.fromBitcoinPrice(
+                fiatUnit = fiatUnit,
+                fiatPerBitcoin = BigDecimal.valueOf(btcPrice),
+            )
         } else {
-            "sat"
+            emptyList()
         }
-        val lowerUnit = preferredUnit.lowercase()
-        if (lowerUnit != "sat") {
-            val currency = com.electricdreams.numo.core.model.Amount.Currency.fromCode(lowerUnit)
-            
-            // All items (both originally Sats and Fiat) are now treated as priced in the custom unit
-            var total = 0.0
-            for (basketItem in basketItems) {
-                if (basketItem.isSatsPrice()) {
-                    total += basketItem.item.getGrossSats().toDouble() * basketItem.quantity
-                } else {
-                    total += basketItem.getTotalPrice()
-                }
-            }
-            
-            return if (currency.isZeroDecimal()) {
-                total.toLong()
-            } else {
-                Math.round(total * 100)
-            }
+        return when (
+            val result = BasketPricingEngine(rates).normalize(
+                lines = getPriceLines(fiatUnit.value),
+                target = AssetId.global(UnitId.SAT),
+            )
+        ) {
+            is BasketNormalizationResult.Chargeable -> result.amount.value
+            else -> 0L
         }
-
-        // Start with items already priced in sats
-        var totalSats = getTotalSatsDirectPrice()
-        
-        // Convert fiat items to sats if we have a valid BTC price
-        val fiatTotal = getTotalPrice()
-        if (fiatTotal > 0 && btcPrice > 0) {
-            val btcAmount = fiatTotal / btcPrice
-            totalSats += (btcAmount * 100_000_000L).toLong()
-        }
-        
-        return totalSats
     }
     
     /**

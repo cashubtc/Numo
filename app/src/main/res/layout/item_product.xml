@@ -95,6 +95,15 @@
                 tools:text="Medium / Navy Blue"
                 tools:visibility="visible" />
 
+            <!-- Price wraps beneath the name to accommodate custom units and issuers. -->
+            <TextView
+                android:id="@+id/item_price"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/row_subtitle_gap"
+                android:textAppearance="@style/Text.RowSubtitle"
+                tools:text="25,000 POINTS · mint.example" />
+
             <!-- Stock indicator (if tracking inventory) -->
             <TextView
                 android:id="@+id/item_quantity"
@@ -130,14 +139,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
-
-            <!-- Price -->
-            <TextView
-                android:id="@+id/item_price"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="@style/Text.Body"
-                tools:text="$24.99" />
 
             <!-- Disclosure Chevron -->
             <ImageView

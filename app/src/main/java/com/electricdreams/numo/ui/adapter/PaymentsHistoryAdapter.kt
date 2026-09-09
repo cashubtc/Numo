@@ -11,7 +11,11 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.data.model.HistoryEntry
+import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -246,22 +250,34 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             }
 
             // ── Amount display ──
-            val entryUnit = entry.getEntryUnit()
-            val lowerEntryUnit = entryUnit.lowercase()
-            val isCustomUnit = lowerEntryUnit != "sat"
-            
-            val formattedAmount = if (isCustomUnit) {
-                val currency = Amount.Currency.fromCode(lowerEntryUnit)
-                if (currency.symbol != lowerEntryUnit.uppercase()) {
-                    Amount(kotlin.math.abs(entry.enteredAmount), currency).toString()
-                } else {
-                    val formattedNum = Amount(kotlin.math.abs(entry.enteredAmount), currency).toStringWithoutSymbol()
-                    "$formattedNum ${entryUnit.uppercase()}"
+            val paymentUnit = (entry as? PaymentHistoryEntry)
+                ?.getUnit()
+                ?.let(UnitId::ofOrNull)
+                ?.takeUnless { it.isReserved }
+                ?: UnitId.SAT
+            val entryUnit = UnitId.ofOrNull(entry.getEntryUnit())
+            val formattedAmount = when {
+                !paymentUnit.isSat -> UnitAmountFormatter.formatAtomic(
+                    kotlin.math.abs(entry.getBaseAmountSats()),
+                    UnitDescriptor.defaultFor(paymentUnit),
+                )
+                entryUnit != null && !entryUnit.isSat -> {
+                    val currency = Amount.Currency.fromCode(entryUnit.value)
+                    val entered = Amount(kotlin.math.abs(entry.enteredAmount), currency)
+                    if (UnitDescriptor.defaultFor(entryUnit).kind ==
+                        com.electricdreams.numo.core.model.UnitKind.CUSTOM
+                    ) {
+                        "${entered.toStringWithoutSymbol()} " +
+                            UnitDescriptor.defaultFor(entryUnit).displayCode
+                    } else {
+                        entered.toString()
+                    }
                 }
-            } else {
-                val baseAmountSats = kotlin.math.abs(entry.getBaseAmountSats())
-                val satAmount = Amount(baseAmountSats, Amount.Currency.BTC)
-                satAmount.toString()
+                else -> {
+                    val baseAmountSats = kotlin.math.abs(entry.getBaseAmountSats())
+                    val satAmount = Amount(baseAmountSats, Amount.Currency.BTC)
+                    satAmount.toString()
+                }
             }
 
             val displayAmount = if (isPending || isExpired || isFailed) {

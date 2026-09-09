@@ -2,6 +2,10 @@ package com.electricdreams.numo.payment
 
 import android.util.Log
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.model.UnitId
+import com.electricdreams.numo.core.util.MintCapability
+import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.util.MintOperation
 import org.cashudevkit.WalletRepository
 import org.cashudevkit.Wallet
 import kotlinx.coroutines.CoroutineScope
@@ -73,6 +77,7 @@ class LightningMintHandlerTest {
     private lateinit var handler: LightningMintHandler
     private lateinit var cashuWalletManagerMock: org.mockito.MockedStatic<CashuWalletManager>
     private lateinit var logMock: org.mockito.MockedStatic<Log>
+    private lateinit var mockMintManager: MintManager
     
     // Test data
     private val mintUrlStr = "http://localhost:8080" // Port will be updated
@@ -101,7 +106,7 @@ class LightningMintHandlerTest {
         cashuWalletManagerMock = mockStatic(CashuWalletManager::class.java)
             cashuWalletManagerMock.`when`<WalletRepository> { CashuWalletManager.getWallet() }.thenReturn(mockWalletRepository)
         
-        val mockMintManager = mock(com.electricdreams.numo.core.util.MintManager::class.java)
+        mockMintManager = mock(MintManager::class.java)
         `when`(mockMintManager.getPreferredUnit()).thenReturn("sat")
         ReflectionHelpers.setStaticField(com.electricdreams.numo.core.util.MintManager::class.java, "instance", mockMintManager)
         
@@ -117,6 +122,13 @@ class LightningMintHandlerTest {
         `when`(mockMintInfo.nuts).thenReturn(mockNuts)
 
         runBlocking {
+            listOf(useUrl, mintUrlStr).forEach { url ->
+                whenever(mockMintManager.findPaymentMint(
+                    UnitId.SAT, MintOperation.MINT, "bolt11", listOf(url), url,
+                )).thenReturn(MintCapability(
+                    url, UnitId.SAT, MintOperation.MINT, "bolt11", null, null,
+                ))
+            }
             `when`(mockWalletRepository.getWallet(org.mockito.kotlin.any(), org.mockito.kotlin.any())).thenReturn(mockWallet)
             `when`(mockWallet.loadMintInfo()).thenReturn(mockMintInfo)
         }
@@ -139,6 +151,19 @@ class LightningMintHandlerTest {
         ReflectionHelpers.setStaticField(com.electricdreams.numo.core.util.MintManager::class.java, "instance", null)
         logMock.close()
         mockWebServer.shutdown()
+    }
+
+    @Test
+    fun `missing bolt11 route does not request a quote`() = runBlocking<Unit> {
+        val unsupported = LightningMintHandler(
+            mockContext, "https://bolt12.example", listOf("https://bolt12.example"),
+            testScope, UnconfinedTestDispatcher(),
+        )
+
+        unsupported.start(paymentAmount, mockCallback)
+
+        verify(mockCallback).onError(any())
+        verify(mockWallet, never()).mintQuote(any(), any(), any(), any())
     }
 
     @Test

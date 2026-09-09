@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.SavedBasket
+import com.electricdreams.numo.core.model.UnitAmountFormatter
 import com.electricdreams.numo.core.util.CurrencyManager
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -56,15 +57,11 @@ class BasketArchiveAdapter(
         holder.dateText.text = dateFormat.format(date)
 
         // Total amount
-        val totalText = if (basket.hasMixedPriceTypes()) {
-            val fiat = currencyManager.formatCurrencyAmount(basket.getTotalFiatPrice())
-            val sats = "₿${basket.getTotalSatsPrice()}"
-            "$fiat + $sats"
-        } else if (basket.getTotalSatsPrice() > 0) {
-            "₿${basket.getTotalSatsPrice()}"
-        } else {
-            currencyManager.formatCurrencyAmount(basket.getTotalFiatPrice())
-        }
+        val totalText = runCatching {
+            basket.getPriceTotals(currencyManager.getCurrentCurrency())
+                .joinToString(" + ") { UnitAmountFormatter.formatAsset(it) }
+                .ifEmpty { "—" }
+        }.getOrDefault("—")
         holder.totalText.text = totalText
 
         // Item count

@@ -330,6 +330,41 @@
                     android:orientation="vertical"
                     android:padding="0dp">
 
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/price_unit_layout"
+                        style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/space_s"
+                        android:hint="@string/item_entry_price_unit"
+                        android:visibility="gone"
+                        app:hintEnabled="true"
+                        app:endIconMode="dropdown_menu">
+
+                        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                            android:id="@+id/price_unit_input"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="@dimen/settings_item_height"
+                            android:paddingHorizontal="@dimen/space_l"
+                            android:paddingVertical="@dimen/space_l"
+                            android:maxLines="2"
+                            android:inputType="none"
+                            android:textColor="@color/color_text_primary"
+                            android:textSize="18sp" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:id="@+id/price_unit_warning"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/space_l"
+                        android:paddingHorizontal="@dimen/space_l"
+                        android:textAppearance="@style/Text.Caption"
+                        android:textColor="@color/color_text_secondary"
+                        android:visibility="gone" />
+
                     <!-- Price Type Toggle -->
                     <com.google.android.material.button.MaterialButtonToggleGroup
                         android:id="@+id/price_type_toggle"

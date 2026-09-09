@@ -536,6 +536,12 @@
     <string name="item_entry_section_pricing">PRICING</string>
     <string name="item_entry_price_type_fiat">Local Currency</string>
     <string name="item_entry_price_type_bitcoin">Bitcoin</string>
+    <string name="item_entry_price_unit">Price unit</string>
+    <string name="item_entry_custom_unit_warning">Custom units cannot be mixed with other units. Funds remain at the issuing mint.</string>
+    <string name="item_entry_unsupported_unit_warning">No added mint currently supports this item’s unit. Add a compatible mint before charging it.</string>
+    <string name="item_entry_local_currency_conversion_label">%1$s · converted at checkout</string>
+    <string name="item_entry_unscoped_unit_label">%1$s · issuer not specified</string>
+    <string name="item_entry_error_price_too_large">Price is too large</string>
     <string name="item_entry_currency_symbol_default">$</string>
     <string name="item_entry_hint_price_fiat">0.00</string>
     <string name="item_entry_currency_code_default">USD</string>
@@ -556,7 +562,7 @@
     <string name="item_entry_price_breakdown_total_label">Customer pays</string>
     <string name="item_entry_price_breakdown_total_value_default">$0.00</string>
 
-    <string name="item_entry_price_helper">Set a fixed price in your preferred currency. Bitcoin prices are in satoshis (sats).</string>
+    <string name="item_entry_price_helper">Choose a pricing unit for this item. Bitcoin prices use satoshis (sats).</string>
 
     <string name="item_entry_section_identification">BARCODE &amp; SKU</string>
     <string name="item_entry_label_gtin">Barcode</string>
@@ -569,10 +575,13 @@
     <string name="item_entry_error_name_required">Give your item a name</string>
     <string name="item_entry_error_price_required">Enter a price</string>
     <string name="item_entry_error_price_positive">Price can\'t be negative</string>
-    <string name="item_entry_error_price_decimals">Use up to 2 decimal places</string>
+    <plurals name="item_entry_error_price_decimals">
+        <item quantity="one">Use up to %1$d decimal place</item>
+        <item quantity="other">Use up to %1$d decimal places</item>
+    </plurals>
+    <string name="item_entry_error_price_whole_number">Enter a whole number for this unit</string>
     <string name="item_entry_error_sats_required">Enter a price in sats</string>
     <string name="item_entry_error_sats_positive">Sats can\'t be negative</string>
-    <string name="item_entry_error_sats_whole_number">Sats must be a whole number</string>
     <string name="item_entry_error_quantity_positive">Stock can\'t be negative</string>
     <string name="item_entry_error_threshold_positive">Threshold can\'t be negative</string>
 
@@ -978,8 +987,8 @@
     <string name="pin_reset_button">Reset PIN</string>
     <string name="payment_request_tab_unified">Unified</string>
     <string name="payment_request_default_method_set">%1$s set as default payment method</string>
-    <string name="payment_request_default_description">Payment of %1$d sats</string>
-    <string name="payment_request_lightning_description">Numo POS payment of %1$d sats</string>
+    <string name="payment_request_default_description">Payment of %1$s</string>
+    <string name="payment_request_lightning_description">Numo POS payment of %1$s</string>
 
     <!-- Extracted from layout hardcoded strings -->
     <string name="basket_receipt_items_header_default">ITEMS</string>
@@ -1087,4 +1096,5 @@
     <string name="settings_fiat_conversion_disabled_custom_unit">Fiat currency conversion is disabled when using a custom base unit.</string>
     <string name="mints_base_currency_unit_title">Base Currency Unit</string>
     <string name="mints_base_currency_unit_subtitle">If the mint supports other units, you can switch it here.</string>
+    <string name="payment_request_error_unsupported_unit">This payment unit is unavailable. Select a unit supported by one of your added mints.</string>
 </resources>

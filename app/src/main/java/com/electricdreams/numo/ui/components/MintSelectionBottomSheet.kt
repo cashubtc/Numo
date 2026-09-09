@@ -11,7 +11,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
-import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.util.MintManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -35,6 +37,7 @@ class MintSelectionBottomSheet : BottomSheetDialogFragment() {
 
     private var listener: OnMintSelectedListener? = null
     private var mintBalances: Map<String, Long> = emptyMap()
+    private var balanceUnit: String = UnitId.SAT.value
     private lateinit var mintManager: MintManager
 
     companion object {
@@ -42,10 +45,15 @@ class MintSelectionBottomSheet : BottomSheetDialogFragment() {
 
         fun newInstance(
             mintBalances: Map<String, Long>,
+            balanceUnit: String,
             listener: OnMintSelectedListener
         ): MintSelectionBottomSheet {
             return MintSelectionBottomSheet().apply {
                 this.mintBalances = mintBalances
+                this.balanceUnit = UnitId.ofOrNull(balanceUnit)
+                    ?.takeUnless { it.isReserved }
+                    ?.value
+                    ?: UnitId.SAT.value
                 this.listener = listener
             }
         }
@@ -140,9 +148,11 @@ class MintSelectionBottomSheet : BottomSheetDialogFragment() {
             holder.mintName.text = displayName
             holder.mintUrl.text = url.removePrefix("https://").removePrefix("http://")
             
-            // Balance with Amount formatting
-            val amount = Amount(balance, Amount.Currency.BTC)
-            holder.balanceText.text = amount.toString()
+            val unit = UnitId.of(balanceUnit)
+            holder.balanceText.text = UnitAmountFormatter.formatAtomic(
+                balance,
+                UnitDescriptor.defaultFor(unit),
+            )
             
             // Click handler with ripple feedback
             holder.container.setOnClickListener {

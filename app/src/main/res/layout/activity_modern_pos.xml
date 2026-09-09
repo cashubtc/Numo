@@ -101,6 +101,32 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/charge_unit_selector"
+                style="@style/Widget.Numo.Button.Charge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="@dimen/icon_size_large"
+                android:layout_marginHorizontal="@dimen/space_xl"
+                android:layout_marginTop="@dimen/space_s"
+                android:clickable="true"
+                android:contentDescription="@string/pos_charge_unit_selector_description"
+                android:drawableEnd="@drawable/ic_chevron_down"
+                android:drawablePadding="@dimen/space_xs"
+                android:focusable="true"
+                android:gravity="center"
+                android:minWidth="@dimen/space_5xl"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:paddingHorizontal="@dimen/space_l"
+                android:paddingVertical="@dimen/space_s"
+                android:visibility="gone"
+                app:drawableTint="@color/color_bg_white"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/error_message" />
+
             <!-- Amount Display -->
             <TextView
                 android:id="@+id/amount_display"
@@ -125,7 +151,7 @@
                 app:layout_constraintBottom_toTopOf="@+id/secondary_amount_container"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/error_message"
+                app:layout_constraintTop_toBottomOf="@+id/charge_unit_selector"
                 app:layout_constraintVertical_chainStyle="packed" />
 
             <!-- Secondary Amount Display with Swap Icon -->

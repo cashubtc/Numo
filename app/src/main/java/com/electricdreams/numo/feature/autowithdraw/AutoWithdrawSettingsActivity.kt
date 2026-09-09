@@ -12,7 +12,6 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.EditText
 import android.widget.FrameLayout
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -25,7 +24,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.core.view.ViewCompat
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
@@ -265,6 +263,8 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             // Show beautiful bottom sheet
             val bottomSheet = MintSelectionBottomSheet.newInstance(
                 mintBalances = mintsWithBalance,
+                balanceUnit = MintManager.getInstance(this@AutoWithdrawSettingsActivity)
+                    .getPreferredUnit(),
                 listener = object : MintSelectionBottomSheet.OnMintSelectedListener {
                     override fun onMintSelected(mintUrl: String, balance: Long) {
                         openWithdrawScreen(mintUrl, balance)

@@ -2,6 +2,8 @@ package com.electricdreams.numo.core.util
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.electricdreams.numo.core.model.AssetId
+import com.electricdreams.numo.core.model.UnitId
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -117,5 +119,52 @@ class MintManagerTest {
         val raw = "  mint.test.com/  "
         mintManager.addMint(raw)
         assertTrue(mintManager.isMintAllowed("https://mint.test.com"))
+    }
+
+    @Test
+    fun `supported units are the canonical union across added mints`() {
+        val mintA = "https://mint-a.example"
+        val mintB = "https://mint-b.example"
+        mintManager.addMint(mintA)
+        mintManager.addMint(mintB)
+        mintManager.setMintUnits(mintA, listOf("SAT", "points", "auth"))
+        mintManager.setMintUnits(mintB, listOf("usd", "POINTS"))
+
+        val supported = mintManager.getSupportedUnits().map { it.value }
+
+        assertEquals(listOf("points", "sat", "usd"), supported)
+        assertEquals(listOf(mintA, mintB), mintManager.getMintsSupportingUnit("points").sorted())
+        assertFalse(mintManager.mintSupportsUnit(mintA, "usd"))
+        val chargeAssets = mintManager.getSupportedChargeAssets()
+        assertTrue(chargeAssets.contains(AssetId.global(UnitId.SAT)))
+        assertTrue(chargeAssets.contains(AssetId.mintScoped(UnitId.of("points"), mintA)))
+        assertTrue(chargeAssets.contains(AssetId.mintScoped(UnitId.of("points"), mintB)))
+    }
+
+    @Test
+    fun `discovering custom units preserves offline legacy sat mints`() {
+        val customMint = "https://custom.example"
+        mintManager.addMint(customMint)
+        mintManager.setMintUnits(customMint, listOf("points"))
+
+        assertTrue(mintManager.getSupportedUnits().contains(UnitId.SAT))
+        assertTrue(mintManager.getSupportedChargeAssets().contains(AssetId.global(UnitId.SAT)))
+    }
+
+    @Test
+    fun `an explicitly empty unit list does not advertise the preferred unit`() {
+        mintManager.getAllowedMints().forEach { mintManager.setMintUnits(it, emptyList()) }
+
+        assertTrue(mintManager.getSupportedUnits().isEmpty())
+        assertTrue(mintManager.getSupportedChargeAssets().isEmpty())
+    }
+
+    @Test
+    fun `unknown metadata only uses legacy sat fallback`() {
+        val mint = "https://unknown-metadata.example"
+        mintManager.addMint(mint)
+
+        assertTrue(mintManager.mintSupportsUnit(mint, "sat"))
+        assertFalse(mintManager.mintSupportsUnit(mint, "points"))
     }
 }

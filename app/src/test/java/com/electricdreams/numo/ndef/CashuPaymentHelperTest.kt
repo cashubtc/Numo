@@ -1,5 +1,8 @@
 package com.electricdreams.numo.ndef
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.ndef.CashuPaymentHelper.extractCashuToken
 import com.electricdreams.numo.ndef.CashuPaymentHelper.isCashuPaymentRequest
 import com.electricdreams.numo.ndef.CashuPaymentHelper.isCashuToken
@@ -8,6 +11,7 @@ import com.google.gson.JsonParser
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -67,6 +71,62 @@ class CashuPaymentHelperTest {
         val token = extractCashuToken(text)
 
         assertNull(token)
+    }
+
+    @Test
+    fun `payment request carries explicit custom unit amount and mints`() {
+        val generated = CashuPaymentHelper.createPaymentRequest(
+            amount = 42L,
+            unit = "POINTS",
+            description = "Arcade credit",
+            allowedMints = listOf("https://mint.example"),
+        )
+
+        assertNotNull(generated)
+        val encoded = generated?.original.orEmpty()
+        val payload = android.util.Base64.decode(
+            encoded.removePrefix("creqA"),
+            android.util.Base64.URL_SAFE or
+                android.util.Base64.NO_WRAP or
+                android.util.Base64.NO_PADDING,
+        )
+        val cbor = com.upokecenter.cbor.CBORObject.DecodeFromBytes(payload)
+        assertEquals("points", cbor["u"].AsString())
+        assertEquals(42L, cbor["a"].AsInt64())
+        assertEquals("https://mint.example", cbor["m"][0].AsString())
+    }
+
+    @Test
+    fun `reserved unit cannot create a payment request`() {
+        assertNull(
+            CashuPaymentHelper.createPaymentRequest(
+                amount = 1L,
+                unit = "auth",
+                description = null,
+                allowedMints = null,
+            ),
+        )
+    }
+
+    @Test
+    fun `unknown mint acceptance requires a compatible destination and an unscoped asset`() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val manager = MintManager.getInstance(context)
+        manager.setMintChangeListener(null)
+        manager.getAllowedMints().toList().forEach { manager.removeMint(it) }
+        val mint = "https://destination.example"
+        manager.addMint(mint)
+        manager.setMintUnits(mint, listOf("sat", "points"))
+        manager.setMintInfo(mint, """{"nuts":{"4":{"methods":[
+            {"method":"bolt12","unit":"sat"}, {"method":"bolt11","unit":"points"}
+        ]}}}""")
+        assertFalse(CashuPaymentHelper.supportsUnknownMintSwap(context, "sat"))
+        assertFalse(CashuPaymentHelper.supportsUnknownMintSwap(context, "points"))
+        manager.setMintInfo(mint, """{"nuts":{"4":{"methods":[
+            {"method":"bolt11","unit":"sat"}
+        ]}}}""")
+        assertTrue(CashuPaymentHelper.supportsUnknownMintSwap(context, "sat"))
+        assertFalse(CashuPaymentHelper.supportsUnknownMintSwap(context, "auth"))
     }
 
 }

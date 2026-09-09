@@ -138,6 +138,11 @@ class OnboardingActivityTest {
             val mintUrl = server.url("/").toString().removeSuffix("/")
             server.enqueue(MockResponse().setResponseCode(200).setBody("{\"name\":\"Test Mint\"}"))
             server.enqueue(MockResponse().setResponseCode(200).setBody("{\"name\":\"Test Mint\"}"))
+            server.enqueue(
+                MockResponse()
+                    .setResponseCode(200)
+                    .setBody("{\"keysets\":[{\"id\":\"test\",\"unit\":\"sat\",\"active\":true}]}")
+            )
 
             ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
                 scenario.onActivity { activity ->

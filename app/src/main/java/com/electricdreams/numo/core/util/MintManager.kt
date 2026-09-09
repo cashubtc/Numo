@@ -5,6 +5,10 @@ import android.content.SharedPreferences
 import android.util.Log
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.backup.DeviceRecoveryBackup
+import com.electricdreams.numo.core.model.AssetId
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
+import com.electricdreams.numo.core.model.UnitKind
 import com.electricdreams.numo.nostr.NostrMintBackup
 import org.json.JSONObject
 import java.net.URI
@@ -27,6 +31,7 @@ class MintManager private constructor(context: Context) {
         private const val KEY_ENABLE_SWAP_UNKNOWN_MINTS = "enableSwapUnknownMints"
         private const val KEY_PREFERRED_UNIT = "preferredBaseUnit"
         private const val KEY_MINT_INFO_PREFIX = "mintInfo_"
+        private const val KEY_MINT_UNITS_PREFIX = "mintUnits_"
         private const val KEY_MINT_REFRESH_PREFIX = "mintRefresh_"
         private const val REFRESH_INTERVAL_MS = 60 * 1000L // 1 minute
 
@@ -75,7 +80,8 @@ class MintManager private constructor(context: Context) {
         preferences.getString(KEY_PREFERRED_LIGHTNING_MINT, null)
 
     private var preferredUnit: String =
-        preferences.getString(KEY_PREFERRED_UNIT, "sat") ?: "sat"
+        UnitId.ofOrNull(preferences.getString(KEY_PREFERRED_UNIT, "sat"))?.value
+            ?: UnitId.SAT.value
 
     private var enableSwapFromUnknownMints: Boolean =
         preferences.getBoolean(KEY_ENABLE_SWAP_UNKNOWN_MINTS, true)
@@ -107,25 +113,103 @@ class MintManager private constructor(context: Context) {
      */
     fun hasAnyMints(): Boolean = allowedMints.isNotEmpty()
 
-    /**
-     * Check if a mint supports a specific unit based on its cached info.
-     * Defaults to true if no cached info is available or on parsing errors.
-     */
+    /** Check whether a mint explicitly advertises a unit. */
     fun mintSupportsUnit(mintUrl: String, unit: String): Boolean {
-        val infoJson = getMintInfo(mintUrl) ?: return true
-        return try {
-            val cachedInfo = CashuWalletManager.mintInfoFromJson(infoJson) ?: return true
-            val limits = cachedInfo.mintLimits ?: return true
-            
-            val unitLower = unit.lowercase()
-            val hasMintUnit = limits.mintMethods.any { it.unit.lowercase() == unitLower && !it.disabled }
-            val hasMeltUnit = limits.meltMethods.any { it.unit.lowercase() == unitLower && !it.disabled }
-            
-            hasMintUnit || hasMeltUnit
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse mint info for unit check of $mintUrl", e)
-            true
+        val unitId = UnitId.ofOrNull(unit) ?: return false
+        val units = getMintUnits(mintUrl)
+        if (units.isNotEmpty() || hasMintUnitCache(mintUrl)) {
+            return unitId in units
         }
+
+        // Preserve offline compatibility for old sat-only installations, but never guess support
+        // for a non-sat unit. Unit metadata refresh will replace this legacy fallback.
+        return unitId.isSat
+    }
+
+    /** Persist units discovered from NUT-02/NUT-01 endpoints for one mint. */
+    fun setMintUnits(mintUrl: String, units: Collection<String>) {
+        val normalized = normalizeMintUrl(mintUrl)
+        val previous = getMintUnits(normalized)
+        val canonicalUnits = units.mapNotNull(UnitId::ofOrNull)
+            .filterNot { it.isReserved }
+            .map { it.value }
+            .distinct()
+            .sorted()
+        preferences.edit()
+            .putString(KEY_MINT_UNITS_PREFIX + normalized, canonicalUnits.joinToString(","))
+            .apply()
+        val updated = canonicalUnits.mapTo(linkedSetOf(), UnitId::of)
+        if (previous != updated) {
+            listener?.onMintsChanged(getAllowedMints())
+        }
+    }
+
+    /** Units advertised by a mint, falling back to unit/method pairs cached from NUT-04/05. */
+    fun getMintUnits(mintUrl: String): Set<UnitId> {
+        val normalized = normalizeMintUrl(mintUrl)
+        val key = KEY_MINT_UNITS_PREFIX + normalized
+        if (preferences.contains(key)) {
+            return preferences.getString(key, "")
+                .orEmpty()
+                .split(',')
+                .mapNotNull(UnitId::ofOrNull)
+                .filterNot { it.isReserved }
+                .toSet()
+        }
+
+        val infoJson = getMintInfo(normalized) ?: return emptySet()
+        return try {
+            val limits = CashuWalletManager.mintInfoFromJson(infoJson)?.mintLimits
+                ?: return emptySet()
+            (limits.mintMethods + limits.meltMethods)
+                .asSequence()
+                .filterNot { it.disabled }
+                .mapNotNull { UnitId.ofOrNull(it.unit) }
+                .filterNot { it.isReserved }
+                .toSet()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to parse mint units for $normalized", e)
+            emptySet()
+        }
+    }
+
+    /** Union of spendable units advertised by all mints the user has added. */
+    fun getSupportedUnits(): List<UnitId> {
+        val units = allowedMints.flatMapTo(linkedSetOf()) { mintUrl ->
+            val advertised = getMintUnits(mintUrl)
+            if (advertised.isEmpty() && !hasMintUnitCache(mintUrl)) {
+                setOf(UnitId.SAT)
+            } else {
+                advertised
+            }
+        }
+        return units.sortedBy { it.value }
+    }
+
+    /**
+     * Economic assets available for a charge. Standard units are globally identified; custom
+     * units remain scoped to each issuing mint until explicit fungibility support exists.
+     */
+    fun getSupportedChargeAssets(): List<AssetId> {
+        return getSupportedUnits().flatMap { unit ->
+            val supportingMints = getMintsSupportingUnit(unit.value)
+            when {
+                supportingMints.isEmpty() -> emptyList()
+                UnitDescriptor.defaultFor(unit).kind == UnitKind.CUSTOM ->
+                    supportingMints.map { AssetId.mintScoped(unit, it) }
+                else -> listOf(AssetId.global(unit))
+            }
+        }.distinct()
+    }
+
+    fun getMintsSupportingUnit(unit: String): List<String> {
+        val unitId = UnitId.ofOrNull(unit) ?: return emptyList()
+        return allowedMints.filter { mintSupportsUnit(it, unitId.value) }
+    }
+
+    private fun hasMintUnitCache(mintUrl: String): Boolean {
+        val normalized = normalizeMintUrl(mintUrl)
+        return preferences.contains(KEY_MINT_UNITS_PREFIX + normalized)
     }
 
     /**
@@ -134,8 +218,15 @@ class MintManager private constructor(context: Context) {
      * Falls back to the first allowed supporting mint if not set or invalid.
      */
     fun getPreferredLightningMint(): String? {
-        val activeUnit = getPreferredUnit()
-        val supportingMints = allowedMints.filter { mintSupportsUnit(it, activeUnit) }
+        return getPreferredLightningMint(getPreferredUnit())
+    }
+
+    /**
+     * Resolve the preferred Lightning mint for an immutable payment unit.
+     * This avoids consulting mutable global unit state after checkout begins.
+     */
+    fun getPreferredLightningMint(unit: String): String? {
+        val supportingMints = allowedMints.filter { mintSupportsUnit(it, unit) }
         
         val preferred = preferredLightningMint
         if (preferred != null && supportingMints.contains(preferred)) {
@@ -193,18 +284,21 @@ class MintManager private constructor(context: Context) {
      * Set the preferred base unit.
      */
     fun setPreferredUnit(unit: String) {
-        if (preferredUnit == unit) return
-        preferredUnit = unit
-        preferences.edit().putString(KEY_PREFERRED_UNIT, unit).apply()
-        Log.d(TAG, "Preferred unit changed to: $unit")
+        val unitId = UnitId.of(unit)
+        require(!unitId.isReserved) { "Reserved unit cannot be selected for payments" }
+        val canonicalUnit = unitId.value
+        if (preferredUnit == canonicalUnit) return
+        preferredUnit = canonicalUnit
+        preferences.edit().putString(KEY_PREFERRED_UNIT, canonicalUnit).apply()
+        Log.d(TAG, "Preferred unit changed to: $canonicalUnit")
         
         // Auto-migrate preferred Lightning mint if it doesn't support the new unit
         val currentPreferred = preferredLightningMint
-        if (currentPreferred != null && !mintSupportsUnit(currentPreferred, unit)) {
-            val supportingMints = allowedMints.filter { mintSupportsUnit(it, unit) }
+        if (currentPreferred != null && !mintSupportsUnit(currentPreferred, canonicalUnit)) {
+            val supportingMints = allowedMints.filter { mintSupportsUnit(it, canonicalUnit) }
             preferredLightningMint = supportingMints.firstOrNull()
             savePreferredLightningMint()
-            Log.d(TAG, "Migrated preferred Lightning mint to: $preferredLightningMint because $currentPreferred doesn't support $unit")
+            Log.d(TAG, "Migrated preferred Lightning mint to: $preferredLightningMint because $currentPreferred doesn't support $canonicalUnit")
         }
         
         // Treat as a mints change so that CashuWalletManager rebuilds the wallet with the new unit
@@ -381,131 +475,60 @@ class MintManager private constructor(context: Context) {
         return null
     }
 
+    /** Cached capabilities for UI availability. Missing metadata never implies support. */
+    fun getCachedCapabilities(mintUrl: String): MintCapabilities = MintCapabilities(
+        normalizeMintUrl(mintUrl),
+        getMintInfo(mintUrl)?.let { CashuWalletManager.extractMintLimitsFromJson(it) },
+    )
+
+    suspend fun getMintCapabilities(mintUrl: String): MintCapabilities = MintCapabilities(
+        normalizeMintUrl(mintUrl), getMintLimits(mintUrl, context),
+    )
+
+    /** Resolve an advertised route within the payment's allowed issuers, preferring the user's mint. */
+    suspend fun findPaymentMint(
+        unit: UnitId,
+        operation: MintOperation,
+        method: String,
+        candidates: List<String> = getMintsSupportingUnit(unit.value),
+        preferredMint: String? = getPreferredLightningMint(unit.value),
+    ): MintCapability? {
+        val preferred = preferredMint?.let { normalizeMintUrl(it) }
+        val ordered = candidates.map { normalizeMintUrl(it) }.distinct()
+            .sortedBy { if (it == preferred) 0 else 1 }
+        for (mintUrl in ordered) {
+            getMintCapabilities(mintUrl).find(unit, operation, method)?.let { return it }
+        }
+        return null
+    }
+
     /**
-     * Get the mint limits for a mint URL.
-     * First checks cache, then fetches fresh from network if cache doesn't have limits.
-     * The isFirstFetch parameter should be true only when the app first opens.
+     * Read both operations, including melt-only and explicitly empty settings. A successful refresh
+     * replaces old capabilities; only a failed fetch may fall back to the cached snapshot.
      */
-    suspend fun getMintLimits(mintUrl: String, context: android.content.Context, forceRefresh: Boolean = false, isFirstFetch: Boolean = false): CashuWalletManager.MintLimits? {
-        Log.d(TAG, "getMintLimits() called with mintUrl=$mintUrl, forceRefresh=$forceRefresh, isFirstFetch=$isFirstFetch")
-        
-        // Always normalize the URL for cache lookup
+    suspend fun getMintLimits(
+        mintUrl: String,
+        context: android.content.Context,
+        forceRefresh: Boolean = false,
+        isFirstFetch: Boolean = false,
+    ): CashuWalletManager.MintLimits? {
         val normalizedUrl = normalizeMintUrl(mintUrl)
-        Log.d(TAG, "Normalized URL for cache lookup: $normalizedUrl")
-        
-        // First try cache (works offline) - only if NOT force refresh
-        if (!forceRefresh) {
-            val infoJson = getMintInfo(mintUrl)
-            if (infoJson != null) {
-                try {
-                    val cachedInfo = CashuWalletManager.mintInfoFromJson(infoJson)
-                    val cachedLimits = cachedInfo?.mintLimits
-                    
-                    if (cachedLimits != null && cachedLimits.mintMethods.isNotEmpty()) {
-                        Log.d(TAG, "Returning cached limits: $cachedLimits")
-                        return cachedLimits
-                    }
-                } catch (e: Exception) {
-                    Log.w(TAG, "Failed to parse cached mint info", e)
-                }
-            }
-        } else {
-            Log.d(TAG, "forceRefresh=true, skipping cache and fetching from network")
+        val cachedLimits = getMintInfo(normalizedUrl)?.let {
+            CashuWalletManager.extractMintLimitsFromJson(it)
         }
-        
-        // Cache miss, stale, or force refresh - fetch from network
-        // Pass isFirstFetch to control whether to store the result in cache
-        return fetchMintLimitsSimple(mintUrl, context, isFirstFetch, forceRefresh)
-    }
-    
-    /**
-     * Simple fetch - returns exactly what the mint provides.
-     * Only updates cache on first call (when app opens), then uses existing cache.
-     * This prevents inconsistent responses from mints like Minibits from overwriting valid limits.
-     */
-    private suspend fun fetchMintLimitsSimple(mintUrl: String, context: android.content.Context, isFirstFetch: Boolean = false, forceRefresh: Boolean = false): CashuWalletManager.MintLimits? {
-        return try {
-            val normalizedUrl = normalizeMintUrl(mintUrl)
-            Log.d(TAG, "fetchMintLimitsSimple: normalizedUrl=$normalizedUrl, isFirstFetch=$isFirstFetch")
-            
-            // Get cache info BEFORE fetching (for fallback)
-            val cachedInfoBefore = getMintInfo(normalizedUrl)
-            val cachedLimitsBefore = cachedInfoBefore?.let {
-                try {
-                    CashuWalletManager.mintInfoFromJson(it)?.mintLimits
-                } catch (e: Exception) { null }
+        if (!forceRefresh && !isFirstFetch && cachedLimits != null) return cachedLimits
+
+        val result = MintProfileService.getInstance(context).fetchAndStoreMintProfile(
+            normalizedUrl, validateEndpoint = false, storeInCache = true,
+        )
+        if (result.success) {
+            return getMintInfo(normalizedUrl)?.let {
+                CashuWalletManager.extractMintLimitsFromJson(it)
             }
-            val hasCachedLimitsBefore = cachedLimitsBefore != null && cachedLimitsBefore.mintMethods.isNotEmpty()
-            Log.d(TAG, "Cached limits before fetch: $cachedLimitsBefore, hasValid: $hasCachedLimitsBefore")
-            
-            val profileService = MintProfileService.getInstance(context)
-            
-            // Fetch if it's the first fetch, if there's no cache, OR if a force refresh is explicitly requested
-            val shouldStore = isFirstFetch || !hasCachedLimitsBefore || forceRefresh
-            
-            if (shouldStore) {
-                val result = profileService.fetchAndStoreMintProfile(normalizedUrl, validateEndpoint = false, storeInCache = true)
-                Log.d(TAG, "fetchMintLimitsSimple result: success=${result.success}, stored=$shouldStore")
-                
-                if (result.success) {
-                    // If the fetch succeeded, get the limits from the response
-                    val infoJson = getMintInfo(normalizedUrl)
-                    val cachedInfo = infoJson?.let { CashuWalletManager.mintInfoFromJson(it) }
-                    val newLimits = cachedInfo?.mintLimits
-                    
-                    // If new limits are valid (not null and has methods), use them
-                    // Otherwise, fallback to cached limits (for mints like Minibits that sometimes return empty nuts)
-                    if (newLimits != null && newLimits.mintMethods.isNotEmpty()) {
-                        Log.d(TAG, "Fetch succeeded with valid limits: $newLimits")
-                        return newLimits
-                    } else if (cachedLimitsBefore != null && cachedLimitsBefore.mintMethods.isNotEmpty()) {
-                        Log.d(TAG, "Fetch returned empty limits, using cached fallback: $cachedLimitsBefore")
-                        // Restore the cache to previous valid state
-                        cachedInfoBefore?.let {
-                            preferences.edit().putString(KEY_MINT_INFO_PREFIX + normalizedUrl, it).apply()
-                        }
-                        return cachedLimitsBefore
-                    }
-                    // No limits at all - return null
-                    Log.d(TAG, "Fetch succeeded but no limits (null), no cache to fallback")
-                    return null
-                }
-            } else {
-                // Skip fetch, use existing cache
-                Log.d(TAG, "Skipping fetch - using existing cache (not first fetch)")
-            }
-            
-            // Get info from cache (either newly stored or existing)
-            val infoJson = getMintInfo(normalizedUrl)
-            if (infoJson != null) {
-                val cachedInfo = CashuWalletManager.mintInfoFromJson(infoJson)
-                val limits = cachedInfo?.mintLimits
-                Log.d(TAG, "Cache returned: $limits")
-                
-                // If we have valid limits, use them
-                if (limits != null && limits.mintMethods.isNotEmpty()) {
-                    Log.d(TAG, "Using cached limits (has valid mint methods)")
-                    return limits
-                }
-            }
-            
-            // Fetch failed or no valid limits, use cached if available
-            if (hasCachedLimitsBefore) {
-                Log.d(TAG, "Using cached limits as fallback")
-                cachedInfoBefore?.let {
-                    preferences.edit().putString(KEY_MINT_INFO_PREFIX + normalizedUrl, it).apply()
-                }
-                return cachedLimitsBefore
-            }
-            
-            Log.d(TAG, "No valid limits available, returning null")
-            return null
-        } catch (e: Exception) {
-            Log.e(TAG, "fetchMintLimitsSimple failed", e)
-            return null
         }
+        return cachedLimits
     }
-    
+
     /**
      * Get the primary mint URL used for Lightning payments.
      */

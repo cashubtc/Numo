@@ -2,31 +2,40 @@ package com.electricdreams.numo.feature.items.handlers
 
 import android.text.Editable
 import android.text.InputFilter
+import android.text.InputType
 import android.text.TextWatcher
+import android.text.method.DigitsKeyListener
+import android.util.Log
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.electricdreams.numo.R
-import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.model.AssetId
+import com.electricdreams.numo.core.model.AtomicAmount
 import com.electricdreams.numo.core.model.PriceType
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
+import com.electricdreams.numo.core.model.UnitKind
+import com.electricdreams.numo.core.model.UnitAmountFormatter
 import com.electricdreams.numo.core.util.CurrencyManager
+import com.electricdreams.numo.core.util.MintManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.materialswitch.MaterialSwitch
+import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputLayout
+import java.math.BigDecimal
 
-/**
- * Handles all pricing-related UI and logic including:
- * - Price type toggle (Fiat vs Bitcoin)
- * - VAT section management
- * - Price breakdown calculations
- * - Input validation for prices
- */
+/** Handles item pricing, explicit unit selection, input precision, and VAT display. */
 class PricingHandler(
     private val priceTypeToggle: MaterialButtonToggleGroup,
     private val btnPriceFiat: MaterialButton,
     private val btnPriceBitcoin: MaterialButton,
+    private val priceUnitLayout: TextInputLayout,
+    private val priceUnitInput: MaterialAutoCompleteTextView,
+    private val priceUnitWarning: TextView,
     private val fiatPriceLayout: TextInputLayout,
     private val satsPriceLayout: TextInputLayout,
     private val priceInput: EditText,
@@ -41,14 +50,24 @@ class PricingHandler(
     private val textVatLabel: TextView,
     private val textVatAmount: TextView,
     private val textGrossPrice: TextView,
-    private val currencyManager: CurrencyManager
+    private val currencyManager: CurrencyManager,
 ) {
-    private var currentPriceType: PriceType = PriceType.FIAT
+    private data class PriceUnitOption(
+        val asset: AssetId,
+        val label: String,
+        val directlyChargeable: Boolean,
+        val convertibleToSat: Boolean = false,
+    )
 
-    /**
-     * Initializes pricing controls with listeners and validation.
-     */
+    private var currentPriceType: PriceType = PriceType.FIAT
+    private var unitAwareMode: Boolean = false
+    private var priceUnitOptions: MutableList<PriceUnitOption> = mutableListOf()
+    private var selectedPriceAsset: AssetId = AssetId.global(
+        UnitId.of(currencyManager.getCurrentCurrency()),
+    )
+
     fun initialize() {
+        setupUnitSelection()
         setupPriceTypeToggle()
         setupVatSection()
         setupInputValidation()
@@ -56,66 +75,88 @@ class PricingHandler(
         updateVatSectionVisibility()
     }
 
-    /**
-     * Gets the current price type selection.
-     */
     fun getCurrentPriceType(): PriceType = currentPriceType
 
-    /**
-     * Sets the current price type (used when loading existing item data).
-     */
+    fun getSelectedUnitDescriptor(): UnitDescriptor =
+        UnitDescriptor.defaultFor(selectedPriceAsset.unit)
+
     fun setCurrentPriceType(priceType: PriceType) {
-        currentPriceType = priceType
-        when (priceType) {
-            PriceType.FIAT -> {
-                priceTypeToggle.check(R.id.btn_price_fiat)
-                fiatPriceLayout.visibility = View.VISIBLE
-                satsPriceLayout.visibility = View.GONE
-            }
-            PriceType.SATS -> {
-                priceTypeToggle.check(R.id.btn_price_bitcoin)
-                fiatPriceLayout.visibility = View.GONE
-                satsPriceLayout.visibility = View.VISIBLE
+        val targetUnit = when (priceType) {
+            PriceType.FIAT -> UnitId.of(currencyManager.getCurrentCurrency())
+            PriceType.SATS -> UnitId.SAT
+        }
+        if (unitAwareMode) {
+            priceUnitOptions.firstOrNull { it.asset.unit == targetUnit }?.let {
+                selectUnitOption(it)
+                return
             }
         }
+
+        currentPriceType = priceType
+        selectedPriceAsset = AssetId.global(targetUnit)
+        priceTypeToggle.check(
+            if (priceType == PriceType.FIAT) R.id.btn_price_fiat else R.id.btn_price_bitcoin,
+        )
+        updatePriceInputVisibility()
+        updateCurrencyDisplay()
         updateVatSectionVisibility()
     }
 
-    /**
-     * Gets the VAT rate from the input field.
-     */
+    /** Select an existing item's exact asset, including its custom-unit issuer. */
+    fun setSelectedPriceAsset(asset: AssetId) {
+        if (!unitAwareMode && (
+                asset == AssetId.global(UnitId.SAT) ||
+                    asset == AssetId.global(UnitId.of(currencyManager.getCurrentCurrency()))
+                )
+        ) {
+            setCurrentPriceType(if (asset.unit.isSat) PriceType.SATS else PriceType.FIAT)
+            return
+        }
+
+        if (!unitAwareMode) {
+            unitAwareMode = true
+            priceTypeToggle.visibility = View.GONE
+            priceUnitLayout.visibility = View.VISIBLE
+        }
+        var option = priceUnitOptions.firstOrNull { it.asset == asset }
+        if (option == null) {
+            option = PriceUnitOption(
+                asset = asset,
+                label = unsupportedOptionLabel(asset),
+                directlyChargeable = false,
+            )
+            priceUnitOptions.add(option)
+            refreshUnitAdapter()
+        }
+        selectUnitOption(option)
+    }
+
     fun getVatRate(): Int = vatRateInput.text.toString().toIntOrNull() ?: 0
 
-    /**
-     * Gets whether VAT is enabled.
-     */
     fun isVatEnabled(): Boolean = switchVatEnabled.isChecked
 
-    /**
-     * Gets whether the entered price includes VAT.
-     */
     fun isPriceIncludesVat(): Boolean = switchPriceIncludesVat.isChecked
 
-    /**
-     * Gets the entered fiat price as a Double.
-     * Normalizes comma decimal separator to period.
-     */
     fun getEnteredFiatPrice(): Double {
-        val priceStr = priceInput.text.toString().trim().replace(",", ".")
-        return priceStr.toDoubleOrNull() ?: 0.0
+        val priceString = priceInput.text.toString().trim().replace(",", ".")
+        return priceString.toDoubleOrNull() ?: 0.0
     }
 
-    /**
-     * Gets the entered sats price as a Long.
-     */
-    fun getEnteredSatsPrice(): Long {
-        val satsStr = satsInput.text.toString().trim()
-        return satsStr.toLongOrNull() ?: 0L
+    fun getEnteredSatsPrice(): Long =
+        satsInput.text.toString().trim().toLongOrNull() ?: 0L
+
+    /** Parse input exactly according to the selected unit's fraction digits. */
+    fun getEnteredAtomicAmount(): AtomicAmount {
+        val descriptor = getSelectedUnitDescriptor()
+        val rawValue = if (currentPriceType == PriceType.SATS) {
+            satsInput.text.toString()
+        } else {
+            priceInput.text.toString()
+        }.trim().replace(",", ".")
+        val majorValue = rawValue.toBigDecimalOrNull() ?: BigDecimal.ZERO
+        return AtomicAmount.fromMajorUnits(majorValue, selectedPriceAsset, descriptor)
     }
 
-    /**
-     * Sets VAT-related fields (used when loading existing item data).
-     */
     fun setVatFields(vatEnabled: Boolean, vatRate: Int, priceIncludesVat: Boolean) {
         switchVatEnabled.isChecked = vatEnabled
         vatFieldsContainer.visibility = if (vatEnabled) View.VISIBLE else View.GONE
@@ -126,148 +167,303 @@ class PricingHandler(
         updatePriceBreakdown()
     }
 
-    /**
-     * Sets the fiat price input value (used when loading existing item data).
-     */
     fun setFiatPrice(price: Double) {
-        priceInput.setText(formatFiatPrice(price))
+        priceInput.setText(formatMajorPrice(BigDecimal.valueOf(price)))
     }
 
-    /**
-     * Sets the sats price input value (used when loading existing item data).
-     */
     fun setSatsPrice(sats: Long) {
         satsInput.setText(sats.toString())
     }
 
-    fun updateCurrencyDisplay() {
-        val context = priceInput.context
-        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
-        val isCustomUnit = preferredUnit.lowercase() != "sat"
-        
-        if (isCustomUnit) {
-            val activeCurrencyCode = preferredUnit.uppercase()
-            val currency = Amount.Currency.fromCode(activeCurrencyCode)
-            fiatPriceLayout.prefixText = currency.symbol
-            fiatPriceLayout.suffixText = currency.name
+    fun setAtomicPrice(amount: AtomicAmount) {
+        setSelectedPriceAsset(amount.asset)
+        val descriptor = getSelectedUnitDescriptor()
+        val displayValue = amount.toMajorUnits(descriptor)
+            .setScale(descriptor.fractionDigits)
+            .toPlainString()
+        if (amount.unit.isSat) {
+            satsInput.setText(displayValue)
         } else {
-            fiatPriceLayout.prefixText = currencyManager.getCurrentSymbol()
-            fiatPriceLayout.suffixText = currencyManager.getCurrentCurrency()
+            priceInput.setText(displayValue)
         }
     }
 
-    /**
-     * Validates the fiat price format (max 2 decimal places, accepts . or , as separator).
-     */
+    fun updateCurrencyDisplay() {
+        val descriptor = getSelectedUnitDescriptor()
+        if (!unitAwareMode && currentPriceType == PriceType.FIAT) {
+            fiatPriceLayout.prefixText = currencyManager.getCurrentSymbol()
+            fiatPriceLayout.suffixText = currencyManager.getCurrentCurrency()
+            return
+        }
+
+        fiatPriceLayout.prefixText = descriptor.symbol.takeIf {
+            it != descriptor.displayCode
+        }
+        fiatPriceLayout.suffixText = descriptor.displayCode
+        fiatPriceLayout.hint = if (descriptor.fractionDigits == 0) "0" else {
+            "0." + "0".repeat(descriptor.fractionDigits)
+        }
+    }
+
     fun isValidFiatPrice(price: String): Boolean {
-        val pattern = "^(?:\\d+(?:[.,]\\d{0,2})?|[.,]\\d{1,2})$".toRegex()
+        val fractionDigits = getSelectedUnitDescriptor().fractionDigits
+        val pattern = if (fractionDigits == 0) {
+            "^\\d+$"
+        } else {
+            "^(?:\\d+(?:[.,]\\d{0,$fractionDigits})?|[.,]\\d{1,$fractionDigits})$"
+        }.toRegex()
         return pattern.matches(price)
     }
 
-    /**
-     * Gets the fiat price input EditText for error handling.
-     */
-    fun getPriceInput(): EditText = priceInput
+    fun showPricePrecisionError() {
+        val layout = if (currentPriceType == PriceType.SATS) satsPriceLayout else fiatPriceLayout
+        layout.error = getPricePrecisionError()
+    }
 
-    /**
-     * Gets the sats price input EditText for error handling.
-     */
-    fun getSatsInput(): EditText = satsInput
-
-    private fun setupPriceTypeToggle() {
-        // Set initial selection
-        priceTypeToggle.check(R.id.btn_price_fiat)
-
-        val context = priceInput.context
-        val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
-        val isCustomUnit = preferredUnit.lowercase() != "sat"
-        
-        if (isCustomUnit) {
-            priceTypeToggle.visibility = View.GONE
-            currentPriceType = PriceType.FIAT
-            fiatPriceLayout.visibility = View.VISIBLE
-            satsPriceLayout.visibility = View.GONE
-        }
-
-        priceTypeToggle.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (isChecked) {
-                when (checkedId) {
-                    R.id.btn_price_fiat -> {
-                        currentPriceType = PriceType.FIAT
-                        fiatPriceLayout.visibility = View.VISIBLE
-                        satsPriceLayout.visibility = View.GONE
-                        updateVatSectionVisibility()
-                    }
-                    R.id.btn_price_bitcoin -> {
-                        currentPriceType = PriceType.SATS
-                        fiatPriceLayout.visibility = View.GONE
-                        satsPriceLayout.visibility = View.VISIBLE
-                        updateVatSectionVisibility()
-                    }
-                }
-            }
+    private fun getPricePrecisionError(): String {
+        val fractionDigits = getSelectedUnitDescriptor().fractionDigits
+        return if (fractionDigits == 0) {
+            priceInput.context.getString(R.string.item_entry_error_price_whole_number)
+        } else {
+            priceInput.resources.getQuantityString(
+                R.plurals.item_entry_error_price_decimals, fractionDigits, fractionDigits,
+            )
         }
     }
 
+    fun getPriceInput(): EditText = priceInput
+
+    fun getSatsInput(): EditText = satsInput
+
+    private fun setupUnitSelection() {
+        val context = priceInput.context
+        val mintManager = MintManager.getInstance(context)
+        val supportedUnits = mintManager.getSupportedUnits().filter { unit ->
+            mintManager.getMintsSupportingUnit(unit.value).isNotEmpty()
+        }
+        val isSatOnly = supportedUnits.size == 1 && supportedUnits.single().isSat
+        unitAwareMode = !isSatOnly
+
+        if (!unitAwareMode) {
+            priceUnitLayout.visibility = View.GONE
+            priceUnitWarning.visibility = View.GONE
+            return
+        }
+
+        supportedUnits.forEach { unit ->
+            val descriptor = UnitDescriptor.defaultFor(unit)
+            val supportingMints = mintManager.getMintsSupportingUnit(unit.value)
+            if (descriptor.kind == UnitKind.CUSTOM) {
+                supportingMints.forEach { mintUrl ->
+                    priceUnitOptions.add(
+                        PriceUnitOption(
+                            asset = AssetId.mintScoped(unit, mintUrl),
+                            label = "${descriptor.displayCode} · ${UnitAmountFormatter.issuerLabel(mintUrl)}",
+                            directlyChargeable = true,
+                        ),
+                    )
+                }
+            } else {
+                priceUnitOptions.add(
+                    PriceUnitOption(
+                        asset = AssetId.global(unit),
+                        label = descriptor.displayCode,
+                        directlyChargeable = true,
+                    ),
+                )
+            }
+        }
+
+        val currentFiat = UnitId.of(currencyManager.getCurrentCurrency())
+        val hasSat = supportedUnits.any { it.isSat }
+        if (hasSat && priceUnitOptions.none { it.asset.unit == currentFiat }) {
+            val code = UnitDescriptor.defaultFor(currentFiat).displayCode
+            priceUnitOptions.add(
+                PriceUnitOption(
+                    asset = AssetId.global(currentFiat),
+                    label = context.getString(
+                        R.string.item_entry_local_currency_conversion_label,
+                        code,
+                    ),
+                    directlyChargeable = false,
+                    convertibleToSat = true,
+                ),
+            )
+        }
+
+        if (priceUnitOptions.isEmpty()) {
+            val fallback = UnitId.ofOrNull(mintManager.getPreferredUnit()) ?: UnitId.SAT
+            priceUnitOptions.add(
+                PriceUnitOption(
+                    asset = AssetId.global(fallback),
+                    label = unsupportedOptionLabel(AssetId.global(fallback)),
+                    directlyChargeable = false,
+                ),
+            )
+        }
+
+        val preferredUnit = UnitId.ofOrNull(mintManager.getPreferredUnit())
+        priceUnitOptions.sortWith(
+            compareBy<PriceUnitOption> { if (it.asset.unit == preferredUnit) 0 else 1 }
+                .thenBy { it.label },
+        )
+        refreshUnitAdapter()
+        priceUnitLayout.visibility = View.VISIBLE
+        priceTypeToggle.visibility = View.GONE
+        selectUnitOption(priceUnitOptions.first())
+    }
+
+    private fun refreshUnitAdapter() {
+        priceUnitInput.setAdapter(
+            ArrayAdapter(
+                priceUnitInput.context,
+                R.layout.item_unit_dropdown,
+                priceUnitOptions.map { it.label },
+            ),
+        )
+        priceUnitInput.setOnItemClickListener { _, _, position, _ ->
+            priceUnitOptions.getOrNull(position)?.let(::selectUnitOption)
+        }
+    }
+
+    private fun selectUnitOption(option: PriceUnitOption) {
+        selectedPriceAsset = option.asset
+        currentPriceType = if (option.asset.unit.isSat) PriceType.SATS else PriceType.FIAT
+        priceUnitInput.setText(option.label, false)
+        updatePriceInputVisibility()
+        updateCurrencyDisplay()
+        updateUnitWarning(option)
+        updatePriceBreakdown()
+    }
+
+    private fun updateUnitWarning(option: PriceUnitOption) {
+        val warning = when {
+            !option.directlyChargeable && !option.convertibleToSat ->
+                R.string.item_entry_unsupported_unit_warning
+            UnitDescriptor.defaultFor(option.asset.unit).kind == UnitKind.CUSTOM ->
+                R.string.item_entry_custom_unit_warning
+            else -> null
+        }
+        if (warning == null) {
+            priceUnitWarning.visibility = View.GONE
+        } else {
+            priceUnitWarning.setText(warning)
+            priceUnitWarning.visibility = View.VISIBLE
+        }
+    }
+
+    private fun unsupportedOptionLabel(asset: AssetId): String {
+        val context = priceInput.context
+        val code = UnitDescriptor.defaultFor(asset.unit).displayCode
+        val issuer = asset.issuerScope
+        return if (issuer == null) {
+            context.getString(R.string.item_entry_unscoped_unit_label, code)
+        } else {
+            "$code · ${UnitAmountFormatter.issuerLabel(issuer)}"
+        }
+    }
+
+    private fun setupPriceTypeToggle() {
+        if (!unitAwareMode) {
+            priceTypeToggle.visibility = View.VISIBLE
+            priceTypeToggle.check(R.id.btn_price_fiat)
+            currentPriceType = PriceType.FIAT
+            selectedPriceAsset = AssetId.global(UnitId.of(currencyManager.getCurrentCurrency()))
+        }
+
+        priceTypeToggle.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (!isChecked || unitAwareMode) return@addOnButtonCheckedListener
+            when (checkedId) {
+                R.id.btn_price_fiat -> {
+                    currentPriceType = PriceType.FIAT
+                    selectedPriceAsset = AssetId.global(
+                        UnitId.of(currencyManager.getCurrentCurrency()),
+                    )
+                }
+                R.id.btn_price_bitcoin -> {
+                    currentPriceType = PriceType.SATS
+                    selectedPriceAsset = AssetId.global(UnitId.SAT)
+                }
+            }
+            updatePriceInputVisibility()
+            updateCurrencyDisplay()
+            updateVatSectionVisibility()
+        }
+        updatePriceInputVisibility()
+    }
+
+    private fun updatePriceInputVisibility() {
+        fiatPriceLayout.visibility = if (currentPriceType == PriceType.FIAT) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        satsPriceLayout.visibility = if (currentPriceType == PriceType.SATS) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        val descriptor = getSelectedUnitDescriptor()
+        // Preserve pasted decimal separators for validation instead of turning 12.5 into 125.
+        // Request an integer keypad for units without a fractional denomination.
+        priceInput.keyListener = DigitsKeyListener.getInstance("0123456789.,")
+        priceInput.setRawInputType(
+            InputType.TYPE_CLASS_NUMBER or
+                if (descriptor.fractionDigits > 0) InputType.TYPE_NUMBER_FLAG_DECIMAL else 0,
+        )
+        updateWholeNumberError()
+    }
+
     private fun setupVatSection() {
-        // VAT rate input - integers only (0-99)
         vatRateInput.filters = arrayOf(InputFilter.LengthFilter(2))
         vatRateInput.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                updatePriceBreakdown()
-            }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+            override fun afterTextChanged(s: Editable?) = updatePriceBreakdown()
         })
 
-        // VAT enabled toggle
         switchVatEnabled.setOnCheckedChangeListener { _, isChecked ->
             vatFieldsContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
             priceBreakdownContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
             updatePriceBreakdown()
         }
-
-        // Price includes VAT toggle
-        switchPriceIncludesVat.setOnCheckedChangeListener { _, _ ->
-            updatePriceBreakdown()
-        }
+        switchPriceIncludesVat.setOnCheckedChangeListener { _, _ -> updatePriceBreakdown() }
     }
 
     private fun updateVatSectionVisibility() {
-        // VAT section is always visible for both fiat and Bitcoin prices
         vatSectionCard.visibility = View.VISIBLE
-
-        // Show breakdown when VAT is enabled
-        priceBreakdownContainer.visibility = if (switchVatEnabled.isChecked) View.VISIBLE else View.GONE
+        priceBreakdownContainer.visibility = if (switchVatEnabled.isChecked) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
     }
 
     private fun updatePriceBreakdown() {
+        val layout = if (currentPriceType == PriceType.SATS) satsPriceLayout else fiatPriceLayout
+        val overflowError = priceInput.context.getString(R.string.item_entry_error_price_too_large)
+        if (layout.error == overflowError) layout.error = null
         if (!switchVatEnabled.isChecked) {
             priceBreakdownContainer.visibility = View.GONE
             return
         }
-
         priceBreakdownContainer.visibility = View.VISIBLE
 
-        val vatRate = getVatRate()
-        val breakdown = when (currentPriceType) {
-            PriceType.FIAT -> {
-                VatCalculator.calculateFiatBreakdown(
-                    enteredPrice = getEnteredFiatPrice(),
-                    vatRate = vatRate,
-                    priceIncludesVat = switchPriceIncludesVat.isChecked,
-                    currency = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(priceInput.context)
-                )
-            }
-            PriceType.SATS -> {
-                VatCalculator.calculateSatsBreakdown(
-                    enteredSats = getEnteredSatsPrice(),
-                    vatRate = vatRate,
-                    priceIncludesVat = switchPriceIncludesVat.isChecked
-                )
-            }
+        val enteredAmount = runCatching { getEnteredAtomicAmount() }
+            .getOrElse { AtomicAmount.zero(selectedPriceAsset) }
+        val breakdown = try {
+            VatCalculator.calculateAtomicBreakdown(
+                enteredAmount = enteredAmount,
+                descriptor = getSelectedUnitDescriptor(),
+                vatRate = getVatRate(),
+                priceIncludesVat = switchPriceIncludesVat.isChecked,
+            )
+        } catch (e: ArithmeticException) {
+            Log.w(TAG, "VAT preview exceeds the supported amount", e)
+            layout.error = overflowError
+            priceBreakdownContainer.visibility = View.GONE
+            return
         }
-
         textNetPrice.text = breakdown.netPrice
         textVatLabel.text = breakdown.vatLabel
         textVatAmount.text = breakdown.vatAmount
@@ -275,80 +471,68 @@ class PricingHandler(
     }
 
     private fun setupInputValidation() {
-        // Fiat price input - allow both . and , as decimal separators, max 2 decimal places
         priceInput.addTextChangedListener(object : TextWatcher {
             private var current = ""
 
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
 
             override fun afterTextChanged(s: Editable?) {
-                if (s.toString() != current) {
-                    priceInput.removeTextChangedListener(this)
-
-                    var cleanString = s.toString()
-
-                    val context = priceInput.context
-                    val activeCurrency = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(context)
-                    val isZeroDecimal = Amount.Currency.fromCode(activeCurrency).isZeroDecimal()
-
-                    if (isZeroDecimal) {
-                        // Strip all decimals, periods, commas, and anything after them
-                        val noDecimals = cleanString.replace("[.,].*".toRegex(), "")
-                        if (noDecimals != cleanString) {
-                            cleanString = noDecimals
-                            priceInput.setText(cleanString)
-                            priceInput.setSelection(cleanString.length)
-                        }
-                    } else {
-                        // Find decimal separator (either . or ,)
-                        val decimalSeparator = if (cleanString.contains(",")) "," else "."
-
-                        // Validate decimal places
-                        if (cleanString.contains(decimalSeparator)) {
-                            val parts = cleanString.split(decimalSeparator)
-                            if (parts.size > 1 && parts[1].length > 2) {
-                                // Truncate to 2 decimal places
-                                val truncated = "${parts[0]}$decimalSeparator${parts[1].substring(0, 2)}"
-                                priceInput.setText(truncated)
-                                priceInput.setSelection(truncated.length)
-                            }
-                        }
-                    }
-
-                    current = priceInput.text.toString()
-                    priceInput.addTextChangedListener(this)
-
-                    // Update VAT breakdown in real-time
-                    updatePriceBreakdown()
+                if (s.toString() == current) return
+                priceInput.removeTextChangedListener(this)
+                val original = s.toString()
+                val fractionDigits = getSelectedUnitDescriptor().fractionDigits
+                val sanitized = if (fractionDigits == 0) original else {
+                    truncateFraction(original, fractionDigits)
                 }
-            }
-        })
-
-        // Sats input - integers only (already set in XML with inputType="number")
-        satsInput.filters = arrayOf(InputFilter { source, start, end, dest, dstart, dend ->
-            // Only allow digits
-            for (i in start until end) {
-                if (!Character.isDigit(source[i])) {
-                    return@InputFilter ""
+                if (sanitized != original) {
+                    priceInput.setText(sanitized)
+                    priceInput.setSelection(sanitized.length)
                 }
-            }
-            null
-        })
-
-        // Add text watcher for sats input to update VAT breakdown
-        satsInput.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
+                current = priceInput.text.toString()
+                priceInput.addTextChangedListener(this)
+                updateWholeNumberError()
                 updatePriceBreakdown()
             }
         })
+
+        satsInput.filters = arrayOf(InputFilter { source, start, end, _, _, _ ->
+            for (index in start until end) {
+                if (!Character.isDigit(source[index])) return@InputFilter ""
+            }
+            null
+        })
+        satsInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+            override fun afterTextChanged(s: Editable?) = updatePriceBreakdown()
+        })
     }
 
-    private fun formatFiatPrice(price: Double): String {
-        val activeCurrency = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(priceInput.context)
-        val currency = Amount.Currency.fromCode(activeCurrency)
-        return Amount.fromMajorUnits(price, currency).toStringWithoutSymbol()
+    private fun updateWholeNumberError() {
+        fiatPriceLayout.error = if (getSelectedUnitDescriptor().fractionDigits == 0 &&
+            priceInput.text.any { it == '.' || it == ',' }
+        ) {
+            getPricePrecisionError()
+        } else {
+            null
+        }
+    }
+
+    private fun truncateFraction(value: String, fractionDigits: Int): String {
+        val separatorIndex = value.indexOfFirst { it == '.' || it == ',' }
+        if (separatorIndex < 0) return value
+        if (fractionDigits == 0) return value.substring(0, separatorIndex)
+        val endExclusive = minOf(value.length, separatorIndex + fractionDigits + 1)
+        return value.substring(0, endExclusive)
+    }
+
+    private fun formatMajorPrice(price: BigDecimal): String {
+        val fractionDigits = getSelectedUnitDescriptor().fractionDigits
+        return price.setScale(fractionDigits, java.math.RoundingMode.HALF_UP).toPlainString()
+    }
+
+    companion object {
+        private const val TAG = "PricingHandler"
     }
 }

@@ -23,6 +23,10 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import org.cashudevkit.Token
 import org.cashudevkit.CurrencyUnit
+import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.payment.PaymentIntentFactory
 
@@ -35,6 +39,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_TOKEN = "extra_token"
         const val EXTRA_AMOUNT = "extra_amount"
+        const val EXTRA_UNIT = "extra_unit"
         const val EXTRA_FROM_NFC_ANIMATION = "extra_from_nfc_animation"
         private const val TAG = "PaymentReceivedActivity"
     }
@@ -49,7 +54,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
     
     private var tokenString: String? = null
     private var amount: Long = 0
-    private var unit: String = "sat"
+    private var unit: UnitId = UnitId.SAT
     private var fromNfcAnimation: Boolean = false
     
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -94,12 +99,15 @@ class PaymentReceivedActivity : AppCompatActivity() {
         tokenString = intent.getStringExtra(EXTRA_TOKEN)
         amount = intent.getLongExtra(EXTRA_AMOUNT, 0)
         fromNfcAnimation = intent.getBooleanExtra(EXTRA_FROM_NFC_ANIMATION, false)
-        unit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
+        val legacyUnit = com.electricdreams.numo.core.util.MintManager
+            .getInstance(this)
+            .getPreferredUnit()
+        unit = UnitId.ofOrNull(intent.getStringExtra(EXTRA_UNIT) ?: legacyUnit)
+            ?.takeUnless { it.isReserved }
+            ?: UnitId.SAT
         
         // Parse token to extract amount and unit if provided
-        if (tokenString != null && tokenString!!.isNotBlank()) {
-            parseToken(tokenString!!)
-        }
+        tokenString?.takeIf { it.isNotBlank() }?.let(::parseToken)
         
         // Set up UI
         updateAmountDisplay()
@@ -141,29 +149,27 @@ class PaymentReceivedActivity : AppCompatActivity() {
             val decodedToken = Token.decode(token)
             
             // Extract unit
-            unit = when (val tokenUnit = decodedToken.unit()) {
-                is CurrencyUnit.Sat -> "sat"
-                is CurrencyUnit.Msat -> "msat"
-                is CurrencyUnit.Eur -> "eur"
-                is CurrencyUnit.Usd -> "usd"
-                is CurrencyUnit.Custom -> tokenUnit.unit
-                else -> com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
+            val tokenUnit = decodedToken.unit() ?: CurrencyUnit.Sat
+            val decodedUnit = with(CashuWalletManager) { tokenUnit.toUnitString() }
+            unit = UnitId.of(decodedUnit).also {
+                require(!it.isReserved) { "Reserved token unit cannot be displayed as payment" }
             }
             
             // Calculate total amount from all proofs using the public API
             amount = decodedToken.value().value.toLong()
             
-            Log.d(TAG, "Parsed token: amount=$amount, unit=$unit")
+            Log.d(TAG, "Parsed token: amount=$amount, unit=${unit.value}")
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing token: ${e.message}", e)
-            // Fallback to provided amount or 0
-            unit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
+            // Preserve the explicit intent amount and unit if token parsing fails.
         }
     }
     
     private fun updateAmountDisplay() {
-        val currency = com.electricdreams.numo.core.model.Amount.Currency.fromCode(unit)
-        val formattedAmount = com.electricdreams.numo.core.model.Amount(amount, currency).toString()
+        val formattedAmount = UnitAmountFormatter.formatAtomic(
+            amount,
+            UnitDescriptor.defaultFor(unit),
+        )
         
         amountText.text = getString(R.string.payment_received_amount, formattedAmount)
     }

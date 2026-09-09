@@ -35,6 +35,18 @@ data class CheckoutBasket(
     /** Total amount in satoshis (final payment amount) */
     @SerializedName("totalSatoshis")
     val totalSatoshis: Long,
+
+    /** Canonical charge unit. Null only in legacy receipt snapshots. */
+    @SerializedName("chargeUnit")
+    val chargeUnit: String? = null,
+
+    /** Final charge amount in the atomic denomination of [chargeUnit]. */
+    @SerializedName("chargeAmountAtomic")
+    val chargeAmountAtomic: Long? = null,
+
+    /** Issuer scope when a custom charge unit is accepted from one mint only. */
+    @SerializedName("chargeIssuerScope")
+    val chargeIssuerScope: String? = null,
 ) {
 
     /**
@@ -64,27 +76,37 @@ data class CheckoutBasket(
     /**
      * Calculate total item count (sum of all quantities).
      */
-    fun getTotalItemCount(): Int = items.sumOf { it.quantity }
+    fun getTotalItemCount(): Int = items.fold(0) { total, item ->
+        Math.addExact(total, item.quantity)
+    }
 
     /**
      * Calculate total net amount for fiat items (in minor units/cents).
      */
-    fun getFiatNetTotalCents(): Long = getFiatItems().sumOf { it.getNetTotalCents() }
+    fun getFiatNetTotalCents(): Long = getFiatItems().fold(0L) { total, item ->
+        Math.addExact(total, item.getNetTotalCents())
+    }
 
     /**
      * Calculate total VAT amount for fiat items (in minor units/cents).
      */
-    fun getFiatVatTotalCents(): Long = getFiatItems().sumOf { it.getTotalVatCents() }
+    fun getFiatVatTotalCents(): Long = getFiatItems().fold(0L) { total, item ->
+        Math.addExact(total, item.getTotalVatCents())
+    }
 
     /**
      * Calculate total gross amount for fiat items (in minor units/cents).
      */
-    fun getFiatGrossTotalCents(): Long = getFiatItems().sumOf { it.getGrossTotalCents() }
+    fun getFiatGrossTotalCents(): Long = getFiatItems().fold(0L) { total, item ->
+        Math.addExact(total, item.getGrossTotalCents())
+    }
 
     /**
      * Calculate total sats for directly sats-priced items.
      */
-    fun getSatsDirectTotal(): Long = getSatsItems().sumOf { it.getNetTotalSats() }
+    fun getSatsDirectTotal(): Long = getSatsItems().fold(0L) { total, item ->
+        Math.addExact(total, item.getNetTotalSats())
+    }
 
     /**
      * Get grouped VAT breakdown by rate.
@@ -94,13 +116,34 @@ data class CheckoutBasket(
         return getFiatItems()
             .filter { it.vatEnabled && it.vatRate > 0 }
             .groupBy { it.vatRate }
-            .mapValues { (_, items) -> items.sumOf { it.getTotalVatCents() } }
+            .mapValues { (_, items) ->
+                items.fold(0L) { total, item ->
+                    Math.addExact(total, item.getTotalVatCents())
+                }
+            }
     }
 
     /**
      * Get the checkout date as a Date object.
      */
     fun getCheckoutDate(): Date = Date(checkoutTimestamp)
+
+    /** Resolve the final unit-bearing charge, including sat-only legacy snapshots. */
+    fun getChargeAmount(): AtomicAmount {
+        val unit = if (chargeUnit == null) {
+            UnitId.SAT
+        } else {
+            requireNotNull(UnitId.ofOrNull(chargeUnit)?.takeUnless { it.isReserved }) {
+                "Invalid checkout charge unit: $chargeUnit"
+            }
+        }
+        val amount = chargeAmountAtomic ?: totalSatoshis
+        val issuer = chargeIssuerScope?.takeIf {
+            it.isNotBlank() && UnitDescriptor.defaultFor(unit).kind == UnitKind.CUSTOM
+        }
+        val asset = issuer?.let { AssetId.mintScoped(unit, it) } ?: AssetId.global(unit)
+        return AtomicAmount(amount, asset)
+    }
 
     /**
      * Serialize this basket to JSON string for storage.
@@ -116,10 +159,54 @@ data class CheckoutBasket(
             if (json.isNullOrEmpty()) return null
             return try {
                 Gson().fromJson(json, CheckoutBasket::class.java)
-            } catch (e: Exception) {
+                    ?.takeIf(::isValidSnapshot)
+            } catch (e: RuntimeException) {
                 null
             }
         }
+
+        private fun isValidSnapshot(basket: CheckoutBasket): Boolean = runCatching {
+            require(basket.totalSatoshis >= 0L) { "Checkout total cannot be negative" }
+            require(
+                UnitId.ofOrNull(basket.currency)?.takeUnless { it.isReserved } != null,
+            ) {
+                "Checkout currency must be a valid, non-reserved unit"
+            }
+            require(basket.bitcoinPrice == null || (
+                basket.bitcoinPrice.isFinite() && basket.bitcoinPrice >= 0.0
+                )) {
+                "Bitcoin price must be non-negative and finite"
+            }
+
+            val hasExplicitChargeUnit = basket.chargeUnit != null
+            require(hasExplicitChargeUnit == (basket.chargeAmountAtomic != null)) {
+                "Checkout charge unit and amount must be stored together"
+            }
+            require(hasExplicitChargeUnit || basket.chargeIssuerScope == null) {
+                "Checkout issuer scope requires an explicit charge unit"
+            }
+            basket.getChargeAmount()
+
+            basket.items.forEach { item ->
+                require(item.quantity > 0) { "Checkout item quantity must be positive" }
+                require(item.priceType == "FIAT" || item.priceType == "SATS") {
+                    "Unknown checkout price type: ${item.priceType}"
+                }
+                require(item.netPriceCents >= 0L && item.priceSats >= 0L) {
+                    "Legacy checkout prices cannot be negative"
+                }
+                require(item.vatRate >= 0) { "VAT rate cannot be negative" }
+                val net = item.getNetAtomicAmount()
+                val gross = item.getGrossAtomicAmount()
+                require(gross.asset == net.asset && gross.value >= net.value) {
+                    "Gross checkout price cannot be below net price"
+                }
+                item.getNetLineAtomicAmount()
+                item.getGrossLineAtomicAmount()
+                if (item.isFiatPrice()) item.getGrossTotalCents() else item.getNetTotalSats()
+            }
+            true
+        }.getOrDefault(false)
 
         /**
          * Create a CheckoutBasket from the current BasketManager state.
@@ -129,6 +216,7 @@ data class CheckoutBasket(
             currency: String,
             bitcoinPrice: Double?,
             totalSatoshis: Long,
+            chargeAmount: AtomicAmount? = null,
         ): CheckoutBasket {
             val items = basketManager.getBasketItems().map { basketItem ->
                 CheckoutBasketItem.fromBasketItem(
@@ -142,6 +230,9 @@ data class CheckoutBasket(
                 currency = currency,
                 bitcoinPrice = bitcoinPrice,
                 totalSatoshis = totalSatoshis,
+                chargeUnit = chargeAmount?.unit?.value,
+                chargeAmountAtomic = chargeAmount?.value,
+                chargeIssuerScope = chargeAmount?.asset?.issuerScope,
             )
         }
     }

@@ -3,20 +3,29 @@ package com.electricdreams.numo.feature.autowithdraw
 import android.content.Context
 import android.util.Log
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.util.MintCapabilities
+import com.electricdreams.numo.core.util.MintCapability
+import com.electricdreams.numo.core.util.MintOperation
+import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintManager
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
-import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.FinalizedMelt
 import org.cashudevkit.MintUrl
 import org.cashudevkit.QuoteState
+import org.cashudevkit.Wallet
+import org.cashudevkit.decodeInvoice
 import com.electricdreams.numo.core.data.model.HistoryEntry
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.util.Date
 import java.util.UUID
 
@@ -43,7 +52,11 @@ data class WithdrawHistoryEntry(
     // The generated Cashu token, if this was a manual token withdrawal
     val token: String? = null,
     // User-assigned label for this transaction
-    override val label: String? = null
+    override val label: String? = null,
+    // Lightning accounting above remains in sats; preserve the source wallet denomination too.
+    val sourceUnit: String? = null,
+    val sourceAmountAtomic: Long? = null,
+    val sourceFeeAtomic: Long? = null,
 ) : HistoryEntry {
 
     // HistoryEntry computed properties — no backing field, so Gson won't serialize them
@@ -82,7 +95,11 @@ interface AutoWithdrawProgressListener {
  * - Persists withdrawal history and melt quotes in payment history
  * - Provides progress callbacks for UI updates
  */
-class AutoWithdrawManager private constructor(private val context: Context) {
+class AutoWithdrawManager internal constructor(
+    private val context: Context,
+    private val invoiceAmountMsat: (String) -> ULong? = { decodeInvoice(it).amountMsat },
+    private val withdrawalScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
+) {
 
     companion object {
         private const val TAG = "AutoWithdrawManager"
@@ -110,14 +127,8 @@ class AutoWithdrawManager private constructor(private val context: Context) {
     
     @Volatile
     private var isWithdrawInProgress = false
+    private val withdrawalMutex = Mutex()
     
-    /**
-     * Application-scoped coroutine scope for background withdrawal operations.
-     * Uses SupervisorJob so individual withdrawal failures don't cancel the scope.
-     * This scope survives activity lifecycle changes.
-     */
-    private val withdrawalScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-
     /**
      * Set a progress listener for UI updates.
      */
@@ -142,6 +153,19 @@ class AutoWithdrawManager private constructor(private val context: Context) {
      * @param lightningMintUrl The mint URL for Lightning payments (used when token is empty)
      */
     fun onPaymentReceived(token: String, lightningMintUrl: String?) {
+        onPaymentReceived(token, lightningMintUrl, mintManager.getPreferredUnit())
+    }
+
+    /**
+     * Unit-explicit entry point used by checkout. Capabilities are checked on each source mint.
+     */
+    fun onPaymentReceived(token: String, lightningMintUrl: String?, paymentUnit: String) {
+        val unit = UnitId.ofOrNull(paymentUnit)
+        if (unit == null || unit.isReserved) {
+            Log.d(TAG, "Auto-withdraw is unavailable for payment unit: $paymentUnit")
+            return
+        }
+
         // Determine the mint URL
         val mintUrl: String? = if (token.isNotEmpty()) {
             try {
@@ -165,8 +189,10 @@ class AutoWithdrawManager private constructor(private val context: Context) {
         withdrawalScope.launch {
             try {
                 Log.d(TAG, "🚀 Starting auto-withdrawal check in background scope")
-                checkAndTriggerWithdrawals(mintUrl)
+                checkAndTriggerWithdrawals(mintUrl, unit.value)
                 Log.d(TAG, "✅ Auto-withdrawal check completed")
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Log.e(TAG, "❌ Error checking auto-withdrawals", e)
             }
@@ -179,7 +205,10 @@ class AutoWithdrawManager private constructor(private val context: Context) {
      * 
      * @param paymentMintUrl Optional: the mint that just received payment (checked first)
      */
-    suspend fun checkAndTriggerWithdrawals(paymentMintUrl: String? = null) {
+    suspend fun checkAndTriggerWithdrawals(
+        paymentMintUrl: String? = null,
+        paymentUnit: String = mintManager.getPreferredUnit(),
+    ) {
         Log.d(TAG, "=== checkAndTriggerWithdrawals START ===")
         Log.d(TAG, "paymentMintUrl: $paymentMintUrl")
         
@@ -192,12 +221,22 @@ class AutoWithdrawManager private constructor(private val context: Context) {
             Log.d(TAG, "Auto-withdraw is globally disabled, skipping")
             return
         }
+
+        val activeUnit = UnitId.ofOrNull(paymentUnit)
+        if (activeUnit == null || activeUnit.isReserved) {
+            Log.d(TAG, "Auto-withdraw is unavailable for active unit: $activeUnit")
+            return
+        }
         
         Log.d(TAG, "Auto-withdraw is globally enabled, checking balances...")
 
+        // Include valuation in the lock so two payments cannot spend the same balance snapshot.
+        if (!withdrawalMutex.tryLock()) return
         try {
             // Get all mint balances
-            val balances = CashuWalletManager.getAllMintBalances()
+            val balances = withContext(Dispatchers.IO) {
+                CashuWalletManager.getAllMintBalances(activeUnit.value)
+            }
             Log.d(TAG, "Retrieved ${balances.size} mint balances: $balances")
             
             if (balances.isEmpty()) {
@@ -205,72 +244,112 @@ class AutoWithdrawManager private constructor(private val context: Context) {
                 return
             }
             
-            // Check payment mint first if specified
-            if (paymentMintUrl != null) {
-                Log.d(TAG, "Checking payment mint first: $paymentMintUrl")
-                if (balances.containsKey(paymentMintUrl)) {
-                    val balance = balances[paymentMintUrl] ?: 0L
-                    Log.d(TAG, "Payment mint balance: $balance sats")
-                    if (settingsManager.shouldTriggerWithdrawal(paymentMintUrl, balance)) {
-                        Log.d(TAG, ">>> Triggering withdrawal for payment mint!")
-                        executeWithdrawal(paymentMintUrl, balance)
-                        return // Only process one withdrawal at a time
-                    } else {
-                        Log.d(TAG, "Payment mint did not trigger withdrawal")
+            val repository = CashuWalletManager.getWallet() ?: return
+            val paymentMint = paymentMintUrl?.removeSuffix("/")
+            val orderedBalances = balances.entries.sortedBy { if (it.key == paymentMint) 0 else 1 }
+            for ((mintUrl, balanceAtomic) in orderedBalances) {
+                if (balanceAtomic <= 0 || !settingsManager.isEnabledForMint(mintUrl)) continue
+                if (settingsManager.getMintSettings(mintUrl).lightningAddress.isBlank()) continue
+                try {
+                    val capabilities = mintManager.getMintCapabilities(mintUrl)
+                    val meltCapability = capabilities.find(
+                        activeUnit, MintOperation.MELT, MintCapabilities.BOLT11,
+                    ) ?: continue
+                    val needsValuation = activeUnit != UnitId.SAT &&
+                        activeUnit != UnitId.MSAT && activeUnit != UnitId.BTC
+                    if (needsValuation) {
+                        val valuationCapability = capabilities.find(
+                            activeUnit, MintOperation.MINT, MintCapabilities.BOLT11,
+                        ) ?: continue
+                        if (!valuationCapability.allowsAmount(balanceAtomic)) continue
                     }
-                } else {
-                    Log.w(TAG, "Payment mint URL not found in balances! Available mints: ${balances.keys}")
-                }
-            }
-
-            // Check other mints
-            Log.d(TAG, "Checking other mints...")
-            for ((mintUrl, balance) in balances) {
-                if (mintUrl == paymentMintUrl) {
-                    Log.d(TAG, "Skipping $mintUrl (already checked as payment mint)")
-                    continue
-                }
-                Log.d(TAG, "Checking mint: $mintUrl with balance: $balance")
-                if (settingsManager.shouldTriggerWithdrawal(mintUrl, balance)) {
-                    Log.d(TAG, ">>> Triggering withdrawal for mint: $mintUrl")
-                    executeWithdrawal(mintUrl, balance)
-                    return // Only process one withdrawal at a time
+                    // Retain the wallet and unit for the entire withdrawal.
+                    val mintWallet = withContext(Dispatchers.IO) {
+                        repository.getWallet(
+                            MintUrl(mintUrl),
+                            CashuWalletManager.getCurrencyUnit(activeUnit.value),
+                        )
+                    }
+                    val balanceSats = withContext(Dispatchers.IO) {
+                        balanceInSats(mintWallet, balanceAtomic, activeUnit)
+                    }
+                    if (settingsManager.shouldTriggerWithdrawal(mintUrl, balanceSats)) {
+                        executeWithdrawal(
+                            mintUrl, balanceAtomic, balanceSats, activeUnit, mintWallet, meltCapability,
+                        )
+                        return
+                    }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.e(TAG, "Could not value $mintUrl balance in ${activeUnit.value}", e)
                 }
             }
             
             Log.d(TAG, "No withdrawals triggered for any mint")
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Log.e(TAG, "Error checking balances for auto-withdraw", e)
+        } finally {
+            withdrawalMutex.unlock()
         }
         
         Log.d(TAG, "=== checkAndTriggerWithdrawals END ===")
     }
 
     /**
-     * Execute a withdrawal for a specific mint.
+     * Value this wallet in sats for the existing sat-denominated withdrawal settings.
      */
-    private suspend fun executeWithdrawal(mintUrl: String, currentBalance: Long) {
+    private suspend fun balanceInSats(wallet: Wallet, balanceAtomic: Long, unit: UnitId): Long {
+        return when (unit) {
+            UnitId.SAT, UnitId.BTC -> balanceAtomic
+            UnitId.MSAT -> balanceAtomic / 1_000L
+            else -> {
+                // Ask this issuer for a fresh valuation instead of reusing the POS display rate.
+                // This invoice is only a quote; no payment is made to it and no proofs are minted.
+                val quote = wallet.mintQuote(
+                    org.cashudevkit.PaymentMethod.Bolt11,
+                    org.cashudevkit.Amount(balanceAtomic.toULong()),
+                    null,
+                    null,
+                )
+                require(quote.unit == CashuWalletManager.getCurrencyUnit(unit.value))
+                require(quote.amount?.value == balanceAtomic.toULong())
+                require(quote.expiry > (System.currentTimeMillis() / 1_000L).toULong()) {
+                    "Balance conversion quote has expired"
+                }
+                val msat = requireNotNull(invoiceAmountMsat(quote.request)) {
+                    "Balance conversion invoice has no amount"
+                }
+                require(msat > 0uL) { "Balance conversion invoice amount must be positive" }
+                (msat / 1_000uL).toLongExactAmount()
+            }
+        }
+    }
+
+    private suspend fun executeWithdrawal(
+        mintUrl: String,
+        currentBalanceAtomic: Long,
+        currentBalanceSats: Long,
+        paymentUnit: UnitId,
+        mintWallet: Wallet,
+        meltCapability: MintCapability,
+    ) {
         if (isWithdrawInProgress) {
             Log.w(TAG, "executeWithdrawal called but already in progress, skipping")
             return
         }
-        isWithdrawInProgress = true
-
         val settings = settingsManager.getMintSettings(mintUrl)
-        val withdrawAmount = settingsManager.calculateWithdrawAmount(mintUrl, currentBalance)
+        val withdrawAmount = settingsManager.calculateWithdrawAmount(mintUrl, currentBalanceSats)
         val lightningAddress = settings.lightningAddress
 
         Log.d(TAG, "🚀 STARTING AUTO-WITHDRAWAL:")
         Log.d(TAG, "   Mint: $mintUrl")
-        Log.d(TAG, "   Current balance: $currentBalance sats")
+        Log.d(TAG, "   Current balance: $currentBalanceAtomic ${paymentUnit.value}")
         Log.d(TAG, "   Withdraw amount: $withdrawAmount sats (${settings.withdrawPercentage}%)")
         Log.d(TAG, "   Lightning address: $lightningAddress")
         Log.d(TAG, "   Threshold: ${settings.thresholdSats} sats")
-
-        withContext(Dispatchers.Main) {
-            progressListener?.onWithdrawStarted(mintUrl, withdrawAmount, lightningAddress)
-            progressListener?.onWithdrawProgress("Preparing", "Getting quote...")
-        }
 
         var historyEntry = WithdrawHistoryEntry(
             mintUrl = mintUrl,
@@ -280,31 +359,24 @@ class AutoWithdrawManager private constructor(private val context: Context) {
             amountSats = withdrawAmount,
             feeSats = 0,
             status = WithdrawHistoryEntry.STATUS_PENDING,
-            automatic = true
+            automatic = true,
+            sourceUnit = paymentUnit.value,
         )
 
+        isWithdrawInProgress = true
         try {
-            Log.d(TAG, "📋 Step 1: Getting wallet instance...")
-            val wallet = CashuWalletManager.getWallet()
-            if (wallet == null) {
-                throw Exception("Wallet not initialized")
+            withContext(Dispatchers.Main) {
+                progressListener?.onWithdrawStarted(mintUrl, withdrawAmount, lightningAddress)
+                progressListener?.onWithdrawProgress("Preparing", "Getting quote...")
             }
-            Log.d(TAG, "✅ Wallet instance obtained")
-
             // Get melt quote for Lightning address
             Log.d(TAG, "📋 Step 2: Getting melt quote...")
             withContext(Dispatchers.Main) {
                 progressListener?.onWithdrawProgress("Quote", "Getting Lightning quote...")
             }
 
-            val amountMsat = withdrawAmount * 1000
+            val amountMsat = Math.multiplyExact(withdrawAmount, 1_000L)
             Log.d(TAG, "   Requesting quote for $withdrawAmount sats ($amountMsat msat) to $lightningAddress")
-            
-            // Get the wallet for this mint first
-            val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
-            val unit = com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unitStr)
-            val mintWallet = wallet.getWallet(MintUrl(mintUrl), unit)
-                ?: throw Exception("Failed to get wallet for mint: $mintUrl")
             
             val meltQuote = withContext(Dispatchers.IO) {
                 Log.d(TAG, "   Making CDK call: wallet.meltLightningAddressQuote()")
@@ -318,28 +390,36 @@ class AutoWithdrawManager private constructor(private val context: Context) {
                 }
             }
 
-            val quoteAmount = meltQuote.amount.value.toLong()
-            val feeReserve = meltQuote.feeReserve.value.toLong()
-            val totalRequired = quoteAmount + feeReserve
+            require(meltQuote.unit == CashuWalletManager.getCurrencyUnit(paymentUnit.value)) {
+                "Melt quote has a different unit than the withdrawal wallet"
+            }
+            require(meltCapability.allowsAmount(meltQuote.amount.value.toLongExactAmount())) {
+                "Withdrawal amount is outside the source mint's BOLT11 melt limits"
+            }
+            val quoteAmount = meltQuote.amount.value.toLongExactAmount()
+            require(quoteAmount > 0L) { "Melt quote amount must be positive" }
+            val feeReserve = meltQuote.feeReserve.value.toLongExactAmount()
+            val totalRequired = Math.addExact(quoteAmount, feeReserve)
 
             Log.d(TAG, "✅ Melt quote received:")
             Log.d(TAG, "   Quote ID: ${meltQuote.id}")
-            Log.d(TAG, "   Amount: $quoteAmount sats")
-            Log.d(TAG, "   Fee reserve: $feeReserve sats")
-            Log.d(TAG, "   Total required: $totalRequired sats")
+            Log.d(TAG, "   Amount: $quoteAmount ${paymentUnit.value}")
+            Log.d(TAG, "   Fee reserve: $feeReserve ${paymentUnit.value}")
+            Log.d(TAG, "   Total required: $totalRequired ${paymentUnit.value}")
             Log.d(TAG, "   Request (BOLT11): ${meltQuote.request}")
 
             // Check if we have enough balance
-            if (totalRequired > currentBalance) {
-                Log.e(TAG, "❌ Insufficient balance: need $totalRequired sats, have $currentBalance sats")
-                throw Exception("Insufficient balance for withdrawal + fees (need $totalRequired, have $currentBalance)")
+            val spendBudget = settingsManager.calculateWithdrawAmount(mintUrl, currentBalanceAtomic)
+            if (totalRequired > currentBalanceAtomic || quoteAmount > spendBudget) {
+                throw Exception("Melt quote exceeds the withdrawal budget in ${paymentUnit.value}")
             }
-            Log.d(TAG, "✅ Balance check passed: $currentBalance >= $totalRequired")
 
             // Update history entry with quote info
             historyEntry = historyEntry.copy(
                 quoteId = meltQuote.id,
-                feeSats = feeReserve
+                feeSats = feeInSats(feeReserve, withdrawAmount, quoteAmount),
+                sourceAmountAtomic = quoteAmount,
+                sourceFeeAtomic = feeReserve,
             )
 
             // Execute melt using simplified API
@@ -363,7 +443,8 @@ class AutoWithdrawManager private constructor(private val context: Context) {
 
             // Check melt state
             Log.d(TAG, "📋 Step 5: Checking melt result state...")
-            val actualFee = finalized.feePaid.value.toLong()
+            val actualFeeAtomic = finalized.feePaid.value.toLongExactAmount()
+            val actualFee = feeInSats(actualFeeAtomic, withdrawAmount, quoteAmount)
 
             when (finalized.state) {
                 QuoteState.PAID -> {
@@ -374,7 +455,8 @@ class AutoWithdrawManager private constructor(private val context: Context) {
                     
                     historyEntry = historyEntry.copy(
                         status = WithdrawHistoryEntry.STATUS_COMPLETED,
-                        feeSats = actualFee
+                        feeSats = actualFee,
+                        sourceFeeAtomic = actualFeeAtomic,
                     )
                     
                     // Broadcast balance change so other activities can refresh
@@ -431,6 +513,17 @@ class AutoWithdrawManager private constructor(private val context: Context) {
             Log.d(TAG, "🏁 Auto-withdrawal process completed")
         }
     }
+
+    private fun ULong.toLongExactAmount(): Long {
+        require(this <= Long.MAX_VALUE.toULong()) { "Amount exceeds Long.MAX_VALUE" }
+        return toLong()
+    }
+
+    private fun feeInSats(feeAtomic: Long, paymentSats: Long, quoteAtomic: Long): Long =
+        BigDecimal.valueOf(feeAtomic)
+            .multiply(BigDecimal.valueOf(paymentSats))
+            .divide(BigDecimal.valueOf(quoteAtomic), 0, RoundingMode.CEILING)
+            .longValueExact()
 
     /**
      * Get auto-withdraw history.

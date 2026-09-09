@@ -509,7 +509,7 @@
     <string name="item_entry_price_breakdown_total_label">合計（VATを含む）</string>
     <string name="item_entry_price_breakdown_total_value_default">$0.00</string>
 
-    <string name="item_entry_price_helper">希望の通貨で固定価格を設定します。ビットコインの価格はサトシ（sats）で表されます。</string>
+    <string name="item_entry_price_helper">この商品の価格単位を選択してください。ビットコインの価格はサトシ（sats）で表示されます。</string>
 
     <string name="item_entry_section_identification">識別</string>
     <string name="item_entry_label_gtin">GTIN</string>
@@ -884,8 +884,8 @@
     <string name="pin_reset_paste_clipboard">クリップボードから貼り付け</string>
     <string name="pin_reset_button">PINのリセット</string>
     <string name="payment_request_tab_unified">統合された</string>
-    <string name="payment_request_default_description">%1$d の支払い</string>
-    <string name="payment_request_lightning_description">%1$d 衛星の Numo POS 支払い</string>
+    <string name="payment_request_default_description">%1$sの支払い</string>
+    <string name="payment_request_lightning_description">Numo POS 支払い: %1$s</string>
     <string name="onboarding_status_generating_seed">シードフレーズを生成しています…</string>
     <string name="onboarding_status_setting_up_mints">デフォルトのミントを設定しています…</string>
     <string name="onboarding_status_initializing_wallet">ウォレットを初期化しています…</string>
@@ -990,4 +990,16 @@
     <string name="settings_fiat_conversion_disabled_custom_unit">カスタムベース単位を使用している場合、法定通貨への変換は無効になります。</string>
     <string name="mints_base_currency_unit_title">基準通貨単位</string>
     <string name="mints_base_currency_unit_subtitle">ミントが他の単位をサポートしている場合は、ここで切り替えることができます。</string>
+    <string name="payment_request_error_unsupported_unit">この支払い単位は利用できません。追加済みのミントが対応している単位を選択してください。</string>
+
+    <plurals name="item_entry_error_price_decimals">
+        <item quantity="other">小数点以下は%1$d桁まで入力できます</item>
+    </plurals>
+    <string name="item_entry_error_price_whole_number">この単位には整数を入力してください</string>
+    <string name="item_entry_price_unit">価格の単位</string>
+    <string name="item_entry_custom_unit_warning">カスタム単位は他の単位と混在できません。資金は発行元のミントに残ります。</string>
+    <string name="item_entry_unsupported_unit_warning">追加済みのミントはこの商品の単位に対応していません。請求する前に対応するミントを追加してください。</string>
+    <string name="item_entry_local_currency_conversion_label">%1$s · 請求時に換算</string>
+    <string name="item_entry_unscoped_unit_label">%1$s · 発行元未指定</string>
+    <string name="item_entry_error_price_too_large">価格が大きすぎます</string>
 </resources>

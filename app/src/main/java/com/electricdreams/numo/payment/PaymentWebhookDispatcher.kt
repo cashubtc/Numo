@@ -40,11 +40,17 @@ class PaymentWebhookDispatcher(
 ) {
     data class PaymentSummary(
         val paymentId: String?,
+        /** Legacy field retained for payload compatibility; atomic in [unit]. */
         val amountSats: Long,
+        val amountAtomic: Long,
+        val unit: String,
+        val issuerScope: String?,
         val paymentType: String,
         val status: String,
         val mintUrl: String?,
+        /** Legacy field retained for payload compatibility; atomic in [unit]. */
         val tipAmountSats: Long,
+        val tipAmountAtomic: Long,
         val tipPercentage: Int,
         val basketId: String?,
         val lightningInvoice: String?,
@@ -63,11 +69,18 @@ class PaymentWebhookDispatcher(
         val paymentId: String,
         val status: String,
         val paymentType: String,
+        /** Legacy field retained for payload compatibility; atomic in [unit]. */
         val amountSats: Long,
+        val amountAtomic: Long,
+        /** Legacy field retained for payload compatibility; atomic in [unit]. */
         val baseAmountSats: Long,
+        val baseAmountAtomic: Long,
+        /** Legacy field retained for payload compatibility; atomic in [unit]. */
         val tipAmountSats: Long,
+        val tipAmountAtomic: Long,
         val tipPercentage: Int,
         val unit: String,
+        val issuerScope: String?,
         val entryUnit: String,
         val enteredAmount: Long,
         val formattedAmount: String?,
@@ -103,6 +116,11 @@ class PaymentWebhookDispatcher(
         val totalVatCents: Long,
         val grossPricePerUnitCents: Long,
         val grossTotalCents: Long,
+        val priceUnit: String,
+        val priceIssuerScope: String?,
+        val netPriceAtomic: Long,
+        val grossPriceAtomic: Long,
+        val grossTotalAtomic: Long,
     )
 
     data class CheckoutMetadata(
@@ -112,6 +130,9 @@ class PaymentWebhookDispatcher(
         val currency: String,
         val bitcoinPrice: Double?,
         val totalSatoshis: Long,
+        val chargeUnit: String,
+        val chargeAmountAtomic: Long,
+        val chargeIssuerScope: String?,
         val itemCount: Int,
         val hasVat: Boolean,
         val hasMixedPriceTypes: Boolean,
@@ -324,10 +345,14 @@ class PaymentWebhookDispatcher(
             payment = PaymentSummary(
                 paymentId = entry.id,
                 amountSats = entry.amount,
+                amountAtomic = entry.amount,
+                unit = entry.getUnit(),
+                issuerScope = entry.issuerScope,
                 paymentType = paymentType,
                 status = entry.status,
                 mintUrl = mintUrl,
                 tipAmountSats = entry.tipAmountSats,
+                tipAmountAtomic = entry.tipAmountAtomic,
                 tipPercentage = entry.tipPercentage,
                 basketId = entry.basketId,
                 lightningInvoice = entry.lightningInvoice,
@@ -339,10 +364,14 @@ class PaymentWebhookDispatcher(
                 status = entry.status,
                 paymentType = paymentType,
                 amountSats = entry.amount,
+                amountAtomic = entry.amount,
                 baseAmountSats = entry.getBaseAmountSats(),
+                baseAmountAtomic = entry.getBaseAmountAtomic(),
                 tipAmountSats = entry.tipAmountSats,
+                tipAmountAtomic = entry.tipAmountAtomic,
                 tipPercentage = entry.tipPercentage,
                 unit = entry.getUnit(),
+                issuerScope = entry.issuerScope,
                 entryUnit = entry.getEntryUnit(),
                 enteredAmount = entry.enteredAmount,
                 formattedAmount = entry.formattedAmount,
@@ -377,6 +406,7 @@ class PaymentWebhookDispatcher(
         basket: CheckoutBasket,
         savedBasketId: String?,
     ): CheckoutMetadata {
+        val chargeAmount = basket.getChargeAmount()
         return CheckoutMetadata(
             checkoutBasketId = basket.id,
             savedBasketId = savedBasketId,
@@ -384,6 +414,9 @@ class PaymentWebhookDispatcher(
             currency = basket.currency,
             bitcoinPrice = basket.bitcoinPrice,
             totalSatoshis = basket.totalSatoshis,
+            chargeUnit = chargeAmount.unit.value,
+            chargeAmountAtomic = chargeAmount.value,
+            chargeIssuerScope = chargeAmount.asset.issuerScope,
             itemCount = basket.getTotalItemCount(),
             hasVat = basket.hasVat(),
             hasMixedPriceTypes = basket.hasMixedPriceTypes(),
@@ -397,6 +430,9 @@ class PaymentWebhookDispatcher(
     }
 
     private fun toCheckoutLineItem(item: CheckoutBasketItem): CheckoutLineItem {
+        val netAmount = item.getNetAtomicAmount()
+        val grossAmount = item.getGrossAtomicAmount()
+        val grossLineAmount = item.getGrossLineAtomicAmount()
         return CheckoutLineItem(
             itemId = item.itemId,
             uuid = item.uuid,
@@ -418,6 +454,11 @@ class PaymentWebhookDispatcher(
             totalVatCents = item.getTotalVatCents(),
             grossPricePerUnitCents = item.getGrossPricePerUnitCents(),
             grossTotalCents = item.getGrossTotalCents(),
+            priceUnit = netAmount.unit.value,
+            priceIssuerScope = netAmount.asset.issuerScope,
+            netPriceAtomic = netAmount.value,
+            grossPriceAtomic = grossAmount.value,
+            grossTotalAtomic = grossLineAmount.value,
         )
     }
 
@@ -450,7 +491,7 @@ class PaymentWebhookDispatcher(
     companion object {
         private const val TAG = "PaymentWebhookDispatch"
         private const val EVENT_PAYMENT_RECEIVED = "payment.received"
-        private const val PAYLOAD_VERSION = 2
+        private const val PAYLOAD_VERSION = 3
         private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
 
         private val defaultHttpClient: OkHttpClient by lazy {

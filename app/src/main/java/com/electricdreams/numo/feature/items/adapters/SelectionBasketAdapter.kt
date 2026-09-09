@@ -8,8 +8,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
-import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.BasketItem
+import com.electricdreams.numo.core.model.UnitAmountFormatter
 import com.electricdreams.numo.core.util.CurrencyManager
 
 /**
@@ -85,25 +85,13 @@ class SelectionBasketAdapter(
                 variationView.visibility = View.GONE
             }
 
-            // Format total using unified Amount class
-            val activeCurrencyCode = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(itemView.context)
-            val isCustomUnit = com.electricdreams.numo.core.util.MintManager.getInstance(itemView.context).getPreferredUnit().lowercase() != "sat"
-            
-            totalView.text = if (isCustomUnit) {
-                val displayPrice = if (basketItem.isSatsPrice()) basketItem.getTotalSats().toDouble() else basketItem.getTotalPrice()
-                val currency = Amount.Currency.fromCode(activeCurrencyCode)
-                Amount.fromMajorUnits(displayPrice, currency).toString()
-            } else {
-                if (basketItem.isSatsPrice()) {
-                    Amount(basketItem.getTotalSats(), Amount.Currency.BTC).toString()
-                } else {
-                    val currency = Amount.Currency.fromCode(activeCurrencyCode)
-                    Amount.fromMajorUnits(basketItem.getTotalPrice(), currency).toString()
-                }
-            }
+            totalView.text = runCatching {
+                val amount = basketItem.getGrossAtomicAmount(currencyManager.getCurrentCurrency())
+                UnitAmountFormatter.formatAsset(amount)
+            }.getOrDefault("—")
 
             removeButton.setOnClickListener {
-                val itemId = item.id!!
+                val itemId = item.id ?: return@setOnClickListener
                 onItemRemoved(itemId)
             }
         }

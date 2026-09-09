@@ -1,6 +1,9 @@
 package com.electricdreams.numo.core.data.model
 
 import org.cashudevkit.Token
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
 import com.google.gson.annotations.SerializedName
 import java.util.Date
 import java.util.UUID
@@ -83,7 +86,11 @@ data class PaymentHistoryEntry(
     @SerializedName("basketId")
     val basketId: String? = null,
 
-    /** Tip amount in satoshis (separate from main amount for accounting) */
+    /**
+     * Tip amount in the payment unit's atomic denomination.
+     *
+     * The serialized name is retained for compatibility with existing history backups.
+     */
     @SerializedName("tipAmountSats")
     val tipAmountSats: Long = 0,
 
@@ -106,21 +113,32 @@ data class PaymentHistoryEntry(
     /** User-assigned label for this transaction */
     @SerializedName("label")
     override val label: String? = null,
+
+    /** Issuing mint for custom units that are not assumed fungible across mints. */
+    @SerializedName("issuerScope")
+    val issuerScope: String? = null,
 ) : HistoryEntry {
 
     /** Check if this payment includes a tip */
     fun hasTip(): Boolean = tipAmountSats > 0
 
-    /** Get the base amount (excluding tip) in satoshis */
+    /** Get the base amount (excluding tip) in the payment unit's atomic denomination. */
     override fun getBaseAmountSats(): Long = amount - tipAmountSats
+
+    val tipAmountAtomic: Long
+        get() = tipAmountSats
+
+    fun getBaseAmountAtomic(): Long = getBaseAmountSats()
 
     /** Get tip formatted for display (e.g., "₿500" or "5%") */
     fun getTipDisplayString(): String {
-        return if (tipAmountSats > 0) {
-            com.electricdreams.numo.core.model.Amount(tipAmountSats, com.electricdreams.numo.core.model.Amount.Currency.BTC).toString()
-        } else {
-            ""
-        }
+        if (tipAmountSats <= 0) return ""
+        val unit = UnitId.ofOrNull(getUnit())?.takeUnless { it.isReserved }
+            ?: return "$tipAmountSats ${getUnit()}"
+        return UnitAmountFormatter.formatAtomic(
+            tipAmountSats,
+            UnitDescriptor.defaultFor(unit),
+        )
     }
 
     /**
@@ -142,7 +160,10 @@ data class PaymentHistoryEntry(
     fun hasSavedBasket(): Boolean = !basketId.isNullOrEmpty()
 
     /** Public, non-null view of the token unit. */
-    fun getUnit(): String = rawUnit ?: "sat"
+    fun getUnit(): String {
+        val stored = rawUnit ?: return UnitId.SAT.value
+        return UnitId.ofOrNull(stored)?.takeUnless { it.isReserved }?.value ?: stored
+    }
 
     /** Public, non-null view of the entry unit. */
     override fun getEntryUnit(): String = rawEntryUnit ?: "sat"
@@ -261,13 +282,23 @@ data class PaymentHistoryEntry(
             tipAmountSats: Long = 0,
             tipPercentage: Int = 0,
             ecashUnit: String = "sat",
+            issuerScope: String? = null,
         ): PaymentHistoryEntry {
+            val paymentUnit = UnitId.of(ecashUnit)
+            require(!paymentUnit.isReserved) { "Reserved unit cannot be used for payments" }
+            val normalizedIssuer = issuerScope
+                ?.trim()
+                ?.takeIf {
+                    it.isNotEmpty() &&
+                        UnitDescriptor.defaultFor(paymentUnit).kind ==
+                        com.electricdreams.numo.core.model.UnitKind.CUSTOM
+                }
             return PaymentHistoryEntry(
                 id = UUID.randomUUID().toString(),
                 token = "",
                 amount = amount,
                 date = Date(),
-                rawUnit = ecashUnit,
+                rawUnit = paymentUnit.value,
                 rawEntryUnit = entryUnit,
                 enteredAmount = enteredAmount,
                 bitcoinPrice = bitcoinPrice,
@@ -281,6 +312,7 @@ data class PaymentHistoryEntry(
                 tipAmountSats = tipAmountSats,
                 tipPercentage = tipPercentage,
                 swapToLightningMintJson = null,
+                issuerScope = normalizedIssuer,
             )
         }
     }

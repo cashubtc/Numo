@@ -412,7 +412,7 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="item_entry_price_breakdown_vat_value_default">$0.00</string>
     <string name="item_entry_price_breakdown_total_label">Total (com imposto)</string>
     <string name="item_entry_price_breakdown_total_value_default">$0.00</string>
-    <string name="item_entry_price_helper">Defina um preço fixo na sua moeda preferida. Preços em Bitcoin são em satoshis (sats).</string>
+    <string name="item_entry_price_helper">Escolha uma unidade de preço para este item. Os preços em Bitcoin são expressos em satoshis (sats).</string>
     <string name="item_entry_section_identification">IDENTIFICAÇÃO</string>
     <string name="item_entry_label_gtin">GTIN</string>
     <string name="item_entry_hint_gtin">Escaneie ou insira o código de barras</string>
@@ -706,8 +706,8 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="pin_reset_paste_clipboard">Colar da área de transferência</string>
     <string name="pin_reset_button">Redefinir PIN</string>
     <string name="payment_request_tab_unified">Unificado</string>
-    <string name="payment_request_default_description">Pagamento de %1$d sats</string>
-    <string name="payment_request_lightning_description">Pagamento Numo POS de %1$d sats</string>
+    <string name="payment_request_default_description">Pagamento de %1$s</string>
+    <string name="payment_request_lightning_description">Pagamento Numo POS de %1$s</string>
     <string name="onboarding_add_mint_url_hint">Insira a URL do mint</string>
     <string name="onboarding_mints_popular_section_title">Mints Populares</string>
     <string name="history_dialog_dont_show_again">Não mostrar no futuro</string>
@@ -827,4 +827,18 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="settings_fiat_conversion_disabled_custom_unit">A conversão de moeda fiduciária está desativada ao usar uma unidade base personalizada.</string>
     <string name="mints_base_currency_unit_title">Unidade Monetária Base</string>
     <string name="mints_base_currency_unit_subtitle">Se o mint suportar outras unidades, você pode alterá-lo aqui.</string>
+    <string name="payment_request_error_unsupported_unit">Esta unidade de pagamento não está disponível. Selecione uma unidade compatível com uma das suas mints adicionadas.</string>
+
+    <plurals name="item_entry_error_price_decimals">
+        <item quantity="one">Use até %1$d casa decimal</item>
+        <item quantity="many">Use até %1$d casas decimais</item>
+        <item quantity="other">Use até %1$d casas decimais</item>
+    </plurals>
+    <string name="item_entry_error_price_whole_number">Introduza um número inteiro para esta unidade</string>
+    <string name="item_entry_price_unit">Unidade do preço</string>
+    <string name="item_entry_custom_unit_warning">As unidades personalizadas não podem ser combinadas com outras unidades. Os fundos permanecem na mint emissora.</string>
+    <string name="item_entry_unsupported_unit_warning">Nenhuma mint adicionada suporta atualmente a unidade deste item. Adicione uma mint compatível antes de cobrar.</string>
+    <string name="item_entry_local_currency_conversion_label">%1$s · convertido ao cobrar</string>
+    <string name="item_entry_unscoped_unit_label">%1$s · emissor não especificado</string>
+    <string name="item_entry_error_price_too_large">O preço é demasiado elevado</string>
 </resources>

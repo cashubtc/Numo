@@ -36,6 +36,7 @@ class MintProfileService private constructor(context: Context) {
         val displayName: String?,
         val iconCached: Boolean,
         val errorType: ErrorType? = null,
+        val supportedUnits: Set<String>? = null,
     )
 
     companion object {
@@ -214,6 +215,13 @@ class MintProfileService private constructor(context: Context) {
             Log.d("MintProfileService", "Skipped storing mint info in cache for $normalizedUrl (storeInCache=false)")
         }
 
+        // NUT-01/NUT-02 are authoritative for the units a mint actually has keysets for. A failed
+        // discovery stays unknown; an intentionally empty successful response is cached as empty.
+        val supportedUnits = fetchMintUnitsFromNetwork(normalizedUrl)
+        if (supportedUnits != null) {
+            mintManager.setMintUnits(normalizedUrl, supportedUnits)
+        }
+
         var iconCached = false
         if (!iconUrl.isNullOrBlank()) {
             iconCached = MintIconCache.downloadAndCacheIcon(normalizedUrl, iconUrl) != null
@@ -225,6 +233,7 @@ class MintProfileService private constructor(context: Context) {
             displayName = displayName,
             iconCached = iconCached,
             errorType = null,
+            supportedUnits = supportedUnits,
         )
     }
 
@@ -266,6 +275,37 @@ class MintProfileService private constructor(context: Context) {
                 NetworkMintInfoResult(infoJson = null, errorType = ErrorType.NETWORK)
             }
         }
+
+    private fun fetchMintUnitsFromNetwork(mintUrl: String): Set<String>? {
+        return fetchUnitsEndpoint("$mintUrl/v1/keysets")
+            ?: fetchUnitsEndpoint("$mintUrl/v1/keys")
+    }
+
+    private fun fetchUnitsEndpoint(url: String): Set<String>? {
+        return try {
+            val request = Request.Builder().url(url).get().build()
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return null
+                val body = response.body?.string().orEmpty()
+                if (body.isBlank()) return null
+
+                val root = JSONObject(body)
+                val keysets = root.optJSONArray("keysets") ?: return null
+                buildSet {
+                    for (index in 0 until keysets.length()) {
+                        val unit = keysets.optJSONObject(index)
+                            ?.optString("unit", "")
+                            ?.trim()
+                            .orEmpty()
+                        if (unit.isNotEmpty()) add(unit)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Mint unit discovery failed for $url", e)
+            null
+        }
+    }
 
     private fun canonicalizeMintInfoJson(raw: JSONObject): JSONObject {
         val result = JSONObject()

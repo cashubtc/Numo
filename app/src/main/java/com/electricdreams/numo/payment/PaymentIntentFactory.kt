@@ -21,6 +21,10 @@ object PaymentIntentFactory {
     ): Intent {
         return Intent(context, PaymentRequestActivity::class.java).apply {
             putExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, entry.amount)
+            putExtra(PaymentRequestActivity.EXTRA_PAYMENT_UNIT, entry.getUnit())
+            entry.issuerScope?.let {
+                putExtra(PaymentRequestActivity.EXTRA_PAYMENT_ISSUER_SCOPE, it)
+            }
             putExtra(PaymentRequestActivity.EXTRA_FORMATTED_AMOUNT, entry.formattedAmount)
             putExtra(PaymentRequestActivity.EXTRA_RESUME_PAYMENT_ID, entry.id)
 
@@ -89,6 +93,9 @@ object PaymentIntentFactory {
                 putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_BITCOIN_PRICE, it)
             }
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_MINT_URL, entry.mintUrl)
+            entry.issuerScope?.let {
+                putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ISSUER_SCOPE, it)
+            }
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_REQUEST, entry.paymentRequest)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_POSITION, position)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_TYPE, entry.paymentType)

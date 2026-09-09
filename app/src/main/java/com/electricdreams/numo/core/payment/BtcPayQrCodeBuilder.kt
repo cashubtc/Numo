@@ -2,6 +2,7 @@ package com.electricdreams.numo.core.payment
 
 import android.util.Base64
 import android.util.Log
+import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.upokecenter.cbor.CBORObject
 
 /**
@@ -39,14 +40,9 @@ object BtcPayQrCodeBuilder {
                 decoded.paymentId()?.let { map.Add("i", it) }
                 map.Add("a", amount)
                 decoded.unit()?.let { u ->
-                    map.Add("u", when (u) {
-                        is org.cashudevkit.CurrencyUnit.Sat -> "sat"
-                        is org.cashudevkit.CurrencyUnit.Msat -> "msat"
-                        is org.cashudevkit.CurrencyUnit.Eur -> "eur"
-                        is org.cashudevkit.CurrencyUnit.Usd -> "usd"
-                        is org.cashudevkit.CurrencyUnit.Custom -> u.unit
-                        else -> "sat"
-                    })
+                    // Preserve the protocol unit exactly. A future CDK variant must fail this
+                    // preparation path instead of silently producing a sat-denominated request.
+                    map.Add("u", CashuWalletManager.run { u.toUnitString() })
                 }
                 decoded.description()?.let { map.Add("d", it) }
                 decoded.singleUse()?.let { map.Add("s", it) }

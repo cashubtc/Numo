@@ -17,6 +17,34 @@ import java.util.Date
 @RunWith(RobolectricTestRunner::class)
 class ReceiptPrinterTest {
 
+    @Test
+    fun `legacy yen receipt preserves line prices and explicit payment denomination`() {
+        val item = CheckoutBasketItem(
+            itemId = "yen", uuid = "yen", name = "Coffee",
+            quantity = 1, priceType = "FIAT", netPriceCents = 100_000,
+            priceSats = 0, priceCurrency = "JPY", vatEnabled = false, vatRate = 0,
+        )
+        val data = ReceiptPrinter.ReceiptData(
+            basket = CheckoutBasket(items = listOf(item), currency = "JPY", totalSatoshis = 1_000),
+            paymentType = "cashu", paymentDate = Date(), transactionId = "legacy",
+            mintUrl = null, bitcoinPrice = null, totalSatoshis = 1_000, paymentUnit = "jpy",
+        )
+        val expected = com.electricdreams.numo.core.model.UnitAmountFormatter.formatAtomic(
+            1_000, com.electricdreams.numo.core.model.UnitDescriptor.defaultFor(
+                com.electricdreams.numo.core.model.UnitId.of("jpy"),
+            ),
+        )
+        val receipt = printer.generateTextReceipt(data)
+        val html = printer.generateHtmlReceipt(data)
+        assertTrue(receipt.contains("1 x $expected"))
+        assertTrue(receipt.contains("Paid:"))
+        assertTrue(!receipt.contains("100,000"))
+        assertTrue(!receipt.contains("sat"))
+        assertTrue(html.contains(expected))
+        assertTrue(!html.contains("100,000"))
+        assertTrue(!html.contains("sat"))
+    }
+
     private lateinit var context: Context
     private lateinit var printer: ReceiptPrinter
 
@@ -165,5 +193,54 @@ class ReceiptPrinterTest {
         // To be safe and locale-independent, we'll just check for the presence of the 5 and the € symbol.
         assertTrue(html.contains("€5"))
         assertTrue(html.contains("NUMO POS"))
+    }
+
+    @Test
+    fun `custom unit receipt never labels atomic amounts as sats`() {
+        val issuer = "https://rewards.example"
+        val item = CheckoutBasketItem(
+            itemId = "item-points",
+            uuid = "uuid-points",
+            name = "Reward",
+            quantity = 2,
+            priceType = "FIAT",
+            netPriceCents = 0,
+            priceSats = 0,
+            priceCurrency = "USD",
+            vatEnabled = false,
+            vatRate = 0,
+            priceUnit = "points",
+            netPriceAtomic = 25,
+            grossPriceAtomic = 25,
+            priceIssuerScope = issuer,
+        )
+        val basket = CheckoutBasket(
+            items = listOf(item),
+            currency = "USD",
+            totalSatoshis = 50,
+            chargeUnit = "points",
+            chargeAmountAtomic = 50,
+            chargeIssuerScope = issuer,
+        )
+        val data = ReceiptPrinter.ReceiptData(
+            basket = basket,
+            paymentType = "cashu",
+            paymentDate = Date(),
+            transactionId = "points-payment",
+            mintUrl = issuer,
+            bitcoinPrice = null,
+            totalSatoshis = 50,
+            paymentUnit = "points",
+            paymentIssuerScope = issuer,
+        )
+
+        val receipt = printer.generateTextReceipt(data)
+        val html = printer.generateHtmlReceipt(data)
+
+        assertTrue(receipt.contains("25 POINTS"))
+        assertTrue(receipt.contains("50 POINTS"))
+        assertTrue(!receipt.contains("50 sat"))
+        assertTrue(html.contains("50 POINTS"))
+        assertTrue(!html.contains("50 sat"))
     }
 }
