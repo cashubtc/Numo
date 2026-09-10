@@ -30,6 +30,9 @@ import java.io.File
 class OnboardingRenderTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
+    /** Preview PNGs are design-iteration tooling; CI runs the assertions alone. */
+    private val previews = System.getProperty("numo.previews").toBoolean()
+
     @Before
     fun setup() {
         Settings.Global.putFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 0f)
@@ -81,9 +84,10 @@ class OnboardingRenderTest {
                         val visible = Rect()
                         assertTrue(action.getGlobalVisibleRect(visible))
                         assertTrue("Get started must remain fully visible", visible.height() >= action.height)
+                        // draw() runs even without previews: it is the smoke test that every scene renders.
                         save(draw(root), "page-$page-font-$fontScale")
                     }
-                    if (fontScale == 1f) {
+                    if (previews && fontScale == 1f) {
                         tour.restorePlaybackState(Bundle().apply { putInt("tour_page", 1) })
                         layout(root)
                         val scene = descendants(root).filterIsInstance<OnboardingSceneView>()
@@ -118,6 +122,7 @@ class OnboardingRenderTest {
     ).also { view.draw(Canvas(it)) }
 
     private fun save(bitmap: Bitmap, name: String) {
+        if (!previews) return
         val file = File("build/onboarding-previews/$name.png")
         file.parentFile?.mkdirs()
         file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }

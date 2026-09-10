@@ -78,6 +78,8 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
+            // Opt in to the onboarding preview PNGs: ./gradlew testDebugUnitTest -Dnumo.previews=true
+            all { it.systemProperty("numo.previews", System.getProperty("numo.previews") ?: "false") }
         }
     }
 
