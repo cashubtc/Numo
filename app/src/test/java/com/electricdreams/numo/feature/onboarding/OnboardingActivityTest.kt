@@ -1,14 +1,19 @@
 package com.electricdreams.numo.feature.onboarding
 
+import android.content.Context
+import android.provider.Settings
 import android.view.View
 import android.widget.FrameLayout
 import androidx.test.core.app.ActivityScenario
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.electricdreams.numo.R
 import com.google.android.material.button.MaterialButton
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert.*
+import org.junit.Before
+import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
@@ -17,6 +22,19 @@ import org.robolectric.util.ReflectionHelpers
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34])
 class OnboardingActivityTest {
+
+    @Before
+    fun disableWelcomeMotion() {
+        val context: Context = ApplicationProvider.getApplicationContext()
+        context.getSharedPreferences("OnboardingPrefs", Context.MODE_PRIVATE).edit().clear().commit()
+        Settings.Global.putFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 0f)
+    }
+
+    @After
+    fun restoreWelcomeMotion() {
+        val context: Context = ApplicationProvider.getApplicationContext()
+        Settings.Global.putFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
+    }
 
     // ── Navigation tests ────────────────────────────────────────────────
 
