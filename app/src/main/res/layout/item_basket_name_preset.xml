@@ -6,17 +6,20 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:paddingVertical="@dimen/row_padding_vertical"
-    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-    android:background="@drawable/bg_row_ripple">
+    android:paddingHorizontal="0dp"
+    android:background="@drawable/bg_settings_group"
+    android:clipToOutline="true"
+    android:minHeight="@dimen/settings_switch_height">
 
     <!-- Name Text -->
+
     <TextView
         android:id="@+id/preset_name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textAppearance="@style/Text.RowTitle"
         android:ellipsize="end"
-        android:maxLines="1"
+        android:maxLines="2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/delete_button"
         app:layout_constraintTop_toTopOf="parent"
@@ -24,14 +27,15 @@
         tools:text="Table 5" />
 
     <!-- Delete Button -->
+
     <ImageButton
         android:id="@+id/delete_button"
-        android:layout_width="@dimen/icon_size_medium"
-        android:layout_height="@dimen/icon_size_medium"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_close"
+        android:src="@drawable/ic_delete"
         android:contentDescription="@string/common_delete"
-        android:padding="@dimen/space_m"
+        android:padding="12dp"
         app:tint="@color/color_icon_tertiary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"

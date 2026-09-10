@@ -1,37 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 
-    Clean mint list item without selection indicators.
-    Tapping opens mint details (no selection behavior).
--->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/mint_item_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <!-- Main Row Content -->
+
     <LinearLayout
         android:id="@+id/mint_item_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="@dimen/margin_screen_horizontal"
-        android:paddingVertical="@dimen/row_padding_vertical"
+        android:paddingHorizontal="0dp"
+        android:paddingVertical="@dimen/settings_row_padding"
         android:background="?attr/selectableItemBackground"
+        android:screenReaderFocusable="true"
         android:clickable="true"
-        android:focusable="true">
+        android:focusable="true"
+        android:minHeight="@dimen/settings_detail_row_height">
 
         <!-- Mint Icon (circular avatar) -->
+
         <FrameLayout
             android:id="@+id/icon_container"
-            android:layout_width="44dp"
-            android:layout_height="44dp">
+            android:layout_width="@dimen/settings_row_icon_size"
+            android:layout_height="@dimen/settings_row_icon_size">
 
             <com.google.android.material.imageview.ShapeableImageView
                 android:id="@+id/mint_icon"
-                android:layout_width="44dp"
-                android:layout_height="44dp"
+                android:layout_width="@dimen/settings_row_icon_size"
+                android:layout_height="@dimen/settings_row_icon_size"
                 android:layout_gravity="center"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_bitcoin"
@@ -39,58 +40,61 @@
                 app:shapeAppearanceOverlay="@style/ShapeAppearance.Circle"
                 app:strokeColor="@color/color_bg_white"
                 app:strokeWidth="1dp"
-                android:contentDescription="@string/cd_mint_icon" />
+                android:importantForAccessibility="no" />
 
         </FrameLayout>
 
-        <!-- Text Content -->
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/mint_text_container"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginStart="@dimen/row_icon_gap"
-            android:layout_marginEnd="@dimen/space_m">
+            android:layout_marginStart="@dimen/settings_row_icon_gap">
 
             <TextView
                 android:id="@+id/mint_name"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Mint Name"
+                android:layout_marginEnd="@dimen/space_s"
                 android:textAppearance="@style/Text.RowTitle"
-                android:maxLines="1"
-                android:ellipsize="end" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/balance_text" />
 
             <TextView
                 android:id="@+id/mint_url"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/settings_row_subtitle_gap"
+                android:textAppearance="@style/Text.SettingsCaption"
+                app:layout_constraintTop_toBottomOf="@id/mint_name"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <TextView
+                android:id="@+id/balance_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="mint.example.com"
-                style="@style/Text.RowSubtitle"
-                android:maxLines="1"
-                android:ellipsize="end" />
+                android:textAppearance="@style/Text.SettingsCaption"
+                android:fontFeatureSettings="tnum"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginEnd="@dimen/space_s"
+                app:layout_constraintEnd_toStartOf="@id/chevron" />
 
-        </LinearLayout>
+            <!-- Chevron -->
 
-        <!-- Balance -->
-        <TextView
-            android:id="@+id/balance_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="₿0"
-            android:textAppearance="@style/Text.BodyBold"
-            android:textColor="@color/color_text_secondary"
-            android:layout_marginEnd="@dimen/space_s" />
+            <ImageView
+                android:id="@+id/chevron"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_chevron_right"
+                app:tint="@color/color_icon_secondary"
+                android:contentDescription="@null"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/balance_text"
+                app:layout_constraintBottom_toBottomOf="@id/balance_text" />
 
-        <!-- Chevron -->
-        <ImageView
-            android:id="@+id/chevron"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:src="@drawable/ic_chevron_right"
-            app:tint="@color/color_text_quaternary"
-            android:contentDescription="@null" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </LinearLayout>
 

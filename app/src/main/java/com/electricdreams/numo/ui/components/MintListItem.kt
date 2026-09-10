@@ -9,13 +9,13 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
-import com.google.android.material.imageview.ShapeableImageView
+import androidx.constraintlayout.widget.ConstraintSet
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.MintIconCache
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.databinding.ComponentMintListItemBinding
 
 /**
  * Clean, simplified mint list item.
@@ -36,6 +36,9 @@ class MintListItem @JvmOverloads constructor(
         fun onMintTapped(mintUrl: String)
     }
 
+    private val binding = ComponentMintListItemBinding.inflate(LayoutInflater.from(context), this, true)
+    private var stackedBalance: Boolean? = null
+
     // Views
     private val container: View
     private val iconContainer: FrameLayout
@@ -47,20 +50,55 @@ class MintListItem @JvmOverloads constructor(
     
     private var mintUrl: String = ""
     private var listener: OnMintItemListener? = null
-    private var isLastItem: Boolean = false
 
     init {
-        LayoutInflater.from(context).inflate(R.layout.component_mint_list_item, this, true)
         
-        container = findViewById(R.id.mint_item_container)
-        iconContainer = findViewById(R.id.icon_container)
-        mintIcon = findViewById(R.id.mint_icon)
-        nameText = findViewById(R.id.mint_name)
-        urlText = findViewById(R.id.mint_url)
-        balanceText = findViewById(R.id.balance_text)
-        chevron = findViewById(R.id.chevron)
+        container = binding.mintItemContainer
+        iconContainer = binding.iconContainer
+        mintIcon = binding.mintIcon
+        nameText = binding.mintName
+        urlText = binding.mintUrl
+        balanceText = binding.balanceText
+        chevron = binding.chevron
         
         setupClickListener()
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val availableWidth = MeasureSpec.getSize(widthMeasureSpec) -
+            resources.getDimensionPixelSize(R.dimen.settings_row_icon_size) -
+            resources.getDimensionPixelSize(R.dimen.settings_row_icon_gap) -
+            resources.getDimensionPixelSize(R.dimen.space_s) - chevron.layoutParams.width
+        val amountWidth = balanceText.paint.measureText(balanceText.text.toString())
+        val stack = resources.configuration.fontScale >= 1.3f ||
+            amountWidth > availableWidth * 0.4f
+        if (stackedBalance != stack) {
+            stackedBalance = stack
+            ConstraintSet().apply {
+                clone(binding.mintTextContainer)
+                connect(R.id.mint_name, ConstraintSet.END,
+                    if (stack) ConstraintSet.PARENT_ID else R.id.balance_text,
+                    if (stack) ConstraintSet.END else ConstraintSet.START)
+                clear(R.id.balance_text, ConstraintSet.START)
+                clear(R.id.balance_text, ConstraintSet.END)
+                connect(R.id.balance_text, ConstraintSet.TOP,
+                    if (stack) R.id.mint_url else ConstraintSet.PARENT_ID,
+                    if (stack) ConstraintSet.BOTTOM else ConstraintSet.TOP,
+                    if (stack) resources.getDimensionPixelSize(R.dimen.settings_row_subtitle_gap) else 0)
+                connect(R.id.balance_text, if (stack) ConstraintSet.START else ConstraintSet.END,
+                    if (stack) ConstraintSet.PARENT_ID else R.id.chevron, ConstraintSet.START,
+                    if (stack) 0 else resources.getDimensionPixelSize(R.dimen.space_s))
+                if (stack) {
+                    connect(R.id.balance_text, ConstraintSet.END,
+                        R.id.chevron, ConstraintSet.START,
+                        resources.getDimensionPixelSize(R.dimen.space_s))
+                }
+                constrainWidth(R.id.balance_text,
+                    if (stack) ConstraintSet.MATCH_CONSTRAINT else ConstraintSet.WRAP_CONTENT)
+                applyTo(binding.mintTextContainer)
+            }
+        }
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }
 
     private fun setupClickListener() {
@@ -70,9 +108,8 @@ class MintListItem @JvmOverloads constructor(
         }
     }
 
-    fun bind(url: String, balance: Long, isLast: Boolean = false) {
+    fun bind(url: String, balance: Long) {
         mintUrl = url
-        isLastItem = isLast
         
         // Get mint info
         val mintManager = MintManager.getInstance(context)
@@ -107,31 +144,8 @@ class MintListItem @JvmOverloads constructor(
         // Load icon
         loadIcon(url)
         
-        // Add divider if not last item
-        updateDivider()
     }
 
-    private fun updateDivider() {
-        // Remove any existing divider
-        val existingDivider = findViewById<View>(R.id.item_divider)
-        existingDivider?.let { (parent as? FrameLayout)?.removeView(it) }
-        
-        if (!isLastItem) {
-            // Add divider view
-            val divider = View(context).apply {
-                id = R.id.item_divider
-                layoutParams = LayoutParams(
-                    LayoutParams.MATCH_PARENT,
-                    resources.getDimensionPixelSize(R.dimen.divider_height)
-                ).apply {
-                    marginStart = resources.getDimensionPixelSize(R.dimen.mint_item_divider_margin)
-                    gravity = android.view.Gravity.BOTTOM
-                }
-                setBackgroundColor(context.getColor(R.color.color_divider))
-            }
-            addView(divider)
-        }
-    }
 
     private fun loadIcon(url: String) {
         val cachedFile = MintIconCache.getCachedIconFile(url)

@@ -8,6 +8,7 @@
     </declare-styleable>
 
     <declare-styleable name="NumoTopBar">
+        <attr name="topBarSettingsStyle" format="boolean" />
         <attr name="topBarTitle" format="string|reference" />
         <attr name="topBarNavIcon" format="reference" />
         <attr name="topBarNavContentDescription" format="string|reference" />

@@ -5,22 +5,24 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.gridlayout.widget.GridLayout
+import com.google.android.material.button.MaterialButton
+
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
-import com.google.android.material.button.MaterialButton
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.electricdreams.numo.databinding.ActivitySeedPhraseBinding
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 /**
  * Activity for displaying the wallet's 12-word seed phrase.
  * Shows words in a numbered grid format with a single copy button.
  */
 class SeedPhraseActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivitySeedPhraseBinding
 
     private lateinit var seedWordsGrid: GridLayout
     private lateinit var copyButton: MaterialButton
@@ -31,19 +33,15 @@ class SeedPhraseActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_seed_phrase)
+        binding = ActivitySeedPhraseBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+        seedWordsGrid = binding.seedWordsGrid
+        copyButton = binding.copyButton
+        toggleVisibilityButton = binding.toggleVisibilityButton
 
-        seedWordsGrid = findViewById(R.id.seed_words_grid)
-        copyButton = findViewById(R.id.copy_button)
-        toggleVisibilityButton = findViewById(R.id.toggle_visibility_button)
-
-        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
+        binding.topBar.onNavClick { finish() }
 
         // Load the mnemonic but keep it hidden initially
         loadMnemonic()

@@ -1,124 +1,154 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<com.electricdreams.numo.ui.components.SettingsPageLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
+    android:layout_height="match_parent">
 
-    <!-- Top App Bar -->
-    <com.electricdreams.numo.ui.components.NumoTopBar
-        android:id="@+id/top_bar"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        app:topBarTitle="@string/developer_error_logs_title"
-        app:topBarNavIcon="@drawable/ic_close"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent">
 
-    <!-- Section Header -->
-    <TextView
-        android:id="@+id/section_header"
-        style="@style/Text.SectionHeader"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/space_xl"
-        android:layout_marginTop="@dimen/space_xl"
-        android:text="@string/developer_error_logs_section_title"
-        app:layout_constraintTop_toBottomOf="@id/top_bar" />
+        <!-- Top App Bar -->
 
-    <!-- Date Filter Row -->
-    <LinearLayout
-        android:id="@+id/date_filter_row"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/space_xl"
-        android:layout_marginTop="@dimen/space_s"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/section_header">
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:topBarTitle="@string/developer_error_logs_title"
+            app:layout_constraintTop_toTopOf="parent"
+            android:minHeight="64dp"
+            app:topBarSettingsStyle="true" />
+
+        <!-- Section Header -->
 
         <TextView
-            android:id="@+id/date_filter_label"
+            android:id="@+id/section_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/developer_error_logs_section_title"
+            app:layout_constraintTop_toBottomOf="@id/top_bar"
+            android:textAppearance="@style/Text.SettingsSection"
+            android:textAllCaps="false"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="12dp"
+            android:accessibilityHeading="true" />
+
+        <!-- Date Filter Row -->
+
+        <LinearLayout
+            android:id="@+id/date_filter_row"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/settings_page_margin"
+            android:layout_marginTop="@dimen/space_s"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/section_header"
+            android:background="@drawable/bg_settings_group"
+            android:clipToOutline="true"
+            android:padding="16dp"
+            android:minHeight="64dp"
+            android:foreground="?attr/selectableItemBackground"
+            android:screenReaderFocusable="true">
+
+            <TextView
+                android:id="@+id/date_filter_label"
+                style="@style/Text.Body"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/developer_error_logs_filter_label" />
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="0dp" />
+
+            <TextView
+                android:id="@+id/date_filter_value"
+                style="@style/Text.BodyBold"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/developer_error_logs_filter_today" />
+
+            <ImageView
+                android:importantForAccessibility="no"
+                android:id="@+id/date_filter_button"
+                android:layout_width="@dimen/icon_size_small"
+                android:layout_height="@dimen/icon_size_small"
+                android:src="@drawable/ic_chevron_forward"
+                app:tint="@color/color_icon_secondary" />
+
+        </LinearLayout>
+
+        <!-- RecyclerView for log entries -->
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/error_logs_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/space_s"
+            android:clipToPadding="false"
+            android:paddingBottom="16dp"
+            app:layout_constraintTop_toBottomOf="@id/date_filter_row"
+            app:layout_constraintBottom_toTopOf="@id/action_bar"
+            android:paddingHorizontal="@dimen/settings_page_margin" />
+
+        <!-- Empty View -->
+
+        <TextView
+            android:id="@+id/empty_view"
             style="@style/Text.Body"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/developer_error_logs_filter_label" />
-
-        <Space
-            android:layout_width="8dp"
-            android:layout_height="0dp" />
-
-        <TextView
-            android:id="@+id/date_filter_value"
-            style="@style/Text.BodyBold"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/developer_error_logs_filter_today" />
+            android:text="@string/developer_error_logs_empty"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/date_filter_row"
+            app:layout_constraintBottom_toTopOf="@id/action_bar"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginHorizontal="24dp"
+            android:gravity="center"
+            android:textAppearance="@style/Text.SettingsBody" />
 
-        <ImageView
-            android:importantForAccessibility="no"
-            android:id="@+id/date_filter_button"
-            android:layout_width="@dimen/icon_size_small"
-            android:layout_height="@dimen/icon_size_small"
-            android:src="@drawable/ic_chevron_forward"
-            app:tint="@color/color_icon_secondary" />
-    </LinearLayout>
+        <!-- Bottom Action Bar -->
 
-    <!-- RecyclerView for log entries -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/error_logs_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="@dimen/space_s"
-        android:clipToPadding="false"
-        android:paddingBottom="@dimen/space_l"
-        app:layout_constraintTop_toBottomOf="@id/date_filter_row"
-        app:layout_constraintBottom_toTopOf="@id/action_bar" />
-
-    <!-- Empty View -->
-    <TextView
-        android:id="@+id/empty_view"
-        style="@style/Text.Body"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/developer_error_logs_empty"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/date_filter_row"
-        app:layout_constraintBottom_toTopOf="@id/action_bar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <!-- Bottom Action Bar -->
-    <LinearLayout
-        android:id="@+id/action_bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="@dimen/space_l"
-        android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <Button
-            android:id="@+id/copy_all_button"
-            style="@style/Widget.Button.Secondary.Outlined"
-            android:layout_width="0dp"
+        <LinearLayout
+            android:id="@+id/action_bar"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/developer_error_logs_copy_all" />
+            android:padding="@dimen/space_l"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent">
 
-        <Space
-            android:layout_width="12dp"
-            android:layout_height="0dp" />
+            <Button
+                android:id="@+id/copy_all_button"
+                style="@style/Widget.Button.Secondary.Outlined"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/developer_error_logs_copy_all"
+                android:minHeight="56dp" />
 
-        <Button
-            android:id="@+id/share_button"
-            style="@style/Widget.Button.Primary.Green"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/developer_error_logs_share" />
-    </LinearLayout>
+            <Space
+                android:layout_width="12dp"
+                android:layout_height="0dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <Button
+                android:id="@+id/share_button"
+                style="@style/Widget.Button.Primary.Green"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/developer_error_logs_share"
+                android:minHeight="56dp" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

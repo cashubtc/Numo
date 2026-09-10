@@ -3,14 +3,13 @@ package com.electricdreams.numo.feature.items
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -23,34 +22,28 @@ import androidx.core.view.WindowCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.util.Collections
+
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.Item
 import com.electricdreams.numo.core.util.ItemManager
+import com.electricdreams.numo.databinding.ActivityItemListBinding
 import com.electricdreams.numo.feature.items.CsvImportHelper
 import com.electricdreams.numo.ui.util.DialogHelper
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
-import java.util.Collections
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 class ItemListActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityItemListBinding
 
     private lateinit var itemManager: ItemManager
     private lateinit var recyclerView: RecyclerView
     private lateinit var emptyView: View
     private lateinit var itemsContent: View
     private lateinit var bottomActions: LinearLayout
-    private lateinit var fabAddItem: ImageButton
-    private lateinit var doneReorderButton: ImageButton
     private lateinit var topBar: View
     private lateinit var adapter: ItemAdapter
     private lateinit var itemTouchHelper: ItemTouchHelper
-    
-    // Empty state animator
     private var emptyStateAnimator: EmptyStateAnimator? = null
 
     // Reordering mode state
@@ -94,16 +87,12 @@ class ItemListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_item_list)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+        binding = ActivityItemListBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
         // Set up back button
-        findViewById<View?>(R.id.back_button)?.setOnClickListener {
+        binding.topBar.onNavClick {
             if (isReorderingMode) {
                 exitReorderingMode()
             } else {
@@ -111,16 +100,14 @@ class ItemListActivity : AppCompatActivity() {
             }
         }
 
-        recyclerView = findViewById(R.id.items_recycler_view)
-        emptyView = findViewById(R.id.empty_view)
-        itemsContent = findViewById(R.id.items_content)
-        bottomActions = findViewById(R.id.bottom_actions)
-        fabAddItem = findViewById(R.id.fab_add_item)
-        doneReorderButton = findViewById(R.id.done_reorder_button)
-        topBar = findViewById(R.id.top_bar)
-        val importCsvButton: Button = findViewById(R.id.import_csv_button)
-        val exportCsvButton: Button = findViewById(R.id.export_csv_button)
-        val clearItemsButton: TextView = findViewById(R.id.clear_items_button)
+        recyclerView = binding.itemsRecyclerView
+        emptyView = binding.emptyView.root
+        itemsContent = binding.itemsContent
+        bottomActions = binding.bottomActions
+        topBar = binding.topBar
+        val importCsvButton: Button = binding.importCsvButton
+        val exportCsvButton: Button = binding.exportCsvButton
+        val clearItemsButton: TextView = binding.clearItemsButton
 
         itemManager = ItemManager.getInstance(this)
 
@@ -130,19 +117,18 @@ class ItemListActivity : AppCompatActivity() {
 
         // Set up drag-and-drop reordering
         setupDragAndDrop()
-        
+
         // Set up empty state buttons
         setupEmptyStateButtons()
 
         updateEmptyViewVisibility()
 
-        fabAddItem.setOnClickListener {
-            val intent = Intent(this, ItemEntryActivity::class.java)
-            addItemLauncher.launch(intent)
-        }
-
-        doneReorderButton.setOnClickListener {
-            exitReorderingMode()
+        binding.topBar.onActionClick {
+            if (isReorderingMode) {
+                exitReorderingMode()
+            } else {
+                addItemLauncher.launch(Intent(this, ItemEntryActivity::class.java))
+            }
         }
 
         importCsvButton.setOnClickListener {
@@ -161,10 +147,6 @@ class ItemListActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         refreshItems()
-        // Start animation if empty state is visible
-        if (emptyView.visibility == View.VISIBLE) {
-            emptyStateAnimator?.start()
-        }
     }
 
     override fun onPause() {
@@ -173,33 +155,18 @@ class ItemListActivity : AppCompatActivity() {
     }
 
     private fun setupEmptyStateButtons() {
-        // Find buttons in the included empty state layout
-        val addButton = emptyView.findViewById<Button>(R.id.empty_state_add_button)
-        val importButton = emptyView.findViewById<View>(R.id.empty_state_import_button)
-        val closeButton = emptyView.findViewById<ImageButton>(R.id.empty_state_close_button)
-        val backButton = emptyView.findViewById<ImageButton>(R.id.empty_state_back_button)
-        val ribbonContainer = emptyView.findViewById<View>(R.id.ribbon_container)
-
-        addButton?.setOnClickListener {
-            val intent = Intent(this, ItemEntryActivity::class.java)
-            addItemLauncher.launch(intent)
+        binding.emptyView.emptyStateAddButton.setOnClickListener {
+            addItemLauncher.launch(Intent(this, ItemEntryActivity::class.java))
         }
-
-        importButton?.setOnClickListener {
+        binding.emptyView.emptyStateImportButton.setOnClickListener {
             csvPickerLauncher.launch(arrayOf("*/*"))
         }
-        
-        // Settings → Items: Show back arrow, hide close button
-        closeButton?.visibility = View.GONE
-        backButton?.visibility = View.VISIBLE
-        backButton?.setOnClickListener {
-            finish()
+        binding.emptyView.emptyStateCloseButton.visibility = View.GONE
+        binding.emptyView.emptyStateBackButton.apply {
+            visibility = View.VISIBLE
+            setOnClickListener { finish() }
         }
-
-        // Initialize the animator
-        ribbonContainer?.let {
-            emptyStateAnimator = EmptyStateAnimator(this, it)
-        }
+        emptyStateAnimator = EmptyStateAnimator(this, binding.emptyView.ribbonContainer)
     }
 
     private fun refreshItems() {
@@ -209,58 +176,25 @@ class ItemListActivity : AppCompatActivity() {
 
     private fun updateEmptyViewVisibility() {
         val hasItems = adapter.itemCount > 0
+        emptyView.visibility = if (hasItems) View.GONE else View.VISIBLE
+        itemsContent.visibility = if (hasItems) View.VISIBLE else View.GONE
+        topBar.visibility = if (hasItems) View.VISIBLE else View.GONE
+        binding.catalogContent.visibility = if (hasItems) View.VISIBLE else View.GONE
+
+        val background = if (hasItems) R.color.settings_background else R.color.empty_state_background
+        binding.root.setBackgroundResource(background)
+        window.navigationBarColor = ContextCompat.getColor(this, background)
+        val darkSurface = !hasItems || resources.configuration.uiMode and
+            Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = !darkSurface
+            isAppearanceLightNavigationBars = !darkSurface
+        }
+
         if (hasItems) {
-            // Show items list, hide empty state
-            emptyView.visibility = View.GONE
-            itemsContent.visibility = View.VISIBLE
-            fabAddItem.visibility = View.VISIBLE
-            topBar.visibility = View.VISIBLE
-            topBar.setBackgroundResource(R.color.color_bg_white)
-            
-            // Reset navigation bar to normal
-            setNavigationBarStyle(isDarkBackground = false)
-            
-            // Stop animation
             emptyStateAnimator?.stop()
         } else {
-            // Show empty state, hide items list
-            emptyView.visibility = View.VISIBLE
-            itemsContent.visibility = View.GONE
-            fabAddItem.visibility = View.GONE
-            topBar.visibility = View.GONE
-            
-            // Set navigation bar to match empty state background
-            setNavigationBarStyle(isDarkBackground = true)
-            
-            // Start animation
             emptyStateAnimator?.start()
-        }
-    }
-    
-    /**
-     * Set the navigation bar style to match the current screen background.
-     */
-    private fun setNavigationBarStyle(isDarkBackground: Boolean) {
-        window.navigationBarColor = if (isDarkBackground) {
-            ContextCompat.getColor(this, R.color.empty_state_background)
-        } else {
-            ContextCompat.getColor(this, R.color.color_bg_white)
-        }
-        
-        // Set light/dark icons in navigation bar
-        WindowCompat.getInsetsController(window, window.decorView).apply {
-            isAppearanceLightNavigationBars = !isDarkBackground
-        }
-        
-        // Also update status bar
-        window.statusBarColor = if (isDarkBackground) {
-            ContextCompat.getColor(this, R.color.empty_state_background)
-        } else {
-            ContextCompat.getColor(this, R.color.color_bg_white)
-        }
-        
-        WindowCompat.getInsetsController(window, window.decorView).apply {
-            isAppearanceLightStatusBars = !isDarkBackground
         }
     }
 
@@ -281,8 +215,6 @@ class ItemListActivity : AppCompatActivity() {
             )
         )
     }
-
-    
 
     private fun setupDragAndDrop() {
         val callback = object : ItemTouchHelper.Callback() {
@@ -345,20 +277,8 @@ class ItemListActivity : AppCompatActivity() {
         if (isReorderingMode) return
         isReorderingMode = true
 
-        // Swap buttons with cross-fade animation
-        fabAddItem.animate()
-            .alpha(0f)
-            .setDuration(150)
-            .withEndAction {
-                fabAddItem.visibility = View.GONE
-                doneReorderButton.visibility = View.VISIBLE
-                doneReorderButton.alpha = 0f
-                doneReorderButton.animate()
-                    .alpha(1f)
-                    .setDuration(150)
-                    .start()
-            }
-            .start()
+        binding.topBar.setActionIcon(R.drawable.ic_check)
+        binding.topBar.actionView.contentDescription = getString(R.string.item_list_done_reordering)
 
         // Hide bottom actions during reordering
         bottomActions.animate()
@@ -380,20 +300,8 @@ class ItemListActivity : AppCompatActivity() {
         if (!isReorderingMode) return
         isReorderingMode = false
 
-        // Swap buttons with cross-fade animation
-        doneReorderButton.animate()
-            .alpha(0f)
-            .setDuration(150)
-            .withEndAction {
-                doneReorderButton.visibility = View.GONE
-                fabAddItem.visibility = View.VISIBLE
-                fabAddItem.alpha = 0f
-                fabAddItem.animate()
-                    .alpha(1f)
-                    .setDuration(150)
-                    .start()
-            }
-            .start()
+        binding.topBar.setActionIcon(R.drawable.ic_add)
+        binding.topBar.actionView.contentDescription = getString(R.string.item_list_add_item)
 
         // Show bottom actions again
         bottomActions.visibility = View.VISIBLE

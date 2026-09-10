@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="?attr/selectableItemBackground"
+    android:background="@drawable/bg_settings_group"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    android:clipToOutline="true"
+    android:minHeight="72dp">
 
     <!-- Main Content Row -->
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -19,6 +23,7 @@
         android:paddingVertical="@dimen/space_l">
 
         <!-- Icon container with status badge overlay -->
+
         <FrameLayout
             android:id="@+id/icon_container"
             android:layout_width="50dp"
@@ -29,6 +34,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <!-- Main direction icon circle -->
+
             <FrameLayout
                 android:layout_width="44dp"
                 android:layout_height="44dp"
@@ -44,9 +50,11 @@
                     android:layout_gravity="center"
                     android:src="@drawable/ic_arrow_up_send"
                     app:tint="@color/color_text_primary" />
+
             </FrameLayout>
 
             <!-- Status badge (top-start corner) -->
+
             <FrameLayout
                 android:id="@+id/status_badge_icon_container"
                 android:layout_width="22dp"
@@ -63,11 +71,13 @@
                     android:layout_height="12dp"
                     android:layout_gravity="center"
                     android:src="@drawable/ic_check_small" />
+
             </FrameLayout>
 
         </FrameLayout>
 
         <!-- Amount -->
+
         <TextView
             android:id="@+id/amount_text"
             android:layout_width="0dp"
@@ -76,13 +86,14 @@
             android:layout_marginEnd="@dimen/space_m"
             android:ellipsize="end"
             android:textAppearance="@style/Text.RowTitle"
-            android:maxLines="1"
+            android:maxLines="2"
             app:layout_constraintEnd_toStartOf="@id/status_badge"
             app:layout_constraintStart_toEndOf="@id/icon_container"
             app:layout_constraintTop_toTopOf="@id/icon_container"
             tools:text="₿10,000" />
 
         <!-- Destination (address or invoice) -->
+
         <TextView
             android:id="@+id/address_text"
             android:layout_width="0dp"
@@ -91,8 +102,8 @@
             android:layout_marginTop="@dimen/space_xs"
             android:layout_marginEnd="@dimen/space_m"
             android:ellipsize="middle"
-            android:maxLines="1"
-            android:textAppearance="@style/Text.RowSubtitle"
+            android:maxLines="2"
+            android:textAppearance="@style/Text.SettingsCaption"
             android:textColor="@color/color_text_secondary"
             app:layout_constraintEnd_toStartOf="@id/status_badge"
             app:layout_constraintStart_toEndOf="@id/icon_container"
@@ -100,6 +111,7 @@
             tools:text="user@walletofsatoshi.com" />
 
         <!-- Mint name/url -->
+
         <TextView
             android:id="@+id/mint_text"
             android:layout_width="0dp"
@@ -108,8 +120,8 @@
             android:layout_marginTop="2dp"
             android:layout_marginEnd="@dimen/space_m"
             android:ellipsize="end"
-            android:maxLines="1"
-            android:textAppearance="@style/Text.RowSubtitle"
+            android:maxLines="2"
+            android:textAppearance="@style/Text.SettingsCaption"
             android:textColor="@color/color_text_secondary"
             app:layout_constraintEnd_toStartOf="@id/status_badge"
             app:layout_constraintStart_toEndOf="@id/icon_container"
@@ -117,6 +129,7 @@
             tools:text="https://mint.example.com" />
 
         <!-- Timestamp -->
+
         <TextView
             android:id="@+id/timestamp_text"
             android:layout_width="0dp"
@@ -124,7 +137,7 @@
             android:layout_marginStart="@dimen/row_icon_gap"
             android:layout_marginTop="2dp"
             android:layout_marginEnd="@dimen/space_m"
-            android:textAppearance="@style/Text.RowSubtitle"
+            android:textAppearance="@style/Text.SettingsCaption"
             android:textColor="@color/color_text_secondary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/icon_container"
@@ -132,6 +145,7 @@
             tools:text="Jan 15, 2025 • 14:30" />
 
         <!-- Status Badge -->
+
         <TextView
             android:id="@+id/status_badge"
             android:layout_width="wrap_content"
@@ -148,6 +162,7 @@
             tools:text="Sent" />
 
         <!-- Auto badge (for automatic withdrawals) -->
+
         <TextView
             android:id="@+id/auto_badge"
             android:layout_width="wrap_content"
@@ -165,6 +180,7 @@
             tools:visibility="visible" />
 
         <!-- Expand/share indicator -->
+
         <ImageView
             android:importantForAccessibility="no"
             android:id="@+id/expand_indicator"
@@ -181,6 +197,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Expandable Error Container -->
+
     <LinearLayout
         android:id="@+id/error_container"
         android:layout_width="match_parent"
@@ -192,6 +209,7 @@
         tools:visibility="visible">
 
         <!-- Error Card -->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -214,7 +232,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_xs"
                 android:fontFamily="sans-serif"
-                android:textAppearance="@style/Text.Caption"
+                android:textAppearance="@style/Text.SettingsCaption"
                 android:textColor="@color/color_text_secondary"
                 tools:text="Payment failed: Quote state is UNPAID" />
 

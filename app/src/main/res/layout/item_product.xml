@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/color_bg_white">
+    android:background="@drawable/bg_settings_group"
+    android:clipToOutline="true"
+    android:minHeight="72dp"
+    android:layout_marginBottom="8dp">
 
     <!-- Main Content Row -->
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,6 +22,7 @@
         android:background="?attr/selectableItemBackground">
 
         <!-- Drag Handle -->
+
         <ImageView
             android:id="@+id/drag_handle"
             android:layout_width="32dp"
@@ -30,6 +36,7 @@
             app:layout_constraintBottom_toBottomOf="parent" />
 
         <!-- Item Image - Apple-style rounded square -->
+
         <androidx.cardview.widget.CardView
             android:id="@+id/image_container"
             android:layout_width="64dp"
@@ -57,9 +64,11 @@
                 android:contentDescription="@string/item_product_image_placeholder"
                 android:src="@drawable/ic_image_placeholder"
                 app:tint="@color/color_icon_tertiary" />
+
         </androidx.cardview.widget.CardView>
 
         <!-- Text Content -->
+
         <LinearLayout
             android:id="@+id/text_content"
             android:layout_width="0dp"
@@ -73,29 +82,32 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <!-- Item Name -->
+
             <TextView
                 android:id="@+id/item_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:textAppearance="@style/Text.RowTitle"
                 tools:text="Classic T-Shirt" />
 
             <!-- Item Variation (grey, smaller) -->
+
             <TextView
                 android:id="@+id/item_variation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:ellipsize="end"
-                android:maxLines="1"
-                android:textAppearance="@style/Text.RowSubtitle"
+                android:maxLines="2"
+                android:textAppearance="@style/Text.SettingsCaption"
                 android:visibility="gone"
                 tools:text="Medium / Navy Blue"
                 tools:visibility="visible" />
 
             <!-- Stock indicator (if tracking inventory) -->
+
             <TextView
                 android:id="@+id/item_quantity"
                 android:layout_width="wrap_content"
@@ -107,6 +119,7 @@
                 tools:visibility="visible" />
 
             <!-- Hidden fields for compatibility -->
+
             <TextView
                 android:id="@+id/item_description"
                 android:layout_width="wrap_content"
@@ -118,9 +131,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone" />
+
         </LinearLayout>
 
         <!-- Right Side Content -->
+
         <LinearLayout
             android:id="@+id/right_content"
             android:layout_width="wrap_content"
@@ -132,6 +147,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <!-- Price -->
+
             <TextView
                 android:id="@+id/item_price"
                 android:layout_width="wrap_content"
@@ -140,6 +156,7 @@
                 tools:text="$24.99" />
 
             <!-- Disclosure Chevron -->
+
             <ImageView
                 android:id="@+id/chevron"
                 android:layout_width="20dp"
@@ -148,9 +165,11 @@
                 android:src="@drawable/ic_chevron_forward"
                 app:tint="@color/color_icon_tertiary"
                 android:contentDescription="@string/item_product_chevron_more" />
+
         </LinearLayout>
 
         <!-- Hidden action buttons (for compatibility) -->
+
         <LinearLayout
             android:id="@+id/actions_layout"
             android:layout_width="wrap_content"
@@ -162,9 +181,9 @@
 
             <ImageButton
                 android:id="@+id/edit_item_button"
-                android:layout_width="@dimen/icon_size_large"
-                android:layout_height="@dimen/icon_size_large"
-                android:padding="@dimen/space_m"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="12dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/cd_edit"
                 android:src="@drawable/ic_edit"
@@ -172,18 +191,20 @@
 
             <ImageButton
                 android:id="@+id/delete_item_button"
-                android:layout_width="@dimen/icon_size_large"
-                android:layout_height="@dimen/icon_size_large"
-                android:padding="@dimen/space_m"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:padding="12dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/cd_delete"
                 android:src="@drawable/ic_delete"
                 android:visibility="gone" />
+
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Divider -->
+
     <View
         android:id="@+id/divider"
         android:layout_width="match_parent"

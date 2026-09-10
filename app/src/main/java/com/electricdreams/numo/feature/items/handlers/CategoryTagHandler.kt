@@ -1,6 +1,7 @@
 package com.electricdreams.numo.feature.items.handlers
 
 import android.content.Context
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
@@ -127,25 +128,13 @@ class CategoryTagHandler(
     }
 
     private fun createAddNewCategoryButton(): View {
-        return TextView(context).apply {
-            text = "+ Add New"
-            textSize = 14f
-            setTextColor(ContextCompat.getColor(context, R.color.color_primary_green))
-            background = ContextCompat.getDrawable(context, R.drawable.bg_category_tag_add)
-
-            val params = FlexboxLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            )
-            params.setMargins(0, 0, 12, 12)
-            layoutParams = params
-
-            setOnClickListener {
-                // Show the new category input
-                newCategoryContainer.visibility = View.VISIBLE
-                newCategoryInput.requestFocus()
+        return LayoutInflater.from(context)
+            .inflate(R.layout.item_add_category_button, categoryTagsContainer, false).apply {
+                setOnClickListener {
+                    newCategoryContainer.visibility = View.VISIBLE
+                    newCategoryInput.requestFocus()
+                }
             }
-        }
     }
 
     private fun selectCategory(category: String?) {

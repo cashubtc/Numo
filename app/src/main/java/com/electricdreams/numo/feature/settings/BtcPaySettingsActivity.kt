@@ -5,29 +5,31 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.materialswitch.MaterialSwitch
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import com.electricdreams.numo.R
-import com.electricdreams.numo.core.payment.BTCPayConfig
-import com.electricdreams.numo.core.payment.BtcPayAppsService
-import com.electricdreams.numo.core.payment.BtcPayPosApp
-import com.electricdreams.numo.core.prefs.PreferenceStore
-import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
-import com.electricdreams.numo.ui.components.NumoTopBar
+import com.google.android.material.materialswitch.MaterialSwitch
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.util.concurrent.TimeUnit
+
+import com.electricdreams.numo.R
+import com.electricdreams.numo.core.payment.BTCPayConfig
+import com.electricdreams.numo.core.payment.BtcPayAppsService
+import com.electricdreams.numo.core.payment.BtcPayPosApp
+import com.electricdreams.numo.core.prefs.PreferenceStore
+import com.electricdreams.numo.databinding.ActivityBtcpaySettingsBinding
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 class BtcPaySettingsActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityBtcpaySettingsBinding
 
     private lateinit var enableSwitch: MaterialSwitch
     private lateinit var serverUrlInput: EditText
@@ -52,9 +54,9 @@ class BtcPaySettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_btcpay_settings)
-
-        enableEdgeToEdgeWithPill(this, lightNavIcons = true)
+        binding = ActivityBtcpaySettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
         initViews()
         setupListeners()
@@ -62,18 +64,18 @@ class BtcPaySettingsActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        findViewById<NumoTopBar>(R.id.top_bar).onNavClick {
+        binding.topBar.onNavClick {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        enableSwitch = findViewById(R.id.btcpay_enable_switch)
-        serverUrlInput = findViewById(R.id.btcpay_server_url_input)
-        apiKeyInput = findViewById(R.id.btcpay_api_key_input)
-        storeIdInput = findViewById(R.id.btcpay_store_id_input)
-        testConnectionStatus = findViewById(R.id.test_connection_status)
-        posSectionLabel = findViewById(R.id.pos_section_label)
-        posAppCard = findViewById(R.id.pos_app_card)
-        posAppSubtitle = findViewById(R.id.pos_app_subtitle)
+        enableSwitch = binding.btcpayEnableSwitch
+        serverUrlInput = binding.btcpayServerUrlInput
+        apiKeyInput = binding.btcpayApiKeyInput
+        storeIdInput = binding.btcpayStoreIdInput
+        testConnectionStatus = binding.testConnectionStatus
+        posSectionLabel = binding.posSectionLabel
+        posAppCard = binding.posAppCard
+        posAppSubtitle = binding.posAppSubtitle
     }
 
     private fun hasAllFields(): Boolean {
@@ -98,9 +100,9 @@ class BtcPaySettingsActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        val enableToggleRow = findViewById<LinearLayout>(R.id.enable_toggle_row)
+        val enableToggleRow = binding.enableToggleRow
         enableToggleRow.setOnClickListener {
-            if (hasAllFields()) enableSwitch.toggle()
+            if (hasAllFields()) enableSwitch.performClick()
         }
 
         enableSwitch.setOnCheckedChangeListener { _, isChecked ->
@@ -122,11 +124,11 @@ class BtcPaySettingsActivity : AppCompatActivity() {
         apiKeyInput.addTextChangedListener(fieldWatcher)
         storeIdInput.addTextChangedListener(fieldWatcher)
 
-        findViewById<LinearLayout>(R.id.test_connection_row).setOnClickListener {
+        binding.testConnectionRow.setOnClickListener {
             testConnection()
         }
 
-        findViewById<LinearLayout>(R.id.pos_app_row).setOnClickListener {
+        binding.posAppRow.setOnClickListener {
             showPosAppPicker()
         }
     }

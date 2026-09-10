@@ -6,9 +6,10 @@
 
     <ImageView
         android:id="@+id/row_icon"
-        android:layout_width="@dimen/icon_size_small"
-        android:layout_height="@dimen/icon_size_small"
-        android:layout_marginEnd="@dimen/row_icon_gap"
+        android:layout_width="@dimen/settings_row_icon_size"
+        android:layout_height="@dimen/settings_row_icon_size"
+        android:layout_marginEnd="@dimen/settings_row_icon_gap"
+        android:padding="@dimen/settings_icon_padding"
         android:importantForAccessibility="no"
         android:visibility="gone"
         app:tint="@color/color_icon_secondary"
@@ -34,8 +35,9 @@
             android:id="@+id/row_subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/row_subtitle_gap"
-            android:textAppearance="@style/Text.RowSubtitle"
+            android:layout_marginTop="@dimen/settings_row_subtitle_gap"
+            android:textAppearance="@style/Text.SettingsCaption"
+            android:textColor="@color/m3_on_surface_variant"
             android:visibility="gone"
             tools:text="Subtitle"
             tools:visibility="visible" />
@@ -47,7 +49,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/space_m"
-        android:textAppearance="@style/Text.RowSubtitle"
+        android:textAppearance="@style/Text.SettingsCaption"
         android:visibility="gone"
         tools:text="Value"
         tools:visibility="visible" />

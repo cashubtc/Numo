@@ -14,28 +14,13 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
-import android.widget.ImageButton
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import com.electricdreams.numo.R
-import com.electricdreams.numo.core.cashu.CashuWalletManager
-import com.electricdreams.numo.core.dev.WalletLogger
-import com.electricdreams.numo.core.model.Amount
-import com.electricdreams.numo.core.worker.BitcoinPriceWorker
-import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
-import com.electricdreams.numo.core.util.LightningAddressManager
-import com.electricdreams.numo.core.util.MintManager
-import com.electricdreams.numo.feature.scanner.QRScannerActivity
-import com.electricdreams.numo.ui.components.WithdrawAddressCard
-import com.electricdreams.numo.ui.components.WithdrawInvoiceCard
-import com.electricdreams.numo.ui.util.QrCodeGenerator
 import com.google.android.material.card.MaterialCardView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -43,18 +28,30 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.MintUrl
+import org.cashudevkit.P2pkLockedProofSendMode
 import org.cashudevkit.SendKind
 import org.cashudevkit.SendOptions
 import org.cashudevkit.SplitTarget
-import org.cashudevkit.P2pkLockedProofSendMode
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+
+import com.electricdreams.numo.R
+import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.dev.WalletLogger
+import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
+import com.electricdreams.numo.core.util.LightningAddressManager
+import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.worker.BitcoinPriceWorker
+import com.electricdreams.numo.databinding.ActivityWithdrawLightningBinding
+import com.electricdreams.numo.feature.scanner.QRScannerActivity
+import com.electricdreams.numo.ui.components.WithdrawAddressCard
+import com.electricdreams.numo.ui.components.WithdrawInvoiceCard
+import com.electricdreams.numo.ui.util.QrCodeGenerator
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 /**
  * Premium Apple-like activity for withdrawing balance from a mint via Lightning.
- * 
+ *
  * Features:
  * - Beautiful card-based design
  * - Separate cards for Invoice and Lightning Address
@@ -64,6 +61,8 @@ import androidx.core.view.WindowInsetsCompat
  * - Shared lightning address with auto-withdraw feature
  */
 class WithdrawLightningActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityWithdrawLightningBinding
 
     companion object {
         private const val TAG = "WithdrawLightning"
@@ -136,13 +135,9 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_withdraw_lightning)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+        binding = ActivityWithdrawLightningBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
         mintUrl = intent.getStringExtra("mint_url") ?: ""
         balance = intent.getLongExtra("balance", 0)
@@ -166,31 +161,31 @@ class WithdrawLightningActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        topBar = findViewById(R.id.top_bar)
-        balanceCard = findViewById(R.id.balance_card)
-        mintNameText = findViewById(R.id.mint_name_text)
-        balanceText = findViewById(R.id.balance_text)
-        fiatBalanceText = findViewById(R.id.fiat_balance_text)
-        invoiceCard = findViewById(R.id.invoice_card)
-        addressCard = findViewById(R.id.address_card)
-        loadingOverlay = findViewById(R.id.loading_overlay)
+        topBar = binding.topBar
+        balanceCard = binding.balanceCard
+        mintNameText = binding.mintNameText
+        balanceText = binding.balanceText
+        fiatBalanceText = binding.fiatBalanceText
+        invoiceCard = binding.invoiceCard
+        addressCard = binding.addressCard
+        loadingOverlay = binding.loadingOverlay
 
         // Initialize new views
-        tabsContainer = findViewById(R.id.tabs_container)
-        tabLightning = findViewById(R.id.tab_lightning)
-        tabCashu = findViewById(R.id.tab_cashu)
-        lightningOptionsContainer = findViewById(R.id.lightning_options_container)
-        cashuTokenOptionsContainer = findViewById(R.id.cashu_token_options_container)
-        
-        cashuAmountInput = findViewById(R.id.cashu_amount_input)
-        createTokenButton = findViewById(R.id.create_token_button)
-        tokenResultCard = findViewById(R.id.token_result_card)
-        tokenQrCode = findViewById(R.id.token_qr_code)
-        qrSpeedSelector = findViewById(R.id.qr_speed_selector)
-        fullscreenQrOverlay = findViewById(R.id.fullscreen_qr_overlay)
-        fullscreenQrCode = findViewById(R.id.fullscreen_qr_code)
-        tokenText = findViewById(R.id.token_text)
-        copyTokenButton = findViewById(R.id.copy_token_button)
+        tabsContainer = binding.tabsContainer
+        tabLightning = binding.tabLightning
+        tabCashu = binding.tabCashu
+        lightningOptionsContainer = binding.lightningOptionsContainer
+        cashuTokenOptionsContainer = binding.cashuTokenOptionsContainer
+
+        cashuAmountInput = binding.cashuAmountInput
+        createTokenButton = binding.createTokenButton
+        tokenResultCard = binding.tokenResultCard
+        tokenQrCode = binding.tokenQrCode
+        qrSpeedSelector = binding.qrSpeedSelector
+        fullscreenQrOverlay = binding.fullscreenQrOverlay
+        fullscreenQrCode = binding.fullscreenQrCode
+        tokenText = binding.tokenText
+        copyTokenButton = binding.copyTokenButton
     }
 
     private fun setupListeners() {
@@ -202,7 +197,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 processInvoice(invoice)
             }
         })
-        
+
         // Invoice card scan listener
         invoiceCard.setOnScanListener(object : WithdrawInvoiceCard.OnScanListener {
             override fun onScanClicked() {
@@ -315,7 +310,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
         animatedQrJob?.cancel()
         animatedQrJob = null
         setLoading(true)
-        
+
         lifecycleScope.launch {
             try {
                 val walletRepo = CashuWalletManager.getWallet()
@@ -352,7 +347,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
                     preparedSend.confirm(null)
                 }
                 WalletLogger.log("OUT", amountSats, mintUrl, "Token created (melt)")
-                
+
                 val tokenString = token.encode()
 
                 // Save to withdrawal history
@@ -396,13 +391,13 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
                     tokenText.text = tokenString
                     tokenResultCard.visibility = View.VISIBLE
-                    
+
                     // Hide input to focus on result
                     cashuAmountInput.isEnabled = false
                     createTokenButton.isEnabled = false
                     createTokenButton.alpha = 0.5f
                     createTokenButton.text = "Token Created"
-                    
+
                     setLoading(false)
                     refreshBalance()
                 }
@@ -512,8 +507,8 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 if (wallet == null) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
-                            this@WithdrawLightningActivity, 
-                            "Wallet not initialized", 
+                            this@WithdrawLightningActivity,
+                            "Wallet not initialized",
                             Toast.LENGTH_SHORT
                         ).show()
                         setLoading(false)
@@ -530,11 +525,11 @@ class WithdrawLightningActivity : AppCompatActivity() {
                     mintWallet.meltQuote(org.cashudevkit.PaymentMethod.Bolt11, invoice, null,null)
                 }
                 WalletLogger.log("OUT", meltQuote.amount.value.toLong(), mintUrl, "Invoice melt quote requested")
-                
+
                 withContext(Dispatchers.Main) {
 
                     setLoading(false)
-                    
+
                     // Check if we have enough balance (including fee reserve)
                     val totalRequired = meltQuote.amount.value.toLong() + meltQuote.feeReserve.value.toLong()
                     if (totalRequired > balance) {
@@ -591,8 +586,8 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 if (wallet == null) {
                     withContext(Dispatchers.Main) {
                         Toast.makeText(
-                            this@WithdrawLightningActivity, 
-                            "Wallet not initialized", 
+                            this@WithdrawLightningActivity,
+                            "Wallet not initialized",
                             Toast.LENGTH_SHORT
                         ).show()
                         setLoading(false)
@@ -609,11 +604,11 @@ class WithdrawLightningActivity : AppCompatActivity() {
                     mintWallet.meltLightningAddressQuote(address, org.cashudevkit.Amount(amountMsat.toULong()))
                 }
                 WalletLogger.log("OUT", meltQuote.amount.value.toLong(), mintUrl, "Lightning address melt quote requested")
-                
+
                 withContext(Dispatchers.Main) {
 
                     setLoading(false)
-                    
+
                     // Check if we have enough balance (including fee reserve)
                     val totalRequired = meltQuote.amount.value.toLong() + meltQuote.feeReserve.value.toLong()
                     if (totalRequired > balance) {
@@ -648,8 +643,8 @@ class WithdrawLightningActivity : AppCompatActivity() {
     }
 
     private fun launchMeltQuoteActivity(
-        meltQuote: org.cashudevkit.MeltQuote, 
-        invoice: String?, 
+        meltQuote: org.cashudevkit.MeltQuote,
+        invoice: String?,
         lightningAddress: String?
     ) {
         val intent = Intent(this, WithdrawMeltQuoteActivity::class.java)
@@ -665,7 +660,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
     private fun setLoading(loading: Boolean) {
         loadingOverlay.visibility = if (loading) View.VISIBLE else View.GONE
-        
+
         // Animate loading overlay
         if (loading) {
             loadingOverlay.alpha = 0f
@@ -674,7 +669,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 .setDuration(200)
                 .start()
         }
-        
+
         // Disable cards during loading
         invoiceCard.setCardEnabled(!loading)
         addressCard.setCardEnabled(!loading)
@@ -706,7 +701,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 val newBalance = withContext(Dispatchers.IO) {
                     CashuWalletManager.getBalanceForMint(mintUrl)
                 }
-                
+
                 withContext(Dispatchers.Main) {
                     if (newBalance != balance) {
                         balance = newBalance
@@ -719,7 +714,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
                         if (suggestedAmount > 0) {
                             addressCard.setSuggestedAmount(suggestedAmount)
                         }
-                        
+
                         Log.d(TAG, "Balance updated to: $balance sats")
                     }
                 }

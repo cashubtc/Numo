@@ -8,17 +8,15 @@ import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import androidx.core.content.getSystemService
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
 import androidx.fragment.app.FragmentManager
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+
 import com.electricdreams.numo.R
 import com.electricdreams.numo.databinding.DialogInputBinding
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.ui.util.shake
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 /**
  * Material bottom sheet replacement for the input dialog.
@@ -27,7 +25,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 class InputBottomSheet : BottomSheetDialogFragment() {
 
     private var _binding: DialogInputBinding? = null
-    private val binding get() = _binding!!
+    private val binding get() = requireNotNull(_binding)
 
     private var config: DialogHelper.InputConfig? = null
 
@@ -46,7 +44,7 @@ class InputBottomSheet : BottomSheetDialogFragment() {
         }
     }
 
-    override fun getTheme(): Int = R.style.Theme_Numo_BottomSheet
+    override fun getTheme(): Int = R.style.Theme_Numo_SettingsInput
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,14 +58,8 @@ class InputBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val originalPaddingBottom = view.paddingBottom
-        ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
-            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
-            v.updatePadding(bottom = originalPaddingBottom + ime.bottom)
-            insets
-        }
-
-        // Allow keyboard to resize the bottom sheet
+        // Let the window resize the scrollable sheet. Adding IME padding to the
+        // scroll view as well would shrink its viewport twice and hide Save.
         dialog?.window?.setSoftInputMode(
             WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE or
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
@@ -159,9 +151,10 @@ class InputBottomSheet : BottomSheetDialogFragment() {
 
         // Request focus and show keyboard with slight delay for sheet animation
         binding.dialogInput.postDelayed({
-            binding.dialogInput.requestFocus()
+            val input = _binding?.dialogInput ?: return@postDelayed
+            input.requestFocus()
             ctx.getSystemService<InputMethodManager>()
-                ?.showSoftInput(binding.dialogInput, InputMethodManager.SHOW_IMPLICIT)
+                ?.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT)
         }, 300)
     }
 
@@ -177,6 +170,7 @@ class InputBottomSheet : BottomSheetDialogFragment() {
                 behavior.isFitToContents = true
                 behavior.skipCollapsed = true
                 behavior.isDraggable = true
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
 
                 behavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
                     override fun onStateChanged(bottomSheet: View, newState: Int) {
@@ -197,7 +191,4 @@ class InputBottomSheet : BottomSheetDialogFragment() {
         _binding?.dialogInput?.let { imm?.hideSoftInputFromWindow(it.windowToken, 0) }
     }
 
-    private fun dpToPx(dp: Int): Int {
-        return (dp * resources.displayMetrics.density).toInt()
-    }
 }

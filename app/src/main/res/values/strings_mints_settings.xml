@@ -1,6 +1,6 @@
 <resources>
     <!-- Mints settings screen -->
-    <string name="mints_settings_section_allowed_mints">ALLOWED MINTS</string>
+    <string name="mints_settings_section_allowed_mints">Allowed mints</string>
     <string name="mints_settings_lightning_hint">
         Select a mint for ⚡ Lightning payments. The selected mint will be used to receive and send Bitcoin over Lightning.
     </string>

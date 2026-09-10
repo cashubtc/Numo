@@ -1,163 +1,181 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
+    android:layout_height="match_parent">
 
-    <!-- Header -->
-    <ImageButton
-        android:id="@+id/back_button"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Back"
-        android:src="@drawable/ic_chevron_back"
-        app:tint="@color/color_text_primary"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Progress Indicator -->
     <LinearLayout
-        android:id="@+id/progress_container"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <View
-            android:id="@+id/step1_indicator"
-            android:layout_width="8dp"
-            android:layout_height="8dp"
-            android:background="@drawable/bg_pin_dot_filled" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="64dp"
+            android:padding="8dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <View
-            android:layout_width="24dp"
-            android:layout_height="2dp"
-            android:layout_marginHorizontal="4dp"
-            android:background="@color/color_divider" />
+            <ImageButton
+                android:id="@+id/back_button"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/common_back"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="@color/color_text_primary" />
 
-        <View
-            android:id="@+id/step2_indicator"
-            android:layout_width="8dp"
-            android:layout_height="8dp"
-            android:background="@drawable/bg_pin_dot_empty" />
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="@string/settings_security_title"
+                android:textAppearance="@style/Text.SettingsPageTitle"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:accessibilityHeading="true" />
+
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/settings_page_margin"
+                android:paddingBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:padding="20dp"
+                    android:background="@drawable/bg_settings_group">
+
+                    <LinearLayout
+                        android:id="@+id/progress_container"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="12dp">
+
+                        <View
+                            android:id="@+id/step1_indicator"
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:background="@drawable/bg_pin_dot_filled" />
+
+                        <View
+                            android:layout_width="24dp"
+                            android:layout_height="2dp"
+                            android:layout_marginHorizontal="4dp"
+                            android:background="@color/color_divider" />
+
+                        <View
+                            android:id="@+id/step2_indicator"
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:background="@drawable/bg_pin_dot_empty" />
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/lock_icon"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_lock"
+                        app:tint="?attr/colorPrimary"
+                        android:layout_marginTop="12dp"
+                        android:padding="12dp"
+                        android:importantForAccessibility="no" />
+
+                    <TextView
+                        android:id="@+id/title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pin_setup_create_title"
+                        android:textSize="24sp"
+                        android:textColor="@color/color_text_primary"
+                        android:fontFamily="sans-serif-medium"
+                        android:layout_marginTop="12dp"
+                        android:gravity="center"
+                        android:textAppearance="@style/Text.Heading1" />
+
+                    <TextView
+                        android:id="@+id/subtitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pin_setup_create_subtitle"
+                        android:textSize="15sp"
+                        android:textColor="@color/color_text_secondary"
+                        android:gravity="center"
+                        android:lineSpacingMultiplier="1.2"
+                        android:layout_marginTop="12dp" />
+
+                    <com.electricdreams.numo.feature.pin.PinDotsView
+                        android:id="@+id/pin_dots"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp" />
+
+                    <TextView
+                        android:id="@+id/pin_length_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/pin_setup_digits"
+                        android:textSize="13sp"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:layout_marginTop="12dp"
+                        android:gravity="center" />
+
+                    <TextView
+                        android:id="@+id/error_message"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textSize="14sp"
+                        android:textColor="@color/color_warning_red"
+                        android:visibility="invisible"
+                        android:layout_marginTop="12dp"
+                        android:gravity="center"
+                        android:accessibilityLiveRegion="polite" />
+
+                </LinearLayout>
+
+                <com.electricdreams.numo.feature.pin.PinKeypadView
+                    android:id="@+id/pin_keypad"
+                    android:layout_width="match_parent"
+                    android:layout_height="320dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_settings_group"
+                    android:padding="8dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/continue_button"
+                    style="@style/Widget.Numo.Button.Dialog.Confirm"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pin_setup_continue"
+                    android:enabled="false"
+                    android:alpha="0.4"
+                    android:minHeight="56dp"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center" />
+
+            </LinearLayout>
+
+        </ScrollView>
 
     </LinearLayout>
 
-    <!-- Lock Icon — start of vertical chain that fills space above the keypad -->
-    <ImageView
-        android:id="@+id/lock_icon"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_marginTop="32dp"
-        android:src="@drawable/ic_lock"
-        app:tint="@color/color_text_primary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/progress_container"
-        app:layout_constraintBottom_toTopOf="@id/title"
-        app:layout_constraintVertical_chainStyle="packed"
-        app:layout_constraintVertical_bias="0.3" />
-
-    <!-- Title -->
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="@string/pin_setup_create_title"
-        android:textSize="24sp"
-        android:textColor="@color/color_text_primary"
-        android:fontFamily="sans-serif-medium"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/lock_icon" />
-
-    <!-- Subtitle -->
-    <TextView
-        android:id="@+id/subtitle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginHorizontal="48dp"
-        android:text="@string/pin_setup_create_subtitle"
-        android:textSize="15sp"
-        android:textColor="@color/color_text_secondary"
-        android:gravity="center"
-        android:lineSpacingMultiplier="1.2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/title" />
-
-    <!-- PIN Dots -->
-    <com.electricdreams.numo.feature.pin.PinDotsView
-        android:id="@+id/pin_dots"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/subtitle" />
-
-    <!-- PIN Length Label -->
-    <TextView
-        android:id="@+id/pin_length_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/pin_setup_digits"
-        android:textSize="13sp"
-        android:textColor="@color/color_text_tertiary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/pin_dots" />
-
-    <!-- Error Message — end of vertical chain (closes to keypad top) -->
-    <TextView
-        android:id="@+id/error_message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text=""
-        android:textSize="14sp"
-        android:textColor="@color/color_warning_red"
-        android:visibility="invisible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/pin_length_label"
-        app:layout_constraintBottom_toTopOf="@id/pin_keypad" />
-
-    <!-- Keypad - fixed 320dp height like POS -->
-    <com.electricdreams.numo.feature.pin.PinKeypadView
-        android:id="@+id/pin_keypad"
-        android:layout_width="0dp"
-        android:layout_height="320dp"
-        android:layout_marginHorizontal="32dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@id/continue_button"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <!-- Continue Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/continue_button"
-        style="@style/Widget.Numo.Button.Dialog.Confirm"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/button_height"
-        android:layout_marginHorizontal="@dimen/space_xl"
-        android:layout_marginBottom="@dimen/space_2xl"
-        android:text="@string/pin_setup_continue"
-        android:enabled="false"
-        android:alpha="0.4"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

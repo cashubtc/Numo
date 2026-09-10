@@ -16,31 +16,32 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.electricdreams.numo.ui.util.DialogHelper
 import androidx.core.content.ContextCompat
 import androidx.gridlayout.widget.GridLayout
 import androidx.lifecycle.lifecycleScope
-import com.electricdreams.numo.R
-import com.electricdreams.numo.core.cashu.CashuWalletManager
-import com.electricdreams.numo.core.util.MintManager
-import com.electricdreams.numo.nostr.NostrMintBackup
-import com.electricdreams.numo.ui.seed.Bip39Wordlist
-import com.electricdreams.numo.ui.seed.SeedWordEditText
 import com.google.android.material.button.MaterialButton
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.coroutines.resume
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
+
+import com.electricdreams.numo.R
+import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.databinding.ActivityRestoreWalletBinding
+import com.electricdreams.numo.nostr.NostrMintBackup
+import com.electricdreams.numo.ui.seed.Bip39Wordlist
+import com.electricdreams.numo.ui.seed.SeedWordEditText
+import com.electricdreams.numo.ui.util.DialogHelper
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 /**
  * Activity for restoring wallet from a 12-word seed phrase.
- * 
+ *
  * Enhanced multi-step flow:
  * 1. Enter seed phrase
  * 2. Fetch mints from Nostr backup (if available)
@@ -49,6 +50,8 @@ import androidx.core.view.WindowInsetsCompat
  * 5. Show success summary
  */
 class RestoreWalletActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityRestoreWalletBinding
 
     private companion object {
         const val REQUEST_DEVICE_BACKUP_RESTORE = 801
@@ -118,13 +121,9 @@ class RestoreWalletActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_restore_wallet)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+        binding = ActivityRestoreWalletBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
         initViews()
         setupSeedInputs()
@@ -134,42 +133,42 @@ class RestoreWalletActivity : AppCompatActivity() {
 
     private fun initViews() {
         // Top bar
-        topBar = findViewById(R.id.top_bar)
+        topBar = binding.topBar
 
         // Step 1: Seed entry
-        seedEntryContainer = findViewById(R.id.seed_entry_container)
-        seedInputGrid = findViewById(R.id.seed_input_grid)
-        pasteButton = findViewById(R.id.paste_button)
-        continueButton = findViewById(R.id.continue_button)
-        restoreDeviceBackupButton = findViewById(R.id.restore_device_backup_button)
-        validationStatus = findViewById(R.id.validation_status)
-        validationIcon = findViewById(R.id.validation_icon)
-        validationText = findViewById(R.id.validation_text)
+        seedEntryContainer = binding.seedEntryContainer
+        seedInputGrid = binding.seedInputGrid
+        pasteButton = binding.pasteButton
+        continueButton = binding.continueButton
+        restoreDeviceBackupButton = binding.restoreDeviceBackupButton
+        validationStatus = binding.validationStatus
+        validationIcon = binding.validationIcon
+        validationText = binding.validationText
 
         // Step 2: Fetching backup
-        fetchingOverlay = findViewById(R.id.fetching_overlay)
-        fetchingStatus = findViewById(R.id.fetching_status)
+        fetchingOverlay = binding.fetchingOverlay
+        fetchingStatus = binding.fetchingStatus
 
         // Step 3: Review mints
-        reviewMintsContainer = findViewById(R.id.review_mints_container)
-        backupStatusCard = findViewById(R.id.backup_status_card)
-        backupStatusIcon = findViewById(R.id.backup_status_icon)
-        backupStatusTitle = findViewById(R.id.backup_status_title)
-        backupStatusSubtitle = findViewById(R.id.backup_status_subtitle)
-        mintsListContainer = findViewById(R.id.mints_list_container)
-        mintsCountText = findViewById(R.id.mints_count_text)
-        startRestoreButton = findViewById(R.id.start_restore_button)
+        reviewMintsContainer = binding.reviewMintsContainer
+        backupStatusCard = binding.backupStatusCard
+        backupStatusIcon = binding.backupStatusIcon
+        backupStatusTitle = binding.backupStatusTitle
+        backupStatusSubtitle = binding.backupStatusSubtitle
+        mintsListContainer = binding.mintsListContainer
+        mintsCountText = binding.mintsCountText
+        startRestoreButton = binding.startRestoreButton
 
         // Step 4: Restoring
-        progressOverlay = findViewById(R.id.restore_progress_overlay)
-        progressStatus = findViewById(R.id.restore_progress_status)
-        mintProgressContainer = findViewById(R.id.mint_progress_container)
+        progressOverlay = binding.restoreProgressOverlay
+        progressStatus = binding.restoreProgressStatus
+        mintProgressContainer = binding.mintProgressContainer
 
         // Step 5: Success
-        successOverlay = findViewById(R.id.restore_success_overlay)
-        balanceChangesContainer = findViewById(R.id.balance_changes_container)
-        successSummaryText = findViewById(R.id.success_summary_text)
-        doneButton = findViewById(R.id.done_button)
+        successOverlay = binding.restoreSuccessOverlay
+        balanceChangesContainer = binding.balanceChangesContainer
+        successSummaryText = binding.successSummaryText
+        doneButton = binding.doneButton
     }
 
     private fun setupSeedInputs() {

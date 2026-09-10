@@ -17,7 +17,7 @@
     <string name="tips_settings_title">Tips</string>
     <string name="tips_settings_description">Allow customers to add a tip when paying. Tip presets will appear as quick-select buttons on the payment screen.</string>
     <string name="tips_settings_enable_label">Enable Tips</string>
-    <string name="tips_settings_presets_header">TIP PRESETS</string>
+    <string name="tips_settings_presets_header">Tip presets</string>
     <string name="tips_settings_presets_description">Configure quick-select tip percentages. Customers can also enter a custom amount.</string>
     <string name="tips_settings_add_preset">Add Preset</string>
     <string name="tips_settings_reset_defaults">Reset to Defaults</string>
@@ -314,7 +314,7 @@
     
     <string name="developer_error_logs_title">Error Logs</string>
     <string name="developer_error_logs_subtitle">View and export recent error logs</string>
-    <string name="developer_error_logs_section_title">ERROR LOGS</string>
+    <string name="developer_error_logs_section_title">Error logs</string>
     <string name="developer_error_logs_filter_label">Show errors up to</string>
     <string name="developer_error_logs_filter_today">Today</string>
     <string name="developer_error_logs_copy_all">Copy All</string>
@@ -384,7 +384,7 @@
     <string name="withdraw_melt_toolbar_back">Back</string>
     <string name="withdraw_melt_title">Confirm Withdrawal</string>
     <string name="withdraw_melt_summary">Withdraw from %1$s</string>
-    <string name="withdraw_melt_destination_label">TO</string>
+    <string name="withdraw_melt_destination_label">To</string>
     <string name="withdraw_melt_destination_placeholder">user@domain.com</string>
     <string name="withdraw_melt_amount_label">Amount</string>
     <string name="withdraw_melt_fee_label">Fee Reserve</string>
@@ -519,7 +519,7 @@
     <string name="item_entry_button_add_photo">Add Photo</string>
     <string name="item_entry_button_remove_photo">Remove Photo</string>
 
-    <string name="item_entry_section_basic_information">DETAILS</string>
+    <string name="item_entry_section_basic_information">Details</string>
     <string name="item_entry_label_name">Name</string>
     <string name="item_entry_hint_name">e.g. Cappuccino</string>
     <string name="item_entry_label_variation">Variation</string>
@@ -527,13 +527,13 @@
     <string name="item_entry_label_description">Description</string>
     <string name="item_entry_hint_description">Notes about this item</string>
 
-    <string name="item_entry_section_category">CATEGORY</string>
+    <string name="item_entry_section_category">Category</string>
     <string name="item_entry_hint_new_category">Category name</string>
     <string name="item_entry_category_confirm">Confirm</string>
     <string name="item_entry_category_cancel">Cancel</string>
     <string name="item_entry_category_helper">Select a category or create a new one.</string>
 
-    <string name="item_entry_section_pricing">PRICING</string>
+    <string name="item_entry_section_pricing">Pricing</string>
     <string name="item_entry_price_type_fiat">Local Currency</string>
     <string name="item_entry_price_type_bitcoin">Bitcoin</string>
     <string name="item_entry_currency_symbol_default">$</string>
@@ -558,7 +558,7 @@
 
     <string name="item_entry_price_helper">Set a fixed price in your preferred currency. Bitcoin prices are in satoshis (sats).</string>
 
-    <string name="item_entry_section_identification">BARCODE &amp; SKU</string>
+    <string name="item_entry_section_identification">Barcode &amp; SKU</string>
     <string name="item_entry_label_gtin">Barcode</string>
     <string name="item_entry_hint_gtin">Scan or type barcode number</string>
     <string name="item_entry_scan_barcode">Scan barcode</string>
@@ -576,7 +576,7 @@
     <string name="item_entry_error_quantity_positive">Stock can\'t be negative</string>
     <string name="item_entry_error_threshold_positive">Threshold can\'t be negative</string>
 
-    <string name="item_entry_section_inventory">STOCK</string>
+    <string name="item_entry_section_inventory">Stock</string>
     <string name="item_entry_label_track_quantity">Track Stock</string>
     <string name="item_entry_label_current_stock">In Stock</string>
     <string name="item_entry_hint_current_stock">0</string>
@@ -697,7 +697,7 @@
     
     <string name="basket_names_settings_title">Basket Names</string>
     <string name="basket_names_settings_description">Create preset names for quick basket saving.\nPerfect for restaurant tables or customer orders.</string>
-    <string name="basket_names_settings_presets_header">PRESET NAMES</string>
+    <string name="basket_names_settings_presets_header">Preset names</string>
     <string name="basket_names_settings_empty_title">No preset names</string>
     <string name="basket_names_settings_empty_subtitle">Add names for quick basket saving</string>
     <string name="basket_names_settings_add_name">Add Name</string>
@@ -795,7 +795,7 @@
     <string name="settings_item_default_payment_method_subtitle">Unified</string>
     <string name="default_payment_method_explainer_title">Quick Settings</string>
     <string name="default_payment_method_explainer_body">You can quickly change the default payment method directly from the payment screen by long-pressing on any of the Unified, Cashu, or Lightning tabs.</string>
-    <string name="default_payment_method_section_options">DEFAULT QR CODE</string>
+    <string name="default_payment_method_section_options">Default QR code</string>
     <string name="default_payment_method_option_unified">Unified (Cashu + Lightning)</string>
     <string name="default_payment_method_option_cashu">Cashu</string>
     <string name="default_payment_method_option_lightning">Lightning</string>
@@ -894,7 +894,7 @@
     <string name="mints_lightning_changed">Lightning mint updated</string>
 
     
-    <string name="mints_swap_unknown_mints_title">Accept payments from unknown mints</string>
+    <string name="mints_swap_unknown_mints_title">Accept unknown mints</string>
     <string name="mints_swap_unknown_mints_subtitle">
         When enabled, tokens from unknown mints are automatically swapped into your Lightning mint.
     </string>
@@ -1043,7 +1043,7 @@
     <string name="insights_day_label_sun">Sun</string>
     <string name="developer_wallet_logs_title">Wallet Logs</string>
     <string name="developer_wallet_logs_subtitle">View and export recent wallet activity logs</string>
-    <string name="developer_wallet_logs_section_title">WALLET ACTIVITY LOGS</string>
+    <string name="developer_wallet_logs_section_title">Wallet activity logs</string>
     <string name="developer_wallet_logs_empty">No wallet activity logs available.</string>
     <string name="developer_wallet_logs_share_title">Share Wallet Activity Logs</string>
     <string name="developer_wallet_logs_copied">Wallet activity logs copied to clipboard</string>
@@ -1085,6 +1085,9 @@
     <string name="mints_select_base_unit">Select Base Unit</string>
     <string name="mints_changed_base_unit_toast">Changed base unit to %1$s</string>
     <string name="settings_fiat_conversion_disabled_custom_unit">Fiat currency conversion is disabled when using a custom base unit.</string>
-    <string name="mints_base_currency_unit_title">Base Currency Unit</string>
+    <string name="mints_base_currency_unit_title">Currency unit</string>
     <string name="mints_base_currency_unit_subtitle">If the mint supports other units, you can switch it here.</string>
+    <string name="item_entry_add_category">Add category</string>
+    <string name="mints_other_mints">Other mints</string>
+    <string name="mints_more_options">More options</string>
 </resources>

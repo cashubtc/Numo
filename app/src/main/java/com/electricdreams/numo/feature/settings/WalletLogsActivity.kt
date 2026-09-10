@@ -12,20 +12,22 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.text.SimpleDateFormat
+import java.util.Locale
+
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.data.model.WalletLogEntry
 import com.electricdreams.numo.core.dev.WalletLogStore
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.electricdreams.numo.databinding.ActivityWalletLogsBinding
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 /**
  * Developer-facing screen that displays persisted wallet activity logs and allows
  * copying or sharing them for debugging purposes.
  */
 class WalletLogsActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityWalletLogsBinding
 
     private lateinit var adapter: WalletLogsAdapter
     private lateinit var emptyView: TextView
@@ -34,34 +36,30 @@ class WalletLogsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_wallet_logs)
+        binding = ActivityWalletLogsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+        binding.topBar.onNavClick { finish() }
 
-        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
+        emptyView = binding.emptyView
 
-        emptyView = findViewById(R.id.empty_view)
-
-        val recyclerView: RecyclerView = findViewById(R.id.wallet_logs_recycler_view)
+        val recyclerView: RecyclerView = binding.walletLogsRecyclerView
         adapter = WalletLogsAdapter { entry ->
             showEntryDetails(entry)
         }
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
-        findViewById<View>(R.id.copy_all_button).setOnClickListener {
+        binding.copyAllButton.setOnClickListener {
             copyAllToClipboard()
         }
 
-        findViewById<View>(R.id.share_button).setOnClickListener {
+        binding.shareButton.setOnClickListener {
             shareLogs()
         }
 
-        findViewById<View>(R.id.clear_button).setOnClickListener {
+        binding.clearButton.setOnClickListener {
             showClearLogsDialog()
         }
 

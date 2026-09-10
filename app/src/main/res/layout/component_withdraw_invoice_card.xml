@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="@dimen/margin_screen_horizontal">
+    android:padding="16dp">
 
     <!-- Lightning Invoice Label -->
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -15,8 +17,9 @@
         style="@style/Text.RowTitle" />
 
     <!-- Input Field -->
+
     <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
+        style="@style/Widget.Numo.SettingsTextInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -32,36 +35,39 @@
             android:gravity="top"
             android:textAppearance="@style/Text.Body"
             android:textColor="@color/color_text_primary"
-            android:textColorHint="@color/color_text_tertiary" />
+            android:textColorHint="?attr/colorOnSurfaceVariant" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Helper Text -->
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/space_s"
-        android:alpha="0.7"
         android:text="@string/withdraw_invoice_helper"
-        android:textAppearance="@style/Text.Helper" />
+        android:textAppearance="@style/Text.SettingsCaption" />
 
     <!-- Continue Button -->
+
     <Button
         android:id="@+id/continue_button"
         style="@style/Widget.Button.Primary.Green"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/button_height"
+        android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/space_l"
         android:enabled="false"
         android:text="@string/withdraw_continue_button"
         android:textAllCaps="false"
-        android:textSize="17sp" />
+        android:textSize="17sp"
+        android:minHeight="56dp" />
 
     <!-- Scan Invoice Button -->
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/scan_button"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/button_height"
+        android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/space_m"
         android:insetTop="0dp"
         android:insetBottom="0dp"
@@ -80,6 +86,7 @@
         app:iconGravity="textStart"
         app:iconPadding="@dimen/space_s"
         app:iconTint="@color/color_text_primary"
-        app:rippleColor="@color/color_ripple" />
+        app:rippleColor="@color/color_ripple"
+        android:minHeight="56dp" />
 
 </LinearLayout>

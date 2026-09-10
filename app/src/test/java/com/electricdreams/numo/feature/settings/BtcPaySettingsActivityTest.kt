@@ -1,10 +1,12 @@
 package com.electricdreams.numo.feature.settings
 
+import android.view.View
 import android.widget.EditText
 import androidx.test.core.app.ActivityScenario
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.google.android.material.materialswitch.MaterialSwitch
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -15,6 +17,31 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class BtcPaySettingsActivityTest {
+
+    @Test
+    fun `row tap respects incomplete configuration and enables after all fields are provided`() {
+        ActivityScenario.launch(BtcPaySettingsActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val server = activity.findViewById<EditText>(R.id.btcpay_server_url_input)
+                val key = activity.findViewById<EditText>(R.id.btcpay_api_key_input)
+                val store = activity.findViewById<EditText>(R.id.btcpay_store_id_input)
+                server.setText("")
+                key.setText("")
+                store.setText("")
+                val toggle = activity.findViewById<MaterialSwitch>(R.id.btcpay_enable_switch)
+                val row = activity.findViewById<View>(R.id.enable_toggle_row)
+                row.performClick()
+                assertFalse(toggle.isChecked)
+                assertFalse(toggle.isEnabled)
+                server.setText("https://test.btcpay.com")
+                key.setText("test-key")
+                store.setText("test-store")
+                row.performClick()
+                assertTrue(toggle.isChecked)
+                assertTrue(PreferenceStore.app(activity).getBoolean("btcpay_enabled", false))
+            }
+        }
+    }
 
     @Test
     fun `loads and saves settings correctly`() {

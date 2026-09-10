@@ -1,170 +1,184 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout 
+<com.electricdreams.numo.ui.components.SettingsPageLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
+    android:layout_height="match_parent">
 
-    <!-- Top Bar -->
-    <com.electricdreams.numo.ui.components.NumoTopBar
-        android:id="@+id/top_bar"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        app:topBarTitle="@string/tips_settings_title"
-        app:topBarNavContentDescription="@string/tips_settings_toolbar_back"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:fillViewport="true"
-        app:layout_constraintTop_toBottomOf="@id/top_bar"
-        app:layout_constraintBottom_toBottomOf="parent">
+        <!-- Top Bar -->
 
-        <LinearLayout
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/space_2xl">
+            app:topBarTitle="@string/tips_settings_title"
+            app:topBarNavContentDescription="@string/tips_settings_toolbar_back"
+            app:layout_constraintTop_toTopOf="parent"
+            android:minHeight="64dp"
+            app:topBarSettingsStyle="true" />
 
-            <!-- Description -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/settings_horizontal_padding"
-                android:paddingTop="@dimen/space_l"
-                android:paddingBottom="@dimen/space_s"
-                android:text="@string/tips_settings_description"
-                android:textAppearance="@style/Text.Body"
-                android:textColor="@color/color_text_secondary"
-                android:lineSpacingExtra="2dp" />
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:fillViewport="true"
+            app:layout_constraintTop_toBottomOf="@id/top_bar"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:clipToPadding="false">
 
-            <!-- Enable Tips Switch -->
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="@dimen/settings_horizontal_padding"
-                android:background="?attr/selectableItemBackground">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/space_l"
-                    android:src="@drawable/ic_tip"
-                    app:tint="@color/color_primary_green" />
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/tips_settings_enable_label"
-                    android:textAppearance="@style/Text.RowTitle" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/tips_enabled_switch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <!-- Presets Section -->
-            <LinearLayout
-                android:id="@+id/presets_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:paddingBottom="24dp"
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
-                <!-- Section Header -->
+                <!-- Description -->
+
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/settings_horizontal_padding"
-                    android:paddingTop="@dimen/space_xl"
+                    android:paddingHorizontal="0dp"
+                    android:paddingTop="@dimen/space_l"
                     android:paddingBottom="@dimen/space_s"
-                    android:text="@string/tips_settings_presets_header"
-                    style="@style/Text.SectionHeader" />
+                    android:text="@string/tips_settings_description"
+                    android:textAppearance="@style/Text.SettingsBody"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
-                <TextView
+                <!-- Enable Tips Switch -->
+
+                <LinearLayout
+                    android:id="@+id/enable_tips_row"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/settings_horizontal_padding"
-                    android:paddingBottom="@dimen/space_m"
-                    android:text="@string/tips_settings_presets_description"
-                    android:textAppearance="@style/Text.Caption" />
-
-                <!-- Card Container for Presets -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/space_l"
-                    android:orientation="vertical"
-                    android:background="@drawable/bg_rounded_card_large">
-
-                    <!-- Presets List -->
-                    <LinearLayout
-                        android:id="@+id/presets_list"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical" />
-
-                </LinearLayout>
-
-                <!-- Add Preset Button -->
-                <LinearLayout
-                    android:id="@+id/add_preset_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/settings_item_height"
-                    android:layout_marginTop="@dimen/space_s"
-                    android:layout_marginHorizontal="@dimen/space_l"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="@dimen/space_l"
-                    android:background="@drawable/bg_rounded_card_large"
-                    android:clickable="true"
-                    android:focusable="true">
+                    android:background="@drawable/bg_settings_group"
+                    android:clipToOutline="true"
+                    android:paddingHorizontal="0dp"
+                    android:paddingVertical="@dimen/settings_row_padding"
+                    android:minHeight="@dimen/settings_switch_height">
 
                     <ImageView
                         android:importantForAccessibility="no"
-                        android:layout_width="@dimen/icon_size_small"
-                        android:layout_height="@dimen/icon_size_small"
-                        android:layout_marginEnd="@dimen/space_l"
-                        android:src="@drawable/ic_add"
-                        app:tint="@color/color_primary_green" />
+                        android:layout_width="@dimen/settings_row_icon_size"
+                        android:layout_height="@dimen/settings_row_icon_size"
+                        android:layout_marginEnd="@dimen/settings_row_icon_gap"
+                        android:padding="@dimen/settings_icon_padding"
+                        android:src="@drawable/ic_tip"
+                        app:tint="?attr/colorPrimary" />
 
                     <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/tips_settings_enable_label"
+                        android:textAppearance="@style/Text.RowTitle" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/tips_enabled_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/tips_settings_add_preset"
-                        android:textAppearance="@style/Text.Button"
-                        android:textColor="@color/color_primary_green" />
+                        android:minHeight="48dp"
+                        android:contentDescription="@string/tips_settings_enable_label" />
+
                 </LinearLayout>
 
-                <!-- Reset to Defaults -->
+                <!-- Presets Section -->
+
                 <LinearLayout
-                    android:id="@+id/reset_defaults_button"
+                    android:id="@+id/presets_container"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/settings_item_height"
-                    android:layout_marginTop="@dimen/space_xl"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:background="?attr/selectableItemBackground">
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <!-- Section Header -->
 
                     <TextView
-                        android:layout_width="wrap_content"
+                        android:text="@string/tips_settings_presets_header"
+                        style="@style/Widget.Numo.SettingsSectionTitle"
+                        android:textAllCaps="false"
+                        android:layout_marginTop="@dimen/settings_section_gap"
+                        android:accessibilityHeading="true" />
+
+                    <TextView
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/tips_settings_reset_defaults"
-                        android:textAppearance="@style/Text.Body"
-                        android:textColor="@color/color_text_secondary" />
+                        android:paddingHorizontal="0dp"
+                        android:paddingBottom="@dimen/space_m"
+                        android:text="@string/tips_settings_presets_description"
+                        android:textAppearance="@style/Text.SettingsCaption" />
+
+                    <!-- Card Container for Presets -->
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:background="@drawable/bg_settings_group"
+                        android:clipToOutline="true">
+
+                        <!-- Presets List -->
+
+                        <LinearLayout
+                            android:id="@+id/presets_list"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical" />
+
+                    </LinearLayout>
+
+                    <!-- Add Preset Button -->
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/add_preset_button"
+                        style="@style/Widget.Numo.SettingsAddButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_m"
+                        android:text="@string/tips_settings_add_preset" />
+
+                    <!-- Reset to Defaults -->
+
+                    <LinearLayout
+                        android:id="@+id/reset_defaults_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xl"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="@drawable/bg_settings_group"
+                        android:clipToOutline="true"
+                    android:foreground="?attr/selectableItemBackground"
+                        android:paddingHorizontal="0dp"
+                        android:paddingVertical="@dimen/settings_row_padding"
+                        android:minHeight="64dp"
+                        android:screenReaderFocusable="true">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/tips_settings_reset_defaults"
+                            android:textAppearance="@style/Text.SettingsBody"
+                            android:textColor="?attr/colorOnSurfaceVariant" />
+
+                    </LinearLayout>
+
                 </LinearLayout>
+
             </LinearLayout>
 
-        </LinearLayout>
-    </ScrollView>
+        </ScrollView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.electricdreams.numo.ui.components.SettingsPageLayout>
