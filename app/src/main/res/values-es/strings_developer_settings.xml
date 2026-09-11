@@ -5,4 +5,7 @@
         Esto borrará el estado de finalización del onboarding y te llevará de nuevo a la pantalla de bienvenida. ¿Seguro que quieres continuar?
     </string>
     <string name="developer_settings_restart_dialog_positive">Reiniciar</string>
+    <string name="developer_error_logs_starting">Iniciando el registro de errores…</string>
+    <string name="developer_error_logs_retrying">El registro de errores no está disponible. Se reintentará automáticamente…</string>
+    <string name="developer_error_logs_disabled">Activa el modo de desarrollador para registrar nuevos errores.</string>
 </resources>

@@ -3,6 +3,7 @@ package com.electricdreams.numo
 import android.app.Application
 import android.util.Log
 import com.electricdreams.numo.core.dev.ErrorLogCollector
+import com.electricdreams.numo.feature.settings.DeveloperPrefs
 
 /**
  * Custom Application class for global initialisation.
@@ -17,10 +18,8 @@ class NumoApplication : Application() {
         // Wallet initialisation is handled by onboarding / ModernPOS flows.
         Log.d("NumoApplication", "Application initialised")
 
-        // Start developer error log collection in debug builds so the
-        // Developer Settings > Error Logs screen can show recent errors
-        // without modifying existing Log.e() sites.
-        if (BuildConfig.DEBUG) {
+        // Developer Mode enables diagnostics in installed release builds too.
+        if (DeveloperPrefs.isDeveloperModeEnabled(this)) {
             ErrorLogCollector.start()
         }
     }

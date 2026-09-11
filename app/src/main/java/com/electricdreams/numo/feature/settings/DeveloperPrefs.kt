@@ -2,6 +2,7 @@ package com.electricdreams.numo.feature.settings
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.electricdreams.numo.core.dev.ErrorLogCollector
 
 /**
  * Manages developer settings preferences.
@@ -22,6 +23,7 @@ object DeveloperPrefs {
 
     fun setDeveloperModeEnabled(context: Context, enabled: Boolean) {
         getPrefs(context).edit().putBoolean(KEY_DEVELOPER_MODE_ENABLED, enabled).apply()
+        if (enabled) ErrorLogCollector.start() else ErrorLogCollector.stop()
     }
 
     fun isLightningInvoiceDelayed(context: Context): Boolean {

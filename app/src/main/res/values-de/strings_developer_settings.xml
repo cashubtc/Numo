@@ -5,4 +5,7 @@
         Damit wird der Abschlussstatus des Onboardings gelöscht und du kehrst zum Willkommensbildschirm zurück. Möchtest du wirklich fortfahren?
     </string>
     <string name="developer_settings_restart_dialog_positive">Neu starten</string>
+    <string name="developer_error_logs_starting">Fehlerprotokollierung wird gestartet…</string>
+    <string name="developer_error_logs_retrying">Fehlerprotokollierung nicht verfügbar. Ein neuer Versuch erfolgt automatisch…</string>
+    <string name="developer_error_logs_disabled">Aktiviere den Entwicklermodus, um neue Fehler aufzuzeichnen.</string>
 </resources>
