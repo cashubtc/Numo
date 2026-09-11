@@ -5,4 +5,7 @@
  </string>
     <string name="developer_settings_restart_dialog_title">オンボーディングの再起動</string>
     <string name="developer_settings_restart_dialog_positive">再起動</string>
+    <string name="developer_error_logs_starting">エラーログの記録を開始しています…</string>
+    <string name="developer_error_logs_retrying">エラーログを記録できません。自動的に再試行します…</string>
+    <string name="developer_error_logs_disabled">新しいエラーを記録するには、開発者モードを有効にしてください。</string>
 </resources>

@@ -1,85 +1,110 @@
 package com.electricdreams.numo.core.dev
 
 import com.electricdreams.numo.core.data.model.ErrorLogEntry
+import java.io.ByteArrayInputStream
+import java.io.IOException
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
-/**
- * Unit tests for [ErrorLogCollector] parsing logic.
- *
- * These tests focus on verifying that sample logcat lines are parsed into
- * correct tag/message values and forwarded to [ErrorLogStore]. To avoid
- * touching the real store, this test uses a simple FakeErrorLogStore.
- */
 class ErrorLogCollectorParseTest {
+    @Test
+    fun `real binary record preserves tag unicode multiline message and timestamp`() {
+        val message = "❌ Failed: timeout\n\nRequest details: mint unavailable"
+        val reader = reader(logcatBytes(message, tag = "Mint: withdrawal worker"))
+        val record = requireNotNull(reader.read())
+        assertEquals("Mint: withdrawal worker", record.tag)
+        assertEquals(message, record.message)
+        assertEquals(1_767_225_600_123L, record.timestamp.time)
+        assertEquals(1235, record.threadId)
+        assertNull(reader.read())
+    }
 
     @Test
-    fun `parseAndStoreLine extracts tag and message from -v time format`() {
-        val fakeStore = FakeErrorLogStore()
-        val collector = TestableErrorLogCollector(fakeStore)
-
-        val sampleLine = "03-15 12:34:56.789  1234  1234 E AutoWithdrawManager: ❌ Auto-withdrawal failed: some error"
-
-        collector.invokeParse(sampleLine, pid = 1234)
-
-        assertEquals(1, fakeStore.entries.size)
-        val entry = fakeStore.entries.first()
-        assertEquals("AutoWithdrawManager", entry.tag)
-        assertEquals("❌ Auto-withdrawal failed: some error", entry.message)
-    }
-
-    private class FakeErrorLogStore {
-        val entries = mutableListOf<ErrorLogEntry>()
-
-        fun append(tag: String, message: String) {
-            entries.add(
-                ErrorLogEntry(
-                    id = "test",
-                    timestamp = Date(),
-                    tag = tag,
-                    message = message,
-                    stackTrace = null,
-                ),
-            )
+    fun `reader accepts both 24 and 28 byte Android headers`() {
+        for (size in listOf(24, 28)) {
+            assertEquals("Failure", reader(logcatBytes("Failure", headerSize = size)).read()?.message)
         }
     }
 
-    private class TestableErrorLogCollector(
-        private val fakeStore: FakeErrorLogStore,
-    ) {
-        private val logcatDateFormat = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US)
+    @Test
+    fun `only errors and fatal records from this process and text buffers are collected`() {
+        val stream = logcatBytes("Other app", pid = 9000) + logcatBytes("Warning", priority = 5) +
+            logcatBytes("Event buffer", buffer = 2) + logcatBytes("Error") +
+            logcatBytes("Fatal", priority = 7, buffer = 4)
+        val reader = reader(stream)
+        assertEquals("Error", reader.read()?.message)
+        assertEquals("Fatal", reader.read()?.message)
+        assertNull(reader.read())
+    }
 
-        fun invokeParse(raw: String, pid: Int) {
-            // Direct copy of ErrorLogCollector.parseAndStoreLine, but writing to fake store.
-            if (!raw.contains(" $pid ")) return
+    @Test
+    fun `truncated records and unexpected subprocess text report a read failure`() {
+        assertThrows(IOException::class.java) { reader(logcatBytes("Error").dropLast(2).toByteArray()).read() }
+        assertThrows(IOException::class.java) { reader("logcat: Permission denied".toByteArray()).read() }
+    }
 
-            val firstSpace = raw.indexOf(' ')
-            val secondSpace = if (firstSpace > 0) raw.indexOf(' ', firstSpace + 1) else -1
-            if (secondSpace <= 0) return
+    @Test
+    fun `replayed records retain identity and distinct nanosecond timestamps remain distinct`() {
+        val first = reader(logcatBytes("Failure")).read()
+        assertEquals(first, reader(logcatBytes("Failure")).read())
+        assertNotEquals(first?.id, reader(logcatBytes("Failure", nanos = 123_456_790)).read()?.id)
+    }
 
-            val timestampStr = raw.substring(0, secondSpace)
-            val rest = raw.substring(secondSpace + 1)
+    @Test
+    fun `one exception produces one entry containing only its top five frames`() {
+        val entries = collect(logcatBytes("Request failed\njava.io.IOException: offline\n" + frames(1..20)))
+        val entry = entries.single()
+        assertEquals("Request failed", entry.message)
+        assertTrue(entry.stackTrace.orEmpty().startsWith("java.io.IOException: offline"))
+        assertTrue(entry.stackTrace.orEmpty().contains("Mint.step5(Mint.kt:5)"))
+        assertFalse(entry.stackTrace.orEmpty().contains("Mint.step6("))
+        assertTrue(entry.stackTrace.orEmpty().endsWith("… (stack trace truncated)"))
+    }
 
-            val colonIndex = rest.indexOf(':')
-            if (colonIndex <= 0) return
+    @Test
+    fun `large stack trace split across log records updates its original entry`() {
+        val entries = collect(
+            logcatBytes("Request failed\njava.io.IOException: offline\n" + frames(1..3)) +
+                logcatBytes(frames(4..30), nanos = 124_000_000),
+        )
+        val entry = entries.single()
+        assertEquals("Request failed", entry.message)
+        assertTrue(entry.stackTrace.orEmpty().contains("Mint.step5(Mint.kt:5)"))
+        assertFalse(entry.stackTrace.orEmpty().contains("Mint.step6("))
+    }
 
-            val header = rest.substring(0, colonIndex).trim()
-            val message = rest.substring(colonIndex + 1).trim()
+    @Test
+    fun `interleaved errors from another thread do not absorb the exception tail`() {
+        val entries = collect(
+            logcatBytes("First\njava.io.IOException: offline\n" + frames(1..3)) +
+                logcatBytes("Second", tid = 99) + logcatBytes(frames(4..30)),
+        )
+        assertEquals(listOf("First", "Second"), entries.map { it.message })
+        assertNull(entries.last().stackTrace)
+    }
 
-            val parts = header.split(Regex("\\s+"))
-            val tag = parts.lastOrNull() ?: "Unknown"
+    @Test
+    fun `independent errors sharing a tag and timestamp remain separate`() {
+        val entries = collect(logcatBytes("First") + logcatBytes("Second"))
+        assertEquals(listOf("First", "Second"), entries.map { it.message })
+    }
 
-            // Parse to ensure the timestamp format is valid (even if we ignore value).
-            try {
-                logcatDateFormat.parse(timestampStr)
-            } catch (_: Exception) {
-                // ignore
-            }
+    private fun reader(bytes: ByteArray) = LogcatRecordReader(ByteArrayInputStream(bytes), 1234)
 
-            fakeStore.append(tag, message)
-        }
+    private fun collect(bytes: ByteArray): List<ErrorLogEntry> {
+        val entries = linkedMapOf<String, ErrorLogEntry>()
+        val assembler = ErrorLogAssembler { entries[it.id] = it }
+        val reader = reader(bytes)
+        while (true) assembler.accept(reader.read() ?: break)
+        return entries.values.toList()
+    }
+
+    private fun frames(range: IntRange) = range.joinToString("\n") {
+        "\tat com.example.Mint.step$it(Mint.kt:$it)"
     }
 }

@@ -320,6 +320,9 @@
     <string name="developer_error_logs_copy_all">Copy All</string>
     <string name="developer_error_logs_share">Share</string>
     <string name="developer_error_logs_empty">No error logs available.</string>
+    <string name="developer_error_logs_starting">Starting error collection…</string>
+    <string name="developer_error_logs_retrying">Error collection is unavailable. Retrying automatically…</string>
+    <string name="developer_error_logs_disabled">Enable Developer Mode to collect new errors.</string>
     <string name="developer_error_logs_copied">Error logs copied to clipboard</string>
     <string name="developer_error_logs_share_title">Share Error Logs</string>
 
