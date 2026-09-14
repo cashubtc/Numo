@@ -66,15 +66,11 @@ class LightningAddressManager private constructor(context: Context) {
 
     /**
      * Validate a lightning address format.
-     * Basic validation: should contain @ and have non-empty parts before and after.
+     * Uses the same hostname validation as the LNURL lookup to reject incomplete input.
      * @param address The address to validate.
      * @return True if the address appears to be valid.
      */
     fun isValidLightningAddress(address: String): Boolean {
-        val trimmed = address.trim()
-        if (!trimmed.contains("@")) return false
-        val parts = trimmed.split("@")
-        if (parts.size != 2) return false
-        return parts[0].isNotBlank() && parts[1].isNotBlank() && parts[1].contains(".")
+        return LnUrlClient.convertAddressToUrl(address) != null
     }
 }

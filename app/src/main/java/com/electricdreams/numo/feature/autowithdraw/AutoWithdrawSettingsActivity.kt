@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
@@ -27,7 +28,10 @@ import com.google.android.material.slider.Slider
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -35,6 +39,7 @@ import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.LightningAddressManager
+import com.electricdreams.numo.core.util.LnUrlClient
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.databinding.ActivityAutoWithdrawSettingsBinding
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
@@ -90,6 +95,8 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     private lateinit var mintManager: MintManager
 
     private var isUpdatingUI = false
+    private val lnUrlClient = LnUrlClient
+    private var thresholdFetchJob: Job? = null
 
     // Current threshold value (in sats)
     private var currentThreshold: Long = AutoWithdrawSettingsManager.DEFAULT_THRESHOLD_SATS
@@ -174,6 +181,9 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
             override fun afterTextChanged(s: Editable?) {
+                // A response for the previous address must not overwrite this input's state.
+                thresholdFetchJob?.cancel()
+                fetchedMinThresholdSats = AutoWithdrawSettingsManager.MIN_THRESHOLD_SATS
                 val address = s?.toString()?.trim() ?: ""
                 val isValidFormat = LightningAddressManager.getInstance(this@AutoWithdrawSettingsActivity).isValidLightningAddress(address)
 
@@ -363,6 +373,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
     }
 
     private fun fetchMinThreshold(address: String) {
+        thresholdFetchJob?.cancel()
         // Show checking state
         lightningAddressValidation.visibility = View.VISIBLE
         lightningAddressValidation.text = getString(R.string.auto_withdraw_lightning_address_checking)
@@ -370,33 +381,48 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
 
         val percentage = settingsManager.getDefaultPercentage()
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            val details = com.electricdreams.numo.core.util.LnUrlClient.fetchLnUrlDetails(address)
-            withContext(Dispatchers.Main) {
-                if (details != null) {
-                    // Update validation UI
-                    lightningAddressValidation.text = getString(R.string.auto_withdraw_lightning_address_valid)
-                    lightningAddressValidation.setTextColor(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_success_green))
-
-                    // convert msat to sat
-                    val minSendableSats = details.minSendable / 1000
-
-                    // Min threshold = minSendableSats * 100 / percentage
-                    fetchedMinThresholdSats = (minSendableSats * 100 / percentage) + 1 // +1 to ensure it's strictly > min
-
-                    // Ensure threshold is at least the min
-                    if (currentThreshold < fetchedMinThresholdSats) {
-                        currentThreshold = fetchedMinThresholdSats
-                        settingsManager.setDefaultThreshold(currentThreshold)
-                        updateThresholdDisplay()
-                    }
-                } else {
-                    // Update validation UI
-                    lightningAddressValidation.text = getString(R.string.auto_withdraw_lightning_address_invalid)
-                    lightningAddressValidation.setTextColor(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_error))
-
-                    fetchedMinThresholdSats = AutoWithdrawSettingsManager.MIN_THRESHOLD_SATS
+        thresholdFetchJob = lifecycleScope.launch {
+            val details = try {
+                withContext(Dispatchers.IO) {
+                    lnUrlClient.fetchLnUrlDetails(address)
                 }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.w(TAG, "Unable to check Lightning address minimum", e)
+                null
+            }
+            // A blocking lookup can also throw after this job has been cancelled.
+            ensureActive()
+
+            if (details != null) {
+                // Update validation UI
+                lightningAddressValidation.text =
+                    getString(R.string.auto_withdraw_lightning_address_valid)
+                lightningAddressValidation.setTextColor(
+                    ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_success_green)
+                )
+
+                // convert msat to sat
+                val minSendableSats = details.minSendable / 1000
+
+                // Min threshold = minSendableSats * 100 / percentage, strictly greater than min.
+                fetchedMinThresholdSats = (minSendableSats * 100 / percentage) + 1
+
+                // Ensure threshold is at least the min
+                if (currentThreshold < fetchedMinThresholdSats) {
+                    currentThreshold = fetchedMinThresholdSats
+                    settingsManager.setDefaultThreshold(currentThreshold)
+                    updateThresholdDisplay()
+                }
+            } else {
+                lightningAddressValidation.text =
+                    getString(R.string.auto_withdraw_lightning_address_invalid)
+                lightningAddressValidation.setTextColor(
+                    ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_error)
+                )
+
+                fetchedMinThresholdSats = AutoWithdrawSettingsManager.MIN_THRESHOLD_SATS
             }
         }
     }
@@ -668,5 +694,9 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         }
 
         override fun getItemCount() = entries.size
+    }
+
+    companion object {
+        private const val TAG = "AutoWithdrawSettings"
     }
 }
