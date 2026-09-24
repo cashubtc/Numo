@@ -77,20 +77,25 @@
     <!-- Activity screen -->
     <string name="history_total_balance_label">Total Balance</string>
     <string name="history_menu_export_activity">Export Activity</string>
-    <string name="history_menu_filter">Filter Transactions</string>
-    <string name="history_menu_filter_paid">Completed</string>
-    <string name="history_menu_filter_pending">Pending</string>
-    <string name="history_menu_filter_all">All</string>
-    <string name="history_filter_date_all">All Time</string>
     <string name="history_filter_date_today">Today</string>
-    <string name="history_filter_date_week">Week</string>
-    <string name="history_filter_date_month">Month</string>
-    <string name="history_filter_date_custom">Custom Range...</string>
-    <string name="history_filter_status_format">Status: %1$s</string>
-    <string name="history_filter_header_format">Filter by: %1$s</string>
-    <string name="history_filter_date_format">Date: %1$s</string>
-    <string name="history_filter_date_range_format">%1$s - %2$s</string>
+    <string name="history_filter_date_range_format">%1$s – %2$s</string>
     <string name="history_filter_date_picker_title">Select Date Range</string>
+    <string name="history_filter_button">Filter</string>
+    <string name="history_filter_button_count">Filter · %1$d</string>
+    <string name="history_filter_reset">Reset</string>
+    <string name="history_filter_status">Status</string>
+    <string name="history_filter_date">Date</string>
+    <string name="history_filter_status_all">All</string>
+    <string name="history_filter_status_paid">Paid</string>
+    <string name="history_filter_status_pending">Pending</string>
+    <string name="history_filter_date_any">Any time</string>
+    <string name="history_filter_date_last_7_days">Last 7 days</string>
+    <string name="history_filter_date_last_30_days">Last 30 days</string>
+    <string name="history_filter_date_this_month">This month</string>
+    <string name="history_filter_date_custom_option">Custom…</string>
+    <string name="history_filter_remove">Remove filter %1$s</string>
+    <string name="history_empty_filtered_title">No matching activity</string>
+    <string name="history_empty_filtered_subtitle">Nothing matches these filters. Try another or reset them.</string>
     <string name="history_export_success">Activity exported to CSV</string>
     <string name="history_export_error">Error exporting activity</string>
 

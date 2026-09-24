@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Filter chip fill: monochrome "selected" like the app's segmented buttons -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/color_brand_foreground" android:state_checked="true" />
+    <item android:color="@android:color/transparent" />
+</selector>
