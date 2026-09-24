@@ -382,6 +382,7 @@
     <string name="history_toolbar_title">活動</string>
     <string name="history_section_payment_history">支払い履歴</string>
     <string name="history_empty">支払い履歴がありません</string>
+    <string name="history_empty_subtitle">最初の請求の後、受け取ったすべての支払いの記録がここに表示されます。</string>
 
     <string name="transaction_row_copy">コピー</string>
     <string name="transaction_row_open">開ける</string>

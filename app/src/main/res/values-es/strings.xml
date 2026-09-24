@@ -313,6 +313,7 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="history_toolbar_title">Actividad</string>
     <string name="history_section_payment_history">HISTORIAL DE PAGOS</string>
     <string name="history_empty">No hay historial de pagos</string>
+    <string name="history_empty_subtitle">Después de tu primer cobro, verás aquí un registro de cada pago recibido.</string>
     <string name="transaction_row_copy">Copiar</string>
     <string name="transaction_row_open">Abrir</string>
     <string name="transaction_row_delete">Eliminar</string>

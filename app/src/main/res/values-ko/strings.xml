@@ -382,6 +382,7 @@
     <string name="history_toolbar_title">활동</string>
     <string name="history_section_payment_history">결제 내역</string>
     <string name="history_empty">결제 내역이 없습니다</string>
+    <string name="history_empty_subtitle">첫 결제 요청 후에는 받은 모든 결제 기록이 여기에 표시됩니다.</string>
 
     <string name="transaction_row_copy">복사</string>
     <string name="transaction_row_open">열려 있는</string>

@@ -41,165 +41,139 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintEnd_toStartOf="@id/overflow_button" />
 
-    <!-- Balance Summary (centered) -->
-    <LinearLayout
-        android:id="@+id/balance_section"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp"
-        app:layout_constraintTop_toBottomOf="@id/top_bar">
-
-        <!-- "Total Balance" label -->
-        <TextView
-            android:id="@+id/balance_label"
-            style="@style/Text.Caption"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/history_total_balance_label" />
-
-        <!-- Large fiat balance -->
-        <TextView
-            android:id="@+id/balance_fiat"
-            style="@style/Text.DisplayAmount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_xs"
-            android:textColor="@color/color_text_primary"
-            tools:text="$15.29" />
-
-        <!-- Sat balance subtitle -->
-        <TextView
-            android:id="@+id/balance_sats"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textAppearance="@style/Text.Body"
-            android:textColor="@color/color_text_tertiary"
-            tools:text="₿21,305" />
-
-    </LinearLayout>
-
-    <!-- Expandable Filter Header -->
-    <LinearLayout
-        android:id="@+id/filter_header"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="8dp"
-        android:paddingVertical="4dp"
-        android:paddingHorizontal="8dp"
-        android:background="?attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true"
-        app:layout_constraintTop_toBottomOf="@id/balance_section"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <TextView
-            android:id="@+id/filter_header_text"
-            style="@style/Text.Body"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textColor="@color/color_text_secondary"
-            android:text="@string/history_menu_filter" />
-
-        <ImageView
-            android:id="@+id/filter_expand_icon"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="4dp"
-            android:src="@drawable/ic_chevron_down"
-            app:tint="@color/color_text_secondary" />
-
-    </LinearLayout>
-
-    <!-- Filters Container (Hidden by default) -->
-    <LinearLayout
-        android:id="@+id/filters_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:baselineAligned="false"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="12dp"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/filter_header">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_filter_status"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:minHeight="48dp"
-            android:layout_weight="1"
-            android:layout_marginEnd="6dp"
-            android:text="Status: All"
-            android:textAllCaps="false"
-            android:textSize="13sp"
-            android:lines="1"
-            android:ellipsize="end"
-            android:paddingHorizontal="12dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:textColor="@color/color_text_primary"
-            app:icon="@drawable/ic_chevron_down"
-            app:iconGravity="textEnd"
-            app:iconPadding="4dp"
-            app:iconTint="@color/color_text_primary"
-            app:strokeColor="@color/color_divider" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_filter_date"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:minHeight="48dp"
-            android:layout_weight="1"
-            android:layout_marginStart="6dp"
-            android:text="Date: All Time"
-            android:textAllCaps="false"
-            android:textSize="13sp"
-            android:lines="1"
-            android:ellipsize="end"
-            android:paddingHorizontal="12dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:textColor="@color/color_text_primary"
-            app:icon="@drawable/ic_chevron_down"
-            app:iconGravity="textEnd"
-            app:iconPadding="4dp"
-            app:iconTint="@color/color_text_primary"
-            app:strokeColor="@color/color_divider" />
-
-    </LinearLayout>
-
-    <!-- List (month headers + transaction items) -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/history_recycler_view"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/history_coordinator"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:clipChildren="false"
-        android:clipToPadding="false"
-        android:paddingBottom="@dimen/space_l"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/filters_container" />
+        app:layout_constraintTop_toBottomOf="@id/top_bar">
 
-    <!-- Empty View -->
-    <include
-        android:id="@+id/empty_view"
-        layout="@layout/component_empty_state"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/filters_container" />
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/history_app_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/color_bg_white"
+            android:stateListAnimator="@null"
+            app:elevation="0dp"
+            app:liftOnScroll="false">
 
+            <!-- Balance Summary: scrolls away with the list -->
+            <LinearLayout
+                android:id="@+id/balance_section"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_xl"
+                app:layout_scrollFlags="scroll">
+
+                <!-- "Total Balance" label -->
+                <TextView
+                    android:id="@+id/balance_label"
+                    style="@style/Text.Caption"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/history_total_balance_label" />
+
+                <!-- Large fiat balance -->
+                <TextView
+                    android:id="@+id/balance_fiat"
+                    style="@style/Text.DisplayAmount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_xs"
+                    android:textColor="@color/color_text_primary"
+                    tools:text="$15.29" />
+
+                <!-- Sat balance subtitle -->
+                <TextView
+                    android:id="@+id/balance_sats"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textAppearance="@style/Text.Body"
+                    android:textColor="@color/color_text_tertiary"
+                    tools:text="₿21,305" />
+
+            </LinearLayout>
+
+            <!-- Filter row: pinned under the top bar. Active filters as removable chips,
+                 then the Filter pill that opens the filter sheet. -->
+            <LinearLayout
+                android:id="@+id/filter_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/color_bg_white"
+                android:gravity="center_vertical"
+                android:minHeight="52dp"
+                android:orientation="horizontal"
+                android:paddingStart="@dimen/space_l"
+                android:paddingEnd="@dimen/space_l">
+
+                <HorizontalScrollView
+                    android:id="@+id/active_filters_scroll"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fadingEdgeLength="@dimen/space_l"
+                    android:overScrollMode="never"
+                    android:requiresFadingEdge="horizontal"
+                    android:scrollbars="none">
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/active_filter_chips"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:chipSpacingHorizontal="@dimen/space_s"
+                        app:singleLine="true" />
+                </HorizontalScrollView>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/filter_button"
+                    style="@style/Widget.Numo.Button.FilterPill"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="@dimen/space_s"
+                    android:text="@string/history_filter_button"
+                    app:icon="@drawable/ic_tune" />
+            </LinearLayout>
+
+            <!-- Hairline shown once the balance has scrolled away -->
+            <View
+                android:id="@+id/filter_row_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:alpha="0"
+                android:background="@color/color_divider" />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+            <!-- List (month headers + transaction items) -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/history_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipChildren="false"
+                android:clipToPadding="false"
+                android:paddingBottom="@dimen/space_l" />
+
+            <!-- Empty View -->
+            <include
+                android:id="@+id/empty_view"
+                layout="@layout/component_empty_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+        </FrameLayout>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
