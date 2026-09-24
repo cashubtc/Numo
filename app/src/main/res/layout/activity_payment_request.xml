@@ -382,12 +382,12 @@
     </LinearLayout>
 
 
-    <!-- NFC Animation Overlay (Native View) - ONLY for NFC payments -->
+    <!-- Payment overlay: NFC loading, then the success or error result for every payment path -->
     <FrameLayout
         android:id="@+id/nfc_animation_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/color_nfc_idle"
+        android:background="@color/color_bg_white"
         android:clickable="true"
         android:focusable="true"
         android:fitsSystemWindows="false"
@@ -397,82 +397,149 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
+        <!-- Draws the green success reveal and the result badge, centred on the indicator slot -->
         <com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
             android:id="@+id/nfc_animation_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@android:color/transparent" />
+            android:importantForAccessibility="no" />
 
-        <TextView
-            android:id="@+id/animation_result_amount"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|center_vertical"
-            android:gravity="center"
-            android:textAlignment="center"
-            android:translationY="-180dp"
-            android:textColor="@android:color/white"
-            android:textSize="56sp"
-            android:textStyle="bold"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/animation_result_label"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|center_vertical"
-            android:layout_marginStart="@dimen/space_2xl"
-            android:layout_marginEnd="@dimen/space_2xl"
-            android:gravity="center"
-            android:maxLines="3"
-            android:textAlignment="center"
-            android:translationY="-120dp"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:visibility="gone" />
-
-        <!-- Result action buttons appear after animation completes -->
         <LinearLayout
-            android:id="@+id/animation_actions_container"
+            android:id="@+id/nfc_overlay_column"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center_horizontal"
-            android:layout_marginStart="@dimen/space_xl"
-            android:layout_marginEnd="@dimen/space_xl"
-            android:layout_marginBottom="@dimen/space_3xl"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            android:visibility="gone">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/animation_view_details_button"
+            <ScrollView
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
-                android:text="@string/payment_received_button_view_details"
-                android:textColor="@android:color/white"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:visibility="gone" />
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:fillViewport="true"
+                android:overScrollMode="never"
+                android:scrollbars="none">
 
-            <TextView
-                android:id="@+id/animation_close_button"
+                <LinearLayout
+                    android:id="@+id/nfc_overlay_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:animateLayoutChanges="true"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="@dimen/space_2xl"
+                    android:paddingVertical="@dimen/space_xl">
+
+                    <!-- Amount being charged; stays in place from loading into the result -->
+                    <TextView
+                        android:id="@+id/animation_result_amount"
+                        style="@style/Text.DisplayAmount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:maxLines="2"
+                        android:visibility="invisible" />
+
+                    <!-- Loader and result badge share this slot -->
+                    <FrameLayout
+                        android:id="@+id/nfc_indicator_slot"
+                        android:layout_width="@dimen/nfc_indicator_size"
+                        android:layout_height="@dimen/nfc_indicator_size"
+                        android:layout_marginTop="@dimen/space_2xl">
+
+                        <com.google.android.material.progressindicator.CircularProgressIndicator
+                            android:id="@+id/nfc_loader"
+                            style="@style/Widget.Numo.NfcLoader"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:indeterminate="true"
+                            android:visibility="invisible" />
+                    </FrameLayout>
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_2xl">
+
+                        <!-- Loading hint: "Hold phone here" / "You can lift your phone" -->
+                        <TextView
+                            android:id="@+id/nfc_hint"
+                            style="@style/Text.Subtitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:accessibilityLiveRegion="polite"
+                            android:gravity="center"
+                            android:textColor="@color/color_text_secondary"
+                            android:visibility="invisible" />
+
+                        <!-- Result title: "Payment received" / "Payment not received" -->
+                        <TextView
+                            android:id="@+id/animation_result_label"
+                            style="@style/Text.Heading1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:accessibilityLiveRegion="polite"
+                            android:gravity="center"
+                            android:visibility="invisible" />
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/nfc_result_reason"
+                        style="@style/Text.Body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:accessibilityLiveRegion="polite"
+                        android:gravity="center"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/nfc_result_reassurance"
+                        style="@style/Text.Caption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_m"
+                        android:gravity="center"
+                        android:text="@string/payment_failure_reassurance"
+                        android:textColor="@color/color_text_tertiary"
+                        android:visibility="gone" />
+                </LinearLayout>
+            </ScrollView>
+
+            <!-- Result actions; kept INVISIBLE (not GONE) while loading so content never shifts -->
+            <LinearLayout
+                android:id="@+id/animation_actions_container"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/button_height"
-                android:layout_marginTop="@dimen/space_m"
-                android:background="@drawable/bg_button_black"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:gravity="center"
-                android:text="@string/payment_request_animation_close"
-                android:textColor="@color/color_text_on_dark"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/space_xl"
+                android:layout_marginEnd="@dimen/space_xl"
+                android:layout_marginBottom="@dimen/space_3xl"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:visibility="invisible">
+
+                <TextView
+                    android:id="@+id/animation_view_details_button"
+                    style="@style/Text.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:text="@string/payment_received_button_view_details"
+                    android:textColor="@android:color/white" />
+
+                <TextView
+                    android:id="@+id/animation_close_button"
+                    style="@style/Text.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/button_height"
+                    android:layout_marginTop="@dimen/space_m"
+                    android:background="@drawable/bg_button_black"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:text="@string/payment_request_animation_close"
+                    android:textColor="@color/color_text_on_dark" />
+            </LinearLayout>
         </LinearLayout>
     </FrameLayout>
 

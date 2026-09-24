@@ -104,6 +104,7 @@
     <string name="payment_failure_error_background_description">오류 배경</string>
     <string name="payment_failure_error_icon_description">오류</string>
     <string name="payment_failure_error_no_pending">재시도할 대기 중인 결제가 없습니다.</string>
+    <string name="payment_failure_reassurance">자금이 이체되지 않았습니다. 안심하고 다시 시도하세요.</string>
 
     
     <string name="onboarding_welcome_tagline">수수료 없이 즉시 비트코인 ​​결제를 수락하세요.</string>
@@ -303,8 +304,8 @@
     <string name="nfc_payment_error_nfc_comm">NFC 통신 오류: %1$s</string>
     <string name="nfc_payment_error_satocash">Satocash 카드 오류: %1$s(SW: 0x%2$04X)</string>
     <string name="nfc_payment_error_unexpected">예상치 못한 오류가 발생했습니다: %1$s</string>
-    <string name="nfc_payment_hint_keep_close">휴대전화를 가까이에 두세요</string>
-    <string name="nfc_payment_hint_processing">결제 처리 중...\n휴대전화를 들어도 됩니다.</string>
+    <string name="nfc_payment_hint_keep_close">휴대전화를 여기에 대세요</string>
+    <string name="nfc_payment_hint_processing">휴대전화를 떼도 됩니다</string>
 
     
     <string name="common_ok">좋아요</string>

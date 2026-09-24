@@ -104,6 +104,7 @@
     <string name="payment_failure_error_background_description">エラーの背景</string>
     <string name="payment_failure_error_icon_description">エラー</string>
     <string name="payment_failure_error_no_pending">再試行するための保留中の支払いはありません</string>
+    <string name="payment_failure_reassurance">資金は送金されていません。安全に再試行できます。</string>
 
     
     <string name="onboarding_welcome_tagline">手数料なしでビットコイン支払いを即座に受け入れます。</string>
@@ -303,8 +304,8 @@
     <string name="nfc_payment_error_nfc_comm">NFC 通信エラー: %1$s</string>
     <string name="nfc_payment_error_satocash">SATOCASH カード エラー: %1$s (SW: 0x%2$04X)</string>
     <string name="nfc_payment_error_unexpected">予期しないエラーが発生しました: %1$s</string>
-    <string name="nfc_payment_hint_keep_close">携帯電話を近くに置いておく</string>
-    <string name="nfc_payment_hint_processing">支払いを処理しています...\n携帯電話を持ち上げても大丈夫です</string>
+    <string name="nfc_payment_hint_keep_close">ここにスマートフォンをかざしてください</string>
+    <string name="nfc_payment_hint_processing">スマートフォンを離しても大丈夫です</string>
 
     
     <string name="common_ok">わかりました</string>

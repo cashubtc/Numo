@@ -329,8 +329,8 @@
     <string name="nfc_payment_error_nfc_comm">Tippen unterbrochen — halte die Karte ruhig und versuche es erneut</string>
     <string name="nfc_payment_error_satocash">Karte konnte nicht gelesen werden: %1$s (Code: 0x%2$04X)</string>
     <string name="nfc_payment_error_unexpected">Etwas ist schiefgelaufen. Versuche es erneut — es wurden keine Gelder überwiesen.</string>
-    <string name="nfc_payment_hint_keep_close">Telefon nah halten</string>
-    <string name="nfc_payment_hint_processing">Zahlung wird verarbeitet...\nDu kannst dein Telefon wegnehmen</string>
+    <string name="nfc_payment_hint_keep_close">Telefon hier halten</string>
+    <string name="nfc_payment_hint_processing">Du kannst dein Telefon wegnehmen</string>
 
 
     <string name="common_ok">OK</string>

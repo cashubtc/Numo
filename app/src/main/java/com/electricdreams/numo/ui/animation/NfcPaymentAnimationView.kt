@@ -3,160 +3,114 @@ package com.electricdreams.numo.ui.animation
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.AnimatorSet
-import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PathMeasure
-import android.graphics.RectF
-import android.graphics.Shader
 import android.util.AttributeSet
 import android.view.View
-import android.view.animation.DecelerateInterpolator
-import android.view.animation.LinearInterpolator
+import android.view.ViewTreeObserver
+import android.view.animation.PathInterpolator
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.withScale
 import com.electricdreams.numo.R
+import kotlin.math.hypot
+import kotlin.math.max
 import kotlin.math.min
 
+/**
+ * Draws the result moment of the NFC payment overlay, centred on an anchor view
+ * (the slot that holds the loading spinner) so the result grows out of the loader:
+ *
+ * - Success: a full-screen green reveal growing from the anchor, then a white badge
+ *   with a green checkmark drawn in.
+ * - Error: a red badge with a white ✕ drawn in, over the app background.
+ *
+ * The loading spinner is a Material progress indicator owned by the layout. With system
+ * animations removed, results jump straight to their final frame.
+ */
 class NfcPaymentAnimationView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
 ) : View(context, attrs, defStyleAttr) {
 
-    private enum class State {
-        IDLE,
-        READING,
-        PROCESSING,
-        RESULT_TRANSITION,
-        RESULT,
-    }
+    private enum class State { IDLE, TRANSITION, RESULT }
 
-    private enum class ResultType {
-        SUCCESS,
-        ERROR,
-    }
+    private enum class ResultType { SUCCESS, ERROR }
 
-    private val colorIdle = ContextCompat.getColor(context, R.color.color_nfc_idle)
-    private val colorReading = ContextCompat.getColor(context, R.color.color_bitcoin_orange)
-    private val colorProcessing = ContextCompat.getColor(context, R.color.color_accent_blue)
     private val colorSuccess = ContextCompat.getColor(context, R.color.color_nfc_success)
-    private val colorSuccessGradientStart = ContextCompat.getColor(context, R.color.color_nfc_success_gradient_start)
-    private val colorSuccessGradientEnd = ContextCompat.getColor(context, R.color.color_nfc_success_gradient_end)
     private val colorError = ContextCompat.getColor(context, R.color.color_error)
 
-    private val backgroundPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val successGradientPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val spinnerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        strokeCap = Paint.Cap.ROUND
-        color = Color.WHITE
-    }
-    private val resultCirclePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val revealPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL
-        color = Color.WHITE
+        color = colorSuccess
     }
-    private val resultIconPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    private val badgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
+    }
+    private val glyphPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
+        strokeWidth = resources.getDimension(R.dimen.nfc_result_icon_stroke_width)
     }
 
     private var state = State.IDLE
     private var resultType: ResultType? = null
 
-    private var currentBackgroundColor = colorIdle
-    private var spinnerRotation = 0f
-    private var spinnerPulse = 1f
-    private var spinnerAlpha = 0f
-    private var resultCircleScale = 0f
-    private var resultIconProgress = 0f
+    private var revealFraction = 0f
+    private var badgeScale = 0f
+    private var badgeAlpha = 0f
+    private var glyphProgress = 0f
 
+    private var anchor: View? = null
+    private val anchorLocation = IntArray(2)
+    private val ownLocation = IntArray(2)
     private var centerX = 0f
     private var centerY = 0f
-    private var spinnerRadius = 0f
-    private var spinnerStrokeWidth = 0f
-    private var resultCircleRadius = 0f
-    private var successGradient: LinearGradient? = null
+    private var badgeRadius = resources.getDimension(R.dimen.nfc_indicator_size) / 2f
+    private var maxRevealRadius = 0f
 
     private val checkPath = Path()
     private val checkPathMeasure = PathMeasure()
     private val checkPathSegment = Path()
     private var checkPathLength = 0f
 
-    private var spinAnimator: ValueAnimator? = null
-    private var pulseAnimator: ValueAnimator? = null
     private var transitionAnimator: AnimatorSet? = null
-
     private var onResultDisplayedListener: ((Boolean) -> Unit)? = null
+
+    // Keeps the badge on the anchor when the content around it re-lays out (e.g. the
+    // error reason appearing below, or a large font scale making the column scroll).
+    private val anchorTracker = ViewTreeObserver.OnPreDrawListener {
+        if (resultType != null) {
+            val previousX = centerX
+            val previousY = centerY
+            updateGeometry()
+            if (previousX != centerX || previousY != centerY) invalidate()
+        }
+        true
+    }
 
     fun setOnResultDisplayedListener(listener: ((Boolean) -> Unit)?) {
         onResultDisplayedListener = listener
     }
 
-    fun startReading() {
-        cancelAnimations()
-
-        state = State.READING
-        resultType = null
-        currentBackgroundColor = colorReading
-        spinnerRotation = 0f
-        spinnerPulse = 1f
-        spinnerAlpha = 1f
-        resultCircleScale = 0f
-        resultIconProgress = 0f
-
-        spinAnimator = ValueAnimator.ofFloat(0f, 360f).apply {
-            duration = 1100L
-            repeatCount = ValueAnimator.INFINITE
-            interpolator = LinearInterpolator()
-            addUpdateListener { animator ->
-                spinnerRotation = animator.animatedValue as Float
-                invalidate()
-            }
-            start()
-        }
-
-        pulseAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 1200L
-            repeatCount = ValueAnimator.INFINITE
-            repeatMode = ValueAnimator.REVERSE
-            interpolator = DecelerateInterpolator()
-            addUpdateListener { animator ->
-                val progress = animator.animatedValue as Float
-                spinnerPulse = 1f + (progress * 0.08f)
-                invalidate()
-            }
-            start()
-        }
-
-        invalidate()
+    /** The view the result badge and success reveal are centred on. */
+    fun setAnchor(view: View) {
+        anchor = view
     }
 
-    fun startProcessing() {
-        if (state != State.READING) return
-        
-        state = State.PROCESSING
-        
-        val colorAnimator = ValueAnimator.ofObject(ArgbEvaluator(), currentBackgroundColor, colorProcessing).apply {
-            duration = 360L
-            addUpdateListener { animator ->
-                currentBackgroundColor = animator.animatedValue as Int
-                invalidate()
-            }
-        }
-        colorAnimator.start()
-    }
-
-    fun showSuccess(_amountText: String) {
+    /** Reveals the success state; the full-screen green grows from the anchor. */
+    fun showSuccess() {
         startResultTransition(ResultType.SUCCESS)
     }
 
-    fun showError(_message: String) {
+    /** Shows the error badge over the app background; there is no full-screen colour. */
+    fun showError() {
         startResultTransition(ResultType.ERROR)
     }
 
@@ -164,238 +118,203 @@ class NfcPaymentAnimationView @JvmOverloads constructor(
         cancelAnimations()
         state = State.IDLE
         resultType = null
-        currentBackgroundColor = colorIdle
-        spinnerRotation = 0f
-        spinnerPulse = 1f
-        spinnerAlpha = 0f
-        resultCircleScale = 0f
-        resultIconProgress = 0f
+        revealFraction = 0f
+        badgeScale = 0f
+        badgeAlpha = 0f
+        glyphProgress = 0f
         invalidate()
     }
 
     private fun startResultTransition(target: ResultType) {
-        if (state == State.IDLE) {
-            startReading()
-        }
+        if (resultType != null) return
 
-        if (resultType != null) {
+        resultType = target
+        state = State.TRANSITION
+        updateGeometry()
+
+        if (ReducedMotion.isEnabled(context)) {
+            revealFraction = if (target == ResultType.SUCCESS) 1f else 0f
+            badgeScale = 1f
+            badgeAlpha = 1f
+            glyphProgress = 1f
+            state = State.RESULT
+            invalidate()
+            post { onResultDisplayedListener?.invoke(target == ResultType.SUCCESS) }
             return
         }
 
-        state = State.RESULT_TRANSITION
-        resultType = target
-
-        val targetColor = when (target) {
-            ResultType.SUCCESS -> colorSuccess
-            ResultType.ERROR -> colorError
-        }
-
-        transitionAnimator?.cancel()
-
-        val colorAnimator = ValueAnimator.ofObject(ArgbEvaluator(), currentBackgroundColor, targetColor).apply {
-            duration = 360L
-            addUpdateListener { animator ->
-                currentBackgroundColor = animator.animatedValue as Int
-                invalidate()
+        val animators = mutableListOf<Animator>()
+        val badgeDelay: Long
+        val glyphDelay: Long
+        if (target == ResultType.SUCCESS) {
+            animators += floatAnimator(REVEAL_DURATION_MS, 0L, EMPHASIZED_DECELERATE) {
+                revealFraction = it
             }
+            badgeDelay = SUCCESS_BADGE_DELAY_MS
+            glyphDelay = SUCCESS_GLYPH_DELAY_MS
+        } else {
+            badgeDelay = ERROR_BADGE_DELAY_MS
+            glyphDelay = ERROR_GLYPH_DELAY_MS
         }
-
-        val spinnerFadeAnimator = ValueAnimator.ofFloat(spinnerAlpha, 0f).apply {
-            duration = 280L
-            addUpdateListener { animator ->
-                spinnerAlpha = animator.animatedValue as Float
-                invalidate()
-            }
+        animators += floatAnimator(BADGE_DURATION_MS, badgeDelay, EMPHASIZED_DECELERATE) {
+            badgeScale = BADGE_START_SCALE + (1f - BADGE_START_SCALE) * it
         }
-
-        val circleAnimator = ValueAnimator.ofFloat(0.82f, 1f).apply {
-            duration = 320L
-            addUpdateListener { animator ->
-                resultCircleScale = animator.animatedValue as Float
-                invalidate()
-            }
+        animators += floatAnimator(BADGE_FADE_DURATION_MS, badgeDelay, STANDARD) {
+            badgeAlpha = it
         }
-
-        val iconAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 300L
-            startDelay = 120L
-            interpolator = DecelerateInterpolator()
-            addUpdateListener { animator ->
-                resultIconProgress = animator.animatedValue as Float
-                invalidate()
-            }
+        animators += floatAnimator(GLYPH_DURATION_MS, glyphDelay, STANDARD) {
+            glyphProgress = it
         }
 
         transitionAnimator = AnimatorSet().apply {
-            playTogether(colorAnimator, spinnerFadeAnimator, circleAnimator, iconAnimator)
+            playTogether(animators)
             addListener(object : AnimatorListenerAdapter() {
+                private var cancelled = false
+
+                override fun onAnimationCancel(animation: Animator) {
+                    cancelled = true
+                }
+
                 override fun onAnimationEnd(animation: Animator) {
+                    if (cancelled) return
                     state = State.RESULT
-                    val success = resultType == ResultType.SUCCESS
-                    onResultDisplayedListener?.invoke(success)
+                    onResultDisplayedListener?.invoke(resultType == ResultType.SUCCESS)
                 }
             })
             start()
         }
+    }
 
-        spinAnimator?.cancel()
-        pulseAnimator?.cancel()
+    private fun floatAnimator(
+        duration: Long,
+        delay: Long,
+        interpolator: PathInterpolator,
+        onUpdate: (Float) -> Unit,
+    ): ValueAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+        this.duration = duration
+        startDelay = delay
+        this.interpolator = interpolator
+        addUpdateListener { animator ->
+            onUpdate(animator.animatedValue as Float)
+            invalidate()
+        }
     }
 
     private fun cancelAnimations() {
-        spinAnimator?.cancel()
-        pulseAnimator?.cancel()
         transitionAnimator?.cancel()
-        spinAnimator = null
-        pulseAnimator = null
         transitionAnimator = null
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        centerX = w / 2f
-        centerY = h * 0.55f
+        updateGeometry()
+    }
 
-        val minSize = min(w, h).toFloat()
-        spinnerRadius = resources.getDimension(R.dimen.nfc_spinner_radius).coerceAtMost(minSize * 0.24f)
-        spinnerStrokeWidth = resources.getDimension(R.dimen.nfc_spinner_stroke_width)
-        resultCircleRadius = resources.getDimension(R.dimen.nfc_result_circle_radius).coerceAtMost(minSize * 0.31f)
-
-        spinnerPaint.strokeWidth = spinnerStrokeWidth
-        resultIconPaint.strokeWidth = resources.getDimension(R.dimen.nfc_result_icon_stroke_width)
-        resultIconPaint.color = colorSuccess
-        successGradient = LinearGradient(
-            0f,
-            0f,
-            w.toFloat(),
-            h.toFloat(),
-            colorSuccessGradientStart,
-            colorSuccessGradientEnd,
-            Shader.TileMode.CLAMP,
-        )
-        successGradientPaint.shader = successGradient
-
+    /** Recomputes the badge centre from the anchor's on-screen position. */
+    private fun updateGeometry() {
+        val anchorView = anchor
+        if (anchorView != null && anchorView.width > 0) {
+            anchorView.getLocationInWindow(anchorLocation)
+            getLocationInWindow(ownLocation)
+            centerX = (anchorLocation[0] - ownLocation[0]) + anchorView.width / 2f
+            centerY = (anchorLocation[1] - ownLocation[1]) + anchorView.height / 2f
+            badgeRadius = min(anchorView.width, anchorView.height) / 2f
+        } else {
+            centerX = width / 2f
+            centerY = height / 2f
+        }
+        maxRevealRadius = hypot(max(centerX, width - centerX), max(centerY, height - centerY))
         rebuildCheckPath()
     }
 
     private fun rebuildCheckPath() {
-        val size = resultCircleRadius * 0.9f
-        val startX = centerX - size * 0.33f
-        val startY = centerY + size * 0.06f
-        val midX = centerX - size * 0.07f
-        val midY = centerY + size * 0.31f
-        val endX = centerX + size * 0.35f
-        val endY = centerY - size * 0.26f
-
+        val size = badgeRadius * 0.9f
         checkPath.reset()
-        checkPath.moveTo(startX, startY)
-        checkPath.lineTo(midX, midY)
-        checkPath.lineTo(endX, endY)
-
+        checkPath.moveTo(centerX - size * 0.36f, centerY + size * 0.02f)
+        checkPath.lineTo(centerX - size * 0.1f, centerY + size * 0.28f)
+        checkPath.lineTo(centerX + size * 0.38f, centerY - size * 0.24f)
         checkPathMeasure.setPath(checkPath, false)
         checkPathLength = checkPathMeasure.length
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (state == State.IDLE) {
-            return
+        val result = resultType ?: return
+        if (state == State.IDLE) return
+
+        if (result == ResultType.SUCCESS && revealFraction > 0f) {
+            canvas.drawCircle(centerX, centerY, maxRevealRadius * revealFraction, revealPaint)
         }
 
-        backgroundPaint.color = currentBackgroundColor
-        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), backgroundPaint)
-        if (resultType == ResultType.SUCCESS &&
-            (state == State.RESULT_TRANSITION || state == State.RESULT) &&
-            successGradient != null
-        ) {
-            successGradientPaint.alpha = when (state) {
-                State.RESULT -> 255
-                State.RESULT_TRANSITION -> (resultIconProgress * 255).toInt().coerceIn(0, 255)
-                else -> 0
+        if (badgeScale <= 0f) return
+        badgePaint.color = if (result == ResultType.SUCCESS) Color.WHITE else colorError
+        badgePaint.alpha = (badgeAlpha * 255).toInt().coerceIn(0, 255)
+        canvas.drawCircle(centerX, centerY, badgeRadius * badgeScale, badgePaint)
+
+        if (glyphProgress <= 0f) return
+        canvas.withScale(badgeScale, badgeScale, centerX, centerY) {
+            when (result) {
+                ResultType.SUCCESS -> drawCheck(this)
+                ResultType.ERROR -> drawCross(this)
             }
-            canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), successGradientPaint)
-        }
-
-        if (state == State.READING || state == State.PROCESSING || state == State.RESULT_TRANSITION) {
-            val radius = spinnerRadius * spinnerPulse
-            val rect = RectF(
-                centerX - radius,
-                centerY - radius,
-                centerX + radius,
-                centerY + radius,
-            )
-
-            spinnerPaint.alpha = (spinnerAlpha * 255).toInt().coerceIn(0, 255)
-            canvas.save()
-            canvas.rotate(spinnerRotation, centerX, centerY)
-            canvas.drawArc(rect, 0f, 300f, false, spinnerPaint)
-            canvas.restore()
-        }
-
-        if (state == State.RESULT_TRANSITION || state == State.RESULT) {
-            if (resultCircleScale > 0f) {
-                canvas.drawCircle(
-                    centerX,
-                    centerY,
-                    resultCircleRadius * resultCircleScale,
-                    resultCirclePaint,
-                )
-            }
-            drawResultIcon(canvas)
         }
     }
 
-    private fun drawResultIcon(canvas: Canvas) {
-        val result = resultType ?: return
-        if (resultIconProgress <= 0f) return
+    private fun drawCheck(canvas: Canvas) {
+        glyphPaint.color = colorSuccess
+        checkPathSegment.reset()
+        checkPathMeasure.getSegment(0f, checkPathLength * glyphProgress, checkPathSegment, true)
+        canvas.drawPath(checkPathSegment, glyphPaint)
+    }
 
-        when (result) {
-            ResultType.SUCCESS -> {
-                resultIconPaint.color = colorSuccess
-                checkPathSegment.reset()
-                checkPathMeasure.getSegment(
-                    0f,
-                    checkPathLength * resultIconProgress,
-                    checkPathSegment,
-                    true,
-                )
-                canvas.drawPath(checkPathSegment, resultIconPaint)
-            }
-            ResultType.ERROR -> {
-                resultIconPaint.color = colorError
-                val arm = resultCircleRadius * 0.42f
-                val firstLineProgress = min(1f, resultIconProgress * 2f)
-                val secondLineProgress = min(1f, maxOf(0f, (resultIconProgress - 0.5f) * 2f))
+    private fun drawCross(canvas: Canvas) {
+        glyphPaint.color = Color.WHITE
+        val arm = badgeRadius * 0.3f
+        val first = min(1f, glyphProgress * 2f)
+        val second = min(1f, max(0f, (glyphProgress - 0.5f) * 2f))
 
-                val x1 = centerX - arm
-                val y1 = centerY - arm
-                val x2 = centerX + arm
-                val y2 = centerY + arm
-                val x3 = centerX - arm
-                val y3 = centerY + arm
-                val x4 = centerX + arm
-                val y4 = centerY - arm
-
-                canvas.drawLine(
-                    x1,
-                    y1,
-                    x1 + ((x2 - x1) * firstLineProgress),
-                    y1 + ((y2 - y1) * firstLineProgress),
-                    resultIconPaint,
-                )
-                canvas.drawLine(
-                    x3,
-                    y3,
-                    x3 + ((x4 - x3) * secondLineProgress),
-                    y3 + ((y4 - y3) * secondLineProgress),
-                    resultIconPaint,
-                )
-            }
+        canvas.drawLine(
+            centerX - arm,
+            centerY - arm,
+            centerX - arm + 2 * arm * first,
+            centerY - arm + 2 * arm * first,
+            glyphPaint,
+        )
+        if (second > 0f) {
+            canvas.drawLine(
+                centerX + arm,
+                centerY - arm,
+                centerX + arm - 2 * arm * second,
+                centerY - arm + 2 * arm * second,
+                glyphPaint,
+            )
         }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        viewTreeObserver.addOnPreDrawListener(anchorTracker)
     }
 
     override fun onDetachedFromWindow() {
+        viewTreeObserver.removeOnPreDrawListener(anchorTracker)
         super.onDetachedFromWindow()
-        reset()
+        cancelAnimations()
+    }
+
+    companion object {
+        private const val REVEAL_DURATION_MS = 520L
+        private const val BADGE_DURATION_MS = 380L
+        private const val BADGE_FADE_DURATION_MS = 160L
+        private const val GLYPH_DURATION_MS = 340L
+        private const val SUCCESS_BADGE_DELAY_MS = 140L
+        private const val SUCCESS_GLYPH_DELAY_MS = 320L
+        private const val ERROR_BADGE_DELAY_MS = 120L
+        private const val ERROR_GLYPH_DELAY_MS = 280L
+        private const val BADGE_START_SCALE = 0.6f
+
+        // Material 3 motion curves
+        private val EMPHASIZED_DECELERATE = PathInterpolator(0.05f, 0.7f, 0.1f, 1f)
+        private val STANDARD = PathInterpolator(0.2f, 0f, 0f, 1f)
     }
 }

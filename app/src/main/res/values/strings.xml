@@ -351,8 +351,8 @@
     <string name="nfc_payment_error_nfc_comm">Tap lost — hold the card steady and try again</string>
     <string name="nfc_payment_error_satocash">Card couldn\'t be read: %1$s (Code: 0x%2$04X)</string>
     <string name="nfc_payment_error_unexpected">Something went wrong. Try again — no funds were transferred.</string>
-    <string name="nfc_payment_hint_keep_close">Keep phone close</string>
-    <string name="nfc_payment_hint_processing">Processing payment...\nYou can lift your phone</string>
+    <string name="nfc_payment_hint_keep_close">Hold phone here</string>
+    <string name="nfc_payment_hint_processing">You can lift your phone</string>
 
     
     <string name="common_ok">OK</string>

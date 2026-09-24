@@ -78,6 +78,7 @@
     <string name="payment_failure_error_background_description">Indicador de error</string>
     <string name="payment_failure_error_icon_description">Pago no recibido</string>
     <string name="payment_failure_error_no_pending">No hay ningún pago pendiente para reintentar</string>
+    <string name="payment_failure_reassurance">No se transfirieron fondos: puedes volver a intentarlo con seguridad.</string>
     <string name="onboarding_welcome_tagline">Acepta pagos en Bitcoin al instante y sin comisiones.</string>
     <string name="onboarding_welcome_message">Acepta pagos en Bitcoin al instante y sin comisiones usando la tecnología Cashu ecash.</string>
     <string name="onboarding_terms_text">Al continuar, aceptas nuestros <annotation id="terms">Términos de servicio</annotation> y <annotation id="privacy">Política de privacidad</annotation>
@@ -249,8 +250,8 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="nfc_payment_error_nfc_comm">Error de comunicación NFC: %1$s</string>
     <string name="nfc_payment_error_satocash">Error de tarjeta Satocash: %1$s (SW: 0x%2$04X)</string>
     <string name="nfc_payment_error_unexpected">Se produjo un error inesperado: %1$s</string>
-    <string name="nfc_payment_hint_keep_close">Mantén el teléfono cerca</string>
-    <string name="nfc_payment_hint_processing">Procesando pago...\nPuedes levantar tu teléfono</string>
+    <string name="nfc_payment_hint_keep_close">Mantén el teléfono aquí</string>
+    <string name="nfc_payment_hint_processing">Puedes retirar tu teléfono</string>
     <string name="common_ok">Aceptar</string>
     <string name="common_or">o</string>
     <string name="withdraw_lightning_toolbar_back">Atrás</string>
