@@ -7,26 +7,40 @@
     android:orientation="vertical"
     android:paddingBottom="@dimen/space_2xl">
 
-    <com.google.android.material.bottomsheet.BottomSheetDragHandleView
+    <!-- Header: close ✕, centred title and Reset, matching the app's other sheets -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="@dimen/top_bar_height"
+        android:paddingHorizontal="@dimen/space_xs">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="@dimen/space_xl"
-        android:paddingEnd="@dimen/space_s">
+        <ImageButton
+            android:id="@+id/filter_close_button"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/common_close"
+            android:padding="@dimen/space_m"
+            android:src="@drawable/ic_close"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/color_text_secondary" />
 
         <TextView
-            style="@style/Text.Subtitle"
+            style="@style/Text.Title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:accessibilityHeading="true"
-            tools:targetApi="p"
-            android:text="@string/history_filter_button" />
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:paddingHorizontal="@dimen/space_3xl"
+            android:text="@string/history_filter_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:targetApi="p" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/filter_reset_button"
@@ -35,15 +49,23 @@
             android:layout_height="48dp"
             android:text="@string/history_filter_reset"
             android:textAppearance="@style/TextAppearance.Numo.Chip"
-            android:textColor="@color/color_text_secondary" />
-    </LinearLayout>
+            android:textColor="@color/color_text_secondary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/color_divider" />
 
     <TextView
         style="@style/Text.RowTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/space_xl"
-        android:layout_marginTop="@dimen/space_m"
+        android:layout_marginTop="@dimen/space_l"
         android:text="@string/history_filter_status"
         android:textColor="@color/color_text_secondary" />
 

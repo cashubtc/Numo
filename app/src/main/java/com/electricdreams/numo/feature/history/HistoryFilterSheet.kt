@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import com.electricdreams.numo.R
 import com.electricdreams.numo.databinding.SheetHistoryFilterBinding
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -69,8 +71,20 @@ class HistoryFilterSheet : BottomSheetDialogFragment() {
         b.chipDateCustom.setOnClickListener { host?.pickCustomDateRange() }
 
         b.filterResetButton.setOnClickListener { host?.applyHistoryFilter(HistoryFilter()) }
+        b.filterCloseButton.setOnClickListener { dismiss() }
 
         host?.let { render(it.historyFilter) }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // Same dismissal as the app's other sheets: opens fully, one swipe down closes it
+        (dialog as? BottomSheetDialog)?.behavior?.apply {
+            isFitToContents = true
+            skipCollapsed = true
+            isDraggable = true
+            state = BottomSheetBehavior.STATE_EXPANDED
+        }
     }
 
     /** Reflects [filter] in the chips; also used to revert "Custom…" when the picker is cancelled. */
