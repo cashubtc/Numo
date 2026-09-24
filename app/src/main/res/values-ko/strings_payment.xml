@@ -4,4 +4,14 @@
     <string name="payment_toast_hce_not_available">이 기기에서는 호스트 카드 에뮬레이션을 사용할 수 없습니다</string>
     <string name="payment_toast_error_ndef_setup">NDEF 결제 설정 오류: %1$s</string>
     <string name="payment_toast_failed_create_request">결제 요청 생성 실패</string>
+
+    <!-- Payment: human-readable failure reasons (see PaymentErrorMessages) -->
+    <string name="payment_error_nfc_connection_lost">휴대전화를 너무 빨리 뗐습니다. 진동이 울릴 때까지 가까이 대고 있으세요.</string>
+    <string name="payment_error_invoice_expired">이 결제 요청이 만료되었습니다.</string>
+    <string name="payment_error_network">서버에 연결할 수 없습니다. 인터넷 연결을 확인하세요.</string>
+    <string name="payment_error_unknown_mint">이 지갑은 허용되지 않은 Mint를 사용합니다. 설정 › Mints에서 허용할 수 있습니다.</string>
+    <string name="payment_error_wrong_unit">고객의 지갑이 다른 통화를 보냈습니다.</string>
+    <string name="payment_error_already_spent">이미 사용된 결제입니다.</string>
+    <string name="payment_error_timeout">결제 시간이 너무 오래 걸렸습니다.</string>
+    <string name="payment_error_unknown">문제가 발생했습니다.</string>
 </resources>

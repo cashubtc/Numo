@@ -41,6 +41,8 @@ import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.feature.tips.TipSelectionActivity
 import com.electricdreams.numo.ndef.CashuPaymentHelper
 import com.electricdreams.numo.ndef.NdefHostCardEmulationService
+import com.electricdreams.numo.payment.PaymentErrorMessages
+import com.electricdreams.numo.payment.PaymentErrorReason
 import com.electricdreams.numo.payment.LightningMintHandler
 import com.electricdreams.numo.payment.NostrPaymentHandler
 import com.electricdreams.numo.payment.PaymentIntentFactory
@@ -1385,7 +1387,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
                             if (failedInMiddleOfTransaction) {
                                 Log.e(TAG, "NFC connection lost while writing data - failing payment")
-                                handlePaymentError(getString(R.string.payment_failure_button_try_again))
+                                handlePaymentError(PaymentErrorMessages.RAW_NFC_CONNECTION_LOST)
                             } else {
                                 Log.d(TAG, "NFC connection stopped without writing data. Returning to payment request screen.")
                                 hideNfcAnimationOverlay()
@@ -1549,8 +1551,9 @@ class PaymentRequestActivity : AppCompatActivity() {
         Log.e(TAG, "Payment error: $errorMessage")
         cancelNfcSafetyTimeout()
 
+        val reason = PaymentErrorMessages.reasonFor(errorMessage)
         statusText.visibility = View.VISIBLE
-        statusText.text = getString(R.string.payment_request_status_failed, errorMessage)
+        statusText.text = getString(R.string.payment_request_status_failed, getString(reason.messageRes))
         setResult(Activity.RESULT_CANCELED)
 
         // ALWAYS render the native failure overlay (the ALL RED screen) so that failure paths stay consistent,
@@ -1567,7 +1570,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             applyFullscreenForAnimationOverlay()
         }
 
-        showNfcAnimationError(errorMessage)
+        showNfcAnimationError(reason)
     }
 
     private fun cancelPayment() {
@@ -1889,7 +1892,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 return@Runnable
             }
             Log.e(TAG, "NFC safety timeout triggered - payment did not reach terminal state")
-            handlePaymentError("Payment failed. Please try again.")
+            handlePaymentError(PaymentErrorMessages.RAW_NFC_TIMEOUT)
         }
 
         nfcTimeoutHandler.postDelayed(nfcAnimationTimeoutRunnable!!, NFC_READ_TIMEOUT_MS)
@@ -1938,7 +1941,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         vibrator?.vibrateCompat(longArrayOf(0, 50, 100, 50), -1)
     }
 
-    private fun showNfcAnimationError(message: String) {
+    private fun showNfcAnimationError(reason: PaymentErrorReason) {
         if (nfcAnimationContainer.visibility != View.VISIBLE) return
 
         animationResultLabelText.animate().cancel()
@@ -1953,7 +1956,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         animationResultLabelText.maxLines = 2
         animationResultAmountText.text = ""
         animationResultLabelText.text = getString(R.string.payment_failure_title)
-        nfcAnimationView.showError(message)
+        nfcAnimationView.showError(getString(reason.messageRes))
     }
 
     private fun onNfcAnimationResultDisplayed(success: Boolean) {

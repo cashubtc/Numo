@@ -1,6 +1,7 @@
 package com.electricdreams.numo.payment
 
 import android.os.Handler
+import android.util.Log
 import android.os.Looper
 import android.widget.Toast
 import android.content.Intent
@@ -84,8 +85,10 @@ class PaymentResultHandler(
         mainHandler.post {
             onComplete()
 
-            // Brief, inline feedback for context
-            Toast.makeText(activity, activity.getString(R.string.payment_toast_error_payment, message), Toast.LENGTH_LONG).show()
+            // Brief, inline feedback for context; the raw message is for logs only
+            Log.e(TAG, "Payment error: $message")
+            val userMessage = PaymentErrorMessages.toUserMessage(activity, message)
+            Toast.makeText(activity, activity.getString(R.string.payment_toast_error_payment, userMessage), Toast.LENGTH_LONG).show()
 
             // Global failure screen with explicit recovery actions
             val intent = Intent(activity, PaymentFailureActivity::class.java)
@@ -102,5 +105,9 @@ class PaymentResultHandler(
         }
     } catch (_: Exception) { 
         null 
+    }
+
+    companion object {
+        private const val TAG = "PaymentResultHandler"
     }
 }

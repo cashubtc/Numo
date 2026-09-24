@@ -4,4 +4,14 @@
     <string name="payment_toast_failed_create_request">Failed to create payment request</string>
     <string name="payment_toast_error_ndef_setup">Error setting up NDEF payment: %1$s</string>
     <string name="payment_toast_error_payment">Payment error: %1$s</string>
+
+    <!-- Payment: human-readable failure reasons (see PaymentErrorMessages) -->
+    <string name="payment_error_nfc_connection_lost">Phone moved away too soon. Hold it close until it vibrates.</string>
+    <string name="payment_error_invoice_expired">This payment request expired.</string>
+    <string name="payment_error_network">Couldn\'t reach the server. Check your internet connection.</string>
+    <string name="payment_error_unknown_mint">This wallet uses a mint you don\'t accept. You can allow it in Settings › Mints.</string>
+    <string name="payment_error_wrong_unit">The customer\'s wallet sent a different currency.</string>
+    <string name="payment_error_already_spent">This payment was already used.</string>
+    <string name="payment_error_timeout">The payment took too long.</string>
+    <string name="payment_error_unknown">Something went wrong.</string>
 </resources>

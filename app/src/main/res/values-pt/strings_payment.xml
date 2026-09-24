@@ -4,4 +4,14 @@
     <string name="payment_toast_hce_not_available">Emulação de Cartão Host não disponível neste dispositivo</string>
     <string name="payment_toast_error_ndef_setup">Erro ao configurar pagamento NDEF: %1$s</string>
     <string name="payment_toast_failed_create_request">Falha ao criar solicitação de pagamento</string>
+
+    <!-- Payment: human-readable failure reasons (see PaymentErrorMessages) -->
+    <string name="payment_error_nfc_connection_lost">O telefone foi afastado cedo demais. Mantenha-o próximo até vibrar.</string>
+    <string name="payment_error_invoice_expired">Esta solicitação de pagamento expirou.</string>
+    <string name="payment_error_network">Não foi possível conectar ao servidor. Verifique sua conexão com a internet.</string>
+    <string name="payment_error_unknown_mint">Esta carteira usa uma mint que você não aceita. Você pode permiti-la em Configurações › Mints.</string>
+    <string name="payment_error_wrong_unit">A carteira do cliente enviou outra moeda.</string>
+    <string name="payment_error_already_spent">Este pagamento já foi usado.</string>
+    <string name="payment_error_timeout">O pagamento demorou demais.</string>
+    <string name="payment_error_unknown">Algo deu errado.</string>
 </resources>

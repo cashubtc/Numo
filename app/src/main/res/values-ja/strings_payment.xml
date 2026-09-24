@@ -4,4 +4,14 @@
     <string name="payment_toast_hce_not_available">このデバイスではホストカードエミュレーションは利用できません</string>
     <string name="payment_toast_error_ndef_setup">NDEF支払いのセットアップ中にエラーが発生しました: %1$s</string>
     <string name="payment_toast_failed_create_request">支払いリクエストの作成に失敗しました</string>
+
+    <!-- Payment: human-readable failure reasons (see PaymentErrorMessages) -->
+    <string name="payment_error_nfc_connection_lost">スマートフォンが早く離れすぎました。振動するまで近づけたままにしてください。</string>
+    <string name="payment_error_invoice_expired">この支払いリクエストは期限切れです。</string>
+    <string name="payment_error_network">サーバーに接続できませんでした。インターネット接続を確認してください。</string>
+    <string name="payment_error_unknown_mint">このウォレットは許可されていないMintを使用しています。設定 › Mintsで許可できます。</string>
+    <string name="payment_error_wrong_unit">お客様のウォレットから別の通貨が送信されました。</string>
+    <string name="payment_error_already_spent">この支払いはすでに使用されています。</string>
+    <string name="payment_error_timeout">支払いに時間がかかりすぎました。</string>
+    <string name="payment_error_unknown">問題が発生しました。</string>
 </resources>
