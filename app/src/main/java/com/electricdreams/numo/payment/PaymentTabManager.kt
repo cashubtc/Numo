@@ -1,31 +1,25 @@
 package com.electricdreams.numo.payment
 
-import android.animation.LayoutTransition
-import android.content.res.Resources
+import android.os.Build
+import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
-import com.electricdreams.numo.R
+import androidx.transition.TransitionManager
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.button.MaterialButtonToggleGroup
+import com.google.android.material.transition.MaterialFadeThrough
 
 /**
  * Manages the payment method tab UI (Unified vs Cashu vs Lightning).
  *
- * Handles visual state switching between tabs and visibility of QR containers.
+ * The tabs are a [MaterialButtonToggleGroup], which owns the checked styling; this class maps
+ * the checked button to a [PaymentTab] and swaps the visible QR container.
  */
 class PaymentTabManager(
-    private val unifiedTab: LinearLayout,
-    private val cashuTab: LinearLayout,
-    private val lightningTab: LinearLayout,
-    
-    private val unifiedTabText: TextView,
-    private val cashuTabText: TextView,
-    private val lightningTabText: TextView,
-
-    private val unifiedTabIcon: TextView,
-    private val cashuTabIcon: ImageView,
-    private val lightningTabIcon: ImageView,
+    private val toggleGroup: MaterialButtonToggleGroup,
+    private val unifiedTab: MaterialButton,
+    private val cashuTab: MaterialButton,
+    private val lightningTab: MaterialButton,
 
     private val unifiedQrContainer: View,
     private val cashuQrContainer: View,
@@ -36,10 +30,7 @@ class PaymentTabManager(
     private val lightningLoadingSpinner: View,
     private val cashuLoadingSpinner: View,
     private val cashuQrImageView: View,
-    private val lightningQrImageView: View,
-    
-    private val resources: Resources,
-    private val theme: Resources.Theme
+    private val lightningQrImageView: View
 ) {
     enum class PaymentTab {
         UNIFIED, CASHU, LIGHTNING
@@ -58,17 +49,11 @@ class PaymentTabManager(
     private var currentTab: PaymentTab? = null
 
     /**
-     * Set up tab click listeners.
+     * Set up tab selection and long-press listeners.
      */
     fun setup(listener: TabSelectionListener) {
         this.listener = listener
 
-        // Enable layout transitions for smooth text appearance/disappearance
-        val container = unifiedTab.parent as? ViewGroup
-        container?.layoutTransition = LayoutTransition().apply {
-            enableTransitionType(LayoutTransition.CHANGING)
-        }
-        
         // Setup long click listeners to change default payment method
         unifiedTab.setOnLongClickListener {
             setDefaultTab(PaymentTab.UNIFIED)
@@ -89,9 +74,26 @@ class PaymentTabManager(
         // Default: show the default payment method
         selectTab(DefaultPaymentMethodManager.getInstance(unifiedTab.context).getDefaultPaymentMethod())
 
-        unifiedTab.setOnClickListener { selectTab(PaymentTab.UNIFIED) }
-        cashuTab.setOnClickListener { selectTab(PaymentTab.CASHU) }
-        lightningTab.setOnClickListener { selectTab(PaymentTab.LIGHTNING) }
+        toggleGroup.addOnButtonCheckedListener { group, checkedId, isChecked ->
+            if (!isChecked) return@addOnButtonCheckedListener
+            val tab = when (checkedId) {
+                unifiedTab.id -> PaymentTab.UNIFIED
+                cashuTab.id -> PaymentTab.CASHU
+                lightningTab.id -> PaymentTab.LIGHTNING
+                else -> return@addOnButtonCheckedListener
+            }
+            // selectTab() updates currentTab before checking, so programmatic selection lands here
+            // with an unchanged tab; only a user tap gets the haptic tick.
+            if (tab == currentTab) return@addOnButtonCheckedListener
+            group.performHapticFeedback(
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    HapticFeedbackConstants.SEGMENT_TICK
+                } else {
+                    HapticFeedbackConstants.CLOCK_TICK
+                }
+            )
+            selectTab(tab)
+        }
     }
     
     private fun setDefaultTab(tab: PaymentTab) {
@@ -106,108 +108,66 @@ class PaymentTabManager(
     }
     
     fun reorderTabs() {
-        val container = unifiedTab.parent as? ViewGroup ?: return
         val defaultTab = DefaultPaymentMethodManager.getInstance(unifiedTab.context).getDefaultPaymentMethod()
         
-        container.removeView(unifiedTab)
-        container.removeView(cashuTab)
-        container.removeView(lightningTab)
+        toggleGroup.removeView(unifiedTab)
+        toggleGroup.removeView(cashuTab)
+        toggleGroup.removeView(lightningTab)
         
         when (defaultTab) {
             PaymentTab.UNIFIED -> {
-                container.addView(unifiedTab)
-                container.addView(cashuTab)
-                container.addView(lightningTab)
+                toggleGroup.addView(unifiedTab)
+                toggleGroup.addView(cashuTab)
+                toggleGroup.addView(lightningTab)
             }
             PaymentTab.CASHU -> {
-                container.addView(cashuTab)
-                container.addView(unifiedTab)
-                container.addView(lightningTab)
+                toggleGroup.addView(cashuTab)
+                toggleGroup.addView(unifiedTab)
+                toggleGroup.addView(lightningTab)
             }
             PaymentTab.LIGHTNING -> {
-                container.addView(lightningTab)
-                container.addView(unifiedTab)
-                container.addView(cashuTab)
+                toggleGroup.addView(lightningTab)
+                toggleGroup.addView(unifiedTab)
+                toggleGroup.addView(cashuTab)
             }
         }
     }
 
     fun selectTab(tab: PaymentTab) {
         if (currentTab == tab) return
+        val isInitialSelection = currentTab == null
         currentTab = tab
 
-        val primaryBg = R.drawable.bg_button_primary_green
-        val transparentBg = android.R.color.transparent
-        val whiteColor = resources.getColor(R.color.color_bg_white, theme)
-        val secondaryColor = resources.getColor(R.color.color_text_secondary, theme)
+        toggleGroup.check(buttonFor(tab).id)
 
-        // Reset all
-        unifiedTab.setBackgroundResource(transparentBg)
-        cashuTab.setBackgroundResource(transparentBg)
-        lightningTab.setBackgroundResource(transparentBg)
-        
-        unifiedTabText.visibility = View.GONE
-        cashuTabText.visibility = View.GONE
-        lightningTabText.visibility = View.GONE
-        
-        unifiedTabIcon.visibility = View.VISIBLE
-        cashuTabIcon.visibility = View.VISIBLE
-        lightningTabIcon.visibility = View.VISIBLE
-
-        unifiedTabText.setTextColor(secondaryColor)
-        cashuTabText.setTextColor(secondaryColor)
-        lightningTabText.setTextColor(secondaryColor)
-
-        unifiedTabIcon.setTextColor(secondaryColor)
-        cashuTabIcon.setColorFilter(secondaryColor)
-        lightningTabIcon.setColorFilter(secondaryColor)
-
-        unifiedQrContainer.visibility = View.INVISIBLE
-        cashuQrContainer.visibility = View.INVISIBLE
-        lightningQrContainer.visibility = View.INVISIBLE
-
-        // Set selected
-        when (tab) {
-            PaymentTab.UNIFIED -> {
-                unifiedTab.setBackgroundResource(primaryBg)
-                unifiedTabText.visibility = View.VISIBLE
-                unifiedTabText.setTextColor(whiteColor)
-                unifiedTabIcon.visibility = View.GONE
-                
-                unifiedQrContainer.visibility = View.VISIBLE
-            }
-            PaymentTab.CASHU -> {
-                cashuTab.setBackgroundResource(primaryBg)
-                cashuTabText.visibility = View.VISIBLE
-                cashuTabText.setTextColor(whiteColor)
-                cashuTabIcon.visibility = View.GONE
-                
-                cashuQrContainer.visibility = View.VISIBLE
-            }
-            PaymentTab.LIGHTNING -> {
-                lightningTab.setBackgroundResource(primaryBg)
-                lightningTabText.visibility = View.VISIBLE
-                lightningTabText.setTextColor(whiteColor)
-                lightningTabIcon.visibility = View.GONE
-                
-                lightningQrContainer.visibility = View.VISIBLE
-            }
+        // Fade through between QR codes on a switch; the first one appears without motion
+        val qrCard = unifiedQrContainer.parent as? ViewGroup
+        if (!isInitialSelection && qrCard != null) {
+            TransitionManager.beginDelayedTransition(qrCard, MaterialFadeThrough())
         }
 
+        unifiedQrContainer.visibility = if (tab == PaymentTab.UNIFIED) View.VISIBLE else View.INVISIBLE
+        cashuQrContainer.visibility = if (tab == PaymentTab.CASHU) View.VISIBLE else View.INVISIBLE
+        lightningQrContainer.visibility = if (tab == PaymentTab.LIGHTNING) View.VISIBLE else View.INVISIBLE
+
         listener?.onTabSelected(tab)
+    }
+
+    private fun buttonFor(tab: PaymentTab): MaterialButton = when (tab) {
+        PaymentTab.UNIFIED -> unifiedTab
+        PaymentTab.CASHU -> cashuTab
+        PaymentTab.LIGHTNING -> lightningTab
     }
 
     fun getCurrentTab(): PaymentTab = currentTab ?: PaymentTab.UNIFIED
 
     /**
      * Disable a tab (e.g. when BTCPay returns no cashuPR, disable [Tab.CASHU]).
-     * Greys it out, removes its click listener, and auto-selects the other tab.
+     * Greys it out via the button's disabled state and auto-selects the other tab.
      */
     fun disableTab(tab: Tab) {
         val view = if (tab == Tab.CASHU) cashuTab else lightningTab
         view.isEnabled = false
-        view.alpha = 0.35f
-        view.setOnClickListener(null)
         if (tab == Tab.CASHU) selectTab(PaymentTab.LIGHTNING) else selectTab(PaymentTab.CASHU)
     }
 

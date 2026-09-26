@@ -980,6 +980,8 @@
     <string name="pin_reset_paste_clipboard">Paste from Clipboard</string>
     <string name="pin_reset_button">Reset PIN</string>
     <string name="payment_request_tab_unified">Unified</string>
+    <string name="payment_request_tab_cashu" translatable="false">Cashu</string>
+    <string name="payment_request_tab_lightning" translatable="false">Lightning</string>
     <string name="payment_request_default_method_set">%1$s set as default payment method</string>
     <string name="payment_request_default_description">Payment of %1$d sats</string>
     <string name="payment_request_lightning_description">Numo POS payment of %1$d sats</string>

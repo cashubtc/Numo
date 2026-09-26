@@ -287,6 +287,29 @@
         <item name="elevation">0dp</item>
     </style>
 
+    <!-- M3 Expressive connected toggle button (payment method switcher) in the app's
+         black/white palette. Theme.Numo is plain Material 3, so the Expressive spring for
+         the checked-corner morph is set here too. -->
+    <style name="Widget.Numo.Button.ConnectedToggle" parent="Widget.Material3Expressive.Button.TonalButton">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Numo.Button.ConnectedToggle</item>
+        <item name="materialSizeOverlay">@style/SizeOverlay.Numo.Button.ConnectedToggle</item>
+    </style>
+
+    <!-- Medium height and label, but narrower side padding: three equal segments leave too little
+         room for "Lightning" (and longer translations) inside Medium's 24dp padding. -->
+    <style name="SizeOverlay.Numo.Button.ConnectedToggle" parent="SizeOverlay.Material3Expressive.Button.Medium">
+        <item name="containerPaddingStart">@dimen/space_s</item>
+        <item name="containerPaddingEnd">@dimen/space_s</item>
+    </style>
+
+    <style name="ThemeOverlay.Numo.Button.ConnectedToggle" parent="ThemeOverlay.Material3Expressive.Button.Tonal">
+        <item name="colorContainerChecked">@color/color_brand_foreground</item>
+        <item name="colorContainerUnchecked">@color/color_bg_secondary</item>
+        <item name="colorOnContainerChecked">@color/color_bg_white</item>
+        <item name="colorOnContainerUnchecked">@color/color_text_primary</item>
+        <item name="motionSpringFastSpatial">@style/Motion.Material3.Spring.Expressive.Fast.Spatial</item>
+    </style>
+
     <!-- Tertiary: borderless text button with consistent sizing -->
     <style name="Widget.Numo.Button.Tertiary" parent="Widget.Material3.Button.TextButton">
         <item name="android:elevation">0dp</item>
