@@ -3,6 +3,8 @@ package com.electricdreams.numo.feature.insights
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.view.ContextThemeWrapper
 import android.view.View
 import android.widget.LinearLayout
@@ -74,11 +76,18 @@ class InsightsRowRenderTest {
     private fun at(day: Int, hour: Int, minute: Int): Date =
         Calendar.getInstance().apply { set(2026, Calendar.SEPTEMBER, day, hour, minute, 0) }.time
 
-    /** The sample photo, copied to a file as item pictures are stored on the device */
+    /**
+     * A stand-in item photo, drawn here rather than shipped as a file, and saved as a JPEG the
+     * way item pictures are stored on the device: a product on a white ground.
+     */
     private fun photo(): String {
-        val file = File.createTempFile("coffee", ".jpg")
-        val input = requireNotNull(javaClass.classLoader?.getResourceAsStream("insights/coffee.jpg"))
-        input.use { source -> file.outputStream().use { source.copyTo(it) } }
+        val bitmap = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888)
+        Canvas(bitmap).apply {
+            drawColor(Color.WHITE)
+            drawCircle(200f, 210f, 140f, Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.rgb(196, 112, 64) })
+        }
+        val file = File.createTempFile("item", ".jpg")
+        file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 85, it) }
         return file.absolutePath
     }
 
