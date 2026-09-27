@@ -498,7 +498,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
     private fun loadHistory() {
         loadHistoryJob?.cancel()
         loadHistoryJob = lifecycleScope.launch {
-            val (filteredList, titles, activeFilterCount) = withContext(ioDispatcher) {
+            val (filteredList, baskets, activeFilterCount) = withContext(ioDispatcher) {
                 // Stale BTCPay pending entries (no resume data) will never be resolved by polling
                 // if the app was killed mid-flow — expire them now so they don't sit as "Pending" forever.
                 expireStaleBtcPayEntries()
@@ -518,19 +518,17 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     .filter { filter.matches(it, now) }
                     .sortedByDescending { it.date.time }
 
-                // Each sale named as Sales names it: what was sold, or a quick charge
+                // What each sale sold, so its row reads and looks as it does in Sales
                 val basketManager = SavedBasketManager.getInstance(appContext)
-                val titles = list.filterIsInstance<PaymentHistoryEntry>().associate { entry ->
-                    entry.id to SaleSummaries.title(
-                        appContext,
-                        SaleSummaries.basket(entry, basketManager, imagesByItemId = emptyMap()),
-                    )
-                }
+                val images = SaleSummaries.imagesByItemId(appContext)
+                val baskets = list.filterIsInstance<PaymentHistoryEntry>().mapNotNull { entry ->
+                    SaleSummaries.basket(entry, basketManager, images)?.let { entry.id to it }
+                }.toMap()
 
-                Triple(list, titles, filter.activeCount)
+                Triple(list, baskets, filter.activeCount)
             }
 
-            adapter.setEntries(filteredList, titles)
+            adapter.setEntries(filteredList, baskets)
 
             val isEmptyList = filteredList.isEmpty()
             binding.emptyView.root.visibility = if (isEmptyList) View.VISIBLE else View.GONE

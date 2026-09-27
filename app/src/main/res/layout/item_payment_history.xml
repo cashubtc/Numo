@@ -13,19 +13,21 @@
     android:paddingHorizontal="@dimen/space_xl"
     android:paddingVertical="@dimen/space_l">
 
-    <!-- Icon container with status badge overlay -->
+    <!-- Leading visual, as in Sales: the items' photos for a basket sale, the quick-charge glyph
+         for a keypad sale, an arrow for a withdrawal. The status badge sits over its corner. -->
     <FrameLayout
         android:id="@+id/icon_container"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
+        android:layout_width="@dimen/icon_size_medium"
+        android:layout_height="@dimen/icon_size_medium"
         android:clipChildren="false"
         android:clipToPadding="false"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Main direction icon circle -->
+        <!-- Withdrawal arrow -->
         <FrameLayout
+            android:id="@+id/direction_icon"
             android:layout_width="@dimen/icon_size_medium"
             android:layout_height="@dimen/icon_size_medium"
             android:layout_gravity="center"
@@ -38,9 +40,27 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_arrow_down_receive"
+                android:src="@drawable/ic_arrow_up_send"
                 app:tint="@color/color_text_primary" />
         </FrameLayout>
+
+        <!-- A basket sale's items; the stack draws up into the row's top padding -->
+        <com.electricdreams.numo.feature.insights.StackedAvatarsView
+            android:id="@+id/avatars"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <!-- A keypad sale -->
+        <ImageView
+            android:id="@+id/quick_glyph"
+            android:layout_width="@dimen/icon_size_medium"
+            android:layout_height="@dimen/icon_size_medium"
+            android:importantForAccessibility="no"
+            android:padding="@dimen/space_s"
+            android:src="@drawable/ic_quick_charge"
+            android:visibility="gone"
+            app:tint="@color/color_text_tertiary" />
 
         <!-- Status badge (top-start corner) -->
         <FrameLayout
@@ -49,8 +69,8 @@
             android:layout_width="22dp"
             android:layout_height="22dp"
             android:layout_gravity="top|start"
-            android:layout_marginStart="-4dp"
-            android:layout_marginTop="-4dp"
+            android:layout_marginStart="-6dp"
+            android:layout_marginTop="-6dp"
             android:background="@drawable/bg_status_badge_green">
 
             <ImageView

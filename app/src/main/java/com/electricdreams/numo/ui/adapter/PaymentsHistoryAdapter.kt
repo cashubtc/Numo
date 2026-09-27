@@ -16,6 +16,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.data.model.HistoryEntry
 import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.feature.insights.BasketSummary
+import com.electricdreams.numo.feature.insights.SaleSummaries
+import com.electricdreams.numo.feature.insights.StackedAvatarsView
 import com.electricdreams.numo.ui.util.TransactionDates
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -42,8 +45,8 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         data class Transaction(
             val entry: HistoryEntry,
             val originalPosition: Int,
-            /** What was sold, as Sales names it; null for a withdrawal */
-            val title: String?,
+            /** What was sold; null for a quick charge or a withdrawal */
+            val basket: BasketSummary?,
         ) : ListItem()
     }
 
@@ -62,10 +65,10 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     /**
-     * Groups entries by month and builds a flat list of headers + items. [titles] names each
-     * sale by payment id, the way the Sales list does.
+     * Groups entries by month and builds a flat list of headers + items. [baskets] holds what
+     * each sale sold, by payment id, so its row reads and looks like its row in Sales.
      */
-    fun setEntries(newEntries: List<HistoryEntry>, titles: Map<String, String> = emptyMap()) {
+    fun setEntries(newEntries: List<HistoryEntry>, baskets: Map<String, BasketSummary> = emptyMap()) {
         val oldItems = ArrayList(items)
 
         val newItems = mutableListOf<ListItem>()
@@ -87,7 +90,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 lastMonthKey = monthKey
             }
 
-            newItems.add(ListItem.Transaction(entry, index, titles[entry.id]))
+            newItems.add(ListItem.Transaction(entry, index, baskets[entry.id]))
         }
 
         val diffResult = DiffUtil.calculateDiff(ListItemDiffCallback(oldItems, newItems))
@@ -123,7 +126,7 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     old.entry.amount == new.entry.amount &&
                     old.entry.status == new.entry.status &&
                     old.entry.label == new.entry.label &&
-                    old.title == new.title &&
+                    old.basket == new.basket &&
                     old.originalPosition == new.originalPosition
                 else -> false
             }
@@ -176,7 +179,9 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         val titleText: TextView = view.findViewById(R.id.title_text)
         val subtitleText: TextView = view.findViewById(R.id.subtitle_text)
         val statusText: TextView = view.findViewById(R.id.status_text)
-        val icon: ImageView = view.findViewById(R.id.icon)
+        val directionIcon: View = view.findViewById(R.id.direction_icon)
+        val avatars: StackedAvatarsView = view.findViewById(R.id.avatars)
+        val quickGlyph: ImageView = view.findViewById(R.id.quick_glyph)
         val statusBadge: FrameLayout = view.findViewById(R.id.status_badge)
         val statusBadgeIcon: ImageView = view.findViewById(R.id.status_badge_icon)
 
@@ -222,18 +227,22 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             // ── Date ──
             dateText.text = TransactionDates.row(context, entry.date)
 
-            // ── Title: what was sold, as Sales names it; the status sits under the amount ──
-            titleText.text = when {
-                !isIncoming -> context.getString(R.string.history_row_title_withdrawal)
-                else -> item.title ?: context.getString(R.string.insights_quick_charge)
+            // ── Title and leading visual, as the sale's row in Sales: its items' photos, or the
+            //    quick-charge glyph; a withdrawal keeps its arrow. The status sits under the amount.
+            val basket = item.basket
+            titleText.text = if (isIncoming) {
+                SaleSummaries.title(context, basket)
+            } else {
+                context.getString(R.string.history_row_title_withdrawal)
             }
-
-            // ── Direction icon ──
-            icon.setImageResource(
-                if (isIncoming) R.drawable.ic_arrow_down_receive
-                else R.drawable.ic_arrow_up_send
-            )
-            icon.setColorFilter(context.getColor(R.color.color_text_primary))
+            directionIcon.visibility = if (isIncoming) View.GONE else View.VISIBLE
+            quickGlyph.visibility = if (isIncoming && basket == null) View.VISIBLE else View.GONE
+            if (isIncoming && basket != null) {
+                avatars.setItems(basket.items)
+                avatars.visibility = View.VISIBLE
+            } else {
+                avatars.visibility = View.GONE
+            }
 
             // ── Status badge: only while something is left to do or went wrong ──
             when {
