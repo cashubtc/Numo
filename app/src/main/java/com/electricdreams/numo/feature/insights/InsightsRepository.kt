@@ -3,7 +3,6 @@ package com.electricdreams.numo.feature.insights
 import android.content.Context
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
-import com.electricdreams.numo.core.util.ItemManager
 import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import java.text.SimpleDateFormat
@@ -34,54 +33,41 @@ object InsightsRepository {
             .sortedByDescending { it.date.time }
 
         val basketManager = SavedBasketManager.getInstance(context)
-        val imagesByItemId = ItemManager.getInstance(context).getAllItems()
-            .mapNotNull { item ->
-                val id = item.id?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
-                val path = item.imagePath?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
-                id to path
-            }
-            .toMap()
+        val imagesByItemId = SaleSummaries.imagesByItemId(context)
 
-        val perBucketSats = LongArray(7)
-        val perBucketFiat = LongArray(7)
+        val perBucket = Array(7) { SaleValue(0, 0, 0, 0) }
         val perBucketTxCount = IntArray(7)
 
-        var periodTotalSats = 0L
-        var periodTotalFiatMinor = 0L
-
-        val txRows = payments.map { entry ->
+        val values = payments.map { entry ->
+            val value = if (isSatsMode) {
+                valueAtSale(entry, currentCurrencyCode, currentBtcPrice)
+            } else {
+                // A mint's own unit: amounts are already in its minor units, with no sats behind them
+                SaleValue(entry.enteredAmount, entry.enteredAmount, entry.tipAmountSats, entry.tipAmountSats)
+            }
             val idx = buckets.indexOfBucket(entry.date.time)
             perBucketTxCount[idx] += 1
+            perBucket[idx] = perBucket[idx] + value
+            entry to value
+        }
+        val period = values.fold(SaleValue(0, 0, 0, 0)) { sum, (_, value) -> sum + value }
 
-            val (sats, fiatMinor) = if (isSatsMode) {
-                // Sats mode: standard sats-to-fiat calculation
-                val satsVal = entry.amount
-                val fiatVal = satsToFiatMinor(satsVal, currentBtcPrice)
-                Pair(satsVal, fiatVal)
-            } else {
-                // Custom unit mode: use entered custom unit minor units directly
-                val valCents = entry.enteredAmount
-                Pair(valCents, valCents)
-            }
-
-            perBucketSats[idx] += sats
-            perBucketFiat[idx] += fiatMinor
-            periodTotalSats += sats
-            periodTotalFiatMinor += fiatMinor
-
+        val txRows = values.map { (entry, value) ->
             TxRow(
                 id = entry.id,
                 date = entry.date,
-                totalSats = sats,
-                totalFiatMinor = fiatMinor,
-                basket = buildBasketSummary(entry, basketManager, imagesByItemId),
+                totalSats = value.sats,
+                totalFiatMinor = value.fiatMinor,
+                basket = SaleSummaries.basket(entry, basketManager, imagesByItemId),
             )
         }
 
         val filledBuckets = buckets.mapIndexed { idx, scaffold ->
             scaffold.copy(
-                totalSats = perBucketSats[idx],
-                totalFiatMinor = perBucketFiat[idx],
+                totalSats = perBucket[idx].sats,
+                totalFiatMinor = perBucket[idx].fiatMinor,
+                tipSats = perBucket[idx].tipSats,
+                tipFiatMinor = perBucket[idx].tipFiatMinor,
                 transactionCount = perBucketTxCount[idx],
             )
         }
@@ -90,12 +76,49 @@ object InsightsRepository {
             range = range,
             buckets = filledBuckets,
             transactions = txRows,
-            periodTotalSats = periodTotalSats,
-            periodTotalFiatMinor = periodTotalFiatMinor,
+            periodTotalSats = period.sats,
+            periodTotalFiatMinor = period.fiatMinor,
+            periodTipSats = period.tipSats,
+            periodTipFiatMinor = period.tipFiatMinor,
             periodTxCount = txRows.size,
             fiatCurrency = fiatCurrency,
         )
     }
+
+    /**
+     * A sats sale, in [fiatCode], as of when it was paid: what was charged before tip, and the
+     * tip on its own. Past sales keep their value; today's bitcoin price is only the fallback
+     * when the sale didn't record one it can use.
+     */
+    internal fun valueAtSale(
+        entry: PaymentHistoryEntry,
+        fiatCode: String,
+        currentBtcPrice: Double?,
+    ): SaleValue {
+        val saleSats = entry.getBaseAmountSats()
+        val tipSats = entry.tipAmountSats
+        val entryUnit = entry.getEntryUnit()
+        val keyedInThisFiat = entry.enteredAmount > 0 && entryUnit.equals(fiatCode, ignoreCase = true)
+        // A sale keyed in sats recorded the price in the display currency of the day; one keyed
+        // in another fiat recorded that currency's price, which can't value it in this one
+        val priceAtSale = entry.bitcoinPrice?.takeIf {
+            it > 0 && (keyedInThisFiat || entryUnit.equals("sat", ignoreCase = true))
+        }
+        val price = priceAtSale ?: currentBtcPrice
+        return SaleValue(
+            sats = saleSats,
+            fiatMinor = if (keyedInThisFiat) entry.enteredAmount else satsToFiatMinor(saleSats, price),
+            tipSats = tipSats,
+            tipFiatMinor = satsToFiatMinor(tipSats, price),
+        )
+    }
+
+    private operator fun SaleValue.plus(other: SaleValue) = SaleValue(
+        sats = sats + other.sats,
+        fiatMinor = fiatMinor + other.fiatMinor,
+        tipSats = tipSats + other.tipSats,
+        tipFiatMinor = tipFiatMinor + other.tipFiatMinor,
+    )
 
     /**
      * Whether [entry] was received in [baseUnit]. This is the ecash unit, not the currency
@@ -162,54 +185,6 @@ object InsightsRepository {
                 label = label,
             )
         }
-    }
-
-    private fun buildBasketSummary(
-        entry: PaymentHistoryEntry,
-        basketManager: SavedBasketManager,
-        imagesByItemId: Map<String, String>,
-    ): BasketSummary? {
-        val saved = entry.basketId?.let { basketManager.getBasket(it) }
-        if (saved != null && saved.items.isNotEmpty()) {
-            val items = saved.items
-                .filter { it.item.name?.isNotBlank() == true }
-                .groupBy { it.item.name!! }
-                .map { (name, instances) ->
-                    BasketItemSummary(
-                        itemName = name,
-                        itemImagePath = instances.firstNotNullOfOrNull { it.item.imagePath?.takeIf { p -> p.isNotBlank() } },
-                        quantity = instances.sumOf { it.quantity },
-                    )
-                }
-                .sortedByDescending { it.quantity }
-            return BasketSummary(
-                items = items,
-                totalQuantity = items.sumOf { it.quantity },
-                distinctTypes = items.size,
-            )
-        }
-
-        val checkout = entry.getCheckoutBasket()
-        if (checkout != null && checkout.items.isNotEmpty()) {
-            val items = checkout.items
-                .filter { it.name.isNotBlank() }
-                .groupBy { it.name }
-                .map { (name, instances) ->
-                    BasketItemSummary(
-                        itemName = name,
-                        itemImagePath = instances.firstNotNullOfOrNull { imagesByItemId[it.itemId] },
-                        quantity = instances.sumOf { it.quantity },
-                    )
-                }
-                .sortedByDescending { it.quantity }
-            return BasketSummary(
-                items = items,
-                totalQuantity = items.sumOf { it.quantity },
-                distinctTypes = items.size,
-            )
-        }
-
-        return null
     }
 
     private fun List<BucketTotal>.indexOfBucket(timeMillis: Long): Int {

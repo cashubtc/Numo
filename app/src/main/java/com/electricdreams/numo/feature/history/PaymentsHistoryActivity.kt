@@ -28,11 +28,13 @@ import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.util.CurrencyManager
+import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.databinding.ActivityHistoryBinding
 import com.electricdreams.numo.ui.components.EmptyStateHelper
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry
+import com.electricdreams.numo.feature.insights.SaleSummaries
 import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.ui.adapter.PaymentsHistoryAdapter
 import com.google.gson.Gson
@@ -57,8 +59,6 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
     private lateinit var adapter: PaymentsHistoryAdapter
     
     private var balanceReceiver: BroadcastReceiver? = null
-
-    private var currentHistoryList = listOf<HistoryEntry>()
 
     private var loadHistoryJob: kotlinx.coroutines.Job? = null
 
@@ -90,8 +90,8 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
 
         // Setup RecyclerView
         adapter = PaymentsHistoryAdapter().apply {
-            setOnItemClickListener { entry, position ->
-                handleEntryClick(entry, position)
+            setOnItemClickListener { entry, _ ->
+                handleEntryClick(entry)
             }
             setOnItemDeleteListener { entry, position ->
                 handleDeleteClick(entry, position)
@@ -136,14 +136,6 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
         super.onActivityResult(requestCode, resultCode, data)
 
         when (requestCode) {
-            REQUEST_TRANSACTION_DETAIL -> {
-                if (resultCode == RESULT_OK && data != null) {
-                    val positionToDelete = data.getIntExtra("position_to_delete", -1)
-                    if (positionToDelete >= 0 && positionToDelete < currentHistoryList.size) {
-                        deletePaymentFromHistory(currentHistoryList[positionToDelete])
-                    }
-                }
-            }
             REQUEST_RESUME_PAYMENT -> {
                 // Payment resumed - reload history to reflect any changes
                 loadHistory()
@@ -211,13 +203,10 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
         }
     }
 
-    private fun handleEntryClick(entry: HistoryEntry, position: Int) {
+    private fun handleEntryClick(entry: HistoryEntry) {
         when (entry) {
             is PaymentHistoryEntry -> {
                 when {
-                    entry.isExpired() -> {
-                        // Expired payments shouldn't be tappable
-                    }
                     entry.isPending() -> {
                         val activeUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
                         if (!entry.getUnit().equals(activeUnit, ignoreCase = true)) {
@@ -234,15 +223,15 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                                 if (offline) OfflineExplainerActivity.start(this) else checkAndFinalizeSwap(entry)
                             // BTCPay pending entries have no lightning/nostr resume data —
                             // resuming would create a new invoice, so just show details.
-                            entry.lightningQuoteId == null && entry.nostrNprofile == null -> showTransactionDetails(entry, position)
+                            entry.lightningQuoteId == null && entry.nostrNprofile == null -> showTransactionDetails(entry)
                             offline && !canResumeOffline -> OfflineExplainerActivity.start(this)
                             else -> resumePendingPayment(entry)
                         }
                     }
-                    else -> showTransactionDetails(entry, position)
+                    else -> showTransactionDetails(entry)
                 }
             }
-            is WithdrawHistoryEntry -> showTransactionDetails(entry, position)
+            is WithdrawHistoryEntry -> showTransactionDetails(entry)
         }
     }
 
@@ -289,9 +278,9 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
         startActivityForResultCompat(intent, REQUEST_RESUME_PAYMENT)
     }
 
-    private fun showTransactionDetails(entry: HistoryEntry, position: Int) {
-        val intent = PaymentIntentFactory.createTransactionDetailIntent(this, entry, position)
-        startActivityForResultCompat(intent, REQUEST_TRANSACTION_DETAIL)
+    // Details delete by id themselves; onResume reloads the list
+    private fun showTransactionDetails(entry: HistoryEntry) {
+        startActivity(PaymentIntentFactory.createTransactionDetailIntent(this, entry))
     }
 
     private fun openPaymentWithApp(token: String) {
@@ -509,7 +498,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
     private fun loadHistory() {
         loadHistoryJob?.cancel()
         loadHistoryJob = lifecycleScope.launch {
-            val (filteredList, activeFilterCount) = withContext(ioDispatcher) {
+            val (filteredList, titles, activeFilterCount) = withContext(ioDispatcher) {
                 // Stale BTCPay pending entries (no resume data) will never be resolved by polling
                 // if the app was killed mid-flow — expire them now so they don't sit as "Pending" forever.
                 expireStaleBtcPayEntries()
@@ -529,11 +518,19 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     .filter { filter.matches(it, now) }
                     .sortedByDescending { it.date.time }
 
-                list to filter.activeCount
+                // Each sale named as Sales names it: what was sold, or a quick charge
+                val basketManager = SavedBasketManager.getInstance(appContext)
+                val titles = list.filterIsInstance<PaymentHistoryEntry>().associate { entry ->
+                    entry.id to SaleSummaries.title(
+                        appContext,
+                        SaleSummaries.basket(entry, basketManager, imagesByItemId = emptyMap()),
+                    )
+                }
+
+                Triple(list, titles, filter.activeCount)
             }
 
-            currentHistoryList = filteredList
-            adapter.setEntries(currentHistoryList)
+            adapter.setEntries(filteredList, titles)
 
             val isEmptyList = filteredList.isEmpty()
             binding.emptyView.root.visibility = if (isEmptyList) View.VISIBLE else View.GONE
@@ -565,14 +562,8 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
 
     private fun deletePaymentFromHistory(entry: HistoryEntry) {
         if (entry is PaymentHistoryEntry) {
-            val history = getPaymentHistory().toMutableList()
-            val index = history.indexOfFirst { it.id == entry.id }
-            if (index >= 0) {
-                history.removeAt(index)
-                val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
-                loadHistory()
-            }
+            deletePayment(this, entry.id)
+            loadHistory()
         } else if (entry is WithdrawHistoryEntry) {
             AutoWithdrawManager.getInstance(this).deleteHistoryEntry(entry.id)
             loadHistory()
@@ -652,7 +643,6 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
 
         private const val PREFS_NAME = "PaymentHistory"
         private const val KEY_HISTORY = "history"
-        private const val REQUEST_TRANSACTION_DETAIL = 1001
         private const val REQUEST_RESUME_PAYMENT = 1002
         // Pending payments older than this are considered stale regardless of resume data.
         // BTCPay invoices default to 15min; local Lightning quotes also expire. 2h is generous.
@@ -1042,6 +1032,18 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
 
             val prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
             prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
+        }
+
+        /**
+         * Delete the payment with [paymentId] from history, whatever its status.
+         */
+        @JvmStatic
+        fun deletePayment(context: Context, paymentId: String) {
+            val history = getPaymentHistory(context).toMutableList()
+            if (history.removeAll { it.id == paymentId }) {
+                val prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
+            }
         }
 
         /**

@@ -64,6 +64,76 @@ class InsightsRepositoryTest {
     }
 
     @Test
+    fun `a sale keyed in dollars is worth what was charged, whatever bitcoin does after`() {
+        val sale = sale(amount = 10_109, entryUnit = "USD", enteredAmount = 850)
+            .copyWith(bitcoinPrice = 84_079.72)
+
+        // Today's price is far above the sale's; the sale still reads $8.50
+        val value = InsightsRepository.valueAtSale(sale, "USD", currentBtcPrice = 101_600.0)
+
+        assertEquals(850L, value.fiatMinor)
+        assertEquals(10_109L, value.sats)
+    }
+
+    @Test
+    fun `a sale keyed in sats is valued at the price it was paid at`() {
+        val sale = sale(amount = 10_000, entryUnit = "sat", enteredAmount = 10_000)
+            .copyWith(bitcoinPrice = 80_000.0)
+
+        val value = InsightsRepository.valueAtSale(sale, "USD", currentBtcPrice = 120_000.0)
+
+        assertEquals(800L, value.fiatMinor)
+    }
+
+    @Test
+    fun `a sale keyed in another currency falls back to today's price`() {
+        // A euro price can't value the sale in dollars
+        val sale = sale(amount = 10_000, entryUnit = "EUR", enteredAmount = 700)
+            .copyWith(bitcoinPrice = 70_000.0)
+
+        val value = InsightsRepository.valueAtSale(sale, "USD", currentBtcPrice = 100_000.0)
+
+        assertEquals(1_000L, value.fiatMinor)
+    }
+
+    @Test
+    fun `tips are their own total, never part of sales`() {
+        seedHistory(
+            // $8.50 sale plus a 1,000 sat tip, paid at $80,000
+            sale(amount = 11_000, entryUnit = "USD", enteredAmount = 850)
+                .copyWith(bitcoinPrice = 80_000.0, tipAmountSats = 1_000),
+            sale(amount = 5_000, entryUnit = "USD", enteredAmount = 400)
+                .copyWith(bitcoinPrice = 80_000.0),
+        )
+
+        val data = InsightsRepository.compute(context, InsightsRange.DAY)
+
+        assertEquals(2, data.periodTxCount)
+        assertEquals(15_000L, data.periodTotalSats)
+        assertEquals(1_250L, data.periodTotalFiatMinor)
+        assertEquals(1_000L, data.periodTipSats)
+        assertEquals(80L, data.periodTipFiatMinor)
+        assertEquals(1_000L, data.buckets.last().tipSats)
+        assertEquals(setOf(850L, 400L), data.transactions.map { it.totalFiatMinor }.toSet())
+    }
+
+    private fun PaymentHistoryEntry.copyWith(
+        bitcoinPrice: Double?,
+        tipAmountSats: Long = 0,
+    ) = PaymentHistoryEntry(
+        id = id,
+        token = token,
+        amount = amount,
+        date = date,
+        rawUnit = getUnit(),
+        rawEntryUnit = getEntryUnit(),
+        enteredAmount = enteredAmount,
+        bitcoinPrice = bitcoinPrice,
+        rawStatus = status,
+        tipAmountSats = tipAmountSats,
+    )
+
+    @Test
     fun `legacy sat units still count in sats`() {
         assertTrue(InsightsRepository.isInBaseUnit(sale(1, "sat", 1, unit = "sats"), "sat"))
         assertTrue(InsightsRepository.isInBaseUnit(sale(1, "sat", 1, unit = "btc"), "sat"))

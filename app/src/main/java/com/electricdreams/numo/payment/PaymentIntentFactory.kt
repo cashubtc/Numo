@@ -56,17 +56,15 @@ object PaymentIntentFactory {
     fun createTransactionDetailIntent(
         context: Context,
         entry: HistoryEntry,
-        position: Int,
     ): Intent = when (entry) {
-        is PaymentHistoryEntry -> createPaymentDetailIntent(context, entry, position)
-        is WithdrawHistoryEntry -> createWithdrawDetailIntent(context, entry, position)
+        is PaymentHistoryEntry -> createPaymentDetailIntent(context, entry)
+        is WithdrawHistoryEntry -> createWithdrawDetailIntent(context, entry)
         else -> throw IllegalArgumentException("Unknown HistoryEntry type: ${entry::class}")
     }
 
     private fun createWithdrawDetailIntent(
         context: Context,
         entry: WithdrawHistoryEntry,
-        position: Int,
     ): Intent {
         return Intent(context, TransactionDetailActivity::class.java).apply {
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TOKEN, entry.token ?: "")
@@ -77,7 +75,6 @@ object PaymentIntentFactory {
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ENTERED_AMOUNT, entry.amountSats)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_MINT_URL, entry.mintUrl)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_REQUEST, entry.destination.ifBlank { entry.lightningAddress })
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_POSITION, position)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_TYPE, PaymentHistoryEntry.TYPE_LIGHTNING)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ID, entry.id)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_LABEL, entry.label)
@@ -87,7 +84,6 @@ object PaymentIntentFactory {
     private fun createPaymentDetailIntent(
         context: Context,
         entry: PaymentHistoryEntry,
-        position: Int,
     ): Intent {
         return Intent(context, TransactionDetailActivity::class.java).apply {
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TOKEN, entry.token)
@@ -101,7 +97,6 @@ object PaymentIntentFactory {
             }
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_MINT_URL, entry.mintUrl)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_REQUEST, entry.paymentRequest)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_POSITION, position)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_TYPE, entry.paymentType)
             putExtra(
                 TransactionDetailActivity.EXTRA_TRANSACTION_LIGHTNING_INVOICE,
@@ -113,6 +108,7 @@ object PaymentIntentFactory {
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_PERCENTAGE, entry.tipPercentage)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ID, entry.id)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_LABEL, entry.label)
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_STATUS, entry.status)
         }
     }
 }

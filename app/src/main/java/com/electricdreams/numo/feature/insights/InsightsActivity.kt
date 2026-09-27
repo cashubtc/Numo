@@ -4,6 +4,7 @@ import android.animation.ValueAnimator
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -13,6 +14,9 @@ import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.databinding.ActivityInsightsBinding
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
+import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
+import com.electricdreams.numo.payment.PaymentIntentFactory
+import com.electricdreams.numo.ui.components.EmptyStateHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -21,7 +25,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-class InsightsActivity : AppCompatActivity() {
+class InsightsActivity : AppCompatActivity(), InsightsOptionsSheet.Host {
 
     private lateinit var binding: ActivityInsightsBinding
     private lateinit var adapter: InsightsTransactionAdapter
@@ -47,10 +51,14 @@ class InsightsActivity : AppCompatActivity() {
         unit = DisplayUnit.fromKey(prefs().getString(KEY_UNIT, null))
         range = InsightsRange.fromKey(prefs().getString(KEY_RANGE, null))
 
-        binding.backButton.setOnClickListener { finish() }
-        binding.viewOptionsButton.setOnClickListener { openViewOptions() }
+        binding.topBar.onNavClick { finish() }
+        binding.topBar.onActionClick {
+            if (supportFragmentManager.findFragmentByTag(InsightsOptionsSheet.TAG) == null) {
+                InsightsOptionsSheet().show(supportFragmentManager, InsightsOptionsSheet.TAG)
+            }
+        }
 
-        adapter = InsightsTransactionAdapter(unit, Amount.Currency.USD)
+        adapter = InsightsTransactionAdapter(unit, Amount.Currency.USD, ::openTransaction)
         binding.transactionsRecycler.layoutManager = LinearLayoutManager(this)
         binding.transactionsRecycler.adapter = adapter
 
@@ -96,32 +104,25 @@ class InsightsActivity : AppCompatActivity() {
         val isEmptyPeriod = d.periodTxCount == 0
 
         if (isEmptyPeriod && selectedIndex == null) {
-            renderEmpty(d)
+            renderEmpty(d, animate)
             return
         }
 
-        binding.statPair.visibility = View.VISIBLE
         binding.transactionsRecycler.visibility = View.VISIBLE
-        binding.emptyText.visibility = View.GONE
+        binding.emptyView.root.visibility = View.GONE
 
         val sel = selectedIndex
         if (sel == null) {
             binding.statLabel.text = getString(periodLabelRes(d.range))
             updatePrimary(d.periodTotalSats, d.periodTotalFiatMinor, d.fiatCurrency, animate)
-            binding.statSecondary.visibility = View.GONE
+            renderSecondary(d.periodTxCount, d.periodTipSats, d.periodTipFiatMinor, d.fiatCurrency)
             adapter.submit(d.transactions, unit, d.fiatCurrency)
         } else {
             val bucket = d.buckets[sel]
             val bucketLabel = formatSelectedBucketLabel(d.range, bucket)
             binding.statLabel.text = bucketLabel
             updatePrimary(bucket.totalSats, bucket.totalFiatMinor, d.fiatCurrency, animate)
-            binding.statSecondary.visibility = View.VISIBLE
-            binding.statSecondaryLabel.visibility = View.GONE
-            binding.statSecondaryValue.text = if (bucket.transactionCount == 1) {
-                getString(R.string.insights_day_count_one)
-            } else {
-                getString(R.string.insights_day_count_other, bucket.transactionCount)
-            }
+            renderSecondary(bucket.transactionCount, bucket.tipSats, bucket.tipFiatMinor, d.fiatCurrency)
 
             val slice = d.transactions.filter {
                 it.date.time in bucket.startMillis until bucket.endExclusiveMillis
@@ -129,25 +130,36 @@ class InsightsActivity : AppCompatActivity() {
             adapter.submit(slice, unit, d.fiatCurrency)
 
             if (slice.isEmpty()) {
-                binding.transactionsRecycler.visibility = View.GONE
-                binding.emptyText.visibility = View.VISIBLE
-                binding.emptyText.text = getString(R.string.insights_empty_day, bucketLabel)
+                showEmpty(getString(R.string.insights_empty_day, bucketLabel), "")
             }
         }
     }
 
-    private fun renderEmpty(d: InsightsData) {
-        binding.statPair.visibility = View.VISIBLE
-        binding.transactionsRecycler.visibility = View.GONE
-        binding.emptyText.visibility = View.VISIBLE
-        binding.emptyText.text = getString(R.string.insights_empty_hint)
-
+    private fun renderEmpty(d: InsightsData, animate: Boolean) {
         binding.statLabel.text = getString(periodLabelRes(d.range))
-        binding.statValue.text = getString(R.string.insights_empty_headline)
+        updatePrimary(0L, 0L, d.fiatCurrency, animate)
         binding.statSecondary.visibility = View.GONE
-        primaryAnimator?.cancel()
-        lastPrimarySats = 0L
-        lastPrimaryFiatMinor = 0L
+        adapter.submit(emptyList(), unit, d.fiatCurrency)
+        showEmpty(getString(R.string.insights_empty_title), getString(R.string.insights_empty_subtitle))
+    }
+
+    private fun showEmpty(title: String, description: String) {
+        binding.transactionsRecycler.visibility = View.GONE
+        binding.emptyView.root.visibility = View.VISIBLE
+        EmptyStateHelper.bind(binding.emptyView.root, R.drawable.ic_receipt, title, description)
+    }
+
+    /** "12 sales", then "· $4.50 in tips" when any were added. Tips never count as sales. */
+    private fun renderSecondary(count: Int, tipSats: Long, tipFiatMinor: Long, fiat: Amount.Currency) {
+        val sales = resources.getQuantityString(R.plurals.insights_sales_count, count, count)
+        val hasTips = tipSats > 0 || tipFiatMinor > 0
+        binding.statSecondary.text = if (hasTips) {
+            val tips = InsightsFormatter.format(unit, tipSats, tipFiatMinor, fiat)
+            getString(R.string.insights_sales_and_tips, sales, getString(R.string.insights_tips_amount, tips))
+        } else {
+            sales
+        }
+        binding.statSecondary.visibility = View.VISIBLE
     }
 
     private fun updatePrimary(sats: Long, fiatMinor: Long, fiat: Amount.Currency, animate: Boolean) {
@@ -180,32 +192,44 @@ class InsightsActivity : AppCompatActivity() {
         start()
     }
 
-    private fun openViewOptions() {
-        ViewOptionsSheet().apply {
-            configure(
-                currentUnit = unit,
-                currentRange = range,
-                onUnitChanged = { newUnit ->
-                    if (newUnit == unit) return@configure
-                    unit = newUnit
-                    prefs().edit().putString(KEY_UNIT, newUnit.toKey()).apply()
-                    renderForSelection(animate = false)
-                },
-                onRangeChanged = { newRange ->
-                    if (newRange == range) return@configure
-                    range = newRange
-                    selectedIndex = null
-                    prefs().edit().putString(KEY_RANGE, newRange.toKey()).apply()
-                    refresh(animate = true)
-                },
-            )
-        }.show(supportFragmentManager, ViewOptionsSheet.TAG)
+    /** The same details screen a tap in Activity opens */
+    private fun openTransaction(row: TxRow) {
+        lifecycleScope.launch {
+            val entry = withContext(Dispatchers.IO) {
+                PaymentsHistoryActivity.getPaymentEntryById(this@InsightsActivity, row.id)
+            }
+            if (entry == null) {
+                Log.w(TAG, "Sale ${row.id} is no longer in history")
+                refresh(animate = true)
+                return@launch
+            }
+            startActivity(PaymentIntentFactory.createTransactionDetailIntent(this@InsightsActivity, entry))
+        }
+    }
+
+    override val insightsUnit: DisplayUnit get() = unit
+
+    override val insightsRange: InsightsRange get() = range
+
+    override fun applyInsightsUnit(unit: DisplayUnit) {
+        if (unit == this.unit) return
+        this.unit = unit
+        prefs().edit().putString(KEY_UNIT, unit.toKey()).apply()
+        renderForSelection(animate = false)
+    }
+
+    override fun applyInsightsRange(range: InsightsRange) {
+        if (range == this.range) return
+        this.range = range
+        selectedIndex = null
+        prefs().edit().putString(KEY_RANGE, range.toKey()).apply()
+        refresh(animate = true)
     }
 
     private fun periodLabelRes(range: InsightsRange): Int = when (range) {
-        InsightsRange.DAY -> R.string.insights_this_week
-        InsightsRange.WEEK -> R.string.insights_last_7_weeks
-        InsightsRange.MONTH -> R.string.insights_last_7_months
+        InsightsRange.DAY -> R.string.insights_range_days
+        InsightsRange.WEEK -> R.string.insights_range_weeks
+        InsightsRange.MONTH -> R.string.insights_range_months
     }
 
     private fun formatSelectedBucketLabel(range: InsightsRange, bucket: BucketTotal): String {
@@ -240,6 +264,7 @@ class InsightsActivity : AppCompatActivity() {
     private fun prefs() = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     companion object {
+        private const val TAG = "InsightsActivity"
         private const val PREFS_NAME = "InsightsPrefs"
         private const val KEY_UNIT = "display_unit"
         private const val KEY_RANGE = "date_range"

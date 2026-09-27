@@ -8,8 +8,8 @@
     android:background="?attr/selectableItemBackground"
     android:clipChildren="false"
     android:clipToPadding="false"
-    android:paddingHorizontal="20dp"
-    android:paddingVertical="16dp">
+    android:paddingHorizontal="@dimen/space_xl"
+    android:paddingVertical="@dimen/space_l">
 
     <!-- A basket's thumbnails stack upward into the top padding (StackedAvatarsView), so the
          row must not clip them -->
@@ -26,13 +26,12 @@
         android:id="@+id/tx_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:fontFamily="sans-serif-medium"
-        android:textColor="@color/color_text_primary"
-        android:textSize="15sp"
+        android:layout_marginStart="@dimen/row_icon_gap"
+        style="@style/Text.BodyBold"
         android:ellipsize="end"
         android:maxLines="1"
         app:layout_constraintStart_toEndOf="@id/avatars"
+        android:layout_marginEnd="@dimen/space_l"
         app:layout_constraintEnd_toStartOf="@id/tx_total"
         app:layout_constraintTop_toTopOf="@id/avatars"
         tools:text="3 × Black hat +2 more" />
@@ -41,14 +40,13 @@
         android:id="@+id/tx_meta"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="2dp"
-        android:fontFamily="sans-serif"
-        android:textColor="@color/color_text_tertiary"
-        android:textSize="13sp"
+        android:layout_marginStart="@dimen/row_icon_gap"
+        android:layout_marginTop="@dimen/row_subtitle_gap"
+        style="@style/Text.Caption"
         android:ellipsize="end"
         android:maxLines="1"
         app:layout_constraintStart_toEndOf="@id/avatars"
+        android:layout_marginEnd="@dimen/space_l"
         app:layout_constraintEnd_toStartOf="@id/tx_total"
         app:layout_constraintTop_toBottomOf="@id/tx_title"
         tools:text="Sat · 14:22" />
@@ -57,9 +55,7 @@
         android:id="@+id/tx_total"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="sans-serif-medium"
-        android:textColor="@color/color_text_primary"
-        android:textSize="15sp"
+        style="@style/Text.BodyBold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
