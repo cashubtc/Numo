@@ -6,8 +6,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?attr/selectableItemBackground"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     android:paddingHorizontal="20dp"
     android:paddingVertical="16dp">
+
+    <!-- A basket's thumbnails stack upward into the top padding (StackedAvatarsView), so the
+         row must not clip them -->
 
     <com.electricdreams.numo.feature.insights.StackedAvatarsView
         android:id="@+id/avatars"
