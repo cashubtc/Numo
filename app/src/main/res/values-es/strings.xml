@@ -785,4 +785,28 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="payment_request_arkoor_retrying">Reconectando con la mint…</string>
     <string name="payment_request_arkoor_failed">Error en el pago Arkoor: %1$s</string>
     <string name="payment_request_arkoor_requires_mint">Selecciona una mint Arkoor y usa sats como unidad base.</string>
+
+    <!-- Sales screen -->
+    <string name="insights_open">Ventas</string>
+    <string name="insights_title">Ventas</string>
+    <string name="insights_view_options">Opciones de vista</string>
+    <string name="insights_date_range">Periodo</string>
+    <string name="insights_range_days">Últimos 7 días</string>
+    <string name="insights_range_weeks">Últimas 7 semanas</string>
+    <string name="insights_range_months">Últimos 7 meses</string>
+    <string name="insights_quick_charge">Cobro rápido</string>
+    <string name="insights_items_count_one">1 artículo</string>
+    <string name="insights_items_count_other">%1$d artículos</string>
+    <string name="insights_items_lead_with_more">%1$s · %2$s +%3$d más</string>
+    <string name="insights_item_xn">%1$d × %2$s</string>
+    <string name="insights_empty_day">Sin ventas el %1$s</string>
+    <plurals name="insights_sales_count">
+        <item quantity="one">%d venta</item>
+        <item quantity="other">%d ventas</item>
+    </plurals>
+    <string name="insights_tips_amount">%1$s en propinas</string>
+    <string name="insights_empty_title">Aún no hay ventas</string>
+    <string name="insights_empty_subtitle">Cada venta aparece aquí, con lo que se vendió y cuándo.</string>
+    <string name="insights_show_me_in">Mostrar en</string>
+    <string name="insights_currency_sats">₿</string>
 </resources>
