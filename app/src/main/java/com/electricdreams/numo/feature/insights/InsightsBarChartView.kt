@@ -24,7 +24,7 @@ class InsightsBarChartView @JvmOverloads constructor(
     private val barTopPadding = dp(4f)
     private val labelTopMargin = dp(10f)
     private val labelTextSize = sp(12f)
-    private val sideInset = dp(20f)
+    private val sideInset = dp(24f)
 
     private val colorBarMuted = ContextCompat.getColor(context, R.color.color_chip_border)
     private val colorBarAccent = ContextCompat.getColor(context, R.color.color_primary)

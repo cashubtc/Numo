@@ -112,7 +112,6 @@ class BasketArchiveActivity : AppCompatActivity() {
                 PaymentIntentFactory.createTransactionDetailIntent(
                     context = this,
                     entry = payment,
-                    position = -1,
                 ),
             )
         }

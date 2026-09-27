@@ -435,7 +435,7 @@
     <string name="transaction_detail_type_payment_received">Zahlung erhalten</string>
     <string name="transaction_detail_mint_label">Von Mint</string>
     <string name="transaction_detail_view_receipt">Beleg anzeigen</string>
-    <string name="transaction_detail_section_transaction_details">TRANSAKTIONSDETAILS</string>
+    <string name="transaction_detail_section_payment">Zahlung</string>
 
     <string name="transaction_detail_payment_type_label">Zahlungsart</string>
     <string name="transaction_detail_payment_type_cashu">Cashu</string>
@@ -988,37 +988,28 @@
     <string name="auto_withdraw_percentage_max" translatable="false">98%</string>
 
     <!-- Insights Screen -->
-    <string name="insights_open">Einblicke öffnen</string>
+    <string name="insights_open">Verkäufe</string>
     <string name="insights_title">Verkäufe</string>
-    <string name="insights_back">Zurück</string>
     <string name="insights_view_options">Ansichtsoptionen</string>
-    <string name="insights_this_week">Diese Woche</string>
-    <string name="insights_last_7_weeks">Letzte 7 Wochen</string>
-    <string name="insights_last_7_months">Letzte 7 Monate</string>
     <string name="insights_date_range">Datumsbereich</string>
     <string name="insights_range_days">Letzte 7 Tage</string>
     <string name="insights_range_weeks">Letzte 7 Wochen</string>
     <string name="insights_range_months">Letzte 7 Monate</string>
-    <string name="insights_day_count_one">1 Transaktion</string>
-    <string name="insights_day_count_other">%1$d Transaktionen</string>
     <string name="insights_quick_charge">Schnelle Zahlungsanfrage</string>
     <string name="insights_items_count_one">1 Artikel</string>
     <string name="insights_items_count_other">%1$d Artikel</string>
     <string name="insights_items_lead_with_more">%1$s · %2$s +%3$d mehr</string>
     <string name="insights_item_xn">%1$d × %2$s</string>
-    <string name="insights_empty_headline">0 Verkäufe</string>
-    <string name="insights_empty_hint">Deine Verkäufe werden hier angezeigt.</string>
     <string name="insights_empty_day">Keine Verkäufe am %1$s</string>
+    <plurals name="insights_sales_count">
+        <item quantity="one">%d Verkauf</item>
+        <item quantity="other">%d Verkäufe</item>
+    </plurals>
+    <string name="insights_tips_amount">%1$s Trinkgeld</string>
+    <string name="insights_empty_title">Noch keine Verkäufe</string>
+    <string name="insights_empty_subtitle">Jeder Verkauf erscheint hier, mit dem, was verkauft wurde, und wann.</string>
     <string name="insights_show_me_in">Anzeigen in</string>
     <string name="insights_currency_sats">₿</string>
-    <string name="insights_close">Schließen</string>
-    <string name="insights_day_label_mon">Mo</string>
-    <string name="insights_day_label_tue">Di</string>
-    <string name="insights_day_label_wed">Mi</string>
-    <string name="insights_day_label_thu">Do</string>
-    <string name="insights_day_label_fri">Fr</string>
-    <string name="insights_day_label_sat">Sa</string>
-    <string name="insights_day_label_sun">So</string>
     <string name="developer_wallet_logs_title">Wallet-Protokolle</string>
     <string name="developer_wallet_logs_subtitle">Aktuelle Wallet-Aktivitätsprotokolle anzeigen und exportieren</string>
     <string name="developer_wallet_logs_section_title">WALLET-AKTIVITÄTSPROTOKOLLE</string>

@@ -47,6 +47,8 @@ data class BucketTotal(
     val endExclusiveMillis: Long,
     val totalSats: Long,
     val totalFiatMinor: Long,
+    val tipSats: Long = 0,
+    val tipFiatMinor: Long = 0,
     val transactionCount: Int,
     val isCurrent: Boolean,
     val label: String,
@@ -64,6 +66,17 @@ data class BasketSummary(
     val distinctTypes: Int,
 )
 
+/**
+ * What a sale brought in, valued as of when it was paid: the sale itself, and its tip
+ * apart from it. Sales totals leave tips out; tips are their own total.
+ */
+data class SaleValue(
+    val sats: Long,
+    val fiatMinor: Long,
+    val tipSats: Long,
+    val tipFiatMinor: Long,
+)
+
 data class TxRow(
     val id: String,
     val date: Date,
@@ -78,6 +91,8 @@ data class InsightsData(
     val transactions: List<TxRow>,
     val periodTotalSats: Long,
     val periodTotalFiatMinor: Long,
+    val periodTipSats: Long,
+    val periodTipFiatMinor: Long,
     val periodTxCount: Int,
     val fiatCurrency: Amount.Currency,
 )

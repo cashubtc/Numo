@@ -282,7 +282,7 @@ class PaymentsHistoryActivityTest {
     }
 
     @Test
-    fun `expired payment is not tappable and does not show details`() {
+    fun `expired payment opens its details`() {
         val paymentId = PaymentsHistoryActivity.addPendingPayment(
             context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
             bitcoinPrice = null, paymentRequest = null, formattedAmount = null
@@ -303,17 +303,15 @@ class PaymentsHistoryActivityTest {
         val holder = adapter.createViewHolder(recyclerView, 1) as PaymentsHistoryAdapter.TransactionViewHolder
         adapter.bindViewHolder(holder, position)
 
-        // Click the main content or the item view and verify no activity is launched
-        assertFalse(holder.mainContent.isClickable)
-        assertFalse(holder.itemView.isClickable)
-
-        val shadowActivity = org.robolectric.Shadows.shadowOf(activity)
-        assertNull(shadowActivity.nextStartedActivity)
-
+        // Every row opens its details, where an expired payment says so and can be deleted
         holder.mainContent.performClick()
-        holder.itemView.performClick()
 
-        assertNull(shadowActivity.nextStartedActivity)
+        val started = org.robolectric.Shadows.shadowOf(activity).nextStartedActivity
+        assertEquals(TransactionDetailActivity::class.java.name, started?.component?.className)
+        assertEquals(
+            PaymentHistoryEntry.STATUS_EXPIRED,
+            started?.getStringExtra(TransactionDetailActivity.EXTRA_TRANSACTION_STATUS),
+        )
     }
 
     @Test
@@ -350,6 +348,40 @@ class PaymentsHistoryActivityTest {
     }
 
     @Test
+    fun `a settled sale is named by what sold, as in Sales, with no badge or sign`() {
+        val basket = com.electricdreams.numo.core.model.CheckoutBasket(
+            items = listOf(
+                com.electricdreams.numo.core.model.CheckoutBasketItem(
+                    itemId = "bun", uuid = "bun-uuid", name = "Cinnamon Bun", quantity = 2,
+                    priceType = "FIAT", netPriceCents = 425, priceSats = 0, priceCurrency = "USD",
+                    vatEnabled = false, vatRate = 0,
+                ),
+            ),
+            currency = "USD",
+            totalSatoshis = 10_109,
+        )
+        val paymentId = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 10_109L, entryUnit = "sat", enteredAmount = 10_109L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null,
+            checkoutBasketJson = basket.toJson(),
+        )
+        PaymentsHistoryActivity.completePendingPayment(
+            context = context, paymentId = paymentId, token = "token",
+            paymentType = PaymentHistoryEntry.TYPE_CASHU, mintUrl = null
+        )
+
+        val activity = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup().get()
+        val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
+        val adapter = recyclerView.adapter as PaymentsHistoryAdapter
+        val holder = adapter.createViewHolder(recyclerView, 1) as PaymentsHistoryAdapter.TransactionViewHolder
+        adapter.bindViewHolder(holder, 1)
+
+        assertEquals("2 × Cinnamon Bun", holder.titleText.text.toString())
+        assertFalse(holder.amountText.text.startsWith("+"))
+        assertEquals(View.GONE, holder.statusBadge.visibility)
+    }
+
+    @Test
     fun `custom zero decimal currency entry displays formatted amount with correct scale`() {
         val paymentId = PaymentsHistoryActivity.addPendingPayment(
             context = context,
@@ -380,9 +412,9 @@ class PaymentsHistoryActivityTest {
         val holder = adapter.createViewHolder(recyclerView, 1) as PaymentsHistoryAdapter.TransactionViewHolder
         adapter.bindViewHolder(holder, position)
 
-        // Assert that the amount display is "+10 POINT" instead of "+1000 POINT" or similar scaling bug
+        // "10 POINT", not "1000 POINT" or a similar scaling bug; sales carry no "+" sign
         val amountDisplay = holder.amountText.text.toString()
-        assertEquals("+10 POINT", amountDisplay)
+        assertEquals("10 POINT", amountDisplay)
     }
 
     @Test

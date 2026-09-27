@@ -312,6 +312,7 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="history_toolbar_title">Actividad</string>
     <string name="history_section_payment_history">HISTORIAL DE PAGOS</string>
     <string name="history_empty">No hay historial de pagos</string>
+    <string name="history_empty_subtitle">Después de tu primer cobro, verás aquí un registro de cada pago recibido.</string>
     <string name="transaction_row_copy">Copiar</string>
     <string name="transaction_row_open">Abrir</string>
     <string name="transaction_row_delete">Eliminar</string>
@@ -332,7 +333,7 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="transaction_detail_type_payment_received">Pago recibido</string>
     <string name="transaction_detail_mint_label">Desde el mint</string>
     <string name="transaction_detail_view_receipt">Ver recibo</string>
-    <string name="transaction_detail_section_transaction_details">DETALLES DE LA TRANSACCIÓN</string>
+    <string name="transaction_detail_section_payment">Pago</string>
     <string name="transaction_detail_payment_type_label">Tipo de pago</string>
     <string name="transaction_detail_payment_type_cashu">Cashu</string>
     <string name="transaction_detail_amount_label">Cantidad</string>
@@ -747,4 +748,28 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="settings_fiat_conversion_disabled_custom_unit">La conversión de moneda fiduciaria está deshabilitada cuando se usa una unidad base personalizada.</string>
     <string name="mints_base_currency_unit_title">Unidad de moneda base</string>
     <string name="mints_base_currency_unit_subtitle">Si la casa de la moneda admite otras unidades, puedes cambiarla aquí.</string>
+
+    <!-- Sales screen -->
+    <string name="insights_open">Ventas</string>
+    <string name="insights_title">Ventas</string>
+    <string name="insights_view_options">Opciones de vista</string>
+    <string name="insights_date_range">Periodo</string>
+    <string name="insights_range_days">Últimos 7 días</string>
+    <string name="insights_range_weeks">Últimas 7 semanas</string>
+    <string name="insights_range_months">Últimos 7 meses</string>
+    <string name="insights_quick_charge">Cobro rápido</string>
+    <string name="insights_items_count_one">1 artículo</string>
+    <string name="insights_items_count_other">%1$d artículos</string>
+    <string name="insights_items_lead_with_more">%1$s · %2$s +%3$d más</string>
+    <string name="insights_item_xn">%1$d × %2$s</string>
+    <string name="insights_empty_day">Sin ventas el %1$s</string>
+    <plurals name="insights_sales_count">
+        <item quantity="one">%d venta</item>
+        <item quantity="other">%d ventas</item>
+    </plurals>
+    <string name="insights_tips_amount">%1$s en propinas</string>
+    <string name="insights_empty_title">Aún no hay ventas</string>
+    <string name="insights_empty_subtitle">Cada venta aparece aquí, con lo que se vendió y cuándo.</string>
+    <string name="insights_show_me_in">Mostrar en</string>
+    <string name="insights_currency_sats">₿</string>
 </resources>

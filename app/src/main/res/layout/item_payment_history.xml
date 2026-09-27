@@ -1,168 +1,156 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Tap opens the details; long-press offers Delete. The status badge shows only while a
+     payment is pending, expired or failed. -->
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
     android:clipChildren="false"
-    android:clipToPadding="false">
+    android:clipToPadding="false"
+    android:paddingHorizontal="@dimen/space_xl"
+    android:paddingVertical="@dimen/space_l">
 
-    <!-- Delete button background container -->
-    <LinearLayout
-        android:id="@+id/delete_button_container"
-        android:layout_width="80dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="end"
-        android:background="@color/color_error"
-        android:gravity="center"
-        android:orientation="vertical">
-
-        <ImageView
-            android:importantForAccessibility="no"
-            android:layout_width="@dimen/icon_size_small"
-            android:layout_height="@dimen/icon_size_small"
-            android:src="@drawable/ic_delete"
-            app:tint="@color/white" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/space_xs"
-            android:text="@string/common_delete"
-            android:textAppearance="@style/Text.Badge"
-            android:textColor="@color/white" />
-    </LinearLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/main_content"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/color_bg_white"
-        android:foreground="?attr/selectableItemBackground"
+    <!-- Leading visual, as in Sales: the items' photos for a basket sale, the quick-charge glyph
+         for a keypad sale, an arrow for a withdrawal. The status badge sits over its corner. -->
+    <FrameLayout
+        android:id="@+id/icon_container"
+        android:layout_width="@dimen/icon_size_medium"
+        android:layout_height="@dimen/icon_size_medium"
         android:clipChildren="false"
         android:clipToPadding="false"
-        android:paddingHorizontal="@dimen/space_xl"
-        android:paddingVertical="@dimen/space_l">
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-        <!-- Icon container with status badge overlay -->
+        <!-- Withdrawal arrow -->
         <FrameLayout
-            android:id="@+id/icon_container"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:clipChildren="false"
-            android:clipToPadding="false"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent">
+            android:id="@+id/direction_icon"
+            android:layout_width="@dimen/icon_size_medium"
+            android:layout_height="@dimen/icon_size_medium"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_chip_circle"
+            android:backgroundTint="@color/color_bg_light">
 
-            <!-- Main direction icon circle -->
-            <FrameLayout
-                android:layout_width="@dimen/icon_size_medium"
-                android:layout_height="@dimen/icon_size_medium"
+            <ImageView
+                android:importantForAccessibility="no"
+                android:id="@+id/icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_gravity="center"
-                android:background="@drawable/bg_chip_circle"
-                android:backgroundTint="@color/color_bg_light">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:id="@+id/icon"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_arrow_down_receive"
-                    app:tint="@color/color_text_primary" />
-            </FrameLayout>
-
-            <!-- Status badge (top-start corner) -->
-            <FrameLayout
-                android:id="@+id/status_badge"
-                android:layout_width="22dp"
-                android:layout_height="22dp"
-                android:layout_gravity="top|start"
-                android:layout_marginStart="-4dp"
-                android:layout_marginTop="-4dp"
-                android:background="@drawable/bg_status_badge_green">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:id="@+id/status_badge_icon"
-                    android:layout_width="12dp"
-                    android:layout_height="12dp"
-                    android:layout_gravity="center"
-                    android:src="@drawable/ic_check_small" />
-            </FrameLayout>
+                android:src="@drawable/ic_arrow_up_send"
+                app:tint="@color/color_text_primary" />
         </FrameLayout>
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/row_icon_gap"
-            android:layout_marginEnd="@dimen/space_l"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/amount_container"
-            app:layout_constraintStart_toEndOf="@+id/icon_container"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <TextView
-                android:id="@+id/title_text"
-                style="@style/Text.BodyBold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/payment_history_title"
-                android:maxLines="1"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/date_text"
-                style="@style/Text.Caption"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:maxLines="1"
-                android:ellipsize="end"
-                tools:text="Aug 24" />
-
-            <TextView
-                android:id="@+id/subtitle_text"
-                style="@style/Text.Caption"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:visibility="gone"
-                android:maxLines="1"
-                android:ellipsize="end"
-                tools:text="Lightning" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/amount_container"
+        <!-- A basket sale's items; the stack draws up into the row's top padding -->
+        <com.electricdreams.numo.feature.insights.StackedAvatarsView
+            android:id="@+id/avatars"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="end"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:visibility="gone" />
 
-            <TextView
-                android:id="@+id/amount_text"
-                style="@style/Text.BodyBold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="$0" />
+        <!-- A keypad sale -->
+        <ImageView
+            android:id="@+id/quick_glyph"
+            android:layout_width="@dimen/icon_size_medium"
+            android:layout_height="@dimen/icon_size_medium"
+            android:importantForAccessibility="no"
+            android:padding="@dimen/space_s"
+            android:src="@drawable/ic_quick_charge"
+            android:visibility="gone"
+            app:tint="@color/color_text_tertiary" />
 
-            <TextView
-                android:id="@+id/status_text"
-                style="@style/Text.Caption"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="@string/payment_history_status_pending"
-                android:textColor="@color/color_warning"
-                android:visibility="gone" />
-        </LinearLayout>
+        <!-- Status badge (top-start corner) -->
+        <FrameLayout
+            android:id="@+id/status_badge"
+            android:visibility="gone"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_gravity="top|start"
+            android:layout_marginStart="-6dp"
+            android:layout_marginTop="-6dp"
+            android:background="@drawable/bg_status_badge_green">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <ImageView
+                android:importantForAccessibility="no"
+                android:id="@+id/status_badge_icon"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_check_small" />
+        </FrameLayout>
+    </FrameLayout>
 
-</FrameLayout>
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/row_icon_gap"
+        android:layout_marginEnd="@dimen/space_l"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/amount_container"
+        app:layout_constraintStart_toEndOf="@+id/icon_container"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/title_text"
+            style="@style/Text.BodyBold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/payment_history_title"
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/date_text"
+            style="@style/Text.Caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            tools:text="Aug 24" />
+
+        <TextView
+            android:id="@+id/subtitle_text"
+            style="@style/Text.Caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:visibility="gone"
+            android:maxLines="1"
+            android:ellipsize="end"
+            tools:text="Lightning" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/amount_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="end"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/amount_text"
+            style="@style/Text.BodyBold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="$0" />
+
+        <TextView
+            android:id="@+id/status_text"
+            style="@style/Text.Caption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/payment_history_status_pending"
+            android:textColor="@color/color_warning"
+            android:visibility="gone" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
