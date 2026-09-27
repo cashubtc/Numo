@@ -3,7 +3,6 @@ package com.electricdreams.numo.feature.insights
 import android.content.Context
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
-import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.util.ItemManager
 import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
@@ -18,6 +17,10 @@ object InsightsRepository {
         val currentCurrencyCode = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(context)
         val fiatCurrency = Amount.Currency.fromCode(currentCurrencyCode)
         val currentBtcPrice = com.electricdreams.numo.core.worker.BitcoinPriceWorker.getInstance(context).getCurrentPrice()
+        // "sat", or a mint's custom unit (e.g. "usd") that replaces sats entirely. Not the same
+        // as currentCurrencyCode, which is the fiat display currency while in sats.
+        val baseUnit = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
+        val isSatsMode = baseUnit.equals("sat", ignoreCase = true)
 
         val locale = Locale.getDefault()
         val buckets = buildBuckets(range, locale)
@@ -27,13 +30,7 @@ object InsightsRepository {
         val payments = PaymentsHistoryActivity.getPaymentHistory(context)
             .filter { it.isCompleted() }
             .filter { it.date.time in periodStart until periodEnd }
-            .filter {
-                val entryUnit = it.getEntryUnit().lowercase()
-                val activeUnitLower = currentCurrencyCode.lowercase()
-                entryUnit == activeUnitLower ||
-                // Backward compatibility fallback for legacy satoshi entries recorded as "btc" or "sats"
-                (activeUnitLower == "sat" && (entryUnit == "btc" || entryUnit == "sats"))
-            }
+            .filter { isInBaseUnit(it, baseUnit) }
             .sortedByDescending { it.date.time }
 
         val basketManager = SavedBasketManager.getInstance(context)
@@ -56,9 +53,7 @@ object InsightsRepository {
             val idx = buckets.indexOfBucket(entry.date.time)
             perBucketTxCount[idx] += 1
 
-            val activeUnitLower = currentCurrencyCode.lowercase()
-
-            val (sats, fiatMinor) = if (activeUnitLower == "sat") {
+            val (sats, fiatMinor) = if (isSatsMode) {
                 // Sats mode: standard sats-to-fiat calculation
                 val satsVal = entry.amount
                 val fiatVal = satsToFiatMinor(satsVal, currentBtcPrice)
@@ -100,6 +95,17 @@ object InsightsRepository {
             periodTxCount = txRows.size,
             fiatCurrency = fiatCurrency,
         )
+    }
+
+    /**
+     * Whether [entry] was received in [baseUnit]. This is the ecash unit, not the currency
+     * the amount was typed in: a sale keyed in dollars is still paid in sats.
+     */
+    internal fun isInBaseUnit(entry: PaymentHistoryEntry, baseUnit: String): Boolean {
+        val unit = entry.getUnit().lowercase()
+        val base = baseUnit.lowercase()
+        // Backward compatibility fallback for legacy satoshi entries recorded as "btc" or "sats"
+        return unit == base || (base == "sat" && (unit == "btc" || unit == "sats"))
     }
 
     private fun buildBuckets(range: InsightsRange, locale: Locale): List<BucketTotal> {
