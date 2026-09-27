@@ -25,6 +25,7 @@ import com.electricdreams.numo.core.util.MintProfileService
 import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.ui.util.TransactionDates
+import com.electricdreams.numo.ui.util.TransactionTransitions
 import androidx.lifecycle.lifecycleScope
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -49,9 +50,11 @@ class TransactionDetailActivity : AppCompatActivity() {
     private var status: String = PaymentHistoryEntry.STATUS_COMPLETED
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        TransactionTransitions.prepareDetail(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdgeWithPill(this)
         setContentView(R.layout.activity_transaction_detail)
+        TransactionTransitions.attachDetail(this)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
             val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -109,7 +112,8 @@ class TransactionDetailActivity : AppCompatActivity() {
 
     private fun setupViews() {
         val topBar = findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar)
-        topBar.onNavClick { finish() }
+        // Back shrinks the details into their row, as system Back does
+        topBar.onNavClick { finishAfterTransition() }
         topBar.onActionClick { showOverflowMenu(topBar.actionView) }
 
         // Display transaction details

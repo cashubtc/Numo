@@ -8,11 +8,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.ui.util.TransactionDates
+import com.electricdreams.numo.ui.util.TransactionTransitions
 
 class InsightsTransactionAdapter(
     private var unit: DisplayUnit,
     private var fiatCurrency: Amount.Currency,
-    private val onRowClick: (TxRow) -> Unit = {},
+    /** The tapped sale and its row, which grows into the details it opens */
+    private val onRowClick: (TxRow, View) -> Unit = { _, _ -> },
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var rows: List<TxRow> = emptyList()
@@ -38,7 +40,7 @@ class InsightsTransactionAdapter(
         }
         holder.itemView.setOnClickListener {
             val position = holder.bindingAdapterPosition
-            if (position != RecyclerView.NO_POSITION) onRowClick(rows[position])
+            if (position != RecyclerView.NO_POSITION) onRowClick(rows[position], holder.itemView)
         }
         return holder
     }
@@ -47,6 +49,7 @@ class InsightsTransactionAdapter(
         val row = rows[position]
         val total = InsightsFormatter.format(unit, row.totalSats, row.totalFiatMinor, fiatCurrency)
         val meta = TransactionDates.row(holder.itemView.context, row.date)
+        holder.itemView.transitionName = TransactionTransitions.nameFor(row.id)
 
         when (holder) {
             is ItemVH -> {

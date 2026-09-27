@@ -32,6 +32,7 @@ import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.databinding.ActivityHistoryBinding
 import com.electricdreams.numo.ui.components.EmptyStateHelper
+import com.electricdreams.numo.ui.util.TransactionTransitions
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry
 import com.electricdreams.numo.feature.insights.SaleSummaries
@@ -73,6 +74,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        TransactionTransitions.prepareList(this)
         super.onCreate(savedInstanceState)
         binding = ActivityHistoryBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -90,8 +92,8 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
 
         // Setup RecyclerView
         adapter = PaymentsHistoryAdapter().apply {
-            setOnItemClickListener { entry, _ ->
-                handleEntryClick(entry)
+            setOnItemClickListener { entry, _, row ->
+                handleEntryClick(entry, row)
             }
             setOnItemDeleteListener { entry, position ->
                 handleDeleteClick(entry, position)
@@ -203,7 +205,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
         }
     }
 
-    private fun handleEntryClick(entry: HistoryEntry) {
+    private fun handleEntryClick(entry: HistoryEntry, row: View) {
         when (entry) {
             is PaymentHistoryEntry -> {
                 when {
@@ -223,15 +225,15 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                                 if (offline) OfflineExplainerActivity.start(this) else checkAndFinalizeSwap(entry)
                             // BTCPay pending entries have no lightning/nostr resume data —
                             // resuming would create a new invoice, so just show details.
-                            entry.lightningQuoteId == null && entry.nostrNprofile == null -> showTransactionDetails(entry)
+                            entry.lightningQuoteId == null && entry.nostrNprofile == null -> showTransactionDetails(entry, row)
                             offline && !canResumeOffline -> OfflineExplainerActivity.start(this)
                             else -> resumePendingPayment(entry)
                         }
                     }
-                    else -> showTransactionDetails(entry)
+                    else -> showTransactionDetails(entry, row)
                 }
             }
-            is WithdrawHistoryEntry -> showTransactionDetails(entry)
+            is WithdrawHistoryEntry -> showTransactionDetails(entry, row)
         }
     }
 
@@ -279,8 +281,8 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
     }
 
     // Details delete by id themselves; onResume reloads the list
-    private fun showTransactionDetails(entry: HistoryEntry) {
-        startActivity(PaymentIntentFactory.createTransactionDetailIntent(this, entry))
+    private fun showTransactionDetails(entry: HistoryEntry, row: View) {
+        TransactionTransitions.open(this, row, PaymentIntentFactory.createTransactionDetailIntent(this, entry))
     }
 
     private fun openPaymentWithApp(token: String) {

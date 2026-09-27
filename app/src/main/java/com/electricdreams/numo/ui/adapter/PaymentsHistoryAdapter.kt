@@ -20,6 +20,7 @@ import com.electricdreams.numo.feature.insights.BasketSummary
 import com.electricdreams.numo.feature.insights.SaleSummaries
 import com.electricdreams.numo.feature.insights.StackedAvatarsView
 import com.electricdreams.numo.ui.util.TransactionDates
+import com.electricdreams.numo.ui.util.TransactionTransitions
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -27,7 +28,8 @@ import java.util.Locale
 class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     fun interface OnItemClickListener {
-        fun onItemClick(entry: HistoryEntry, position: Int)
+        /** [row] is the tapped row, which grows into the details it opens */
+        fun onItemClick(entry: HistoryEntry, position: Int, row: View)
     }
 
     fun interface OnItemDeleteListener {
@@ -194,8 +196,9 @@ class PaymentsHistoryAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             val isIncoming = entry.amount >= 0
 
             // Every row opens its details; long-press offers Delete, as a menu on the row
+            mainContent.transitionName = TransactionTransitions.nameFor(entry.id)
             mainContent.setOnClickListener {
-                onItemClickListener?.onItemClick(entry, item.originalPosition)
+                onItemClickListener?.onItemClick(entry, item.originalPosition, mainContent)
             }
             mainContent.setOnLongClickListener {
                 showRowMenu(entry, item.originalPosition)

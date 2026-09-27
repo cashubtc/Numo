@@ -24,8 +24,8 @@ class InsightsTransactionAdapterTest {
     @Test
     fun `tapping a sale opens that sale, quick charge or basket`() {
         val tapped = mutableListOf<String>()
-        val adapter = InsightsTransactionAdapter(DisplayUnit.FIAT, Amount.Currency.USD) {
-            tapped += it.id
+        val adapter = InsightsTransactionAdapter(DisplayUnit.FIAT, Amount.Currency.USD) { row, _ ->
+            tapped += row.id
         }
         val basket = BasketSummary(listOf(BasketItemSummary("Latte", null, 1)), 1, 1)
         adapter.submit(

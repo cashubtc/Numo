@@ -17,6 +17,7 @@ import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.ui.components.EmptyStateHelper
+import com.electricdreams.numo.ui.util.TransactionTransitions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -42,6 +43,7 @@ class InsightsActivity : AppCompatActivity(), InsightsOptionsSheet.Host {
     private var lastPrimaryFiatMinor: Long = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        TransactionTransitions.prepareList(this)
         super.onCreate(savedInstanceState)
         binding = ActivityInsightsBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -192,8 +194,8 @@ class InsightsActivity : AppCompatActivity(), InsightsOptionsSheet.Host {
         start()
     }
 
-    /** The same details screen a tap in Activity opens */
-    private fun openTransaction(row: TxRow) {
+    /** The same details screen a tap in Activity opens, grown from the tapped row */
+    private fun openTransaction(row: TxRow, rowView: View) {
         lifecycleScope.launch {
             val entry = withContext(Dispatchers.IO) {
                 PaymentsHistoryActivity.getPaymentEntryById(this@InsightsActivity, row.id)
@@ -203,7 +205,11 @@ class InsightsActivity : AppCompatActivity(), InsightsOptionsSheet.Host {
                 refresh(animate = true)
                 return@launch
             }
-            startActivity(PaymentIntentFactory.createTransactionDetailIntent(this@InsightsActivity, entry))
+            TransactionTransitions.open(
+                this@InsightsActivity,
+                rowView,
+                PaymentIntentFactory.createTransactionDetailIntent(this@InsightsActivity, entry),
+            )
         }
     }
 
