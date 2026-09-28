@@ -12,7 +12,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -30,6 +29,8 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+
+import com.electricdreams.numo.core.update.launchPaymentOperation
 
 /**
  * Handles Lightning payment flow via mint quote and WebSocket subscription (NUT-17).
@@ -146,7 +147,7 @@ class LightningMintHandler(
         mintCalled.set(false)
 
         mintJob?.cancel()
-        mintJob = uiScope.launch(ioDispatcher) {
+        mintJob = uiScope.launchPaymentOperation(ioDispatcher) {
             try {
                 // CDK Amount is in minor units of wallet's CurrencyUnit (we constructed wallet in sats)
                 val quoteAmount = CdkAmount(paymentAmount.toULong())
@@ -173,13 +174,13 @@ class LightningMintHandler(
                 Log.d(TAG, "Received Lightning mint quote id=${quote.id} bolt11=$bolt11")
 
                 // Notify UI that invoice is ready with full quote info
-                launch(Dispatchers.Main) {
+                launchPaymentOperation(Dispatchers.Main) {
                     callback.onInvoiceReady(bolt11, quote.id, mintUrlStr)
                 }
 
                 // Start both WebSocket subscription and polling in parallel
                 // Whichever detects payment first will call tryMintOnce (atomic, only one wins)
-                val wsJob = launch {
+                val wsJob = launchPaymentOperation {
                     try {
                         Log.d(TAG, "Starting WebSocket subscription for quote ${quote.id}")
                         awaitMintQuotePaid(mintUrl, quote.id)
@@ -192,7 +193,7 @@ class LightningMintHandler(
                     }
                 }
 
-                val pollJob = launch {
+                val pollJob = launchPaymentOperation {
                     try {
                         pollForQuotePaid(mintUrl, quote.id, callback)
                     } catch (ce: CancellationException) {
@@ -208,7 +209,7 @@ class LightningMintHandler(
 
             } catch (e: Exception) {
                 Log.e(TAG, "Error in Lightning mint flow: ${e.message}", e)
-                launch(Dispatchers.Main) {
+                launchPaymentOperation(Dispatchers.Main) {
                     callback.onError(e.message ?: "Unknown error")
                 }
             }
@@ -246,18 +247,18 @@ class LightningMintHandler(
         mintCalled.set(false)
 
         mintJob?.cancel()
-        mintJob = uiScope.launch(Dispatchers.IO) {
+        mintJob = uiScope.launchPaymentOperation(Dispatchers.IO) {
             try {
                 Log.d(TAG, "Resuming Lightning mint quote monitoring for id=$quoteId")
 
                 // Notify UI that invoice is ready (for display)
-                launch(Dispatchers.Main) {
+                launchPaymentOperation(Dispatchers.Main) {
                     callback.onInvoiceReady(invoice, quoteId, mintUrlStr)
                 }
 
                 // Start both WebSocket subscription and polling in parallel
                 // Whichever detects payment first will call tryMintOnce (atomic, only one wins)
-                val wsJob = launch {
+                val wsJob = launchPaymentOperation {
                     try {
                         Log.d(TAG, "Starting WebSocket subscription for resumed quote $quoteId")
                         awaitMintQuotePaid(mintUrl, quoteId)
@@ -270,7 +271,7 @@ class LightningMintHandler(
                     }
                 }
 
-                val pollJob = launch {
+                val pollJob = launchPaymentOperation {
                     try {
                         pollForQuotePaid(mintUrl, quoteId, callback)
                     } catch (ce: CancellationException) {
@@ -286,7 +287,7 @@ class LightningMintHandler(
 
             } catch (e: Exception) {
                 Log.e(TAG, "Error in resumed Lightning mint flow: ${e.message}", e)
-                launch(Dispatchers.Main) {
+                launchPaymentOperation(Dispatchers.Main) {
                     callback.onError(e.message ?: "Unknown error")
                 }
             }
@@ -492,7 +493,7 @@ class LightningMintHandler(
         val wallet = CashuWalletManager.getWallet()
         if (wallet == null) {
             Log.e(TAG, "Wallet not available for minting")
-            uiScope.launch(Dispatchers.Main) {
+            uiScope.launchPaymentOperation(Dispatchers.Main) {
                 callback.onError("Wallet not ready")
             }
             return false
@@ -505,14 +506,14 @@ class LightningMintHandler(
         val proofs = mintWallet?.mint(quoteId, org.cashudevkit.SplitTarget.None, null)
             ?: run {
                 Log.e(TAG, "Failed to get wallet for mint: ${mintUrl.url}")
-                uiScope.launch(Dispatchers.Main) {
+                uiScope.launchPaymentOperation(Dispatchers.Main) {
                     callback.onError("Wallet not ready")
                 }
                 return false
             }
         Log.d(TAG, "Lightning mint completed with ${proofs.size} proofs ($source)")
 
-        uiScope.launch(Dispatchers.Main) {
+        uiScope.launchPaymentOperation(Dispatchers.Main) {
             callback.onPaymentSuccess()
         }
         return true

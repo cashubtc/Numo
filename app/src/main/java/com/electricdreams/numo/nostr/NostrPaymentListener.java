@@ -3,6 +3,7 @@ package com.electricdreams.numo.nostr;
 import android.util.Log;
 
 import com.electricdreams.numo.AppGlobals;
+import com.electricdreams.numo.core.update.UpdateOperationGate;
 import com.electricdreams.numo.ndef.CashuPaymentHelper;
 import com.electricdreams.numo.payment.SwapToLightningMintManager;
 
@@ -101,6 +102,18 @@ public final class NostrPaymentListener {
             Log.w(TAG, "Received kind 1059 event without id from " + relayUrl + "; skipping");
             return;
         }
+        // A relay callback can outlive its payment screen. Hold the gate until
+        // redemption and its callback finish, including on exceptional exits.
+        AutoCloseable operation = UpdateOperationGate.shared.tryBeginOperation();
+        if (operation == null) return;
+        try (AutoCloseable ignored = operation) {
+            handlePaymentEvent(relayUrl, event);
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to finish Nostr payment operation", e);
+        }
+    }
+
+    private void handlePaymentEvent(String relayUrl, NostrEvent event) {
         // Deduplicate by event ID across all relays. Synchronize so only one
         // thread at a time can perform the check-and-add.
         synchronized (seenEventIds) {

@@ -68,6 +68,9 @@ class AboutActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
+        binding.updateItem.setOnClickListener {
+            startActivity(Intent(this, AppUpdateActivity::class.java))
+        }
         // Version tap for developer mode
         binding.versionText.setOnClickListener {
             handleVersionTap()

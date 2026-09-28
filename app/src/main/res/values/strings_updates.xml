@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="update_title">App updates</string>
+    <string name="update_check">Check for updates</string>
+    <string name="update_checking">Checking for updates…</string>
+    <string name="update_current">Numo is up to date</string>
+    <string name="update_available">A new version of Numo is available</string>
+    <string name="update_version">Version %1$s</string>
+    <string name="update_download">Download update</string>
+    <string name="update_downloading">Downloading update… %1$d%%</string>
+    <string name="update_ready">Update ready to install</string>
+    <string name="update_install">Install update</string>
+    <string name="update_installing">Preparing installation…</string>
+    <string name="update_description">You can keep using Numo while the update downloads. Install it when you have finished taking payments.</string>
+    <string name="update_check_failed">Could not check for updates. Please try again later.</string>
+    <string name="update_download_failed">The download could not finish. Tap Download update to retry.</string>
+    <string name="update_install_failed">The update was not installed. You can try again.</string>
+    <string name="update_payment_busy">Finish the current payment, withdrawal, or wallet operation before installing.</string>
+    <string name="update_permission_title">Allow Numo updates</string>
+    <string name="update_permission_message">Allow this app to install updates in Android settings, then return here and tap Install update.</string>
+    <string name="update_open_settings">Open settings</string>
+    <string name="update_view">View update</string>
+    <string name="update_cancel_install">Cancel installation</string>
+</resources>

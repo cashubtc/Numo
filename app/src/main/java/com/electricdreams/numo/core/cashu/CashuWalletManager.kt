@@ -13,7 +13,6 @@ import com.electricdreams.numo.core.wallet.impl.CdkWalletProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.MintUrl
 import org.cashudevkit.Wallet
@@ -25,6 +24,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.cashudevkit.WalletSqliteDatabase
 import org.cashudevkit.WalletStore
 import org.cashudevkit.generateMnemonic
+
+import com.electricdreams.numo.core.update.launchPaymentOperation
 
 /**
  * Global owner of the CDK WalletRepository and its backing SQLite database.
@@ -90,7 +91,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
 
         // Build initial wallet
         val initialMints = mintManager.getAllowedMints()
-        scope.launch {
+        scope.launchPaymentOperation {
             rebuildWallet(initialMints)
         }
     }
@@ -267,7 +268,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
 
     override fun onMintsChanged(newMints: List<String>) {
         Log.d(TAG, "Mint list changed, rebuilding wallet with ${'$'}{newMints.size} mints")
-        scope.launch {
+        scope.launchPaymentOperation {
             rebuildWallet(newMints)
         }
     }

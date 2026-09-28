@@ -8,6 +8,14 @@ on:
         description: 'Release version (e.g., v1.0.0)'
         required: true
         type: string
+      version_code:
+        description: 'Android versionCode (must exceed every previous release)'
+        required: true
+        type: number
+      release_notes:
+        description: 'Release notes shown in the app'
+        required: false
+        type: string
       pre_release:
         description: 'Is this a pre-release?'
         required: false
@@ -21,6 +29,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      RELEASE_VERSION: ${{ inputs.version }}
+      RELEASE_CODE: ${{ inputs.version_code }}
+      RELEASE_NOTES: ${{ inputs.release_notes }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -33,6 +45,14 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
           cache: gradle
+
+      - name: Validate release version
+        run: |
+          python3 - <<'PYVALIDATE'
+          import os, re
+          assert re.fullmatch(r'v?\d+\.\d+(?:\.\d+)?(?:[-.][A-Za-z0-9.-]+)?', os.environ['RELEASE_VERSION'])
+          assert 0 < int(os.environ['RELEASE_CODE']) <= 2100000000
+          PYVALIDATE
 
       # Decode the base64 encoded keystore string to keystore.jks
       - name: Decode Keystore
@@ -62,6 +82,9 @@ jobs:
                   getByName("release") {
                       signingConfig = signingConfigs.getByName("release")
                   }
+                  getByName("play") {
+                      signingConfig = signingConfigs.getByName("release")
+                  }
               }
           }
           EOT
@@ -88,7 +111,7 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleRelease -PnumoVersionCode="$RELEASE_CODE" -PnumoVersionName="${RELEASE_VERSION#v}"
 
       # Also build an Android App Bundle
       - name: Build Release Bundle (AAB)
@@ -96,14 +119,14 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew bundleRelease
+        run: ./gradlew bundlePlay -PnumoVersionCode="$RELEASE_CODE" -PnumoVersionName="${RELEASE_VERSION#v}"
 
       # Rename output artifacts to include numo and the version
       - name: Rename artifacts with numo and version
         run: |
-          VERSION="${{ github.event.inputs.version }}"
+          VERSION="$RELEASE_VERSION"
           APK_DIR="app/build/outputs/apk/release"
-          BUNDLE_DIR="app/build/outputs/bundle/release"
+          BUNDLE_DIR="app/build/outputs/bundle/play"
 
           echo "Using version: $VERSION"
 
@@ -145,6 +168,25 @@ jobs:
             echo "No AAB files found in $BUNDLE_DIR"
           fi
 
+      - name: Create signed update manifest
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          PRE_RELEASE: ${{ inputs.pre_release }}
+        run: |
+          export KEYSTORE_PATH="$HOME/keystore/app-release.keystore"
+          BUILD_TOOLS=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
+          CHANNEL=stable
+          if [ "$PRE_RELEASE" = true ]; then CHANNEL=beta; fi
+          printf '%s' "$RELEASE_NOTES" > "$RUNNER_TEMP/update-notes.txt"
+          python3 scripts/create_update_manifest.py \
+            --apk "app/build/outputs/apk/release/numo-${RELEASE_VERSION}-universal.apk" \
+            --tag "$RELEASE_VERSION" --channel "$CHANNEL" --check-latest \
+            --aapt "$BUILD_TOOLS/aapt" --apksigner "$BUILD_TOOLS/apksigner" \
+            --notes-file "$RUNNER_TEMP/update-notes.txt" \
+            --output app/build/outputs/apk/release/update.json
+
       # Create a GitHub release draft with the signed APK and Bundle
       - name: Create Release Draft
         id: create_release
@@ -153,9 +195,11 @@ jobs:
           tag_name: ${{ github.event.inputs.version }}
           name: Release ${{ github.event.inputs.version }}
           draft: true
+          body: ${{ inputs.release_notes }}
           prerelease: ${{ github.event.inputs.pre_release }}
           files: |
             app/build/outputs/apk/release/*.apk
-            app/build/outputs/bundle/release/numo-${{ github.event.inputs.version }}.aab
+            app/build/outputs/apk/release/update.json
+            app/build/outputs/bundle/play/numo-${{ github.event.inputs.version }}.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

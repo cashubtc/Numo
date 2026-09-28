@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="64dp"
+            app:topBarTitle="@string/update_title"
+            app:topBarNavContentDescription="@string/desc_back"
+            app:topBarSettingsStyle="true" />
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/settings_page_margin"
+                android:paddingBottom="24dp">
+                <TextView
+                    android:id="@+id/status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/update_check"
+                    android:textAppearance="@style/Text.Heading1"
+                    android:accessibilityLiveRegion="polite" />
+                <TextView
+                    android:id="@+id/version"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textAppearance="@style/Text.SettingsCaption" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/update_description"
+                    android:textAppearance="@style/Text.RowTitle" />
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/progress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:visibility="gone" />
+                <TextView
+                    android:id="@+id/message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:textAppearance="@style/Text.RowTitle"
+                    android:accessibilityLiveRegion="polite"
+                    android:visibility="gone" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/action"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:layout_marginTop="24dp"
+                    android:text="@string/update_check" />
+                <TextView
+                    android:id="@+id/release_notes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:textAppearance="@style/Text.RowTitle"
+                    android:textIsSelectable="true" />
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

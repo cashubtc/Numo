@@ -12,8 +12,8 @@ android {
         applicationId = "com.electricdreams.numo"
         minSdk = 24
         targetSdk = 36
-        versionCode = 25
-        versionName = "1.9"
+        versionCode = providers.gradleProperty("numoVersionCode").orElse("25").get().toInt()
+        versionName = providers.gradleProperty("numoVersionName").orElse("1.9").get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -33,6 +33,27 @@ android {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
         }
+        create("play") {
+            initWith(getByName("release"))
+            matchingFallbacks += "release"
+        }
+    }
+
+    // Keep existing debug/release commands for direct APK distribution. The Play build
+    // contains neither the APK installer permission nor the direct updater implementation.
+    sourceSets {
+        getByName("debug") {
+            kotlin.srcDir("src/direct/java")
+            manifest.srcFile("src/direct/AndroidManifest.xml")
+        }
+        getByName("release") {
+            kotlin.srcDir("src/direct/java")
+            manifest.srcFile("src/direct/AndroidManifest.xml")
+        }
+        getByName("testDebug").kotlin.srcDir("src/testDirect/java")
+        getByName("testRelease").kotlin.srcDir("src/testDirect/java")
+        getByName("testDebug").resources.srcDir("src/testDirect/resources")
+        getByName("testRelease").resources.srcDir("src/testDirect/resources")
     }
     
     splits {
@@ -155,6 +176,7 @@ dependencies {
     
     // Custom Tabs for embedded web links
     implementation("androidx.browser:browser:1.8.0")
+    "playImplementation"("com.google.android.play:app-update-ktx:2.1.0")
 }
 
 tasks.withType<Test>().configureEach {
