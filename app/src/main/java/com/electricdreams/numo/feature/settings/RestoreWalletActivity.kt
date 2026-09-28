@@ -25,7 +25,6 @@ import java.util.Date
 import java.util.Locale
 import kotlin.coroutines.resume
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 
@@ -38,6 +37,9 @@ import com.electricdreams.numo.ui.seed.Bip39Wordlist
 import com.electricdreams.numo.ui.seed.SeedWordEditText
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.ui.util.applySettingsWindowInsets
+
+import com.electricdreams.numo.core.update.holdPaymentScreen
+import com.electricdreams.numo.core.update.launchPaymentOperation
 
 /**
  * Activity for restoring wallet from a 12-word seed phrase.
@@ -121,6 +123,7 @@ class RestoreWalletActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!holdPaymentScreen()) return
         binding = ActivityRestoreWalletBinding.inflate(layoutInflater)
         setContentView(binding.root)
         applySettingsWindowInsets(this, binding.root)
@@ -442,7 +445,7 @@ class RestoreWalletActivity : AppCompatActivity() {
         updateUIForStep(RestoreStep.FETCHING_BACKUP)
         fetchingStatus.text = getString(R.string.onboarding_status_restoring_wallet)
 
-        lifecycleScope.launch {
+        lifecycleScope.launchPaymentOperation {
             // Fetch backup from Nostr
             val result = withContext(Dispatchers.IO) {
                 fetchMintBackupSuspend(mnemonic)
@@ -707,7 +710,7 @@ class RestoreWalletActivity : AppCompatActivity() {
             mintProgressViews[mintUrl] = progressView
         }
 
-        lifecycleScope.launch {
+        lifecycleScope.launchPaymentOperation {
             try {
                 progressStatus.text = getString(R.string.onboarding_restoring_initializing)
 

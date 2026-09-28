@@ -10,7 +10,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.cashudevkit.FinalizedMelt
 import org.cashudevkit.MintUrl
@@ -23,6 +22,9 @@ import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.databinding.ActivityWithdrawMeltQuoteBinding
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.ui.util.applySettingsWindowInsets
+
+import com.electricdreams.numo.core.update.holdPaymentScreen
+import com.electricdreams.numo.core.update.launchPaymentOperation
 
 class WithdrawMeltQuoteActivity : AppCompatActivity() {
 
@@ -62,6 +64,7 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!holdPaymentScreen()) return
         binding = ActivityWithdrawMeltQuoteBinding.inflate(layoutInflater)
         setContentView(binding.root)
         applySettingsWindowInsets(this, binding.root)
@@ -148,7 +151,7 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
     private fun confirmWithdrawal() {
         setLoading(true)
 
-        lifecycleScope.launch {
+        lifecycleScope.launchPaymentOperation {
             var withdrawEntryId: String? = null
             val autoWithdrawManager = AutoWithdrawManager.getInstance(this@WithdrawMeltQuoteActivity)
 
@@ -163,7 +166,7 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
                         ).show()
                         setLoading(false)
                     }
-                    return@launch
+                    return@launchPaymentOperation
                 }
 
                 val destinationLabel = lightningAddress ?: request

@@ -2,6 +2,7 @@ package com.electricdreams.numo.payment
 
 import android.util.Log
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.update.UpdateOperationGate
 import org.cashudevkit.WalletRepository
 import org.cashudevkit.Wallet
 import kotlinx.coroutines.CoroutineScope
@@ -191,6 +192,27 @@ class LightningMintHandlerTest {
         verify(mockCallback).onPaymentSuccess()
         verify(manager, never()).getPreferredUnit()
         sockets.close()
+    }
+
+    @Test
+    fun `queued resumed quote blocks installation until cancellation completes`() = runTest {
+        val sockets = MintQuoteWebSocket(this, FakeQuoteSocketFactory())
+        val guardedHandler = LightningMintHandler(
+            mockContext, preferredMint, allowedMints, this,
+            StandardTestDispatcher(testScheduler), sockets, paymentUnit = "sat",
+        )
+        try {
+            guardedHandler.resume(quoteId, preferredMint, bolt11, mockCallback)
+            assertFalse(UpdateOperationGate.shared.tryBeginInstall())
+            guardedHandler.cancel()
+            runCurrent()
+            assertTrue(UpdateOperationGate.shared.tryBeginInstall())
+        } finally {
+            guardedHandler.cancel()
+            runCurrent()
+            sockets.close()
+            UpdateOperationGate.shared.finishInstall()
+        }
     }
 
     @Test

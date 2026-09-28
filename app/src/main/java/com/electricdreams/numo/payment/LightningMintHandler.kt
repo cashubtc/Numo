@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.update.launchPaymentOperation
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -12,7 +13,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.cashudevkit.Amount as CdkAmount
 import org.cashudevkit.MintQuote
 import org.cashudevkit.MintUrl
@@ -132,7 +132,7 @@ class LightningMintHandler(
         mintCompleted.set(false)
 
         mintJob?.cancel()
-        mintJob = uiScope.launch(ioDispatcher) {
+        mintJob = uiScope.launchPaymentOperation(ioDispatcher) {
             try {
                 // CDK Amount is in minor units of wallet's CurrencyUnit (we constructed wallet in sats)
                 val quoteAmount = CdkAmount(paymentAmount.toULong())
@@ -160,7 +160,7 @@ class LightningMintHandler(
                 Log.d(TAG, "Received Lightning mint quote id=${quote.id} bolt11=$bolt11")
 
                 // Notify UI that invoice is ready with full quote info
-                launch(Dispatchers.Main) {
+                launchPaymentOperation(Dispatchers.Main) {
                     callback.onInvoiceReady(bolt11, quote.id, mintUrlStr)
                 }
 
@@ -170,7 +170,7 @@ class LightningMintHandler(
                 throw cancelled
             } catch (e: Exception) {
                 Log.e(TAG, "Error in Lightning mint flow: ${e.message}", e)
-                launch(Dispatchers.Main) {
+                launchPaymentOperation(Dispatchers.Main) {
                     callback.onError(e.message ?: "Unknown error")
                 }
             }
@@ -209,12 +209,12 @@ class LightningMintHandler(
         mintCompleted.set(false)
 
         mintJob?.cancel()
-        mintJob = uiScope.launch(ioDispatcher) {
+        mintJob = uiScope.launchPaymentOperation(ioDispatcher) {
             try {
                 Log.d(TAG, "Resuming Lightning mint quote monitoring for id=$quoteId")
 
                 // Notify UI that invoice is ready (for display)
-                launch(Dispatchers.Main) {
+                launchPaymentOperation(Dispatchers.Main) {
                     callback.onInvoiceReady(invoice, quoteId, mintUrlStr)
                 }
 
@@ -224,7 +224,7 @@ class LightningMintHandler(
                 throw cancelled
             } catch (e: Exception) {
                 Log.e(TAG, "Error in resumed Lightning mint flow: ${e.message}", e)
-                launch(Dispatchers.Main) {
+                launchPaymentOperation(Dispatchers.Main) {
                     callback.onError(e.message ?: "Unknown error")
                 }
             }
@@ -247,7 +247,7 @@ class LightningMintHandler(
         quoteId: String,
         callback: Callback,
     ) = coroutineScope {
-        val wsJob = launch {
+        val wsJob = launchPaymentOperation {
             try {
                 awaitMintQuotePaid(mintUrl, quoteId)
                 tryMintOnce(mintUrl, quoteId, callback, "WebSocket")
@@ -306,7 +306,7 @@ class LightningMintHandler(
             val wallet = CashuWalletManager.getWallet()
             if (wallet == null) {
                 Log.e(TAG, "Wallet not available for minting")
-                uiScope.launch(Dispatchers.Main) {
+                uiScope.launchPaymentOperation(Dispatchers.Main) {
                     callback.onError("Wallet not ready")
                 }
                 return false
@@ -320,7 +320,7 @@ class LightningMintHandler(
             val proofs = mintWallet?.mint(quoteId, org.cashudevkit.SplitTarget.None, null)
                 ?: run {
                     Log.e(TAG, "Failed to get wallet for mint: ${mintUrl.url}")
-                    uiScope.launch(Dispatchers.Main) {
+                    uiScope.launchPaymentOperation(Dispatchers.Main) {
                         callback.onError("Wallet not ready")
                     }
                     return false
@@ -328,7 +328,7 @@ class LightningMintHandler(
             Log.d(TAG, "Lightning mint completed with ${proofs.size} proofs ($source)")
 
             mintCompleted.set(true)
-            uiScope.launch(Dispatchers.Main) {
+            uiScope.launchPaymentOperation(Dispatchers.Main) {
                 callback.onPaymentSuccess()
             }
             return true

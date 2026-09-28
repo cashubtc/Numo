@@ -48,3 +48,6 @@ btcpay_env.properties
 
 # Impeccable design-tool session artifacts
 .impeccable/
+
+# Python release tooling
+__pycache__/
