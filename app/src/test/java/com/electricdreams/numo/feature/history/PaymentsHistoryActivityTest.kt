@@ -88,6 +88,23 @@ class PaymentsHistoryActivityTest {
     }
 
     @Test
+    fun `arkoor request keeps its method and quote when saved for resume`() {
+        val id = PaymentsHistoryActivity.addPendingPayment(
+            context, 1_000L, "sat", 1_000L, null, null, "1,000 sats",
+        )
+        PaymentsHistoryActivity.updatePendingWithLightningInfo(
+            context, id, "ark1address", "ark-quote", "http://127.0.0.1:3339",
+            paymentType = PaymentHistoryEntry.TYPE_ARKOOR,
+        )
+        val entry = PaymentsHistoryActivity.getPaymentHistory(context).single()
+        assertEquals(PaymentHistoryEntry.TYPE_ARKOOR, entry.paymentType)
+        assertEquals("ark1address", entry.lightningInvoice)
+        assertEquals("ark-quote", entry.lightningQuoteId)
+        assertEquals("http://127.0.0.1:3339", entry.lightningMintUrl)
+        assertTrue(entry.isPending())
+    }
+
+    @Test
     fun `cancelPendingPayment removes only pending entries`() {
         val id1 = PaymentsHistoryActivity.addPendingPayment(
             context = context,
@@ -411,6 +428,23 @@ class PaymentsHistoryActivityTest {
         assertEquals(1, history.size)
         val entry = history.first()
         assertTrue(entry.isExpired())
+    }
+
+    @Test
+    fun `old arkoor quotes stay resumable for late payments`() {
+        val entry = PaymentHistoryEntry(
+            token = "", amount = 330L, enteredAmount = 330L,
+            date = java.util.Date(System.currentTimeMillis() - 3 * 60 * 60 * 1000L),
+            rawStatus = PaymentHistoryEntry.STATUS_PENDING,
+            paymentType = PaymentHistoryEntry.TYPE_ARKOOR,
+            lightningInvoice = "ark1address", lightningQuoteId = "quote",
+            lightningMintUrl = "http://127.0.0.1:3339",
+        )
+        context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE).edit()
+            .putString("history", com.google.gson.Gson().toJson(listOf(entry))).apply()
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+        assertTrue(PaymentsHistoryActivity.getPaymentHistory(context).single().isPending())
+        controller.pause().stop().destroy()
     }
 
     @Test

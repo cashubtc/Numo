@@ -1,3 +1,5 @@
+import java.net.URI
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.parcelize")
@@ -9,11 +11,16 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.electricdreams.numo"
+        applicationId = "com.electricdreams.numo.arkoor"
+        val arkMintUrl = providers.gradleProperty("arkMintUrl").getOrElse("http://127.0.0.1:3339")
+        val arkMintUri = URI(arkMintUrl)
+        require(arkMintUri.scheme in listOf("http", "https") && arkMintUri.host != null)
+        require(arkMintUri.userInfo == null && arkMintUri.query == null && arkMintUri.fragment == null)
+        buildConfigField("String", "ARK_MINT_URL", "\"$arkMintUrl\"")
         minSdk = 24
         targetSdk = 36
         versionCode = 25
-        versionName = "1.9"
+        versionName = "1.9-arkoor-experimental"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

@@ -36,6 +36,10 @@ class AmountDisplayManager(
     var requestedAmount: Long = 0
         private set
 
+    /** Current input value, independent of any in-flight text animation. */
+    var formattedAmount: String = ""
+        private set
+
     private var currentMintLimits: CashuWalletManager.MintLimits? = null
 
     fun setMintLimits(limits: CashuWalletManager.MintLimits?) {
@@ -153,7 +157,8 @@ class AmountDisplayManager(
                 rawInput
             }
             
-            amountDisplayText = Amount(fiatCents, currency).toString()
+            formattedAmount = Amount(fiatCents, currency).toString()
+            amountDisplayText = formattedAmount
             amountDisplayText = if (amountDisplayText.length > 9) Amount(fiatCents, currency).toShortString() else amountDisplayText
             
             // Convert fiat to satoshis for secondary display and requestedAmount
@@ -163,7 +168,8 @@ class AmountDisplayManager(
         } else {
             // Input mode: satoshi, display sats as primary, fiat as secondary
             satsValue = if (currentInputStr.isEmpty()) 0L else currentInputStr.toLong()
-            amountDisplayText = formatAmount(currentInputStr)
+            formattedAmount = formatAmount(currentInputStr)
+            amountDisplayText = formattedAmount
             if (!isCustomUnit) {
                 amountDisplayText = if (amountDisplayText.length > 9) Amount(satsValue, Amount.Currency.BTC).toShortString() else amountDisplayText
             }

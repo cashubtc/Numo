@@ -1020,4 +1020,9 @@
     <string name="offline_status_updating">更新中…</string>
     <string name="offline_row_content_description">%1$s、%2$s</string>
     <string name="offline_row_content_description_outdated">%1$s、古い情報。%2$s</string>
+    <string name="payment_request_arkoor_address">Arkアドレス</string>
+    <string name="payment_request_arkoor_waiting">表示された金額をこのArkアドレスに送信してください</string>
+    <string name="payment_request_arkoor_retrying">ミントに再接続中…</string>
+    <string name="payment_request_arkoor_failed">Arkoor決済に失敗しました: %1$s</string>
+    <string name="payment_request_arkoor_requires_mint">Arkoorミントを選択し、基本単位をsatsにしてください。</string>
 </resources>

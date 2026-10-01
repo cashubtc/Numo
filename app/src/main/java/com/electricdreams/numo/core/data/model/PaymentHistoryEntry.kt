@@ -51,11 +51,11 @@ data class PaymentHistoryEntry(
     @SerializedName("paymentType")
     val paymentType: String? = null,
 
-    /** Lightning invoice (BOLT11) - only for lightning payments */
+    /** Payment request: BOLT11 or Ark address (legacy serialized field name). */
     @SerializedName("lightningInvoice")
     val lightningInvoice: String? = null,
 
-    /** Lightning mint quote ID - for resuming pending lightning payments */
+    /** CDK mint quote ID for resuming pending payments. */
     @SerializedName("lightningQuoteId")
     val lightningQuoteId: String? = null,
 
@@ -214,6 +214,7 @@ data class PaymentHistoryEntry(
         const val STATUS_FAILED = "failed"
 
         const val TYPE_CASHU = "cashu"
+        const val TYPE_ARKOOR = "arkoor"
         const val TYPE_LIGHTNING = "lightning"
 
         /**

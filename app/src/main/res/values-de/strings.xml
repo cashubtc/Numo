@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Numo</string>
+    <string name="app_name">Numo Ark</string>
     <string name="navigation_drawer_open">Navigationsmenü öffnen</string>
     <string name="navigation_drawer_close">Navigationsmenü schließen</string>
     <string name="item_list_title">Katalogartikel verwalten</string>
@@ -1120,4 +1120,9 @@
     <string name="offline_status_updating">Wird aktualisiert…</string>
     <string name="offline_row_content_description">%1$s, %2$s</string>
     <string name="offline_row_content_description_outdated">%1$s, veraltet. %2$s</string>
+    <string name="payment_request_arkoor_address">Ark-Adresse</string>
+    <string name="payment_request_arkoor_waiting">Sende den angezeigten Betrag an diese Ark-Adresse</string>
+    <string name="payment_request_arkoor_retrying">Verbindung zur Mint wird wiederhergestellt…</string>
+    <string name="payment_request_arkoor_failed">Arkoor-Zahlung fehlgeschlagen: %1$s</string>
+    <string name="payment_request_arkoor_requires_mint">Wähle eine Arkoor-Mint und verwende Sats als Basiseinheit.</string>
 </resources>

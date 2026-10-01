@@ -648,8 +648,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
         var modified = false
         history.forEachIndexed { index, entry ->
             if (entry.isPending() && (
-                // Old enough that no invoice type would still be valid
-                entry.date.time < cutoff ||
+                // Ark addresses can still receive funds after quote expiry.
+                // Keep their pending entries resumable so late payments can be claimed.
+                (entry.date.time < cutoff && entry.paymentType != PaymentHistoryEntry.TYPE_ARKOOR) ||
                 // BTCPay is disabled — pending BTCPay entries can never be resolved.
                 // BTCPay entries have lightningQuoteId (set to invoice ID) but no
                 // lightningMintUrl (local Lightning) or nostrNprofile (Nostr).
@@ -832,6 +833,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             lightningQuoteId: String? = null,
             lightningMintUrl: String? = null,
             swapToLightningMintJson: String? = null,
+            paymentType: String? = null,
         ) {
             val history = getPaymentHistory(context).toMutableList()
             val index = history.indexOfFirst { it.id == paymentId }
@@ -850,7 +852,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     mintUrl = existing.mintUrl,
                     paymentRequest = existing.paymentRequest,
                     rawStatus = existing.status,
-                    paymentType = existing.paymentType,
+                    paymentType = paymentType ?: existing.paymentType,
                     lightningInvoice = lightningInvoice ?: existing.lightningInvoice,
                     lightningQuoteId = lightningQuoteId ?: existing.lightningQuoteId,
                     lightningMintUrl = lightningMintUrl ?: existing.lightningMintUrl,

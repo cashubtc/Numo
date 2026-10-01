@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Numo</string>
+    <string name="app_name">Numo Ark</string>
     <string name="navigation_drawer_open">Abrir menu de navegação</string>
     <string name="navigation_drawer_close">Fechar menu de navegação</string>
     <string name="item_list_title">Gerenciar itens do catálogo</string>
@@ -859,4 +859,9 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="offline_status_updating">Atualizando…</string>
     <string name="offline_row_content_description">%1$s, %2$s</string>
     <string name="offline_row_content_description_outdated">%1$s, desatualizado. %2$s</string>
+    <string name="payment_request_arkoor_address">Endereço Ark</string>
+    <string name="payment_request_arkoor_waiting">Envie o valor exibido para este endereço Ark</string>
+    <string name="payment_request_arkoor_retrying">Reconectando à mint…</string>
+    <string name="payment_request_arkoor_failed">Falha no pagamento Arkoor: %1$s</string>
+    <string name="payment_request_arkoor_requires_mint">Selecione uma mint Arkoor e use sats como unidade base.</string>
 </resources>
