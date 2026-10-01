@@ -47,21 +47,31 @@ data class PaymentHistoryEntry(
     @SerializedName("status")
     private val rawStatus: String? = "completed",
 
-    /** Payment type: "cashu", "lightning", or null for pending/unknown */
+    /** Payment type: "cashu", "lightning", "arkoor", or null for pending/unknown */
     @SerializedName("paymentType")
     val paymentType: String? = null,
 
-    /** Payment request: BOLT11 or Ark address (legacy serialized field name). */
+    /** BOLT11 invoice for this checkout. */
     @SerializedName("lightningInvoice")
     val lightningInvoice: String? = null,
 
-    /** CDK mint quote ID for resuming pending payments. */
+    /** Lightning mint quote ID for resuming pending payments. */
     @SerializedName("lightningQuoteId")
     val lightningQuoteId: String? = null,
 
     /** Mint URL for lightning payment - for resuming */
     @SerializedName("lightningMintUrl")
     val lightningMintUrl: String? = null,
+
+    /** Independent Arkoor request and mint quote for the same checkout amount. */
+    @SerializedName("arkoorAddress")
+    val arkoorAddress: String? = null,
+
+    @SerializedName("arkoorQuoteId")
+    val arkoorQuoteId: String? = null,
+
+    @SerializedName("arkoorMintUrl")
+    val arkoorMintUrl: String? = null,
 
     /** Formatted amount string for display when resuming */
     @SerializedName("formattedAmount")
@@ -107,6 +117,24 @@ data class PaymentHistoryEntry(
     @SerializedName("label")
     override val label: String? = null,
 ) : HistoryEntry {
+
+    /** Migrate requests saved by the first, Arkoor-only experimental build. */
+    fun withSeparateArkoorQuote(): PaymentHistoryEntry {
+        val legacyAddress = lightningInvoice ?: return this
+        if (paymentType != TYPE_ARKOOR || arkoorQuoteId != null ||
+            !(legacyAddress.startsWith("ark1") || legacyAddress.startsWith("tark1"))) {
+            return this
+        }
+        return copy(
+            arkoorAddress = legacyAddress,
+            arkoorQuoteId = lightningQuoteId,
+            arkoorMintUrl = lightningMintUrl,
+            lightningInvoice = null,
+            lightningQuoteId = null,
+            lightningMintUrl = null,
+            paymentType = if (isPending()) null else paymentType,
+        )
+    }
 
     /** Check if this payment includes a tip */
     fun hasTip(): Boolean = tipAmountSats > 0
@@ -165,6 +193,13 @@ data class PaymentHistoryEntry(
 
     /** Check if this payment was via Cashu */
     fun isCashu(): Boolean = paymentType == TYPE_CASHU
+
+    /** The request for the method that actually paid, for details and CSV export. */
+    fun getPaymentReference(): String? = when (paymentType) {
+        TYPE_ARKOOR -> arkoorAddress ?: lightningInvoice
+        TYPE_CASHU -> paymentRequest ?: lightningInvoice
+        else -> lightningInvoice
+    }
 
     /** Get abbreviated lightning invoice for display (first 10 + ... + last 10 chars) */
     fun getAbbreviatedInvoice(): String? {

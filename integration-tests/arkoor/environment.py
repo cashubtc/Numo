@@ -88,7 +88,7 @@ def start():
             backup = STATE / "bark-before-experiment"
             if not backup.exists():
                 shutil.copytree(data, backup)
-        env = dict(os.environ, BARK_PAYMENT_METHODS="arkoor", SERVER_ADDRESS="127.0.0.1",
+        env = dict(os.environ, BARK_PAYMENT_METHODS="bolt11,arkoor", SERVER_ADDRESS="127.0.0.1",
                    SERVER_PORT=str(PROCESSOR_PORT), TLS_ENABLE="false", ALLOW_INSECURE="true")
         spawn("processor", [str(processor)], BARK, env, PROCESSOR_PORT)
     mint_dir = STATE / "mint"
@@ -146,7 +146,8 @@ def status():
     with urllib.request.urlopen(f"http://127.0.0.1:{MINT_PORT}/v1/info", timeout=10) as response:
         info = json.load(response)
     methods = info["nuts"]["4"]["methods"]
-    assert any(m["method"] == "arkoor" and m["unit"] == "sat" for m in methods), methods
+    supported = {(m["method"], m["unit"]) for m in methods}
+    assert {("arkoor", "sat"), ("bolt11", "sat")} <= supported, methods
     print(f"Mint healthy: {info.get('name')}; mint methods: {methods}")
 
 

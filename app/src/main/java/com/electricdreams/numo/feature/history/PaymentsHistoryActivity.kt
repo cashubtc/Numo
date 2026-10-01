@@ -650,7 +650,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             if (entry.isPending() && (
                 // Ark addresses can still receive funds after quote expiry.
                 // Keep their pending entries resumable so late payments can be claimed.
-                (entry.date.time < cutoff && entry.paymentType != PaymentHistoryEntry.TYPE_ARKOOR) ||
+                (entry.date.time < cutoff && entry.arkoorQuoteId == null) ||
                 // BTCPay is disabled — pending BTCPay entries can never be resolved.
                 // BTCPay entries have lightningQuoteId (set to invoice ID) but no
                 // lightningMintUrl (local Lightning) or nostrNprofile (Nostr).
@@ -673,6 +673,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     lightningInvoice = entry.lightningInvoice,
                     lightningQuoteId = entry.lightningQuoteId,
                     lightningMintUrl = entry.lightningMintUrl,
+                    arkoorAddress = entry.arkoorAddress,
+                    arkoorQuoteId = entry.arkoorQuoteId,
+                    arkoorMintUrl = entry.arkoorMintUrl,
                     formattedAmount = entry.formattedAmount,
                     nostrNprofile = entry.nostrNprofile,
                     nostrSecretHex = entry.nostrSecretHex,
@@ -718,7 +721,8 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             val prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
             val json = prefs.getString(KEY_HISTORY, "[]")
             val type: Type = object : TypeToken<ArrayList<PaymentHistoryEntry>>() {}.type
-            return Gson().fromJson(json, type)
+            return Gson().fromJson<List<PaymentHistoryEntry>>(json, type)
+                .map { it.withSeparateArkoorQuote() }
         }
 
         @JvmStatic
@@ -782,6 +786,7 @@ class PaymentsHistoryActivity : AppCompatActivity() {
             lightningQuoteId: String? = null,
             lightningMintUrl: String? = null,
             btcPayInvoiceId: String? = null,
+            paymentRequest: String? = null,
         ) {
             val history = getPaymentHistory(context).toMutableList()
             // Only complete entries that are still pending — never overwrite expired/cancelled status
@@ -799,12 +804,15 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     enteredAmount = existing.enteredAmount,
                     bitcoinPrice = existing.bitcoinPrice,
                     mintUrl = mintUrl ?: existing.mintUrl,
-                    paymentRequest = existing.paymentRequest,
+                    paymentRequest = paymentRequest ?: existing.paymentRequest,
                     rawStatus = PaymentHistoryEntry.STATUS_COMPLETED,
                     paymentType = paymentType,
-                    lightningInvoice = lightningInvoice,
-                    lightningQuoteId = lightningQuoteId,
-                    lightningMintUrl = lightningMintUrl,
+                    lightningInvoice = lightningInvoice ?: existing.lightningInvoice,
+                    lightningQuoteId = lightningQuoteId ?: existing.lightningQuoteId,
+                    lightningMintUrl = lightningMintUrl ?: existing.lightningMintUrl,
+                    arkoorAddress = existing.arkoorAddress,
+                    arkoorQuoteId = existing.arkoorQuoteId,
+                    arkoorMintUrl = existing.arkoorMintUrl,
                     formattedAmount = existing.formattedAmount,
                     nostrNprofile = existing.nostrNprofile,
                     nostrSecretHex = existing.nostrSecretHex,
@@ -856,6 +864,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     lightningInvoice = lightningInvoice ?: existing.lightningInvoice,
                     lightningQuoteId = lightningQuoteId ?: existing.lightningQuoteId,
                     lightningMintUrl = lightningMintUrl ?: existing.lightningMintUrl,
+                    arkoorAddress = existing.arkoorAddress,
+                    arkoorQuoteId = existing.arkoorQuoteId,
+                    arkoorMintUrl = existing.arkoorMintUrl,
                     formattedAmount = existing.formattedAmount,
                     nostrNprofile = existing.nostrNprofile,
                     nostrSecretHex = existing.nostrSecretHex,
@@ -870,6 +881,27 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 val prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
                 prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
             }
+        }
+
+        /** Save Arkoor independently of the Lightning quote and the eventual paid method. */
+        @JvmStatic
+        fun updatePendingWithArkoorInfo(
+            context: Context,
+            paymentId: String,
+            address: String,
+            quoteId: String,
+            mintUrl: String,
+        ) {
+            val history = getPaymentHistory(context).toMutableList()
+            val index = history.indexOfFirst { it.id == paymentId && it.isPending() }
+            if (index < 0) return
+            history[index] = history[index].copy(
+                arkoorAddress = address,
+                arkoorQuoteId = quoteId,
+                arkoorMintUrl = mintUrl,
+            )
+            context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+                .putString(KEY_HISTORY, Gson().toJson(history)).apply()
         }
 
         /**
@@ -903,6 +935,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     lightningInvoice = existing.lightningInvoice,
                     lightningQuoteId = existing.lightningQuoteId,
                     lightningMintUrl = existing.lightningMintUrl,
+                    arkoorAddress = existing.arkoorAddress,
+                    arkoorQuoteId = existing.arkoorQuoteId,
+                    arkoorMintUrl = existing.arkoorMintUrl,
                     formattedAmount = existing.formattedAmount,
                     nostrNprofile = nostrNprofile,
                     nostrSecretHex = nostrSecretHex,
@@ -951,6 +986,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     lightningInvoice = existing.lightningInvoice,
                     lightningQuoteId = existing.lightningQuoteId,
                     lightningMintUrl = existing.lightningMintUrl,
+                    arkoorAddress = existing.arkoorAddress,
+                    arkoorQuoteId = existing.arkoorQuoteId,
+                    arkoorMintUrl = existing.arkoorMintUrl,
                     formattedAmount = existing.formattedAmount,
                     nostrNprofile = existing.nostrNprofile,
                     nostrSecretHex = existing.nostrSecretHex,
@@ -993,6 +1031,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 lightningInvoice = existing.lightningInvoice,
                 lightningQuoteId = existing.lightningQuoteId,
                 lightningMintUrl = existing.lightningMintUrl,
+                arkoorAddress = existing.arkoorAddress,
+                arkoorQuoteId = existing.arkoorQuoteId,
+                arkoorMintUrl = existing.arkoorMintUrl,
                 formattedAmount = existing.formattedAmount,
                 nostrNprofile = existing.nostrNprofile,
                 nostrSecretHex = existing.nostrSecretHex,
@@ -1030,6 +1071,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                 lightningInvoice = existing.lightningInvoice,
                 lightningQuoteId = existing.lightningQuoteId,
                 lightningMintUrl = existing.lightningMintUrl,
+                arkoorAddress = existing.arkoorAddress,
+                arkoorQuoteId = existing.arkoorQuoteId,
+                arkoorMintUrl = existing.arkoorMintUrl,
                 formattedAmount = existing.formattedAmount,
                 nostrNprofile = existing.nostrNprofile,
                 nostrSecretHex = existing.nostrSecretHex,
@@ -1084,6 +1128,9 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                     lightningInvoice = existing.lightningInvoice,
                     lightningQuoteId = existing.lightningQuoteId,
                     lightningMintUrl = existing.lightningMintUrl,
+                    arkoorAddress = existing.arkoorAddress,
+                    arkoorQuoteId = existing.arkoorQuoteId,
+                    arkoorMintUrl = existing.arkoorMintUrl,
                     formattedAmount = existing.formattedAmount,
                     nostrNprofile = existing.nostrNprofile,
                     nostrSecretHex = existing.nostrSecretHex,
