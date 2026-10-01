@@ -193,9 +193,8 @@ object ActivityCsvExportHelper {
 
                 // Invoice/Cashu Request (full, non-truncated)
                 val invoiceOrToken = when (entry) {
-                    is PaymentHistoryEntry -> entry.lightningInvoice
-                        ?: entry.token.ifEmpty { null }
-                        ?: ""
+                    is PaymentHistoryEntry -> entry.getPaymentReference()
+                        ?: entry.token.ifEmpty { null } ?: ""
                     is WithdrawHistoryEntry -> entry.token ?: ""
                     else -> ""
                 }

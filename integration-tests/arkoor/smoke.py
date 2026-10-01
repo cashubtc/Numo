@@ -2,7 +2,6 @@
 """Verify real Arkoor quote creation and polling without sending funds."""
 import argparse
 import json
-import urllib.error
 import urllib.request
 
 
@@ -32,13 +31,13 @@ def main():
         assert quote["amount_issued"] == 0
         status = request(base, "/v1/mint/quote/arkoor/" + quote["quote"])
         assert status["request"] == quote["request"] and status["amount_paid"] == 0
-    try:
-        request(base, "/v1/mint/quote/bolt11", {"amount": 330, "unit": "sat"})
-    except urllib.error.HTTPError as error:
-        assert 400 <= error.code < 500
-    else:
-        raise AssertionError("This experiment should advertise only Arkoor")
-    print("PASS: two distinct mainnet Ark requests, unpaid status, no BOLT11 fallback")
+    lightning = request(base, "/v1/mint/quote/bolt11", {"amount": 330, "unit": "sat"})
+    assert lightning["request"].startswith("lnbc"), lightning
+    assert lightning["quote"] not in {q["quote"] for q in quotes}
+    assert lightning["state"] == "UNPAID", lightning
+    status = request(base, "/v1/mint/quote/bolt11/" + lightning["quote"])
+    assert status["request"] == lightning["request"] and status["state"] == "UNPAID"
+    print("PASS: independent Arkoor and Lightning mainnet quotes, all unpaid")
 
 
 if __name__ == "__main__":

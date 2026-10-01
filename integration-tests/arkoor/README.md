@@ -1,20 +1,42 @@
 # Numo Arkoor experiment
 
-This branch replaces the **local CDK checkout's Lightning tab** with **Arkoor**.
-It requests `PaymentMethod.Custom("arkoor")`, displays the returned Ark address
-unchanged as a QR code, shares that address, and polls the saved quote until the
-full checkout amount is paid and ecash has been issued. The address does not
-encode an amount: the payer must enter the amount shown by Numo. The Cashu tab
-remains available. The combined Cashu/Lightning QR is hidden for this checkout;
-Ark addresses must not go in a BIP321 `lightning=` parameter. BTCPay remains a
-separate, unchanged payment mode.
+This branch adds Arkoor to the **unified BIP321 QR** alongside Cashu and
+Lightning. Every new local checkout immediately requests two independent mint
+quotes for the same amount: `PaymentMethod.Bolt11` and
+`PaymentMethod.Custom("arkoor")`. Both are monitored, and the method that first
+completes payment and ecash issuance completes the checkout. They are alternative
+ways to pay the full amount; partial payments across different methods are not
+combined. The original Cashu and Lightning tabs remain available. BTCPay remains
+a separate payment mode.
+
+The unified QR, share action, and NFC payload all use the same URI:
+
+```text
+BITCOIN:?AMOUNT=0.0000033&ARK=ARK1...&LIGHTNING=LNBC...&CREQ=CREQB1...
+```
+
+**The correct URI key is `ark`, while the CDK method name is `arkoor`.**
+Bark 0.6.2's `BarkExtension::handle_param` explicitly accepts `ark`, and
+`serialize_params` emits `ark`. Its round-trip test also checks `&ARK=ARK1`.
+See [Bark's payment request implementation](https://raw.githubusercontent.com/ark-bitcoin/bark/master/bark/src/payment_request.rs)
+and [BIP321](https://github.com/bitcoin/bips/blob/master/bip-0321.mediawiki).
+BIP321 keys are case insensitive; uppercase Bech32 values make the QR denser.
+The Ark address has no amount, so `AMOUNT` carries the checkout value in decimal
+BTC (330 sats = `0.0000033` BTC), using exact integer-to-decimal conversion.
+Wallets need Ark support to use that option; Lightning wallets can use the
+`LIGHTNING` alternative.
+
+The unified payload waits for both quote attempts to finish. If one method fails,
+the other available methods remain usable and the user sees the method error.
+Quote IDs are stored independently; reopening a pending checkout reuses both.
+Previously saved Arkoor-only experimental entries migrate their legacy Lightning
+fields into the dedicated Arkoor fields before requesting the missing Lightning
+quote. An expired Arkoor quote remains in history so late funds can be checked.
 
 The APK uses application ID `com.electricdreams.numo.arkoor` and version suffix
 `-arkoor-experimental`, with its own wallet and preferences. It can coexist with
-normal Numo. New-wallet onboarding selects the local Arkoor mint. Unknown-mint
-Lightning swaps are disabled by default. Select **sats** as the base unit.
-The Arkoor-only mint does not offer Lightning withdrawals; ecash can be exported
-as a Cashu token.
+normal Numo. New-wallet onboarding selects the local mint. Unknown-mint Lightning
+swaps are disabled by default. Select **sats** as the base unit.
 
 ## Mainnet environment
 
@@ -43,8 +65,10 @@ python3 integration-tests/arkoor/smoke.py
 ```
 
 The mint listens on `127.0.0.1:3339`; its Bark processor listens on
-`127.0.0.1:50059`. Both bind only to loopback. The processor advertises **only
-`arkoor`** for this experiment. Do not run another processor over the same Bark
+`127.0.0.1:50059`. Both bind only to loopback. The processor advertises **`bolt11` and
+`arkoor`** for this experiment. When upgrading from the Arkoor-only setup,
+run `environment.py stop` and then `environment.py start` to apply the new
+processor method list. Do not run another processor over the same Bark
 wallet directory at the same time.
 
 State, logs, the mint seed, and a backup of Bark's data before this experiment
@@ -82,17 +106,16 @@ URL with `./gradlew assembleDebug -ParkMintUrl=https://your-mint.example`.
 
 Launch **Numo Ark**, create its wallet, keep **Numo Arkoor experiment** as the
 selected mint, and enter a checkout of at least **330 sats** (maximum 1,000,000).
-The initial selected tab is **Arkoor**, with the exact quoted amount in sats as
-the main amount. Fiat input remains recorded in history. Scan with a compatible Bark wallet on
-the same Ark server, enter the displayed sats amount, and pay. A successful
-checkout means the mint has confirmed payment and Numo has obtained ecash.
+The initially selected tab is **Unified**, with the exact quoted amount in sats
+as the main amount. Fiat input remains recorded in history. Scan with a compatible
+Bark wallet on the same Ark server to pay using Arkoor, or use the Lightning
+invoice. A successful checkout means the mint has confirmed payment and Numo has
+obtained ecash. Closing the screen keeps the pending checkout in history.
 
-Closing the screen leaves the quote in payment history. Reopen the pending
-entry to reuse the address and quote; no replacement quote is created.
-The existing serialized history fields `lightningInvoice`, `lightningQuoteId`,
-and `lightningMintUrl` hold the request, quote, and mint for this branch;
-`paymentType` distinguishes `arkoor` from `lightning`. Transaction details and
-CSV exports label these payments Arkoor.
+History stores `lightningInvoice`, `lightningQuoteId`, and `lightningMintUrl`
+separately from `arkoorAddress`, `arkoorQuoteId`, and `arkoorMintUrl`.
+`paymentType` records the method that actually paid, rather than the first quote
+that happened to become ready. Both quote records survive completion.
 
 ## Backend behavior and compatibility
 
@@ -114,7 +137,11 @@ method name.
 ```bash
 ./gradlew testDebugUnitTest \
   --tests 'com.electricdreams.numo.payment.ArkoorMintSessionTest' \
+  --tests 'com.electricdreams.numo.payment.UnifiedPaymentRequestTest' \
+  --tests 'com.electricdreams.numo.payment.LightningMintHandlerTest' \
+  --tests 'com.electricdreams.numo.payment.LightningMintHandlerCoreTest' \
   --tests 'com.electricdreams.numo.feature.history.PaymentsHistoryActivityTest' \
+  --tests 'com.electricdreams.numo.feature.history.ActivityCsvExportHelperTest' \
   --tests 'com.electricdreams.numo.core.util.MintManagerTest' \
   --tests 'com.electricdreams.numo.ui.components.AmountDisplayManagerTest'
 ./gradlew assembleDebug lintDebug
@@ -124,14 +151,26 @@ python3 integration-tests/arkoor/smoke.py
 ```
 
 The smoke test uses the real mainnet mint/processor to create two distinct
-unpaid Ark requests, poll them, and check that BOLT11 is unavailable. It sends
+unpaid Ark requests and one Lightning invoice, and poll their saved quotes. It sends
 no funds. Unit tests cover partial-payment accounting, cancellation, retries,
 resume behavior, history persistence, receive attribution and durable event
 deduplication. A funded mainnet payment is a separate manual validation step.
 
-Validation on the development host also covered onboarding against the real
-mint, opening a 330-sat request in an Android 34 emulator, decoding the rendered
-QR back to the exact mint-provided address, sharing that same address, and
-reopening the saved quote. No mainnet payment was sent. Android Lint completes
-with the repository's existing findings (`abortOnError = false`); it is not a
-clean lint baseline.
+To check a decoded URI with Bark's actual parser without opening a wallet or
+sending funds, write the URI to a text file and run:
+
+```bash
+cd ~/cdk-payment-processors/crates/bark
+cargo run --locked --example inspect_bip321 -- /path/to/unified-request.txt
+```
+
+The result contains the parsed sats amount, Ark addresses, and Lightning invoices.
+Compare them with the two mint quote responses. Android Lint completes with the
+repository's existing findings (`abortOnError = false`); it is not a clean lint
+baseline. A funded mainnet payment has not been tested.
+
+On the development host, the Android 34 emulator generated a real 330-sat checkout
+with distinct Lightning and Arkoor quote IDs. The rendered QR decoded successfully;
+Bark 0.6.2 parsed that exact URI and recovered both mint-provided destinations and
+330 sats. Android's share preview matched the same URI. Reopening the checkout
+reused both quote IDs and preserved both destinations and the amount in the QR.
