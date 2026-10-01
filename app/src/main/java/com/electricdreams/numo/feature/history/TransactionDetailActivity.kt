@@ -221,6 +221,7 @@ class TransactionDetailActivity : AppCompatActivity() {
         val paymentTypeText: TextView = findViewById(R.id.detail_payment_type)
         paymentTypeText.text = when {
             isWithdrawal -> getString(R.string.transaction_detail_type_withdrawal)
+            paymentType == PaymentHistoryEntry.TYPE_ARKOOR -> getString(R.string.payment_request_arkoor)
             paymentType == PaymentHistoryEntry.TYPE_LIGHTNING -> getString(R.string.transaction_detail_payment_type_lightning_value)
             paymentType == PaymentHistoryEntry.TYPE_CASHU -> getString(R.string.transaction_detail_payment_type_cashu_value)
             else -> getString(R.string.transaction_detail_type_payment_received)
@@ -307,7 +308,9 @@ class TransactionDetailActivity : AppCompatActivity() {
         val isCashu = paymentType == PaymentHistoryEntry.TYPE_CASHU
 
         if (!lightningInvoice.isNullOrEmpty()) {
-            invoiceLabel.text = if (isCashu) {
+            invoiceLabel.text = if (paymentType == PaymentHistoryEntry.TYPE_ARKOOR) {
+                getString(R.string.payment_request_arkoor_address)
+            } else if (isCashu) {
                 getString(R.string.transaction_detail_cashu_request_label)
             } else {
                 getString(R.string.transaction_detail_invoice_label)

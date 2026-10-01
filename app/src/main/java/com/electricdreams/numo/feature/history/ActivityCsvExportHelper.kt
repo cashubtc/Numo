@@ -114,6 +114,7 @@ object ActivityCsvExportHelper {
                 // Payment Method
                 val method = when (entry) {
                     is PaymentHistoryEntry -> when (entry.paymentType) {
+                        PaymentHistoryEntry.TYPE_ARKOOR -> "Arkoor"
                         PaymentHistoryEntry.TYPE_LIGHTNING -> "Lightning"
                         PaymentHistoryEntry.TYPE_CASHU -> "Cashu"
                         else -> "Cashu"
