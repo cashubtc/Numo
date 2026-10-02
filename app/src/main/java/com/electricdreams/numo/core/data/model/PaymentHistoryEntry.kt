@@ -118,7 +118,7 @@ data class PaymentHistoryEntry(
     override val label: String? = null,
 ) : HistoryEntry {
 
-    /** Migrate requests saved by the first, Arkoor-only experimental build. */
+    /** Migrate requests saved by the first Arkoor-only build. */
     fun withSeparateArkoorQuote(): PaymentHistoryEntry {
         val legacyAddress = lightningInvoice ?: return this
         if (paymentType != TYPE_ARKOOR || arkoorQuoteId != null ||
