@@ -1,6 +1,10 @@
 package com.electricdreams.numo.payment
 
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.cashudevkit.Amount
 import org.cashudevkit.CurrencyUnit
@@ -19,9 +23,11 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ArkoorMintSessionTest {
     private val wallet = mock<WalletInterface>()
     private val method = ArkoorMintSession.METHOD
@@ -78,6 +84,80 @@ class ArkoorMintSessionTest {
         assertEquals(1, retries)
         verify(wallet, never()).mintQuote(any(), anyOrNull(), anyOrNull(), anyOrNull())
         verify(wallet, never()).mint(any(), any(), anyOrNull())
+    }
+
+    @Test
+    fun `resume retries the first status check without replacing the saved quote`() = runTest {
+        val initial = quote()
+        val issued = quote(1_000u, 1_000u)
+        whenever(wallet.checkMintQuote("quote"))
+            .thenThrow(RuntimeException("offline"))
+            .thenThrow(RuntimeException("still offline"))
+            .thenReturn(initial, issued)
+        var retries = 0
+        var ready = 0
+        ArkoorMintSession(wallet, 1).receive(1_000, "quote", { ready++ }, { retries++ })
+        assertEquals(2, retries)
+        assertEquals(1, ready)
+        verify(wallet, times(4)).checkMintQuote("quote")
+        verify(wallet, never()).mintQuote(any(), anyOrNull(), anyOrNull(), anyOrNull())
+    }
+
+    @Test
+    fun `websocket updates trigger checks and partial payments never complete checkout`() = runTest {
+        val initial = quote()
+        val partial = quote(500u)
+        val paid = quote(1_000u)
+        whenever(wallet.checkMintQuote("quote")).thenReturn(initial, initial, partial, paid)
+        val proof = mock<Proof>()
+        whenever(proof.amount).thenReturn(Amount(1_000u))
+        whenever(wallet.mint(any(), any(), anyOrNull())).thenReturn(listOf(proof))
+        var closed = false
+        val updates = MintQuoteWebSocket.Subscription("quote", "arkoor_mint_quote") { closed = true }
+        updates.isConnected = true
+        val session = ArkoorMintSession(wallet, subscribeToQuote = { updates })
+        val receiving = launch { session.receive(1_000, "quote", {}, { throw it }) }
+        runCurrent()
+        advanceTimeBy(10_000)
+        runCurrent()
+        verify(wallet, times(2)).checkMintQuote("quote")
+        updates.signal()
+        runCurrent()
+        verify(wallet, times(3)).checkMintQuote("quote")
+        verify(wallet, never()).mint(any(), any(), anyOrNull())
+        assertTrue(receiving.isActive)
+        updates.signal()
+        runCurrent()
+        assertTrue(receiving.isCompleted)
+        assertTrue(closed)
+        verify(wallet).mint("quote", org.cashudevkit.SplitTarget.None, null)
+    }
+
+    @Test
+    fun `unavailable websocket falls back to checks on the same quote`() = runTest {
+        val initial = quote()
+        val issued = quote(1_000u, 1_000u)
+        whenever(wallet.checkMintQuote("quote")).thenReturn(initial, initial, issued)
+        var closed = false
+        val updates = MintQuoteWebSocket.Subscription("quote", "arkoor_mint_quote") { closed = true }
+        ArkoorMintSession(wallet, 1, subscribeToQuote = { updates })
+            .receive(1_000, "quote", {}, { throw it })
+        verify(wallet, times(3)).checkMintQuote("quote")
+        assertTrue(closed)
+        verify(wallet, never()).mintQuote(any(), anyOrNull(), anyOrNull(), anyOrNull())
+    }
+
+    @Test
+    fun `cancellation during first saved quote check does not retry`() = runTest {
+        whenever(wallet.checkMintQuote("quote")).thenThrow(CancellationException("closed"))
+        var retries = 0
+        val failure = runCatching {
+            ArkoorMintSession(wallet, 1).receive(1_000, "quote", {}, { retries++ })
+        }.exceptionOrNull()
+        assertTrue(failure is CancellationException)
+        assertEquals(0, retries)
+        verify(wallet).checkMintQuote("quote")
+        verify(wallet, never()).mintQuote(any(), anyOrNull(), anyOrNull(), anyOrNull())
     }
 
     @Test

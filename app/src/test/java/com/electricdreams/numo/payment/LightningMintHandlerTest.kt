@@ -5,6 +5,8 @@ import com.electricdreams.numo.core.cashu.CashuWalletManager
 import org.cashudevkit.WalletRepository
 import org.cashudevkit.Wallet
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -16,6 +18,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.test.runTest
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okhttp3.mockwebserver.MockResponse
@@ -24,6 +27,7 @@ import org.mockito.kotlin.anyOrNull
 import android.content.Context
 import com.electricdreams.numo.R
 import org.mockito.kotlin.whenever
+import org.mockito.kotlin.doSuspendableAnswer
 import org.cashudevkit.Amount
 import org.cashudevkit.MintQuote
 import org.cashudevkit.MintUrl
@@ -55,6 +59,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class LightningMintHandlerTest {
 
     @Mock
@@ -194,6 +199,114 @@ class LightningMintHandlerTest {
             // Then - verify that we get an error (either from validation or wallet)
             verify(mockCallback).onError(any())
         }
+    }
+
+    @Test
+    fun `websocket payment uses shared connection and mints once`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val factory = FakeQuoteSocketFactory()
+        val sockets = MintQuoteWebSocket(this, factory)
+        val arkoor = sockets.subscribe(preferredMint, "arkoor_mint_quote", "arkoor-quote")
+        val sharedHandler = LightningMintHandler(
+            mockContext, preferredMint, allowedMints, this, dispatcher, sockets,
+        )
+        whenever(mockWallet.mintQuote(any(), anyOrNull(), anyOrNull(), anyOrNull()))
+            .thenReturn(mockMintQuote)
+        whenever(mockWallet.checkMintQuote(any())).thenReturn(mockMintQuote)
+        whenever(mockWallet.mint(any(), any(), anyOrNull())).thenReturn(emptyList())
+        sharedHandler.start(paymentAmount, mockCallback)
+        runCurrent()
+        assertEquals(1, factory.connections.size)
+        val connection = factory.connections.single()
+        connection.open()
+        val lightningRequest = com.google.gson.JsonParser.parseString(connection.messages.last())
+            .asJsonObject.getAsJsonObject("params")
+        connection.notify(arkoor.id, "arkoor-quote", "\"amount_paid\":1000")
+        runCurrent()
+        verify(mockWallet, never()).mint(any(), any(), anyOrNull())
+        connection.notify(lightningRequest.get("subId").asString, quoteId, "\"state\":\"PAID\"")
+        runCurrent()
+        advanceTimeBy(LightningMintHandler.POLL_INTERVAL_MS)
+        runCurrent()
+        verify(mockWallet, times(1)).mint(quoteId, org.cashudevkit.SplitTarget.None, null)
+        verify(mockCallback, times(1)).onPaymentSuccess()
+        verify(connection.socket, never()).close(any(), any())
+        arkoor.close()
+        sockets.close()
+    }
+
+    @Test
+    fun `polling payment releases lightning subscription while arkoor remains active`() = runTest {
+        val dispatcher = StandardTestDispatcher(testScheduler)
+        val factory = FakeQuoteSocketFactory()
+        val sockets = MintQuoteWebSocket(this, factory)
+        val arkoor = sockets.subscribe(preferredMint, "arkoor_mint_quote", "arkoor-quote")
+        val sharedHandler = LightningMintHandler(
+            mockContext, preferredMint, allowedMints, this, dispatcher, sockets,
+        )
+        whenever(mockWallet.mintQuote(any(), anyOrNull(), anyOrNull(), anyOrNull()))
+            .thenReturn(mockMintQuote)
+        val paid = mock(MintQuote::class.java)
+        whenever(paid.state).thenReturn(QuoteState.PAID)
+        whenever(mockWallet.checkMintQuote(any())).thenReturn(paid)
+        whenever(mockWallet.mint(any(), any(), anyOrNull())).thenReturn(emptyList())
+        sharedHandler.start(paymentAmount, mockCallback)
+        runCurrent()
+        val connection = factory.connections.single()
+        connection.open()
+        advanceTimeBy(LightningMintHandler.POLL_INTERVAL_MS)
+        runCurrent()
+        verify(mockCallback).onPaymentSuccess()
+        verify(connection.socket, never()).close(any(), any())
+        val lastRequest = com.google.gson.JsonParser.parseString(connection.messages.last()).asJsonObject
+        assertEquals("unsubscribe", lastRequest.get("method").asString)
+        connection.notify(arkoor.id, "arkoor-quote", "\"amount_paid\":1000")
+        assertEquals(1_000, arkoor.awaitUpdate(1_000)?.get("amount_paid")?.asInt)
+        sockets.close()
+    }
+
+    @Test
+    fun `polling waits for websocket issuance to finish before cleanup`() = runTest {
+        val factory = FakeQuoteSocketFactory()
+        val sockets = MintQuoteWebSocket(this, factory)
+        val sharedHandler = LightningMintHandler(
+            mockContext, preferredMint, allowedMints, this,
+            StandardTestDispatcher(testScheduler), sockets,
+        )
+        whenever(mockWallet.mintQuote(any(), anyOrNull(), anyOrNull(), anyOrNull()))
+            .thenReturn(mockMintQuote)
+        whenever(mockWallet.checkMintQuote(any())).thenReturn(mockMintQuote)
+        val issuance = CompletableDeferred<List<Proof>>()
+        var issuanceCancelled = false
+        whenever(mockWallet.mint(any(), any(), anyOrNull())).doSuspendableAnswer {
+            try {
+                issuance.await()
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                issuanceCancelled = true
+                throw cancelled
+            }
+        }
+        sharedHandler.start(paymentAmount, mockCallback)
+        runCurrent()
+        val connection = factory.connections.single()
+        connection.open()
+        val params = com.google.gson.JsonParser.parseString(connection.messages.single())
+            .asJsonObject.getAsJsonObject("params")
+        connection.notify(params.get("subId").asString, quoteId, "\"state\":\"PAID\"")
+        runCurrent()
+        advanceTimeBy(LightningMintHandler.POLL_INTERVAL_MS * 2)
+        runCurrent()
+        assertFalse(issuanceCancelled)
+        assertTrue(ReflectionHelpers.getField<kotlinx.coroutines.Job>(sharedHandler, "mintJob").isActive)
+        verify(mockCallback, never()).onPaymentSuccess()
+        issuance.complete(emptyList())
+        runCurrent()
+        advanceTimeBy(LightningMintHandler.POLL_INTERVAL_MS)
+        runCurrent()
+        verify(mockCallback).onPaymentSuccess()
+        verify(mockWallet, times(1)).mint(quoteId, org.cashudevkit.SplitTarget.None, null)
+        verify(connection.socket).close(1000, "Checkout monitoring finished")
+        sockets.close()
     }
 
     @Test

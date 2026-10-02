@@ -117,7 +117,7 @@ description = "Mainnet ecash backed by the local Bark wallet"
 [payment_backend]
 backend = "grpcprocessor"
 unit = "sat"
-min_mint = 330
+min_mint = 2
 max_mint = 1000000
 
 [grpc_processor]

@@ -55,6 +55,7 @@ import com.electricdreams.numo.ndef.NdefHostCardEmulationService
 import com.electricdreams.numo.payment.UnifiedPaymentRequest
 import com.electricdreams.numo.payment.ArkoorMintSession
 import com.electricdreams.numo.payment.LightningMintHandler
+import com.electricdreams.numo.payment.MintQuoteWebSocket
 import com.electricdreams.numo.payment.NostrPaymentHandler
 import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.payment.PaymentTabManager
@@ -144,6 +145,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     // Payment handlers
     private var nostrHandler: NostrPaymentHandler? = null
     private var lightningHandler: LightningMintHandler? = null
+    private var quoteSockets: MintQuoteWebSocket? = null
     private var arkoorJob: Job? = null
     private var isDualQuoteCheckout = false
     private var arkoorLoading = false
@@ -189,6 +191,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     // Pending NFC animation outcome data consumed when native animation reaches terminal frame.
     private var pendingNfcSuccessToken: String? = null
+    private var pendingNfcSuccessMintUrl: String? = null
     private var pendingNfcSuccessAmount: Long = 0
     private var currentOverlayActionMode: OverlayActionMode = OverlayActionMode.SUCCESS
     private var isProcessingNfcPayment = false
@@ -839,7 +842,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         // Both start immediately, including when the delayed-Lightning preference is set.
         val preferredMint = resumeLightningMintUrl ?: resumeArkoorMintUrl
             ?: mintManager.getPreferredLightningMint()
-        lightningHandler = LightningMintHandler(this, preferredMint, allowedMints, lifecycleScope)
+        val sockets = MintQuoteWebSocket(lifecycleScope)
+        quoteSockets = sockets
+        lightningHandler = LightningMintHandler(
+            this, preferredMint, allowedMints, lifecycleScope, quoteSockets = sockets,
+        )
         largeAmountDisplay.text = Amount(paymentAmount, Currency.BTC).toString()
         convertedAmountDisplay.visibility = View.GONE
         tabManager.selectTab(PaymentTabManager.PaymentTab.UNIFIED)
@@ -899,7 +906,9 @@ class PaymentRequestActivity : AppCompatActivity() {
                     val wallet = repository.getWallet(
                         org.cashudevkit.MintUrl(mintUrl), org.cashudevkit.CurrencyUnit.Sat,
                     )
-                    ArkoorMintSession(wallet).receive(
+                    ArkoorMintSession(wallet, subscribeToQuote = { quoteId ->
+                        checkNotNull(quoteSockets).subscribe(mintUrl, "arkoor_mint_quote", quoteId)
+                    }).receive(
                         amountSats = paymentAmount,
                         existingQuoteId = resumeArkoorQuoteId,
                         onRequestReady = { quote ->
@@ -1627,7 +1636,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
-        showPaymentSuccess("", paymentAmount)
+        showPaymentSuccess("", paymentAmount, paidMint)
     }
 
     /**
@@ -1670,6 +1679,10 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Immediately stop/clear NFC/HCE service to prevent paying wallets from attempting again
         clearHceService()
+
+        arkoorJob?.cancel()
+        lightningHandler?.cancel()
+        quoteSockets?.close()
 
         return true
     }
@@ -1746,6 +1759,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         arkoorJob?.cancel()
         lightningHandler?.cancel()
         lightningHandler = null
+        quoteSockets?.close()
+        quoteSockets = null
 
         // Clean up HCE service
         clearHceService()
@@ -1769,6 +1784,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         arkoorJob?.cancel()
         lightningHandler?.cancel()
         lightningHandler = null
+        quoteSockets?.close()
+        quoteSockets = null
 
         // Clean up HCE service
         clearHceService()
@@ -1834,12 +1851,12 @@ class PaymentRequestActivity : AppCompatActivity() {
      * This is extracted so it can be called from both the normal flow and the NFC animation flow.
      * This ensures auto-withdrawal logic is consistent across all payment paths.
      */
-    private fun triggerPostPaymentOperations(token: String) {
+    private fun triggerPostPaymentOperations(token: String, receivedMintUrl: String?) {
         // Archive the basket now that payment is complete
         markBasketAsPaid()
         
         // Check for auto-withdrawal after successful payment (runs in background, survives activity destruction)
-        AutoWithdrawManager.getInstance(this).onPaymentReceived(token, lightningMintUrl)
+        AutoWithdrawManager.getInstance(this).onPaymentReceived(token, receivedMintUrl)
     }
 
     private fun dispatchPaymentReceivedWebhook() {
@@ -1861,7 +1878,7 @@ class PaymentRequestActivity : AppCompatActivity() {
      * Unified success handler for all payment types.
      * Always renders the native success overlay so NFC and non-NFC success paths stay consistent.
      */
-    private fun showPaymentSuccess(token: String, amount: Long) {
+    private fun showPaymentSuccess(token: String, amount: Long, receivedMintUrl: String? = null) {
         if (nfcAnimationContainer.visibility != View.VISIBLE) {
             nfcOverlayShownAtMs = SystemClock.elapsedRealtime()
             Log.d(TAG, "overlay_shown_ms=$nfcOverlayShownAtMs")
@@ -1875,6 +1892,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             applyFullscreenForAnimationOverlay()
         }
         pendingNfcSuccessToken = token
+        pendingNfcSuccessMintUrl = receivedMintUrl
         pendingNfcSuccessAmount = amount
         showNfcAnimationSuccess(formattedAmountString)
     }
@@ -1932,6 +1950,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         arkoorJob?.cancel()
         lightningHandler?.cancel()
         lightningHandler = null
+        quoteSockets?.close()
+        quoteSockets = null
 
         // Clean up HCE service
         clearHceService()
@@ -1954,6 +1974,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         resetResultTextViews()
         resetResultActionButtons()
         pendingNfcSuccessToken = null
+        pendingNfcSuccessMintUrl = null
         pendingNfcSuccessAmount = 0
 
         animationResultLabelText.animate().cancel()
@@ -2105,14 +2126,15 @@ class PaymentRequestActivity : AppCompatActivity() {
         animateResultTextIn(showAmount = success)
         showResultActionsAnimated(mode)
 
-        if (success && pendingNfcSuccessToken != null) {
-            val token = pendingNfcSuccessToken!!
+        if (success) pendingNfcSuccessToken?.let { token ->
+            val receivedMintUrl = pendingNfcSuccessMintUrl
             pendingNfcSuccessToken = null
+            pendingNfcSuccessMintUrl = null
             pendingNfcSuccessAmount = 0
 
             // Trigger auto-withdrawal and basket archiving (same as showPaymentSuccess does)
             // but don't show PaymentReceivedActivity since we're already showing animation
-            triggerPostPaymentOperations(token)
+            triggerPostPaymentOperations(token, receivedMintUrl)
         }
     }
 
