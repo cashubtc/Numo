@@ -62,6 +62,7 @@ cd ~/numo
 python3 integration-tests/arkoor/environment.py start
 python3 integration-tests/arkoor/environment.py status
 python3 integration-tests/arkoor/smoke.py
+./integration-tests/arkoor/websocket-smoke.sh
 ```
 
 The mint listens on `127.0.0.1:3339`; its Bark processor listens on
@@ -77,6 +78,19 @@ are stored in `~/.local/share/numo-arkoor/`. Keep the complete mint directory an
 The existing Bark mnemonic stays in its existing configuration and is never
 copied into this repository. `NUMO_CDK_DIR`, `NUMO_BARK_DIR`, and `NUMO_ARK_STATE`
 override the default paths.
+
+Follow both service logs while testing (`Ctrl-C` stops viewing the logs only):
+
+```bash
+tail -F ~/.local/share/numo-arkoor/mint.log \
+        ~/.local/share/numo-arkoor/processor.log
+```
+
+For detailed mint request and quote logs:
+
+```bash
+tail -F ~/.local/share/numo-arkoor/mint/logs/cdk-mintd.log
+```
 
 CDK stores configuration in its database. `environment.py` imports `mint.toml`
 once with `config init --new-mint`. To change the mint config later, stop the
@@ -105,7 +119,7 @@ alias `10.0.2.2`. A remotely hosted mint should use HTTPS; override the build
 URL with `./gradlew assembleDebug -ParkMintUrl=https://your-mint.example`.
 
 Launch **Numo Ark**, create its wallet, keep **Numo Arkoor experiment** as the
-selected mint, and enter a checkout of at least **330 sats** (maximum 1,000,000).
+selected mint, and enter a checkout of at least **2 sats** (maximum 1,000,000).
 The initially selected tab is **Unified**, with the exact quoted amount in sats
 as the main amount. Fiat input remains recorded in history. Scan with a compatible
 Bark wallet on the same Ark server to pay using Arkoor, or use the Lightning
@@ -151,10 +165,10 @@ python3 integration-tests/arkoor/smoke.py
 ```
 
 The smoke test uses the real mainnet mint/processor to create two distinct
-unpaid Ark requests and one Lightning invoice, and poll their saved quotes. It sends
-no funds. Unit tests cover partial-payment accounting, cancellation, retries,
+unpaid 2-sat Ark requests and one 2-sat Lightning invoice, and poll their saved
+quotes. It sends no funds. Unit tests cover partial-payment accounting, cancellation, retries,
 resume behavior, history persistence, receive attribution and durable event
-deduplication. A funded mainnet payment is a separate manual validation step.
+deduplication. A funded 2-sat mainnet payment remains a separate manual validation step.
 
 To check a decoded URI with Bark's actual parser without opening a wallet or
 sending funds, write the URI to a text file and run:
@@ -167,10 +181,28 @@ cargo run --locked --example inspect_bip321 -- /path/to/unified-request.txt
 The result contains the parsed sats amount, Ark addresses, and Lightning invoices.
 Compare them with the two mint quote responses. Android Lint completes with the
 repository's existing findings (`abortOnError = false`); it is not a clean lint
-baseline. A funded mainnet payment has not been tested.
+baseline.
 
 On the development host, the Android 34 emulator generated a real 330-sat checkout
 with distinct Lightning and Arkoor quote IDs. The rendered QR decoded successfully;
 Bark 0.6.2 parsed that exact URI and recovered both mint-provided destinations and
 330 sats. Android's share preview matched the same URI. Reopening the checkout
 reused both quote IDs and preserved both destinations and the amount in the QR.
+
+On 2026-10-01, a manual 330-sat Ark payment from Noah Android reached Bark at
+15:52:56 UTC. Numo displayed success at 15:52:58 UTC, and both the mint quote
+(`amount_paid = amount_issued = 330`) and Numo's completed history entry confirmed
+issuance. That build polled its saved Arkoor quote every two seconds.
+
+Current checkouts share one WebSocket connection per mint, with separate
+`arkoor_mint_quote` and `bolt11_mint_quote` subscriptions. Arkoor notifications
+wake CDK status checks, which validate the full received amount before issuance.
+Arkoor reconciles status every 30 seconds while connected, and every two seconds
+when push updates are unavailable or issuance needs recovery. Lightning retains
+its five-second polling fallback. Saved Arkoor quotes also retry their initial
+status check without creating a replacement quote.
+
+`websocket-smoke.sh` runs the Android shared-connection code against this real
+mint, checking both quote snapshots and resubscription on a single connection.
+It creates unpaid 2-sat quotes and sends no funds. Start the environment first;
+set `NUMO_ARKOOR_MINT_URL` to test a different mint.

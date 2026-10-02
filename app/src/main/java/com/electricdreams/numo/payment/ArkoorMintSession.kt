@@ -13,6 +13,7 @@ import org.cashudevkit.WalletInterface
 class ArkoorMintSession(
     private val wallet: WalletInterface,
     private val pollIntervalMs: Long = 2_000,
+    private val subscribeToQuote: ((String) -> MintQuoteWebSocket.Subscription)? = null,
     private val nowSeconds: () -> ULong = { (System.currentTimeMillis() / 1_000).toULong() },
 ) {
     suspend fun receive(
@@ -26,7 +27,7 @@ class ArkoorMintSession(
         val initial = if (existingQuoteId != null) {
             // Load the locally stored quote, preserving its NUT-20 signing key.
             // Never create a replacement quote when resuming a checkout.
-            wallet.checkMintQuote(existingQuoteId)
+            checkSavedQuote(existingQuoteId, onRetry)
         } else {
             val settings = wallet.fetchMintInfo()?.nuts?.nut04
             check(settings != null && !settings.disabled) { "Minting is disabled" }
@@ -42,35 +43,71 @@ class ArkoorMintSession(
         validateQuote(initial, expected)
         onRequestReady(initial)
 
+        val updates = subscribeToQuote?.invoke(initial.id)
+        try {
+            while (true) {
+                var recovering = false
+                var expiry = initial.expiry
+                try {
+                    // Notifications wake this check; CDK remains responsible for
+                    // persisting quote state and recovering interrupted operations.
+                    val quote = wallet.checkMintQuote(initial.id)
+                    validateQuote(quote, expected)
+                    expiry = quote.expiry
+                    // Custom quotes can receive several partial payments. A PAID state
+                    // alone does not establish that the checkout amount was received.
+                    if (quote.amountIssued.value >= expected) {
+                        if (quote.usedByOperation == null) return
+                        recovering = true
+                    } else if (quote.amountPaid.value >= expected) {
+                        val proofs = wallet.mint(quote.id, SplitTarget.None, null)
+                        val minted = proofs.sumOf { it.amount.value }
+                        if (quote.amountIssued.value + minted >= expected) return
+                        recovering = true
+                    } else if (quote.expiry > 0uL && quote.expiry <= nowSeconds()) {
+                        error("Arkoor request expired; reopen this payment to check for late funds")
+                    }
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (error: IllegalStateException) {
+                    throw error
+                } catch (error: Exception) {
+                    onRetry(error)
+                    recovering = true
+                }
+                if (recovering || updates == null) {
+                    delay(pollIntervalMs)
+                } else {
+                    // Use push updates while connected, with slower reconciliation
+                    // for missed events. Disconnected/unsupported mints keep polling.
+                    var timeout = if (updates.isConnected) RECONCILE_INTERVAL_MS else pollIntervalMs
+                    val now = nowSeconds()
+                    if (expiry > now) {
+                        timeout = minOf(timeout, (expiry - now).coerceAtMost(30u).toLong() * 1_000)
+                    }
+                    updates.awaitUpdate(timeout)
+                }
+            }
+        } finally {
+            updates?.close()
+        }
+    }
+
+    private suspend fun checkSavedQuote(
+        quoteId: String,
+        onRetry: suspend (Exception) -> Unit,
+    ): MintQuote {
         while (true) {
             try {
-                val quote = wallet.checkMintQuote(initial.id)
-                validateQuote(quote, expected)
-                // Custom quotes can receive several partial payments. A PAID state
-                // alone does not establish that the checkout amount was received.
-                if (quote.amountIssued.value >= expected) {
-                    // CDK status checks recover interrupted mint operations. Do not
-                    // report success while that recovery still owns the quote.
-                    if (quote.usedByOperation == null) return
-                    delay(pollIntervalMs)
-                    continue
-                }
-                if (quote.amountPaid.value >= expected) {
-                    val proofs = wallet.mint(quote.id, SplitTarget.None, null)
-                    val minted = proofs.sumOf { it.amount.value }
-                    if (quote.amountIssued.value + minted >= expected) return
-                } else if (quote.expiry > 0uL && quote.expiry <= nowSeconds()) {
-                    error("Arkoor request expired; reopen this payment to check for late funds")
-                }
+                return wallet.checkMintQuote(quoteId)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (error: IllegalStateException) {
                 throw error
             } catch (error: Exception) {
-                // A transient status or mint failure must keep the same quote alive.
                 onRetry(error)
+                delay(pollIntervalMs)
             }
-            delay(pollIntervalMs)
         }
     }
 
@@ -86,5 +123,6 @@ class ArkoorMintSession(
 
     companion object {
         val METHOD = PaymentMethod.Custom("arkoor")
+        private const val RECONCILE_INTERVAL_MS = 30_000L
     }
 }
