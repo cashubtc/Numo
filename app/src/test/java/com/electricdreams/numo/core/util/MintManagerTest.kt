@@ -53,11 +53,9 @@ class MintManagerTest {
         assertTrue(mintManager.hasAnyMints())
         val mints = mintManager.getAllowedMints()
         assertFalse(mints.isEmpty())
-        assertTrue(mints.contains("https://mint.minibits.cash/Bitcoin"))
-        assertTrue(mints.contains("https://mint.macadamia.cash"))
-        assertTrue(mints.contains("https://antifiat.cash"))
-        assertFalse(mints.contains("https://mint.chorus.community"))
-        assertFalse(mints.contains("https://mint.coinos.io"))
+        assertEquals(listOf(com.electricdreams.numo.BuildConfig.ARK_MINT_URL), mints)
+        assertEquals(com.electricdreams.numo.BuildConfig.ARK_MINT_URL,
+            mintManager.getPreferredLightningMint())
     }
 
     @Test
@@ -77,7 +75,7 @@ class MintManagerTest {
 
     @Test
     fun testRemoveMint() {
-        val mint = "https://mint.minibits.cash/Bitcoin"
+        val mint = com.electricdreams.numo.BuildConfig.ARK_MINT_URL
         assertTrue(mintManager.isMintAllowed(mint))
         assertTrue(mintManager.removeMint(mint))
         assertFalse(mintManager.isMintAllowed(mint))

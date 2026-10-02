@@ -88,6 +88,73 @@ class PaymentsHistoryActivityTest {
     }
 
     @Test
+    fun `legacy arkoor request migrates into independent quote fields`() {
+        val id = PaymentsHistoryActivity.addPendingPayment(
+            context, 1_000L, "sat", 1_000L, null, null, "1,000 sats",
+        )
+        PaymentsHistoryActivity.updatePendingWithLightningInfo(
+            context, id, "ark1address", "ark-quote", "http://127.0.0.1:3339",
+            paymentType = PaymentHistoryEntry.TYPE_ARKOOR,
+        )
+        val entry = PaymentsHistoryActivity.getPaymentHistory(context).single()
+        assertNull(entry.paymentType)
+        assertEquals("ark1address", entry.arkoorAddress)
+        assertEquals("ark-quote", entry.arkoorQuoteId)
+        assertEquals("http://127.0.0.1:3339", entry.arkoorMintUrl)
+        assertNull(entry.lightningInvoice)
+        assertNull(entry.lightningQuoteId)
+        assertTrue(entry.isPending())
+    }
+
+    @Test
+    fun `both quote callback orders preserve independent requests through completion`() {
+        for (arkoorFirst in listOf(true, false)) {
+            val id = PaymentsHistoryActivity.addPendingPayment(
+                context, 1_000L, "sat", 1_000L, null, null, "1,000 sats",
+            )
+            val saveArk = {
+                PaymentsHistoryActivity.updatePendingWithArkoorInfo(
+                    context, id, "ark1address", "ark-quote", "https://mint.example",
+                )
+            }
+            val saveLightning = {
+                PaymentsHistoryActivity.updatePendingWithLightningInfo(
+                    context, id, "lnbc1invoice", "ln-quote", "https://mint.example",
+                )
+            }
+            if (arkoorFirst) { saveArk(); saveLightning() } else { saveLightning(); saveArk() }
+            PaymentsHistoryActivity.updatePendingWithNostrInfo(context, id, "nprofile", "secret")
+            val pending = PaymentsHistoryActivity.getPaymentEntryById(context, id)
+                ?: error("Missing pending checkout")
+            assertNull(pending.paymentType)
+            assertEquals("ark-quote", pending.arkoorQuoteId)
+            assertEquals("ln-quote", pending.lightningQuoteId)
+            val intent = com.electricdreams.numo.payment.PaymentIntentFactory
+                .createResumePaymentIntent(context, pending)
+            assertEquals("ark-quote", intent.getStringExtra("arkoor_quote_id"))
+            assertEquals("ln-quote", intent.getStringExtra("lightning_quote_id"))
+            assertEquals("lnbc1invoice", intent.getStringExtra("lightning_invoice"))
+            PaymentsHistoryActivity.completePendingPayment(
+                context, id, "", PaymentHistoryEntry.TYPE_ARKOOR, "https://mint.example",
+            )
+            val completed = PaymentsHistoryActivity.getPaymentEntryById(context, id)
+                ?: error("Missing completed checkout")
+            assertTrue(completed.isCompleted())
+            assertEquals(PaymentHistoryEntry.TYPE_ARKOOR, completed.paymentType)
+            assertEquals("ark1address", completed.arkoorAddress)
+            assertEquals("ark-quote", completed.arkoorQuoteId)
+            assertEquals("lnbc1invoice", completed.lightningInvoice)
+            assertEquals("ln-quote", completed.lightningQuoteId)
+            // Late callbacks must not replace the method that completed the checkout.
+            PaymentsHistoryActivity.completePendingPayment(
+                context, id, "", PaymentHistoryEntry.TYPE_LIGHTNING, "https://mint.example",
+            )
+            assertEquals(PaymentHistoryEntry.TYPE_ARKOOR,
+                PaymentsHistoryActivity.getPaymentEntryById(context, id)?.paymentType)
+        }
+    }
+
+    @Test
     fun `cancelPendingPayment removes only pending entries`() {
         val id1 = PaymentsHistoryActivity.addPendingPayment(
             context = context,
@@ -411,6 +478,23 @@ class PaymentsHistoryActivityTest {
         assertEquals(1, history.size)
         val entry = history.first()
         assertTrue(entry.isExpired())
+    }
+
+    @Test
+    fun `old arkoor quotes stay resumable for late payments`() {
+        val entry = PaymentHistoryEntry(
+            token = "", amount = 330L, enteredAmount = 330L,
+            date = java.util.Date(System.currentTimeMillis() - 3 * 60 * 60 * 1000L),
+            rawStatus = PaymentHistoryEntry.STATUS_PENDING,
+            paymentType = PaymentHistoryEntry.TYPE_ARKOOR,
+            lightningInvoice = "ark1address", lightningQuoteId = "quote",
+            lightningMintUrl = "http://127.0.0.1:3339",
+        )
+        context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE).edit()
+            .putString("history", com.google.gson.Gson().toJson(listOf(entry))).apply()
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+        assertTrue(PaymentsHistoryActivity.getPaymentHistory(context).single().isPending())
+        controller.pause().stop().destroy()
     }
 
     @Test

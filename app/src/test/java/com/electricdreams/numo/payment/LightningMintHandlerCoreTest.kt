@@ -8,7 +8,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Narrow tests for the deterministic helper logic used by [LightningMintHandler].
+ * Narrow tests for the shared quote connection's URL builder and CDK amounts.
  *
  * We deliberately avoid exercising WebSocket / polling orchestration and instead
  * focus on small, pure pieces of behavior that can be tested in isolation.
@@ -18,7 +18,7 @@ class LightningMintHandlerCoreTest {
     @Test
     fun `buildMintWsUrl builds expected ws url for https base`() {
         val mintUrl = MintUrl("https://mint.minibits.cash/Bitcoin")
-        val wsUrl = TestLightningMintHandler.buildWsUrlForTest(mintUrl)
+        val wsUrl = MintQuoteWebSocket.buildWsUrl(mintUrl.url)
 
         assertEquals("wss://mint.minibits.cash/Bitcoin/v1/ws", wsUrl)
     }
@@ -26,7 +26,7 @@ class LightningMintHandlerCoreTest {
     @Test
     fun `buildMintWsUrl builds expected ws url for http base`() {
         val mintUrl = MintUrl("http://example.com")
-        val wsUrl = TestLightningMintHandler.buildWsUrlForTest(mintUrl)
+        val wsUrl = MintQuoteWebSocket.buildWsUrl(mintUrl.url)
 
         assertEquals("ws://example.com/v1/ws", wsUrl)
     }
@@ -34,7 +34,7 @@ class LightningMintHandlerCoreTest {
     @Test
     fun `buildMintWsUrl leaves ws scheme untouched`() {
         val mintUrl = MintUrl("wss://custom.mint.local/path")
-        val wsUrl = TestLightningMintHandler.buildWsUrlForTest(mintUrl)
+        val wsUrl = MintQuoteWebSocket.buildWsUrl(mintUrl.url)
 
         assertEquals("wss://custom.mint.local/path/v1/ws", wsUrl)
     }
@@ -51,26 +51,5 @@ class LightningMintHandlerCoreTest {
         assertEquals(sats.toULong(), amount.value)
         // Basic check that the CurrencyUnit enum exposes a SAT unit.
         assertTrue(CurrencyUnit.Sat.toString().contains("Sat", ignoreCase = true))
-    }
-
-    /**
-     * Local helper that mirrors the private URL builder from LightningMintHandler
-     * so we can verify its deterministic behavior without touching internals
-     * via reflection.
-     */
-    private object TestLightningMintHandler {
-        fun buildWsUrlForTest(mintUrl: MintUrl): String {
-            val base = mintUrl.url.removeSuffix("/")
-            val wsBase = when {
-                base.startsWith("https://", ignoreCase = true) ->
-                    "wss://" + base.removePrefix("https://")
-                base.startsWith("http://", ignoreCase = true) ->
-                    "ws://" + base.removePrefix("http://")
-                base.startsWith("wss://", ignoreCase = true) ||
-                    base.startsWith("ws://", ignoreCase = true) -> base
-                else -> "wss://$base"
-            }
-            return "$wsBase/v1/ws"
-        }
     }
 }

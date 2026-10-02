@@ -990,4 +990,9 @@
     <string name="settings_fiat_conversion_disabled_custom_unit">사용자 정의 기준 단위를 사용할 때는 법정 화폐 환율 변환이 비활성화됩니다.</string>
     <string name="mints_base_currency_unit_title">기준 통화 단위</string>
     <string name="mints_base_currency_unit_subtitle">민트가 다른 단위를 지원하는 경우 여기에서 전환할 수 있습니다.</string>
+    <string name="payment_request_arkoor_address">Ark 주소</string>
+    <string name="payment_request_arkoor_waiting">표시된 금액을 이 Ark 주소로 보내세요</string>
+    <string name="payment_request_arkoor_retrying">민트에 다시 연결 중…</string>
+    <string name="payment_request_arkoor_failed">Arkoor 결제 실패: %1$s</string>
+    <string name="payment_request_arkoor_requires_mint">Arkoor 민트를 선택하고 기본 단위로 sats를 사용하세요.</string>
 </resources>

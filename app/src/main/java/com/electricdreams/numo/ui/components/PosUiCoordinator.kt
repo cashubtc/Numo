@@ -167,7 +167,7 @@ class PosUiCoordinator(
                 if (submitButton.isEnabled) {
                     Log.d("PosUiCoordinator", "Auto-initiating payment flow for basket checkout with amount: $paymentAmount")
                     showChargeButtonSpinner()
-                    val formattedAmount = amountDisplay.text.toString()
+                    val formattedAmount = amountDisplayManager.formattedAmount
                     paymentMethodHandler.showPaymentMethodDialog(amountDisplayManager.requestedAmount, formattedAmount)
                 }
             }, 500)
@@ -371,7 +371,7 @@ class PosUiCoordinator(
 
             if (amountDisplayManager.requestedAmount > 0) {
                 showChargeButtonSpinner()
-                val formattedAmount = amountDisplay.text.toString()
+                val formattedAmount = amountDisplayManager.formattedAmount
                 paymentMethodHandler.showPaymentMethodDialog(amountDisplayManager.requestedAmount, formattedAmount)
             } else {
                 showAmountRequiredError()

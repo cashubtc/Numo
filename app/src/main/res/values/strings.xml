@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Numo</string>
+    <string name="app_name">Numo Ark</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="item_list_title">Manage Catalog Items</string>
@@ -1093,4 +1093,10 @@
     <string name="item_entry_add_category">Add category</string>
     <string name="mints_other_mints">Other mints</string>
     <string name="mints_more_options">More options</string>
+    <string name="payment_request_arkoor" translatable="false">Arkoor</string>
+    <string name="payment_request_arkoor_address">Ark address</string>
+    <string name="payment_request_arkoor_waiting">Send the amount shown to this Ark address</string>
+    <string name="payment_request_arkoor_retrying">Reconnecting to mint…</string>
+    <string name="payment_request_arkoor_failed">Arkoor payment failed: %1$s</string>
+    <string name="payment_request_arkoor_requires_mint">Select an Arkoor mint and use sats as the base unit.</string>
 </resources>

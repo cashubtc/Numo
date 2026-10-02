@@ -31,15 +31,8 @@ class MintManager private constructor(context: Context) {
         private const val REFRESH_INTERVAL_MS = 60 * 1000L // 1 minute
 
         // Default mints
-        private val DEFAULT_MINTS: Set<String> = setOf(
-            "https://mint.minibits.cash/Bitcoin",
-            "https://mint.macadamia.cash",
-            "https://antifiat.cash",
-            "https://mint.cubabitcoin.org",
-        )
-        
-        // Default Lightning mint (first of the default mints)
-        private const val DEFAULT_LIGHTNING_MINT = "https://mint.minibits.cash/Bitcoin"
+        private val DEFAULT_MINTS = setOf(com.electricdreams.numo.BuildConfig.ARK_MINT_URL)
+        private val DEFAULT_LIGHTNING_MINT = com.electricdreams.numo.BuildConfig.ARK_MINT_URL
 
         @Volatile
         private var instance: MintManager? = null
@@ -78,7 +71,7 @@ class MintManager private constructor(context: Context) {
         preferences.getString(KEY_PREFERRED_UNIT, "sat") ?: "sat"
 
     private var enableSwapFromUnknownMints: Boolean =
-        preferences.getBoolean(KEY_ENABLE_SWAP_UNKNOWN_MINTS, true)
+        preferences.getBoolean(KEY_ENABLE_SWAP_UNKNOWN_MINTS, false)
 
     private var listener: MintChangeListener? = null
 
@@ -215,7 +208,7 @@ class MintManager private constructor(context: Context) {
      * Whether the POS should accept payments from unknown mints by swapping
      * them into the configured Lightning mint.
      *
-     * Default: true (current behavior).
+     * Disabled by default for Arkoor checkout; unknown-mint swaps require Lightning.
      */
     fun isSwapFromUnknownMintsEnabled(): Boolean = enableSwapFromUnknownMints
 

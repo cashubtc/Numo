@@ -990,4 +990,9 @@
     <string name="settings_fiat_conversion_disabled_custom_unit">カスタムベース単位を使用している場合、法定通貨への変換は無効になります。</string>
     <string name="mints_base_currency_unit_title">基準通貨単位</string>
     <string name="mints_base_currency_unit_subtitle">ミントが他の単位をサポートしている場合は、ここで切り替えることができます。</string>
+    <string name="payment_request_arkoor_address">Arkアドレス</string>
+    <string name="payment_request_arkoor_waiting">表示された金額をこのArkアドレスに送信してください</string>
+    <string name="payment_request_arkoor_retrying">ミントに再接続中…</string>
+    <string name="payment_request_arkoor_failed">Arkoor決済に失敗しました: %1$s</string>
+    <string name="payment_request_arkoor_requires_mint">Arkoorミントを選択し、基本単位をsatsにしてください。</string>
 </resources>

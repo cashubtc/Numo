@@ -92,10 +92,7 @@ class OnboardingActivity : AppCompatActivity() {
         private const val PREFS_NAME = "OnboardingPrefs"
         private const val KEY_ONBOARDING_COMPLETE = "onboarding_complete"
         private val ONBOARDING_DEFAULT_MINTS = listOf(
-            "https://mint.minibits.cash/Bitcoin",
-            "https://mint.macadamia.cash",
-            "https://antifiat.cash",
-            "https://mint.cubabitcoin.org"
+            com.electricdreams.numo.BuildConfig.ARK_MINT_URL,
         )
 
         fun isOnboardingComplete(context: Context): Boolean {
