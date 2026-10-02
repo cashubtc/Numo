@@ -208,7 +208,7 @@ class MintManager private constructor(context: Context) {
      * Whether the POS should accept payments from unknown mints by swapping
      * them into the configured Lightning mint.
      *
-     * Disabled by default in the Arkoor experiment; unknown-mint swaps require Lightning.
+     * Disabled by default for Arkoor checkout; unknown-mint swaps require Lightning.
      */
     fun isSwapFromUnknownMintsEnabled(): Boolean = enableSwapFromUnknownMints
 

@@ -1,0 +1,93 @@
+name: Arkoor Integration Tests
+
+on:
+  push:
+    branches: ["main", "master"]
+  pull_request:
+    branches: ["main", "master"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arkoor-integration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      NUMO_ARKOOR_MINT_URL: http://127.0.0.1:3339
+      NUMO_ARKOOR_PAY_SCRIPT: ${{ github.workspace }}/integration-tests/arkoor/pay.py
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: temurin
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Test environment launcher
+        run: python3 -m unittest discover -s integration-tests/arkoor -p 'test_*.py' -v
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build pinned CDK and Bark processor
+        uses: docker/build-push-action@v6
+        with:
+          context: integration-tests/arkoor
+          target: services
+          load: true
+          tags: numo-arkoor-services:local
+          cache-from: type=gha,scope=numo-arkoor
+          cache-to: type=gha,scope=numo-arkoor,mode=max
+
+      - name: Start Docker regtest stack and wait for readiness
+        run: python3 integration-tests/arkoor/environment.py start --no-build
+
+      - name: Fund the regtest Ark server and Bark payer
+        run: python3 integration-tests/arkoor/provision.py
+
+      - name: Check Arkoor and Lightning quote creation and recovery
+        run: python3 integration-tests/arkoor/smoke.py
+
+      - name: Run Android unit tests and real shared WebSocket test
+        run: ./gradlew testDebugUnitTest assembleDebug --no-daemon --console=plain
+
+      - name: Collect service logs
+        if: always()
+        run: |
+          mkdir -p integration-tests/arkoor/logs
+          docker compose -f integration-tests/arkoor/docker-compose.yml logs --no-color \
+            > integration-tests/arkoor/logs/services.log 2>&1
+          docker compose -f integration-tests/arkoor/docker-compose.yml ps --all \
+            > integration-tests/arkoor/logs/status.txt 2>&1
+          docker compose -f integration-tests/arkoor/docker-compose.yml cp \
+            mint:/data/mint/logs integration-tests/arkoor/logs/mint || true
+
+      - name: Upload logs and test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arkoor-integration-results
+          path: |
+            integration-tests/arkoor/logs/
+            app/build/reports/tests/testDebugUnitTest/
+            app/build/test-results/testDebugUnitTest/
+
+      - name: Cleanup regtest containers and volumes
+        if: always()
+        run: docker compose -f integration-tests/arkoor/docker-compose.yml --profile tools down --volumes --remove-orphans
