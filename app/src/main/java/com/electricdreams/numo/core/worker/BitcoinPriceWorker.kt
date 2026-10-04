@@ -252,6 +252,13 @@ class BitcoinPriceWorker private constructor(context: Context) {
         }.start()
     }
 
+    /** When the cached price for the current currency was fetched, or null if there is none. */
+    fun getPriceUpdatedAt(): Long? {
+        if (getCurrentPrice() <= 0.0) return null
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.getLong(KEY_LAST_UPDATE_TIME, 0L).takeIf { it > 0L }
+    }
+
     /** Cache the Bitcoin price for a specific currency in SharedPreferences. */
     private fun cachePrice(currency: String, price: Double) {
         val editor: SharedPreferences.Editor =

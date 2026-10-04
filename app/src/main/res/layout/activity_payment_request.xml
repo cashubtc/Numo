@@ -240,6 +240,7 @@
         app:layout_constraintTop_toBottomOf="@id/qr_card">
 
         <ImageView
+            android:id="@+id/contactless_icon"
             android:layout_width="@dimen/icon_size_small"
             android:layout_height="@dimen/icon_size_small"
             android:src="@drawable/contactless"
@@ -263,7 +264,11 @@
         android:id="@+id/payment_status_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/space_2xl"
         android:layout_marginTop="@dimen/space_s"
+        android:breakStrategy="balanced"
+        android:gravity="center"
+        app:layout_constrainedWidth="true"
         android:text="@string/payment_request_status_waiting_for_payment"
         android:textColor="@color/color_text_secondary"
         android:textSize="14sp"

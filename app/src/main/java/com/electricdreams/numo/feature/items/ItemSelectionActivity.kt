@@ -44,6 +44,7 @@ import com.electricdreams.numo.feature.items.handlers.BasketUIHandler
 import com.electricdreams.numo.feature.items.handlers.CheckoutHandler
 import com.electricdreams.numo.feature.items.handlers.ItemSearchHandler
 import com.electricdreams.numo.feature.items.handlers.SelectionAnimationHandler
+import com.electricdreams.numo.feature.offline.OfflineExplainerActivity
 
 import com.electricdreams.numo.core.payment.BTCPayConfig
 import com.electricdreams.numo.core.payment.BtcPayAppsService
@@ -412,7 +413,7 @@ class ItemSelectionActivity : AppCompatActivity() {
 
         checkoutButton.setOnClickListener {
             if (!com.electricdreams.numo.core.util.NetworkUtils.isNetworkAvailable(this)) {
-                Toast.makeText(this, getString(R.string.pos_error_no_network_charge), Toast.LENGTH_SHORT).show()
+                OfflineExplainerActivity.start(this)
                 return@setOnClickListener
             }
             // Save basket before checkout if not already saved, or update existing

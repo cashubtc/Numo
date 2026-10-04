@@ -894,8 +894,6 @@
     <string name="onboarding_generating_hint">少々お待ちください</string>
     <string name="onboarding_fetching_searching_backup">バックアップを検索しています…</string>
     <string name="onboarding_fetching_checking_relays">ミント設定のNostrリレーを確認しています</string>
-    <string name="pos_error_no_network_pending_payment">保留中の支払いを開くにはネットワーク接続が必要です。</string>
-    <string name="pos_error_no_network_charge">請求を作成するにはネットワーク接続が必要です。</string>
     <string name="settings_item_default_payment_method_title">デフォルトの支払い</string>
     <string name="settings_item_default_payment_method_subtitle">統合</string>
     <string name="default_payment_method_explainer_title">クイック設定</string>
@@ -990,4 +988,28 @@
     <string name="settings_fiat_conversion_disabled_custom_unit">カスタムベース単位を使用している場合、法定通貨への変換は無効になります。</string>
     <string name="mints_base_currency_unit_title">基準通貨単位</string>
     <string name="mints_base_currency_unit_subtitle">ミントが他の単位をサポートしている場合は、ここで切り替えることができます。</string>
+
+    <!-- Offline mode -->
+    <string name="offline_strip_title">オフライン</string>
+    <string name="offline_strip_subtitle">再接続するまで支払いを受け付けられません</string>
+    <string name="offline_strip_back_online_title">オンラインに戻りました</string>
+    <string name="offline_strip_back_online_subtitle">支払いを再び受け付けられます</string>
+    <string name="offline_strip_action_details">オフラインで使える機能を見る</string>
+    <string name="offline_explainer_title">オフラインです。</string>
+    <string name="offline_explainer_subtitle">支払いを受け付けるには、インターネット接続が必要です。オフラインでも使える機能:</string>
+    <string name="offline_explainer_back_online_title">オンラインに戻りました。</string>
+    <string name="offline_explainer_back_online_subtitle">すべての機能が利用できます。</string>
+    <string name="offline_explainer_close_content_description">閉じる</string>
+    <string name="offline_feature_catalog">カタログとバスケット</string>
+    <string name="offline_feature_history">活動と売上</string>
+    <string name="offline_feature_exchange_rate">為替レート</string>
+    <string name="offline_feature_accept_payments">支払いの受け付け</string>
+    <string name="offline_feature_withdrawals">出金</string>
+    <string name="offline_feature_auto_withdraw">自動出金</string>
+    <string name="offline_status_available">利用可能</string>
+    <string name="offline_status_unavailable">利用不可</string>
+    <string name="offline_status_paused">一時停止中</string>
+    <string name="offline_status_last_updated">最終更新: %1$s</string>
+    <string name="payment_request_instruction_scan">スキャンして支払う</string>
+    <string name="payment_request_offline_note">お客様が支払った場合、オンラインに戻った時点でNumoが確認します。</string>
 </resources>

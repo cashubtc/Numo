@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Stroked globe for the offline explainer hero. Tint via app:tint. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M12,2.75a9.25,9.25 0,1 0,0 18.5a9.25,9.25 0,1 0,0 -18.5z"
+        android:strokeWidth="1.6"
+        android:strokeColor="@android:color/black" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M12,2.75C9.4,5.25 8,8.55 8,12s1.4,6.75 4,9.25M12,2.75c2.6,2.5 4,5.8 4,9.25s-1.4,6.75 -4,9.25"
+        android:strokeWidth="1.6"
+        android:strokeColor="@android:color/black" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M2.75,12h18.5M3.92,7.5h16.16M3.92,16.5h16.16"
+        android:strokeWidth="1.6"
+        android:strokeColor="@android:color/black" />
+</vector>

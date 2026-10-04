@@ -639,8 +639,6 @@
     <string name="item_selection_charge_button">Charge</string>
     <string name="item_selection_charge_button_default">Charge</string>
     <string name="pos_error_no_mints_configured">Add at least one mint in Settings → Mints before charging customers.</string>
-    <string name="pos_error_no_network_pending_payment">Network connection is required to open pending payments.</string>
-    <string name="pos_error_no_network_charge">Network connection is required to create a charge.</string>
 
     <string name="item_selection_save_button">Save</string>
     <string name="item_selection_saved_baskets_button">Saved</string>
@@ -1093,4 +1091,28 @@
     <string name="item_entry_add_category">Add category</string>
     <string name="mints_other_mints">Other mints</string>
     <string name="mints_more_options">More options</string>
+
+    <!-- Offline mode -->
+    <string name="offline_strip_title">Offline</string>
+    <string name="offline_strip_subtitle">Payments paused until you reconnect</string>
+    <string name="offline_strip_back_online_title">Back online</string>
+    <string name="offline_strip_back_online_subtitle">Payments are available again</string>
+    <string name="offline_strip_action_details">See what works offline</string>
+    <string name="offline_explainer_title">You\'re offline.</string>
+    <string name="offline_explainer_subtitle">Numo needs an internet connection to take payments. Here\'s what still works:</string>
+    <string name="offline_explainer_back_online_title">You\'re back online.</string>
+    <string name="offline_explainer_back_online_subtitle">Everything is available again.</string>
+    <string name="offline_explainer_close_content_description">Close</string>
+    <string name="offline_feature_catalog">Catalog &amp; baskets</string>
+    <string name="offline_feature_history">Activity &amp; sales</string>
+    <string name="offline_feature_exchange_rate">Exchange rate</string>
+    <string name="offline_feature_accept_payments">Accept payments</string>
+    <string name="offline_feature_withdrawals">Withdrawals</string>
+    <string name="offline_feature_auto_withdraw">Automatic withdrawals</string>
+    <string name="offline_status_available">Available</string>
+    <string name="offline_status_unavailable">Unavailable</string>
+    <string name="offline_status_paused">Paused</string>
+    <string name="offline_status_last_updated">Last updated %1$s</string>
+    <string name="payment_request_instruction_scan">Scan to Pay</string>
+    <string name="payment_request_offline_note">If the customer pays, Numo will confirm it once you\'re back online.</string>
 </resources>

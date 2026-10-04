@@ -21,6 +21,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import com.electricdreams.numo.core.dev.WalletLogger
+import com.electricdreams.numo.core.network.ConnectivityMonitor
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -29,6 +30,10 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.updateLayoutParams
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.Amount.Currency
@@ -60,6 +65,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -268,6 +274,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         animationLabelBaseTranslationY = animationResultLabelText.translationY
 
         setupNfcAnimationOverlay()
+        observeConnectivityForPayment()
 
         // Initialize tab manager
         tabManager = PaymentTabManager(
@@ -908,6 +915,38 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     /**
+     * Offline mid-payment: keep the QR up (an issued invoice can still be paid), drop the tap
+     * prompt since ecash over NFC needs the mint, and swap "Waiting for payment..." for a line
+     * that reassures the merchant.
+     */
+    private fun observeConnectivityForPayment() {
+        val contactlessIcon = findViewById<ImageView>(R.id.contactless_icon)
+        val instructionText = findViewById<TextView>(R.id.instruction_text)
+        val iconGap = resources.getDimensionPixelSize(R.dimen.space_m)
+        val waitingText = getString(R.string.payment_request_status_waiting_for_payment)
+        val offlineText = getString(R.string.payment_request_offline_note)
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                ConnectivityMonitor.getInstance(this@PaymentRequestActivity).isOnline.collect { online ->
+                    contactlessIcon.visibility = if (online) View.VISIBLE else View.GONE
+                    instructionText.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        marginStart = if (online) iconGap else 0
+                    }
+                    instructionText.setText(
+                        if (online) R.string.payment_request_instruction_scan_or_tap
+                        else R.string.payment_request_instruction_scan
+                    )
+                    // Only replace the waiting line; errors and results keep their own text
+                    when (statusText.text.toString()) {
+                        waitingText -> if (!online) statusText.text = offlineText
+                        offlineText -> if (online) statusText.text = waitingText
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Poll BTCPay invoice status every 2 seconds until terminal state.
      */
     private fun startBtcPayPolling(paymentId: String) {
@@ -955,6 +994,15 @@ class PaymentRequestActivity : AppCompatActivity() {
                         PaymentState.PENDING -> { /* continue */ }
                     }
                 }.onFailure { error ->
+                    val connectivity = ConnectivityMonitor.getInstance(this@PaymentRequestActivity)
+                    if (!connectivity.isOnline.value) {
+                        // Offline isn't a server failure: wait it out, then poll fresh
+                        Log.d(TAG, "BTCPay poll failed while offline; waiting for connection")
+                        connectivity.isOnline.first { it }
+                        consecutiveErrors = 0
+                        pollInterval = 2000L
+                        return@onFailure
+                    }
                     // Fix 6: exponential backoff, stop after too many consecutive errors
                     consecutiveErrors++
                     pollInterval = minOf(pollInterval * 2, 30_000L)
