@@ -7,6 +7,7 @@ import android.util.TypedValue
 import com.electricdreams.numo.NfcEnableActivity
 import com.electricdreams.numo.PaymentFailureActivity
 import com.electricdreams.numo.PaymentReceivedActivity
+import com.electricdreams.numo.PaymentRequestActivity
 import com.electricdreams.numo.core.network.ConnectivityMonitor
 import com.electricdreams.numo.feature.items.BarcodeScannerActivity
 import com.electricdreams.numo.feature.items.CheckoutScannerActivity
@@ -19,6 +20,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
@@ -50,7 +54,11 @@ class OfflineStripController private constructor(
         hideJob?.cancel()
         when {
             !online -> setMode(OfflineStripView.Mode.OFFLINE)
-            mode == OfflineStripView.Mode.OFFLINE -> {
+            mode != OfflineStripView.Mode.OFFLINE -> Unit
+            // The explainer celebrates on its own; a second "Back online" after it closes
+            // would only flash, so the screens underneath simply settle back.
+            resumedActivity?.get() is OfflineExplainerActivity -> setMode(null)
+            else -> {
                 setMode(OfflineStripView.Mode.BACK_ONLINE)
                 hideJob = scope.launch {
                     delay(BACK_ONLINE_HOLD_MS)
@@ -62,6 +70,7 @@ class OfflineStripController private constructor(
 
     private fun setMode(newMode: OfflineStripView.Mode?) {
         mode = newMode
+        _stripMode.value = newMode
         val resumed = resumedActivity?.get()
         hosts.forEach { (activity, host) -> host.render(newMode, animate = activity === resumed) }
     }
@@ -108,9 +117,18 @@ class OfflineStripController private constructor(
         /** How long "Back online" stays up before the strip tucks away. */
         private const val BACK_ONLINE_HOLD_MS = 2_000L
 
-        /** Splash/onboarding, transient result screens, camera scanners, and the explainer. */
+        private val _stripMode = MutableStateFlow<OfflineStripView.Mode?>(null)
+
+        /** What the strip is showing app-wide; screens that can't host it mirror this instead. */
+        val stripMode: StateFlow<OfflineStripView.Mode?> = _stripMode.asStateFlow()
+
+        /**
+         * Splash/onboarding, transient result screens, camera scanners, the explainer, and the
+         * payment request, which shows its own header pill so the QR never moves mid-scan.
+         */
         private val EXEMPT_ACTIVITIES: Set<Class<out Activity>> = setOf(
             OnboardingActivity::class.java,
+            PaymentRequestActivity::class.java,
             NfcEnableActivity::class.java,
             PaymentReceivedActivity::class.java,
             PaymentFailureActivity::class.java,

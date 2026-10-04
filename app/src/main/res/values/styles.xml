@@ -511,4 +511,34 @@
         <item name="cornerSize">50%</item>
     </style>
 
+    <!-- Offline mode: strip, in-header pill, and explainer -->
+    <style name="Text.OfflineStripTitle" parent="">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/color_warning</item>
+    </style>
+
+    <style name="Text.OfflineStripSubtitle" parent="">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/color_warning</item>
+    </style>
+
+    <style name="Text.OfflineIntro" parent="Text.Body">
+        <item name="android:textSize">17sp</item>
+        <item name="android:lineHeight">24sp</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="Text.OfflineRowTitle" parent="Text.RowTitle">
+        <item name="android:textSize">16sp</item>
+        <item name="android:lineHeight">22sp</item>
+    </style>
+
+    <!-- Secondary, not tertiary: the status word carries the row's meaning -->
+    <style name="Text.OfflineRowStatus" parent="Text.RowSubtitle">
+        <item name="android:textSize">14sp</item>
+        <item name="android:lineHeight">20sp</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
+    </style>
 </resources>

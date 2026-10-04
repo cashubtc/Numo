@@ -4,11 +4,14 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.text.format.DateUtils
+import android.view.accessibility.AccessibilityManager
 import android.view.animation.OvershootInterpolator
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.getSystemService
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -16,7 +19,10 @@ import com.electricdreams.numo.R
 import com.electricdreams.numo.core.network.ConnectivityMonitor
 import com.electricdreams.numo.databinding.ActivityOfflineExplainerBinding
 import com.electricdreams.numo.databinding.ItemOfflineCapabilityBinding
+import com.electricdreams.numo.databinding.ItemOfflineCapabilityGroupBinding
 import com.electricdreams.numo.feature.offline.OfflineCapabilities.Feature
+import com.electricdreams.numo.feature.offline.OfflineCapabilities.Group
+import com.electricdreams.numo.feature.offline.OfflineCapabilities.Row
 import com.electricdreams.numo.feature.offline.OfflineCapabilities.Status
 import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 import com.electricdreams.numo.util.overridePendingTransitionCompat
@@ -24,15 +30,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * Full-screen answer to "why can't I charge?": what still works offline and what doesn't.
+ * Full-screen answer to "why can't I charge?": what needs internet, then what still works.
  *
- * If the connection returns while it's open, it flips to "You're back online.", ticks every row
- * green, and closes itself.
+ * If the connection returns while it's open, it flips to "You're back online.", ticks the rows
+ * green, and closes itself (unless TalkBack is on, where a time limit would cut the user off).
  */
 class OfflineExplainerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityOfflineExplainerBinding
-    private val rowViews = mutableListOf<Pair<OfflineCapabilities.Row, ItemOfflineCapabilityBinding>>()
+    private val rowViews = mutableListOf<Pair<Row, ItemOfflineCapabilityBinding>>()
     private var celebrating = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +48,8 @@ class OfflineExplainerActivity : AppCompatActivity() {
         applySettingsWindowInsets(this, binding.root)
 
         binding.closeButton.setOnClickListener { finish() }
-        renderRows(OfflineCapabilities.rows(OfflineCapabilities.Config.from(this)))
+        val paymentOnScreen = intent.getBooleanExtra(EXTRA_PAYMENT_ON_SCREEN, false)
+        renderGroups(OfflineCapabilities.groups(OfflineCapabilities.Config.from(this, paymentOnScreen)))
         observeConnectivity()
     }
 
@@ -54,7 +61,7 @@ class OfflineExplainerActivity : AppCompatActivity() {
                     .collect { online ->
                         when {
                             !online -> sawOffline = true
-                            sawOffline -> celebrateAndClose()
+                            sawOffline -> celebrate()
                             // Opened while already online: nothing to explain.
                             else -> finish()
                         }
@@ -63,23 +70,45 @@ class OfflineExplainerActivity : AppCompatActivity() {
         }
     }
 
-    private fun renderRows(rows: List<OfflineCapabilities.Row>) {
-        binding.capabilityList.removeAllViews()
+    private fun renderGroups(groups: Map<Group, List<Row>>) {
+        binding.capabilityGroups.removeAllViews()
         rowViews.clear()
-        rows.forEach { row ->
-            val item = ItemOfflineCapabilityBinding.inflate(
-                layoutInflater, binding.capabilityList, true
+        Group.entries.forEach { group ->
+            val rows = groups[group].orEmpty()
+            if (rows.isEmpty()) return@forEach
+            val groupBinding = ItemOfflineCapabilityGroupBinding.inflate(
+                layoutInflater, binding.capabilityGroups, true
             )
-            item.capabilityTitle.setText(titleFor(row.feature))
-            item.capabilityStatus.text = statusTextFor(row)
-            item.capabilityIcon.setImageResource(iconFor(row.status))
-            item.root.contentDescription =
-                "${item.capabilityTitle.text}, ${item.capabilityStatus.text}"
-            rowViews += row to item
+            groupBinding.groupTitle.setText(
+                when (group) {
+                    Group.NEEDS_INTERNET -> R.string.offline_explainer_group_needs_internet
+                    Group.WORKS_OFFLINE -> R.string.offline_explainer_group_works_offline
+                }
+            )
+            rows.forEach { row ->
+                val item = ItemOfflineCapabilityBinding.inflate(
+                    layoutInflater, groupBinding.groupRows, true
+                )
+                item.capabilityTitle.setText(titleFor(row.feature))
+                item.capabilityIcon.setImageResource(iconFor(row.status))
+                setStatus(row, item, statusTextFor(row), outdated = row.feature == Feature.EXCHANGE_RATE && row.status == Status.DEGRADED)
+                rowViews += row to item
+            }
         }
     }
 
-    private fun celebrateAndClose() {
+    private fun setStatus(row: Row, item: ItemOfflineCapabilityBinding, status: String, outdated: Boolean) {
+        item.capabilityStatus.text = status
+        val title = getString(titleFor(row.feature))
+        item.root.contentDescription = getString(
+            if (outdated) R.string.offline_row_content_description_outdated
+            else R.string.offline_row_content_description,
+            title,
+            status
+        )
+    }
+
+    private fun celebrate() {
         if (celebrating) return
         celebrating = true
 
@@ -89,17 +118,19 @@ class OfflineExplainerActivity : AppCompatActivity() {
 
         var delayMs = ROW_STAGGER_START_MS
         rowViews.filter { (row, _) -> row.status != Status.AVAILABLE }.forEach { (row, item) ->
-            swapIcon(item.capabilityIcon, R.drawable.ic_status_available, startDelay = delayMs)
-            crossfadeText(
-                item.capabilityStatus,
-                getString(R.string.offline_status_available),
-                startDelay = delayMs
+            // Degraded rows (rate, code on screen) aren't fresh the instant we reconnect
+            val status = getString(
+                if (row.status == Status.DEGRADED) R.string.offline_status_updating
+                else R.string.offline_status_available
             )
-            item.root.contentDescription =
-                "${getString(titleFor(row.feature))}, ${getString(R.string.offline_status_available)}"
+            swapIcon(item.capabilityIcon, R.drawable.ic_status_available, startDelay = delayMs)
+            crossfadeText(item.capabilityStatus, status, startDelay = delayMs)
+            setStatus(row, item, status, outdated = false)
             delayMs += ROW_STAGGER_MS
         }
 
+        val touchExploration = getSystemService<AccessibilityManager>()?.isTouchExplorationEnabled == true
+        if (touchExploration) return
         lifecycleScope.launch {
             delay(AUTO_CLOSE_MS)
             finish()
@@ -112,7 +143,7 @@ class OfflineExplainerActivity : AppCompatActivity() {
             .withEndAction {
                 view.setImageResource(icon)
                 view.animate().scaleX(1f).scaleY(1f).setStartDelay(0L).setDuration(ICON_IN_MS)
-                    .setInterpolator(OvershootInterpolator(2f))
+                    .setInterpolator(OvershootInterpolator(ICON_OVERSHOOT))
                     .start()
             }
             .start()
@@ -130,19 +161,22 @@ class OfflineExplainerActivity : AppCompatActivity() {
             .start()
     }
 
+    @StringRes
     private fun titleFor(feature: Feature): Int = when (feature) {
+        Feature.NEW_CHARGES -> R.string.offline_feature_new_charges
         Feature.CATALOG -> R.string.offline_feature_catalog
-        Feature.HISTORY -> R.string.offline_feature_history
-        Feature.EXCHANGE_RATE -> R.string.offline_feature_exchange_rate
-        Feature.ACCEPT_PAYMENTS -> R.string.offline_feature_accept_payments
         Feature.WITHDRAWALS -> R.string.offline_feature_withdrawals
         Feature.AUTO_WITHDRAW -> R.string.offline_feature_auto_withdraw
+        Feature.PAYMENT_ON_SCREEN -> R.string.offline_feature_payment_on_screen
+        Feature.HISTORY -> R.string.offline_feature_history
+        Feature.EXCHANGE_RATE -> R.string.offline_feature_exchange_rate
     }
 
-    private fun statusTextFor(row: OfflineCapabilities.Row): String = when {
+    private fun statusTextFor(row: Row): String = when {
         row.status == Status.AVAILABLE -> getString(R.string.offline_status_available)
         row.updatedAt != null ->
-            getString(R.string.offline_status_last_updated, formatUpdatedAt(row.updatedAt))
+            getString(R.string.offline_status_using_rate, formatUpdatedAt(row.updatedAt))
+        row.feature == Feature.PAYMENT_ON_SCREEN -> getString(R.string.offline_status_confirms_later)
         row.feature == Feature.AUTO_WITHDRAW -> getString(R.string.offline_status_paused)
         else -> getString(R.string.offline_status_unavailable)
     }
@@ -164,17 +198,23 @@ class OfflineExplainerActivity : AppCompatActivity() {
     }
 
     companion object {
+        private const val EXTRA_PAYMENT_ON_SCREEN = "payment_on_screen"
         private const val ROW_STAGGER_START_MS = 120L
         private const val ROW_STAGGER_MS = 60L
         private const val ICON_OUT_MS = 120L
         private const val ICON_IN_MS = 320L
+        private const val ICON_OVERSHOOT = 1.4f
         private const val TEXT_OUT_MS = 120L
         private const val TEXT_IN_MS = 220L
         private const val TEXT_RISE_DP = 6f
         private const val AUTO_CLOSE_MS = 1_500L
 
-        fun start(context: Context) {
-            context.startActivity(Intent(context, OfflineExplainerActivity::class.java))
+        /** [paymentOnScreen]: opened from a payment request whose code can still be paid. */
+        fun start(context: Context, paymentOnScreen: Boolean = false) {
+            context.startActivity(
+                Intent(context, OfflineExplainerActivity::class.java)
+                    .putExtra(EXTRA_PAYMENT_ON_SCREEN, paymentOnScreen)
+            )
         }
     }
 }

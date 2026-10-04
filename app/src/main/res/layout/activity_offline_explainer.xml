@@ -43,8 +43,8 @@
 
             <!-- Globe with a status badge cut out of its lower-right edge -->
             <FrameLayout
-                android:layout_width="72dp"
-                android:layout_height="72dp"
+                android:layout_width="@dimen/offline_hero_frame_size"
+                android:layout_height="@dimen/offline_hero_frame_size"
                 android:importantForAccessibility="noHideDescendants">
 
                 <ImageView
@@ -85,23 +85,19 @@
 
             <TextView
                 android:id="@+id/subtitle"
-                style="@style/Text.Body"
+                style="@style/Text.OfflineIntro"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_m"
-                android:letterSpacing="0"
-                android:lineHeight="24sp"
-                android:text="@string/offline_explainer_subtitle"
-                android:textSize="17sp" />
+                android:breakStrategy="balanced"
+                android:text="@string/offline_explainer_subtitle" />
 
+            <!-- "Needs internet" then "Works offline", each an outlined card -->
             <LinearLayout
-                android:id="@+id/capability_list"
+                android:id="@+id/capability_groups"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/space_xl"
-                android:background="@drawable/bg_offline_capability_card"
-                android:orientation="vertical"
-                android:paddingVertical="@dimen/space_s" />
+                android:orientation="vertical" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

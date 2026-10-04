@@ -24,7 +24,10 @@ internal class OfflineStripHost(private val activity: Activity, onTap: () -> Uni
 
     private val window = activity.window
     private val decor = window.decorView as ViewGroup
-    private val strip = OfflineStripView(activity).apply { setOnStripClickListener(onTap) }
+    private val strip = OfflineStripView(activity).apply {
+        setOnStripClickListener(onTap)
+        readBefore(android.R.id.content)
+    }
     private var insetsTarget: View? = null
     private var extraTop = 0
     private var animator: ValueAnimator? = null
@@ -65,7 +68,7 @@ internal class OfflineStripHost(private val activity: Activity, onTap: () -> Uni
                 strip.setMode(mode, animate = false)
                 reveal(show = true, animate = animate)
             }
-            mode != null -> strip.setMode(mode, animate)
+            mode != null -> strip.setMode(mode, animate) { remeasure() }
             wasShown -> reveal(show = false, animate = animate)
         }
     }
@@ -115,6 +118,14 @@ internal class OfflineStripHost(private val activity: Activity, onTap: () -> Uni
         }
     }
 
+    /** Offline and Back-online text can wrap to different line counts; keep the gap honest. */
+    private fun remeasure() {
+        if (shownMode == null || animator?.isRunning == true) return
+        val width = decor.width.takeIf { it > 0 } ?: activity.resources.displayMetrics.widthPixels
+        strip.measureContentHeight(width)
+        applyReveal(strip.reveal)
+    }
+
     private fun applyReveal(progress: Float) {
         strip.reveal = progress
         val newExtraTop = (strip.contentHeight * progress).roundToInt()
@@ -153,8 +164,8 @@ internal class OfflineStripHost(private val activity: Activity, onTap: () -> Uni
     }
 
     companion object {
-        private const val SHOW_DURATION_MS = 420L
-        private const val HIDE_DURATION_MS = 340L
+        private const val SHOW_DURATION_MS = 320L
+        private const val HIDE_DURATION_MS = 280L
         private val EASE_OUT = PathInterpolator(0.32f, 0.72f, 0f, 1f)
     }
 }

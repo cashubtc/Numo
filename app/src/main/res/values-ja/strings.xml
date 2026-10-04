@@ -991,25 +991,33 @@
 
     <!-- Offline mode -->
     <string name="offline_strip_title">オフライン</string>
-    <string name="offline_strip_subtitle">再接続するまで支払いを受け付けられません</string>
+    <string name="offline_strip_subtitle">新しい請求にはインターネットが必要です</string>
     <string name="offline_strip_back_online_title">オンラインに戻りました</string>
-    <string name="offline_strip_back_online_subtitle">支払いを再び受け付けられます</string>
+    <string name="offline_strip_back_online_subtitle">新しい請求を再び作成できます</string>
     <string name="offline_strip_action_details">オフラインで使える機能を見る</string>
     <string name="offline_explainer_title">オフラインです。</string>
-    <string name="offline_explainer_subtitle">支払いを受け付けるには、インターネット接続が必要です。オフラインでも使える機能:</string>
+    <string name="offline_explainer_subtitle">オンラインに戻るまで新しい請求は作成できません。Wi-Fiまたはモバイルデータを確認してください。</string>
     <string name="offline_explainer_back_online_title">オンラインに戻りました。</string>
     <string name="offline_explainer_back_online_subtitle">すべての機能が利用できます。</string>
     <string name="offline_explainer_close_content_description">閉じる</string>
     <string name="offline_feature_catalog">カタログとバスケット</string>
     <string name="offline_feature_history">活動と売上</string>
     <string name="offline_feature_exchange_rate">為替レート</string>
-    <string name="offline_feature_accept_payments">支払いの受け付け</string>
     <string name="offline_feature_withdrawals">出金</string>
     <string name="offline_feature_auto_withdraw">自動出金</string>
     <string name="offline_status_available">利用可能</string>
     <string name="offline_status_unavailable">利用不可</string>
     <string name="offline_status_paused">一時停止中</string>
-    <string name="offline_status_last_updated">最終更新: %1$s</string>
     <string name="payment_request_instruction_scan">スキャンして支払う</string>
     <string name="payment_request_offline_note">お客様が支払った場合、オンラインに戻った時点でNumoが確認します。</string>
+    <string name="offline_strip_pane_title">%1$s。%2$s</string>
+    <string name="offline_explainer_group_needs_internet">インターネットが必要</string>
+    <string name="offline_explainer_group_works_offline">オフラインで使える</string>
+    <string name="offline_feature_new_charges">新しい請求</string>
+    <string name="offline_feature_payment_on_screen">この請求</string>
+    <string name="offline_status_confirms_later">オンラインに戻ると確認されます</string>
+    <string name="offline_status_using_rate">%1$s時点のレート</string>
+    <string name="offline_status_updating">更新中…</string>
+    <string name="offline_row_content_description">%1$s、%2$s</string>
+    <string name="offline_row_content_description_outdated">%1$s、古い情報。%2$s</string>
 </resources>

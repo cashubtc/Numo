@@ -2,7 +2,6 @@ package com.electricdreams.numo.ui.offline
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.ColorStateList
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.Path
@@ -13,7 +12,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat
 import androidx.core.view.updatePadding
-import androidx.core.widget.ImageViewCompat
 import com.electricdreams.numo.R
 import com.electricdreams.numo.databinding.ViewOfflineStripBinding
 import kotlin.math.ceil
@@ -75,6 +73,11 @@ class OfflineStripView(context: Context) : FrameLayout(context) {
         onStripClick = listener
     }
 
+    /** Lets TalkBack read the strip before the screen under it, matching what's seen first. */
+    fun readBefore(viewId: Int) {
+        binding.stripContent.accessibilityTraversalBefore = viewId
+    }
+
     /** Measures the strip at [width] and caches [contentHeight]. Safe to call before layout. */
     fun measureContentHeight(width: Int): Int {
         binding.stripContent.measure(
@@ -85,7 +88,8 @@ class OfflineStripView(context: Context) : FrameLayout(context) {
         return contentHeight
     }
 
-    fun setMode(newMode: Mode, animate: Boolean) {
+    /** [onApplied] runs once the new text is in place, so the strip can be re-measured. */
+    fun setMode(newMode: Mode, animate: Boolean, onApplied: () -> Unit = {}) {
         if (newMode == mode) return
         mode = newMode
         val text = binding.stripText
@@ -93,10 +97,12 @@ class OfflineStripView(context: Context) : FrameLayout(context) {
         if (!animate) {
             text.alpha = 1f
             applyMode(newMode)
+            onApplied()
             return
         }
         text.animate().alpha(0f).setDuration(TEXT_OUT_MS).withEndAction {
             applyMode(newMode)
+            onApplied()
             text.animate().alpha(1f).setDuration(TEXT_IN_MS).start()
         }.start()
     }
@@ -116,8 +122,15 @@ class OfflineStripView(context: Context) : FrameLayout(context) {
         )
         binding.stripTitle.setTextColor(color)
         binding.stripSubtitle.setTextColor(color)
-        binding.stripIcon.setImageResource(if (offline) R.drawable.ic_info else R.drawable.ic_check)
-        ImageViewCompat.setImageTintList(binding.stripIcon, ColorStateList.valueOf(color))
+        // TalkBack announces a pane when it appears and when its title changes
+        ViewCompat.setAccessibilityPaneTitle(
+            this,
+            context.getString(
+                R.string.offline_strip_pane_title,
+                binding.stripTitle.text,
+                binding.stripSubtitle.text
+            )
+        )
 
         // Only the offline state leads anywhere; "Back online" is purely informational.
         binding.stripContent.isClickable = offline
@@ -150,8 +163,9 @@ class OfflineStripView(context: Context) : FrameLayout(context) {
     }
 
     companion object {
-        /** Share of the reveal over which the strip fades in, so the status bar doesn't pop. */
-        private const val FADE_PORTION = 0.35f
+        /** Share of the reveal over which the strip fades in: just enough that the status bar
+         *  doesn't pop, short enough that the strip lands with the dimmed Charge button. */
+        private const val FADE_PORTION = 0.15f
         private const val TEXT_OUT_MS = 120L
         private const val TEXT_IN_MS = 200L
     }

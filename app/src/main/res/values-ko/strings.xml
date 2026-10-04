@@ -991,25 +991,33 @@
 
     <!-- Offline mode -->
     <string name="offline_strip_title">오프라인</string>
-    <string name="offline_strip_subtitle">다시 연결될 때까지 결제가 일시 중지됩니다</string>
+    <string name="offline_strip_subtitle">새 결제는 인터넷이 필요합니다</string>
     <string name="offline_strip_back_online_title">다시 연결됨</string>
-    <string name="offline_strip_back_online_subtitle">결제를 다시 받을 수 있습니다</string>
+    <string name="offline_strip_back_online_subtitle">새 결제를 다시 받을 수 있습니다</string>
     <string name="offline_strip_action_details">오프라인에서 가능한 기능 보기</string>
     <string name="offline_explainer_title">오프라인 상태입니다.</string>
-    <string name="offline_explainer_subtitle">결제를 받으려면 인터넷 연결이 필요합니다. 계속 사용할 수 있는 기능:</string>
+    <string name="offline_explainer_subtitle">다시 온라인 상태가 될 때까지 새 결제를 시작할 수 없습니다. Wi-Fi 또는 모바일 데이터를 확인하세요.</string>
     <string name="offline_explainer_back_online_title">다시 온라인 상태입니다.</string>
     <string name="offline_explainer_back_online_subtitle">모든 기능을 다시 사용할 수 있습니다.</string>
     <string name="offline_explainer_close_content_description">닫기</string>
     <string name="offline_feature_catalog">카탈로그 및 바구니</string>
     <string name="offline_feature_history">활동 및 매출</string>
     <string name="offline_feature_exchange_rate">환율</string>
-    <string name="offline_feature_accept_payments">결제 받기</string>
     <string name="offline_feature_withdrawals">인출</string>
     <string name="offline_feature_auto_withdraw">자동 인출</string>
     <string name="offline_status_available">사용 가능</string>
     <string name="offline_status_unavailable">사용 불가</string>
     <string name="offline_status_paused">일시 중지됨</string>
-    <string name="offline_status_last_updated">마지막 업데이트: %1$s</string>
     <string name="payment_request_instruction_scan">스캔하여 결제하세요</string>
     <string name="payment_request_offline_note">고객이 결제하면 다시 온라인 상태가 될 때 Numo가 확인합니다.</string>
+    <string name="offline_strip_pane_title">%1$s. %2$s</string>
+    <string name="offline_explainer_group_needs_internet">인터넷 필요</string>
+    <string name="offline_explainer_group_works_offline">오프라인에서 사용 가능</string>
+    <string name="offline_feature_new_charges">새 결제</string>
+    <string name="offline_feature_payment_on_screen">이 결제</string>
+    <string name="offline_status_confirms_later">다시 온라인 상태가 되면 확인됩니다</string>
+    <string name="offline_status_using_rate">%1$s 기준 환율</string>
+    <string name="offline_status_updating">업데이트 중…</string>
+    <string name="offline_row_content_description">%1$s, %2$s</string>
+    <string name="offline_row_content_description_outdated">%1$s, 오래된 정보. %2$s</string>
 </resources>

@@ -18,19 +18,17 @@
 
         <TextView
             android:id="@+id/capability_title"
-            style="@style/Text.RowTitle"
+            style="@style/Text.OfflineRowTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            tools:text="Accept payments" />
+            tools:text="New charges" />
 
         <TextView
             android:id="@+id/capability_status"
-            style="@style/Text.RowSubtitle"
+            style="@style/Text.OfflineRowStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textSize="14sp"
+            android:layout_marginTop="@dimen/space_2xs"
             tools:text="Unavailable" />
     </LinearLayout>
 

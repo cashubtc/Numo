@@ -33,6 +33,34 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Offline marker: lives in the header row instead of the app-wide strip, so the QR never
+         moves while a customer may be scanning it -->
+    <LinearLayout
+        android:id="@+id/offline_pill"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/offline_pill_height"
+        android:background="@drawable/bg_offline_pill"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="@drawable/bg_offline_strip_ripple"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/space_m"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/close_button"
+        app:layout_constraintEnd_toStartOf="@id/share_button"
+        app:layout_constraintStart_toEndOf="@id/close_button"
+        app:layout_constraintTop_toTopOf="@id/close_button">
+
+        <TextView
+            android:id="@+id/offline_pill_text"
+            style="@style/Text.OfflineStripTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/offline_strip_title"
+            android:textSize="14sp" />
+    </LinearLayout>
+
     <!-- Pay Label -->
     <TextView
         android:id="@+id/pay_label"
@@ -243,6 +271,7 @@
             android:id="@+id/contactless_icon"
             android:layout_width="@dimen/icon_size_small"
             android:layout_height="@dimen/icon_size_small"
+            android:importantForAccessibility="no"
             android:src="@drawable/contactless"
             android:rotation="270"
             app:tint="@color/color_text_primary" />
@@ -264,6 +293,7 @@
         android:id="@+id/payment_status_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:accessibilityLiveRegion="polite"
         android:layout_marginHorizontal="@dimen/space_2xl"
         android:layout_marginTop="@dimen/space_s"
         android:breakStrategy="balanced"

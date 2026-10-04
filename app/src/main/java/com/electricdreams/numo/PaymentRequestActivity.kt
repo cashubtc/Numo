@@ -22,6 +22,10 @@ import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import com.electricdreams.numo.core.dev.WalletLogger
 import com.electricdreams.numo.core.network.ConnectivityMonitor
+import com.electricdreams.numo.core.util.NetworkUtils
+import com.electricdreams.numo.feature.offline.OfflineExplainerActivity
+import com.electricdreams.numo.ui.offline.OfflineStripController
+import com.electricdreams.numo.ui.offline.OfflineStripView
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -31,6 +35,9 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
+import androidx.core.content.ContextCompat
+import android.view.animation.DecelerateInterpolator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -707,7 +714,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     fetchBtcPayLightningInBackground(payment.paymentId)
                 }
 
-                statusText.text = getString(R.string.payment_request_status_waiting_for_payment)
+                showWaitingStatus()
 
                 // Start polling BTCPay for payment status
                 startBtcPayPolling(payment.paymentId)
@@ -791,7 +798,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     fetchBtcPayLightningInBackground(invoiceId)
                 }
 
-                statusText.text = getString(R.string.payment_request_status_waiting_for_payment)
+                showWaitingStatus()
                 startBtcPayPolling(invoiceId)
             }.onFailure { error ->
                 Log.e(TAG, "BTCPay resume failed: ${error.message}", error)
@@ -925,25 +932,80 @@ class PaymentRequestActivity : AppCompatActivity() {
         val iconGap = resources.getDimensionPixelSize(R.dimen.space_m)
         val waitingText = getString(R.string.payment_request_status_waiting_for_payment)
         val offlineText = getString(R.string.payment_request_offline_note)
+        val offlinePill = findViewById<View>(R.id.offline_pill)
+        offlinePill.setOnClickListener {
+            OfflineExplainerActivity.start(this, paymentOnScreen = true)
+        }
+        ViewCompat.replaceAccessibilityAction(
+            offlinePill,
+            AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
+            getString(R.string.offline_strip_action_details),
+            null
+        )
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                ConnectivityMonitor.getInstance(this@PaymentRequestActivity).isOnline.collect { online ->
-                    contactlessIcon.visibility = if (online) View.VISIBLE else View.GONE
-                    instructionText.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        marginStart = if (online) iconGap else 0
-                    }
-                    instructionText.setText(
-                        if (online) R.string.payment_request_instruction_scan_or_tap
-                        else R.string.payment_request_instruction_scan
-                    )
-                    // Only replace the waiting line; errors and results keep their own text
-                    when (statusText.text.toString()) {
-                        waitingText -> if (!online) statusText.text = offlineText
-                        offlineText -> if (online) statusText.text = waitingText
+                launch {
+                    ConnectivityMonitor.getInstance(this@PaymentRequestActivity).isOnline.collect { online ->
+                        contactlessIcon.visibility = if (online) View.VISIBLE else View.GONE
+                        instructionText.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                            marginStart = if (online) iconGap else 0
+                        }
+                        instructionText.setText(
+                            if (online) R.string.payment_request_instruction_scan_or_tap
+                            else R.string.payment_request_instruction_scan
+                        )
+                        // Only replace the waiting line; errors and results keep their own text
+                        when (statusText.text.toString()) {
+                            waitingText -> if (!online) statusText.text = offlineText
+                            offlineText -> if (online) statusText.text = waitingText
+                        }
                     }
                 }
+                launch { OfflineStripController.stripMode.collect(::renderOfflinePill) }
             }
         }
+    }
+
+    /** "Waiting for payment...", or the offline reassurance while there's no connection. */
+    private fun showWaitingStatus() {
+        statusText.text = getString(
+            if (NetworkUtils.isNetworkAvailable(this)) R.string.payment_request_status_waiting_for_payment
+            else R.string.payment_request_offline_note
+        )
+    }
+
+    /** The header's stand-in for the app-wide strip, which this screen opts out of. */
+    private fun renderOfflinePill(mode: OfflineStripView.Mode?) {
+        val pill = findViewById<View>(R.id.offline_pill)
+        val text = findViewById<TextView>(R.id.offline_pill_text)
+        pill.animate().cancel()
+        if (mode == null) {
+            if (pill.visibility != View.VISIBLE) return
+            pill.animate().alpha(0f).scaleX(PILL_HIDDEN_SCALE).scaleY(PILL_HIDDEN_SCALE)
+                .setDuration(PILL_OUT_MS)
+                .withEndAction { pill.visibility = View.GONE }
+                .start()
+            return
+        }
+        val offline = mode == OfflineStripView.Mode.OFFLINE
+        val color = ContextCompat.getColor(
+            this,
+            if (offline) R.color.color_warning else R.color.color_success_green
+        )
+        text.setText(if (offline) R.string.offline_strip_title else R.string.offline_strip_back_online_title)
+        text.setTextColor(color)
+        pill.isClickable = offline
+        pill.isFocusable = offline
+        if (pill.visibility != View.VISIBLE) {
+            pill.alpha = 0f
+            pill.scaleX = PILL_HIDDEN_SCALE
+            pill.scaleY = PILL_HIDDEN_SCALE
+            pill.visibility = View.VISIBLE
+        }
+        pill.animate().alpha(1f).scaleX(1f).scaleY(1f)
+            .setDuration(PILL_IN_MS)
+            .setInterpolator(DecelerateInterpolator(2f))
+            .start()
     }
 
     /**
@@ -1149,7 +1211,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     cashuQrImageView.setImageBitmap(qrBitmap)
                     cashuQrImageView.visibility = View.VISIBLE
                     cashuLoadingSpinner.visibility = View.GONE
-                    statusText.text = getString(R.string.payment_request_status_waiting_for_payment)
+                    showWaitingStatus()
                     updateUnifiedQrCode()
                 } catch (e: Exception) {
                     Log.e(TAG, "Error generating Cashu QR bitmap: ${e.message}", e)
@@ -2242,6 +2304,9 @@ class PaymentRequestActivity : AppCompatActivity() {
         private const val NFC_READ_TIMEOUT_MS = 5_000L
         private const val BTCPAY_INVOICE_TIMEOUT_MS = 15 * 60 * 1000L // 15 min
         private const val BTCPAY_MAX_POLL_ERRORS = 5
+        private const val PILL_IN_MS = 220L
+        private const val PILL_OUT_MS = 160L
+        private const val PILL_HIDDEN_SCALE = 0.92f
 
 
 

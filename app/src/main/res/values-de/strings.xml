@@ -1091,25 +1091,33 @@
 
     <!-- Offline mode -->
     <string name="offline_strip_title">Offline</string>
-    <string name="offline_strip_subtitle">Zahlungen pausiert, bis du wieder online bist</string>
+    <string name="offline_strip_subtitle">Neue Zahlungen brauchen Internet</string>
     <string name="offline_strip_back_online_title">Wieder online</string>
-    <string name="offline_strip_back_online_subtitle">Zahlungen sind wieder möglich</string>
+    <string name="offline_strip_back_online_subtitle">Neue Zahlungen funktionieren wieder</string>
     <string name="offline_strip_action_details">Zeigen, was offline funktioniert</string>
     <string name="offline_explainer_title">Du bist offline.</string>
-    <string name="offline_explainer_subtitle">Numo braucht eine Internetverbindung, um Zahlungen anzunehmen. Das funktioniert weiterhin:</string>
+    <string name="offline_explainer_subtitle">Ohne Internet kannst du keine neuen Zahlungen starten. Prüfe WLAN oder mobile Daten.</string>
     <string name="offline_explainer_back_online_title">Du bist wieder online.</string>
     <string name="offline_explainer_back_online_subtitle">Alles ist wieder verfügbar.</string>
     <string name="offline_explainer_close_content_description">Schließen</string>
     <string name="offline_feature_catalog">Katalog &amp; Warenkörbe</string>
     <string name="offline_feature_history">Aktivität &amp; Verkäufe</string>
     <string name="offline_feature_exchange_rate">Wechselkurs</string>
-    <string name="offline_feature_accept_payments">Zahlungen annehmen</string>
     <string name="offline_feature_withdrawals">Abhebungen</string>
     <string name="offline_feature_auto_withdraw">Automatische Abhebungen</string>
     <string name="offline_status_available">Verfügbar</string>
     <string name="offline_status_unavailable">Nicht verfügbar</string>
     <string name="offline_status_paused">Pausiert</string>
-    <string name="offline_status_last_updated">Zuletzt aktualisiert: %1$s</string>
     <string name="payment_request_instruction_scan">Scannen zum Bezahlen</string>
     <string name="payment_request_offline_note">Wenn der Kunde bezahlt, bestätigt Numo die Zahlung, sobald du wieder online bist.</string>
+    <string name="offline_strip_pane_title">%1$s. %2$s</string>
+    <string name="offline_explainer_group_needs_internet">Braucht Internet</string>
+    <string name="offline_explainer_group_works_offline">Funktioniert offline</string>
+    <string name="offline_feature_new_charges">Neue Zahlungen</string>
+    <string name="offline_feature_payment_on_screen">Diese Zahlung</string>
+    <string name="offline_status_confirms_later">Wird bestätigt, sobald du wieder online bist</string>
+    <string name="offline_status_using_rate">Kurs von %1$s</string>
+    <string name="offline_status_updating">Wird aktualisiert…</string>
+    <string name="offline_row_content_description">%1$s, %2$s</string>
+    <string name="offline_row_content_description_outdated">%1$s, veraltet. %2$s</string>
 </resources>

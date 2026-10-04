@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:parentTag="android.widget.FrameLayout">
 
@@ -9,7 +8,6 @@
         android:id="@+id/strip_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:accessibilityLiveRegion="polite"
         android:background="@drawable/bg_offline_strip_ripple"
         android:clickable="true"
         android:focusable="true"
@@ -19,6 +17,7 @@
         android:paddingTop="@dimen/space_xs"
         android:paddingBottom="@dimen/space_m">
 
+        <!-- Fades separately from the ripple background when the mode swaps -->
         <LinearLayout
             android:id="@+id/strip_text"
             android:layout_width="wrap_content"
@@ -26,41 +25,21 @@
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/strip_title"
+                style="@style/Text.OfflineStripTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/strip_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-medium"
-                    android:text="@string/offline_strip_title"
-                    android:textColor="@color/color_warning"
-                    android:textSize="15sp" />
-
-                <ImageView
-                    android:id="@+id/strip_icon"
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_marginStart="6dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_info"
-                    app:tint="@color/color_warning" />
-            </LinearLayout>
+                android:text="@string/offline_strip_title" />
 
             <TextView
                 android:id="@+id/strip_subtitle"
+                style="@style/Text.OfflineStripSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:fontFamily="sans-serif"
+                android:layout_marginTop="@dimen/space_2xs"
                 android:gravity="center"
-                android:text="@string/offline_strip_subtitle"
-                android:textColor="@color/color_warning"
-                android:textSize="13sp" />
+                android:text="@string/offline_strip_subtitle" />
         </LinearLayout>
     </LinearLayout>
 </merge>

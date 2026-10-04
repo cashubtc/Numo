@@ -262,7 +262,8 @@
     <color name="m3_primary_inverse">#42E360</color>
 
     <!-- Offline strip: the dark layer revealed above the app. Same in light and dark mode so the
-         app below always reads as a card, and it stays a step lighter than the obsidian theme. -->
-    <color name="color_offline_strip">#1A1F23</color>
+         app below always reads as a card; lifted enough off obsidian (#0B1215) that the rounded
+         card edge still reads in dark mode. -->
+    <color name="color_offline_strip">#22282D</color>
     <color name="color_offline_strip_ripple">#1FFFFFFF</color>
 </resources>
