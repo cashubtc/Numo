@@ -9,7 +9,6 @@ import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat.AccessibilityActionCompat
 import androidx.core.view.updatePadding
 import com.electricdreams.numo.R
@@ -57,20 +56,22 @@ class OfflineStripView(context: Context) : FrameLayout(context) {
         setWillNotDraw(false)
         // Room below the strip for the fillets; touches there fall through to the app.
         setPadding(0, 0, 0, ceil(cornerRadius).toInt())
-        ViewCompat.setOnApplyWindowInsetsListener(this) { _, insets ->
-            val top = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
-            if (top != statusBarInset) {
-                statusBarInset = top
-                binding.stripContent.updatePadding(top = basePaddingTop + top)
-            }
-            insets
-        }
         binding.stripContent.setOnClickListener { onStripClick?.invoke() }
         applyMode(Mode.OFFLINE)
     }
 
     fun setOnStripClickListener(listener: () -> Unit) {
         onStripClick = listener
+    }
+
+    /**
+     * The real (un-inflated) status bar height, fed by the host. The strip doesn't listen for
+     * insets itself: below API 30 siblings receive whatever the screen's own handling returns.
+     */
+    fun setStatusBarInset(top: Int) {
+        if (top == statusBarInset) return
+        statusBarInset = top
+        binding.stripContent.updatePadding(top = basePaddingTop + top)
     }
 
     /** Lets TalkBack read the strip before the screen under it, matching what's seen first. */

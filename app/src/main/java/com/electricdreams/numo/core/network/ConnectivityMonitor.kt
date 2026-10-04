@@ -21,9 +21,12 @@ import kotlinx.coroutines.flow.transformLatest
 /**
  * Single source of truth for whether Numo can reach the internet.
  *
- * "Online" means the default network has internet capability **and** Android has validated it,
- * so captive portals and Wi-Fi without upstream count as offline. Going offline is debounced
- * by [OFFLINE_DEBOUNCE_MS] to ride out network handoffs; coming back online is immediate.
+ * "Online" means the default network has internet capability and isn't stuck behind a captive
+ * portal. Android's own validation is deliberately not required: it fails on networks that
+ * block Google's connectivity check (some countries, corporate firewalls) even though the mint
+ * is reachable, and blocking a merchant from charging is worse than an occasional failed charge.
+ * Going offline is debounced by [OFFLINE_DEBOUNCE_MS] to ride out network handoffs; coming back
+ * online is immediate.
  */
 class ConnectivityMonitor private constructor(context: Context) {
 
@@ -37,11 +40,14 @@ class ConnectivityMonitor private constructor(context: Context) {
     /** Debounced connectivity used by every UI surface (offline strip, Charge, explainer). */
     val isOnline: StateFlow<Boolean> = rawOnline
         .debounceOffline(OFFLINE_DEBOUNCE_MS)
-        .stateIn(scope, SharingStarted.Eagerly, true)
+        // Seeded with the real state so a cold start offline isn't treated as online for 2s
+        .stateIn(scope, SharingStarted.Eagerly, rawOnline.value)
+
+    private var callbackRegistered = false
 
     private val callback = object : ConnectivityManager.NetworkCallback() {
         override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
-            rawOnline.value = capabilities.hasValidatedInternet()
+            rawOnline.value = capabilities.isUsable()
         }
 
         override fun onLost(network: Network) {
@@ -52,21 +58,29 @@ class ConnectivityMonitor private constructor(context: Context) {
     init {
         try {
             connectivityManager.registerDefaultNetworkCallback(callback)
+            callbackRegistered = true
         } catch (e: RuntimeException) {
             // Registration can fail if the app exceeds the per-UID callback limit.
             Log.e(TAG, "Failed to register network callback", e)
         }
     }
 
-    private fun readCurrentState(): Boolean {
-        val network = connectivityManager.activeNetwork ?: return false
-        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
-        return capabilities.hasValidatedInternet()
+    /** Current connectivity for one-off checks; reads live if the callback never registered. */
+    fun isOnlineNow(): Boolean = if (callbackRegistered) isOnline.value else readCurrentState()
+
+    private fun readCurrentState(): Boolean = try {
+        val network = connectivityManager.activeNetwork
+        val capabilities = network?.let { connectivityManager.getNetworkCapabilities(it) }
+        capabilities?.isUsable() == true
+    } catch (e: RuntimeException) {
+        // Some Android 11 builds throw SecurityException here; never block charging on that
+        Log.e(TAG, "Failed to read network state", e)
+        true
     }
 
-    private fun NetworkCapabilities.hasValidatedInternet(): Boolean =
+    private fun NetworkCapabilities.isUsable(): Boolean =
         hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-            hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            !hasCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL)
 
     companion object {
         private const val TAG = "ConnectivityMonitor"

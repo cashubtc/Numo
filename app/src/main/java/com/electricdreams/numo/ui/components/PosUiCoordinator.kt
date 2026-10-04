@@ -166,7 +166,8 @@ class PosUiCoordinator(
             amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
 
             Handler(Looper.getMainLooper()).postDelayed({
-                if (submitButton.isEnabled) {
+                // Offline the button stays enabled (a tap explains why), so check the network too
+                if (submitButton.isEnabled && NetworkUtils.isNetworkAvailable(activity)) {
                     Log.d("PosUiCoordinator", "Auto-initiating payment flow for basket checkout with amount: $paymentAmount")
                     showChargeButtonSpinner()
                     val formattedAmount = amountDisplay.text.toString()

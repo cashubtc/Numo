@@ -4,6 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.Activity
+import android.graphics.Color
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import android.view.animation.PathInterpolator
 import android.widget.FrameLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import kotlin.math.roundToInt
 
 /**
@@ -32,6 +34,7 @@ internal class OfflineStripHost(private val activity: Activity, onTap: () -> Uni
     private var extraTop = 0
     private var animator: ValueAnimator? = null
     private var savedLightStatusBars: Boolean? = null
+    private var savedStatusBarColor: Int? = null
 
     /** Mode currently on screen, or null when the strip is hidden. */
     private var shownMode: OfflineStripView.Mode? = null
@@ -49,6 +52,8 @@ internal class OfflineStripHost(private val activity: Activity, onTap: () -> Uni
         val target = findTopLevelContentView() ?: return
         insetsTarget = target
         ViewCompat.setOnApplyWindowInsetsListener(target) { view, insets ->
+            // This decor child always sees the real insets first, on every API level
+            strip.setStatusBarInset(insets.getInsets(WindowInsetsCompat.Type.statusBars()).top)
             ViewCompat.onApplyWindowInsets(view, insets.withExtraStatusBarTop(extraTop))
         }
     }
@@ -74,6 +79,7 @@ internal class OfflineStripHost(private val activity: Activity, onTap: () -> Uni
     }
 
     /** Screens may reset status bar icon colors in onResume; keep them light over the strip. */
+    @Suppress("DEPRECATION")
     fun onResumed() {
         decor.post {
             if (shownMode == null) return@post
@@ -81,6 +87,10 @@ internal class OfflineStripHost(private val activity: Activity, onTap: () -> Uni
             if (controller.isAppearanceLightStatusBars) {
                 savedLightStatusBars = true
                 controller.isAppearanceLightStatusBars = false
+            }
+            if (window.statusBarColor != Color.TRANSPARENT) {
+                savedStatusBarColor = window.statusBarColor
+                window.statusBarColor = Color.TRANSPARENT
             }
         }
     }
@@ -92,7 +102,7 @@ internal class OfflineStripHost(private val activity: Activity, onTap: () -> Uni
         strip.measureContentHeight(width)
         if (show) {
             strip.visibility = View.VISIBLE
-            useLightStatusBarIcons(true)
+            adaptStatusBar(stripVisible = true)
         }
         val target = if (show) 1f else 0f
         if (!animate) {
@@ -137,19 +147,30 @@ internal class OfflineStripHost(private val activity: Activity, onTap: () -> Uni
 
     private fun finishHide() {
         strip.visibility = View.GONE
-        useLightStatusBarIcons(false)
+        adaptStatusBar(stripVisible = false)
     }
 
-    private fun useLightStatusBarIcons(stripVisible: Boolean) {
+    /**
+     * Light icons over the dark strip. Below Android 15 a screen's status bar color is drawn as a
+     * view on top of the strip, so it goes transparent while the strip shows; both are restored.
+     */
+    @Suppress("DEPRECATION")
+    private fun adaptStatusBar(stripVisible: Boolean) {
         val controller = WindowCompat.getInsetsController(window, decor)
         if (stripVisible) {
             if (savedLightStatusBars == null) {
                 savedLightStatusBars = controller.isAppearanceLightStatusBars
             }
+            if (savedStatusBarColor == null) {
+                savedStatusBarColor = window.statusBarColor
+            }
             controller.isAppearanceLightStatusBars = false
+            window.statusBarColor = Color.TRANSPARENT
         } else {
             savedLightStatusBars?.let { controller.isAppearanceLightStatusBars = it }
+            savedStatusBarColor?.let { window.statusBarColor = it }
             savedLightStatusBars = null
+            savedStatusBarColor = null
         }
     }
 

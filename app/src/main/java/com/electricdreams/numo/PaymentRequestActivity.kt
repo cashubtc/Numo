@@ -72,7 +72,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -890,7 +889,9 @@ class PaymentRequestActivity : AppCompatActivity() {
         uiScope.launch {
             val mintUrlToUse = preferredLightningMint ?: allowedMints.firstOrNull()
             
-            if (mintUrlToUse != null) {
+            // A resumed payment already holds an invoice from this mint, so bolt11 is supported;
+            // skipping the lookup also keeps it showing when resumed offline without cached limits.
+            if (mintUrlToUse != null && resumeLightningInvoice == null) {
                 val limits = mintManager.getMintLimits(mintUrlToUse, this@PaymentRequestActivity)
                 val preferredUnit = MintManager.getInstance(this@PaymentRequestActivity).getPreferredUnit()
                 val checkResult = MintLimitChecker.checkMintLimits(paymentAmount, limits, preferredUnit)
@@ -934,7 +935,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         val offlineText = getString(R.string.payment_request_offline_note)
         val offlinePill = findViewById<View>(R.id.offline_pill)
         offlinePill.setOnClickListener {
-            OfflineExplainerActivity.start(this, paymentOnScreen = true)
+            OfflineExplainerActivity.start(this, paymentOnScreen = confirmsAfterReconnect())
         }
         ViewCompat.replaceAccessibilityAction(
             offlinePill,
@@ -956,7 +957,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                         )
                         // Only replace the waiting line; errors and results keep their own text
                         when (statusText.text.toString()) {
-                            waitingText -> if (!online) statusText.text = offlineText
+                            waitingText -> if (!online && confirmsAfterReconnect()) statusText.text = offlineText
                             offlineText -> if (online) statusText.text = waitingText
                         }
                     }
@@ -968,11 +969,20 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     /** "Waiting for payment...", or the offline reassurance while there's no connection. */
     private fun showWaitingStatus() {
+        val offline = !NetworkUtils.isNetworkAvailable(this)
         statusText.text = getString(
-            if (NetworkUtils.isNetworkAvailable(this)) R.string.payment_request_status_waiting_for_payment
-            else R.string.payment_request_offline_note
+            if (offline && confirmsAfterReconnect()) R.string.payment_request_offline_note
+            else R.string.payment_request_status_waiting_for_payment
         )
     }
+
+    /**
+     * Whether a payment made while offline is picked up on reconnect: the local wallet keeps
+     * polling its mint quote and re-subscribes to Nostr. BTCPay polling gives up after repeated
+     * errors, so it makes no such promise.
+     */
+    private fun confirmsAfterReconnect(): Boolean =
+        !(::paymentService.isInitialized && paymentService is BTCPayPaymentService)
 
     /** The header's stand-in for the app-wide strip, which this screen opts out of. */
     private fun renderOfflinePill(mode: OfflineStripView.Mode?) {
@@ -1056,15 +1066,6 @@ class PaymentRequestActivity : AppCompatActivity() {
                         PaymentState.PENDING -> { /* continue */ }
                     }
                 }.onFailure { error ->
-                    val connectivity = ConnectivityMonitor.getInstance(this@PaymentRequestActivity)
-                    if (!connectivity.isOnline.value) {
-                        // Offline isn't a server failure: wait it out, then poll fresh
-                        Log.d(TAG, "BTCPay poll failed while offline; waiting for connection")
-                        connectivity.isOnline.first { it }
-                        consecutiveErrors = 0
-                        pollInterval = 2000L
-                        return@onFailure
-                    }
                     // Fix 6: exponential backoff, stop after too many consecutive errors
                     consecutiveErrors++
                     pollInterval = minOf(pollInterval * 2, 30_000L)
