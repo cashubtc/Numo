@@ -74,7 +74,7 @@ class WithdrawActivityTest {
             assertEquals(activity.getString(R.string.auto_withdraw_status_failed), rowText(newest, R.id.recent_status))
 
             val pending = list.getChildAt(1)
-            assertEquals(activity.getString(R.string.withdraw_review_to_invoice), rowText(pending, R.id.recent_title))
+            assertEquals(activity.getString(R.string.withdraw_recent_invoice), rowText(pending, R.id.recent_title))
             assertEquals(activity.getString(R.string.auto_withdraw_status_pending), rowText(pending, R.id.recent_status))
 
             val sent = list.getChildAt(2)
@@ -87,9 +87,22 @@ class WithdrawActivityTest {
     }
 
     @Test
+    fun `auto-withdraw without an address says it cannot run`() {
+        val settings = AutoWithdrawSettingsManager.getInstance(context)
+        settings.setGloballyEnabled(true)
+        settings.setDefaultLightningAddress("")
+
+        launch { activity ->
+            val row = activity.findViewById<SettingsRowView>(R.id.auto_withdraw_row)
+            assertTrue(row.searchableText.contains(activity.getString(R.string.withdraw_hub_auto_needs_address)))
+        }
+    }
+
+    @Test
     fun `auto-withdraw row summarises the rule`() {
         val settings = AutoWithdrawSettingsManager.getInstance(context)
         settings.setGloballyEnabled(true)
+        settings.setDefaultLightningAddress("shop@wallet.com")
         settings.setDefaultPercentage(95)
         settings.setDefaultThreshold(50_000)
 

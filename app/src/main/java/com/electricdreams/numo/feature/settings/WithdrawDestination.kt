@@ -49,7 +49,12 @@ sealed class WithdrawDestination {
                     .firstOrNull { it.startsWith("lightning=", ignoreCase = true) }
                     ?.substringAfter('=')
                 if (lightningParam != null) {
-                    value = URLDecoder.decode(lightningParam, "UTF-8")
+                    // A malformed %-escape leaves the link as-is, which then parses as Invalid.
+                    value = try {
+                        URLDecoder.decode(lightningParam, "UTF-8")
+                    } catch (e: IllegalArgumentException) {
+                        value
+                    }
                 }
             }
             if (value.startsWith("lightning:", ignoreCase = true)) {

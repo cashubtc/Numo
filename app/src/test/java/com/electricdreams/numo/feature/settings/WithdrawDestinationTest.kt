@@ -67,6 +67,11 @@ class WithdrawDestinationTest {
     }
 
     @Test
+    fun `bip21 link with a malformed escape is invalid instead of crashing`() {
+        assertTrue(parse("bitcoin:bc1qexample?lightning=lnbc%zz") is WithdrawDestination.Invalid)
+    }
+
+    @Test
     fun `lnurl is not mistaken for an invoice`() {
         assertTrue(parse("LNURL1DP68GURN8GHJ7UM9WFMXJCM99E3K7MF0V9CXJ0M385EKVCENXC6R2C35XVUKXEFCV5MKVV34X5EKZD3EV56NYD3HXQURZEPEXEJXXEPNXSCRVWFNV9NXZCN9XQ6XYEFHVGCXXCMYXYMNSERXFQ5FNS") is WithdrawDestination.Invalid)
     }

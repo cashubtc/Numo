@@ -12,8 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.lifecycleScope
-import androidx.transition.AutoTransition
-import androidx.transition.TransitionManager
+import androidx.core.view.isVisible
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -85,7 +84,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
             val savedAddress = lightningAddressManager.getLightningAddress()
             if (savedAddress.isNotBlank()) setDestinationText(savedAddress)
         }
-        sourcePicker.load(intent.getStringExtra(EXTRA_MINT_URL))
+        sourcePicker.load()
     }
 
     override fun onStart() {
@@ -109,9 +108,16 @@ class WithdrawLightningActivity : AppCompatActivity() {
     }
 
     private fun setupDestinationField() {
+        // Single-line input semantics (so the keyboard's Done works) that still wrap a long
+        // invoice over a few lines instead of scrolling it sideways.
+        binding.toInput.setHorizontallyScrolling(false)
+        binding.toInput.maxLines = TO_FIELD_MAX_LINES
         binding.toInput.doAfterTextChanged { onDestinationChanged(showInvalid = false) }
         binding.toInput.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) onDestinationChanged(showInvalid = true)
+            if (!hasFocus) {
+                onDestinationChanged(showInvalid = true)
+                showInvoiceStart()
+            }
         }
         binding.toInput.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -136,6 +142,15 @@ class WithdrawLightningActivity : AppCompatActivity() {
         binding.toInput.setText(text)
         binding.toInput.setSelection(text.length)
         onDestinationChanged(showInvalid = true)
+        showInvoiceStart()
+    }
+
+    /** A wrapped invoice reads from its recognisable "lnbc…" start, never a clipped middle. */
+    private fun showInvoiceStart() {
+        if (destination is WithdrawDestination.Invoice) {
+            binding.toInput.setSelection(0)
+            binding.toInput.scrollTo(0, 0)
+        }
     }
 
     private fun onDestinationChanged(showInvalid: Boolean) {
@@ -147,9 +162,9 @@ class WithdrawLightningActivity : AppCompatActivity() {
             getString(if (hasText) R.string.withdraw_to_clear else R.string.withdraw_to_scan)
 
         when (val d = destination) {
-            WithdrawDestination.Empty -> showToHelper(getString(R.string.withdraw_to_helper))
+            WithdrawDestination.Empty -> showToStatus(helper = getString(R.string.withdraw_to_helper))
             is WithdrawDestination.LightningAddress ->
-                showToHelper(getString(R.string.withdraw_to_detected_address))
+                showToStatus(helper = getString(R.string.withdraw_to_detected_address))
             is WithdrawDestination.Invoice -> {
                 val helper = d.amountSats?.let {
                     getString(R.string.withdraw_to_detected_invoice_amount, WithdrawUi.sats(it))
@@ -157,34 +172,39 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 // Until the source has loaded there is no balance to compare against.
                 val available = sourcePicker.current?.balance
                 if (d.amountSats != null && available != null && d.amountSats > available) {
-                    binding.toLayout.error = getString(
-                        R.string.withdraw_amount_too_large, WithdrawUi.sats(available)
-                    )
+                    showToStatus(error = getString(R.string.withdraw_amount_too_large, WithdrawUi.sats(available)))
                 } else {
-                    showToHelper(helper)
+                    showToStatus(helper = helper)
                 }
             }
             is WithdrawDestination.Invalid -> {
                 if (showInvalid) {
-                    binding.toLayout.error = getString(R.string.withdraw_to_invalid)
+                    showToStatus(error = getString(R.string.withdraw_to_invalid))
                 } else {
-                    showToHelper(getString(R.string.withdraw_to_helper))
+                    showToStatus(helper = getString(R.string.withdraw_to_helper))
                 }
             }
         }
 
         // An invoice carries its own amount; everything else needs one from the merchant.
         val needsAmount = destination !is WithdrawDestination.Invoice
-        if ((binding.amount.root.visibility == View.VISIBLE) != needsAmount) {
-            TransitionManager.beginDelayedTransition(binding.root as android.view.ViewGroup, AutoTransition())
+        if (binding.amount.root.isVisible != needsAmount) {
+            WithdrawUi.animateLayoutChange(binding.root)
             binding.amount.root.visibility = if (needsAmount) View.VISIBLE else View.GONE
         }
         updateReviewEnabled()
     }
 
-    private fun showToHelper(text: String) {
-        binding.toLayout.error = null
-        binding.toLayout.helperText = text
+    /**
+     * The line under the field shows either what was detected or what is wrong. Moving
+     * between the two can change its height, so the content below glides instead of jumping.
+     */
+    private fun showToStatus(helper: String? = null, error: String? = null) {
+        val layout = binding.toLayout
+        val changesKind = (layout.error != null) != (error != null)
+        if (changesKind) WithdrawUi.animateLayoutChange(binding.root)
+        layout.error = error
+        if (error == null) layout.helperText = helper
     }
 
     private fun updateReviewEnabled() {
@@ -255,7 +275,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Log.e(TAG, "Unable to get melt quote", e)
                 setQuoting(false)
-                binding.toLayout.error = getString(R.string.withdraw_error_quote)
+                showToStatus(error = getString(R.string.withdraw_error_quote))
             }
         }
     }
@@ -269,15 +289,17 @@ class WithdrawLightningActivity : AppCompatActivity() {
                 val sendable = (source.balance - feeReserve).coerceAtLeast(0)
                 amountField.setError(getString(R.string.withdraw_error_insufficient, WithdrawUi.sats(sendable)))
             } else {
-                binding.toLayout.error =
-                    getString(R.string.withdraw_error_insufficient_invoice, WithdrawUi.sats(feeReserve))
+                showToStatus(error = getString(R.string.withdraw_error_insufficient_invoice))
             }
             return
         }
 
         val address = (target as? WithdrawDestination.LightningAddress)?.address
-        // The address is shared with auto-withdraw, so a successful lookup becomes the default.
-        address?.let { lightningAddressManager.setLightningAddress(it) }
+        // The saved address is also where auto-withdraw sends, so a one-off payment to
+        // someone else must never replace it; it only fills it in when none is set yet.
+        if (address != null && !lightningAddressManager.hasLightningAddress()) {
+            lightningAddressManager.setLightningAddress(address)
+        }
 
         val intent = Intent(this, WithdrawMeltQuoteActivity::class.java).apply {
             putExtra(WithdrawMeltQuoteActivity.EXTRA_MINT_URL, source.mintUrl)
@@ -315,6 +337,6 @@ class WithdrawLightningActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "WithdrawLightning"
         private const val FEE_BUFFER_PERCENT = 0.02
-        const val EXTRA_MINT_URL = "mint_url"
+        private const val TO_FIELD_MAX_LINES = 3
     }
 }

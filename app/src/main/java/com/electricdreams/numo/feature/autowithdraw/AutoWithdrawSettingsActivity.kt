@@ -1,6 +1,7 @@
 package com.electricdreams.numo.feature.autowithdraw
 
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.View
@@ -11,20 +12,20 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.lifecycleScope
-import androidx.transition.AutoTransition
-import androidx.transition.TransitionManager
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.google.android.material.slider.Slider
 
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.LightningAddressManager
 import com.electricdreams.numo.core.util.LnUrlClient
 import com.electricdreams.numo.databinding.ActivityAutoWithdrawSettingsBinding
+import com.electricdreams.numo.feature.settings.WithdrawUi
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
@@ -76,7 +77,7 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
         binding.enableSwitch.setOnCheckedChangeListener { _, isChecked ->
             if (isUpdatingUI) return@setOnCheckedChangeListener
             settingsManager.setGloballyEnabled(isChecked)
-            TransitionManager.beginDelayedTransition(binding.content, AutoTransition())
+            WithdrawUi.animateLayoutChange(binding.content)
             binding.autoWithdrawConfigContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
         }
 
@@ -103,11 +104,18 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             if (fromUser && !isUpdatingUI) {
                 settingsManager.setDefaultPercentage(percentage)
                 slider.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
-                // The minimum threshold depends on the share being sent.
+            }
+        }
+        binding.percentageSlider.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
+            override fun onStartTrackingTouch(slider: Slider) = Unit
+
+            override fun onStopTrackingTouch(slider: Slider) {
+                // The minimum threshold depends on the share being sent; check it once the
+                // merchant lets go rather than on every step of the drag.
                 val address = binding.lightningAddressInput.text?.toString()?.trim().orEmpty()
                 if (lightningAddressManager.isValidLightningAddress(address)) fetchMinThreshold(address)
             }
-        }
+        })
         binding.percentageSlider.setLabelFormatter { getString(R.string.auto_withdraw_percentage_value, it.toInt()) }
     }
 
@@ -122,12 +130,15 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             context = this,
             config = DialogHelper.InputConfig(
                 title = getString(R.string.withdraw_auto_threshold_title),
-                description = getString(R.string.auto_withdraw_threshold_subtitle),
                 hint = AutoWithdrawSettingsManager.DEFAULT_THRESHOLD_SATS.toString(),
                 initialValue = currentThreshold.toString(),
                 suffix = Amount.Currency.BTC.symbol,
-                helperText = getString(R.string.auto_withdraw_threshold_helper_dynamic, minAmount.toString()),
-                inputType = android.text.InputType.TYPE_CLASS_NUMBER,
+                helperText = getString(
+                    R.string.withdraw_auto_threshold_range,
+                    minAmount.toString(),
+                    Amount(AutoWithdrawSettingsManager.MAX_THRESHOLD_SATS, Amount.Currency.BTC).toString()
+                ),
+                inputType = InputType.TYPE_CLASS_NUMBER,
                 saveText = getString(R.string.common_save),
                 onSave = { value ->
                     val newThreshold = value.replace(",", "").toLongOrNull()

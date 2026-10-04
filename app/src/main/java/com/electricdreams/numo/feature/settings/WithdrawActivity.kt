@@ -141,14 +141,17 @@ class WithdrawActivity : AppCompatActivity() {
 
     private fun bindAutoWithdraw() {
         val settings = AutoWithdrawSettingsManager.getInstance(this)
-        val subtitle = if (settings.isGloballyEnabled()) {
-            getString(
+        val hasAddress = LightningAddressManager.getInstance(this)
+            .isValidLightningAddress(settings.getDefaultLightningAddress())
+        val subtitle = when {
+            !settings.isGloballyEnabled() -> getString(R.string.withdraw_hub_auto_off)
+            // Switched on but with nowhere to send, the rule never runs; say so.
+            !hasAddress -> getString(R.string.withdraw_hub_auto_needs_address)
+            else -> getString(
                 R.string.withdraw_hub_auto_on,
                 settings.getDefaultPercentage(),
                 WithdrawUi.sats(settings.getDefaultThreshold())
             )
-        } else {
-            getString(R.string.withdraw_hub_auto_off)
         }
         binding.autoWithdrawRow.setSubtitle(subtitle)
     }
@@ -170,7 +173,7 @@ class WithdrawActivity : AppCompatActivity() {
             entry.token != null -> getString(R.string.withdraw_recent_token)
             entry.destinationType == "manual_invoice" ||
                 (destination.startsWith("ln", ignoreCase = true) && !destination.contains('@')) ->
-                getString(R.string.withdraw_review_to_invoice)
+                getString(R.string.withdraw_recent_invoice)
             entry.automatic -> getString(R.string.withdraw_recent_auto_to, destination)
             else -> getString(R.string.withdraw_recent_to, destination)
         }

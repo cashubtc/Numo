@@ -668,7 +668,7 @@
     <string name="auto_withdraw_lightning_address_hint">du@wallet.com</string>
     <string name="auto_withdraw_lightning_address_valid">Gültige Lightning-Adresse</string>
     <string name="auto_withdraw_lightning_address_invalid">Ungültige Lightning-Adresse</string>
-    <string name="auto_withdraw_lightning_address_checking">Adresse wird überprüft...</string>
+    <string name="auto_withdraw_lightning_address_checking">Adresse wird überprüft…</string>
 
     <string name="auto_withdraw_threshold_subtitle">Auslösen, wenn Saldo überschreitet</string>
     <string name="auto_withdraw_threshold_helper">Min: ₿1.000 • Max: ₿1.000.000</string>

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Amount entry with a Max shortcut, shared by Send to wallet and Export as ecash. -->
+<!-- Amount entry with a Max shortcut, shared by Send to wallet and Export as ecash.
+     The label row is 48dp tall for the Max touch target; the field's -2dp margin keeps
+     the label text 12dp above the field, like every other section. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -24,15 +26,15 @@
 
         <Button
             android:id="@+id/max_button"
-            style="@style/Widget.Numo.Button.Tertiary"
+            style="@style/Widget.Numo.Button.Quiet"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="-12dp"
+            android:gravity="end|center_vertical"
             android:minWidth="64dp"
             android:minHeight="48dp"
             android:text="@string/withdraw_amount_max"
-            android:textAppearance="@style/Text.Chip"
-            android:textColor="@color/text_button_primary" />
+            android:textAppearance="@style/Text.Chip" />
 
     </LinearLayout>
 
@@ -41,11 +43,13 @@
         style="@style/Widget.Numo.SettingsTextInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/space_xs"
+        android:layout_marginTop="-2dp"
+        app:errorIconDrawable="@null"
         app:helperTextEnabled="true"
         app:helperTextTextAppearance="@style/Text.SettingsCaption"
         app:hintEnabled="false"
-        app:suffixTextAppearance="@style/Text.Body"
+        app:suffixTextAppearance="@style/Text.Heading1"
+        app:suffixTextColor="@color/color_text_secondary"
         tools:helperText="≈ $0.02 · 21 sat available"
         tools:suffixText="sat">
 

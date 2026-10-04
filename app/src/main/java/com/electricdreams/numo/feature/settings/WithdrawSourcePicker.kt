@@ -12,7 +12,6 @@ import kotlinx.coroutines.withContext
 
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
-import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.databinding.ComponentWithdrawSourceBinding
 import com.electricdreams.numo.ui.components.MintSelectionBottomSheet
@@ -75,10 +74,8 @@ class WithdrawSourcePicker(
         } else {
             binding.sourceName.text = mintManager.getMintDisplayName(source.mintUrl)
             binding.sourceAvailable.visibility = View.VISIBLE
-            binding.sourceAvailable.text = activity.getString(
-                R.string.withdraw_from_available,
-                Amount(source.balance, Amount.Currency.BTC).toString()
-            )
+            binding.sourceAvailable.text =
+                WithdrawUi.sourceCaption(activity, source.mintUrl, source.balance, funded.keys)
         }
         onChanged(source)
     }

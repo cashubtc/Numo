@@ -9,7 +9,7 @@
 
     <TextView
         style="@style/Widget.Numo.SettingsSectionTitle"
-        android:layout_marginBottom="0dp"
+        android:layout_marginBottom="@dimen/space_xs"
         android:text="@string/withdraw_from_label" />
 
     <LinearLayout
@@ -20,9 +20,9 @@
         android:clickable="false"
         android:focusable="false"
         android:gravity="center_vertical"
-        android:minHeight="@dimen/settings_row_height"
+        android:minHeight="56dp"
         android:orientation="horizontal"
-        android:paddingVertical="@dimen/space_m">
+        android:paddingVertical="@dimen/space_s">
 
         <LinearLayout
             android:layout_width="0dp"

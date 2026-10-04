@@ -39,6 +39,9 @@
              the per-theme background color). -->
         <item name="android:navigationBarColor">@color/dark_windowBackground</item>
         <item name="android:windowLightNavigationBar">false</item>
+        <!-- Default ink for TextViews without a text appearance. Never set
+             android:textColor here: it would override every textAppearance colour. -->
+        <item name="android:textColorPrimary">@color/dark_textColorPrimary</item>
         <!-- Background colors -->
         <item name="android:windowBackground">@color/dark_windowBackground</item>
         <item name="android:colorBackground">@color/dark_windowBackground</item>

@@ -7,7 +7,7 @@
     <string name="withdraw_hub_export">ecashとしてエクスポート</string>
     <string name="withdraw_hub_auto_title">自動引き出し</string>
     <string name="withdraw_hub_auto_off">オフ</string>
-    <string name="withdraw_hub_auto_on">残高が %2$s を超えると %1$d%% を送金</string>
+    <string name="withdraw_hub_auto_on">%2$s超で%1$d%%を送金</string>
     <string name="withdraw_hub_recent">最近</string>
     <string name="withdraw_hub_see_all">すべてのアクティビティを表示</string>
     <string name="withdraw_hub_recent_empty">出金履歴はここに表示されます。</string>
@@ -26,7 +26,7 @@
     <string name="withdraw_to_detected_address">ライトニングアドレス</string>
     <string name="withdraw_to_detected_invoice">ライトニングインボイス</string>
     <string name="withdraw_to_detected_invoice_amount">%1$s のライトニングインボイス</string>
-    <string name="withdraw_to_invalid">name@wallet.com のようなライトニングアドレス、またはライトニングインボイスを入力してください。</string>
+    <string name="withdraw_to_invalid">ライトニングアドレスかインボイスを入力してください。</string>
     <string name="withdraw_to_scan">QRコードをスキャン</string>
     <string name="withdraw_to_clear">クリア</string>
     <string name="withdraw_amount_label">金額</string>
@@ -35,10 +35,10 @@
     <string name="withdraw_amount_too_large">利用可能な %1$s を超えています。</string>
     <string name="withdraw_review">確認</string>
     <string name="withdraw_review_loading">見積もりを取得中…</string>
-    <string name="withdraw_error_insufficient">残高が不足しています。手数料を含めて最大 %1$s まで送金できます。</string>
-    <string name="withdraw_error_insufficient_invoice">このインボイスと最大 %1$s の手数料を支払う残高がありません。</string>
+    <string name="withdraw_error_insufficient">手数料込みで最大 %1$s まで送金できます。</string>
+    <string name="withdraw_error_insufficient_invoice">インボイスと手数料に足りません。</string>
     <string name="withdraw_paste_empty">貼り付ける内容がありません</string>
-    <string name="withdraw_error_quote">見積もりを取得できませんでした。送金先と接続を確認して、もう一度お試しください。</string>
+    <string name="withdraw_error_quote">見積もりを取得できませんでした。</string>
     <string name="withdraw_error_wallet">ウォレットの準備ができていません。しばらくしてからもう一度お試しください。</string>
     <string name="withdraw_error_no_source">現在、出金できる残高はありません。</string>
     <string name="withdraw_review_title">確認</string>
@@ -52,7 +52,6 @@
     <string name="withdraw_row_total">合計</string>
     <string name="withdraw_send_amount">%1$s を送金</string>
     <string name="withdraw_sending">送金中…</string>
-    <string name="withdraw_sending_status">%1$s を送金中…</string>
     <string name="withdraw_failed_title">支払いが完了しませんでした</string>
     <string name="withdraw_failed_body">Mintはこの支払いを完了できませんでした。もう一度試すか、戻って送金先を変更してください。</string>
     <string name="withdraw_try_again">もう一度試す</string>
@@ -60,7 +59,7 @@
     <string name="withdraw_pending_title">送金処理中</string>
     <string name="withdraw_pending_body">支払いはまだ確定しておらず、完了する可能性があります。再送金する前にウォレットを確認してください。</string>
     <string name="withdraw_done">完了</string>
-    <string name="withdraw_sent_balance_left">残高</string>
+    <string name="withdraw_sent_balance_left">未出金の残高</string>
     <string name="withdraw_ecash_title">ecashとしてエクスポート</string>
     <string name="withdraw_ecash_note">誰かに渡せるトークンを作成します。トークンを持っている人がそのお金を受け取れます。</string>
     <string name="withdraw_ecash_create">トークンを作成</string>
@@ -71,7 +70,7 @@
     <string name="withdraw_ecash_share">トークンを共有</string>
     <string name="withdraw_ecash_copy">コピー</string>
     <string name="withdraw_ecash_saved_note">出金画面の「最近」にも保存されます。</string>
-    <string name="withdraw_ecash_qr_description">トークンのQRコード。ダブルタップで拡大します。</string>
+    <string name="withdraw_ecash_qr_description">トークンのQRコード</string>
     <string name="withdraw_ecash_error">トークンを作成できませんでした。しばらくしてからもう一度お試しください。</string>
     <string name="withdraw_ecash_qr_speed">QR速度: %1$s</string>
     <string name="withdraw_ecash_fullscreen_close">QRコードを閉じる</string>
@@ -82,4 +81,18 @@
     <string name="withdraw_auto_percentage_title">送金する割合</string>
     <string name="withdraw_auto_percentage_subtitle">手数料分を残した残高の割合</string>
     <string name="auto_withdraw_percentage_value">%1$d%%</string>
+    <string name="withdraw_recent_invoice">ライトニングインボイス</string>
+    <string name="withdraw_ecash_qr_enlarge">拡大</string>
+    <string name="withdraw_unconfirmed_title">支払いを確認できませんでした</string>
+    <string name="withdraw_unconfirmed_body">Mintの応答前に接続が切れました。支払いが完了する可能性があるため、再送金する前にウォレットを確認してください。</string>
+    <string name="withdraw_fee_changed">ネットワーク手数料が変わりました。新しい合計を確認してから送金してください。</string>
+    <string name="withdraw_auto_threshold_range">%1$s～%2$s</string>
+    <string name="withdraw_auto_address_hint">name@wallet.com</string>
+    <string name="withdraw_animated_qr_speed_slow">遅い</string>
+    <string name="withdraw_animated_qr_speed_normal">標準</string>
+    <string name="withdraw_animated_qr_speed_fast">速い</string>
+    <string name="auto_withdraw_lightning_address_checking">アドレスを確認中…</string>
+    <string name="withdraw_ecash_error_fee">Mintの手数料分を残してください。</string>
+    <string name="withdraw_from_available_host">%1$s 利用可能 · %2$s</string>
+    <string name="withdraw_hub_auto_needs_address">ライトニングアドレスが未設定です</string>
 </resources>

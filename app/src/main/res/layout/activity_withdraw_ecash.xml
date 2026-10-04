@@ -8,6 +8,7 @@
     tools:context=".feature.settings.WithdrawEcashActivity">
 
     <LinearLayout
+        android:id="@+id/page"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
@@ -51,7 +52,7 @@
                         layout="@layout/component_withdraw_amount"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/settings_section_gap" />
+                        android:layout_marginTop="2dp" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -78,7 +79,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/space_2xl"
                         android:accessibilityLiveRegion="polite"
-                        android:textAppearance="@style/Text.DisplayAmount"
+                        android:gravity="center"
+                    android:textAppearance="@style/Text.DisplayAmount"
                         tools:text="21 sat" />
 
                     <TextView
@@ -100,10 +102,10 @@
                             android:id="@+id/token_qr"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:background="?attr/selectableItemBackground"
                             android:clickable="true"
                             android:contentDescription="@string/withdraw_ecash_qr_description"
                             android:focusable="true"
+                            android:foreground="?attr/selectableItemBackground"
                             android:scaleType="fitCenter" />
 
                     </FrameLayout>
@@ -155,13 +157,11 @@
 
             <Button
                 android:id="@+id/copy_button"
-                style="@style/Widget.Numo.Button.Tertiary"
+                style="@style/Widget.Numo.Button.Quiet"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/button_height"
                 android:layout_marginTop="@dimen/space_xs"
                 android:text="@string/withdraw_ecash_copy"
-                android:textAppearance="@style/Text.Button"
-                android:textColor="@color/text_button_primary"
                 android:visibility="gone" />
 
         </LinearLayout>
@@ -209,13 +209,11 @@
 
         <Button
             android:id="@+id/qr_speed_button"
-            style="@style/Widget.Numo.Button.Tertiary"
+            style="@style/Widget.Numo.Button.Quiet"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/button_height"
             android:layout_gravity="bottom|center_horizontal"
             android:layout_marginBottom="@dimen/space_xl"
-            android:textAppearance="@style/Text.Button"
-            android:textColor="@color/text_button_primary"
             android:visibility="gone"
             tools:text="QR speed: Normal"
             tools:visibility="visible" />

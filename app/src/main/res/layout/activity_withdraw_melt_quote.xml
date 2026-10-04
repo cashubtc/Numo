@@ -37,7 +37,8 @@
                     android:id="@+id/amount_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_3xl"
+                    android:layout_marginTop="@dimen/space_2xl"
+                    android:gravity="center"
                     android:textAppearance="@style/Text.DisplayAmount"
                     tools:text="20 sat" />
 
@@ -46,6 +47,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_xs"
+                    android:gravity="center"
                     android:textAppearance="@style/Text.AmountSubtitle"
                     tools:text="$0.02" />
 
@@ -278,6 +280,7 @@
 
             <Button
                 android:id="@+id/send_button"
+                android:accessibilityLiveRegion="polite"
                 style="@style/Widget.Button.Primary.Green"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/button_height"
@@ -285,13 +288,11 @@
 
             <Button
                 android:id="@+id/secondary_button"
-                style="@style/Widget.Numo.Button.Tertiary"
+                style="@style/Widget.Numo.Button.Quiet"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/button_height"
                 android:layout_marginTop="@dimen/space_xs"
                 android:text="@string/withdraw_change_destination"
-                android:textAppearance="@style/Text.Button"
-                android:textColor="@color/text_button_primary"
                 android:visibility="gone" />
 
         </LinearLayout>

@@ -100,6 +100,7 @@
                         style="@style/Widget.Numo.SettingsTextInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        app:errorIconDrawable="@null"
                         app:helperTextEnabled="true"
                         app:helperTextTextAppearance="@style/Text.SettingsCaption"
                         app:hintEnabled="false">
@@ -108,7 +109,7 @@
                             android:id="@+id/lightning_address_input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="@string/auto_withdraw_lightning_address_hint"
+                            android:hint="@string/withdraw_auto_address_hint"
                             android:imeOptions="actionDone"
                             android:inputType="textEmailAddress|textNoSuggestions"
                             android:minHeight="56dp"
@@ -133,14 +134,16 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
+                        android:gravity="top"
                         android:minHeight="@dimen/settings_row_height"
                         android:orientation="horizontal"
                         android:paddingTop="@dimen/settings_row_padding">
 
+                        <!-- The value sits on the title's baseline, not between title and caption. -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:baselineAlignedChildIndex="0"
                             android:layout_marginEnd="@dimen/space_l"
                             android:layout_weight="1"
                             android:orientation="vertical">
@@ -181,12 +184,8 @@
                         android:stepSize="1"
                         android:valueFrom="50"
                         android:valueTo="98"
-                        app:haloColor="@color/color_ripple"
                         app:labelBehavior="gone"
-                        app:thumbColor="@color/color_brand_foreground"
-                        app:tickVisible="false"
-                        app:trackColorActive="@color/color_brand_foreground"
-                        app:trackColorInactive="@color/color_bg_tertiary" />
+                        app:tickVisible="false" />
 
                 </LinearLayout>
 

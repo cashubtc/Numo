@@ -301,6 +301,14 @@
         <item name="rippleColor">@color/color_white_10</item>
     </style>
 
+    <!-- Quiet text action on light settings surfaces: ink text with a visible ripple. -->
+    <style name="Widget.Numo.Button.Quiet" parent="Widget.Numo.Button.Tertiary">
+        <item name="android:textAppearance">@style/Text.Button</item>
+        <item name="android:textColor">@color/text_button_primary</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="rippleColor">@color/color_ripple</item>
+    </style>
+
     <!-- ══════════════════════════════════════════════════════════ -->
     <!-- Primary action variants                                   -->
     <!-- Use these instead of inlining android:background=@drawable -->

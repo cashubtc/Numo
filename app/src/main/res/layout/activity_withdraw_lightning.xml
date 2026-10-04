@@ -40,10 +40,12 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/space_l" />
 
+                <!-- 48dp row for the Paste target: 2dp + 14dp half-row + the source row's
+                     8dp padding keeps a 24dp section gap above the label text. -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/settings_section_gap"
+                    android:layout_marginTop="2dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
@@ -57,15 +59,15 @@
 
                     <Button
                         android:id="@+id/paste_button"
-                        style="@style/Widget.Numo.Button.Tertiary"
+                        style="@style/Widget.Numo.Button.Quiet"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="-12dp"
+                        android:gravity="end|center_vertical"
                         android:minWidth="64dp"
                         android:minHeight="48dp"
                         android:text="@string/withdraw_paste"
-                        android:textAppearance="@style/Text.Chip"
-                        android:textColor="@color/text_button_primary" />
+                        android:textAppearance="@style/Text.Chip" />
 
                 </LinearLayout>
 
@@ -74,11 +76,12 @@
                     style="@style/Widget.Numo.SettingsTextInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/space_xs"
+                    android:layout_marginTop="-2dp"
                     app:endIconContentDescription="@string/withdraw_to_scan"
                     app:endIconDrawable="@drawable/ic_qr_scan"
                     app:endIconMode="custom"
                     app:endIconTint="?attr/colorOnSurfaceVariant"
+                    app:errorIconDrawable="@null"
                     app:helperText="@string/withdraw_to_helper"
                     app:helperTextEnabled="true"
                     app:helperTextTextAppearance="@style/Text.SettingsCaption"
@@ -90,7 +93,7 @@
                         android:layout_height="wrap_content"
                         android:hint="@string/withdraw_to_hint"
                         android:imeOptions="actionDone"
-                        android:inputType="textNoSuggestions|textEmailAddress|textMultiLine"
+                        android:inputType="textNoSuggestions|textEmailAddress"
                         android:maxLines="3"
                         android:minHeight="56dp"
                         android:textAppearance="@style/Text.SettingsInput"
@@ -103,7 +106,7 @@
                     layout="@layout/component_withdraw_amount"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/settings_section_gap" />
+                    android:layout_marginTop="10dp" />
 
             </LinearLayout>
 

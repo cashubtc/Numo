@@ -101,6 +101,7 @@
 
                 <TextView
                     android:id="@+id/detail_payment_type"
+                    android:textColor="@color/color_text_primary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="@style/Text.RowSubtitle"
@@ -128,6 +129,7 @@
 
                 <TextView
                     android:id="@+id/detail_mint"
+                    android:textColor="@color/color_text_primary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxWidth="200dp"
@@ -159,6 +161,7 @@
 
                 <TextView
                     android:id="@+id/detail_transaction_id"
+                    android:textColor="@color/color_text_primary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxWidth="180dp"
@@ -240,6 +243,7 @@
 
                         <TextView
                             android:id="@+id/subtotal_value"
+                            android:textColor="@color/color_text_primary"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textAppearance="@style/Text.RowSubtitle" />
@@ -279,6 +283,7 @@
 
                             <TextView
                                 android:id="@+id/sats_items_value"
+                                android:textColor="@color/color_text_primary"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textAppearance="@style/Text.RowSubtitle" />
