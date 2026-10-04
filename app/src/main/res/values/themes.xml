@@ -39,8 +39,6 @@
              the per-theme background color). -->
         <item name="android:navigationBarColor">@color/color_bg_white</item>
         <item name="android:windowLightNavigationBar">true</item>
-        <!-- Text colors -->
-        <item name="android:textColor">@color/color_text_primary</item>
         <!-- Background colors -->
         <item name="android:windowBackground">@color/color_bg_white</item>
         <item name="android:colorBackground">@color/color_bg_white</item>

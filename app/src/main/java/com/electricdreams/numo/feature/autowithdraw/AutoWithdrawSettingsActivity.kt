@@ -1,33 +1,18 @@
 package com.electricdreams.numo.feature.autowithdraw
 
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
-import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.view.View
-import android.view.ViewGroup
-import android.view.animation.AccelerateDecelerateInterpolator
-import android.view.animation.OvershootInterpolator
-import android.widget.EditText
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.Switch
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
-import androidx.core.content.ContextCompat
+import androidx.core.view.AccessibilityDelegateCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
+import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.materialswitch.MaterialSwitch
-import com.google.android.material.slider.Slider
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import androidx.transition.AutoTransition
+import androidx.transition.TransitionManager
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -36,272 +21,112 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 import com.electricdreams.numo.R
-import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.LightningAddressManager
 import com.electricdreams.numo.core.util.LnUrlClient
-import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.databinding.ActivityAutoWithdrawSettingsBinding
-import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
-import com.electricdreams.numo.feature.settings.WithdrawLightningActivity
-import com.electricdreams.numo.ui.components.EmptyStateHelper
-import com.electricdreams.numo.ui.components.MintSelectionBottomSheet
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 /**
- * Premium Apple-like settings screen for automatic withdrawals.
- *
- * Uses shared settings surfaces and explicit status indicators,
- * smooth animations, and a clean transaction history with expandable
- * error details for failed withdrawals.
+ * Auto-withdraw rule: where takings go and when. The Withdraw hub links here and
+ * summarises the rule; manual withdrawals and history live on the hub.
  */
 class AutoWithdrawSettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAutoWithdrawSettingsBinding
-
     private lateinit var settingsManager: AutoWithdrawSettingsManager
-    private lateinit var autoWithdrawManager: AutoWithdrawManager
-
-    // Hero section
-    private lateinit var statusContainer: LinearLayout
-    private lateinit var statusDot: View
-    private lateinit var statusText: TextView
-
-    // Toggle icon
-
-    // Settings controls
-    private lateinit var enableSwitch: MaterialSwitch
-    private lateinit var enableToggleRow: LinearLayout
-    private lateinit var lightningAddressInput: EditText
-    private lateinit var lightningAddressValidation: TextView
-    private lateinit var thresholdDisplay: TextView
-    private lateinit var percentageSlider: Slider
-    private lateinit var percentageBadge: TextView
-
-    // History section
-    private lateinit var historyCard: CardView
-    private lateinit var historyEmptyContainer: View
-    private lateinit var historyRecyclerView: RecyclerView
-    private lateinit var seeAllButton: TextView
-
-    // Auto-withdraw config container (Destination + Trigger Settings)
-    private lateinit var configContainer: LinearLayout
-
-    // Manual withdraw
-    private lateinit var manualWithdrawRow: LinearLayout
-
-    // Manager for mint info
-    private lateinit var mintManager: MintManager
+    private lateinit var lightningAddressManager: LightningAddressManager
 
     private var isUpdatingUI = false
     private val lnUrlClient = LnUrlClient
     private var thresholdFetchJob: Job? = null
-
-    // Current threshold value (in sats)
     private var currentThreshold: Long = AutoWithdrawSettingsManager.DEFAULT_THRESHOLD_SATS
-    // Min threshold fetched from LNURL
     private var fetchedMinThresholdSats: Long = AutoWithdrawSettingsManager.MIN_THRESHOLD_SATS
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
         binding = ActivityAutoWithdrawSettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
         applySettingsWindowInsets(this, binding.root)
 
         settingsManager = AutoWithdrawSettingsManager.getInstance(this)
-        autoWithdrawManager = AutoWithdrawManager.getInstance(this)
-        mintManager = MintManager.getInstance(this)
+        lightningAddressManager = LightningAddressManager.getInstance(this)
 
-        initViews()
+        binding.topBar.onNavClick { onBackPressedDispatcher.onBackPressed() }
+        setupToggleRow()
         setupListeners()
         loadSettings()
-        loadHistory()
     }
 
-    private fun initViews() {
-        binding.topBar.onNavClick {
-            onBackPressedDispatcher.onBackPressed()
-        }
-
-        // Hero section
-        statusContainer = binding.statusContainer
-        statusDot = binding.statusDot
-        statusText = binding.statusText
-
-        // Toggle icon
-
-        // Main toggle
-        enableSwitch = binding.enableSwitch
-        enableToggleRow = binding.enableToggleRow
-
-        // Config inputs
-        lightningAddressInput = binding.lightningAddressInput
-        lightningAddressValidation = binding.lightningAddressValidation
-        thresholdDisplay = binding.thresholdDisplay
-        percentageSlider = binding.percentageSlider
-        percentageBadge = binding.percentageBadge
-
-        // History
-        historyCard = binding.historyCard
-        historyEmptyContainer = binding.historyEmptyContainer.root
-        historyRecyclerView = binding.historyRecyclerView
-        seeAllButton = binding.seeAllButton
-
-        // Config container (Destination + Trigger Settings)
-        configContainer = binding.autoWithdrawConfigContainer
-
-        // Manual withdraw
-        manualWithdrawRow = binding.manualWithdrawRow
-
-        historyRecyclerView.layoutManager = LinearLayoutManager(this)
+    private fun setupToggleRow() {
+        binding.enableToggleRow.setOnClickListener { binding.enableSwitch.toggle() }
+        // The row is the control; expose it to TalkBack as the switch it wraps.
+        ViewCompat.setAccessibilityDelegate(binding.enableToggleRow, object : AccessibilityDelegateCompat() {
+            override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfoCompat) {
+                super.onInitializeAccessibilityNodeInfo(host, info)
+                info.className = Switch::class.java.name
+                info.isCheckable = true
+                info.isChecked = binding.enableSwitch.isChecked
+            }
+        })
     }
 
     private fun setupListeners() {
-        // Toggle row click (toggles switch)
-        enableToggleRow.setOnClickListener {
-            enableSwitch.performClick()
+        binding.enableSwitch.setOnCheckedChangeListener { _, isChecked ->
+            if (isUpdatingUI) return@setOnCheckedChangeListener
+            settingsManager.setGloballyEnabled(isChecked)
+            TransitionManager.beginDelayedTransition(binding.content, AutoTransition())
+            binding.autoWithdrawConfigContainer.visibility = if (isChecked) View.VISIBLE else View.GONE
         }
 
-        // Enable switch
-        enableSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if (!isUpdatingUI) {
-                settingsManager.setGloballyEnabled(isChecked)
-                updateStatusIndicator(isChecked)
-                animateConfigContainer(isChecked)
-                animateStatusChange(isChecked)
-                if (isChecked) {
-                }
+        binding.lightningAddressInput.doAfterTextChanged { text ->
+            // A response for the previous address must not overwrite this input's state.
+            thresholdFetchJob?.cancel()
+            fetchedMinThresholdSats = AutoWithdrawSettingsManager.MIN_THRESHOLD_SATS
+            val address = text?.toString()?.trim().orEmpty()
+
+            when {
+                address.isBlank() -> showAddressHelper(null)
+                !lightningAddressManager.isValidLightningAddress(address) ->
+                    binding.lightningAddressLayout.error = getString(R.string.auto_withdraw_lightning_address_invalid)
+                !isUpdatingUI -> fetchMinThreshold(address)
             }
+            if (!isUpdatingUI) settingsManager.setDefaultLightningAddress(address)
         }
 
-        // Lightning address
-        lightningAddressInput.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: Editable?) {
-                // A response for the previous address must not overwrite this input's state.
-                thresholdFetchJob?.cancel()
-                fetchedMinThresholdSats = AutoWithdrawSettingsManager.MIN_THRESHOLD_SATS
-                val address = s?.toString()?.trim() ?: ""
-                val isValidFormat = LightningAddressManager.getInstance(this@AutoWithdrawSettingsActivity).isValidLightningAddress(address)
+        binding.thresholdRow.setOnClickListener { showThresholdEditDialog() }
 
-                if (address.isBlank()) {
-                    lightningAddressValidation.visibility = View.GONE
-                } else if (!isValidFormat) {
-                    lightningAddressValidation.visibility = View.VISIBLE
-                    lightningAddressValidation.text = getString(R.string.auto_withdraw_lightning_address_invalid)
-                    lightningAddressValidation.setTextColor(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_error))
-                } else {
-                    // Valid format, start network ping
-                    if (!isUpdatingUI) {
-                        fetchMinThreshold(address)
-                    }
-                }
-
-                if (!isUpdatingUI) {
-                    settingsManager.setDefaultLightningAddress(address)
-                }
-            }
-        })
-
-        // Threshold display - click to show edit dialog
-        thresholdDisplay.setOnClickListener {
-            showThresholdEditDialog()
-        }
-
-        // Percentage slider with haptic feedback
-        percentageSlider.addOnChangeListener { slider, value, fromUser ->
+        binding.percentageSlider.addOnChangeListener { slider, value, fromUser ->
             val percentage = value.toInt()
-            percentageBadge.text = "$percentage%"
-
+            binding.percentageBadge.text = getString(R.string.auto_withdraw_percentage_value, percentage)
             if (fromUser && !isUpdatingUI) {
                 settingsManager.setDefaultPercentage(percentage)
-                // Subtle haptic on step changes
-                slider.performHapticFeedback(android.view.HapticFeedbackConstants.CLOCK_TICK)
-
-                // Recalculate minimum threshold based on new percentage
-                val address = lightningAddressInput.text.toString().trim()
-                if (LightningAddressManager.getInstance(this@AutoWithdrawSettingsActivity).isValidLightningAddress(address)) {
-                    fetchMinThreshold(address)
-                }
+                slider.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+                // The minimum threshold depends on the share being sent.
+                val address = binding.lightningAddressInput.text?.toString()?.trim().orEmpty()
+                if (lightningAddressManager.isValidLightningAddress(address)) fetchMinThreshold(address)
             }
         }
-
-        // Manual withdraw row
-        manualWithdrawRow.setOnClickListener {
-            showMintSelectionDialog()
-        }
-
-        // See all button (recent activity view all)
-        seeAllButton.setOnClickListener {
-            val intent = Intent(this, PaymentsHistoryActivity::class.java)
-            startActivity(intent)
-        }
+        binding.percentageSlider.setLabelFormatter { getString(R.string.auto_withdraw_percentage_value, it.toInt()) }
     }
 
-    /**
-     * Show a mint selection bottom sheet for manual withdrawal.
-     * Displays mints with balances, allowing user to select which to withdraw from.
-     */
-    private fun showMintSelectionDialog() {
-        lifecycleScope.launch {
-            // Fetch mint balances
-            val balances = withContext(Dispatchers.IO) {
-                CashuWalletManager.getAllMintBalances()
-            }
-
-            // Filter mints with positive balance
-            val mintsWithBalance = balances.filter { it.value > 0 }
-
-            if (mintsWithBalance.isEmpty()) {
-                // No balance to withdraw - show a nice toast instead of dialog
-                Toast.makeText(
-                    this@AutoWithdrawSettingsActivity,
-                    R.string.manual_withdraw_no_balance,
-                    Toast.LENGTH_LONG
-                ).show()
-                return@launch
-            }
-
-            // Show beautiful bottom sheet
-            val bottomSheet = MintSelectionBottomSheet.newInstance(
-                mintBalances = mintsWithBalance,
-                listener = object : MintSelectionBottomSheet.OnMintSelectedListener {
-                    override fun onMintSelected(mintUrl: String, balance: Long) {
-                        openWithdrawScreen(mintUrl, balance)
-                    }
-                }
-            )
-            bottomSheet.show(supportFragmentManager, "MintSelectionBottomSheet")
-        }
-    }
-
-    /**
-     * Open the withdraw screen for the selected mint
-     */
-    private fun openWithdrawScreen(mintUrl: String, balance: Long) {
-        val intent = Intent(this, WithdrawLightningActivity::class.java).apply {
-            putExtra("mint_url", mintUrl)
-            putExtra("balance", balance)
-        }
-        startActivity(intent)
+    private fun showAddressHelper(text: CharSequence?) {
+        binding.lightningAddressLayout.error = null
+        binding.lightningAddressLayout.helperText = text
     }
 
     private fun showThresholdEditDialog() {
         val minAmount = Amount(fetchedMinThresholdSats, Amount.Currency.BTC)
-        val dynamicHelperText = getString(R.string.auto_withdraw_threshold_helper_dynamic, minAmount.toString())
-
         DialogHelper.showInput(
             context = this,
             config = DialogHelper.InputConfig(
-                title = getString(R.string.auto_withdraw_threshold_title),
+                title = getString(R.string.withdraw_auto_threshold_title),
                 description = getString(R.string.auto_withdraw_threshold_subtitle),
-                hint = "50000",
+                hint = AutoWithdrawSettingsManager.DEFAULT_THRESHOLD_SATS.toString(),
                 initialValue = currentThreshold.toString(),
-                prefix = "₿",
-                helperText = dynamicHelperText,
+                suffix = Amount.Currency.BTC.symbol,
+                helperText = getString(R.string.auto_withdraw_threshold_helper_dynamic, minAmount.toString()),
                 inputType = android.text.InputType.TYPE_CLASS_NUMBER,
                 saveText = getString(R.string.common_save),
                 onSave = { value ->
@@ -316,76 +141,48 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
                 },
                 validator = { value ->
                     val amount = value.replace(",", "").toLongOrNull()
-                    amount != null && amount >= fetchedMinThresholdSats
-                        && amount <= AutoWithdrawSettingsManager.MAX_THRESHOLD_SATS
+                    amount != null && amount >= fetchedMinThresholdSats &&
+                        amount <= AutoWithdrawSettingsManager.MAX_THRESHOLD_SATS
                 }
             )
         )
     }
 
     private fun updateThresholdDisplay() {
-        // Use Amount class to format with ₿ symbol
-        val amount = Amount(currentThreshold, Amount.Currency.BTC)
-        thresholdDisplay.text = amount.toString()
+        binding.thresholdRow.setTrailingText(Amount(currentThreshold, Amount.Currency.BTC).toString())
     }
 
     private fun loadSettings() {
         isUpdatingUI = true
 
         val enabled = settingsManager.isGloballyEnabled()
-        enableSwitch.isChecked = enabled
-        updateStatusIndicator(enabled)
-        configContainer.visibility = if (enabled) View.VISIBLE else View.GONE
+        binding.enableSwitch.isChecked = enabled
+        binding.autoWithdrawConfigContainer.visibility = if (enabled) View.VISIBLE else View.GONE
 
-        lightningAddressInput.setText(settingsManager.getDefaultLightningAddress())
         val savedAddress = settingsManager.getDefaultLightningAddress()
-
-        if (LightningAddressManager.getInstance(this).isValidLightningAddress(savedAddress)) {
+        binding.lightningAddressInput.setText(savedAddress)
+        if (lightningAddressManager.isValidLightningAddress(savedAddress)) {
             fetchMinThreshold(savedAddress)
-        } else if (savedAddress.isNotBlank()) {
-            lightningAddressValidation.visibility = View.VISIBLE
-            lightningAddressValidation.text = getString(R.string.auto_withdraw_lightning_address_invalid)
-            lightningAddressValidation.setTextColor(ContextCompat.getColor(this, R.color.color_error))
         }
 
         currentThreshold = settingsManager.getDefaultThreshold()
         updateThresholdDisplay()
 
         val percentage = settingsManager.getDefaultPercentage()
-        percentageSlider.value = percentage.toFloat()
-        percentageBadge.text = "$percentage%"
+        binding.percentageSlider.value = percentage.toFloat()
+        binding.percentageBadge.text = getString(R.string.auto_withdraw_percentage_value, percentage)
 
         isUpdatingUI = false
     }
 
-    private fun updateStatusIndicator(enabled: Boolean) {
-        if (enabled) {
-            statusDot.backgroundTintList = ContextCompat.getColorStateList(this, R.color.color_success_green)
-            statusText.text = getString(R.string.auto_withdraw_status_active)
-            statusText.setTextColor(ContextCompat.getColor(this, R.color.color_success_green))
-            statusContainer.background = ContextCompat.getDrawable(this, R.drawable.bg_status_pill_success)
-        } else {
-            statusDot.backgroundTintList = ContextCompat.getColorStateList(this, R.color.color_text_tertiary)
-            statusText.text = getString(R.string.auto_withdraw_status_inactive)
-            statusText.setTextColor(ContextCompat.getColor(this, R.color.color_text_tertiary))
-            statusContainer.background = ContextCompat.getDrawable(this, R.drawable.bg_pill_badge)
-        }
-    }
-
     private fun fetchMinThreshold(address: String) {
         thresholdFetchJob?.cancel()
-        // Show checking state
-        lightningAddressValidation.visibility = View.VISIBLE
-        lightningAddressValidation.text = getString(R.string.auto_withdraw_lightning_address_checking)
-        lightningAddressValidation.setTextColor(ContextCompat.getColor(this, R.color.color_text_tertiary))
-
+        showAddressHelper(getString(R.string.auto_withdraw_lightning_address_checking))
         val percentage = settingsManager.getDefaultPercentage()
 
         thresholdFetchJob = lifecycleScope.launch {
             val details = try {
-                withContext(Dispatchers.IO) {
-                    lnUrlClient.fetchLnUrlDetails(address)
-                }
+                withContext(Dispatchers.IO) { lnUrlClient.fetchLnUrlDetails(address) }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
@@ -396,304 +193,20 @@ class AutoWithdrawSettingsActivity : AppCompatActivity() {
             ensureActive()
 
             if (details != null) {
-                // Update validation UI
-                lightningAddressValidation.text =
-                    getString(R.string.auto_withdraw_lightning_address_valid)
-                lightningAddressValidation.setTextColor(
-                    ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_success_green)
-                )
-
-                // convert msat to sat
+                showAddressHelper(getString(R.string.auto_withdraw_lightning_address_valid))
                 val minSendableSats = details.minSendable / 1000
-
                 // Min threshold = minSendableSats * 100 / percentage, strictly greater than min.
                 fetchedMinThresholdSats = (minSendableSats * 100 / percentage) + 1
-
-                // Ensure threshold is at least the min
                 if (currentThreshold < fetchedMinThresholdSats) {
                     currentThreshold = fetchedMinThresholdSats
                     settingsManager.setDefaultThreshold(currentThreshold)
                     updateThresholdDisplay()
                 }
             } else {
-                lightningAddressValidation.text =
-                    getString(R.string.auto_withdraw_lightning_address_invalid)
-                lightningAddressValidation.setTextColor(
-                    ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_error)
-                )
-
+                binding.lightningAddressLayout.error = getString(R.string.auto_withdraw_lightning_address_invalid)
                 fetchedMinThresholdSats = AutoWithdrawSettingsManager.MIN_THRESHOLD_SATS
             }
         }
-    }
-
-    private fun animateStatusChange(enabled: Boolean) {
-        // Pulse animation on status container
-        val scaleX = ObjectAnimator.ofFloat(statusContainer, "scaleX", 1f, 1.1f, 1f)
-        val scaleY = ObjectAnimator.ofFloat(statusContainer, "scaleY", 1f, 1.1f, 1f)
-
-        AnimatorSet().apply {
-            playTogether(scaleX, scaleY)
-            duration = 300
-            interpolator = OvershootInterpolator()
-            start()
-        }
-
-    }
-
-    private fun animateConfigContainer(show: Boolean) {
-        if (show) {
-            configContainer.visibility = View.VISIBLE
-            configContainer.alpha = 0f
-            configContainer.translationY = -20f
-            configContainer.animate()
-                .alpha(1f)
-                .translationY(0f)
-                .setDuration(250)
-                .setInterpolator(AccelerateDecelerateInterpolator())
-                .start()
-        } else {
-            configContainer.animate()
-                .alpha(0f)
-                .translationY(-20f)
-                .setDuration(200)
-                .setInterpolator(AccelerateDecelerateInterpolator())
-                .withEndAction {
-                    configContainer.visibility = View.GONE
-                }
-                .start()
-        }
-    }
-
-    private fun loadHistory() {
-        val history = autoWithdrawManager.getHistory()
-
-        if (history.isEmpty()) {
-            historyEmptyContainer.visibility = View.VISIBLE
-            EmptyStateHelper.bind(
-                historyEmptyContainer,
-                R.drawable.ic_history,
-                getString(R.string.auto_withdraw_history_empty_title),
-                getString(R.string.auto_withdraw_history_empty_subtitle)
-            )
-            historyRecyclerView.visibility = View.GONE
-            seeAllButton.visibility = View.GONE
-        } else {
-            historyEmptyContainer.visibility = View.GONE
-            historyRecyclerView.visibility = View.VISIBLE
-            seeAllButton.visibility = if (history.size > 5) View.VISIBLE else View.GONE
-
-            // Show only latest 5 entries
-            val displayHistory = history.take(5)
-            historyRecyclerView.adapter = AutoWithdrawHistoryAdapter(displayHistory)
-        }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        // Refresh history when returning to activity (e.g., after completing a withdrawal)
-        loadHistory()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
-    /**
-     * Premium adapter for displaying auto-withdraw history with expandable error details.
-     */
-    private inner class AutoWithdrawHistoryAdapter(
-        private val entries: List<WithdrawHistoryEntry>
-    ) : RecyclerView.Adapter<AutoWithdrawHistoryAdapter.ViewHolder>() {
-
-        // Track expanded state for each item
-        private val expandedItems = mutableSetOf<String>()
-
-        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-            val iconContainer: FrameLayout = view.findViewById(R.id.icon_container)
-            val statusIcon: ImageView = view.findViewById(R.id.status_icon)
-            val statusBadgeIcon: FrameLayout = view.findViewById(R.id.status_badge_icon_container)
-            val amountText: TextView = view.findViewById(R.id.amount_text)
-            val addressText: TextView = view.findViewById(R.id.address_text)
-            val mintText: TextView = view.findViewById(R.id.mint_text)
-            val timestampText: TextView = view.findViewById(R.id.timestamp_text)
-            val statusBadge: TextView = view.findViewById(R.id.status_badge)
-            val autoBadge: TextView = view.findViewById(R.id.auto_badge)
-            val expandIndicator: ImageView = view.findViewById(R.id.expand_indicator)
-            val errorContainer: LinearLayout = view.findViewById(R.id.error_container)
-            val errorText: TextView = view.findViewById(R.id.error_text)
-        }
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-            val view = layoutInflater.inflate(R.layout.item_auto_withdraw_history, parent, false)
-            return ViewHolder(view)
-        }
-
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val entry = entries[position]
-
-            // Format amount using Amount class with ₿ symbol
-            val amount = Amount(entry.amountSats, Amount.Currency.BTC)
-            holder.amountText.text = amount.toString()
-
-            // Destination (address or invoice abbreviation)
-            holder.addressText.text = entry.destination.ifBlank { entry.lightningAddress ?: "" }
-
-            // Mint label
-            holder.mintText.text = entry.mintUrl
-
-            // Auto/manual badge
-            if (entry.automatic) {
-                holder.autoBadge.visibility = View.VISIBLE
-            } else {
-                holder.autoBadge.visibility = View.GONE
-            }
-
-            // Relative timestamp
-            val dateFormat = SimpleDateFormat("MMM d • HH:mm", Locale.getDefault())
-            holder.timestampText.text = dateFormat.format(Date(entry.timestamp))
-
-            // Status styling
-            when (entry.status) {
-                WithdrawHistoryEntry.STATUS_COMPLETED -> {
-                    holder.statusIcon.setImageResource(R.drawable.ic_arrow_up_send)
-                    holder.statusIcon.setColorFilter(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_text_primary))
-                    holder.statusBadgeIcon.visibility = View.VISIBLE
-                    holder.statusBadge.visibility = View.GONE
-                    holder.expandIndicator.visibility = View.GONE
-                    holder.errorContainer.visibility = View.GONE
-                }
-                WithdrawHistoryEntry.STATUS_PENDING -> {
-                    holder.statusIcon.setImageResource(R.drawable.ic_pending)
-                    holder.statusIcon.setColorFilter(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_warning))
-                    holder.statusBadgeIcon.visibility = View.GONE
-                    holder.statusBadge.visibility = View.VISIBLE
-                    holder.statusBadge.text = getString(R.string.auto_withdraw_status_pending)
-                    holder.statusBadge.setTextColor(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_warning))
-                    holder.statusBadge.background = ContextCompat.getDrawable(this@AutoWithdrawSettingsActivity, R.drawable.bg_status_pill_pending)
-                    holder.expandIndicator.visibility = View.GONE
-                    holder.errorContainer.visibility = View.GONE
-                }
-                WithdrawHistoryEntry.STATUS_FAILED -> {
-                    holder.statusIcon.setImageResource(R.drawable.ic_close)
-                    holder.statusIcon.setColorFilter(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_error))
-                    holder.statusBadgeIcon.visibility = View.GONE
-                    holder.statusBadge.visibility = View.VISIBLE
-                    holder.statusBadge.text = getString(R.string.auto_withdraw_status_failed)
-                    holder.statusBadge.setTextColor(ContextCompat.getColor(this@AutoWithdrawSettingsActivity, R.color.color_error))
-                    holder.statusBadge.background = ContextCompat.getDrawable(this@AutoWithdrawSettingsActivity, R.drawable.bg_status_pill_error)
-
-                    // Show expand indicator if there's an error message
-                    val hasError = !entry.errorMessage.isNullOrBlank()
-                    holder.expandIndicator.visibility = if (hasError) View.VISIBLE else View.GONE
-
-                    // Set error message
-                    holder.errorText.text = entry.errorMessage ?: ""
-
-                    // Check if this item is expanded
-                    val isExpanded = expandedItems.contains(entry.id)
-                    updateExpandState(holder, isExpanded, animate = false)
-
-                    // Set click listener to toggle expansion
-                    if (hasError) {
-                        holder.itemView.setOnClickListener {
-                            toggleExpand(entry.id, holder)
-                        }
-                    } else {
-                        holder.itemView.setOnClickListener(null)
-                    }
-                }
-            }
-
-            if (entry.token != null) {
-                holder.expandIndicator.visibility = View.VISIBLE
-                holder.expandIndicator.setImageResource(R.drawable.ic_share)
-                holder.expandIndicator.rotation = 0f
-                holder.itemView.setOnClickListener {
-                    val context = holder.itemView.context
-                    val cashuUri = "cashu:${entry.token}"
-                    val uriIntent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(cashuUri)).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, cashuUri)
-                    }
-                    val chooserIntent = Intent.createChooser(uriIntent, context.getString(R.string.token_history_open_with)).apply {
-                        putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(shareIntent))
-                    }
-
-                    val clipboard = context.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                    val clip = android.content.ClipData.newPlainText("Cashu Token", entry.token)
-                    clipboard.setPrimaryClip(clip)
-                    Toast.makeText(context, R.string.withdraw_cashu_copied, Toast.LENGTH_SHORT).show()
-
-                    try {
-                        context.startActivity(chooserIntent)
-                    } catch (e: Exception) {
-                        // ignore if no app can handle it
-                    }
-                }
-            } else if (entry.status != WithdrawHistoryEntry.STATUS_FAILED) {
-                holder.expandIndicator.setImageResource(R.drawable.ic_chevron_down)
-                holder.itemView.setOnClickListener(null)
-            } else {
-                holder.expandIndicator.setImageResource(R.drawable.ic_chevron_down)
-            }
-
-        }
-
-        private fun toggleExpand(entryId: String, holder: ViewHolder) {
-            val isCurrentlyExpanded = expandedItems.contains(entryId)
-            if (isCurrentlyExpanded) {
-                expandedItems.remove(entryId)
-            } else {
-                expandedItems.add(entryId)
-            }
-            updateExpandState(holder, !isCurrentlyExpanded, animate = true)
-        }
-
-        private fun updateExpandState(holder: ViewHolder, isExpanded: Boolean, animate: Boolean) {
-            if (animate) {
-                // Rotate expand indicator
-                val targetRotation = if (isExpanded) 180f else 0f
-                holder.expandIndicator.animate()
-                    .rotation(targetRotation)
-                    .setDuration(200)
-                    .setInterpolator(AccelerateDecelerateInterpolator())
-                    .start()
-
-                // Animate error container
-                if (isExpanded) {
-                    holder.errorContainer.visibility = View.VISIBLE
-                    holder.errorContainer.alpha = 0f
-                    holder.errorContainer.translationY = -10f
-                    holder.errorContainer.animate()
-                        .alpha(1f)
-                        .translationY(0f)
-                        .setDuration(200)
-                        .setInterpolator(AccelerateDecelerateInterpolator())
-                        .start()
-                } else {
-                    holder.errorContainer.animate()
-                        .alpha(0f)
-                        .translationY(-10f)
-                        .setDuration(150)
-                        .setInterpolator(AccelerateDecelerateInterpolator())
-                        .withEndAction {
-                            holder.errorContainer.visibility = View.GONE
-                        }
-                        .start()
-                }
-            } else {
-                // Instant update without animation
-                holder.expandIndicator.rotation = if (isExpanded) 180f else 0f
-                holder.errorContainer.visibility = if (isExpanded) View.VISIBLE else View.GONE
-                holder.errorContainer.alpha = if (isExpanded) 1f else 0f
-            }
-        }
-
-        override fun getItemCount() = entries.size
     }
 
     companion object {

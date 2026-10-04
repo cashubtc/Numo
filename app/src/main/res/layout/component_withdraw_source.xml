@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- "From" section shared by Send to wallet and Export as ecash. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <TextView
+        style="@style/Widget.Numo.SettingsSectionTitle"
+        android:layout_marginBottom="0dp"
+        android:text="@string/withdraw_from_label" />
+
+    <LinearLayout
+        android:id="@+id/source_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_row_ripple"
+        android:clickable="false"
+        android:focusable="false"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/settings_row_height"
+        android:orientation="horizontal"
+        android:paddingVertical="@dimen/space_m">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/source_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textAppearance="@style/Text.RowTitle"
+                tools:text="Minibits" />
+
+            <TextView
+                android:id="@+id/source_available"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/settings_row_subtitle_gap"
+                android:textAppearance="@style/Text.SettingsCaption"
+                tools:text="21 sat available" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/source_chevron"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="@dimen/space_s"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_chevron_forward"
+            android:visibility="gone"
+            app:tint="@color/color_text_tertiary"
+            tools:visibility="visible" />
+
+    </LinearLayout>
+
+</LinearLayout>

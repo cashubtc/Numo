@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".feature.settings.WithdrawActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:topBarSettingsStyle="true"
+            app:topBarTitle="@string/withdraw_hub_title" />
+
+        <ScrollView
+            android:id="@+id/scroll"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="@dimen/settings_page_margin"
+                android:paddingBottom="@dimen/space_xl">
+
+                <!-- The amount leads; one line says where it is headed. -->
+                <TextView
+                    android:id="@+id/balance_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_2xl"
+                    android:textAppearance="@style/Text.DisplayAmount"
+                    tools:text="21 sat" />
+
+                <TextView
+                    android:id="@+id/fiat_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_xs"
+                    android:textAppearance="@style/Text.AmountSubtitle"
+                    tools:text="$0.02" />
+
+                <TextView
+                    android:id="@+id/destination_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_m"
+                    android:ellipsize="middle"
+                    android:gravity="center"
+                    android:singleLine="true"
+                    android:textAppearance="@style/Text.Body"
+                    tools:text="Ready to send to shop@wallet.com" />
+
+                <com.electricdreams.numo.ui.components.SettingsRowView
+                    android:id="@+id/auto_withdraw_row"
+                    style="@style/Widget.Numo.SettingsRow"
+                    android:layout_marginTop="@dimen/space_3xl"
+                    android:minHeight="@dimen/settings_row_height"
+                    app:rowIcon="@drawable/ic_autoplay"
+                    app:rowShowChevron="true"
+                    app:rowSubtitle="@string/withdraw_hub_auto_off"
+                    app:rowTitle="@string/withdraw_hub_auto_title" />
+
+                <TextView
+                    android:id="@+id/recent_title"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
+                    android:layout_marginTop="@dimen/settings_section_gap"
+                    android:text="@string/withdraw_hub_recent" />
+
+                <LinearLayout
+                    android:id="@+id/recent_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" />
+
+                <TextView
+                    android:id="@+id/recent_empty_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="@dimen/space_s"
+                    android:text="@string/withdraw_hub_recent_empty"
+                    android:textAppearance="@style/Text.SettingsCaption"
+                    android:visibility="gone" />
+
+                <com.electricdreams.numo.ui.components.SettingsRowView
+                    android:id="@+id/see_all_row"
+                    style="@style/Widget.Numo.SettingsRow"
+                    android:minHeight="@dimen/settings_row_height"
+                    android:visibility="gone"
+                    app:rowShowChevron="true"
+                    app:rowTitle="@string/withdraw_hub_see_all" />
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <LinearLayout
+            android:id="@+id/action_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/settings_page_margin"
+            android:paddingTop="@dimen/space_m"
+            android:paddingBottom="@dimen/space_s">
+
+            <Button
+                android:id="@+id/send_button"
+                style="@style/Widget.Button.Primary.Green"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:text="@string/withdraw_hub_send" />
+
+            <Button
+                android:id="@+id/export_button"
+                style="@style/Widget.Numo.Button.Tertiary"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:layout_marginTop="@dimen/space_xs"
+                android:text="@string/withdraw_hub_export"
+                android:textAppearance="@style/Text.Button"
+                android:textColor="@color/text_button_primary" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

@@ -19,7 +19,6 @@ import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.databinding.ActivitySettingsBinding
-import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawSettingsActivity
 import com.electricdreams.numo.feature.baskets.BasketNamesSettingsActivity
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
 import com.electricdreams.numo.feature.items.ItemListActivity
@@ -176,7 +175,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         withdrawalsSettingsItem.setOnClickListener {
             if (withdrawalsSettingsItem.isEnabled) {
-                openProtectedActivity(AutoWithdrawSettingsActivity::class.java)
+                openProtectedActivity(WithdrawActivity::class.java)
             }
         }
         webhooksSettingsItem.setOnClickListener {

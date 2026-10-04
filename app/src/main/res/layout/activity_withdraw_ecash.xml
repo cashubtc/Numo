@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".feature.settings.WithdrawEcashActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:topBarSettingsStyle="true"
+            app:topBarTitle="@string/withdraw_ecash_title" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:fillViewport="true">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="@dimen/settings_page_margin"
+                android:paddingBottom="@dimen/space_xl">
+
+                <!-- Form -->
+                <LinearLayout
+                    android:id="@+id/form_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <include
+                        android:id="@+id/source"
+                        layout="@layout/component_withdraw_source"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_l" />
+
+                    <include
+                        android:id="@+id/amount"
+                        layout="@layout/component_withdraw_amount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/settings_section_gap" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xl"
+                        android:text="@string/withdraw_ecash_note"
+                        android:textAppearance="@style/Text.Body" />
+
+                </LinearLayout>
+
+                <!-- Result -->
+                <LinearLayout
+                    android:id="@+id/result_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    tools:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/result_amount"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_2xl"
+                        android:accessibilityLiveRegion="polite"
+                        android:textAppearance="@style/Text.DisplayAmount"
+                        tools:text="21 sat" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:gravity="center"
+                        android:text="@string/withdraw_ecash_result_caption"
+                        android:textAppearance="@style/Text.AmountSubtitle" />
+
+                    <FrameLayout
+                        android:layout_width="240dp"
+                        android:layout_height="240dp"
+                        android:layout_marginTop="@dimen/space_2xl"
+                        android:background="@drawable/bg_qr_quiet_zone"
+                        android:padding="@dimen/space_l">
+
+                        <ImageView
+                            android:id="@+id/token_qr"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="?attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:contentDescription="@string/withdraw_ecash_qr_description"
+                            android:focusable="true"
+                            android:scaleType="fitCenter" />
+
+                    </FrameLayout>
+
+                    <TextView
+                        android:id="@+id/token_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xl"
+                        android:background="@drawable/bg_withdraw_banner"
+                        android:backgroundTint="@color/color_bg_secondary"
+                        android:ellipsize="end"
+                        android:fontFamily="monospace"
+                        android:maxLines="2"
+                        android:padding="@dimen/space_m"
+                        android:textAppearance="@style/Text.SettingsCaption"
+                        android:textColor="@color/color_text_primary"
+                        tools:text="cashuBo2FteCJodHRwczovL21pbnQubWluaWJpdHMuY2FzaC9CaXRjb2luYXVjc2F0YXSBomFpSAD" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_m"
+                        android:gravity="center"
+                        android:text="@string/withdraw_ecash_saved_note"
+                        android:textAppearance="@style/Text.SettingsCaption" />
+
+                </LinearLayout>
+
+            </FrameLayout>
+
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/settings_page_margin"
+            android:paddingTop="@dimen/space_m"
+            android:paddingBottom="@dimen/space_l">
+
+            <Button
+                android:id="@+id/primary_button"
+                style="@style/Widget.Button.Primary.Green"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:enabled="false"
+                android:text="@string/withdraw_ecash_create" />
+
+            <Button
+                android:id="@+id/copy_button"
+                style="@style/Widget.Numo.Button.Tertiary"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/button_height"
+                android:layout_marginTop="@dimen/space_xs"
+                android:text="@string/withdraw_ecash_copy"
+                android:textAppearance="@style/Text.Button"
+                android:textColor="@color/text_button_primary"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Fullscreen QR for scanning across a counter -->
+    <FrameLayout
+        android:id="@+id/fullscreen_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/settings_background"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <ImageButton
+            android:id="@+id/fullscreen_close"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
+            android:layout_marginStart="@dimen/space_s"
+            android:layout_marginTop="@dimen/space_s"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/withdraw_ecash_fullscreen_close"
+            android:src="@drawable/ic_close"
+            app:tint="@color/color_text_primary" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="@dimen/space_l"
+            android:background="@drawable/bg_qr_quiet_zone"
+            android:padding="@dimen/space_xl">
+
+            <ImageView
+                android:id="@+id/fullscreen_qr"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:importantForAccessibility="no"
+                android:scaleType="fitCenter" />
+
+        </FrameLayout>
+
+        <Button
+            android:id="@+id/qr_speed_button"
+            style="@style/Widget.Numo.Button.Tertiary"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/button_height"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="@dimen/space_xl"
+            android:textAppearance="@style/Text.Button"
+            android:textColor="@color/text_button_primary"
+            android:visibility="gone"
+            tools:text="QR speed: Normal"
+            tools:visibility="visible" />
+
+    </FrameLayout>
+
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

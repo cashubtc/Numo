@@ -166,7 +166,7 @@
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">13sp</item>
         <item name="android:lineHeight">18sp</item>
-        <item name="android:textColor">@color/color_text_tertiary</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
     </style>
 
     <!-- RowSubtitle: List item secondary text -->
@@ -174,7 +174,7 @@
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">13sp</item>
         <item name="android:lineHeight">18sp</item>
-        <item name="android:textColor">@color/color_text_tertiary</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
     </style>
 
     <!-- Helper: Form hints, contextual help -->
@@ -182,7 +182,7 @@
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">13sp</item>
         <item name="android:lineHeight">18sp</item>
-        <item name="android:textColor">@color/color_text_tertiary</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
     </style>
 
     <!-- Badge: Status indicators, counters -->

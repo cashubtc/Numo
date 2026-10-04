@@ -39,8 +39,6 @@
              the per-theme background color). -->
         <item name="android:navigationBarColor">@color/dark_windowBackground</item>
         <item name="android:windowLightNavigationBar">false</item>
-        <!-- Text colors -->
-        <item name="android:textColor">@color/dark_textColorPrimary</item>
         <!-- Background colors -->
         <item name="android:windowBackground">@color/dark_windowBackground</item>
         <item name="android:colorBackground">@color/dark_windowBackground</item>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Amount entry with a Max shortcut, shared by Send to wallet and Export as ecash. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/amount_label"
+            style="@style/Widget.Numo.SettingsSectionTitle"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_marginBottom="0dp"
+            android:labelFor="@id/amount_input"
+            android:text="@string/withdraw_amount_label" />
+
+        <Button
+            android:id="@+id/max_button"
+            style="@style/Widget.Numo.Button.Tertiary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="-12dp"
+            android:minWidth="64dp"
+            android:minHeight="48dp"
+            android:text="@string/withdraw_amount_max"
+            android:textAppearance="@style/Text.Chip"
+            android:textColor="@color/text_button_primary" />
+
+    </LinearLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/amount_layout"
+        style="@style/Widget.Numo.SettingsTextInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_xs"
+        app:helperTextEnabled="true"
+        app:helperTextTextAppearance="@style/Text.SettingsCaption"
+        app:hintEnabled="false"
+        app:suffixTextAppearance="@style/Text.Body"
+        tools:helperText="≈ $0.02 · 21 sat available"
+        tools:suffixText="sat">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/amount_input"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:imeOptions="actionDone"
+            android:inputType="number"
+            android:maxLength="12"
+            android:minHeight="56dp"
+            android:textAppearance="@style/Text.Heading1"
+            tools:text="20" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</LinearLayout>

@@ -2,13 +2,12 @@ package com.electricdreams.numo.feature.autowithdraw
 
 import android.app.Application
 import android.os.Looper
-import android.view.View
 import android.widget.EditText
-import android.widget.TextView
 import com.electricdreams.numo.AppGlobals
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.util.LightningAddressManager
 import com.electricdreams.numo.core.util.LnUrlClient
+import com.google.android.material.textfield.TextInputLayout
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CancellationException
@@ -69,7 +68,7 @@ class AutoWithdrawSettingsActivityTest {
             assertEquals("user@example.com", settings.getDefaultLightningAddress())
             assertEquals(
                 activity.getString(R.string.auto_withdraw_lightning_address_valid),
-                validation(activity).text.toString(),
+                validationText(activity),
             )
         }
     }
@@ -103,7 +102,7 @@ class AutoWithdrawSettingsActivityTest {
                 verify(client).fetchLnUrlDetails("user@x.com")
                 verifyNoMoreInteractions(client)
                 input(activity).setText("")
-                assertEquals(View.GONE, validation(activity).visibility)
+                assertEquals(null, validationText(activity))
             }
         } finally {
             release.countDown()
@@ -148,7 +147,7 @@ class AutoWithdrawSettingsActivityTest {
                 await { oldLookup.isCompleted }
                 assertEquals(
                     activity.getString(R.string.auto_withdraw_lightning_address_valid),
-                    validation(activity).text.toString(),
+                    validationText(activity),
                 )
                 assertEquals("user@new.example.com", settings.getDefaultLightningAddress())
             }
@@ -193,7 +192,7 @@ class AutoWithdrawSettingsActivityTest {
             await { lookupJob(activity).isCompleted }
             assertEquals(
                 activity.getString(R.string.auto_withdraw_lightning_address_valid),
-                validation(activity).text.toString(),
+                validationText(activity),
             )
             assertEquals(63_158L, settings.getDefaultThreshold())
         }
@@ -210,7 +209,7 @@ class AutoWithdrawSettingsActivityTest {
             assertTrue(lookupJob(activity).isCancelled)
             assertEquals(
                 activity.getString(R.string.auto_withdraw_lightning_address_checking),
-                validation(activity).text.toString(),
+                validationText(activity),
             )
         }
     }
@@ -223,17 +222,22 @@ class AutoWithdrawSettingsActivityTest {
     private fun input(activity: AutoWithdrawSettingsActivity): EditText =
         activity.findViewById(R.id.lightning_address_input)
 
-    private fun validation(activity: AutoWithdrawSettingsActivity): TextView =
-        activity.findViewById(R.id.lightning_address_validation)
+    private fun addressLayout(activity: AutoWithdrawSettingsActivity): TextInputLayout =
+        activity.findViewById(R.id.lightning_address_layout)
+
+    /** The status line under the address field: the error when present, else the helper. */
+    private fun validationText(activity: AutoWithdrawSettingsActivity): String? {
+        val layout = addressLayout(activity)
+        return (layout.error ?: layout.helperText)?.toString()
+    }
 
     private fun lookupJob(activity: AutoWithdrawSettingsActivity): Job =
         ReflectionHelpers.getField(activity, "thresholdFetchJob")
 
     private fun assertInvalid(activity: AutoWithdrawSettingsActivity) {
-        assertEquals(View.VISIBLE, validation(activity).visibility)
         assertEquals(
             activity.getString(R.string.auto_withdraw_lightning_address_invalid),
-            validation(activity).text.toString(),
+            addressLayout(activity).error?.toString(),
         )
     }
 

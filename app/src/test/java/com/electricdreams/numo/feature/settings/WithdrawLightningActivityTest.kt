@@ -1,131 +1,133 @@
 package com.electricdreams.numo.feature.settings
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
+import android.os.Looper
 import android.view.View
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.electricdreams.numo.R
-import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.util.LightningAddressManager
+import com.electricdreams.numo.core.worker.BitcoinPriceWorker
+import com.google.android.material.textfield.TextInputLayout
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.util.ReflectionHelpers
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34])
 class WithdrawLightningActivityTest {
 
-    private val mintUrl = "https://test.mint.com"
-    private val balance = 1000L
+    private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Before
-    fun setup() {
-        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
-        // Ensure MintManager is initialized and has the mint
-        val mintManager = MintManager.getInstance(context)
-        if (!mintManager.getAllowedMints().contains(mintUrl)) {
-            mintManager.addMint(mintUrl)
+    fun setUp() {
+        BitcoinPriceWorker.isTesting = true
+        ReflectionHelpers.setStaticField(LightningAddressManager::class.java, "instance", null)
+        LightningAddressManager.getInstance(context).clearLightningAddress()
+    }
+
+    @Test
+    fun `saved lightning address is prefilled and asks for an amount`() {
+        LightningAddressManager.getInstance(context).setLightningAddress("shop@wallet.com")
+
+        launch { activity ->
+            assertEquals("shop@wallet.com", input(activity).text.toString())
+            assertEquals(activity.getString(R.string.withdraw_to_detected_address), toLayout(activity).helperText)
+            assertEquals(View.VISIBLE, amountSection(activity).visibility)
         }
     }
 
     @Test
-    fun `initial load defaults to lightning tab`() {
-        val intent = Intent(ApplicationProvider.getApplicationContext(), WithdrawLightningActivity::class.java).apply {
-            putExtra("mint_url", mintUrl)
-            putExtra("balance", balance)
-        }
+    fun `pasting a lightning link shows the invoice and its amount instead of an amount field`() {
+        clipboard().setPrimaryClip(ClipData.newPlainText("invoice", "lightning:" + INVOICE.uppercase()))
 
-        ActivityScenario.launch<WithdrawLightningActivity>(intent).use { scenario ->
-            scenario.onActivity { activity ->
-                val tabLightning = activity.findViewById<TextView>(R.id.tab_lightning)
-                val tabCashu = activity.findViewById<TextView>(R.id.tab_cashu)
-                val lightningContainer = activity.findViewById<View>(R.id.lightning_options_container)
-                val cashuContainer = activity.findViewById<View>(R.id.cashu_token_options_container)
+        launch { activity ->
+            activity.findViewById<Button>(R.id.paste_button).performClick()
+            idle()
 
-                // Verify initial visibility
-                assertEquals("Lightning container should be visible", View.VISIBLE, lightningContainer.visibility)
-                assertEquals("Cashu container should be gone", View.GONE, cashuContainer.visibility)
-                
-                // Verify tab styling (checking text color is a proxy for selection)
-                val selectedColor = activity.getColor(R.color.color_bg_white)
-                assertEquals(selectedColor, tabLightning.currentTextColor)
-            }
+            assertEquals(INVOICE, input(activity).text.toString())
+            assertEquals(
+                activity.getString(
+                    R.string.withdraw_to_detected_invoice_amount,
+                    Amount(250_000L, Amount.Currency.BTC).toString()
+                ),
+                toLayout(activity).helperText
+            )
+            assertEquals(View.GONE, amountSection(activity).visibility)
         }
     }
 
     @Test
-    fun `switching to cashu tab updates ui`() {
-        val intent = Intent(ApplicationProvider.getApplicationContext(), WithdrawLightningActivity::class.java).apply {
-            putExtra("mint_url", mintUrl)
-            putExtra("balance", balance)
-        }
+    fun `malformed destination is only flagged once editing is done`() {
+        launch { activity ->
+            input(activity).setText("shop@wallet")
+            assertNull(toLayout(activity).error)
 
-        ActivityScenario.launch<WithdrawLightningActivity>(intent).use { scenario ->
-            scenario.onActivity { activity ->
-                val tabCashu = activity.findViewById<TextView>(R.id.tab_cashu)
-                
-                // Switch to Cashu tab
-                tabCashu.performClick()
-                
-                val lightningContainer = activity.findViewById<View>(R.id.lightning_options_container)
-                val cashuContainer = activity.findViewById<View>(R.id.cashu_token_options_container)
+            input(activity).onEditorAction(EditorInfo.IME_ACTION_DONE)
+            assertEquals(activity.getString(R.string.withdraw_to_invalid), toLayout(activity).error)
 
-                // Verify visibility toggled
-                assertEquals("Lightning container should be gone", View.GONE, lightningContainer.visibility)
-                assertEquals("Cashu container should be visible", View.VISIBLE, cashuContainer.visibility)
-            }
+            input(activity).setText("shop@wallet.com")
+            assertNull(toLayout(activity).error)
         }
     }
 
     @Test
-    fun `create token button is disabled initially`() {
-        val intent = Intent(ApplicationProvider.getApplicationContext(), WithdrawLightningActivity::class.java).apply {
-            putExtra("mint_url", mintUrl)
-            putExtra("balance", balance)
-        }
+    fun `end icon scans when empty and clears when filled`() {
+        launch { activity ->
+            assertEquals(activity.getString(R.string.withdraw_to_scan), toLayout(activity).endIconContentDescription)
 
-        ActivityScenario.launch<WithdrawLightningActivity>(intent).use { scenario ->
-            scenario.onActivity { activity ->
-                // Switch to Cashu tab first to ensure views are "visible" logically
-                activity.findViewById<TextView>(R.id.tab_cashu).performClick()
-                
-                val createButton = activity.findViewById<Button>(R.id.create_token_button)
-                assertTrue("Button should be disabled initially", !createButton.isEnabled)
-            }
+            input(activity).setText("shop@wallet.com")
+            assertEquals(activity.getString(R.string.withdraw_to_clear), toLayout(activity).endIconContentDescription)
+
+            toLayout(activity).findViewById<View>(com.google.android.material.R.id.text_input_end_icon).performClick()
+            assertEquals("", input(activity).text.toString())
         }
     }
 
     @Test
-    fun `entering amount enables create token button`() {
-        val intent = Intent(ApplicationProvider.getApplicationContext(), WithdrawLightningActivity::class.java).apply {
-            putExtra("mint_url", mintUrl)
-            putExtra("balance", balance)
-        }
+    fun `review stays disabled while there is nothing to send from`() {
+        LightningAddressManager.getInstance(context).setLightningAddress("shop@wallet.com")
 
-        ActivityScenario.launch<WithdrawLightningActivity>(intent).use { scenario ->
-            scenario.onActivity { activity ->
-                activity.findViewById<TextView>(R.id.tab_cashu).performClick()
-                
-                val amountInput = activity.findViewById<EditText>(R.id.cashu_amount_input)
-                val createButton = activity.findViewById<Button>(R.id.create_token_button)
-                
-                amountInput.setText("100")
-                
-                assertTrue("Button should be enabled with valid amount", createButton.isEnabled)
-                
-                amountInput.setText("")
-                assertTrue("Button should be disabled with empty amount", !createButton.isEnabled)
-                
-                amountInput.setText("0")
-                assertTrue("Button should be disabled with 0 amount", !createButton.isEnabled)
-            }
+        launch { activity ->
+            assertFalse(activity.findViewById<Button>(R.id.review_button).isEnabled)
         }
+    }
+
+    private fun launch(block: (WithdrawLightningActivity) -> Unit) {
+        val intent = Intent(context, WithdrawLightningActivity::class.java)
+        ActivityScenario.launch<WithdrawLightningActivity>(intent).use { scenario ->
+            idle()
+            scenario.onActivity(block)
+        }
+    }
+
+    private fun input(activity: WithdrawLightningActivity): EditText = activity.findViewById(R.id.to_input)
+
+    private fun toLayout(activity: WithdrawLightningActivity): TextInputLayout = activity.findViewById(R.id.to_layout)
+
+    private fun amountSection(activity: WithdrawLightningActivity): View = activity.findViewById(R.id.amount)
+
+    private fun clipboard() = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+
+    private fun idle() = shadowOf(Looper.getMainLooper()).idle()
+
+    companion object {
+        // BOLT11 specification example: 2500u = 250,000 sat.
+        private const val INVOICE =
+            "lnbc2500u1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdq5xysxxatsyp3k7enxv4jsxqzpuaztrnwngzn3kdzw5hydlzf03qdgm2hdq27cqv3agm2awhz5se903vruatfhq77w3ls4evs3ch9zw97j25emudupq63nyw24cg27h2rspfj9srp"
     }
 }
