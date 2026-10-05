@@ -13,6 +13,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -68,7 +69,7 @@ class UpdateControllerTest {
         operation.close()
     }
 
-    @Test fun `installation holds the gate through confirmation and cancellation releases it`() = runTest {
+    @Test fun `installation holds the gate until the installer reports cancellation`() = runTest {
         val controller = UpdateController(context, { repository }, this,
             StandardTestDispatcher(testScheduler), installer, gate)
         advanceUntilIdle()
@@ -83,8 +84,38 @@ class UpdateControllerTest {
                 .putExtra(Intent.EXTRA_INTENT, Intent("android.intent.action.VIEW")))
             assertNotNull(controller.takeConfirmation())
             controller.onInstallerReturned(Activity.RESULT_CANCELED)
-            verify(installer).abandonSession(42)
+            assertEquals(UpdatePhase.INSTALLING, controller.state.value.phase)
+            assertNull(gate.tryBeginOperation())
+            controller.onInstallStatus(Intent().putExtra(PackageInstaller.EXTRA_SESSION_ID, 42)
+                .putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE_ABORTED))
+            verify(installer, never()).abandonSession(42)
             assertEquals(UpdatePhase.READY, controller.state.value.phase)
+            assertEquals(R.string.update_install_failed, controller.state.value.message)
+            assertTrue(gate.tryBeginInstall())
+        }
+    }
+
+    @Test fun `cancelled activity result after approval waits for successful installer status`() = runTest {
+        val controller = UpdateController(context, { repository }, this,
+            StandardTestDispatcher(testScheduler), installer, gate)
+        advanceUntilIdle()
+        Robolectric.buildActivity(Activity::class.java).setup().use { activity ->
+            controller.install(activity.get())
+            advanceUntilIdle()
+            controller.onInstallStatus(Intent().putExtra(PackageInstaller.EXTRA_SESSION_ID, 42)
+                .putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_PENDING_USER_ACTION)
+                .putExtra(Intent.EXTRA_INTENT, Intent("android.intent.action.VIEW")))
+            assertNotNull(controller.takeConfirmation())
+            controller.onInstallerReturned(Activity.RESULT_CANCELED)
+            verify(installer, never()).abandonSession(42)
+            assertEquals(UpdatePhase.INSTALLING, controller.state.value.phase)
+            assertNull(gate.tryBeginOperation())
+            val preferences = context.getSharedPreferences("app_updates", Context.MODE_PRIVATE)
+            assertEquals(42, preferences.getInt("session_id", -1))
+            controller.onInstallStatus(Intent().putExtra(PackageInstaller.EXTRA_SESSION_ID, 42)
+                .putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_SUCCESS))
+            assertEquals(UpdatePhase.CURRENT, controller.state.value.phase)
+            assertEquals(-1, preferences.getInt("session_id", -1))
             assertTrue(gate.tryBeginInstall())
         }
     }
@@ -122,6 +153,24 @@ class UpdateControllerTest {
         advanceUntilIdle()
         verify(installer).abandonSession(41)
         assertEquals(UpdatePhase.READY, controller.state.value.phase)
+        assertTrue(gate.tryBeginInstall())
+    }
+
+    @Test fun `completed upgrade clears stale install state without a network check`() = runTest {
+        val preferences = context.getSharedPreferences("app_updates", Context.MODE_PRIVATE)
+        preferences.edit().putInt("session_id", 41)
+            .putLong("last_check", System.currentTimeMillis()).commit()
+        whenever(repository.cached()).thenReturn(null)
+        org.mockito.kotlin.doThrow(SecurityException("Session no longer exists"))
+            .whenever(installer).abandonSession(41)
+        val controller = UpdateController(context, { repository }, this,
+            StandardTestDispatcher(testScheduler), installer, gate)
+        advanceUntilIdle()
+        verify(installer).abandonSession(41)
+        verify(repository, never()).check()
+        assertEquals(UpdatePhase.CURRENT, controller.state.value.phase)
+        assertFalse(controller.state.value.canCancelInstall)
+        assertEquals(-1, preferences.getInt("session_id", -1))
         assertTrue(gate.tryBeginInstall())
     }
 

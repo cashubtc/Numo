@@ -58,7 +58,7 @@ class UpdateController internal constructor(
         work = scope.launch {
             try {
                 candidate = withContext(ioDispatcher) { repository.cached() }
-                if (candidate != null || sessionId != -1) showCandidate()
+                showCandidate()
                 val update = candidate
                 if (update != null && preferences.getString("download_hash", null) == update.sha256 &&
                     state.value.phase == UpdatePhase.AVAILABLE) {
@@ -243,9 +243,9 @@ class UpdateController internal constructor(
         mutableConfirmation.value = null
     }
 
-    fun onInstallerReturned(resultCode: Int) {
-        if (resultCode == Activity.RESULT_CANCELED && sessionId != -1) cancelInstall()
-    }
+    // Older Android installers can return RESULT_CANCELED after approving the session.
+    // PackageInstaller status callbacks determine whether installation actually ended.
+    fun onInstallerReturned(resultCode: Int) = Unit
 
     fun onDownloadConsentResult(resultCode: Int) = Unit
 
