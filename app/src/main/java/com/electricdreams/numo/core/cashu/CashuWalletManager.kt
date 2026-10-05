@@ -442,6 +442,21 @@ object CashuWalletManager : MintManager.MintChangeListener {
      * Returns a simple data holder or null if parsing fails.
      */
     fun mintInfoFromJson(jsonString: String): CachedMintInfo? {
+
+        /**
+         * NUT-04/05 limits are numbers in most mints' info, but some caches
+         * hold the amount as a debug string ("Amount(value=1)"). A throwing
+         * getLong must not discard the whole limits block — the cascade used
+         * to make Numo report "mint does not support bolt11".
+         */
+        fun lenientLong(obj: org.json.JSONObject, key: String): Long? {
+            if (!obj.has(key) || obj.isNull(key)) return null
+            return try {
+                obj.getLong(key)
+            } catch (_: org.json.JSONException) {
+                Regex("-?\\d+(?:\\.\\d+)?").find(obj.optString(key))?.value?.toDouble()?.toLong()
+            }
+        }
         return try {
             val json = org.json.JSONObject(jsonString)
             
@@ -491,8 +506,8 @@ object CashuWalletManager : MintManager.MintChangeListener {
                                 val methodsArray = nut04.getJSONArray("methods")
                                 for (i in 0 until methodsArray.length()) {
                                     val methodObj = methodsArray.getJSONObject(i)
-                                    val minAmt = if (methodObj.has("min_amount")) methodObj.getLong("min_amount") else null
-                                    val maxAmt = if (methodObj.has("max_amount")) methodObj.getLong("max_amount") else null
+                                    val minAmt = lenientLong(methodObj, "min_amount")
+                                    val maxAmt = lenientLong(methodObj, "max_amount")
                                     Log.d(TAG, "Parsed method ${i}: method=${methodObj.optString("method")}, unit=${methodObj.optString("unit")}, min=$minAmt, max=$maxAmt")
                                     mintMethods.add(
                                         MintMethodSettings(
@@ -519,8 +534,8 @@ object CashuWalletManager : MintManager.MintChangeListener {
                                         MintMethodSettings(
                                             method = methodObj.optString("method", ""),
                                             unit = methodObj.optString("unit", "").let { if (it.contains("CurrencyUnit$")) it.substringAfter("CurrencyUnit$").substringBefore("@").lowercase() else it },
-                                            minAmount = if (methodObj.has("min_amount")) methodObj.getLong("min_amount") else null,
-                                            maxAmount = if (methodObj.has("max_amount")) methodObj.getLong("max_amount") else null,
+                                            minAmount = lenientLong(methodObj, "min_amount"),
+                                            maxAmount = lenientLong(methodObj, "max_amount"),
                                             disabled = disabled
                                         )
                                     )
