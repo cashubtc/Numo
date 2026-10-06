@@ -7,6 +7,8 @@ import android.content.Intent
 import android.content.pm.PackageInstaller
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
@@ -47,8 +49,19 @@ class UpdateController internal constructor(
     private var requestedCheck: Boolean? = null
     private var preparingInstall = false
     private var cancelRequested = false
+    private val sessionCallback = object : PackageInstaller.SessionCallback() {
+        override fun onCreated(sessionId: Int) = Unit
+        override fun onBadgingChanged(sessionId: Int) = Unit
+        override fun onActiveChanged(sessionId: Int, active: Boolean) = Unit
+        override fun onProgressChanged(sessionId: Int, progress: Float) = Unit
+        override fun onFinished(sessionId: Int, success: Boolean) {
+            onInstallFinished(sessionId, success)
+        }
+    }
 
     init {
+        // Abandoned sessions report lifecycle completion even if commit() was never reached.
+        installer.registerSessionCallback(sessionCallback, Handler(Looper.getMainLooper()))
         // A previous process cannot retain an operation lease. Abandon its outstanding
         // install before accepting new payments; the user can safely retry from settings.
         if (sessionId != -1) {
@@ -214,9 +227,11 @@ class UpdateController internal constructor(
     }
 
     fun onInstallStatus(intent: Intent) {
-        if (intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -2) != sessionId) return
+        val resultSessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID, -2)
+        if (resultSessionId != sessionId) return
         when (intent.getIntExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE)) {
             PackageInstaller.STATUS_PENDING_USER_ACTION -> {
+                if (cancelRequested) return
                 @Suppress("DEPRECATION")
                 val confirmation = intent.getParcelableExtra<Intent>(Intent.EXTRA_INTENT)
                 if (confirmation == null) {
@@ -225,17 +240,22 @@ class UpdateController internal constructor(
                     mutableConfirmation.value = confirmation
                 }
             }
-            PackageInstaller.STATUS_SUCCESS -> {
-                preferences.edit().remove("download_hash").remove("session_id").apply()
-                sessionId = -1
-                gate.finishInstall()
-                mutableState.value = UpdateState(UpdatePhase.CURRENT)
-            }
+            PackageInstaller.STATUS_SUCCESS -> onInstallFinished(resultSessionId, true)
             else -> {
                 Log.w(TAG, "Installer returned status ${intent.getIntExtra(PackageInstaller.EXTRA_STATUS, -1)}")
-                finishInstallState()
-                mutableState.value = state.value.copy(message = R.string.update_install_failed)
+                onInstallFinished(resultSessionId, false)
             }
+        }
+    }
+
+    private fun onInstallFinished(finishedSessionId: Int, success: Boolean) {
+        if (finishedSessionId != sessionId) return
+        finishInstallState()
+        if (success) {
+            preferences.edit().remove("download_hash").apply()
+            mutableState.value = UpdateState(UpdatePhase.CURRENT)
+        } else {
+            mutableState.value = state.value.copy(message = R.string.update_install_failed)
         }
     }
 
@@ -254,25 +274,29 @@ class UpdateController internal constructor(
             cancelRequested = true
             return
         }
-        if (sessionId == -1) return
-        if (sessionId != -1) {
-            try {
-                installer.abandonSession(sessionId)
-            } catch (e: Exception) {
-                Log.w(TAG, "Could not abandon completed update session", e)
-                // Do not resume payments if Android might still be installing this session.
-                val stillInstalling = try {
-                    installer.getSessionInfo(sessionId) != null
-                } catch (queryError: Exception) {
-                    Log.w(TAG, "Could not determine installer state", queryError)
-                    true
-                }
-                if (stillInstalling) {
-                    mutableState.value = state.value.copy(phase = UpdatePhase.INSTALLING,
-                        canCancelInstall = true, message = R.string.update_install_failed)
-                    return
-                }
-            }
+        val cancellingSessionId = sessionId
+        if (cancellingSessionId == -1) return
+        cancelRequested = true
+        mutableConfirmation.value = null
+        try {
+            installer.abandonSession(cancellingSessionId)
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not abandon completed update session", e)
+            mutableState.value = state.value.copy(message = R.string.update_install_failed)
+        }
+        // A successful abandon request can be deferred while Android uses the staged APK.
+        // Keep the session and payment gate until it disappears or a terminal callback arrives.
+        val stillInstalling = try {
+            installer.getSessionInfo(cancellingSessionId) != null
+        } catch (e: Exception) {
+            Log.w(TAG, "Could not determine installer state", e)
+            true
+        }
+        if (sessionId != cancellingSessionId) return
+        if (stillInstalling) {
+            mutableState.value = state.value.copy(phase = UpdatePhase.INSTALLING,
+                canCancelInstall = true)
+            return
         }
         finishInstallState()
     }

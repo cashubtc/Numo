@@ -86,11 +86,14 @@ clean up old update artifacts without changing wallet preferences or databases.
 An application-wide gate accounts for queued and running payment coroutines, Nostr relay
 callbacks, and checkout screens. Starting installation and admitting another payment are
 mutually exclusive.
-New asynchronous operations wait while installation is pending. Cancellation or failure
-releases the gate. Leaving the update screen cancels a pending direct installation;
-configuration changes preserve it. An outstanding direct installer session from an old
-process is abandoned before wallet work starts. Wallet crash recovery remains necessary
-because Android, other installers, or the user can independently terminate the app.
+New asynchronous operations wait while installation is pending. Cancellation releases
+the gate only after Android reports a terminal result or confirms the session no longer
+exists; an abandonment request can be deferred while installation is running. Leaving
+the update screen requests cancellation of a pending direct installation; configuration
+changes preserve it. An outstanding direct installer session from an old process is
+abandoned, with the gate held until Android confirms completion. Wallet crash recovery
+remains necessary because Android, other installers, or the user can independently
+terminate the app.
 
 ## Validation
 

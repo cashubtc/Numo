@@ -21,6 +21,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -190,6 +191,7 @@ class UpdateControllerTest {
     }
 
     @Test fun `cancel during preparation waits until the installer session can be abandoned`() = runTest {
+        whenever(installer.getSessionInfo(42)).thenReturn(mock())
         val controller = UpdateController(context, { repository }, this,
             StandardTestDispatcher(testScheduler), installer, gate)
         advanceUntilIdle()
@@ -199,6 +201,9 @@ class UpdateControllerTest {
             assertFalse(gate.tryBeginInstall())
             advanceUntilIdle()
             verify(installer).abandonSession(42)
+            assertEquals(UpdatePhase.INSTALLING, controller.state.value.phase)
+            assertNull(gate.tryBeginOperation())
+            installerCallback().onFinished(42, false)
             assertEquals(UpdatePhase.READY, controller.state.value.phase)
             assertTrue(gate.tryBeginInstall())
         }
@@ -220,5 +225,123 @@ class UpdateControllerTest {
                 .putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE))
             assertTrue(gate.tryBeginInstall())
         }
+    }
+
+    @Test fun `successful abandonment request retains the gate until terminal installer status`() = runTest {
+        whenever(installer.getSessionInfo(42)).thenReturn(mock())
+        val controller = UpdateController(context, { repository }, this,
+            StandardTestDispatcher(testScheduler), installer, gate)
+        advanceUntilIdle()
+        Robolectric.buildActivity(Activity::class.java).setup().use { activity ->
+            controller.install(activity.get())
+            advanceUntilIdle()
+            val confirmation = Intent().putExtra(PackageInstaller.EXTRA_SESSION_ID, 42)
+                .putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_PENDING_USER_ACTION)
+                .putExtra(Intent.EXTRA_INTENT, Intent("android.intent.action.VIEW"))
+            controller.onInstallStatus(confirmation)
+            assertNotNull(controller.confirmation.value)
+            controller.cancelInstall()
+            verify(installer).abandonSession(42)
+            assertEquals(UpdatePhase.INSTALLING, controller.state.value.phase)
+            assertNull(gate.tryBeginOperation())
+            assertNull(controller.takeConfirmation())
+            controller.onInstallStatus(confirmation)
+            assertNull(controller.takeConfirmation())
+            val preferences = context.getSharedPreferences("app_updates", Context.MODE_PRIVATE)
+            assertEquals(42, preferences.getInt("session_id", -1))
+
+            controller.onInstallStatus(Intent().putExtra(PackageInstaller.EXTRA_SESSION_ID, 42)
+                .putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE_ABORTED))
+            assertEquals(UpdatePhase.READY, controller.state.value.phase)
+            assertEquals(-1, preferences.getInt("session_id", -1))
+            requireNotNull(gate.tryBeginOperation()).close()
+        }
+    }
+
+    @Test fun `approved installation can report success after an abandonment request`() = runTest {
+        whenever(installer.getSessionInfo(42)).thenReturn(mock())
+        val controller = UpdateController(context, { repository }, this,
+            StandardTestDispatcher(testScheduler), installer, gate)
+        advanceUntilIdle()
+        Robolectric.buildActivity(Activity::class.java).setup().use { activity ->
+            controller.install(activity.get())
+            advanceUntilIdle()
+            controller.onInstallStatus(Intent().putExtra(PackageInstaller.EXTRA_SESSION_ID, 42)
+                .putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_PENDING_USER_ACTION)
+                .putExtra(Intent.EXTRA_INTENT, Intent("android.intent.action.VIEW")))
+            assertNotNull(controller.takeConfirmation())
+            controller.cancelInstall()
+            assertNull(gate.tryBeginOperation())
+
+            controller.onInstallStatus(Intent().putExtra(PackageInstaller.EXTRA_SESSION_ID, 42)
+                .putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_SUCCESS))
+            assertEquals(UpdatePhase.CURRENT, controller.state.value.phase)
+            assertEquals(-1, context.getSharedPreferences("app_updates", Context.MODE_PRIVATE)
+                .getInt("session_id", -1))
+            requireNotNull(gate.tryBeginOperation()).close()
+        }
+    }
+
+    @Test fun `process recreation keeps payments blocked while abandonment is deferred`() = runTest {
+        val preferences = context.getSharedPreferences("app_updates", Context.MODE_PRIVATE)
+        preferences.edit().putInt("session_id", 41).commit()
+        whenever(installer.getSessionInfo(41)).thenReturn(mock())
+        val controller = UpdateController(context, { repository }, this,
+            StandardTestDispatcher(testScheduler), installer, gate)
+        advanceUntilIdle()
+        verify(installer).abandonSession(41)
+        assertEquals(UpdatePhase.INSTALLING, controller.state.value.phase)
+        assertEquals(41, preferences.getInt("session_id", -1))
+        assertNull(gate.tryBeginOperation())
+
+        installerCallback().onFinished(12, false)
+        assertNull(gate.tryBeginOperation())
+        installerCallback().onFinished(41, false)
+        assertEquals(UpdatePhase.READY, controller.state.value.phase)
+        assertEquals(-1, preferences.getInt("session_id", -1))
+        requireNotNull(gate.tryBeginOperation()).close()
+    }
+
+    @Test fun `failed session query retains the gate until the lifecycle reports success`() = runTest {
+        whenever(installer.getSessionInfo(42)).thenThrow(IllegalStateException("unavailable"))
+        val controller = UpdateController(context, { repository }, this,
+            StandardTestDispatcher(testScheduler), installer, gate)
+        advanceUntilIdle()
+        Robolectric.buildActivity(Activity::class.java).setup().use { activity ->
+            controller.install(activity.get())
+            advanceUntilIdle()
+            controller.cancelInstall()
+            assertEquals(UpdatePhase.INSTALLING, controller.state.value.phase)
+            assertNull(gate.tryBeginOperation())
+
+            installerCallback().onFinished(42, true)
+            assertEquals(UpdatePhase.CURRENT, controller.state.value.phase)
+            requireNotNull(gate.tryBeginOperation()).close()
+        }
+    }
+
+    @Test fun `uncommitted session failure waits for abandonment lifecycle confirmation`() = runTest {
+        whenever(installer.openSession(42)).thenThrow(IllegalStateException("cannot stage APK"))
+        whenever(installer.getSessionInfo(42)).thenReturn(mock())
+        val controller = UpdateController(context, { repository }, this,
+            StandardTestDispatcher(testScheduler), installer, gate)
+        advanceUntilIdle()
+        Robolectric.buildActivity(Activity::class.java).setup().use { activity ->
+            controller.install(activity.get())
+            advanceUntilIdle()
+            verify(session, never()).commit(any())
+            verify(installer).abandonSession(42)
+            assertNull(gate.tryBeginOperation())
+
+            installerCallback().onFinished(42, false)
+            assertEquals(UpdatePhase.READY, controller.state.value.phase)
+            requireNotNull(gate.tryBeginOperation()).close()
+        }
+    }
+
+    private fun installerCallback(): PackageInstaller.SessionCallback {
+        val callback = argumentCaptor<PackageInstaller.SessionCallback>()
+        verify(installer).registerSessionCallback(callback.capture(), any())
+        return callback.firstValue
     }
 }
