@@ -1,37 +1,58 @@
 package com.electricdreams.numo.feature.settings
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.core.view.isVisible
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.cashudevkit.FinalizedMelt
+import kotlinx.coroutines.withTimeoutOrNull
+import org.cashudevkit.MeltQuote
 import org.cashudevkit.MintUrl
+import org.cashudevkit.PaymentMethod
 import org.cashudevkit.QuoteState
 
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
-import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.dev.WalletLogger
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.databinding.ActivityWithdrawMeltQuoteBinding
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
+import com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry
 import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
+/**
+ * Review: the amount leads, the route and fee are spelled out, and the button says
+ * exactly what will happen. Sending and every outcome resolve on this screen, and an
+ * outcome that might have moved money never offers to send again.
+ */
 class WithdrawMeltQuoteActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityWithdrawMeltQuoteBinding
+    private enum class State { READY, SENDING, REFUSED, PENDING, UNCONFIRMED }
 
-    companion object {
-        private const val TAG = "WithdrawMeltQuote"
+    private sealed class MeltResult {
+        data class Paid(val feePaid: Long) : MeltResult()
+        object Pending : MeltResult()
+        object Refused : MeltResult()
+        object Unconfirmed : MeltResult()
+        object WalletUnavailable : MeltResult()
     }
 
+    private lateinit var binding: ActivityWithdrawMeltQuoteBinding
     private lateinit var mintUrl: String
     private lateinit var quoteId: String
     private var amount: Long = 0
@@ -39,26 +60,17 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
     private var invoice: String? = null
     private var lightningAddress: String? = null
     private var request: String = ""
-    private lateinit var mintManager: MintManager
 
-    private lateinit var topBar: com.electricdreams.numo.ui.components.NumoTopBar
-    private lateinit var summaryText: TextView
-    private lateinit var destinationText: TextView
-    private lateinit var amountText: TextView
-    private lateinit var feeText: TextView
-    private lateinit var totalText: TextView
-    private lateinit var confirmButton: Button
-    private lateinit var confirmationScroll: View
-    private lateinit var processingContainer: View
-    private lateinit var processingStatusText: TextView
-    private lateinit var processingAmountValue: TextView
-    private lateinit var processingDestinationValue: TextView
-    private lateinit var processingStepPreparingIndicator: View
-    private lateinit var processingStepContactingIndicator: View
-    private lateinit var processingStepSettlingIndicator: View
-    private lateinit var processingStepPreparingLabel: TextView
-    private lateinit var processingStepContactingLabel: TextView
-    private lateinit var processingStepSettlingLabel: TextView
+    private var historyEntryId: String? = null
+    private var state = State.READY
+
+    private val backHandler = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            // While a melt is in flight its outcome must stay on screen; once it may have
+            // moved money, leaving goes to the hub rather than back to an editable form.
+            if (state != State.SENDING) openHub()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,336 +78,327 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
         setContentView(binding.root)
         applySettingsWindowInsets(this, binding.root)
 
-        mintUrl = intent.getStringExtra("mint_url") ?: ""
-        quoteId = intent.getStringExtra("quote_id") ?: ""
-        amount = intent.getLongExtra("amount", 0)
-        feeReserve = intent.getLongExtra("fee_reserve", 0)
-        invoice = intent.getStringExtra("invoice")
-        lightningAddress = intent.getStringExtra("lightning_address")
-        request = intent.getStringExtra("request") ?: ""
-        mintManager = MintManager.getInstance(this)
+        mintUrl = intent.getStringExtra(EXTRA_MINT_URL).orEmpty()
+        quoteId = intent.getStringExtra(EXTRA_QUOTE_ID).orEmpty()
+        amount = intent.getLongExtra(EXTRA_AMOUNT, 0)
+        feeReserve = intent.getLongExtra(EXTRA_FEE_RESERVE, 0)
+        invoice = intent.getStringExtra(EXTRA_INVOICE)
+        lightningAddress = intent.getStringExtra(EXTRA_LIGHTNING_ADDRESS)
+        request = intent.getStringExtra(EXTRA_REQUEST).orEmpty()
 
         if (mintUrl.isEmpty() || quoteId.isEmpty()) {
-            Toast.makeText(
-                this,
-                getString(R.string.withdraw_melt_error_invalid_data),
-                Toast.LENGTH_SHORT
-            ).show()
+            Log.e(TAG, "Missing melt quote data")
             finish()
             return
         }
 
-        initViews()
-        setupListeners()
-        displayQuoteInfo()
-    }
-
-    private fun initViews() {
-        topBar = binding.topBar
-        summaryText = binding.summaryText
-        destinationText = binding.destinationText
-        amountText = binding.amountText
-        feeText = binding.feeText
-        totalText = binding.totalText
-        confirmButton = binding.confirmButton
-        confirmationScroll = binding.confirmationScroll
-        processingContainer = binding.processingContainer
-        processingStatusText = binding.processingStatusText
-        processingAmountValue = binding.processingAmountValue
-        processingDestinationValue = binding.processingDestinationValue
-        processingStepPreparingIndicator = binding.processingStepPreparingIndicator
-        processingStepContactingIndicator = binding.processingStepContactingIndicator
-        processingStepSettlingIndicator = binding.processingStepSettlingIndicator
-        processingStepPreparingLabel = binding.processingStepPreparingLabel
-        processingStepContactingLabel = binding.processingStepContactingLabel
-        processingStepSettlingLabel = binding.processingStepSettlingLabel
-    }
-
-    private fun setupListeners() {
-        topBar.onNavClick { finish() }
-        confirmButton.setOnClickListener { confirmWithdrawal() }
-    }
-
-    private fun displayQuoteInfo() {
-        val destination = when {
-            !lightningAddress.isNullOrBlank() -> lightningAddress!!
-            !invoice.isNullOrBlank() -> {
-                if (invoice!!.length > 24) {
-                    "${invoice!!.take(12)}...${invoice!!.takeLast(12)}"
-                } else {
-                    invoice!!
-                }
-            }
-            else -> getString(R.string.withdraw_melt_destination_unknown)
+        if (savedInstanceState != null) {
+            quoteId = savedInstanceState.getString(STATE_QUOTE_ID, quoteId)
+            feeReserve = savedInstanceState.getLong(STATE_FEE_RESERVE, feeReserve)
+            historyEntryId = savedInstanceState.getString(STATE_HISTORY_ID)
+            val saved = State.valueOf(savedInstanceState.getString(STATE_NAME, State.READY.name))
+            // Recreated mid-send: the melt finishes in the background, but this screen
+            // can no longer know how, so it must not offer to send again.
+            state = if (saved == State.SENDING) State.UNCONFIRMED else saved
         }
-        destinationText.text = destination
 
-        val amountObj = Amount(amount, Amount.Currency.BTC)
-        val feeObj = Amount(feeReserve, Amount.Currency.BTC)
-        val totalObj = Amount(amount + feeReserve, Amount.Currency.BTC)
-
-        amountText.text = amountObj.toString()
-        feeText.text = feeObj.toString()
-        totalText.text = totalObj.toString()
-
-        val mintName = mintManager.getMintDisplayName(mintUrl)
-        summaryText.text = getString(
-            R.string.withdraw_melt_summary,
-            mintName
-        )
+        onBackPressedDispatcher.addCallback(this, backHandler)
+        binding.topBar.onNavClick { onBackPressedDispatcher.onBackPressed() }
+        binding.sendButton.setOnClickListener { onPrimaryAction() }
+        binding.secondaryButton.setOnClickListener { finish() }
+        bindQuote()
+        render(animate = false)
     }
 
-    private fun confirmWithdrawal() {
-        setLoading(true)
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(STATE_QUOTE_ID, quoteId)
+        outState.putLong(STATE_FEE_RESERVE, feeReserve)
+        outState.putString(STATE_HISTORY_ID, historyEntryId)
+        outState.putString(STATE_NAME, state.name)
+    }
 
+    private fun bindQuote() {
+        binding.amountText.text = WithdrawUi.sats(amount)
+
+        val priceWorker = BitcoinPriceWorker.getInstance(this)
+        val fiat = priceWorker.satoshisToFiat(amount)
+        if (fiat > 0) {
+            binding.fiatText.text = priceWorker.formatFiatAmount(fiat)
+        } else {
+            binding.fiatText.visibility = View.GONE
+        }
+
+        val address = lightningAddress
+        if (!address.isNullOrBlank()) {
+            binding.destinationText.text = getString(R.string.withdraw_review_to, address)
+        } else {
+            binding.destinationText.text = getString(R.string.withdraw_review_to_invoice)
+            binding.invoiceRow.visibility = View.VISIBLE
+            binding.invoiceValue.text = invoice ?: request
+        }
+
+        binding.fromValue.text = MintManager.getInstance(this).getMintDisplayName(mintUrl)
+        // The mint reserves the fee up front and refunds what routing didn't use, so
+        // both the fee and the total are upper bounds.
+        if (feeReserve > 0) {
+            binding.feeValue.text = getString(R.string.withdraw_row_fee_value, WithdrawUi.sats(feeReserve))
+            binding.totalValue.text = getString(R.string.withdraw_row_fee_value, WithdrawUi.sats(amount + feeReserve))
+        } else {
+            binding.feeValue.text = WithdrawUi.sats(0)
+            binding.totalValue.text = WithdrawUi.sats(amount)
+        }
+    }
+
+    private fun onPrimaryAction() {
+        when (state) {
+            State.READY -> melt()
+            State.REFUSED -> retryWithFreshQuote()
+            State.PENDING, State.UNCONFIRMED -> openHub()
+            State.SENDING -> Unit
+        }
+    }
+
+    private fun melt() {
+        setState(State.SENDING)
+        val entryId = ensureHistoryEntry()
+        val context = applicationContext
+        val mint = mintUrl
+        val quote = quoteId
+        val sats = amount
+        val destination = destinationLabel()
+        // The melt runs in a process-wide scope: once started it always finishes and
+        // records its outcome, even if this screen goes away.
+        val running = meltScope.async { runMelt(context, mint, quote, sats, destination, entryId) }
         lifecycleScope.launch {
-            var withdrawEntryId: String? = null
-            val autoWithdrawManager = AutoWithdrawManager.getInstance(this@WithdrawMeltQuoteActivity)
+            val result = withTimeoutOrNull(UI_WAIT_MS) { running.await() }
+            if (result != null) {
+                onMeltResult(result)
+                return@launch
+            }
+            // Lightning can take minutes to settle. Free the merchant now, and keep
+            // listening while this screen is open in case it resolves.
+            setState(State.PENDING)
+            onMeltResult(running.await())
+        }
+    }
 
-            try {
-                val wallet = CashuWalletManager.getWallet()
-                if (wallet == null) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(
-                            this@WithdrawMeltQuoteActivity,
-                            getString(R.string.withdraw_melt_error_wallet_not_initialized),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        setLoading(false)
-                    }
-                    return@launch
-                }
+    private fun ensureHistoryEntry(): String {
+        val manager = AutoWithdrawManager.getInstance(applicationContext)
+        historyEntryId?.let {
+            manager.updateWithdrawalStatus(it, WithdrawHistoryEntry.STATUS_PENDING)
+            return it
+        }
+        return manager.addManualWithdrawalEntry(
+            mintUrl = mintUrl,
+            amountSats = amount,
+            feeSats = feeReserve,
+            destination = destinationLabel(),
+            destinationType = if (lightningAddress.isNullOrBlank()) "manual_invoice" else "manual_address",
+            status = WithdrawHistoryEntry.STATUS_PENDING,
+            quoteId = quoteId
+        ).id.also { historyEntryId = it }
+    }
 
-                val destinationLabel = lightningAddress ?: request
-                val destinationType = when {
-                    !lightningAddress.isNullOrBlank() -> "manual_address"
-                    !request.isBlank() -> "manual_invoice"
-                    else -> "manual_unknown"
-                }
-
-                val historyEntry = autoWithdrawManager.addManualWithdrawalEntry(
-                    mintUrl = mintUrl,
-                    amountSats = amount,
-                    feeSats = feeReserve,
-                    destination = destinationLabel ?: "",
-                    destinationType = destinationType,
-                    status = com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry.STATUS_PENDING,
-                    quoteId = quoteId,
-                    errorMessage = null
+    private fun onMeltResult(result: MeltResult) {
+        when (result) {
+            is MeltResult.Paid -> {
+                startActivity(
+                    Intent(this, WithdrawSuccessActivity::class.java)
+                        .putExtra(WithdrawSuccessActivity.EXTRA_AMOUNT, amount)
+                        .putExtra(WithdrawSuccessActivity.EXTRA_FEE_PAID, result.feePaid)
+                        .putExtra(WithdrawSuccessActivity.EXTRA_LIGHTNING_ADDRESS, lightningAddress)
                 )
-                withdrawEntryId = historyEntry.id
+                finish()
+            }
+            MeltResult.Pending -> setState(State.PENDING)
+            MeltResult.Refused -> setState(State.REFUSED)
+            MeltResult.Unconfirmed -> setState(State.UNCONFIRMED)
+            MeltResult.WalletUnavailable -> {
+                setState(State.READY)
+                WithdrawUi.snackbar(binding.sendButton, getString(R.string.withdraw_error_wallet))
+            }
+        }
+    }
 
-                withContext(Dispatchers.Main) {
-                    updateProcessingState(ProcessingStep.CONTACTING)
+    /**
+     * A refused quote may be spent or expired, so trying again asks the mint for a new
+     * one. If routing now costs more, the merchant confirms the new total first.
+     */
+    private fun retryWithFreshQuote() {
+        setState(State.SENDING)
+        lifecycleScope.launch {
+            val quote = try {
+                fetchQuote()
+            } catch (e: Exception) {
+                Log.e(TAG, "Unable to refresh melt quote", e)
+                null
+            }
+            if (quote == null) {
+                setState(State.REFUSED)
+                WithdrawUi.snackbar(binding.sendButton, getString(R.string.withdraw_error_quote))
+                return@launch
+            }
+            val newFee = quote.feeReserve.value.toLong()
+            val feeIncreased = newFee > feeReserve
+            quoteId = quote.id
+            feeReserve = newFee
+            bindQuote()
+            if (feeIncreased) {
+                setState(State.READY)
+                WithdrawUi.snackbar(binding.sendButton, getString(R.string.withdraw_fee_changed))
+            } else {
+                melt()
+            }
+        }
+    }
+
+    private suspend fun fetchQuote(): MeltQuote = withContext(Dispatchers.IO) {
+        val wallet = CashuWalletManager.getWallet() ?: throw IllegalStateException("Wallet not initialized")
+        val unit = MintManager.getInstance(applicationContext).getPreferredUnit()
+        val mintWallet = wallet.getWallet(MintUrl(mintUrl), CashuWalletManager.getCurrencyUnit(unit))
+            ?: throw IllegalStateException("No wallet for mint $mintUrl")
+        val address = lightningAddress
+        if (!address.isNullOrBlank()) {
+            mintWallet.meltLightningAddressQuote(address, org.cashudevkit.Amount((amount * 1000).toULong()))
+        } else {
+            mintWallet.meltQuote(PaymentMethod.Bolt11, invoice ?: request, null, null)
+        }
+    }
+
+    private fun setState(newState: State) {
+        state = newState
+        render(animate = true)
+    }
+
+    private fun render(animate: Boolean) {
+        val sending = state == State.SENDING
+        backHandler.isEnabled = state == State.SENDING || state == State.PENDING || state == State.UNCONFIRMED
+        binding.topBar.setNavEnabled(!sending)
+
+        val label = when (state) {
+            State.READY -> getString(R.string.withdraw_send_amount, WithdrawUi.sats(amount))
+            State.SENDING -> getString(R.string.withdraw_sending)
+            State.REFUSED -> getString(R.string.withdraw_try_again)
+            State.PENDING, State.UNCONFIRMED -> getString(R.string.withdraw_done)
+        }
+        WithdrawUi.setButtonBusy(binding.sendButton, sending, label)
+
+        if (animate) WithdrawUi.animateLayoutChange(binding.root)
+        when (state) {
+            State.REFUSED -> showBanner(
+                R.color.color_status_error_bg, R.drawable.ic_warning, R.color.m3_error,
+                R.string.withdraw_failed_title, R.string.withdraw_failed_body
+            )
+            State.PENDING -> showBanner(
+                R.color.color_status_pending_bg, R.drawable.ic_pending, R.color.color_text_primary,
+                R.string.withdraw_pending_title, R.string.withdraw_pending_body
+            )
+            State.UNCONFIRMED -> showBanner(
+                R.color.color_status_pending_bg, R.drawable.ic_warning, R.color.color_text_primary,
+                R.string.withdraw_unconfirmed_title, R.string.withdraw_unconfirmed_body
+            )
+            // Keep an outcome visible while retrying; clear it only once back to ready.
+            State.SENDING -> Unit
+            State.READY -> binding.statusBanner.visibility = View.GONE
+        }
+        // While a retry is sending, "Change destination" stays in place (disabled) so the
+        // primary button doesn't jump down under the merchant's finger.
+        val retrying = state == State.SENDING && binding.secondaryButton.isVisible
+        binding.secondaryButton.visibility = if (state == State.REFUSED || retrying) View.VISIBLE else View.GONE
+        binding.secondaryButton.isEnabled = state != State.SENDING
+    }
+
+    private fun showBanner(
+        @ColorRes backgroundRes: Int,
+        @DrawableRes iconRes: Int,
+        @ColorRes iconTintRes: Int,
+        @StringRes titleRes: Int,
+        @StringRes bodyRes: Int,
+    ) {
+        binding.statusBanner.backgroundTintList = ContextCompat.getColorStateList(this, backgroundRes)
+        binding.statusIcon.setImageResource(iconRes)
+        binding.statusIcon.imageTintList = ContextCompat.getColorStateList(this, iconTintRes)
+        binding.statusTitle.setText(titleRes)
+        binding.statusBody.setText(bodyRes)
+        binding.statusBanner.visibility = View.VISIBLE
+    }
+
+    private fun destinationLabel(): String =
+        lightningAddress?.takeIf { it.isNotBlank() } ?: invoice ?: request
+
+    private fun openHub() {
+        startActivity(
+            Intent(this, WithdrawActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        )
+        finish()
+    }
+
+    companion object {
+        private const val TAG = "WithdrawMeltQuote"
+        private const val UI_WAIT_MS = 20_000L
+        private val meltScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+
+        private suspend fun runMelt(
+            context: Context,
+            mintUrl: String,
+            quoteId: String,
+            amount: Long,
+            destination: String,
+            entryId: String,
+        ): MeltResult {
+            val wallet = CashuWalletManager.getWallet() ?: return MeltResult.WalletUnavailable
+            val manager = AutoWithdrawManager.getInstance(context)
+            return try {
+                val finalized = withContext(Dispatchers.IO) {
+                    val unit = MintManager.getInstance(context).getPreferredUnit()
+                    val mintWallet = wallet.getWallet(MintUrl(mintUrl), CashuWalletManager.getCurrencyUnit(unit))
+                        ?: throw IllegalStateException("No wallet for mint $mintUrl")
+                    mintWallet.prepareMelt(quoteId).confirm()
                 }
-
-                // Get the wallet for this mint
-                val unit = com.electricdreams.numo.core.util.MintManager.getInstance(this@WithdrawMeltQuoteActivity).getPreferredUnit()
-                val mintWallet = wallet.getWallet(MintUrl(mintUrl), com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unit))
-                    ?: throw Exception("Failed to get wallet for mint: $mintUrl")
-
-                // Prepare and confirm melt
-                val finalized: FinalizedMelt = withContext(Dispatchers.IO) {
-                    val prepared = mintWallet.prepareMelt(quoteId)
-                    prepared.confirm()
-                }
-
-                Log.d(TAG, "Melt completed: state=${finalized.state}, feePaid=${finalized.feePaid.value}, preimage=${finalized.preimage != null}")
-
-                withContext(Dispatchers.Main) {
-                    updateProcessingState(ProcessingStep.SETTLING)
-                }
-
-                val actualFee = finalized.feePaid.value.toLong()
-
-                withContext(Dispatchers.Main) {
-                    setLoading(false)
-
-                    when (finalized.state) {
-                        QuoteState.PAID -> {
-                            withdrawEntryId?.let {
-                                autoWithdrawManager.updateWithdrawalStatus(
-                                    id = it,
-                                    status = com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry.STATUS_COMPLETED,
-                                    feeSats = actualFee
-                                )
-                            }
-                            val destinationLabel = lightningAddress ?: request
-                            com.electricdreams.numo.core.dev.WalletLogger.log("OUT", amount, mintUrl, "Withdrawal successful: $destinationLabel")
-                            showPaymentSuccess()
-                        }
-                        QuoteState.UNPAID -> {
-                            withdrawEntryId?.let {
-                                autoWithdrawManager.updateWithdrawalStatus(
-                                    id = it,
-                                    status = com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry.STATUS_FAILED,
-                                    errorMessage = getString(R.string.withdraw_melt_error_invoice_not_paid)
-                                )
-                            }
-                            showPaymentError(
-                                getString(R.string.withdraw_melt_error_invoice_not_paid)
-                            )
-                        }
-                        QuoteState.PENDING -> {
-                            showPaymentError(
-                                getString(R.string.withdraw_melt_error_pending)
-                            )
-                        }
-                        else -> {
-                            withdrawEntryId?.let {
-                                autoWithdrawManager.updateWithdrawalStatus(
-                                    id = it,
-                                    status = com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry.STATUS_FAILED,
-                                    errorMessage = getString(R.string.withdraw_melt_error_unknown_state)
-                                )
-                            }
-                            showPaymentError(
-                                getString(R.string.withdraw_melt_error_unknown_state)
-                            )
-                        }
+                Log.d(TAG, "Melt finished: state=${finalized.state}, feePaid=${finalized.feePaid.value}")
+                when (finalized.state) {
+                    QuoteState.PAID -> {
+                        val feePaid = finalized.feePaid.value.toLong()
+                        manager.updateWithdrawalStatus(entryId, WithdrawHistoryEntry.STATUS_COMPLETED, feeSats = feePaid)
+                        WalletLogger.log("OUT", amount, mintUrl, "Withdrawal successful: $destination")
+                        MeltResult.Paid(feePaid)
+                    }
+                    // The entry stays pending: the payment may still settle.
+                    QuoteState.PENDING -> MeltResult.Pending
+                    else -> {
+                        manager.updateWithdrawalStatus(
+                            entryId,
+                            WithdrawHistoryEntry.STATUS_FAILED,
+                            errorMessage = context.getString(R.string.withdraw_melt_error_invoice_not_paid)
+                        )
+                        MeltResult.Refused
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error executing melt", e)
-                withContext(Dispatchers.Main) {
-                    setLoading(false)
-
-                    withdrawEntryId?.let { id ->
-                        autoWithdrawManager.updateWithdrawalStatus(
-                            id = id,
-                            status = com.electricdreams.numo.feature.autowithdraw.WithdrawHistoryEntry.STATUS_FAILED,
-                            errorMessage = e.message
-                        )
+                Log.e(TAG, "Melt failed", e)
+                when (MeltOutcome.forError(e)) {
+                    MeltOutcome.REFUSED -> {
+                        manager.updateWithdrawalStatus(entryId, WithdrawHistoryEntry.STATUS_FAILED, errorMessage = e.message)
+                        MeltResult.Refused
                     }
-
-                    showPaymentError(
-                        getString(
-                            R.string.withdraw_melt_error_generic,
-                            e.message ?: ""
-                        )
-                    )
+                    MeltOutcome.PENDING -> MeltResult.Pending
+                    MeltOutcome.UNCONFIRMED -> MeltResult.Unconfirmed
                 }
             }
         }
-    }
 
-    private fun showPaymentSuccess() {
-        val intent = Intent(this, WithdrawSuccessActivity::class.java)
-        intent.putExtra("amount", amount)
-        val destinationLabel = lightningAddress
-            ?: getString(R.string.withdraw_melt_destination_invoice_fallback)
-        intent.putExtra("destination", destinationLabel)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(intent)
-        finish()
-    }
-
-    private fun showPaymentError(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
-        finish()
-    }
-
-    private fun updateProcessingState(step: ProcessingStep) {
-        val (statusText, activeIndicator, activeLabel) = when (step) {
-            ProcessingStep.PREPARING -> Triple(
-                getString(R.string.withdraw_processing_status_preparing),
-                processingStepPreparingIndicator,
-                processingStepPreparingLabel
-            )
-            ProcessingStep.CONTACTING -> Triple(
-                getString(R.string.withdraw_processing_status_contacting),
-                processingStepContactingIndicator,
-                processingStepContactingLabel
-            )
-            ProcessingStep.SETTLING -> Triple(
-                getString(R.string.withdraw_processing_status_settling),
-                processingStepSettlingIndicator,
-                processingStepSettlingLabel
-            )
-        }
-
-        processingStatusText.text = statusText
-        updateStepIndicators(step)
-        activeIndicator.scaleX = 0.85f
-        activeIndicator.scaleY = 0.85f
-        activeIndicator.animate().scaleX(1f).scaleY(1f).setDuration(180).start()
-        activeLabel.alpha = 0.8f
-        activeLabel.animate().alpha(1f).setDuration(180).start()
-    }
-
-    private fun updateStepIndicators(activeStep: ProcessingStep) {
-        setStepState(
-            processingStepPreparingIndicator,
-            processingStepPreparingLabel,
-            activeStep.ordinal >= ProcessingStep.PREPARING.ordinal
-        )
-        setStepState(
-            processingStepContactingIndicator,
-            processingStepContactingLabel,
-            activeStep.ordinal >= ProcessingStep.CONTACTING.ordinal
-        )
-        setStepState(
-            processingStepSettlingIndicator,
-            processingStepSettlingLabel,
-            activeStep.ordinal >= ProcessingStep.SETTLING.ordinal
-        )
-    }
-
-    private fun setStepState(indicator: View, label: TextView, active: Boolean) {
-        val background = if (active) {
-            R.drawable.bg_processing_step_active
-        } else {
-            R.drawable.bg_processing_step_inactive
-        }
-        indicator.setBackgroundResource(background)
-        label.setTextColor(
-            if (active) getColor(R.color.color_text_primary) else getColor(R.color.color_text_secondary)
-        )
-        label.alpha = if (active) 1f else 0.6f
-    }
-
-    private fun setLoading(loading: Boolean) {
-        if (loading) {
-            processingAmountValue.text = totalText.text
-            processingDestinationValue.text = destinationText.text
-            updateProcessingState(ProcessingStep.PREPARING)
-
-            // Fade out confirmation content
-            confirmationScroll.animate().alpha(0f).setDuration(200).withEndAction {
-                confirmationScroll.visibility = View.GONE
-            }.start()
-            confirmButton.animate().alpha(0f).setDuration(200).withEndAction {
-                confirmButton.visibility = View.GONE
-            }.start()
-
-            // Fade in processing content (matching OnboardingActivity pattern)
-            processingContainer.alpha = 0f
-            processingContainer.translationY = 30f
-            processingContainer.visibility = View.VISIBLE
-            processingContainer.animate()
-                .alpha(1f)
-                .translationY(0f)
-                .setStartDelay(100)
-                .setDuration(300)
-                .setInterpolator(android.view.animation.DecelerateInterpolator())
-                .start()
-        } else {
-            // Handle edge case where loading is cancelled (e.g. wallet not initialized)
-            if (processingContainer.visibility == View.VISIBLE) {
-                processingContainer.visibility = View.GONE
-                confirmationScroll.alpha = 1f
-                confirmationScroll.visibility = View.VISIBLE
-                confirmButton.alpha = 1f
-                confirmButton.visibility = View.VISIBLE
-            }
-        }
-        confirmButton.isEnabled = !loading
-        topBar.setNavEnabled(!loading)
-    }
-
-    private enum class ProcessingStep {
-        PREPARING,
-        CONTACTING,
-        SETTLING
+        private const val STATE_QUOTE_ID = "quote_id"
+        private const val STATE_FEE_RESERVE = "fee_reserve"
+        private const val STATE_HISTORY_ID = "history_entry_id"
+        private const val STATE_NAME = "state"
+        const val EXTRA_MINT_URL = "mint_url"
+        const val EXTRA_QUOTE_ID = "quote_id"
+        const val EXTRA_AMOUNT = "amount"
+        const val EXTRA_FEE_RESERVE = "fee_reserve"
+        const val EXTRA_INVOICE = "invoice"
+        const val EXTRA_LIGHTNING_ADDRESS = "lightning_address"
+        const val EXTRA_REQUEST = "request"
     }
 }

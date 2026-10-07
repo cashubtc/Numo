@@ -359,71 +359,17 @@
     <string name="common_or">or</string>
 
     
-    <string name="withdraw_lightning_toolbar_back">Back</string>
-    <string name="withdraw_lightning_title">Withdraw</string>
-    <string name="withdraw_lightning_balance_label">Available Balance</string>
-    <string name="withdraw_lightning_mint_name_label">Mint Name</string>
-    <string name="withdraw_lightning_section_withdraw_to">WITHDRAW TO</string>
-    <string name="withdraw_lightning_option_invoice">⚡ Lightning Invoice</string>
-    <string name="withdraw_lightning_invoice_hint_label">Enter a Lightning invoice (BOLT11)</string>
-    <string name="withdraw_lightning_invoice_hint_value">lnbc...</string>
-    <string name="withdraw_lightning_option_address">📧 Lightning Address</string>
-    <string name="withdraw_lightning_address_hint_label">Enter a Lightning address</string>
-    <string name="withdraw_lightning_address_hint_value">user@domain.com</string>
-    <string name="withdraw_lightning_amount_label">Amount</string>
-    <string name="withdraw_lightning_amount_hint">1000</string>
-    <string name="withdraw_lightning_button_continue">Continue</string>
 
     
-    <string name="withdraw_lightning_error_invalid_mint_url">Invalid mint URL</string>
-    <string name="withdraw_lightning_error_enter_invoice">Please enter a Lightning invoice</string>
-    <string name="withdraw_lightning_error_wallet_not_initialized">Wallet not initialized</string>
-    <string name="withdraw_lightning_error_insufficient_balance">Insufficient balance. Amount + fees (%1$d sats) exceeds your balance (%2$d sats). Try an amount under %3$d sats.</string>
-    <string name="withdraw_lightning_error_enter_address">Please enter a Lightning address</string>
-    <string name="withdraw_lightning_error_enter_valid_amount">Please enter a valid amount</string>
-    <string name="withdraw_lightning_error_generic">Error: %1$s</string>
 
     
-    <string name="withdraw_melt_toolbar_back">Back</string>
-    <string name="withdraw_melt_title">Confirm Withdrawal</string>
-    <string name="withdraw_melt_summary">Withdraw from %1$s</string>
-    <string name="withdraw_melt_destination_label">To</string>
-    <string name="withdraw_melt_destination_placeholder">user@domain.com</string>
-    <string name="withdraw_melt_amount_label">Amount</string>
-    <string name="withdraw_melt_fee_label">Fee Reserve</string>
-    <string name="withdraw_melt_total_label">Total</string>
-    <string name="withdraw_melt_fee_note">The fee reserve will be returned if the Lightning fee is lower.</string>
-    <string name="withdraw_melt_loading">Processing withdrawal...</string>
 
     
-    <string name="withdraw_melt_error_invalid_data">Invalid melt quote data</string>
-    <string name="withdraw_melt_error_wallet_not_initialized">Wallet not initialized</string>
     <string name="withdraw_melt_error_invoice_not_paid">Payment failed: Invoice not paid</string>
-    <string name="withdraw_melt_error_pending">Payment is pending. Please check back later.</string>
-    <string name="withdraw_melt_error_unknown_state">Payment failed: Unknown state</string>
-    <string name="withdraw_melt_error_generic">Error: %1$s</string>
-    <string name="withdraw_melt_destination_unknown">Unknown</string>
-    <string name="withdraw_processing_title">Processing withdrawal</string>
-    <string name="withdraw_processing_subtitle">Please keep the device awake while we complete your transfer</string>
-    <string name="withdraw_processing_amount_label">Amount</string>
-    <string name="withdraw_processing_destination_label">Destination</string>
-    <string name="withdraw_processing_status_preparing">Preparing your withdrawal</string>
-    <string name="withdraw_processing_status_contacting">Contacting the mint</string>
-    <string name="withdraw_processing_status_settling">Waiting for Lightning settlement</string>
-    <string name="withdraw_processing_step_preparing">Preparing funds</string>
-    <string name="withdraw_processing_step_contacting">Contacting mint</string>
-    <string name="withdraw_processing_step_settling">Lightning settlement</string>
-    <string name="withdraw_processing_hint">This usually takes less than 10 seconds. You can safely leave this screen once completed.</string>
 
-    <string name="withdraw_melt_destination_invoice_fallback">Lightning Invoice</string>
 
     
     <string name="withdraw_success_amount">%1$s sent.</string>
-    <string name="withdraw_success_destination">To %1$s</string>
-    <string name="withdraw_success_destination_fallback">Lightning</string>
-    <string name="withdraw_success_close">Close</string>
-    <string name="withdraw_success_background_description">Success background</string>
-    <string name="withdraw_success_icon_description">Success</string>
 
     
     <string name="history_toolbar_title">Activity</string>
@@ -739,61 +685,30 @@
     </plurals>
 
     
-    <string name="auto_withdraw_title">Withdrawals</string>
-    <string name="auto_withdraw_hero_label">AUTO-WITHDRAW</string>
-    <string name="auto_withdraw_hero_title">Auto-Withdraw</string>
-    <string name="auto_withdraw_hero_subtitle">Automatically send funds to your Lightning wallet when balance exceeds a threshold</string>
-    <string name="auto_withdraw_hero_helper">Set a payout threshold and lightning address to automatically withdraw when your balance reaches the limit.</string>
-    <string name="auto_withdraw_status_active">Active</string>
-    <string name="auto_withdraw_status_inactive">Inactive</string>
     
-    <string name="auto_withdraw_enable_title">Auto-Withdraw</string>
-    <string name="auto_withdraw_enable_subtitle">Automatically withdraw when balance exceeds threshold</string>
     
-    <string name="auto_withdraw_section_destination">Destination</string>
-    <string name="auto_withdraw_section_trigger">Trigger Settings</string>
-    <string name="auto_withdraw_section_config">CONFIGURATION</string>
-    <string name="auto_withdraw_lightning_address_label">Lightning Address</string>
     <string name="auto_withdraw_lightning_address_hint">you@wallet.com</string>
-    <string name="auto_withdraw_lightning_address_helper">Funds will be sent to this address automatically</string>
     <string name="auto_withdraw_lightning_address_valid">Valid Lightning address</string>
     <string name="auto_withdraw_lightning_address_invalid">Invalid Lightning address</string>
-    <string name="auto_withdraw_lightning_address_checking">Checking address...</string>
+    <string name="auto_withdraw_lightning_address_checking">Checking address…</string>
     
-    <string name="auto_withdraw_threshold_title">Balance Threshold</string>
     <string name="auto_withdraw_threshold_subtitle">Trigger when balance exceeds</string>
-    <string name="auto_withdraw_threshold_label">Threshold</string>
-    <string name="auto_withdraw_threshold_hint">Trigger withdrawal when balance reaches this amount</string>
     <string name="auto_withdraw_threshold_helper">Min: ₿1,000 • Max: ₿1,000,000</string>
     <string name="auto_withdraw_threshold_helper_dynamic">Min: %1$s • Max: ₿1,000,000</string>
     
-    <string name="auto_withdraw_percentage_title">Withdraw Amount</string>
-    <string name="auto_withdraw_percentage_subtitle">Percentage of balance to send</string>
-    <string name="auto_withdraw_percentage_label">Withdraw Percentage</string>
-    <string name="auto_withdraw_percentage_hint">Percentage of balance to withdraw (keep some for fees)</string>
     
-    <string name="auto_withdraw_section_history">Recent Activity</string>
-    <string name="auto_withdraw_see_all">See All</string>
-    <string name="auto_withdraw_history_empty">No withdrawals yet</string>
-    <string name="auto_withdraw_history_empty_title">No withdrawals yet</string>
-    <string name="auto_withdraw_history_empty_subtitle">When auto-withdraw is enabled, your payments are sent to your wallet automatically. Activity will show here.</string>
     
-    <string name="auto_withdraw_status_completed">Sent</string>
     <string name="auto_withdraw_status_pending">Pending</string>
     <string name="auto_withdraw_status_failed">Failed</string>
     
-    <string name="auto_withdraw_progress_started">Auto-withdrawing...</string>
-    <string name="auto_withdraw_progress_quote">Getting quote...</string>
     <string name="auto_withdraw_progress_sending">Sending to wallet...</string>
     <string name="auto_withdraw_progress_completed">Sent successfully!</string>
     <string name="auto_withdraw_progress_failed">Withdrawal failed</string>
     
-    <string name="auto_withdraw_settings_title">Withdraw</string>
-    <string name="auto_withdraw_error_title">Error Details</string>
 
     
-    <string name="settings_item_withdrawals_title">Withdrawals</string>
-    <string name="settings_item_withdrawals_subtitle">Auto-withdraw settings and history</string>
+    <string name="settings_item_withdrawals_title">Withdraw</string>
+    <string name="settings_item_withdrawals_subtitle">Send funds to your wallet</string>
     <string name="settings_item_default_payment_method_title">Default Payment</string>
     <string name="settings_item_default_payment_method_subtitle">Unified</string>
     <string name="default_payment_method_explainer_title">Quick Settings</string>
@@ -804,47 +719,17 @@
     <string name="default_payment_method_option_lightning">Lightning</string>
 
     
-    <string name="manual_withdraw_section_title">Manual Withdraw</string>
-    <string name="manual_withdraw_title">Withdraw Now</string>
-    <string name="manual_withdraw_subtitle">Send funds to Lightning invoice or address</string>
-    <string name="manual_withdraw_select_mint">Select Mint</string>
-    <string name="manual_withdraw_no_balance">No balance available to withdraw. Add funds to your wallet first.</string>
 
     
     <string name="mints_settings_balance_label">Balance</string>
 
     
-    <string name="mint_selection_title">Select Mint</string>
-    <string name="mint_selection_subtitle">Choose which mint to withdraw from</string>
-    <string name="mint_selection_icon_description">Mint icon</string>
-    <string name="mint_selection_select_description">Select this mint</string>
 
     
-    <string name="withdraw_invoice_card_title">Lightning Invoice</string>
-    <string name="withdraw_invoice_card_subtitle">Paste an invoice to pay instantly</string>
-    <string name="withdraw_address_card_title">Lightning Address</string>
-    <string name="withdraw_address_card_subtitle">Send to an email-like address</string>
-    <string name="withdraw_invoice_placeholder">lnbc1...</string>
-    <string name="withdraw_amount_placeholder">Enter amount in sats</string>
-    <string name="withdraw_continue_button">Continue</string>
     <string name="withdraw_scan_qr">Scan QR</string>
-    <string name="withdraw_scan_invoice_button">Scan Invoice</string>
-    <string name="withdraw_invoice_helper">Enter a BOLT11 lightning invoice</string>
-    <string name="withdraw_address_helper">Send to an email-like lightning address</string>
-    <string name="withdraw_section_send_to">Send To</string>
-    <string name="withdraw_balance_available">Available: %1$s</string>
 
-    <string name="withdraw_tab_lightning">Lightning</string>
-    <string name="withdraw_tab_cashu">Cashu Token</string>
     
-    <string name="withdraw_cashu_amount_card_title">Amount</string>
-    <string name="withdraw_cashu_amount_card_subtitle">Enter amount to create token</string>
-    <string name="withdraw_cashu_create_button">Create Token</string>
-    <string name="withdraw_cashu_result_title">Cashu Token</string>
-    <string name="withdraw_cashu_result_subtitle">Share this token to withdraw</string>
-    <string name="withdraw_cashu_copy_token">Copy Token</string>
     <string name="withdraw_cashu_copied">Token copied to clipboard</string>
-    <string name="withdraw_cashu_creating">Creating token...</string>
     <string name="withdraw_animated_qr_speed_slow">Slow</string>
     <string name="withdraw_animated_qr_speed_normal">Normal</string>
     <string name="withdraw_animated_qr_speed_fast">Fast</string>
@@ -1009,8 +894,6 @@
     <string name="desc_select_lightning_mint">Select as Lightning mint</string>
     <string name="desc_remove_preset">Remove preset</string>
     <string name="label_percent_symbol" translatable="false">%</string>
-    <string name="auto_withdraw_percentage_min" translatable="false">50%</string>
-    <string name="auto_withdraw_percentage_max" translatable="false">98%</string>
 
     <!-- Insights Screen -->
     <string name="insights_open">Open insights</string>

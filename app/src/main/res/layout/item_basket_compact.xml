@@ -61,6 +61,7 @@
     <!-- Total Price -->
     <TextView
         android:id="@+id/item_total"
+        android:textColor="@color/color_text_primary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/Text.Body"

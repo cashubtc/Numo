@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Quiet text buttons on settings surfaces: primary ink, tertiary when disabled. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/color_text_tertiary" android:state_enabled="false" />
+    <item android:color="@color/color_text_primary" />
+</selector>

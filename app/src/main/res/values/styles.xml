@@ -166,7 +166,7 @@
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">13sp</item>
         <item name="android:lineHeight">18sp</item>
-        <item name="android:textColor">@color/color_text_tertiary</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
     </style>
 
     <!-- RowSubtitle: List item secondary text -->
@@ -174,7 +174,7 @@
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">13sp</item>
         <item name="android:lineHeight">18sp</item>
-        <item name="android:textColor">@color/color_text_tertiary</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
     </style>
 
     <!-- Helper: Form hints, contextual help -->
@@ -182,7 +182,7 @@
         <item name="android:fontFamily">sans-serif</item>
         <item name="android:textSize">13sp</item>
         <item name="android:lineHeight">18sp</item>
-        <item name="android:textColor">@color/color_text_tertiary</item>
+        <item name="android:textColor">@color/color_text_secondary</item>
     </style>
 
     <!-- Badge: Status indicators, counters -->
@@ -299,6 +299,14 @@
         <item name="android:stateListAnimator">@null</item>
         <item name="backgroundTint">@android:color/transparent</item>
         <item name="rippleColor">@color/color_white_10</item>
+    </style>
+
+    <!-- Quiet text action on light settings surfaces: ink text with a visible ripple. -->
+    <style name="Widget.Numo.Button.Quiet" parent="Widget.Numo.Button.Tertiary">
+        <item name="android:textAppearance">@style/Text.Button</item>
+        <item name="android:textColor">@color/text_button_primary</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="rippleColor">@color/color_ripple</item>
     </style>
 
     <!-- ══════════════════════════════════════════════════════════ -->

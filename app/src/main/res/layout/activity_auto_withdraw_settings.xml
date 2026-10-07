@@ -4,173 +4,68 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    tools:context=".feature.autowithdraw.AutoWithdrawSettingsActivity">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/root_layout"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <!-- Top Bar -->
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <com.electricdreams.numo.ui.components.NumoTopBar
             android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:topBarTitle="@string/auto_withdraw_settings_title"
-            app:layout_constraintTop_toTopOf="parent"
-            android:minHeight="64dp"
-            app:topBarSettingsStyle="true" />
-
-        <!-- Scrollable Content -->
+            app:topBarSettingsStyle="true"
+            app:topBarTitle="@string/withdraw_hub_auto_title" />
 
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:fillViewport="true"
-            app:layout_constraintTop_toBottomOf="@id/top_bar"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:clipToPadding="false">
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            android:fillViewport="true">
 
             <LinearLayout
+                android:id="@+id/content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingBottom="24dp"
-                android:paddingHorizontal="@dimen/settings_page_margin">
+                android:paddingHorizontal="@dimen/settings_page_margin"
+                android:paddingBottom="@dimen/space_xl">
 
-                <!-- Hero Section -->
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingTop="@dimen/space_l"
-                    android:paddingBottom="@dimen/space_xl">
-
-                    <!-- Hero Card -->
-
-                    <androidx.cardview.widget.CardView
-                        android:id="@+id/hero_card"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        style="@style/Widget.Numo.SettingsCard">
-
-                        <FrameLayout
-                            android:id="@+id/hero_bg"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@color/settings_background"
-                            android:clipChildren="false">
-
-                            <LinearLayout
-                                android:id="@+id/hero_content_row"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:paddingVertical="@dimen/settings_row_padding">
-
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:gravity="center_vertical"
-                                    android:orientation="horizontal">
-
-                                    <TextView
-                                        android:id="@+id/hero_title"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginEnd="@dimen/space_m"
-                                        android:textAppearance="@style/Text.RowTitle"
-                                        android:text="@string/auto_withdraw_hero_title"
-                                        android:letterSpacing="-0.012" />
-
-                                    <LinearLayout
-                                        android:id="@+id/status_container"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:background="@drawable/bg_status_pill_success"
-                                        android:gravity="center"
-                                        android:orientation="horizontal"
-                                        android:paddingHorizontal="@dimen/space_m"
-                                        android:paddingVertical="@dimen/space_xs">
-
-                                        <View
-                                            android:id="@+id/status_dot"
-                                            android:layout_width="8dp"
-                                            android:layout_height="8dp"
-                                            android:layout_marginEnd="@dimen/space_s"
-                                            android:background="@drawable/bg_notification_dot"
-                                            android:backgroundTint="@color/color_success_green" />
-
-                                        <TextView
-                                            android:id="@+id/status_text"
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:textAppearance="@style/Text.Badge"
-                                            android:text="@string/auto_withdraw_status_inactive"
-                                            android:textColor="@color/color_success_green" />
-
-                                    </LinearLayout>
-
-                                </LinearLayout>
-
-                                <TextView
-                                    android:id="@+id/hero_subtitle"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="@dimen/settings_row_subtitle_gap"
-                                    android:textAppearance="@style/Text.SettingsCaption"
-                                    android:text="@string/auto_withdraw_hero_subtitle"
-                                    android:textColor="?attr/colorOnSurfaceVariant" />
-
-                            </LinearLayout>
-
-                        </FrameLayout>
-
-                    </androidx.cardview.widget.CardView>
-
-                </LinearLayout>
-
-                <!-- ==================== -->
-
-                <!-- MAIN TOGGLE ROW -->
-
-                <!-- ==================== -->
-
+                <!-- The rule is explained once, right where it is switched on. -->
                 <LinearLayout
                     android:id="@+id/enable_toggle_row"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_settings_group"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:background="@drawable/bg_row_ripple"
                     android:clickable="true"
                     android:focusable="true"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:clipToOutline="true"
-                    android:foreground="?attr/selectableItemBackground"
-                    android:paddingHorizontal="0dp"
-                    android:paddingVertical="@dimen/settings_row_padding"
                     android:minHeight="@dimen/settings_switch_height"
-                    android:screenReaderFocusable="true">
+                    android:orientation="horizontal"
+                    android:paddingVertical="@dimen/settings_row_padding">
 
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="@dimen/space_l"
                         android:layout_weight="1"
                         android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/auto_withdraw_enable_title"
+                            android:text="@string/withdraw_hub_auto_title"
                             android:textAppearance="@style/Text.RowTitle" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="@dimen/settings_row_subtitle_gap"
-                            android:text="@string/auto_withdraw_enable_subtitle"
+                            android:text="@string/withdraw_auto_subtitle"
                             android:textAppearance="@style/Text.SettingsCaption" />
 
                     </LinearLayout>
@@ -179,410 +74,125 @@
                         android:id="@+id/enable_switch"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:minHeight="48dp"
-                        android:contentDescription="@string/auto_withdraw_enable_title" />
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:importantForAccessibility="no"
+                        android:minHeight="48dp" />
 
                 </LinearLayout>
-
-                <!-- ==================== -->
-
-                <!-- AUTO-WITHDRAW CONFIG (hidden when toggle off) -->
-
-                <!-- ==================== -->
 
                 <LinearLayout
                     android:id="@+id/auto_withdraw_config_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:visibility="gone">
-
-                    <!-- ==================== -->
-
-                    <!-- DESTINATION SECTION -->
-
-                    <!-- ==================== -->
+                    android:visibility="gone"
+                    tools:visibility="visible">
 
                     <TextView
-                        android:text="@string/auto_withdraw_section_destination"
                         style="@style/Widget.Numo.SettingsSectionTitle"
-                        android:textAllCaps="false"
                         android:layout_marginTop="@dimen/settings_section_gap"
-                        android:accessibilityHeading="true" />
+                        android:labelFor="@id/lightning_address_input"
+                        android:text="@string/withdraw_auto_section_destination" />
 
-                    <androidx.cardview.widget.CardView
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/lightning_address_layout"
+                        style="@style/Widget.Numo.SettingsTextInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.Numo.SettingsCard">
+                        app:errorIconDrawable="@null"
+                        app:helperTextEnabled="true"
+                        app:helperTextTextAppearance="@style/Text.SettingsCaption"
+                        app:hintEnabled="false">
 
-                        <LinearLayout
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/lightning_address_input"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:paddingHorizontal="0dp"
-                            android:paddingVertical="@dimen/settings_row_padding">
+                            android:hint="@string/withdraw_auto_address_hint"
+                            android:imeOptions="actionDone"
+                            android:inputType="textEmailAddress|textNoSuggestions"
+                            android:minHeight="56dp"
+                            android:textAppearance="@style/Text.SettingsInput"
+                            android:textColorHint="?attr/colorOnSurfaceVariant" />
 
-                            <!-- Lightning Address Label -->
+                    </com.google.android.material.textfield.TextInputLayout>
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginBottom="@dimen/space_m"
-                                android:text="@string/auto_withdraw_lightning_address_label"
-                                style="@style/Text.RowTitle" />
+                    <TextView
+                        style="@style/Widget.Numo.SettingsSectionTitle"
+                        android:layout_marginTop="@dimen/settings_section_gap"
+                        android:layout_marginBottom="0dp"
+                        android:text="@string/withdraw_auto_section_rule" />
 
-                            <!-- Input Field -->
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/threshold_row"
+                        style="@style/Widget.Numo.SettingsRow"
+                        android:minHeight="@dimen/settings_row_height"
+                        app:rowShowChevron="true"
+                        app:rowTitle="@string/withdraw_auto_threshold_title" />
 
-                            <com.google.android.material.textfield.TextInputLayout
-                                style="@style/Widget.Numo.SettingsTextInput"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top"
+                        android:minHeight="@dimen/settings_row_height"
+                        android:orientation="horizontal"
+                        android:paddingTop="@dimen/settings_row_padding">
 
-                                <com.google.android.material.textfield.TextInputEditText
-                                    android:id="@+id/lightning_address_input"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:minHeight="56dp"
-                                    android:fontFamily="sans-serif"
-                                    android:hint="@string/auto_withdraw_lightning_address_hint"
-                                    android:inputType="textEmailAddress"
-                                    android:textAppearance="@style/Text.SettingsInput"
-                                    android:textColor="@color/color_text_primary"
-                                    android:textColorHint="?attr/colorOnSurfaceVariant" />
-
-                            </com.google.android.material.textfield.TextInputLayout>
-
-                            <!-- Validation Label -->
-
-                            <TextView
-                                android:id="@+id/lightning_address_validation"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/space_s"
-                                android:textAppearance="@style/Text.SettingsCaption"
-                                android:visibility="gone"
-                                tools:text="@string/auto_withdraw_lightning_address_valid" />
-
-                            <!-- Helper Text -->
+                        <!-- The value sits on the title's baseline, not between title and caption. -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:baselineAlignedChildIndex="0"
+                            android:layout_marginEnd="@dimen/space_l"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_marginTop="@dimen/space_s"
-                                android:alpha="0.7"
-                                android:text="@string/auto_withdraw_lightning_address_helper"
+                                android:labelFor="@id/percentage_slider"
+                                android:text="@string/withdraw_auto_percentage_title"
+                                android:textAppearance="@style/Text.RowTitle" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/settings_row_subtitle_gap"
+                                android:text="@string/withdraw_auto_percentage_subtitle"
                                 android:textAppearance="@style/Text.SettingsCaption" />
 
                         </LinearLayout>
 
-                    </androidx.cardview.widget.CardView>
-
-                    <!-- ==================== -->
-
-                    <!-- TRIGGER SETTINGS -->
-
-                    <!-- ==================== -->
-
-                    <TextView
-                        android:text="@string/auto_withdraw_section_trigger"
-                        style="@style/Widget.Numo.SettingsSectionTitle"
-                        android:textAllCaps="false"
-                        android:layout_marginTop="@dimen/settings_section_gap"
-                        android:accessibilityHeading="true" />
-
-                    <androidx.cardview.widget.CardView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        style="@style/Widget.Numo.SettingsCard">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:showDividers="none">
-
-                            <!-- Threshold Row -->
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:gravity="center_vertical"
-                                android:orientation="horizontal"
-                                android:paddingHorizontal="0dp"
-                                android:paddingVertical="@dimen/settings_row_padding">
-
-                                <LinearLayout
-                                    android:layout_width="0dp"
-                                    android:layout_height="wrap_content"
-                                    android:layout_weight="1"
-                                    android:orientation="vertical">
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:textAppearance="@style/Text.RowTitle"
-                                        android:text="@string/auto_withdraw_threshold_title" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:layout_marginTop="@dimen/settings_row_subtitle_gap"
-                                        android:text="@string/auto_withdraw_threshold_subtitle"
-                                        android:textAppearance="@style/Text.SettingsCaption"
-                                        android:textColor="?attr/colorOnSurfaceVariant" />
-
-                                </LinearLayout>
-
-                                <!-- Amount Display with &#8383; symbol -->
-
-                                <TextView
-                                    android:id="@+id/threshold_display"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:background="@drawable/bg_pill_badge"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:paddingHorizontal="@dimen/space_l"
-                                    android:paddingVertical="@dimen/space_m"
-                                    android:text="₿50,000"
-                                    android:textAppearance="@style/Text.RowTitle"
-                                    android:clickable="true"
-                                    android:focusable="true" />
-
-                            </LinearLayout>
-
-                            <!-- Percentage Row -->
-
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:paddingHorizontal="0dp"
-                                android:paddingVertical="@dimen/settings_row_padding">
-
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:gravity="center_vertical"
-                                    android:orientation="horizontal">
-
-                                    <LinearLayout
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="1"
-                                        android:orientation="vertical">
-
-                                        <TextView
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:textAppearance="@style/Text.RowTitle"
-                                            android:text="@string/auto_withdraw_percentage_title" />
-
-                                        <TextView
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:layout_marginTop="@dimen/settings_row_subtitle_gap"
-                                            android:text="@string/auto_withdraw_percentage_subtitle"
-                                            android:textAppearance="@style/Text.SettingsCaption"
-                                            android:textColor="?attr/colorOnSurfaceVariant" />
-
-                                    </LinearLayout>
-
-                                    <!-- Percentage Badge -->
-
-                                    <TextView
-                                        android:id="@+id/percentage_badge"
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:background="@drawable/bg_pill_badge"
-                                        android:fontFamily="sans-serif-medium"
-                                        android:minWidth="64dp"
-                                        android:paddingHorizontal="@dimen/space_l"
-                                        android:paddingVertical="@dimen/space_m"
-                                        android:text="95%"
-                                        android:textAlignment="center"
-                                        android:textAppearance="@style/Text.RowTitle" />
-
-                                </LinearLayout>
-
-                                <!-- Slider -->
-
-                                <com.google.android.material.slider.Slider
-                                    android:id="@+id/percentage_slider"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="@dimen/space_l"
-                                    android:stepSize="1"
-                                    android:valueFrom="50"
-                                    android:valueTo="98"
-                                    app:haloColor="@color/color_bitcoin_orange"
-                                    app:haloRadius="24dp"
-                                    app:thumbColor="@color/color_bitcoin_orange"
-                                    app:thumbRadius="12dp"
-                                    app:tickVisible="false"
-                                    app:trackColorActive="@color/color_bitcoin_orange"
-                                    app:trackColorInactive="@color/color_bg_tertiary"
-                                    app:trackHeight="6dp" />
-
-                                <!-- Range Labels -->
-
-                                <LinearLayout
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:orientation="horizontal">
-
-                                    <TextView
-                                        android:layout_width="0dp"
-                                        android:layout_height="wrap_content"
-                                        android:layout_weight="1"
-                                        android:text="@string/auto_withdraw_percentage_min"
-                                        android:textAppearance="@style/Text.SettingsCaption" />
-
-                                    <TextView
-                                        android:layout_width="wrap_content"
-                                        android:layout_height="wrap_content"
-                                        android:text="@string/auto_withdraw_percentage_max"
-                                        android:textAppearance="@style/Text.SettingsCaption" />
-
-                                </LinearLayout>
-
-                            </LinearLayout>
-
-                        </LinearLayout>
-
-                    </androidx.cardview.widget.CardView>
-
-                </LinearLayout>
-
-                <!-- ==================== -->
-
-                <!-- MANUAL WITHDRAW SECTION -->
-
-                <!-- ==================== -->
-
-                <TextView
-                    android:text="@string/manual_withdraw_section_title"
-                    style="@style/Widget.Numo.SettingsSectionTitle"
-                    android:textAllCaps="false"
-                    android:layout_marginTop="@dimen/settings_section_gap"
-                    android:accessibilityHeading="true" />
-
-                <LinearLayout
-                    android:id="@+id/manual_withdraw_row"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_settings_group"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:clipToOutline="true"
-                    android:foreground="?attr/selectableItemBackground"
-                    android:paddingHorizontal="0dp"
-                    android:paddingVertical="@dimen/settings_row_padding"
-                    android:minHeight="@dimen/settings_switch_height"
-                    android:screenReaderFocusable="true">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
                         <TextView
+                            android:id="@+id/percentage_badge"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/manual_withdraw_title"
-                            android:textAppearance="@style/Text.RowTitle" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/settings_row_subtitle_gap"
-                            android:text="@string/manual_withdraw_subtitle"
-                            android:textAppearance="@style/Text.SettingsCaption" />
+                            android:minWidth="48dp"
+                            android:gravity="end"
+                            android:importantForAccessibility="no"
+                            android:textAppearance="@style/Text.RowTitle"
+                            tools:text="95%" />
 
                     </LinearLayout>
 
-                    <ImageView
-                        android:importantForAccessibility="no"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_chevron_forward"
-                        app:tint="@color/color_text_tertiary" />
-
-                </LinearLayout>
-
-                <!-- ==================== -->
-
-                <!-- HISTORY SECTION -->
-
-                <!-- ==================== -->
-
-                <LinearLayout
-                    android:id="@+id/history_section_header"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="0dp"
-                    android:paddingTop="@dimen/section_gap"
-                    android:paddingBottom="@dimen/row_padding_vertical"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_weight="1"
-                        android:text="@string/auto_withdraw_section_history"
-                        style="@style/Widget.Numo.SettingsSectionTitle"
-                        android:textAllCaps="false"
-                        android:layout_marginTop="@dimen/settings_section_gap"
-                        android:accessibilityHeading="true" />
-
-                    <TextView
-                        android:id="@+id/see_all_button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:fontFamily="sans-serif-medium"
-                        android:paddingHorizontal="@dimen/space_s"
-                        android:paddingVertical="@dimen/space_xs"
-                        android:text="@string/auto_withdraw_see_all"
-                        android:textAppearance="@style/Text.SecondaryButton"
-                        android:textColor="@color/color_bitcoin_orange"
-                        android:visibility="gone" />
-
-                </LinearLayout>
-
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/history_card"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.Numo.SettingsCard">
-
-                    <!-- Empty State -->
-
-                    <include
-                        android:id="@+id/history_empty_container"
-                        layout="@layout/component_settings_empty_state" />
-
-                    <!-- History List -->
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/history_recycler_view"
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/percentage_slider"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:clipToPadding="false"
-                        android:nestedScrollingEnabled="false"
-                        android:paddingVertical="@dimen/space_s"
-                        android:visibility="gone"
-                        tools:listitem="@layout/item_auto_withdraw_history" />
+                        android:layout_marginHorizontal="-16dp"
+                        android:stepSize="1"
+                        android:valueFrom="50"
+                        android:valueTo="98"
+                        app:labelBehavior="gone"
+                        app:tickVisible="false" />
 
-                </androidx.cardview.widget.CardView>
+                </LinearLayout>
 
             </LinearLayout>
 
         </ScrollView>
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </LinearLayout>
 
 </com.electricdreams.numo.ui.components.SettingsPageLayout>

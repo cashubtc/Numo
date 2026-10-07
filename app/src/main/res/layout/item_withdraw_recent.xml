@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mirrors item_payment_history so a withdrawal reads the same here and in Activity. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_row_ripple"
+    android:baselineAligned="false"
+    android:clickable="true"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:minHeight="@dimen/settings_row_height"
+    android:orientation="horizontal"
+    android:paddingVertical="@dimen/space_m">
+
+    <FrameLayout
+        android:layout_width="@dimen/icon_size_medium"
+        android:layout_height="@dimen/icon_size_medium"
+        android:background="@drawable/bg_chip_circle"
+        android:backgroundTint="@color/color_bg_light">
+
+        <ImageView
+            android:id="@+id/recent_icon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center"
+            android:importantForAccessibility="no"
+            android:src="@drawable/ic_arrow_up_send"
+            app:tint="@color/color_text_primary" />
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/row_icon_gap"
+        android:layout_marginEnd="@dimen/space_l"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/recent_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="middle"
+            android:singleLine="true"
+            android:textAppearance="@style/Text.BodyBold"
+            tools:text="to shop@wallet.com" />
+
+        <TextView
+            android:id="@+id/recent_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:singleLine="true"
+            android:textAppearance="@style/Text.SettingsCaption"
+            tools:text="Oct 4 · 14:20" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/recent_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/Text.BodyBold"
+            tools:text="20 sat" />
+
+        <TextView
+            android:id="@+id/recent_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="@style/Text.SettingsCaption"
+            android:visibility="gone"
+            tools:text="Pending"
+            tools:visibility="visible" />
+
+    </LinearLayout>
+
+</LinearLayout>

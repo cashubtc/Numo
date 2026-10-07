@@ -337,71 +337,17 @@
     <string name="common_or">oder</string>
 
 
-    <string name="withdraw_lightning_toolbar_back">Zurück</string>
-    <string name="withdraw_lightning_title">Abheben</string>
-    <string name="withdraw_lightning_balance_label">Verfügbarer Saldo</string>
-    <string name="withdraw_lightning_mint_name_label">Mint-Name</string>
-    <string name="withdraw_lightning_section_withdraw_to">ABHEBEN AN</string>
-    <string name="withdraw_lightning_option_invoice">⚡ Lightning-Rechnung</string>
-    <string name="withdraw_lightning_invoice_hint_label">Lightning-Rechnung eingeben (BOLT11)</string>
-    <string name="withdraw_lightning_invoice_hint_value">lnbc...</string>
-    <string name="withdraw_lightning_option_address">📧 Lightning-Adresse</string>
-    <string name="withdraw_lightning_address_hint_label">Lightning-Adresse eingeben</string>
-    <string name="withdraw_lightning_address_hint_value">benutzer@domain.com</string>
-    <string name="withdraw_lightning_amount_label">Betrag</string>
-    <string name="withdraw_lightning_amount_hint">1000</string>
-    <string name="withdraw_lightning_button_continue">Fortfahren</string>
 
 
-    <string name="withdraw_lightning_error_invalid_mint_url">Ungültige Mint-URL</string>
-    <string name="withdraw_lightning_error_enter_invoice">Bitte eine Lightning-Rechnung eingeben</string>
-    <string name="withdraw_lightning_error_wallet_not_initialized">Wallet nicht initialisiert</string>
-    <string name="withdraw_lightning_error_insufficient_balance">Nicht genügend Saldo. Betrag + Gebühren (%1$d Sats) übersteigt deinen Saldo (%2$d Sats). Versuche einen Betrag unter %3$d Sats.</string>
-    <string name="withdraw_lightning_error_enter_address">Bitte eine Lightning-Adresse eingeben</string>
-    <string name="withdraw_lightning_error_enter_valid_amount">Bitte einen gültigen Betrag eingeben</string>
-    <string name="withdraw_lightning_error_generic">Fehler: %1$s</string>
 
 
-    <string name="withdraw_melt_toolbar_back">Zurück</string>
-    <string name="withdraw_melt_title">Abhebung bestätigen</string>
-    <string name="withdraw_melt_summary">Von %1$s abheben</string>
-    <string name="withdraw_melt_destination_label">AN</string>
-    <string name="withdraw_melt_destination_placeholder">benutzer@domain.com</string>
-    <string name="withdraw_melt_amount_label">Betrag</string>
-    <string name="withdraw_melt_fee_label">Gebührenreserve</string>
-    <string name="withdraw_melt_total_label">Gesamt</string>
-    <string name="withdraw_melt_fee_note">Die Gebührenreserve wird zurückerstattet, wenn die Lightning-Gebühr niedriger ist.</string>
-    <string name="withdraw_melt_loading">Abhebung wird verarbeitet...</string>
 
 
-    <string name="withdraw_melt_error_invalid_data">Ungültige Melt-Angebotsdaten</string>
-    <string name="withdraw_melt_error_wallet_not_initialized">Wallet nicht initialisiert</string>
     <string name="withdraw_melt_error_invoice_not_paid">Zahlung fehlgeschlagen: Rechnung nicht bezahlt</string>
-    <string name="withdraw_melt_error_pending">Zahlung ist ausstehend. Bitte später noch einmal nachsehen.</string>
-    <string name="withdraw_melt_error_unknown_state">Zahlung fehlgeschlagen: Unbekannter Status</string>
-    <string name="withdraw_melt_error_generic">Fehler: %1$s</string>
-    <string name="withdraw_melt_destination_unknown">Unbekannt</string>
-    <string name="withdraw_processing_title">Abhebung wird verarbeitet</string>
-    <string name="withdraw_processing_subtitle">Bitte lasse das Gerät eingeschaltet, während wir deine Überweisung abschließen</string>
-    <string name="withdraw_processing_amount_label">Betrag</string>
-    <string name="withdraw_processing_destination_label">Ziel</string>
-    <string name="withdraw_processing_status_preparing">Deine Abhebung wird vorbereitet</string>
-    <string name="withdraw_processing_status_contacting">Kontaktaufnahme mit dem Mint</string>
-    <string name="withdraw_processing_status_settling">Warte auf Lightning-Abwicklung</string>
-    <string name="withdraw_processing_step_preparing">Gelder werden vorbereitet</string>
-    <string name="withdraw_processing_step_contacting">Kontaktaufnahme mit Mint</string>
-    <string name="withdraw_processing_step_settling">Lightning-Abwicklung</string>
-    <string name="withdraw_processing_hint">Dies dauert normalerweise weniger als 10 Sekunden. Du kannst diesen Bildschirm nach Abschluss sicher verlassen.</string>
 
-    <string name="withdraw_melt_destination_invoice_fallback">Lightning-Rechnung</string>
 
 
     <string name="withdraw_success_amount">%1$s gesendet.</string>
-    <string name="withdraw_success_destination">An %1$s</string>
-    <string name="withdraw_success_destination_fallback">Lightning</string>
-    <string name="withdraw_success_close">Schließen</string>
-    <string name="withdraw_success_background_description">Erfolgshintergrund</string>
-    <string name="withdraw_success_icon_description">Erfolg</string>
 
 
     <string name="history_toolbar_title">Aktivität</string>
@@ -717,61 +663,30 @@
     </plurals>
 
 
-    <string name="auto_withdraw_title">Abhebungen</string>
-    <string name="auto_withdraw_hero_label">AUTO-ABHEBUNG</string>
-    <string name="auto_withdraw_hero_title">Auto-Abhebung</string>
-    <string name="auto_withdraw_hero_subtitle">Gelder automatisch an dein Lightning-Wallet senden, wenn der Saldo einen Schwellenwert überschreitet</string>
-    <string name="auto_withdraw_hero_helper">Lege einen Auszahlungsschwellenwert und eine Lightning-Adresse fest, um automatisch abzuheben, wenn dein Saldo den Grenzwert erreicht.</string>
-    <string name="auto_withdraw_status_active">Aktiv</string>
-    <string name="auto_withdraw_status_inactive">Inaktiv</string>
 
-    <string name="auto_withdraw_enable_title">Auto-Abhebung</string>
-    <string name="auto_withdraw_enable_subtitle">Automatisch abheben, wenn der Saldo den Schwellenwert überschreitet</string>
 
-    <string name="auto_withdraw_section_destination">Ziel</string>
-    <string name="auto_withdraw_section_trigger">Auslöseeinstellungen</string>
-    <string name="auto_withdraw_section_config">KONFIGURATION</string>
-    <string name="auto_withdraw_lightning_address_label">Lightning-Adresse</string>
     <string name="auto_withdraw_lightning_address_hint">du@wallet.com</string>
-    <string name="auto_withdraw_lightning_address_helper">Gelder werden automatisch an diese Adresse gesendet</string>
     <string name="auto_withdraw_lightning_address_valid">Gültige Lightning-Adresse</string>
     <string name="auto_withdraw_lightning_address_invalid">Ungültige Lightning-Adresse</string>
-    <string name="auto_withdraw_lightning_address_checking">Adresse wird überprüft...</string>
+    <string name="auto_withdraw_lightning_address_checking">Adresse wird überprüft…</string>
 
-    <string name="auto_withdraw_threshold_title">Saldoschwellenwert</string>
     <string name="auto_withdraw_threshold_subtitle">Auslösen, wenn Saldo überschreitet</string>
-    <string name="auto_withdraw_threshold_label">Schwellenwert</string>
-    <string name="auto_withdraw_threshold_hint">Abhebung auslösen, wenn der Saldo diesen Betrag erreicht</string>
     <string name="auto_withdraw_threshold_helper">Min: ₿1.000 • Max: ₿1.000.000</string>
     <string name="auto_withdraw_threshold_helper_dynamic">Min: %1$s • Max: ₿1.000.000</string>
 
-    <string name="auto_withdraw_percentage_title">Abhebungsbetrag</string>
-    <string name="auto_withdraw_percentage_subtitle">Prozentsatz des Saldos zum Senden</string>
-    <string name="auto_withdraw_percentage_label">Abhebungsprozentsatz</string>
-    <string name="auto_withdraw_percentage_hint">Prozentsatz des Saldos zum Abheben (etwas für Gebühren zurückhalten)</string>
 
-    <string name="auto_withdraw_section_history">Letzte Aktivität</string>
-    <string name="auto_withdraw_see_all">Alle anzeigen</string>
-    <string name="auto_withdraw_history_empty">Noch keine Abhebungen</string>
-    <string name="auto_withdraw_history_empty_title">Noch keine Abhebungen</string>
-    <string name="auto_withdraw_history_empty_subtitle">Wenn die Auto-Abhebung aktiviert ist, werden deine Zahlungen automatisch an dein Wallet gesendet. Die Aktivität wird hier angezeigt.</string>
 
-    <string name="auto_withdraw_status_completed">Gesendet</string>
     <string name="auto_withdraw_status_pending">Ausstehend</string>
     <string name="auto_withdraw_status_failed">Fehlgeschlagen</string>
 
-    <string name="auto_withdraw_progress_started">Auto-Abhebung läuft...</string>
-    <string name="auto_withdraw_progress_quote">Angebot wird eingeholt...</string>
     <string name="auto_withdraw_progress_sending">Wird an Wallet gesendet...</string>
     <string name="auto_withdraw_progress_completed">Erfolgreich gesendet!</string>
     <string name="auto_withdraw_progress_failed">Abhebung fehlgeschlagen</string>
 
-    <string name="auto_withdraw_settings_title">Abheben</string>
-    <string name="auto_withdraw_error_title">Fehlerdetails</string>
 
 
-    <string name="settings_item_withdrawals_title">Abhebungen</string>
-    <string name="settings_item_withdrawals_subtitle">Auto-Abhebungseinstellungen und -verlauf</string>
+    <string name="settings_item_withdrawals_title">Abheben</string>
+    <string name="settings_item_withdrawals_subtitle">Guthaben an dein Wallet senden</string>
     <string name="settings_item_default_payment_method_title">Standardzahlung</string>
     <string name="settings_item_default_payment_method_subtitle">Unified</string>
     <string name="default_payment_method_explainer_title">Schnelleinstellungen</string>
@@ -782,47 +697,17 @@
     <string name="default_payment_method_option_lightning">Lightning</string>
 
 
-    <string name="manual_withdraw_section_title">Manuelle Abhebung</string>
-    <string name="manual_withdraw_title">Jetzt abheben</string>
-    <string name="manual_withdraw_subtitle">Gelder an Lightning-Rechnung oder -Adresse senden</string>
-    <string name="manual_withdraw_select_mint">Mint auswählen</string>
-    <string name="manual_withdraw_no_balance">Kein Saldo zum Abheben verfügbar. Füge zuerst Gelder zu deinem Wallet hinzu.</string>
 
 
     <string name="mints_settings_balance_label">Saldo</string>
 
 
-    <string name="mint_selection_title">Mint auswählen</string>
-    <string name="mint_selection_subtitle">Wähle, von welchem Mint abgehoben werden soll</string>
-    <string name="mint_selection_icon_description">Mint-Symbol</string>
-    <string name="mint_selection_select_description">Diesen Mint auswählen</string>
 
 
-    <string name="withdraw_invoice_card_title">Lightning-Rechnung</string>
-    <string name="withdraw_invoice_card_subtitle">Eine Rechnung zum sofortigen Bezahlen einfügen</string>
-    <string name="withdraw_address_card_title">Lightning-Adresse</string>
-    <string name="withdraw_address_card_subtitle">An eine E-Mail-ähnliche Adresse senden</string>
-    <string name="withdraw_invoice_placeholder">lnbc1...</string>
-    <string name="withdraw_amount_placeholder">Betrag in Sats eingeben</string>
-    <string name="withdraw_continue_button">Fortfahren</string>
     <string name="withdraw_scan_qr">QR scannen</string>
-    <string name="withdraw_scan_invoice_button">Rechnung scannen</string>
-    <string name="withdraw_invoice_helper">Eine BOLT11-Lightning-Rechnung eingeben</string>
-    <string name="withdraw_address_helper">An eine E-Mail-ähnliche Lightning-Adresse senden</string>
-    <string name="withdraw_section_send_to">Senden an</string>
-    <string name="withdraw_balance_available">Verfügbar: %1$s</string>
 
-    <string name="withdraw_tab_lightning">Lightning</string>
-    <string name="withdraw_tab_cashu">Cashu-Token</string>
 
-    <string name="withdraw_cashu_amount_card_title">Betrag</string>
-    <string name="withdraw_cashu_amount_card_subtitle">Betrag zur Token-Erstellung eingeben</string>
-    <string name="withdraw_cashu_create_button">Token erstellen</string>
-    <string name="withdraw_cashu_result_title">Cashu-Token</string>
-    <string name="withdraw_cashu_result_subtitle">Diesen Token zum Abheben teilen</string>
-    <string name="withdraw_cashu_copy_token">Token kopieren</string>
     <string name="withdraw_cashu_copied">Token in Zwischenablage kopiert</string>
-    <string name="withdraw_cashu_creating">Token wird erstellt...</string>
 
 
     <string name="qr_scanner_title">QR-Code scannen</string>
@@ -984,8 +869,6 @@
     <string name="desc_select_lightning_mint">Als Lightning-Mint auswählen</string>
     <string name="desc_remove_preset">Vorgabe entfernen</string>
     <string name="label_percent_symbol" translatable="false">%</string>
-    <string name="auto_withdraw_percentage_min" translatable="false">50%</string>
-    <string name="auto_withdraw_percentage_max" translatable="false">98%</string>
 
     <!-- Insights Screen -->
     <string name="insights_open">Einblicke öffnen</string>

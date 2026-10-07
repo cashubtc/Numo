@@ -411,22 +411,35 @@
         </activity>
 
         <!-- Withdraw Activities -->
-        <activity android:name="com.electricdreams.numo.feature.settings.WithdrawLightningActivity"
+        <activity android:name="com.electricdreams.numo.feature.settings.WithdrawActivity"
             android:exported="false"
-            android:label="Withdraw"
+            android:label="@string/withdraw_hub_title"
             android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.MintsSettingsActivity"
+            android:parentActivityName=".feature.settings.SettingsActivity"
             android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".feature.settings.MintsSettingsActivity" />
+                android:value=".feature.settings.SettingsActivity" />
+        </activity>
+
+        <activity android:name="com.electricdreams.numo.feature.settings.WithdrawLightningActivity"
+            android:exported="false"
+            android:label="@string/withdraw_send_title"
+            android:theme="@style/Theme.Numo.Settings"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.settings.WithdrawActivity"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.settings.WithdrawActivity" />
         </activity>
 
         <activity android:name="com.electricdreams.numo.feature.settings.WithdrawMeltQuoteActivity"
             android:exported="false"
-            android:label="Confirm Withdrawal"
+            android:label="@string/withdraw_review_title"
             android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
@@ -439,15 +452,28 @@
 
         <activity android:name="com.electricdreams.numo.feature.settings.WithdrawSuccessActivity"
             android:exported="false"
-            android:label="Withdrawal Complete"
+            android:label="@string/withdraw_hub_title"
             android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".ModernPOSActivity"
+            android:parentActivityName=".feature.settings.WithdrawActivity"
             android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".ModernPOSActivity" />
+                android:value=".feature.settings.WithdrawActivity" />
+        </activity>
+
+        <activity android:name="com.electricdreams.numo.feature.settings.WithdrawEcashActivity"
+            android:exported="false"
+            android:label="@string/withdraw_ecash_title"
+            android:theme="@style/Theme.Numo.Settings"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.settings.WithdrawActivity"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.settings.WithdrawActivity" />
         </activity>
 
         <!-- Item Management Activities -->
@@ -594,15 +620,15 @@
 
         <activity android:name="com.electricdreams.numo.feature.autowithdraw.AutoWithdrawSettingsActivity"
             android:exported="false"
-            android:label="@string/auto_withdraw_title"
+            android:label="@string/withdraw_hub_auto_title"
             android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
-            android:parentActivityName=".feature.settings.SettingsActivity"
+            android:parentActivityName=".feature.settings.WithdrawActivity"
             android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".feature.settings.SettingsActivity" />
+                android:value=".feature.settings.WithdrawActivity" />
         </activity>
 
         <!-- HCE Service for NDEF tag emulation -->

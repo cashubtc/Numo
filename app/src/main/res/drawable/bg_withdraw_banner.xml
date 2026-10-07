@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Inline status banner on the withdraw review screen; tinted per state. -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <corners android:radius="@dimen/radius_card" />
+    <solid android:color="@color/white" />
+</shape>

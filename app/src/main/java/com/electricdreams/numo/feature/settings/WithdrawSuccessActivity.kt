@@ -2,33 +2,32 @@ package com.electricdreams.numo.feature.settings
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 import com.electricdreams.numo.R
-import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.databinding.ActivityWithdrawSuccessBinding
 import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 /**
- * Success screen for withdrawal completion
- * Following Cash App design guidelines
+ * Sent: mirrors the payment-received screen so money leaving reads like money
+ * arriving, then adds the fee actually paid and what is left.
  */
 class WithdrawSuccessActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityWithdrawSuccessBinding
-
-    private lateinit var amountText: TextView
-    private lateinit var destinationText: TextView
-    private lateinit var checkmarkCircle: ImageView
-    private lateinit var checkmarkIcon: ImageView
-    private lateinit var closeButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,101 +35,102 @@ class WithdrawSuccessActivity : AppCompatActivity() {
         setContentView(binding.root)
         applySettingsWindowInsets(this, binding.root)
 
-        // Initialize views
-        amountText = binding.amountText
-        destinationText = binding.destinationText
-        checkmarkCircle = binding.checkmarkCircle
-        checkmarkIcon = binding.checkmarkIcon
-        closeButton = binding.closeButton
+        val amount = intent.getLongExtra(EXTRA_AMOUNT, 0)
+        val feePaid = intent.getLongExtra(EXTRA_FEE_PAID, 0)
+        val address = intent.getStringExtra(EXTRA_LIGHTNING_ADDRESS)
 
-        // Get data from intent
-        val amount = intent.getLongExtra("amount", 0)
-        val destination = intent.getStringExtra("destination")
-            ?: getString(R.string.withdraw_success_destination_fallback)
-
-        // Display data
-        val amountObj = Amount(amount, Amount.Currency.BTC)
-        amountText.text = getString(
-            R.string.withdraw_success_amount,
-            amountObj.toString()
-        )
-        destinationText.text = getString(
-            R.string.withdraw_success_destination,
-            destination
-        )
-
-        // Set up button listener
-        closeButton.setOnClickListener {
-            finish()
+        binding.amountText.text = getString(R.string.withdraw_success_amount, WithdrawUi.sats(amount))
+        binding.destinationText.text = if (address.isNullOrBlank()) {
+            getString(R.string.withdraw_review_to_invoice)
+        } else {
+            getString(R.string.withdraw_review_to, address)
         }
+        binding.feeValue.text = WithdrawUi.sats(feePaid)
+        loadRemainingBalance()
 
-        // Start the checkmark animation after a short delay
-        checkmarkIcon.postDelayed({
-            animateCheckmark()
-        }, 100)
+        binding.doneButton.setOnClickListener { returnToWithdraw() }
+        binding.closeIconButton.setOnClickListener { returnToWithdraw() }
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() = returnToWithdraw()
+        })
+
+        if (savedInstanceState == null) {
+            BalanceRefreshBroadcast.send(this, BalanceRefreshBroadcast.REASON_WITHDRAWAL)
+            binding.checkmarkIcon.postDelayed({ animateCheckmark() }, CHECK_DELAY_MS)
+        } else {
+            binding.checkmarkCircle.visibility = View.VISIBLE
+            binding.checkmarkIcon.visibility = View.VISIBLE
+        }
     }
 
-    override fun finish() {
-        // Broadcast balance change so other activities refresh their balance displays
-        BalanceRefreshBroadcast.send(this, BalanceRefreshBroadcast.REASON_WITHDRAWAL)
-        super.finish()
+    private fun loadRemainingBalance() {
+        // Reserve the row's space up front and fade the value in, so nothing shifts.
+        binding.balanceValue.alpha = 0f
+        lifecycleScope.launch {
+            val total = try {
+                withContext(Dispatchers.IO) { CashuWalletManager.getAllMintBalances().values.sum() }
+            } catch (e: Exception) {
+                Log.e(TAG, "Unable to load remaining balance", e)
+                null
+            }
+            if (total == null) {
+                binding.balanceRow.visibility = View.INVISIBLE
+                return@launch
+            }
+            binding.balanceValue.text = WithdrawUi.sats(total)
+            binding.balanceValue.animate().alpha(1f).setDuration(FADE_MS).start()
+        }
     }
 
+    /** Back on the Withdraw hub, with Send and Review cleared from the back stack. */
+    private fun returnToWithdraw() {
+        startActivity(
+            Intent(this, WithdrawActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        )
+        finish()
+    }
+
+    /** Same celebration as payment received: the circle grows, then the check lands. */
     private fun animateCheckmark() {
-        // Simple, elegant success animation
-        // 1. Green circle scales in smoothly
-        // 2. White checkmark pops in with overshoot
+        val circle = binding.checkmarkCircle
+        val icon = binding.checkmarkIcon
+        circle.alpha = 0f
+        circle.scaleX = 0.3f
+        circle.scaleY = 0.3f
+        circle.visibility = View.VISIBLE
+        icon.alpha = 0f
+        icon.scaleX = 0f
+        icon.scaleY = 0f
+        icon.visibility = View.VISIBLE
 
-        // Set initial states
-        checkmarkCircle.alpha = 0f
-        checkmarkCircle.scaleX = 0.3f
-        checkmarkCircle.scaleY = 0.3f
-        checkmarkCircle.visibility = View.VISIBLE
-
-        checkmarkIcon.alpha = 0f
-        checkmarkIcon.scaleX = 0f
-        checkmarkIcon.scaleY = 0f
-        checkmarkIcon.visibility = View.VISIBLE
-
-        // Animate green circle - smooth scale and fade in
-        val circleScaleX = ObjectAnimator.ofFloat(checkmarkCircle, "scaleX", 0.3f, 1f).apply {
-            duration = 400
-            interpolator = android.view.animation.DecelerateInterpolator(2f)
+        val circleEase = DecelerateInterpolator(2f)
+        val iconEase = OvershootInterpolator(3f)
+        AnimatorSet().apply {
+            playTogether(
+                ObjectAnimator.ofFloat(circle, View.SCALE_X, 0.3f, 1f).setDuration(400).apply { interpolator = circleEase },
+                ObjectAnimator.ofFloat(circle, View.SCALE_Y, 0.3f, 1f).setDuration(400).apply { interpolator = circleEase },
+                ObjectAnimator.ofFloat(circle, View.ALPHA, 0f, 1f).setDuration(350),
+                ObjectAnimator.ofFloat(icon, View.SCALE_X, 0f, 1f).setDuration(500).apply {
+                    startDelay = 150
+                    interpolator = iconEase
+                },
+                ObjectAnimator.ofFloat(icon, View.SCALE_Y, 0f, 1f).setDuration(500).apply {
+                    startDelay = 150
+                    interpolator = iconEase
+                },
+                ObjectAnimator.ofFloat(icon, View.ALPHA, 0f, 1f).setDuration(300).apply { startDelay = 150 }
+            )
+            start()
         }
+    }
 
-        val circleScaleY = ObjectAnimator.ofFloat(checkmarkCircle, "scaleY", 0.3f, 1f).apply {
-            duration = 400
-            interpolator = android.view.animation.DecelerateInterpolator(2f)
-        }
-
-        val circleFadeIn = ObjectAnimator.ofFloat(checkmarkCircle, "alpha", 0f, 1f).apply {
-            duration = 350
-        }
-
-        // Animate white checkmark - pop in with overshoot after circle
-        val iconScaleX = ObjectAnimator.ofFloat(checkmarkIcon, "scaleX", 0f, 1f).apply {
-            duration = 500
-            startDelay = 150
-            interpolator = OvershootInterpolator(3f)
-        }
-
-        val iconScaleY = ObjectAnimator.ofFloat(checkmarkIcon, "scaleY", 0f, 1f).apply {
-            duration = 500
-            startDelay = 150
-            interpolator = OvershootInterpolator(3f)
-        }
-
-        val iconFadeIn = ObjectAnimator.ofFloat(checkmarkIcon, "alpha", 0f, 1f).apply {
-            duration = 300
-            startDelay = 150
-        }
-
-        // Play all animations
-        val animatorSet = AnimatorSet()
-        animatorSet.playTogether(
-            circleScaleX, circleScaleY, circleFadeIn,
-            iconScaleX, iconScaleY, iconFadeIn
-        )
-        animatorSet.start()
+    companion object {
+        private const val TAG = "WithdrawSuccess"
+        private const val CHECK_DELAY_MS = 100L
+        private const val FADE_MS = 200L
+        const val EXTRA_AMOUNT = "amount"
+        const val EXTRA_FEE_PAID = "fee_paid"
+        const val EXTRA_LIGHTNING_ADDRESS = "lightning_address"
     }
 }
