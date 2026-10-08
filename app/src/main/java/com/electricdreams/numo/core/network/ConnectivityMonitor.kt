@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.os.Build
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,6 +18,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
 /**
  * Single source of truth for whether Numo can reach the internet.
@@ -28,12 +31,13 @@ import kotlinx.coroutines.flow.transformLatest
  * Going offline is debounced by [OFFLINE_DEBOUNCE_MS] to ride out network handoffs; coming back
  * online is immediate.
  */
-class ConnectivityMonitor private constructor(context: Context) {
+class ConnectivityMonitor internal constructor(
+    context: Context,
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+) {
 
     private val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private val rawOnline = MutableStateFlow(readCurrentState())
 
@@ -46,6 +50,14 @@ class ConnectivityMonitor private constructor(context: Context) {
     private var callbackRegistered = false
 
     private val callback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            // Only Android 8+ guarantees a capabilities callback after availability. On 7,
+            // refresh outside the callback rather than querying ConnectivityManager in it.
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                scope.launch { rawOnline.value = readCurrentState() }
+            }
+        }
+
         override fun onCapabilitiesChanged(network: Network, capabilities: NetworkCapabilities) {
             rawOnline.value = capabilities.isUsable()
         }
@@ -62,11 +74,21 @@ class ConnectivityMonitor private constructor(context: Context) {
         } catch (e: RuntimeException) {
             // Registration can fail if the app exceeds the per-UID callback limit.
             Log.e(TAG, "Failed to register network callback", e)
+            scope.launch {
+                while (isActive) {
+                    rawOnline.value = readCurrentState()
+                    delay(FALLBACK_POLL_INTERVAL_MS)
+                }
+            }
         }
     }
 
     /** Current connectivity for one-off checks; reads live if the callback never registered. */
-    fun isOnlineNow(): Boolean = if (callbackRegistered) isOnline.value else readCurrentState()
+    fun isOnlineNow(): Boolean = if (callbackRegistered) {
+        isOnline.value
+    } else {
+        readCurrentState().also { rawOnline.value = it }
+    }
 
     private fun readCurrentState(): Boolean = try {
         val network = connectivityManager.activeNetwork
@@ -84,6 +106,7 @@ class ConnectivityMonitor private constructor(context: Context) {
 
     companion object {
         private const val TAG = "ConnectivityMonitor"
+        private const val FALLBACK_POLL_INTERVAL_MS = 1_000L
 
         /** How long the network must stay down before the app treats itself as offline. */
         const val OFFLINE_DEBOUNCE_MS = 2_000L

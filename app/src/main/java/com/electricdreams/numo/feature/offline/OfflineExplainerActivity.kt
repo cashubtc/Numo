@@ -26,6 +26,7 @@ import com.electricdreams.numo.feature.offline.OfflineCapabilities.Row
 import com.electricdreams.numo.feature.offline.OfflineCapabilities.Status
 import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 import com.electricdreams.numo.util.overridePendingTransitionCompat
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -40,6 +41,7 @@ class OfflineExplainerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityOfflineExplainerBinding
     private val rowViews = mutableListOf<Pair<Row, ItemOfflineCapabilityBinding>>()
     private var celebrating = false
+    private var autoCloseJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,7 +62,10 @@ class OfflineExplainerActivity : AppCompatActivity() {
                 ConnectivityMonitor.getInstance(this@OfflineExplainerActivity).isOnline
                     .collect { online ->
                         when {
-                            !online -> sawOffline = true
+                            !online -> {
+                                sawOffline = true
+                                restoreOffline()
+                            }
                             sawOffline -> celebrate()
                             // Opened while already online: nothing to explain.
                             else -> finish()
@@ -108,6 +113,40 @@ class OfflineExplainerActivity : AppCompatActivity() {
         )
     }
 
+    private fun restoreOffline() {
+        if (!celebrating) return
+        celebrating = false
+        autoCloseJob?.cancel()
+        autoCloseJob = null
+
+        restoreIcon(binding.heroBadge, R.drawable.ic_status_degraded)
+        restoreText(binding.title, getString(R.string.offline_explainer_title))
+        restoreText(binding.subtitle, getString(R.string.offline_explainer_subtitle))
+        rowViews.forEach { (row, item) ->
+            restoreIcon(item.capabilityIcon, iconFor(row.status))
+            val status = statusTextFor(row)
+            restoreText(item.capabilityStatus, status)
+            setStatus(
+                row, item, status,
+                outdated = row.feature == Feature.EXCHANGE_RATE && row.status == Status.DEGRADED
+            )
+        }
+    }
+
+    private fun restoreIcon(view: ImageView, @DrawableRes icon: Int) {
+        view.animate().cancel()
+        view.setImageResource(icon)
+        view.scaleX = 1f
+        view.scaleY = 1f
+    }
+
+    private fun restoreText(view: TextView, text: CharSequence) {
+        view.animate().cancel()
+        view.text = text
+        view.alpha = 1f
+        view.translationY = 0f
+    }
+
     private fun celebrate() {
         if (celebrating) return
         celebrating = true
@@ -131,7 +170,7 @@ class OfflineExplainerActivity : AppCompatActivity() {
 
         val touchExploration = getSystemService<AccessibilityManager>()?.isTouchExplorationEnabled == true
         if (touchExploration) return
-        lifecycleScope.launch {
+        autoCloseJob = lifecycleScope.launch {
             delay(AUTO_CLOSE_MS)
             finish()
             overridePendingTransitionCompat(0, R.anim.fade_out)
