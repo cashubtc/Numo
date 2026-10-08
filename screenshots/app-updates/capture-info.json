@@ -1,0 +1,33 @@
+{
+  "pr": "https://github.com/cashubtc/Numo/pull/390",
+  "sourceCommit": "be82cd75831b3db845fad7ecc1559a49098219b2",
+  "device": "Pixel 5 emulator",
+  "android": "14",
+  "api": 34,
+  "method": "Production views rendered by a temporary Android instrumentation fixture",
+  "images": {
+    "01-about-entry.png": "07cdc451f8601bb0e0627d781443f77e653a7006b56eb58b23a2b559891e59bc",
+    "02-pos-update-available.png": "b615d18744b2f6fba1944cb8c0d6ae560a8da606a1360e22c47f4e0c1994fc81",
+    "03-pos-update-ready.png": "7edd577605cfb301ef7cb20f94602189183ca5622d4716bde2cd23a2e12d5ff2",
+    "07-update-available.png": "1a573e3cabf792a8a010821be4837ab2d38cc5d064c704d4b4b3efcc52cd37c6",
+    "08-downloading.png": "6ad07eeb432dbeb44ce811eb384613a7fd71db8cff431e374b9e30b184456827",
+    "09-ready-to-install.png": "f1324fb8522d7d706ffe6c4bf853e6748f3c3c8bc41b19dc5f19b6b3f896a363",
+    "10-preparing-installation.png": "5278c0820aff0e7f97d9890c059f383fb8129ec3a6d8f3d0e30114e9a2c850a7",
+    "11-cancel-installation.png": "b76d829798cc73c9dca1f15dcb9c314dd9576f3912166518fdd4b8aa186e73ea",
+    "14-payment-busy.png": "d5e42ad404ef7378a6071c36514e2998dcf56d654c6a0f618083a6d2b441bf85",
+    "15-install-permission-dialog.png": "dbd0ea560b8ef4e2a6b7ab66e5542e70e0fa8e5020e69ecc28c9d1176884ac19",
+    "16-android-install-permission.png": "21e29c0a0849243d1b81c4ea8c864a2cf80620b18600e567a271d69078eeb944",
+    "04-check-for-updates.png": "4b782fb8e74f8ada6f14d6425f41e1e1b524a676a615b0ffbacea92ae2400c39",
+    "05-checking.png": "b5ab122da0c90ef95ab3871bb61879eb0f671eaa2146ecafa1223a539eb8ff99",
+    "06-up-to-date.png": "765df18715f464cadb667c594debdd1769912d023ccf63df598c4970c2e8ecd2",
+    "12-check-error.png": "8b027c898df809d0cbe6d6efe19b8ff7823f3177018e42486b132834c999f4c6",
+    "13-download-retry.png": "7855936e6edfe3132ed7f1aa90112d30465e5622e87eb9c3e6b5dee1cbefae7d",
+    "17-install-retry.png": "2b9134c1b55936f473f23551d41210dacaaed0cd27148225a97ab60c94f41af9",
+    "18-about-dark.png": "fe2336b5dd43282ca4b98648caeb4952513d230f88bc5efdc7d3f0f2fec51025",
+    "19-update-available-dark.png": "9cdbdeafcd55516dfe01c620e0b686088081dcb91ebd353f97455aeaef8066d7",
+    "20-downloading-dark.png": "a476a1c7ad74dd06601f996c1380f558062bcd0b53ca32591b9926c8539979b1",
+    "21-payment-busy-dark.png": "27d576de0cf5ebf5b04bc12f8d420c3b074e7e4dfb270d6689aeb4b7878c1a63",
+    "22-pos-update-available-dark.png": "3bdd5fb7dd4c297fb459b6298f1cf2cf4bdf4d24804749b67b2241df0d2409f5",
+    "23-pos-update-ready-dark.png": "8aa81cf2582a608a5c39c39d20e0eb9a19e354f7f904420403a61dfb34b8c612"
+  }
+}
