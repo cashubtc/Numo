@@ -42,6 +42,9 @@ jobs:
       - name: Test environment launcher
         run: python3 -m unittest discover -s integration-tests/arkoor -p 'test_*.py' -v
 
+      - name: Test payer funding readiness
+        run: python3 -m unittest discover -s scripts/tests -p 'test_wait_for_arkoor_funding.py' -v
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -69,14 +72,7 @@ jobs:
 
       - name: Collect service logs
         if: always()
-        run: |
-          mkdir -p integration-tests/arkoor/logs
-          docker compose -f integration-tests/arkoor/docker-compose.yml logs --no-color \
-            > integration-tests/arkoor/logs/services.log 2>&1
-          docker compose -f integration-tests/arkoor/docker-compose.yml ps --all \
-            > integration-tests/arkoor/logs/status.txt 2>&1
-          docker compose -f integration-tests/arkoor/docker-compose.yml cp \
-            mint:/data/mint/logs integration-tests/arkoor/logs/mint || true
+        run: bash scripts/collect_arkoor_logs.sh
 
       - name: Upload logs and test reports
         if: always()
