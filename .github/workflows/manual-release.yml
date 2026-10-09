@@ -47,63 +47,22 @@ jobs:
           cache: gradle
 
       - name: Validate release version
-        run: |
-          python3 - <<'PYVALIDATE'
-          import os, re
-          assert re.fullmatch(r'v?\d+\.\d+(?:\.\d+)?(?:[-.][A-Za-z0-9.-]+)?', os.environ['RELEASE_VERSION'])
-          assert 0 < int(os.environ['RELEASE_CODE']) <= 2100000000
-          PYVALIDATE
+        run: python3 scripts/validate_release.py
 
       # Decode the base64 encoded keystore string to keystore.jks
       - name: Decode Keystore
         env:
           ENCODED_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 }}
-        run: |
-          mkdir -p $HOME/keystore
-          echo $ENCODED_KEYSTORE | base64 -d > $HOME/keystore/app-release.keystore
+        run: bash scripts/manual_release.sh decode-keystore
 
       # Update app/build.gradle.kts with the signing configuration
       - name: Set up signing configuration
-        run: |
-          cat <<EOT >> app/build.gradle.kts
-          
-          // Added by GitHub Actions for app signing
-          android {
-              signingConfigs {
-                  create("release") {
-                      storeFile = file("$HOME/keystore/app-release.keystore")
-                      storePassword = System.getenv("KEYSTORE_PASSWORD")
-                      keyAlias = System.getenv("KEY_ALIAS")
-                      keyPassword = System.getenv("KEY_PASSWORD")
-                  }
-              }
-              
-              buildTypes {
-                  getByName("release") {
-                      signingConfig = signingConfigs.getByName("release")
-                  }
-                  getByName("play") {
-                      signingConfig = signingConfigs.getByName("release")
-                  }
-              }
-          }
-          EOT
+        run: bash scripts/manual_release.sh configure-signing
 
       # Enable native debug symbols for pre-releases
       - name: Enable debug symbols for pre-release
         if: ${{ github.event.inputs.pre_release == 'true' }}
-        run: |
-          cat <<EOT >> app/build.gradle.kts
-          
-          // Added by GitHub Actions to bundle debug symbols for pre-release
-          android {
-              defaultConfig {
-                  ndk {
-                      debugSymbolLevel = "FULL"
-                  }
-              }
-          }
-          EOT
+        run: bash scripts/manual_release.sh enable-debug-symbols
 
       # Build signed APK with release profile
       - name: Build Release APK
@@ -111,7 +70,7 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew assembleRelease -PnumoVersionCode="$RELEASE_CODE" -PnumoVersionName="${RELEASE_VERSION#v}"
+        run: bash scripts/manual_release.sh build-apk
 
       # Also build an Android App Bundle
       - name: Build Release Bundle (AAB)
@@ -119,54 +78,11 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew bundlePlay -PnumoVersionCode="$RELEASE_CODE" -PnumoVersionName="${RELEASE_VERSION#v}"
+        run: bash scripts/manual_release.sh build-bundle
 
       # Rename output artifacts to include numo and the version
       - name: Rename artifacts with numo and version
-        run: |
-          VERSION="$RELEASE_VERSION"
-          APK_DIR="app/build/outputs/apk/release"
-          BUNDLE_DIR="app/build/outputs/bundle/play"
-
-          echo "Using version: $VERSION"
-
-          if compgen -G "$APK_DIR/*.apk" > /dev/null; then
-            for f in "$APK_DIR"/*.apk; do
-              FILENAME=$(basename "$f")
-              
-              if [[ "$FILENAME" == *"universal"* ]]; then
-                 SUFFIX="universal"
-              elif [[ "$FILENAME" == *"armeabi-v7a"* ]]; then
-                 SUFFIX="armeabi-v7a"
-              elif [[ "$FILENAME" == *"arm64-v8a"* ]]; then
-                 SUFFIX="arm64-v8a"
-              elif [[ "$FILENAME" == *"x86_64"* ]]; then
-                 SUFFIX="x86_64"
-              elif [[ "$FILENAME" == *"x86"* ]]; then
-                 SUFFIX="x86"
-              else
-                 # Default fallback if no specific architecture is found in the name
-                 # This handles the case where it might just be 'app-release.apk'
-                 SUFFIX="universal"
-              fi
-              
-              NEW_NAME="numo-${VERSION}-${SUFFIX}.apk"
-              echo "Renaming $f to $APK_DIR/$NEW_NAME"
-              mv "$f" "$APK_DIR/$NEW_NAME"
-            done
-          else
-            echo "No APK files found in $APK_DIR"
-          fi
-
-          if compgen -G "$BUNDLE_DIR/*.aab" > /dev/null; then
-            for f in "$BUNDLE_DIR"/*.aab; do
-              echo "Renaming $f to $BUNDLE_DIR/numo-${VERSION}.aab"
-              mv "$f" "$BUNDLE_DIR/numo-${VERSION}.aab"
-              break
-            done
-          else
-            echo "No AAB files found in $BUNDLE_DIR"
-          fi
+        run: bash scripts/manual_release.sh rename-artifacts
 
       - name: Create signed update manifest
         env:
@@ -174,18 +90,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           PRE_RELEASE: ${{ inputs.pre_release }}
-        run: |
-          export KEYSTORE_PATH="$HOME/keystore/app-release.keystore"
-          BUILD_TOOLS=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
-          CHANNEL=stable
-          if [ "$PRE_RELEASE" = true ]; then CHANNEL=beta; fi
-          printf '%s' "$RELEASE_NOTES" > "$RUNNER_TEMP/update-notes.txt"
-          python3 scripts/create_update_manifest.py \
-            --apk "app/build/outputs/apk/release/numo-${RELEASE_VERSION}-universal.apk" \
-            --tag "$RELEASE_VERSION" --channel "$CHANNEL" --check-latest \
-            --aapt "$BUILD_TOOLS/aapt" --apksigner "$BUILD_TOOLS/apksigner" \
-            --notes-file "$RUNNER_TEMP/update-notes.txt" \
-            --output app/build/outputs/apk/release/update.json
+        run: bash scripts/manual_release.sh create-manifest
 
       # Create a GitHub release draft with the signed APK and Bundle
       - name: Create Release Draft
