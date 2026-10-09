@@ -62,7 +62,8 @@ object SwapToLightningMintManager {
      */
     data class PaymentContext(
         val paymentId: String?,
-        val amountSats: Long
+        val amountSats: Long,
+        val unit: String? = null,
     )
 
     /**
@@ -102,8 +103,10 @@ object SwapToLightningMintManager {
         //    token so that it holds the proofs we want to melt. This wallet
         //    is entirely ephemeral and uses its own random seed.
 
+        val mintManager = MintManager.getInstance(appContext)
+        val paymentUnit = paymentContext.unit ?: mintManager.getPreferredUnit()
         val tempWallet = try {
-            CashuWalletManager.getTemporaryWalletForMint(unknownMintUrl)
+            CashuWalletManager.getTemporaryWalletForMint(unknownMintUrl, paymentUnit)
         } catch (t: Throwable) {
             val msg = "Failed to create temporary wallet for unknown mint: ${'$'}{t.message}"
             Log.e(TAG, msg, t)
@@ -141,8 +144,7 @@ object SwapToLightningMintManager {
             return@withContext SwapResult.Failure(msg)
         }
 
-        val mintManager = MintManager.getInstance(appContext)
-        val lightningMintUrl = mintManager.getPreferredLightningMint()
+        val lightningMintUrl = mintManager.getPreferredLightningMint(paymentUnit)
             ?: run {
                 Log.e(TAG, "No preferred Lightning mint configured")
                 try { tempWallet.close() } catch (_: Throwable) {}
@@ -152,8 +154,7 @@ object SwapToLightningMintManager {
         
         // Check if the preferred lightning mint actually supports bolt11
         val limits = mintManager.getMintLimits(lightningMintUrl, appContext)
-        val preferredUnit = MintManager.getInstance(appContext).getPreferredUnit()
-        val limitCheck = com.electricdreams.numo.core.util.MintLimitChecker.checkMintLimits(paymentContext.amountSats, limits, preferredUnit)
+        val limitCheck = com.electricdreams.numo.core.util.MintLimitChecker.checkMintLimits(paymentContext.amountSats, limits, paymentUnit)
         if (!limitCheck.isBolt11Supported) {
             val msg = "Preferred mint does not support Lightning (bolt11). Cannot perform swap."
             Log.e(TAG, msg)
@@ -174,8 +175,7 @@ object SwapToLightningMintManager {
         )
 
         val lightningMintUrlObj = MintUrl(lightningMintUrl)
-        val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(appContext).getPreferredUnit()
-        val unit = CashuWalletManager.getCurrencyUnit(unitStr)
+        val unit = CashuWalletManager.getCurrencyUnit(paymentUnit)
         val lightningWallet = wallet.getWallet(lightningMintUrlObj, unit)
             ?: run {
                 Log.e(TAG, "Failed to get Lightning wallet for: $lightningMintUrl")
@@ -452,8 +452,7 @@ object SwapToLightningMintManager {
 
         try {
             val mintUrl = MintUrl(lightningMintUrl)
-            val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(appContext).getPreferredUnit()
-            val unit = CashuWalletManager.getCurrencyUnit(unitStr)
+            val unit = CashuWalletManager.getCurrencyUnit(entry.getUnit())
             val mintWallet = wallet.getWallet(mintUrl, unit)
 
             val quote = mintWallet.checkMintQuote(lightningQuoteId)

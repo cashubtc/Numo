@@ -122,6 +122,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     private enum class OverlayActionMode { SUCCESS, ERROR }
 
     private var paymentAmount: Long = 0
+    private var paymentUnit: String = "sat"
     private var bitcoinPriceWorker: BitcoinPriceWorker? = null
     private var hcePaymentRequest: String? = null
     private var hcePaymentRequestBech32: String? = null
@@ -356,6 +357,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         resumeLightningInvoice = intent.getStringExtra(EXTRA_LIGHTNING_INVOICE)
         resumeArkoorQuoteId = intent.getStringExtra(EXTRA_ARKOOR_QUOTE_ID)
         resumeArkoorMintUrl = intent.getStringExtra(EXTRA_ARKOOR_MINT_URL)
+        initializePaymentUnit()
 
         // Get resume data for Nostr if available
         resumeNostrSecretHex = intent.getStringExtra(EXTRA_NOSTR_SECRET_HEX)
@@ -488,9 +490,17 @@ class PaymentRequestActivity : AppCompatActivity() {
         Log.d(TAG, "   📱 Formatted: $formattedAmountString")
     }
 
+    private fun initializePaymentUnit() {
+        // A checkout keeps its original unit even when the merchant changes preferences.
+        paymentUnit = intent.getStringExtra(EXTRA_PAYMENT_UNIT)
+            ?: pendingPaymentId?.let {
+                PaymentsHistoryActivity.getPaymentEntryById(this, it)?.getUnit()
+            }
+            ?: if (resumeArkoorQuoteId != null) "sat" else MintManager.getInstance(this).getPreferredUnit()
+    }
+
     private fun updateConvertedAmount(formattedAmountString: String) {
-        val preferredUnit = MintManager.getInstance(this).getPreferredUnit()
-        val isCustomUnit = preferredUnit.lowercase() != "sat"
+        val isCustomUnit = paymentUnit.lowercase() != "sat"
         
         if (isCustomUnit) {
             convertedAmountDisplay.visibility = View.GONE
@@ -831,7 +841,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     private fun initializeLocalPaymentRequest() {
         // Get allowed mints supporting the active unit
         val mintManager = MintManager.getInstance(this)
-        val activeUnit = mintManager.getPreferredUnit()
+        val activeUnit = paymentUnit
         val allowedMints = mintManager.getAllowedMints().filter { mintManager.mintSupportsUnit(it, activeUnit) }
         Log.d(TAG, "Using ${allowedMints.size} allowed mints for payment request")
 
@@ -841,11 +851,12 @@ class PaymentRequestActivity : AppCompatActivity() {
         // Every checkout offers two independently quoted ways to pay the same amount.
         // Both start immediately, including when the delayed-Lightning preference is set.
         val preferredMint = resumeLightningMintUrl ?: resumeArkoorMintUrl
-            ?: mintManager.getPreferredLightningMint()
+            ?: mintManager.getPreferredLightningMint(activeUnit)
         val sockets = MintQuoteWebSocket(lifecycleScope)
         quoteSockets = sockets
         lightningHandler = LightningMintHandler(
-            this, preferredMint, allowedMints, lifecycleScope, quoteSockets = sockets,
+            this, preferredMint, allowedMints, lifecycleScope,
+            quoteSockets = sockets, paymentUnit = activeUnit,
         )
         largeAmountDisplay.text = if (activeUnit == "sat") {
             Amount(paymentAmount, Currency.BTC).toString()
@@ -874,7 +885,8 @@ class PaymentRequestActivity : AppCompatActivity() {
             val generatedHce = CashuPaymentHelper.createPaymentRequest(
                 paymentAmount,
                 getString(R.string.payment_request_default_description, paymentAmount),
-                mintsForPaymentRequest
+                mintsForPaymentRequest,
+                paymentUnit = activeUnit,
             )
             hcePaymentRequest = generatedHce?.original
             hcePaymentRequestBech32 = generatedHce?.bech32
@@ -889,7 +901,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
 
         // Initialize Nostr handler and start payment flow
-        nostrHandler = NostrPaymentHandler(this, allowedMints)
+        nostrHandler = NostrPaymentHandler(this, allowedMints, paymentUnit = activeUnit)
         startNostrPaymentFlow()
 
     }
@@ -897,8 +909,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     private fun startArkoorPaymentFlow() {
         val manager = MintManager.getInstance(this)
         val mintUrl = resumeArkoorMintUrl ?: resumeLightningMintUrl
-            ?: manager.getPreferredLightningMint()
-        if (mintUrl == null || manager.getPreferredUnit() != "sat") {
+            ?: manager.getPreferredLightningMint(paymentUnit)
+        if (mintUrl == null || paymentUnit != "sat") {
             onArkoorUnavailable(getString(R.string.payment_request_arkoor_requires_mint))
             return
         }
@@ -1459,10 +1471,11 @@ class PaymentRequestActivity : AppCompatActivity() {
                                 val paymentContext = com.electricdreams.numo.payment.SwapToLightningMintManager.PaymentContext(
                                     paymentId = paymentId,
                                     amountSats = paymentAmount,
+                                    unit = paymentUnit,
                                 )
 
                                 val mintManager = MintManager.getInstance(this@PaymentRequestActivity)
-                                val activeUnit = mintManager.getPreferredUnit()
+                                val activeUnit = paymentUnit
                                 val allowedMints = mintManager.getAllowedMints().filter { mintManager.mintSupportsUnit(it, activeUnit) }
 
                                 val redeemedToken = CashuPaymentHelper.redeemTokenWithSwap(
@@ -2364,6 +2377,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
 
         const val EXTRA_PAYMENT_AMOUNT = "payment_amount"
+        const val EXTRA_PAYMENT_UNIT = "payment_unit"
         const val EXTRA_FORMATTED_AMOUNT = "formatted_amount"
         const val RESULT_EXTRA_TOKEN = "payment_token"
         const val RESULT_EXTRA_AMOUNT = "payment_amount"

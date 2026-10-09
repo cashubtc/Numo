@@ -111,6 +111,23 @@ class MintManagerTest {
     }
 
     @Test
+    fun `selecting mint for saved sats checkout leaves dollar preference unchanged`() {
+        val mint = com.electricdreams.numo.BuildConfig.ARK_MINT_URL
+        mintManager.setMintInfo(mint, """
+            {"nuts":{"4":{"methods":[{"method":"bolt11","unit":"sat"}],"disabled":false}}}
+        """.trimIndent())
+        val previousUnit = mintManager.getPreferredUnit()
+        try {
+            mintManager.setPreferredUnit("usd")
+            assertEquals(mint, mintManager.getPreferredLightningMint("sat"))
+            assertEquals(null, mintManager.getPreferredLightningMint())
+            assertEquals("usd", mintManager.getPreferredUnit())
+        } finally {
+            mintManager.setPreferredUnit(previousUnit)
+        }
+    }
+
+    @Test
     fun testNormalization() {
         val raw = "  mint.test.com/  "
         mintManager.addMint(raw)

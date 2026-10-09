@@ -165,6 +165,35 @@ class LightningMintHandlerTest {
     }
 
     @Test
+    fun `resume polls and issues proofs in checkout unit after preference changes`() = runTest {
+        val manager = com.electricdreams.numo.core.util.MintManager.getInstance(mockContext)
+        whenever(manager.getPreferredUnit()).thenReturn("usd")
+        val sockets = MintQuoteWebSocket(this, FakeQuoteSocketFactory())
+        val resumed = LightningMintHandler(
+            mockContext, preferredMint, allowedMints, this,
+            StandardTestDispatcher(testScheduler), sockets, paymentUnit = "sat",
+        )
+        val paid = mock(MintQuote::class.java)
+        whenever(paid.state).thenReturn(QuoteState.PAID)
+        whenever(mockWallet.checkMintQuote(quoteId)).thenReturn(paid)
+        whenever(mockWallet.mint(any(), any(), anyOrNull())).thenReturn(emptyList())
+
+        resumed.resume(quoteId, preferredMint, bolt11, mockCallback)
+        runCurrent()
+        advanceTimeBy(LightningMintHandler.POLL_INTERVAL_MS)
+        runCurrent()
+
+        verify(mockWalletRepository, atLeastOnce()).getWallet(
+            MintUrl(preferredMint), org.cashudevkit.CurrencyUnit.Sat,
+        )
+        verify(mockWalletRepository, never()).getWallet(MintUrl(preferredMint), org.cashudevkit.CurrencyUnit.Usd)
+        verify(mockWallet).mint(quoteId, org.cashudevkit.SplitTarget.None, null)
+        verify(mockCallback).onPaymentSuccess()
+        verify(manager, never()).getPreferredUnit()
+        sockets.close()
+    }
+
+    @Test
     fun startFailsWhenNoMintsConfigured() {
         runBlocking {
             // Given

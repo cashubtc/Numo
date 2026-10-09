@@ -126,8 +126,10 @@ class MintManager private constructor(context: Context) {
      * Filters out mints that do not support the active preferred unit.
      * Falls back to the first allowed supporting mint if not set or invalid.
      */
-    fun getPreferredLightningMint(): String? {
-        val activeUnit = getPreferredUnit()
+    fun getPreferredLightningMint(): String? = getPreferredLightningMint(getPreferredUnit())
+
+    /** Select a mint for a saved checkout without changing the preferred base unit. */
+    fun getPreferredLightningMint(activeUnit: String): String? {
         val supportingMints = allowedMints.filter { mintSupportsUnit(it, activeUnit) }
         
         val preferred = preferredLightningMint

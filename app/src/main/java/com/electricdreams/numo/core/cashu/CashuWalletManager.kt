@@ -238,7 +238,10 @@ object CashuWalletManager : MintManager.MintChangeListener {
      *  - Stores its state in an in-memory SQLite database ("file::memory:")
      *    so it does not interfere with the persistent wallet database.
      */
-    suspend fun getTemporaryWalletForMint(unknownMintUrl: String): Wallet {
+    suspend fun getTemporaryWalletForMint(
+        unknownMintUrl: String,
+        paymentUnit: String? = null,
+    ): Wallet {
         if (!this::appContext.isInitialized) {
             throw IllegalStateException("CashuWalletManager not initialized")
         }
@@ -253,7 +256,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
         val tempDbStore = WalletStore.Custom(tempDb)
 
         val config = WalletConfig(targetProofCount = 10u)
-        val unitStr = MintManager.getInstance(appContext).getPreferredUnit()
+        val unitStr = paymentUnit ?: MintManager.getInstance(appContext).getPreferredUnit()
         val unit = getCurrencyUnit(unitStr)
 
         return Wallet(

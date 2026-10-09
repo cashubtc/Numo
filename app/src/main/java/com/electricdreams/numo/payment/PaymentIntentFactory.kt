@@ -22,6 +22,7 @@ object PaymentIntentFactory {
         val entry = savedEntry.withSeparateArkoorQuote()
         return Intent(context, PaymentRequestActivity::class.java).apply {
             putExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, entry.amount)
+            putExtra(PaymentRequestActivity.EXTRA_PAYMENT_UNIT, entry.getUnit())
             putExtra(PaymentRequestActivity.EXTRA_FORMATTED_AMOUNT, entry.formattedAmount)
             putExtra(PaymentRequestActivity.EXTRA_RESUME_PAYMENT_ID, entry.id)
 
