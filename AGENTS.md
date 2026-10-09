@@ -122,6 +122,7 @@ Use quotes around the class and method name. If the method uses Kotlin backticks
 4. **Self-Correction Loop:** If you modify logic, immediately run the corresponding unit test. If a test doesn't exist, create a fast, localized unit test before verifying manually or via UI.
 5. **Build Before Finish:** Ensure the app builds (`./gradlew assembleDebug`) before declaring a task complete.
 6. **No Hallucinated Tooling:** Do not attempt to run `ktlint`, `detekt`, or `spotless` unless explicitly configured in the project. Rely on `./gradlew lintDebug` and compilation checks.
+7. **Keep Scripts in `scripts/`:** Store automation scripts in the repository's `scripts/` directory. GitHub Actions `run` steps should invoke those scripts or a single simple command; do not embed script bodies, heredocs, loops, conditionals, or multi-command setup in workflow YAML. Pass workflow inputs and secrets through environment variables or quoted arguments.
 
 ## 8. Security Fixes
 

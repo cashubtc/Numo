@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <application android:networkSecurityConfig="@xml/arkoor_network_security_config" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <application android:networkSecurityConfig="@xml/arkoor_network_security_config">
+        <receiver android:name=".core.update.UpdateInstallReceiver" android:exported="false" />
+    </application>
 </manifest>

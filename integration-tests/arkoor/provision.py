@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import time
 import urllib.error
 import urllib.request
@@ -80,6 +81,12 @@ def provision():
             raise RuntimeError("The payer wallet must use Bitcoin regtest")
         bitcoin("sendtoaddress", address, "0.02")
         bitcoin("-generate", "6")
+        subprocess.run(
+            [sys.executable,
+             str(Path(__file__).resolve().parents[2] / "scripts/wait_for_arkoor_funding.py"),
+             "--amount-sats", "2000000"],
+            check=True,
+        )
         command("run", "--rm", "--no-deps", "-T", "bark", "--quiet", "board", "1000000 sat")
         bitcoin("-generate", "6")
     deadline = time.monotonic() + 60

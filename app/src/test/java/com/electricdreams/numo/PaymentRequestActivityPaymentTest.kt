@@ -8,6 +8,7 @@ import android.widget.TextView
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.network.ConnectivityMonitor
+import com.electricdreams.numo.core.update.UpdateOperationGate
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.ndef.NdefHostCardEmulationService
@@ -152,6 +153,8 @@ class PaymentRequestActivityPaymentTest {
         try {
             ReflectionHelpers.callInstanceMethod<Void>(activity, "startArkoorPaymentFlow")
             withTimeout(5_000) { quoteChecked.await() }
+            assertFalse("An active Arkoor operation must block installation",
+                UpdateOperationGate.shared.tryBeginInstall())
             verify(repository).getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)
             verify(wallet).checkMintQuote("saved-quote")
             verify(wallet, never()).mintQuote(any(), anyOrNull(), anyOrNull(), anyOrNull())
@@ -159,6 +162,13 @@ class PaymentRequestActivityPaymentTest {
             ReflectionHelpers.getField<Job?>(activity, "arkoorJob")?.cancelAndJoin()
             ReflectionHelpers.setStaticField(CashuWalletManager::class.java, "wallet", previousWallet)
             Dispatchers.resetMain()
+            UpdateOperationGate.shared.finishInstall()
+        }
+        try {
+            assertTrue("Cancelling Arkoor must release its update guard",
+                UpdateOperationGate.shared.tryBeginInstall())
+        } finally {
+            UpdateOperationGate.shared.finishInstall()
         }
     }
 

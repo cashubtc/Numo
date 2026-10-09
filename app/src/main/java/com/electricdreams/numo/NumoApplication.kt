@@ -3,6 +3,7 @@ package com.electricdreams.numo
 import android.app.Application
 import android.util.Log
 import com.electricdreams.numo.core.dev.ErrorLogCollector
+import com.electricdreams.numo.core.update.UpdateController
 import com.electricdreams.numo.feature.settings.DeveloperPrefs
 import com.electricdreams.numo.ui.offline.OfflineStripController
 
@@ -16,6 +17,8 @@ class NumoApplication : Application() {
 
         // Expose application context for components without direct Android context (e.g., Nostr listeners)
         AppGlobals.init(this)
+        // Reconcile an interrupted install before wallet or payment work can start.
+        UpdateController.getInstance(this)
         // App-wide "Offline ⓘ" strip above every screen; tapping it explains what still works.
         OfflineStripController.install(this)
         // Wallet initialisation is handled by onboarding / ModernPOS flows.

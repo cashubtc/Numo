@@ -77,6 +77,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+import com.electricdreams.numo.core.update.holdPaymentScreen
+import com.electricdreams.numo.core.update.launchPaymentOperation
+
 class PaymentRequestActivity : AppCompatActivity() {
 
     private lateinit var unifiedQrImageView: ImageView
@@ -213,6 +216,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!holdPaymentScreen()) return
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_payment_request)
         
@@ -563,13 +567,14 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (hasFocus && nfcAnimationContainer.visibility == View.VISIBLE) {
+        if (hasFocus && ::nfcAnimationContainer.isInitialized && nfcAnimationContainer.visibility == View.VISIBLE) {
             applyFullscreenForAnimationOverlay()
         }
     }
 
     override fun onResume() {
         super.onResume()
+        if (isFinishing) return
         try {
             val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
             if (nfcAdapter != null) {
@@ -653,7 +658,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         cashuLogoCard.visibility = View.GONE
         cashuLoadingSpinner.visibility = View.VISIBLE
 
-        uiScope.launch {
+        uiScope.launchPaymentOperation {
             val result = paymentService.createPayment(paymentAmount, "Payment of $paymentAmount sats", checkoutBasketJson)
             result.onSuccess { payment ->
                 btcPayPaymentId = payment.paymentId
@@ -752,7 +757,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         cashuLoadingSpinner.visibility = View.VISIBLE
 
         val btcPay = paymentService as BTCPayPaymentService
-        uiScope.launch {
+        uiScope.launchPaymentOperation {
             val result = btcPay.fetchExistingPaymentData(invoiceId)
             result.onSuccess { payment ->
                 btcPayPaymentId = invoiceId
@@ -817,7 +822,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     private fun fetchBtcPayLightningInBackground(invoiceId: String) {
         val btcPay = paymentService as? BTCPayPaymentService ?: return
-        uiScope.launch {
+        uiScope.launchPaymentOperation {
             for (attempt in 1..10) {
                 delay(1500)
                 if (hasTerminalOutcome) break
@@ -825,7 +830,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 if (bolt11 != null) {
                     Log.d(TAG, "Got bolt11 in background after $attempt attempt(s)")
                     showBtcPayLightningQr(bolt11)
-                    return@launch
+                    return@launchPaymentOperation
                 }
                 Log.d(TAG, "Background bolt11 fetch attempt $attempt — not ready yet")
             }
@@ -925,7 +930,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             arkoorLoading = false
             updateUnifiedQrCode()
         }
-        arkoorJob = lifecycleScope.launch {
+        arkoorJob = lifecycleScope.launchPaymentOperation {
             try {
                 withContext(Dispatchers.IO) {
                     val repository = com.electricdreams.numo.core.cashu.CashuWalletManager.getWallet()
@@ -1085,7 +1090,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     /** Poll BTCPay invoice status every 2 seconds until terminal state. */
     private fun startBtcPayPolling(paymentId: String) {
-        btcPayPollingJob = uiScope.launch {
+        btcPayPollingJob = uiScope.launchPaymentOperation {
             var consecutiveErrors = 0
             var pollInterval = 2000L
 
@@ -1097,7 +1102,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     btcPayPollingJob?.cancel()
                     pendingPaymentId?.let { PaymentsHistoryActivity.markPaymentExpired(this@PaymentRequestActivity, it) }
                     handlePaymentError("Invoice expired")
-                    return@launch
+                    return@launchPaymentOperation
                 }
 
                 delay(pollInterval)
@@ -1419,11 +1424,11 @@ class PaymentRequestActivity : AppCompatActivity() {
                         // Raw Cashu token received over NFC. Delegate full
                         // validation, swap-to-Lightning-mint (if needed),
                         // and redemption to CashuPaymentHelper.
-                        uiScope.launch {
+                        uiScope.launchPaymentOperation {
                             // Check if we are already processing a payment to avoid double-processing
                             if (isProcessingNfcPayment) {
                                 Log.d(TAG, "NFC token received but ignored - already processing a payment")
-                                return@launch
+                                return@launchPaymentOperation
                             }
                             
                             // Mark as processing immediately to lock out subsequent NFC reads
@@ -1472,7 +1477,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                                                 throw Exception("BTCPay redemption failed: ${e.message}")
                                             }
                                         }
-                                        return@launch
+                                        return@launchPaymentOperation
                                     } else {
                                         Log.w(TAG, "BTCPay invoice ID not available, falling back to local flow (likely to fail)")
                                     }

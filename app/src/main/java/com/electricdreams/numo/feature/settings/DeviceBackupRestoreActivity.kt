@@ -11,6 +11,8 @@ import com.electricdreams.numo.core.backup.DeviceRecoveryBackup
 import com.electricdreams.numo.databinding.ActivityDeviceBackupRestoreBinding
 import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
+import com.electricdreams.numo.core.update.holdPaymentScreen
+
 /** Unlocks a recovery envelope that Android restored before Numo was launched. */
 class DeviceBackupRestoreActivity : AppCompatActivity() {
 
@@ -18,6 +20,7 @@ class DeviceBackupRestoreActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!holdPaymentScreen()) return
         if (!DeviceRecoveryBackup.hasRestoredBackup(this)) {
             Toast.makeText(this, R.string.restore_device_backup_missing, Toast.LENGTH_LONG).show()
             finish()
