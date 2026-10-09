@@ -1,9 +1,9 @@
 package com.electricdreams.numo.core.worker
 
 import android.content.Context
-import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.CurrencyManager
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -57,6 +57,72 @@ class BitcoinPriceWorkerTest {
 
         currencyManager.setPreferredCurrency(CurrencyManager.CURRENCY_EUR)
         assertEquals(45_000.0, worker.getCurrentPrice(), 0.0001)
+    }
+
+    @Test
+    fun `cached rate timestamps follow the selected currency after restarting`() {
+        val eurUpdatedAt = 1_700_000_000_000L
+        val usdUpdatedAt = eurUpdatedAt + 86_400_000L
+        context.getSharedPreferences("BitcoinPricePrefs", Context.MODE_PRIVATE).edit()
+            .putFloat("btcPrice_EUR", 45_000f)
+            .putLong("lastUpdateTime_EUR", eurUpdatedAt)
+            .putFloat("btcPrice_USD", 50_000f)
+            .putLong("lastUpdateTime_USD", usdUpdatedAt)
+            .putLong("lastUpdateTime", usdUpdatedAt)
+            .apply()
+
+        val ctor = BitcoinPriceWorker::class.java.getDeclaredConstructor(Context::class.java)
+        ctor.isAccessible = true
+        val restartedWorker = ctor.newInstance(context)
+        assertEquals(usdUpdatedAt, restartedWorker.getPriceUpdatedAt())
+
+        currencyManager.setPreferredCurrency(CurrencyManager.CURRENCY_EUR)
+        assertEquals(45_000.0, restartedWorker.getCurrentPrice(), 0.0001)
+        assertEquals(eurUpdatedAt, restartedWorker.getPriceUpdatedAt())
+    }
+
+    @Test
+    fun `caching another currency preserves the older rates timestamp`() {
+        val prefs = context.getSharedPreferences("BitcoinPricePrefs", Context.MODE_PRIVATE)
+        val cachePrice = BitcoinPriceWorker::class.java.getDeclaredMethod(
+            "cachePrice", String::class.java, Double::class.javaPrimitiveType
+        ).apply { isAccessible = true }
+        cachePrice.invoke(worker, CurrencyManager.CURRENCY_EUR, 45_000.0)
+        assertTrue(prefs.getLong("lastUpdateTime_EUR", 0L) > 0L)
+        assertEquals(45_000f, prefs.getFloat("btcPrice_EUR", 0f))
+
+        val eurUpdatedAt = 1_700_000_000_000L
+        prefs.edit().putLong("lastUpdateTime_EUR", eurUpdatedAt).apply()
+        cachePrice.invoke(worker, CurrencyManager.CURRENCY_USD, 50_000.0)
+
+        val usdUpdatedAt = prefs.getLong("lastUpdateTime_USD", 0L)
+        assertTrue(usdUpdatedAt > eurUpdatedAt)
+        assertEquals(50_000f, prefs.getFloat("btcPrice_USD", 0f))
+        assertEquals(usdUpdatedAt, worker.getPriceUpdatedAt())
+
+        currencyManager.setPreferredCurrency(CurrencyManager.CURRENCY_EUR)
+        assertEquals(eurUpdatedAt, worker.getPriceUpdatedAt())
+    }
+
+    @Test
+    fun `legacy global timestamp is not attributed to a selected currency`() {
+        context.getSharedPreferences("BitcoinPricePrefs", Context.MODE_PRIVATE).edit()
+            .putLong("lastUpdateTime", 1_700_000_000_000L)
+            .apply()
+
+        assertNull(worker.getPriceUpdatedAt())
+        currencyManager.setPreferredCurrency(CurrencyManager.CURRENCY_EUR)
+        assertNull(worker.getPriceUpdatedAt())
+    }
+
+    @Test
+    fun `timestamp is absent when the selected currency has no cached price`() {
+        context.getSharedPreferences("BitcoinPricePrefs", Context.MODE_PRIVATE).edit()
+            .putLong("lastUpdateTime_GBP", 1_700_000_000_000L)
+            .apply()
+        currencyManager.setPreferredCurrency("GBP")
+
+        assertNull(worker.getPriceUpdatedAt())
     }
 
     @Test

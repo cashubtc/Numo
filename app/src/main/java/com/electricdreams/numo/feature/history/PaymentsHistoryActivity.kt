@@ -19,6 +19,7 @@ import com.electricdreams.numo.ui.util.DialogHelper
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
+import com.electricdreams.numo.feature.offline.OfflineExplainerActivity
 import com.electricdreams.numo.R
 import androidx.appcompat.widget.PopupMenu
 import com.electricdreams.numo.core.cashu.CashuWalletManager
@@ -224,15 +225,18 @@ class PaymentsHistoryActivity : AppCompatActivity() {
                             Toast.makeText(this, getString(R.string.pos_error_pending_payment_different_unit), Toast.LENGTH_SHORT).show()
                             return
                         }
-                        if (!com.electricdreams.numo.core.util.NetworkUtils.isNetworkAvailable(this)) {
-                            Toast.makeText(this, getString(R.string.pos_error_no_network_pending_payment), Toast.LENGTH_SHORT).show()
-                            return
-                        }
+                        val offline = !com.electricdreams.numo.core.util.NetworkUtils.isNetworkAvailable(this)
+                        // A stored Lightning invoice can be shown and paid offline; Numo confirms
+                        // it on reconnect. Anything that needs a new invoice or the mint can't.
+                        val canResumeOffline = entry.lightningQuoteId != null &&
+                            entry.lightningInvoice != null && entry.lightningMintUrl != null
                         when {
-                            entry.getSwapLightningQuoteId() != null -> checkAndFinalizeSwap(entry)
+                            entry.getSwapLightningQuoteId() != null ->
+                                if (offline) OfflineExplainerActivity.start(this) else checkAndFinalizeSwap(entry)
                             // BTCPay pending entries have no lightning/nostr resume data —
                             // resuming would create a new invoice, so just show details.
                             entry.lightningQuoteId == null && entry.nostrNprofile == null -> showTransactionDetails(entry, position)
+                            offline && !canResumeOffline -> OfflineExplainerActivity.start(this)
                             else -> resumePendingPayment(entry)
                         }
                     }

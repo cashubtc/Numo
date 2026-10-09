@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Payment screen's offline marker: the strip's dark layer, condensed to a pill -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/color_offline_strip" />
+    <corners android:radius="@dimen/radius_button_pill" />
+</shape>

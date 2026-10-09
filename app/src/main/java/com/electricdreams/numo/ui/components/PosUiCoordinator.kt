@@ -25,6 +25,7 @@ import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.feature.items.ItemSelectionActivity
+import com.electricdreams.numo.feature.offline.OfflineExplainerActivity
 import com.electricdreams.numo.feature.settings.SettingsActivity
 import com.electricdreams.numo.payment.PaymentMethodHandler
 import com.electricdreams.numo.payment.PaymentResultHandler
@@ -84,7 +85,8 @@ class PosUiCoordinator(
                     val canCharge = isReady && isNetworkAvailable
                     // Make sure we only enable it if we don't have a spinner shown
                     if (submitButtonSpinner.visibility != android.view.View.VISIBLE) {
-                        submitButton.isEnabled = canCharge
+                        // Offline stays tappable (but dimmed) so a tap can explain why
+                        submitButton.isEnabled = isReady
                         submitButton.alpha = if (canCharge) 1.0f else 0.5f
                         
                         // Rely on AmountDisplayManager to set correct text/state based on amount and wallet readiness
@@ -164,7 +166,8 @@ class PosUiCoordinator(
             amountDisplayManager.updateDisplay(satoshiInput, fiatInput, AmountDisplayManager.AnimationType.NONE)
 
             Handler(Looper.getMainLooper()).postDelayed({
-                if (submitButton.isEnabled) {
+                // Offline the button stays enabled (a tap explains why), so check the network too
+                if (submitButton.isEnabled && NetworkUtils.isNetworkAvailable(activity)) {
                     Log.d("PosUiCoordinator", "Auto-initiating payment flow for basket checkout with amount: $paymentAmount")
                     showChargeButtonSpinner()
                     val formattedAmount = amountDisplay.text.toString()
@@ -351,11 +354,7 @@ class PosUiCoordinator(
         // Submit button
         submitButton.setOnClickListener {
             if (!NetworkUtils.isNetworkAvailable(activity)) {
-                android.widget.Toast.makeText(
-                    activity,
-                    activity.getString(R.string.pos_error_no_network_charge),
-                    android.widget.Toast.LENGTH_SHORT
-                ).show()
+                OfflineExplainerActivity.start(activity)
                 return@setOnClickListener
             }
             // Do not allow charging if no mints are configured
@@ -403,7 +402,7 @@ class PosUiCoordinator(
         val isReady = CashuWalletManager.walletState.value == com.electricdreams.numo.core.cashu.WalletState.READY
         val isNetworkAvailable = NetworkUtils.isNetworkAvailable(activity)
         val canCharge = isReady && isNetworkAvailable
-        submitButton.isEnabled = canCharge
+        submitButton.isEnabled = isReady
         submitButton.alpha = if (canCharge) 1.0f else 0.5f
     }
 }

@@ -747,4 +747,36 @@ Estos términos pueden actualizarse. El uso continuado implica la aceptación.
     <string name="settings_fiat_conversion_disabled_custom_unit">La conversión de moneda fiduciaria está deshabilitada cuando se usa una unidad base personalizada.</string>
     <string name="mints_base_currency_unit_title">Unidad de moneda base</string>
     <string name="mints_base_currency_unit_subtitle">Si la casa de la moneda admite otras unidades, puedes cambiarla aquí.</string>
+
+    <!-- Offline mode -->
+    <string name="offline_strip_title">Sin conexión</string>
+    <string name="offline_strip_subtitle">Los cobros nuevos necesitan internet</string>
+    <string name="offline_strip_back_online_title">Conexión restablecida</string>
+    <string name="offline_strip_back_online_subtitle">Ya puedes cobrar de nuevo</string>
+    <string name="offline_strip_action_details">Ver qué funciona sin conexión</string>
+    <string name="offline_explainer_title">Estás sin conexión.</string>
+    <string name="offline_explainer_subtitle">No puedes iniciar cobros nuevos sin conexión. Revisa el Wi-Fi o los datos móviles.</string>
+    <string name="offline_explainer_back_online_title">Vuelves a tener conexión.</string>
+    <string name="offline_explainer_back_online_subtitle">Todo vuelve a estar disponible.</string>
+    <string name="offline_explainer_close_content_description">Cerrar</string>
+    <string name="offline_feature_catalog">Catálogo y cestas</string>
+    <string name="offline_feature_history">Actividad y ventas</string>
+    <string name="offline_feature_exchange_rate">Tipo de cambio</string>
+    <string name="offline_feature_withdrawals">Retiros</string>
+    <string name="offline_feature_auto_withdraw">Retiros automáticos</string>
+    <string name="offline_status_available">Disponible</string>
+    <string name="offline_status_unavailable">No disponible</string>
+    <string name="offline_status_paused">En pausa</string>
+    <string name="payment_request_instruction_scan">Escanea para pagar</string>
+    <string name="payment_request_offline_note">Si el cliente paga, Numo lo confirmará cuando vuelvas a tener conexión.</string>
+    <string name="offline_strip_pane_title">%1$s. %2$s</string>
+    <string name="offline_explainer_group_needs_internet">Necesita internet</string>
+    <string name="offline_explainer_group_works_offline">Funciona sin conexión</string>
+    <string name="offline_feature_new_charges">Cobros nuevos</string>
+    <string name="offline_feature_payment_on_screen">Este cobro</string>
+    <string name="offline_status_confirms_later">Se confirmará cuando vuelvas a tener conexión</string>
+    <string name="offline_status_using_rate">Cotización de %1$s</string>
+    <string name="offline_status_updating">Actualizando…</string>
+    <string name="offline_row_content_description">%1$s, %2$s</string>
+    <string name="offline_row_content_description_outdated">%1$s, desactualizado. %2$s</string>
 </resources>

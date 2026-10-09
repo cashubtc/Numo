@@ -122,6 +122,12 @@
                 android:value="com.electricdreams.numo.ModernPOSActivity" />
         </activity>
 
+        <activity android:name="com.electricdreams.numo.feature.offline.OfflineExplainerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Numo.Settings"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden" />
+
         <activity android:name="com.electricdreams.numo.feature.history.PaymentsHistoryActivity"
             android:exported="false"
             android:label="@string/history_toolbar_title"

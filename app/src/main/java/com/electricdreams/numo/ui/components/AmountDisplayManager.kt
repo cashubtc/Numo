@@ -210,7 +210,8 @@ class AmountDisplayManager(
                 val limitCheck = MintLimitChecker.checkMintLimits(satsValue, currentMintLimits, preferredUnit)
                 if (limitCheck.isValid) {
                     submitButton.text = context.getString(R.string.pos_charge_button)
-                    submitButton.isEnabled = isNetworkAvailable
+                    // Offline stays tappable (but dimmed) so a tap can explain why
+                    submitButton.isEnabled = true
                     submitButton.alpha = if (isNetworkAvailable) 1.0f else 0.5f
                 } else {
                     val buttonText = when (limitCheck.limitType) {

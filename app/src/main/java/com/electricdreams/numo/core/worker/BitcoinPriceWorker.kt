@@ -32,7 +32,7 @@ class BitcoinPriceWorker private constructor(context: Context) {
         private const val TAG = "BitcoinPriceWorker"
         private const val PREFS_NAME = "BitcoinPricePrefs"
         private const val KEY_PRICE_PREFIX = "btcPrice_"
-        private const val KEY_LAST_UPDATE_TIME = "lastUpdateTime"
+        private const val KEY_LAST_UPDATE_TIME_PREFIX = "lastUpdateTime_"
         private const val UPDATE_INTERVAL_MINUTES = 1L // Update every minute
 
         @Volatile
@@ -82,8 +82,7 @@ class BitcoinPriceWorker private constructor(context: Context) {
             fetchPrice()
         } else {
             // Check how old the cached price is
-            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val lastUpdateTime = prefs.getLong(KEY_LAST_UPDATE_TIME, 0L)
+            val lastUpdateTime = getPriceUpdatedAt() ?: 0L
             val currentTime = System.currentTimeMillis()
             val elapsedMinutes = TimeUnit.MILLISECONDS.toMinutes(currentTime - lastUpdateTime)
 
@@ -252,12 +251,21 @@ class BitcoinPriceWorker private constructor(context: Context) {
         }.start()
     }
 
+    /** When the current currency's cached price was fetched, or null if its age is unknown. */
+    fun getPriceUpdatedAt(): Long? {
+        if (getCurrentPrice() <= 0.0) return null
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val currency = currencyManager.getCurrentCurrency()
+        // The legacy global timestamp cannot be attributed to a currency safely.
+        return prefs.getLong(KEY_LAST_UPDATE_TIME_PREFIX + currency, 0L).takeIf { it > 0L }
+    }
+
     /** Cache the Bitcoin price for a specific currency in SharedPreferences. */
     private fun cachePrice(currency: String, price: Double) {
         val editor: SharedPreferences.Editor =
             context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
         editor.putFloat(KEY_PRICE_PREFIX + currency, price.toFloat())
-        editor.putLong(KEY_LAST_UPDATE_TIME, System.currentTimeMillis())
+        editor.putLong(KEY_LAST_UPDATE_TIME_PREFIX + currency, System.currentTimeMillis())
         editor.apply()
     }
 
