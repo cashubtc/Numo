@@ -914,6 +914,17 @@ class PaymentRequestActivity : AppCompatActivity() {
             onArkoorUnavailable(getString(R.string.payment_request_arkoor_requires_mint))
             return
         }
+        // Display the saved destination while the session refreshes its status online.
+        // Restoring a request does not establish that the checkout has been paid.
+        val savedAddress = intent.getStringExtra(EXTRA_ARKOOR_ADDRESS)
+        if (resumeArkoorQuoteId != null && resumeArkoorMintUrl != null &&
+            savedAddress != null &&
+            (savedAddress.startsWith("ark1") || savedAddress.startsWith("tark1"))) {
+            arkoorAddress = savedAddress
+            arkoorMintUrl = mintUrl
+            arkoorLoading = false
+            updateUnifiedQrCode()
+        }
         arkoorJob = lifecycleScope.launch {
             try {
                 withContext(Dispatchers.IO) {
@@ -2387,6 +2398,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         const val EXTRA_LIGHTNING_QUOTE_ID = "lightning_quote_id"
         const val EXTRA_LIGHTNING_MINT_URL = "lightning_mint_url"
         const val EXTRA_LIGHTNING_INVOICE = "lightning_invoice"
+        const val EXTRA_ARKOOR_ADDRESS = "arkoor_address"
         const val EXTRA_ARKOOR_QUOTE_ID = "arkoor_quote_id"
         const val EXTRA_ARKOOR_MINT_URL = "arkoor_mint_url"
         const val EXTRA_NOSTR_SECRET_HEX = "nostr_secret_hex"

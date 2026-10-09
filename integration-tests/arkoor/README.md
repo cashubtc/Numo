@@ -22,7 +22,9 @@ the checkout value in decimal BTC, with exact integer conversion (330 sats is
 The unified payload waits for both quote attempts to finish. If one fails, the
 remaining methods stay usable and the failed method's error is shown. History
 stores each method's quote ID, destination, and mint separately. Reopening a
-checkout reuses those records. Older Arkoor-only entries migrate their legacy
+checkout reuses those records, displaying the saved Arkoor destination even while
+offline; quote monitoring retries until the mint is reachable and verifies payment
+before completing checkout. Older Arkoor-only entries migrate their legacy
 Lightning fields into the Arkoor fields. Expired quotes remain available for
 checking late payments.
 

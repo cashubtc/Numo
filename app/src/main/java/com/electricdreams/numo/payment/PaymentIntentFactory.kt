@@ -35,6 +35,9 @@ object PaymentIntentFactory {
             entry.lightningInvoice?.let {
                 putExtra(PaymentRequestActivity.EXTRA_LIGHTNING_INVOICE, it)
             }
+            entry.arkoorAddress?.let {
+                putExtra(PaymentRequestActivity.EXTRA_ARKOOR_ADDRESS, it)
+            }
             entry.arkoorQuoteId?.let {
                 putExtra(PaymentRequestActivity.EXTRA_ARKOOR_QUOTE_ID, it)
             }

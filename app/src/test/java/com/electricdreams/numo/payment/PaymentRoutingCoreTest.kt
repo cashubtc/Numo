@@ -47,6 +47,45 @@ class PaymentRoutingCoreTest {
     }
 
     @Test
+    fun `resume intent preserves the saved arkoor address and quote`() {
+        val context: Context = ApplicationProvider.getApplicationContext()
+        val entry = PaymentHistoryEntry.createPending(
+            amount = 1_000L, entryUnit = "sat", enteredAmount = 1_000L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = "1,000 sat",
+        ).copy(
+            arkoorAddress = "ark1saved", arkoorQuoteId = "arkoor-quote",
+            arkoorMintUrl = "https://mint.test",
+            lightningInvoice = "lnbc1saved", lightningQuoteId = "lightning-quote",
+        )
+
+        val intent = PaymentIntentFactory.createResumePaymentIntent(context, entry)
+
+        assertEquals("ark1saved", intent.getStringExtra(PaymentRequestActivity.EXTRA_ARKOOR_ADDRESS))
+        assertEquals("arkoor-quote", intent.getStringExtra(PaymentRequestActivity.EXTRA_ARKOOR_QUOTE_ID))
+        assertEquals("https://mint.test", intent.getStringExtra(PaymentRequestActivity.EXTRA_ARKOOR_MINT_URL))
+        assertEquals("lnbc1saved", intent.getStringExtra(PaymentRequestActivity.EXTRA_LIGHTNING_INVOICE))
+    }
+
+    @Test
+    fun `resume intent preserves the address from a legacy arkoor checkout`() {
+        val context: Context = ApplicationProvider.getApplicationContext()
+        val entry = PaymentHistoryEntry.createPending(
+            amount = 1_000L, entryUnit = "sat", enteredAmount = 1_000L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = "1,000 sat",
+        ).copy(
+            paymentType = PaymentHistoryEntry.TYPE_ARKOOR,
+            lightningInvoice = "tark1saved", lightningQuoteId = "arkoor-quote",
+            lightningMintUrl = "https://mint.test",
+        )
+
+        val intent = PaymentIntentFactory.createResumePaymentIntent(context, entry)
+
+        assertEquals("tark1saved", intent.getStringExtra(PaymentRequestActivity.EXTRA_ARKOOR_ADDRESS))
+        assertEquals("arkoor-quote", intent.getStringExtra(PaymentRequestActivity.EXTRA_ARKOOR_QUOTE_ID))
+        assertEquals(null, intent.getStringExtra(PaymentRequestActivity.EXTRA_LIGHTNING_INVOICE))
+    }
+
+    @Test
     fun `determinePaymentRoute returns tip selection when tips enabled`() {
         val decision = PaymentRoutingCore.determinePaymentRoute(tipsEnabled = true)
 

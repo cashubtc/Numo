@@ -25,8 +25,8 @@ class ArkoorMintSession(
         require(amountSats > 0) { "Arkoor amount must be positive" }
         val expected = amountSats.toULong()
         val initial = if (existingQuoteId != null) {
-            // Load the locally stored quote, preserving its NUT-20 signing key.
-            // Never create a replacement quote when resuming a checkout.
+            // Refresh the saved quote online, preserving its NUT-20 signing key.
+            // The caller can display its saved request while this check retries.
             checkSavedQuote(existingQuoteId, onRetry)
         } else {
             val settings = wallet.fetchMintInfo()?.nuts?.nut04

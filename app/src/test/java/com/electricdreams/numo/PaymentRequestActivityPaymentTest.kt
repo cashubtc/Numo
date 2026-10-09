@@ -3,9 +3,11 @@ package com.electricdreams.numo
 import android.content.Intent
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
+import com.electricdreams.numo.core.network.ConnectivityMonitor
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.ndef.NdefHostCardEmulationService
@@ -15,6 +17,7 @@ import com.electricdreams.numo.payment.NostrPaymentHandler
 import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.payment.PaymentTabManager
 import com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
+import java.io.IOException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,6 +35,9 @@ import org.cashudevkit.Wallet
 import org.cashudevkit.WalletRepository
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -152,6 +158,76 @@ class PaymentRequestActivityPaymentTest {
         } finally {
             ReflectionHelpers.getField<Job?>(activity, "arkoorJob")?.cancelAndJoin()
             ReflectionHelpers.setStaticField(CashuWalletManager::class.java, "wallet", previousWallet)
+            Dispatchers.resetMain()
+        }
+    }
+
+    @Test
+    fun `offline resume renders saved payment methods before arkoor status is available`(): Unit = runBlocking {
+        val entry = PaymentHistoryEntry.createPending(
+            amount = 1_000L, entryUnit = "sat", enteredAmount = 1_000L,
+            bitcoinPrice = null, paymentRequest = "creqAsaved", formattedAmount = "1,000 sat",
+        ).copy(
+            arkoorAddress = "ark1saved", arkoorQuoteId = "saved-quote",
+            arkoorMintUrl = "https://arkoor.test", lightningInvoice = "lnbc1saved",
+        )
+        activity.intent = PaymentIntentFactory.createResumePaymentIntent(activity, entry)
+        ReflectionHelpers.setField(activity, "resumeArkoorQuoteId", activity.intent.getStringExtra(
+            PaymentRequestActivity.EXTRA_ARKOOR_QUOTE_ID,
+        ))
+        ReflectionHelpers.setField(activity, "resumeArkoorMintUrl", activity.intent.getStringExtra(
+            PaymentRequestActivity.EXTRA_ARKOOR_MINT_URL,
+        ))
+        ReflectionHelpers.setField(activity, "lightningInvoice", activity.intent.getStringExtra(
+            PaymentRequestActivity.EXTRA_LIGHTNING_INVOICE,
+        ))
+        ReflectionHelpers.setField(activity, "hcePaymentRequest", entry.paymentRequest)
+        val tabs = mock<PaymentTabManager>()
+        whenever(tabs.getCurrentTab()).thenReturn(PaymentTabManager.PaymentTab.UNIFIED)
+        ReflectionHelpers.setField(activity, "tabManager", tabs)
+        ReflectionHelpers.setField(activity, "isDualQuoteCheckout", true)
+        ReflectionHelpers.setField(activity, "arkoorLoading", true)
+        ReflectionHelpers.setField(activity, "lightningStarted", true)
+        val qr = ImageView(activity).apply { visibility = View.GONE }
+        val spinner = View(activity)
+        ReflectionHelpers.setField(activity, "unifiedQrImageView", qr)
+        ReflectionHelpers.setField(activity, "unifiedLoadingSpinner", spinner)
+
+        val manager = mock<MintManager>()
+        ReflectionHelpers.setStaticField(MintManager::class.java, "instance", manager)
+        val monitor = mock<ConnectivityMonitor>()
+        whenever(monitor.isOnlineNow()).thenReturn(false)
+        ReflectionHelpers.setStaticField(ConnectivityMonitor::class.java, "instance", monitor)
+        val repository = mock<WalletRepository>()
+        val wallet = mock<Wallet>()
+        whenever(repository.getWallet(MintUrl(checkNotNull(entry.arkoorMintUrl)), CurrencyUnit.Sat)).thenReturn(wallet)
+        val checked = CompletableDeferred<Unit>()
+        whenever(wallet.checkMintQuote("saved-quote")).doSuspendableAnswer {
+            checked.complete(Unit)
+            throw IOException("Offline")
+        }
+        val previousWallet = CashuWalletManager.getWallet()
+        ReflectionHelpers.setStaticField(CashuWalletManager::class.java, "wallet", repository)
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+        try {
+            ReflectionHelpers.callInstanceMethod<Void>(activity, "startArkoorPaymentFlow")
+            withTimeout(5_000) { checked.await() }
+            val request = ReflectionHelpers.callInstanceMethod<String?>(activity, "unifiedPaymentRequest")
+                ?: throw AssertionError("Saved payment methods must be available while offline")
+            assertTrue(request.contains("ARK=ARK1SAVED"))
+            assertTrue(request.contains("LIGHTNING=LNBC1SAVED"))
+            assertTrue(request.contains("CREQ=creqAsaved"))
+            assertEquals(View.VISIBLE, qr.visibility)
+            assertNotNull(qr.drawable)
+            assertEquals(View.GONE, spinner.visibility)
+            assertFalse(ReflectionHelpers.getField(activity, "hasTerminalOutcome"))
+            assertTrue(ReflectionHelpers.getField<Job>(activity, "arkoorJob").isActive)
+            verify(wallet, never()).mintQuote(any(), anyOrNull(), anyOrNull(), anyOrNull())
+            verify(wallet, never()).mint(any(), any(), anyOrNull())
+        } finally {
+            ReflectionHelpers.getField<Job?>(activity, "arkoorJob")?.cancelAndJoin()
+            ReflectionHelpers.setStaticField(CashuWalletManager::class.java, "wallet", previousWallet)
+            ReflectionHelpers.setStaticField(ConnectivityMonitor::class.java, "instance", null)
             Dispatchers.resetMain()
         }
     }
