@@ -4,32 +4,21 @@ import android.content.Context
 import android.util.Log
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
-import com.google.gson.Gson
-import com.google.gson.JsonObject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import okhttp3.WebSocket
-import okhttp3.WebSocketListener
 import org.cashudevkit.Amount as CdkAmount
-import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.MintQuote
 import org.cashudevkit.MintUrl
 import org.cashudevkit.PaymentMethod
 import org.cashudevkit.QuoteState
-import java.util.UUID
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 /**
  * Handles Lightning payment flow via mint quote and WebSocket subscription (NUT-17).
@@ -50,7 +39,9 @@ class LightningMintHandler(
     private val allowedMints: List<String>,
     private val uiScope: CoroutineScope,
     // Allows injecting a mock dispatcher for testing
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val quoteSockets: MintQuoteWebSocket = MintQuoteWebSocket(uiScope),
+    private val paymentUnit: String? = null,
 ) {
     // Secondary constructor to maintain compatibility
     constructor(
@@ -77,16 +68,10 @@ class LightningMintHandler(
     private var currentMintUrl: String? = null
     private var mintJob: Job? = null
     
-    /** Atomic flag to ensure mint is only called once (WebSocket vs polling race) */
+    /** Only one source may issue proofs at a time. */
     private val mintCalled = AtomicBoolean(false)
+    private val mintCompleted = AtomicBoolean(false)
 
-    // Shared OkHttp client for mint WebSocket connections
-    private val wsClient: OkHttpClient by lazy {
-        OkHttpClient.Builder()
-            .readTimeout(0, TimeUnit.MILLISECONDS) // no timeout, rely on WS pings
-            .build()
-    }
-    
     /** The current mint quote, if any */
     val currentQuote: MintQuote? get() = mintQuote
 
@@ -144,6 +129,7 @@ class LightningMintHandler(
 
         // Reset the mint-called flag for this new payment
         mintCalled.set(false)
+        mintCompleted.set(false)
 
         mintJob?.cancel()
         mintJob = uiScope.launch(ioDispatcher) {
@@ -152,20 +138,21 @@ class LightningMintHandler(
                 val quoteAmount = CdkAmount(paymentAmount.toULong())
 
                 Log.d(TAG, "Requesting Lightning mint quote from ${mintUrl.url} for $paymentAmount sats")
-                val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
-        val unit = com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unitStr)
-        val mintWallet = wallet.getWallet(mintUrl, unit)
+                val unitStr = paymentUnit
+                    ?: com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
+                val unit = CashuWalletManager.getCurrencyUnit(unitStr)
+                val mintWallet = wallet.getWallet(mintUrl, unit)
 
                 val nut04 = mintWallet.loadMintInfo().nuts.nut04
                 val supportsDescription = nut04?.methods?.any {
-                    it.method == org.cashudevkit.PaymentMethod.Bolt11 && it.description == true
+                    it.method == PaymentMethod.Bolt11 && it.description == true
                 } == true
                 val description = if (supportsDescription) {
                     context.getString(R.string.payment_request_lightning_description, paymentAmount)
                 } else {
                     null
                 }
-                val quote = mintWallet?.mintQuote(org.cashudevkit.PaymentMethod.Bolt11, quoteAmount, description, null)
+                val quote = mintWallet?.mintQuote(PaymentMethod.Bolt11, quoteAmount, description, null)
                     ?: throw Exception("Failed to get wallet for mint: ${mintUrl.url}")
                 mintQuote = quote
 
@@ -177,35 +164,10 @@ class LightningMintHandler(
                     callback.onInvoiceReady(bolt11, quote.id, mintUrlStr)
                 }
 
-                // Start both WebSocket subscription and polling in parallel
-                // Whichever detects payment first will call tryMintOnce (atomic, only one wins)
-                val wsJob = launch {
-                    try {
-                        Log.d(TAG, "Starting WebSocket subscription for quote ${quote.id}")
-                        awaitMintQuotePaid(mintUrl, quote.id)
-                        // WebSocket detected quote is paid, attempt to mint (only first caller wins)
-                        tryMintOnce(mintUrl, quote.id, callback, "WebSocket")
-                    } catch (ce: CancellationException) {
-                        Log.d(TAG, "WebSocket subscription cancelled for quote ${quote.id}")
-                    } catch (e: Exception) {
-                        Log.e(TAG, "WebSocket error for quote ${quote.id}: ${e.message}", e)
-                    }
-                }
+                monitorQuote(mintUrl, quote.id, callback)
 
-                val pollJob = launch {
-                    try {
-                        pollForQuotePaid(mintUrl, quote.id, callback)
-                    } catch (ce: CancellationException) {
-                        Log.d(TAG, "Polling cancelled for quote ${quote.id}")
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Polling error for quote ${quote.id}: ${e.message}", e)
-                    }
-                }
-
-                // Wait for both to complete (one will finish first and mint, the other will detect mintCalled)
-                wsJob.join()
-                pollJob.join()
-
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (e: Exception) {
                 Log.e(TAG, "Error in Lightning mint flow: ${e.message}", e)
                 launch(Dispatchers.Main) {
@@ -244,9 +206,10 @@ class LightningMintHandler(
 
         // Reset the mint-called flag for this resumed payment
         mintCalled.set(false)
+        mintCompleted.set(false)
 
         mintJob?.cancel()
-        mintJob = uiScope.launch(Dispatchers.IO) {
+        mintJob = uiScope.launch(ioDispatcher) {
             try {
                 Log.d(TAG, "Resuming Lightning mint quote monitoring for id=$quoteId")
 
@@ -255,35 +218,10 @@ class LightningMintHandler(
                     callback.onInvoiceReady(invoice, quoteId, mintUrlStr)
                 }
 
-                // Start both WebSocket subscription and polling in parallel
-                // Whichever detects payment first will call tryMintOnce (atomic, only one wins)
-                val wsJob = launch {
-                    try {
-                        Log.d(TAG, "Starting WebSocket subscription for resumed quote $quoteId")
-                        awaitMintQuotePaid(mintUrl, quoteId)
-                        // WebSocket detected quote is paid, attempt to mint (only first caller wins)
-                        tryMintOnce(mintUrl, quoteId, callback, "WebSocket (resume)")
-                    } catch (ce: CancellationException) {
-                        Log.d(TAG, "WebSocket subscription cancelled for resumed quote $quoteId")
-                    } catch (e: Exception) {
-                        Log.e(TAG, "WebSocket error for resumed quote $quoteId: ${e.message}", e)
-                    }
-                }
+                monitorQuote(mintUrl, quoteId, callback)
 
-                val pollJob = launch {
-                    try {
-                        pollForQuotePaid(mintUrl, quoteId, callback)
-                    } catch (ce: CancellationException) {
-                        Log.d(TAG, "Polling cancelled for resumed quote $quoteId")
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Polling error for resumed quote $quoteId: ${e.message}", e)
-                    }
-                }
-
-                // Wait for both to complete (one will finish first and mint, the other will detect mintCalled)
-                wsJob.join()
-                pollJob.join()
-
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (e: Exception) {
                 Log.e(TAG, "Error in resumed Lightning mint flow: ${e.message}", e)
                 launch(Dispatchers.Main) {
@@ -300,176 +238,51 @@ class LightningMintHandler(
         mintJob?.cancel()
         mintJob = null
         mintCalled.set(false)
+        mintCompleted.set(false)
     }
 
-    /**
-     * Build the mint's WebSocket URL as `<scheme>/v1/ws` based on the MintUrl.
-     *
-     * If the mint URL is `https://mint.com` this returns `wss://mint.com/v1/ws`.
-     * If it includes a path (e.g. `https://mint.com/Bitcoin`) we append `/v1/ws`
-     * after that path: `wss://mint.com/Bitcoin/v1/ws`.
-     */
-    private fun buildMintWsUrl(mintUrl: MintUrl): String {
-        val base = mintUrl.url.removeSuffix("/")
-        val wsBase = when {
-            base.startsWith("https://", ignoreCase = true) ->
-                "wss://" + base.removePrefix("https://")
-            base.startsWith("http://", ignoreCase = true) ->
-                "ws://" + base.removePrefix("http://")
-            base.startsWith("wss://", ignoreCase = true) ||
-                base.startsWith("ws://", ignoreCase = true) -> base
-            else -> "wss://$base"
-        }
-        return "$wsBase/v1/ws"
-    }
-
-    /**
-     * Suspend until the given Lightning mint quote is reported as paid via the
-     * mint's WebSocket (NUT-17) subscription.
-     *
-     * We subscribe with kind = "bolt11_mint_quote" and a single filter: the quote id.
-     * On `state == "PAID"` (or `"ISSUED"` if we attached late), we resume.
-     *
-     * Cancellation of the coroutine will unsubscribe and close the WebSocket,
-     * which is how we shut this down when another payment path wins or the user
-     * cancels the checkout.
-     */
-    private suspend fun awaitMintQuotePaid(
+    /** Both quote types share the injected connection; polling covers unavailable push updates. */
+    private suspend fun monitorQuote(
         mintUrl: MintUrl,
-        quoteId: String
-    ) = suspendCancellableCoroutine<Unit> { cont ->
-        val wsUrl = buildMintWsUrl(mintUrl)
-        Log.d(TAG, "Connecting to mint WebSocket at $wsUrl for quoteId=$quoteId")
-
-        val request = Request.Builder().url(wsUrl).build()
-        val gson = Gson()
-        val subId = UUID.randomUUID().toString()
-        var nextRequestId = 0
-        var webSocket: WebSocket? = null
-
-        fun sendUnsubscribe(ws: WebSocket) {
-            val params = mapOf("subId" to subId)
-            val msg = mapOf(
-                "jsonrpc" to "2.0",
-                "id" to ++nextRequestId,
-                "method" to "unsubscribe",
-                "params" to params
-            )
-            val json = gson.toJson(msg)
-            Log.d(TAG, "Sending unsubscribe for subId=$subId: $json")
-            ws.send(json)
-        }
-
-        val listener = object : WebSocketListener() {
-            override fun onOpen(ws: WebSocket, response: Response) {
-                Log.d(TAG, "Mint WebSocket open: $wsUrl")
-                webSocket = ws
-                val params = mapOf(
-                    "kind" to "bolt11_mint_quote",
-                    "subId" to subId,
-                    "filters" to listOf(quoteId),
-                )
-                val msg = mapOf(
-                    "jsonrpc" to "2.0",
-                    "id" to nextRequestId,
-                    "method" to "subscribe",
-                    "params" to params,
-                )
-                val json = gson.toJson(msg)
-                Log.d(TAG, "Sending subscribe for subId=$subId, quoteId=$quoteId: $json")
-                ws.send(json)
-            }
-
-            override fun onMessage(ws: WebSocket, text: String) {
-                Log.v(TAG, "Mint WS message: $text")
-                try {
-                    val root = gson.fromJson(text, JsonObject::class.java) ?: return
-
-                    if (root.has("error")) {
-                        val errorObj = root.getAsJsonObject("error")
-                        val code = errorObj["code"]?.asInt
-                        val message = errorObj["message"]?.asString
-                        val ex = Exception("Mint WS error code=$code message=$message")
-                        if (!cont.isCompleted) {
-                            cont.resumeWithException(ex)
-                        }
-                        ws.close(1000, "error")
-                        return
-                    }
-
-                    if (root.has("result")) {
-                        // subscribe/unsubscribe ACK; nothing to do here for now
-                        return
-                    }
-
-                    val method = root.get("method")?.asString ?: return
-                    if (method != "subscribe") return
-
-                    val params = root.getAsJsonObject("params") ?: return
-                    val payload = params.getAsJsonObject("payload") ?: return
-                    val state = payload.get("state")?.asString ?: return
-
-                    Log.d(TAG, "Mint quote update for quoteId=$quoteId state=$state")
-
-                    if (state.equals("PAID", ignoreCase = true) ||
-                        state.equals("ISSUED", ignoreCase = true)
-                    ) {
-                        if (!cont.isCompleted) {
-                            cont.resume(Unit)
-                        }
-                        try {
-                            sendUnsubscribe(ws)
-                        } catch (_: Throwable) {
-                        }
-                        ws.close(1000, "quote paid")
-                    }
-                } catch (t: Throwable) {
-                    Log.e(TAG, "Error parsing mint WS message: ${t.message}", t)
-                    if (!cont.isCompleted) {
-                        cont.resumeWithException(t)
-                    }
-                    ws.close(1000, "parse error")
-                }
-            }
-
-            override fun onFailure(ws: WebSocket, t: Throwable, response: Response?) {
-                Log.e(TAG, "Mint WS failure: ${t.message}", t)
-                if (!cont.isCompleted) {
-                    cont.resumeWithException(t)
-                }
-            }
-
-            override fun onClosed(ws: WebSocket, code: Int, reason: String) {
-                Log.d(TAG, "Mint WS closed: code=$code reason=$reason")
-                if (!cont.isCompleted && !cont.isCancelled) {
-                    cont.resumeWithException(
-                        CancellationException("Mint WS closed before quote paid: $code $reason")
-                    )
-                }
-            }
-        }
-
-        val ws = wsClient.newWebSocket(request, listener)
-        webSocket = ws
-
-        cont.invokeOnCancellation {
-            Log.d(TAG, "Coroutine cancelled while waiting for mint quote; closing WS")
+        quoteId: String,
+        callback: Callback,
+    ) = coroutineScope {
+        val wsJob = launch {
             try {
-                webSocket?.let { socket ->
-                    try {
-                        sendUnsubscribe(socket)
-                    } catch (_: Throwable) {
-                    }
-                    socket.close(1000, "cancelled")
-                }
-            } catch (_: Throwable) {
+                awaitMintQuotePaid(mintUrl, quoteId)
+                tryMintOnce(mintUrl, quoteId, callback, "WebSocket")
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (error: Exception) {
+                Log.w(TAG, "Lightning WebSocket monitoring failed", error)
             }
+        }
+        try {
+            pollForQuotePaid(mintUrl, quoteId, callback)
+        } finally {
+            // A polling win must release only this subscription, leaving Arkoor active.
+            wsJob.cancelAndJoin()
+        }
+    }
+
+    private suspend fun awaitMintQuotePaid(mintUrl: MintUrl, quoteId: String) {
+        val subscription = quoteSockets.subscribe(mintUrl.url, "bolt11_mint_quote", quoteId)
+        try {
+            while (true) {
+                val payload = subscription.awaitUpdate(POLL_INTERVAL_MS) ?: continue
+                val state = payload.get("state")?.asString ?: continue
+                if (state.equals("PAID", ignoreCase = true) ||
+                    state.equals("ISSUED", ignoreCase = true)
+                ) return
+            }
+        } finally {
+            subscription.close()
         }
     }
 
     /**
-     * Attempt to mint proofs for the given quote. Uses atomic flag to ensure
-     * this is only called once even if both WebSocket and polling detect payment.
+     * Issue proofs once per successful payment, allowing retries after failed issuance.
+     * The atomic flag prevents WebSocket and polling from issuing concurrently.
      *
      * @param mintUrl The mint URL
      * @param quoteId The quote ID to mint
@@ -489,33 +302,39 @@ class LightningMintHandler(
             return false
         }
 
-        val wallet = CashuWalletManager.getWallet()
-        if (wallet == null) {
-            Log.e(TAG, "Wallet not available for minting")
-            uiScope.launch(Dispatchers.Main) {
-                callback.onError("Wallet not ready")
-            }
-            return false
-        }
-
-        Log.d(TAG, "Mint quote $quoteId is paid (detected by $source), calling wallet.mint")
-        val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
-        val unit = com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unitStr)
-        val mintWallet = wallet.getWallet(mintUrl, unit)
-        val proofs = mintWallet?.mint(quoteId, org.cashudevkit.SplitTarget.None, null)
-            ?: run {
-                Log.e(TAG, "Failed to get wallet for mint: ${mintUrl.url}")
+        try {
+            val wallet = CashuWalletManager.getWallet()
+            if (wallet == null) {
+                Log.e(TAG, "Wallet not available for minting")
                 uiScope.launch(Dispatchers.Main) {
                     callback.onError("Wallet not ready")
                 }
                 return false
             }
-        Log.d(TAG, "Lightning mint completed with ${proofs.size} proofs ($source)")
 
-        uiScope.launch(Dispatchers.Main) {
-            callback.onPaymentSuccess()
+            Log.d(TAG, "Mint quote $quoteId is paid (detected by $source), calling wallet.mint")
+            val unitStr = paymentUnit
+                ?: com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
+            val unit = com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unitStr)
+            val mintWallet = wallet.getWallet(mintUrl, unit)
+            val proofs = mintWallet?.mint(quoteId, org.cashudevkit.SplitTarget.None, null)
+                ?: run {
+                    Log.e(TAG, "Failed to get wallet for mint: ${mintUrl.url}")
+                    uiScope.launch(Dispatchers.Main) {
+                        callback.onError("Wallet not ready")
+                    }
+                    return false
+                }
+            Log.d(TAG, "Lightning mint completed with ${proofs.size} proofs ($source)")
+
+            mintCompleted.set(true)
+            uiScope.launch(Dispatchers.Main) {
+                callback.onPaymentSuccess()
+            }
+            return true
+        } finally {
+            if (!mintCompleted.get()) mintCalled.set(false)
         }
-        return true
     }
 
     /**
@@ -535,31 +354,29 @@ class LightningMintHandler(
         
         Log.d(TAG, "Starting polling for mint quote $quoteId (interval: ${POLL_INTERVAL_MS}ms)")
         
-        while (!mintCalled.get()) {
+        while (!mintCompleted.get()) {
             try {
                 delay(POLL_INTERVAL_MS)
                 
-                // Check if mint was already called by WebSocket while we were waiting
-                if (mintCalled.get()) {
-                    Log.d(TAG, "Mint already called during poll delay, stopping poller")
-                    break
-                }
+                if (mintCompleted.get()) break
+                // Do not stop monitoring (and cancel the socket task) during issuance.
+                if (mintCalled.get()) continue
                 
                 Log.v(TAG, "Polling mint quote state for $quoteId")
                 
                 // Check quote state using checkMintQuote API
-                val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
-        val unit = com.electricdreams.numo.core.cashu.CashuWalletManager.getCurrencyUnit(unitStr)
-        val mintWallet = wallet.getWallet(mintUrl, unit)
+                val unitStr = paymentUnit
+                    ?: com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
+                val unit = CashuWalletManager.getCurrencyUnit(unitStr)
+                val mintWallet = wallet.getWallet(mintUrl, unit)
                     ?: throw Exception("Failed to get wallet for mint: ${mintUrl.url}")
                 
-                val quote = mintWallet.checkMintQuote( quoteId)
+                val quote = mintWallet.checkMintQuote(quoteId)
                 
                 when (quote.state) {
                     QuoteState.PAID, QuoteState.ISSUED -> {
                         Log.d(TAG, "Quote $quoteId is ${quote.state} (detected via polling)")
-                        tryMintOnce(mintUrl, quoteId, callback, "polling")
-                        break
+                        if (tryMintOnce(mintUrl, quoteId, callback, "polling")) break
                     }
                     QuoteState.UNPAID -> {
                         Log.v(TAG, "Quote $quoteId still UNPAID, continuing poll")

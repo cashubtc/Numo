@@ -114,6 +114,7 @@ object ActivityCsvExportHelper {
                 // Payment Method
                 val method = when (entry) {
                     is PaymentHistoryEntry -> when (entry.paymentType) {
+                        PaymentHistoryEntry.TYPE_ARKOOR -> "Arkoor"
                         PaymentHistoryEntry.TYPE_LIGHTNING -> "Lightning"
                         PaymentHistoryEntry.TYPE_CASHU -> "Cashu"
                         else -> "Cashu"
@@ -192,9 +193,8 @@ object ActivityCsvExportHelper {
 
                 // Invoice/Cashu Request (full, non-truncated)
                 val invoiceOrToken = when (entry) {
-                    is PaymentHistoryEntry -> entry.lightningInvoice
-                        ?: entry.token.ifEmpty { null }
-                        ?: ""
+                    is PaymentHistoryEntry -> entry.getPaymentReference()
+                        ?: entry.token.ifEmpty { null } ?: ""
                     is WithdrawHistoryEntry -> entry.token ?: ""
                     else -> ""
                 }

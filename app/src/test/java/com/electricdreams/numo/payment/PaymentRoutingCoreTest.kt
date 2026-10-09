@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.electricdreams.numo.PaymentRequestActivity
+import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -14,6 +15,75 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class PaymentRoutingCoreTest {
+
+    @Test
+    fun `resume intent preserves sats base unit when amount was entered in fiat`() {
+        val context: Context = ApplicationProvider.getApplicationContext()
+        val entry = PaymentHistoryEntry.createPending(
+            amount = 1_000L, entryUnit = "usd", enteredAmount = 100L,
+            bitcoinPrice = 100_000.0, paymentRequest = null, formattedAmount = "$1.00",
+            ecashUnit = "sat",
+        )
+
+        val intent = PaymentIntentFactory.createResumePaymentIntent(context, entry)
+
+        assertEquals("sat", intent.getStringExtra(PaymentRequestActivity.EXTRA_PAYMENT_UNIT))
+        assertEquals(1_000L, intent.getLongExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, -1))
+    }
+
+    @Test
+    fun `resume intent preserves non-satoshi base unit`() {
+        val context: Context = ApplicationProvider.getApplicationContext()
+        val entry = PaymentHistoryEntry.createPending(
+            amount = 100L, entryUnit = "usd", enteredAmount = 100L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = "$1.00",
+            ecashUnit = "usd",
+        )
+
+        val intent = PaymentIntentFactory.createResumePaymentIntent(context, entry)
+
+        assertEquals("usd", intent.getStringExtra(PaymentRequestActivity.EXTRA_PAYMENT_UNIT))
+        assertEquals(100L, intent.getLongExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, -1))
+    }
+
+    @Test
+    fun `resume intent preserves the saved arkoor address and quote`() {
+        val context: Context = ApplicationProvider.getApplicationContext()
+        val entry = PaymentHistoryEntry.createPending(
+            amount = 1_000L, entryUnit = "sat", enteredAmount = 1_000L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = "1,000 sat",
+        ).copy(
+            arkoorAddress = "ark1saved", arkoorQuoteId = "arkoor-quote",
+            arkoorMintUrl = "https://mint.test",
+            lightningInvoice = "lnbc1saved", lightningQuoteId = "lightning-quote",
+        )
+
+        val intent = PaymentIntentFactory.createResumePaymentIntent(context, entry)
+
+        assertEquals("ark1saved", intent.getStringExtra(PaymentRequestActivity.EXTRA_ARKOOR_ADDRESS))
+        assertEquals("arkoor-quote", intent.getStringExtra(PaymentRequestActivity.EXTRA_ARKOOR_QUOTE_ID))
+        assertEquals("https://mint.test", intent.getStringExtra(PaymentRequestActivity.EXTRA_ARKOOR_MINT_URL))
+        assertEquals("lnbc1saved", intent.getStringExtra(PaymentRequestActivity.EXTRA_LIGHTNING_INVOICE))
+    }
+
+    @Test
+    fun `resume intent preserves the address from a legacy arkoor checkout`() {
+        val context: Context = ApplicationProvider.getApplicationContext()
+        val entry = PaymentHistoryEntry.createPending(
+            amount = 1_000L, entryUnit = "sat", enteredAmount = 1_000L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = "1,000 sat",
+        ).copy(
+            paymentType = PaymentHistoryEntry.TYPE_ARKOOR,
+            lightningInvoice = "tark1saved", lightningQuoteId = "arkoor-quote",
+            lightningMintUrl = "https://mint.test",
+        )
+
+        val intent = PaymentIntentFactory.createResumePaymentIntent(context, entry)
+
+        assertEquals("tark1saved", intent.getStringExtra(PaymentRequestActivity.EXTRA_ARKOOR_ADDRESS))
+        assertEquals("arkoor-quote", intent.getStringExtra(PaymentRequestActivity.EXTRA_ARKOOR_QUOTE_ID))
+        assertEquals(null, intent.getStringExtra(PaymentRequestActivity.EXTRA_LIGHTNING_INVOICE))
+    }
 
     @Test
     fun `determinePaymentRoute returns tip selection when tips enabled`() {

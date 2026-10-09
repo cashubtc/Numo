@@ -1020,4 +1020,9 @@
     <string name="offline_status_updating">업데이트 중…</string>
     <string name="offline_row_content_description">%1$s, %2$s</string>
     <string name="offline_row_content_description_outdated">%1$s, 오래된 정보. %2$s</string>
+    <string name="payment_request_arkoor_address">Ark 주소</string>
+    <string name="payment_request_arkoor_waiting">표시된 금액을 이 Ark 주소로 보내세요</string>
+    <string name="payment_request_arkoor_retrying">민트에 다시 연결 중…</string>
+    <string name="payment_request_arkoor_failed">Arkoor 결제 실패: %1$s</string>
+    <string name="payment_request_arkoor_requires_mint">Arkoor 민트를 선택하고 기본 단위로 sats를 사용하세요.</string>
 </resources>

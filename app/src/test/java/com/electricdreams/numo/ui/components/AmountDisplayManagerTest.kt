@@ -105,6 +105,20 @@ class AmountDisplayManagerTest {
     }
 
     @Test
+    fun `checkout amount is independent of animated text view value`() {
+        manager = AmountDisplayManager(
+            mockContext, amountDisplay, secondaryAmountDisplay,
+            switchCurrencyButton, submitButton, bitcoinPriceWorker,
+        )
+        org.mockito.Mockito.`when`(amountDisplay.text).thenReturn("3 sat")
+        manager.updateDisplay(
+            StringBuilder("330"), StringBuilder(), AmountDisplayManager.AnimationType.NONE,
+        )
+        org.junit.Assert.assertEquals("330 sat", manager.formattedAmount)
+        org.junit.Assert.assertEquals(330L, manager.requestedAmount)
+    }
+
+    @Test
     fun `test JPY input shows whole units`() {
         // Initialize manager
         manager = AmountDisplayManager(

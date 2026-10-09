@@ -70,9 +70,10 @@ object CashuPaymentHelper {
         amount: Long,
         description: String?,
         allowedMints: List<String>?,
+        paymentUnit: String? = null,
     ): GeneratedPaymentRequest? {
         return try {
-            val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(com.electricdreams.numo.core.cashu.CashuWalletManager.appContext).getPreferredUnit()
+            val unitStr = paymentUnit ?: MintManager.getInstance(CashuWalletManager.appContext).getPreferredUnit()
             val descUnit = if (unitStr == "sat") "sats" else unitStr
             val map = com.upokecenter.cbor.CBORObject.NewMap()
             map.Add("i", java.util.UUID.randomUUID().toString().substring(0, 8))
@@ -114,9 +115,10 @@ object CashuPaymentHelper {
         description: String?,
         allowedMints: List<String>?,
         nprofile: String,
+        paymentUnit: String? = null,
     ): GeneratedPaymentRequest? {
         return try {
-            val unitStr = com.electricdreams.numo.core.util.MintManager.getInstance(com.electricdreams.numo.core.cashu.CashuWalletManager.appContext).getPreferredUnit()
+            val unitStr = paymentUnit ?: MintManager.getInstance(CashuWalletManager.appContext).getPreferredUnit()
             val descUnit = if (unitStr == "sat") "sats" else unitStr
             val map = com.upokecenter.cbor.CBORObject.NewMap()
             map.Add("i", java.util.UUID.randomUUID().toString().substring(0, 8))
@@ -350,6 +352,7 @@ object CashuPaymentHelper {
         tokenString: String?,
         expectedAmount: Long,
         allowedMints: List<String>?,
+        paymentUnit: String? = null,
     ): TokenValidationResult {
         if (!isCashuToken(tokenString)) {
             Log.e(TAG, "Invalid token format (not a Cashu token)")
@@ -361,7 +364,8 @@ object CashuPaymentHelper {
                 tokenString ?: error("tokenString is null"),
             )
 
-            val expectedUnitStr = com.electricdreams.numo.core.util.MintManager.getInstance(CashuWalletManager.appContext).getPreferredUnit()
+            val expectedUnitStr = paymentUnit
+                ?: MintManager.getInstance(CashuWalletManager.appContext).getPreferredUnit()
             val expectedUnit = CashuWalletManager.getCurrencyUnit(expectedUnitStr)
             if (token.unit() != expectedUnit) {
                 Log.e(TAG, "Unsupported token unit: ${token.unit()}, expected: $expectedUnit")
@@ -470,12 +474,9 @@ object CashuPaymentHelper {
     }
 
     @Throws(RedemptionException::class)
-    private suspend fun redeemProofs(proofs: List<org.cashudevkit.Proof>, mintUrl: String, unit: String) {
-        val expectedUnitStr = com.electricdreams.numo.core.util.MintManager.getInstance(CashuWalletManager.appContext).getPreferredUnit()
-        if (unit != "sat" && !unit.equals(expectedUnitStr, ignoreCase = true)) {
-            throw RedemptionException("Unsupported token unit: $unit, expected: $expectedUnitStr")
-        }
-
+    private suspend fun redeemProofs(
+        proofs: List<org.cashudevkit.Proof>, mintUrl: String, expectedUnitStr: String,
+    ) {
         val wallet = CashuWalletManager.getWallet()
             ?: throw RedemptionException("CDK wallet not initialized")
 
@@ -510,8 +511,8 @@ object CashuPaymentHelper {
         allowedMints: List<String>?,
         paymentContext: SwapToLightningMintManager.PaymentContext
     ): String {
-        val expectedUnitStr = com.electricdreams.numo.core.util.MintManager.getInstance(appContext).getPreferredUnit()
-        if (unit != "sat" && !unit.equals(expectedUnitStr, ignoreCase = true)) {
+        val expectedUnitStr = paymentContext.unit ?: MintManager.getInstance(appContext).getPreferredUnit()
+        if (!unit.equals(expectedUnitStr, ignoreCase = true)) {
             throw RedemptionException("Unsupported token unit: $unit, expected: $expectedUnitStr")
         }
 
@@ -528,7 +529,7 @@ object CashuPaymentHelper {
             Log.d(TAG, "Token mint validated as allowed: $mintUrl")
             // Standard Cashu redemption path
             try {
-                redeemProofs(proofs, mintUrl, unit)
+                redeemProofs(proofs, mintUrl, expectedUnitStr)
                 return "SUCCESS_KNOWN" // Special marker to indicate known mint success
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to redeem proofs for known mint", e)
@@ -593,7 +594,8 @@ object CashuPaymentHelper {
         allowedMints: List<String>?,
         paymentContext: SwapToLightningMintManager.PaymentContext
     ): String {
-        val result = validateTokenDetailed(tokenString, expectedAmount, allowedMints)
+        val expectedUnitStr = paymentContext.unit ?: MintManager.getInstance(appContext).getPreferredUnit()
+        val result = validateTokenDetailed(tokenString, expectedAmount, allowedMints, expectedUnitStr)
 
         return when (result) {
             is TokenValidationResult.InvalidFormat -> {
@@ -618,16 +620,15 @@ object CashuPaymentHelper {
                         else -> "sat"
                     }
                 }
-                val expectedUnitStr = com.electricdreams.numo.core.util.MintManager.getInstance(appContext).getPreferredUnit()
-                if (unit != "sat" && !unit.equals(expectedUnitStr, ignoreCase = true)) {
+                if (!unit.equals(expectedUnitStr, ignoreCase = true)) {
                     throw RedemptionException("Unsupported token unit: $unit, expected: $expectedUnitStr")
                 }
 
                 val wallet = CashuWalletManager.getWallet()
                     ?: throw RedemptionException("CDK wallet not initialized")
 
-            val expectedUnit = CashuWalletManager.getCurrencyUnit(expectedUnitStr)
-            val mintWallet = wallet.getWallet(cdkToken.mintUrl(), cdkToken.unit() ?: expectedUnit)
+                val expectedUnit = CashuWalletManager.getCurrencyUnit(expectedUnitStr)
+                val mintWallet = wallet.getWallet(cdkToken.mintUrl(), cdkToken.unit() ?: expectedUnit)
                     ?: throw RedemptionException("Failed to get wallet for mint: ${cdkToken.mintUrl().url}")
 
                 val receiveOptions = org.cashudevkit.ReceiveOptions(
@@ -657,7 +658,7 @@ object CashuPaymentHelper {
                 Log.i(TAG, "Token from unknown mint detected - fetching keysets and extracting proofs")
 
                 // We instantiate a temp wallet for the unknown mint
-                val tempWallet = CashuWalletManager.getTemporaryWalletForMint(unknownMintUrl)
+                val tempWallet = CashuWalletManager.getTemporaryWalletForMint(unknownMintUrl, expectedUnitStr)
                 
                 // Fetch keysets so CDK can map short Keyset IDs to full IDs
                 val keysets = try {
@@ -777,8 +778,8 @@ object CashuPaymentHelper {
                 }
             }
             
-            val expectedUnitStr = com.electricdreams.numo.core.util.MintManager.getInstance(appContext).getPreferredUnit()
-            if (unit != "sat" && !unit.equals(expectedUnitStr, ignoreCase = true)) {
+            val expectedUnitStr = paymentContext.unit ?: MintManager.getInstance(appContext).getPreferredUnit()
+            if (!unit.equals(expectedUnitStr, ignoreCase = true)) {
                  throw RedemptionException("Unsupported unit in PaymentRequestPayload: $unit, expected: $expectedUnitStr")
             }
             

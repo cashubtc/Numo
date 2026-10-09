@@ -1,6 +1,7 @@
 package com.electricdreams.numo.feature.history
 
 import android.content.Context
+import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.CheckoutBasket
 import com.electricdreams.numo.core.model.CheckoutBasketItem
 import org.junit.Assert.*
@@ -32,6 +33,53 @@ class ActivityCsvExportHelperTest {
         val mintPrefs = context.getSharedPreferences("MintPreferences", Context.MODE_PRIVATE)
         mintPrefs.edit().clear().apply()
         com.electricdreams.numo.core.util.MintManager.getInstance(context).setPreferredUnit("sat")
+    }
+
+    @Test
+    fun `Arkoor completion exports its address while retaining the unused Lightning quote`() {
+        val id = PaymentsHistoryActivity.addPendingPayment(
+            context, 330, "sat", 330, null, null, "330 sat",
+        )
+        PaymentsHistoryActivity.updatePendingWithLightningInfo(
+            context, id, "lnbc1unused", "ln-quote", "https://mint.example",
+        )
+        PaymentsHistoryActivity.updatePendingWithArkoorInfo(
+            context, id, "ark1paid", "ark-quote", "https://mint.example",
+        )
+        PaymentsHistoryActivity.completePendingPayment(
+            context, id, "", PaymentHistoryEntry.TYPE_ARKOOR, "https://mint.example",
+        )
+        val stream = ByteArrayOutputStream()
+        assertTrue(ActivityCsvExportHelper.exportActivityToCsv(context, stream))
+        val lines = stream.toString("UTF-8").trim().lines()
+        val headers = splitCsvLine(lines[0])
+        val row = splitCsvLine(lines[1])
+        assertEquals("Arkoor", row[headers.indexOf("Payment Method")])
+        assertEquals("ark1paid", row[headers.indexOf("Invoice/Cashu Request")])
+    }
+
+    @Test
+    fun `Cashu completion exports its request while retaining both unused mint quotes`() {
+        val id = PaymentsHistoryActivity.addPendingPayment(
+            context, 330, "sat", 330, null, null, "330 sat",
+        )
+        PaymentsHistoryActivity.updatePendingWithLightningInfo(
+            context, id, "lnbc1unused", "ln-quote", "https://mint.example",
+        )
+        PaymentsHistoryActivity.updatePendingWithArkoorInfo(
+            context, id, "ark1paid", "ark-quote", "https://mint.example",
+        )
+        PaymentsHistoryActivity.completePendingPayment(
+            context, id, "cashuAtoken", PaymentHistoryEntry.TYPE_CASHU, "https://mint.example",
+            paymentRequest = "CREQB1PAID",
+        )
+        val stream = ByteArrayOutputStream()
+        assertTrue(ActivityCsvExportHelper.exportActivityToCsv(context, stream))
+        val lines = stream.toString("UTF-8").trim().lines()
+        val headers = splitCsvLine(lines[0])
+        val row = splitCsvLine(lines[1])
+        assertEquals("Cashu", row[headers.indexOf("Payment Method")])
+        assertEquals("CREQB1PAID", row[headers.indexOf("Invoice/Cashu Request")])
     }
 
     @Test
