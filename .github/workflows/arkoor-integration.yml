@@ -65,7 +65,7 @@ jobs:
         run: python3 integration-tests/arkoor/smoke.py
 
       - name: Run Android unit tests and real shared WebSocket test
-        run: ./gradlew testDebugUnitTest assembleDebug --no-daemon --console=plain
+        run: ./gradlew testDebugUnitTest --rerun assembleDebug --no-daemon --console=plain
 
       - name: Collect service logs
         if: always()

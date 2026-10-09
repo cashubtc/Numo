@@ -847,7 +847,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         lightningHandler = LightningMintHandler(
             this, preferredMint, allowedMints, lifecycleScope, quoteSockets = sockets,
         )
-        largeAmountDisplay.text = Amount(paymentAmount, Currency.BTC).toString()
+        largeAmountDisplay.text = if (activeUnit == "sat") {
+            Amount(paymentAmount, Currency.BTC).toString()
+        } else {
+            formattedAmountString
+        }
         convertedAmountDisplay.visibility = View.GONE
         tabManager.selectTab(PaymentTabManager.PaymentTab.UNIFIED)
         startLightningMintFlow()

@@ -118,13 +118,15 @@ callbacks.
 
 The integration tests are skipped during ordinary unit test runs. CI enables
 them with `NUMO_ARKOOR_MINT_URL` and `NUMO_ARKOOR_PAY_SCRIPT`; the shell wrapper
-sets both for the local Docker environment. Run the complete suite locally:
+sets both for the local Docker environment. Run the complete suite locally with
+`--rerun` to execute the tests even when Gradle has cached an ordinary run where
+integration tests were skipped:
 
 ```bash
 python3 -m unittest discover -s integration-tests/arkoor -p 'test_*.py' -v
 NUMO_ARKOOR_MINT_URL=http://127.0.0.1:3339 \
 NUMO_ARKOOR_PAY_SCRIPT="$PWD/integration-tests/arkoor/pay.py" \
-./gradlew testDebugUnitTest assembleDebug
+./gradlew testDebugUnitTest --rerun assembleDebug
 ```
 
 ## Install and connect Android
