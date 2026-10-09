@@ -40,6 +40,8 @@ class OfflineExplainerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityOfflineExplainerBinding
     private val rowViews = mutableListOf<Pair<Row, ItemOfflineCapabilityBinding>>()
+    // Keep this history when observation restarts after returning from network settings.
+    private var sawOffline = false
     private var celebrating = false
     private var autoCloseJob: Job? = null
 
@@ -58,7 +60,6 @@ class OfflineExplainerActivity : AppCompatActivity() {
     private fun observeConnectivity() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                var sawOffline = false
                 ConnectivityMonitor.getInstance(this@OfflineExplainerActivity).isOnline
                     .collect { online ->
                         when {

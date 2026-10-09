@@ -39,8 +39,16 @@ internal class OfflineStripHost(private val activity: Activity, onTap: () -> Uni
     /** Mode currently on screen, or null when the strip is hidden. */
     private var shownMode: OfflineStripView.Mode? = null
 
+    private val stripLayoutListener = View.OnLayoutChangeListener {
+        _, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
+        if (right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop) {
+            remeasure()
+        }
+    }
+
     fun attach() {
         strip.visibility = View.GONE
+        strip.addOnLayoutChangeListener(stripLayoutListener)
         decor.addView(
             strip,
             FrameLayout.LayoutParams(
@@ -60,6 +68,7 @@ internal class OfflineStripHost(private val activity: Activity, onTap: () -> Uni
 
     fun detach() {
         animator?.cancel()
+        strip.removeOnLayoutChangeListener(stripLayoutListener)
         insetsTarget?.let { ViewCompat.setOnApplyWindowInsetsListener(it, null) }
         decor.removeView(strip)
     }
@@ -128,10 +137,12 @@ internal class OfflineStripHost(private val activity: Activity, onTap: () -> Uni
         }
     }
 
-    /** Offline and Back-online text can wrap to different line counts; keep the gap honest. */
+    /** Text and window changes can alter wrapping, including during reveal/hide animations. */
     private fun remeasure() {
-        if (shownMode == null || animator?.isRunning == true) return
-        val width = decor.width.takeIf { it > 0 } ?: activity.resources.displayMetrics.widthPixels
+        if (strip.visibility != View.VISIBLE) return
+        val width = strip.width.takeIf { it > 0 }
+            ?: decor.width.takeIf { it > 0 }
+            ?: activity.resources.displayMetrics.widthPixels
         strip.measureContentHeight(width)
         applyReveal(strip.reveal)
     }

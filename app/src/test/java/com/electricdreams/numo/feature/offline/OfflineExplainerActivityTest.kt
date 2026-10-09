@@ -25,6 +25,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -105,6 +106,44 @@ class OfflineExplainerActivityTest {
                 finishAnimations()
                 assertOnline(activity, binding)
                 assertFalse(activity.isFinishing)
+            }
+    }
+
+    @Test
+    fun `TalkBack explainer celebrates reconnect after returning from network settings`() {
+        Robolectric.buildActivity(OfflineExplainerActivity::class.java)
+            .setup().visible().use { controller ->
+                val activity = controller.get()
+                assertOffline(activity, binding(activity))
+
+                controller.pause().stop()
+                online.value = true
+                controller.start().resume()
+                finishAnimations()
+
+                assertOnline(activity, binding(activity))
+                dispatcher.scheduler.advanceTimeBy(2_000L)
+                dispatcher.scheduler.runCurrent()
+                assertFalse(activity.isFinishing)
+
+                controller.pause().stop().start().resume()
+                assertFalse(activity.isFinishing)
+                online.value = false
+                finishAnimations()
+                assertOffline(activity, binding(activity))
+                online.value = true
+                finishAnimations()
+                assertOnline(activity, binding(activity))
+                assertFalse(activity.isFinishing)
+            }
+    }
+
+    @Test
+    fun `explainer opened while already online still closes with TalkBack enabled`() {
+        online.value = true
+        Robolectric.buildActivity(OfflineExplainerActivity::class.java)
+            .setup().use { controller ->
+                assertTrue(controller.get().isFinishing)
             }
     }
 
