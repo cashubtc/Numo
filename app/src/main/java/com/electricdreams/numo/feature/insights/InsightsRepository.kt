@@ -42,8 +42,13 @@ object InsightsRepository {
             val value = if (isSatsMode) {
                 valueAtSale(entry, currentCurrencyCode, currentBtcPrice)
             } else {
-                // A mint's own unit: amounts are already in its minor units, with no sats behind them
-                SaleValue(entry.enteredAmount, entry.enteredAmount, entry.tipAmountSats, entry.tipAmountSats)
+                // enteredAmount uses internal minor units; zero-decimal token tips use whole units.
+                val tipMinor = if (fiatCurrency.isZeroDecimal()) {
+                    entry.tipAmountSats * 100
+                } else {
+                    entry.tipAmountSats
+                }
+                SaleValue(entry.enteredAmount, entry.enteredAmount, entry.tipAmountSats, tipMinor)
             }
             val idx = buckets.indexOfBucket(entry.date.time)
             perBucketTxCount[idx] += 1
@@ -86,9 +91,9 @@ object InsightsRepository {
     }
 
     /**
-     * A sats sale, in [fiatCode], as of when it was paid: what was charged before tip, and the
-     * tip on its own. Past sales keep their value; today's bitcoin price is only the fallback
-     * when the sale didn't record one it can use.
+     * A sats sale's charge before tip and its separate tip, expressed in [fiatCode]. Sales
+     * keyed in that fiat keep their entered value. Other sales use today's rate unless a
+     * recorded rate's currency is known to match.
      */
     internal fun valueAtSale(
         entry: PaymentHistoryEntry,
@@ -99,10 +104,10 @@ object InsightsRepository {
         val tipSats = entry.tipAmountSats
         val entryUnit = entry.getEntryUnit()
         val keyedInThisFiat = entry.enteredAmount > 0 && entryUnit.equals(fiatCode, ignoreCase = true)
-        // A sale keyed in sats recorded the price in the display currency of the day; one keyed
-        // in another fiat recorded that currency's price, which can't value it in this one
+        // Sats entries don't retain the price's currency. Only a matching fiat entry establishes
+        // that the recorded rate can value this sale in fiatCode.
         val priceAtSale = entry.bitcoinPrice?.takeIf {
-            it > 0 && (keyedInThisFiat || entryUnit.equals("sat", ignoreCase = true))
+            it > 0 && entryUnit.equals(fiatCode, ignoreCase = true)
         }
         val price = priceAtSale ?: currentBtcPrice
         return SaleValue(

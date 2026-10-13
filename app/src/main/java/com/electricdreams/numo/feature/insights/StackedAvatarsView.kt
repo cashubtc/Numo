@@ -1,11 +1,10 @@
 package com.electricdreams.numo.feature.insights
 
 import android.content.Context
-import android.graphics.BitmapFactory
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
-import android.media.ThumbnailUtils
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
@@ -16,6 +15,12 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import com.electricdreams.numo.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 
 /**
  * An item's picture, or for a basket a small stack of up to three: the first item in front,
@@ -25,11 +30,19 @@ import com.electricdreams.numo.R
  * whether it holds one item or many. The cards behind draw into the row's top padding, so
  * the row must not clip its children.
  */
-class StackedAvatarsView @JvmOverloads constructor(
+class StackedAvatarsView internal constructor(
     context: Context,
-    attrs: AttributeSet? = null,
-    defStyle: Int = 0,
+    attrs: AttributeSet?,
+    defStyle: Int,
+    private val loadThumbnail: suspend (String, Int) -> Bitmap?,
 ) : FrameLayout(context, attrs, defStyle) {
+
+    @JvmOverloads
+    constructor(
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyle: Int = 0,
+    ) : this(context, attrs, defStyle, ItemThumbnailLoader::load)
 
     private val avatarSize = dp(40f).toInt()
 
@@ -46,6 +59,8 @@ class StackedAvatarsView @JvmOverloads constructor(
 
     private val cornerRadius = resources.getDimension(R.dimen.radius_s)
     private val pageColor = ContextCompat.getColor(context, R.color.color_bg_white)
+    private var imageScope: CoroutineScope? = null
+    private var avatars: List<Pair<ImageView, String?>> = emptyList()
 
     init {
         clipChildren = false
@@ -53,10 +68,12 @@ class StackedAvatarsView @JvmOverloads constructor(
     }
 
     fun setItems(items: List<BasketItemSummary>) {
+        imageScope?.cancel()
+        imageScope = null
         removeAllViews()
         val visible = items.take(maxAvatars)
         // Back to front, so the first item is added last and drawn on top
-        for (depth in visible.indices.reversed()) {
+        avatars = visible.indices.reversed().map { depth ->
             val item = visible[depth]
             val view = ImageView(context).apply {
                 background = ContextCompat.getDrawable(context, R.drawable.bg_avatar_placeholder)
@@ -76,9 +93,22 @@ class StackedAvatarsView @JvmOverloads constructor(
                 foreground = cardForeground(depth)
             }
             addView(view, LayoutParams(avatarSize, avatarSize))
-            loadAvatarBitmap(view, item.itemImagePath)
+            applyPlaceholder(view)
+            view to item.itemImagePath
         }
+        loadAvatars()
         requestLayout()
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        if (imageScope == null) loadAvatars()
+    }
+
+    override fun onDetachedFromWindow() {
+        imageScope?.cancel()
+        imageScope = null
+        super.onDetachedFromWindow()
     }
 
     /**
@@ -98,31 +128,33 @@ class StackedAvatarsView @JvmOverloads constructor(
         return LayerDrawable(arrayOf(scrim, ring))
     }
 
-    private fun loadAvatarBitmap(view: ImageView, path: String?) {
-        if (path.isNullOrBlank()) {
-            applyPlaceholder(view)
-            return
-        }
-        try {
-            val bmp = BitmapFactory.decodeFile(path)
-            if (bmp != null) {
-                // Cropped to the thumbnail's exact size (and so its memory), and rounded here as
-                // well as by the outline clip, which software drawing ignores
-                val thumb = ThumbnailUtils.extractThumbnail(bmp, avatarSize, avatarSize)
-                thumb.density = resources.displayMetrics.densityDpi
-                view.setImageDrawable(
-                    RoundedBitmapDrawableFactory.create(resources, thumb).apply {
-                        // The ring's outer edge rounds at radius + half its stroke; match it so
-                        // no sliver of photo shows past the ring at the corners
-                        cornerRadius = this@StackedAvatarsView.cornerRadius + dp(1f)
-                    },
-                )
-            } else {
-                applyPlaceholder(view)
+    private fun loadAvatars() {
+        if (avatars.none { !it.second.isNullOrBlank() }) return
+        val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+        imageScope = scope
+        for ((view, path) in avatars) {
+            if (path.isNullOrBlank()) continue
+            scope.launch {
+                val thumbnail = loadThumbnail(path, avatarSize)
+                if (thumbnail != null) applyThumbnail(view, thumbnail)
             }
-        } catch (e: Exception) {
-            applyPlaceholder(view)
         }
+    }
+
+    internal suspend fun awaitThumbnails() {
+        imageScope?.coroutineContext?.get(Job)?.children?.toList()?.forEach { it.join() }
+    }
+
+    private fun applyThumbnail(view: ImageView, thumbnail: Bitmap) {
+        thumbnail.density = resources.displayMetrics.densityDpi
+        view.clearColorFilter()
+        view.scaleType = ImageView.ScaleType.CENTER_CROP
+        view.setImageDrawable(
+            RoundedBitmapDrawableFactory.create(resources, thumbnail).apply {
+                // Match the ring's outer rounded edge when drawing in software too.
+                cornerRadius = this@StackedAvatarsView.cornerRadius + dp(1f)
+            },
+        )
     }
 
     private fun applyPlaceholder(view: ImageView) {

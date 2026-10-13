@@ -13,7 +13,15 @@ import androidx.core.content.ContextCompat
 import androidx.test.core.app.ApplicationProvider
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.Amount
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -27,6 +35,7 @@ import java.util.Date
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34], qualifiers = "w411dp-h891dp-night-xhdpi")
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
+@OptIn(ExperimentalCoroutinesApi::class)
 class InsightsRowRenderTest {
     /** Themed like the Insights screen, so the rows' theme attributes resolve */
     private val context: Context =
@@ -35,8 +44,18 @@ class InsightsRowRenderTest {
     /** Preview PNGs are design-iteration tooling; CI runs the assertions alone. */
     private val previews = System.getProperty("numo.previews").toBoolean()
 
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(StandardTestDispatcher())
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
     @Test
-    fun `thumbnail stacks never push a row's text off the grid`() {
+    fun `thumbnail stacks never push a row's text off the grid`() = runTest {
         for (withPhotos in listOf(true, false)) {
             val list = render(sampleRows(if (withPhotos) photo() else null))
             val titleStarts = (0 until list.childCount).map {
@@ -92,7 +111,7 @@ class InsightsRowRenderTest {
     }
 
     /** Bind the rows through the real adapter and layout, as the Sales list does */
-    private fun render(rows: List<TxRow>): LinearLayout {
+    private suspend fun render(rows: List<TxRow>): LinearLayout {
         val list = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             setBackgroundColor(ContextCompat.getColor(context, R.color.color_bg_white))
@@ -110,6 +129,10 @@ class InsightsRowRenderTest {
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
         )
         list.layout(0, 0, width, list.measuredHeight)
+        for (position in rows.indices) {
+            list.getChildAt(position).findViewById<StackedAvatarsView>(R.id.avatars)
+                .awaitThumbnails()
+        }
         return list
     }
 
