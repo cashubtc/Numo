@@ -11,7 +11,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.electricdreams.numo.arkoor"
+        applicationId = "com.electricdreams.numo"
         val arkMintUrl = providers.gradleProperty("arkMintUrl").getOrElse("http://127.0.0.1:3339")
         val arkMintUri = URI(arkMintUrl)
         require(arkMintUri.scheme in listOf("http", "https") && arkMintUri.host != null)
@@ -20,7 +20,7 @@ android {
         minSdk = 24
         targetSdk = 36
         versionCode = providers.gradleProperty("numoVersionCode").orElse("25").get().toInt()
-        versionName = providers.gradleProperty("numoVersionName").orElse("1.9-arkoor").get()
+        versionName = providers.gradleProperty("numoVersionName").orElse("1.9").get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

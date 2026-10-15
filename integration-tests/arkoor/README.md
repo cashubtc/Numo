@@ -133,9 +133,10 @@ NUMO_ARKOOR_PAY_SCRIPT="$PWD/integration-tests/arkoor/pay.py" \
 
 ## Install and connect Android
 
-The APK uses application ID `com.electricdreams.numo.arkoor`, display name
-**Numo Ark**, and version suffix `-arkoor`. It keeps its own wallet/preferences
-and can coexist with Numo. New-wallet onboarding selects the local mint.
+The APK uses Numo's standard application ID `com.electricdreams.numo`, display
+name **Numo**, and shares its wallet/preferences with other Numo builds. The
+default version name is `1.9`; override it with `-PnumoVersionName` when needed.
+New-wallet onboarding selects the local mint.
 Unknown-mint Lightning swaps are disabled by default. Select **sats** as the
 base unit.
 
@@ -151,7 +152,7 @@ this reverse tunnel. The debug manifest allows cleartext only for loopback and
 the emulator host alias `10.0.2.2`. For a hosted mint, build with
 `-ParkMintUrl=https://your-mint.example`.
 
-Launch Numo Ark, create its wallet, keep **Numo Arkoor regtest** selected, and
+Launch Numo, create its wallet, keep **Numo Arkoor regtest** selected, and
 enter a checkout. The initially selected tab is **Unified**, displaying the
 exact sats amount. Fiat input remains recorded in history. Success means the
 mint confirmed payment and Numo obtained ecash. Closing the screen preserves
