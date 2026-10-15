@@ -4,6 +4,7 @@ import importlib.util
 import io
 import json
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -22,6 +23,75 @@ class UpdateManifestTest(unittest.TestCase):
                                   channel="stable", aapt="aapt", apksigner="apksigner",
                                   output=apk.parent / "update.json", notes_file=None,
                                   check_latest=True)
+
+    @patch.object(manifest.subprocess, "check_output")
+    def test_reads_certificate_from_legacy_and_build_tools_37_signer_labels(self, output):
+        fingerprint = "a1" * 32
+        labels = (
+            "Signer #1",
+            "Signer (minSdkVersion=33, maxSdkVersion=2147483647)",
+            "V1 Signer:",
+            "V2 Signer:",
+            "V3.0 Signer:",
+            "V2 Signer #1:",
+            "V3.1 Signer: (minSdkVersion=33, maxSdkVersion=2147483647)",
+            "V3.1 Signer: (minSdkVersion=33 (dev release=true), maxSdkVersion=2147483647)",
+        )
+        for label in labels:
+            with self.subTest(label=label):
+                output.return_value = (
+                    f"{label} certificate DN: CN=Numo test\n"
+                    f"{label} certificate SHA-256 digest: {fingerprint}\n"
+                    f"{label} public key SHA-256 digest: {'b2' * 32}\n"
+                    f"Source Stamp Signer: certificate SHA-256 digest: {'c3' * 32}\n"
+                )
+                self.assertEqual(fingerprint,
+                                 manifest.apk_signing_certificate(Path("app.apk"), "apksigner"))
+
+    @patch.object(manifest.subprocess, "check_output")
+    def test_same_certificate_reported_for_multiple_schemes_is_one_certificate(self, output):
+        fingerprint = "a1" * 32
+        output.return_value = (
+            f"V3.0 Signer: certificate SHA-256 digest: {fingerprint}\n"
+            f"V3.1 Signer: (minSdkVersion=33, maxSdkVersion=2147483647) "
+            f"certificate SHA-256 digest: {fingerprint.upper()}\n"
+        )
+        self.assertEqual(fingerprint,
+                         manifest.apk_signing_certificate(Path("app.apk"), "apksigner"))
+
+    @patch.object(manifest.subprocess, "check_output")
+    def test_distinct_apk_certificates_are_rejected_in_old_and_new_output(self, output):
+        for labels in (
+                ("Signer #1", "Signer #2"),
+                ("V2 Signer #1:", "V2 Signer #2:"),
+                ("V3.0 Signer:", "V3.1 Signer: (minSdkVersion=33, maxSdkVersion=2147483647)"),
+                ("V3.2 Hybrid Classical Signer: (minSdkVersion=37, maxSdkVersion=2147483647)",
+                 "V3.2 Hybrid PQC Signer: (minSdkVersion=37, maxSdkVersion=2147483647)")):
+            with self.subTest(labels=labels):
+                output.return_value = (
+                    f"{labels[0]} certificate SHA-256 digest: {'a1' * 32}\n"
+                    f"{labels[1]} certificate SHA-256 digest: {'b2' * 32}\n"
+                )
+                with self.assertRaisesRegex(ValueError, "exactly one APK signing certificate"):
+                    manifest.apk_signing_certificate(Path("app.apk"), "apksigner")
+
+    @patch.object(manifest.subprocess, "check_output")
+    def test_missing_apk_certificate_cannot_use_a_public_key_or_source_stamp(self, output):
+        for verification in (
+                "",
+                f"V3.0 Signer: public key SHA-256 digest: {'a1' * 32}\n",
+                f"Source Stamp Signer: certificate SHA-256 digest: {'a1' * 32}\n",
+                f"Signer #1 certificate SHA-256 digest: {'a1' * 31}\n"):
+            with self.subTest(verification=verification):
+                output.return_value = verification
+                with self.assertRaisesRegex(ValueError, "exactly one APK signing certificate"):
+                    manifest.apk_signing_certificate(Path("app.apk"), "apksigner")
+
+    @patch.object(manifest.subprocess, "check_output")
+    def test_apksigner_verification_failure_is_propagated(self, output):
+        output.side_effect = subprocess.CalledProcessError(1, "apksigner")
+        with self.assertRaises(subprocess.CalledProcessError):
+            manifest.apk_signing_certificate(Path("app.apk"), "apksigner")
 
     @patch.object(manifest.subprocess, "check_output")
     def test_reads_version_and_sdk_from_the_apk(self, output):

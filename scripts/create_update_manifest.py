@@ -24,6 +24,26 @@ def apk_metadata(apk, aapt):
                 versionName=package[3], minSdk=int(sdk[1]))
 
 
+def apk_signing_certificate(apk, apksigner):
+    verification = subprocess.check_output(
+        [apksigner, "verify", "--print-certs", str(apk)], text=True)
+    # Build Tools 37 prefixes signer labels with the signature scheme version.
+    signer_label = (
+        r"(?:Signer #\d+|Signer \([^\r\n]+\)|"
+        r"V[123](?:\.\d+)?(?: Hybrid (?:Classical|PQC))? Signer(?: #\d+)?:"
+        r"(?: \([^\r\n]+\))?)"
+    )
+    certificates = {
+        digest.lower() for digest in re.findall(
+            rf"^{signer_label} certificate SHA-256 digest: ([a-fA-F0-9]{{64}})$",
+            verification, re.M)
+    }
+    if len(certificates) != 1:
+        raise ValueError(
+            f"Expected exactly one APK signing certificate (found {len(certificates)})")
+    return next(iter(certificates))
+
+
 def latest_version_code(repository):
     """Compare against the last published stable feed; drafts and prereleases are excluded."""
     request = urllib.request.Request(
@@ -68,11 +88,7 @@ def create_manifest(args):
             raise ValueError(f"versionCode must be greater than the published version ({previous})")
         if previous is None:
             print("Bootstrapping update feed: verify versionCode exceeds all existing releases.")
-    verification = subprocess.check_output(
-        [args.apksigner, "verify", "--print-certs", str(args.apk)], text=True)
-    signers = re.findall(r"Signer #\d+ certificate SHA-256 digest: ([a-fA-F0-9]{64})", verification)
-    if len(signers) != 1:
-        raise ValueError("Expected exactly one APK signing certificate")
+    certificate = apk_signing_certificate(args.apk, args.apksigner)
     size = args.apk.stat().st_size
     if not 0 < size <= 1024 ** 3:
         raise ValueError("APK size is outside updater limits")
@@ -88,7 +104,7 @@ def create_manifest(args):
         payload_path = Path(temporary) / "payload.json"
         payload_path.write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
         subprocess.run(["java", str(Path(__file__).with_name("SignUpdateManifest.java")),
-                        str(payload_path), str(args.output), signers[0]], check=True)
+                        str(payload_path), str(args.output), certificate], check=True)
     print(f"Created signed manifest for versionCode {metadata['versionCode']}")
 
 
