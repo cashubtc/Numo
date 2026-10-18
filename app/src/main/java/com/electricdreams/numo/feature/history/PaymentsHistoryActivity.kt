@@ -31,6 +31,7 @@ import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.databinding.ActivityHistoryBinding
+import com.google.android.material.appbar.AppBarLayout
 import com.electricdreams.numo.ui.components.EmptyStateHelper
 import com.electricdreams.numo.ui.util.TransactionTransitions
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
@@ -533,6 +534,15 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
             adapter.setEntries(filteredList, baskets)
 
             val isEmptyList = filteredList.isEmpty()
+            // An empty list cannot scroll the balance away. Keep its viewport limited to
+            // the visible space below the filter row so its centered state stays on screen.
+            val balanceParams = binding.balanceSection.layoutParams as AppBarLayout.LayoutParams
+            val scrollFlags = if (isEmptyList) 0 else AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
+            if (balanceParams.scrollFlags != scrollFlags) {
+                balanceParams.scrollFlags = scrollFlags
+                binding.balanceSection.layoutParams = balanceParams
+                if (isEmptyList) binding.historyAppBar.setExpanded(true, false)
+            }
             binding.emptyView.root.visibility = if (isEmptyList) View.VISIBLE else View.GONE
             if (isEmptyList) {
                 if (activeFilterCount > 0) {
