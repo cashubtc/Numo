@@ -3,6 +3,7 @@ package com.electricdreams.numo.feature.items
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import com.electricdreams.numo.util.setSoftInputModeResize
 import android.view.LayoutInflater
@@ -522,11 +523,6 @@ class ItemSelectionActivity : AppCompatActivity() {
             ContextCompat.getColor(this, R.color.color_bg_white)
         }
         
-        // Set light/dark icons in navigation bar
-        WindowCompat.getInsetsController(window, window.decorView).apply {
-            isAppearanceLightNavigationBars = !isDarkBackground
-        }
-        
         // Also update status bar
         window.statusBarColor = if (isDarkBackground) {
             ContextCompat.getColor(this, R.color.empty_state_background)
@@ -534,8 +530,12 @@ class ItemSelectionActivity : AppCompatActivity() {
             ContextCompat.getColor(this, R.color.color_bg_white)
         }
         
+        val isDarkTheme = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+            Configuration.UI_MODE_NIGHT_YES
+        val useLightIcons = isDarkBackground || isDarkTheme
         WindowCompat.getInsetsController(window, window.decorView).apply {
-            isAppearanceLightStatusBars = !isDarkBackground
+            isAppearanceLightStatusBars = !useLightIcons
+            isAppearanceLightNavigationBars = !useLightIcons
         }
     }
 
