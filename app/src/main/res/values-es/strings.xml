@@ -130,6 +130,7 @@
     <string name="onboarding_mints_count">Has seleccionado %1$d mint%2$s</string>
     <string name="onboarding_mints_continue_restore">Restaurar cartera</string>
     <string name="onboarding_mints_continue_new_wallet">Continuar</string>
+    <string name="onboarding_mints_none_reachable">No se puede conectar con los mints predeterminados. Comprueba tu conexión y vuelve atrás para reintentarlo, o añade un mint.</string>
     <string name="onboarding_mints_hero_label">MINT PREDETERMINADO</string>
     <string name="onboarding_mints_hero_subtitle">Guarda tu bitcoin</string>
     <string name="onboarding_mints_hero_default_badge">Predeterminado</string>

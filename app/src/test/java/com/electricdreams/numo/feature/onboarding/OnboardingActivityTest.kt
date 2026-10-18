@@ -1,6 +1,7 @@
 package com.electricdreams.numo.feature.onboarding
 
 import android.content.Context
+import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import android.widget.FrameLayout
@@ -9,15 +10,24 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.electricdreams.numo.R
 import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.runBlocking
+import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.junit.Assert.*
+import okhttp3.mockwebserver.RecordedRequest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.util.ReflectionHelpers
+import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34])
@@ -170,6 +180,10 @@ class OnboardingActivityTest {
                     discovered.clear()
                     selected.clear()
                     names.clear()
+                    ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
+                    assertFalse(
+                        activity.findViewById<MaterialButton>(R.id.mints_continue_button).isEnabled
+                    )
 
                     ReflectionHelpers.callInstanceMethod<Unit>(
                         activity,
@@ -179,9 +193,10 @@ class OnboardingActivityTest {
                 }
 
                 val added = waitForCondition(scenario, timeoutMs = 3000L) { activity ->
-                    val discovered =
-                        ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "discoveredMints")
-                    discovered.contains(mintUrl)
+                    val adapter = ReflectionHelpers.getField<OnboardingMintAdapter>(
+                        activity, "mintAdapter"
+                    )
+                    adapter.getDefaultMintUrl() == mintUrl
                 }
                 assertTrue("mint should be added after validation", added)
 
@@ -189,6 +204,9 @@ class OnboardingActivityTest {
                     val selected =
                         ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "selectedMints")
                     assertTrue(selected.contains(mintUrl))
+                    assertTrue(
+                        activity.findViewById<MaterialButton>(R.id.mints_continue_button).isEnabled
+                    )
                 }
             }
         } finally {
@@ -197,6 +215,104 @@ class OnboardingActivityTest {
     }
 
     // ── Mint adapter / review screen tests ──────────────────────────────
+
+    @Test
+    fun `health check keeps only reachable mints in the original order`() {
+        MockWebServer().use { server ->
+            server.dispatcher = object : Dispatcher() {
+                override fun dispatch(request: RecordedRequest): MockResponse {
+                    return if (request.path == "/unhealthy/v1/info") {
+                        MockResponse().setResponseCode(503)
+                    } else {
+                        MockResponse().setBody("{\"name\":\"Test Mint\"}")
+                    }
+                }
+            }
+            server.start()
+            val first = server.url("/first").toString()
+            val unhealthy = server.url("/unhealthy").toString()
+            val second = server.url("/second").toString()
+
+            ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+                scenario.onActivity { activity ->
+                    val healthy = runBlocking {
+                        activity.filterHealthyMints(listOf(first, unhealthy, second))
+                    }
+                    assertEquals(listOf(first, second), healthy)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `health check returns no mints when every endpoint fails`() {
+        MockWebServer().use { server ->
+            server.start()
+            server.enqueue(MockResponse().setResponseCode(503))
+            server.enqueue(MockResponse().setResponseCode(404))
+            val mints = listOf(server.url("/one").toString(), server.url("/two").toString())
+
+            ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+                scenario.onActivity { activity ->
+                    val healthy = runBlocking { activity.filterHealthyMints(mints) }
+                    assertTrue(healthy.isEmpty())
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `health check excludes mints with connection failures`() {
+        val server = MockWebServer()
+        server.start()
+        val mint = server.url("/").toString().removeSuffix("/")
+        server.shutdown()
+
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val healthy = runBlocking { activity.filterHealthyMints(listOf(mint)) }
+                assertTrue(healthy.isEmpty())
+            }
+        }
+    }
+
+    @Test
+    fun `empty review disables continue and keeps the add mint action`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
+
+                val adapter = ReflectionHelpers.getField<OnboardingMintAdapter>(activity, "mintAdapter")
+                assertNull(adapter.getDefaultMintUrl())
+                assertTrue(adapter.getAllSelectedMints().isEmpty())
+                assertEquals(2, adapter.itemCount)
+                val button = activity.findViewById<MaterialButton>(R.id.mints_continue_button)
+                assertFalse(button.isEnabled)
+                assertEquals(0.35f, button.alpha)
+            }
+        }
+    }
+
+    @Test
+    fun `empty review clears a previously selected mint and disables continue`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                setupMints(activity, default = "https://mint.coinos.io", popular = emptyList())
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
+
+                ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "discoveredMints").clear()
+                ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "selectedMints").clear()
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
+
+                val adapter = ReflectionHelpers.getField<OnboardingMintAdapter>(activity, "mintAdapter")
+                assertNull(adapter.getDefaultMintUrl())
+                assertTrue(adapter.getAllSelectedMints().isEmpty())
+                assertFalse(
+                    activity.findViewById<MaterialButton>(R.id.mints_continue_button).isEnabled
+                )
+            }
+        }
+    }
 
     @Test
     fun `review screen populates adapter with default and popular mints`() {
@@ -298,6 +414,7 @@ class OnboardingActivityTest {
     ): Boolean {
         val deadline = System.currentTimeMillis() + timeoutMs
         while (System.currentTimeMillis() < deadline) {
+            shadowOf(Looper.getMainLooper()).idleFor(50, TimeUnit.MILLISECONDS)
             var met = false
             scenario.onActivity { activity ->
                 met = condition(activity)

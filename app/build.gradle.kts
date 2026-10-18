@@ -1,5 +1,3 @@
-import java.net.URI
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.parcelize")
@@ -12,11 +10,6 @@ android {
 
     defaultConfig {
         applicationId = "com.electricdreams.numo"
-        val arkMintUrl = providers.gradleProperty("arkMintUrl").getOrElse("http://127.0.0.1:3339")
-        val arkMintUri = URI(arkMintUrl)
-        require(arkMintUri.scheme in listOf("http", "https") && arkMintUri.host != null)
-        require(arkMintUri.userInfo == null && arkMintUri.query == null && arkMintUri.fragment == null)
-        buildConfigField("String", "ARK_MINT_URL", "\"$arkMintUrl\"")
         minSdk = 24
         targetSdk = 36
         versionCode = providers.gradleProperty("numoVersionCode").orElse("25").get().toInt()

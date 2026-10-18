@@ -91,9 +91,6 @@ class OnboardingActivity : AppCompatActivity() {
     companion object {
         private const val PREFS_NAME = "OnboardingPrefs"
         private const val KEY_ONBOARDING_COMPLETE = "onboarding_complete"
-        private val ONBOARDING_DEFAULT_MINTS = listOf(
-            com.electricdreams.numo.BuildConfig.ARK_MINT_URL,
-        )
 
         fun isOnboardingComplete(context: Context): Boolean {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -977,7 +974,7 @@ class OnboardingActivity : AppCompatActivity() {
                 discoveredMints.clear()
                 selectedMints.clear()
                 onboardingMintDisplayNames.clear()
-                val healthyMints = filterHealthyMints(ONBOARDING_DEFAULT_MINTS.shuffled())
+                val healthyMints = filterHealthyMints(MintManager.DEFAULT_MINTS.shuffled())
                 discoveredMints.addAll(healthyMints)
                 selectedMints.addAll(healthyMints)
                 backupFound = false
@@ -1152,7 +1149,7 @@ class OnboardingActivity : AppCompatActivity() {
             } else {
                 backupFound = false
                 backupTimestamp = null
-                val healthyMints = filterHealthyMints(ONBOARDING_DEFAULT_MINTS.shuffled())
+                val healthyMints = filterHealthyMints(MintManager.DEFAULT_MINTS.shuffled())
                 discoveredMints.addAll(healthyMints)
                 selectedMints.addAll(healthyMints)
             }
@@ -1257,13 +1254,20 @@ class OnboardingActivity : AppCompatActivity() {
         // Populate the RecyclerView adapter
         // First mint is the default, rest are popular
         val mintList = discoveredMints.toList()
-        val defaultMint = mintList.firstOrNull() ?: return
+        val defaultMint = mintList.firstOrNull()
         val popularMints = mintList.drop(1)
         // All popular mints start as accepted
         val acceptedMints = selectedMints.filter { it != defaultMint }.toSet()
 
         mintAdapter.setMints(defaultMint, popularMints, acceptedMints)
         updateContinueButtonState()
+        if (mintList.isEmpty()) {
+            Toast.makeText(
+                this,
+                R.string.onboarding_mints_none_reachable,
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     private fun showAddMintBottomSheet() {
@@ -1335,15 +1339,13 @@ class OnboardingActivity : AppCompatActivity() {
 
     /**
      * Pings each mint in parallel and returns only the ones that respond successfully.
-     * Falls back to the full list if all mints are unreachable.
      */
-    private suspend fun filterHealthyMints(mints: List<String>): List<String> =
+    internal suspend fun filterHealthyMints(mints: List<String>): List<String> =
         withContext(Dispatchers.IO) {
             val results = mints.map { url ->
                 async { url to mintProfileService.validateMintUrl(url).isValid }
             }.awaitAll()
-            val healthy = results.filter { it.second }.map { it.first }
-            healthy.ifEmpty { mints } // fall back to full list if none reachable
+            results.filter { it.second }.map { it.first }
         }
 
     private fun refreshMintProfilesForReview() {

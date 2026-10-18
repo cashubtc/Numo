@@ -136,9 +136,10 @@ NUMO_ARKOOR_PAY_SCRIPT="$PWD/integration-tests/arkoor/pay.py" \
 The APK uses Numo's standard application ID `com.electricdreams.numo`, display
 name **Numo**, and shares its wallet/preferences with other Numo builds. The
 default version name is `1.9`; override it with `-PnumoVersionName` when needed.
-New-wallet onboarding selects the local mint.
-Unknown-mint Lightning swaps are disabled by default. Select **sats** as the
-base unit.
+New-wallet onboarding offers public mints. For local Arkoor testing, add the local
+mint with **+ Add New Mint** and use it as the default. Disable **Accept unknown
+mints** in the mint settings, since this test mint does not support Lightning
+swaps. Select **sats** as the base unit.
 
 ```bash
 ./gradlew assembleDebug
@@ -147,12 +148,11 @@ adb install -r app/build/outputs/apk/debug/app-universal-debug.apk
 ```
 
 For multiple devices, add `-s DEVICE_SERIAL`. Repeat `adb reverse` after
-reconnecting. The default mint URL, `http://127.0.0.1:3339`, reaches Docker through
+reconnecting. The local mint URL, `http://127.0.0.1:3339`, reaches Docker through
 this reverse tunnel. The debug manifest allows cleartext only for loopback and
-the emulator host alias `10.0.2.2`. For a hosted mint, build with
-`-ParkMintUrl=https://your-mint.example`.
+the emulator host alias `10.0.2.2`. For a hosted mint, add its HTTPS URL instead.
 
-Launch Numo, create its wallet, keep **Numo Arkoor regtest** selected, and
+Launch Numo, create its wallet, add **Numo Arkoor regtest** as the default mint, and
 enter a checkout. The initially selected tab is **Unified**, displaying the
 exact sats amount. Fiat input remains recorded in history. Success means the
 mint confirmed payment and Numo obtained ecash. Closing the screen preserves

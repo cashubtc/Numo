@@ -132,6 +132,7 @@
     <string name="onboarding_mints_count">%1$d mint%2$s selecionado(s)</string>
     <string name="onboarding_mints_continue_restore">Restaurar carteira</string>
     <string name="onboarding_mints_continue_new_wallet">Continuar</string>
+    <string name="onboarding_mints_none_reachable">Não foi possível conectar aos mints padrão. Verifique sua conexão e volte para tentar novamente, ou adicione um mint.</string>
     <string name="onboarding_mints_hero_label">MINT PADRÃO</string>
     <string name="onboarding_mints_hero_subtitle">Guarda seu bitcoin</string>
     <string name="onboarding_mints_hero_default_badge">Padrão</string>

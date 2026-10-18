@@ -73,9 +73,9 @@ class OnboardingMintAdapter(
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setMints(defaultUrl: String, popularUrls: List<String>, acceptedUrls: Set<String>) {
+    fun setMints(defaultUrl: String?, popularUrls: List<String>, acceptedUrls: Set<String>) {
         mints.clear()
-        mints.add(defaultUrl)
+        defaultUrl?.let { mints.add(it) }
         mints.addAll(popularUrls)
         accepted.clear()
         accepted.addAll(acceptedUrls)

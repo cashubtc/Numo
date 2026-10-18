@@ -169,6 +169,7 @@
     <string name="onboarding_mints_count">%1$d Mint%2$s ausgewählt</string>
     <string name="onboarding_mints_continue_restore">Wallet wiederherstellen</string>
     <string name="onboarding_mints_continue_new_wallet">Fortfahren</string>
+    <string name="onboarding_mints_none_reachable">Keine der Standard-Mints ist erreichbar. Prüfe deine Verbindung und gehe zurück, um es erneut zu versuchen, oder füge eine Mint hinzu.</string>
     <string name="onboarding_mints_add_different">Einen anderen Mint hinzufügen</string>
     <string name="onboarding_mints_add_hint">Mint-Adresse eingeben</string>
     <string name="onboarding_mints_scan_row_title">QR-Code scannen</string>

@@ -169,6 +169,7 @@
     <string name="onboarding_mints_count">%1$d mint%2$s selected</string>
     <string name="onboarding_mints_continue_restore">Restore Wallet</string>
     <string name="onboarding_mints_continue_new_wallet">Continue</string>
+    <string name="onboarding_mints_none_reachable">No default mints are reachable. Check your connection and go back to try again, or add a mint.</string>
     <string name="onboarding_mints_add_different">Add a different mint</string>
     <string name="onboarding_mints_add_hint">Enter mint address</string>
     <string name="onboarding_mints_scan_row_title">Scan QR Code</string>

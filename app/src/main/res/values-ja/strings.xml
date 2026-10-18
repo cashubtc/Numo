@@ -160,6 +160,7 @@
     <string name="onboarding_mints_count">%1$d ミント%2$s が選択されました</string>
     <string name="onboarding_mints_continue_restore">ウォレットを復元する</string>
     <string name="onboarding_mints_continue_new_wallet">続く</string>
+    <string name="onboarding_mints_none_reachable">デフォルトのミントに接続できません。接続を確認して前の画面に戻り、もう一度試すか、ミントを追加してください。</string>
     <string name="onboarding_mints_add_different">別のミントを追加する</string>
     <string name="onboarding_mints_add_hint">造幣局の住所を入力してください</string>
     <string name="onboarding_mints_scan_row_title">QRコードをスキャン</string>

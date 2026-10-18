@@ -160,6 +160,7 @@
     <string name="onboarding_mints_count">%1$d개 민트%2$s 선택됨</string>
     <string name="onboarding_mints_continue_restore">지갑 복원</string>
     <string name="onboarding_mints_continue_new_wallet">계속하다</string>
+    <string name="onboarding_mints_none_reachable">기본 민트에 연결할 수 없습니다. 연결을 확인하고 뒤로 돌아가 다시 시도하거나 민트를 추가하세요.</string>
     <string name="onboarding_mints_add_different">다른 민트 추가</string>
     <string name="onboarding_mints_add_hint">민트 주소를 입력하세요</string>
     <string name="onboarding_mints_scan_row_title">QR 코드 스캔</string>
