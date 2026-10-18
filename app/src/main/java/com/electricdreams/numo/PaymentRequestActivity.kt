@@ -153,6 +153,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     private var arkoorJob: Job? = null
     private var isDualQuoteCheckout = false
     private var arkoorLoading = false
+    private var arkoorError: String? = null
     private var arkoorAddress: String? = null
     private var arkoorMintUrl: String? = null
     private var resumeArkoorQuoteId: String? = null
@@ -853,7 +854,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         isDualQuoteCheckout = true
         arkoorLoading = true
         lightningStarted = true
-        // Every checkout offers two independently quoted ways to pay the same amount.
+        // Offer independently quoted methods when the selected mint supports them.
         // Both start immediately, including when the delayed-Lightning preference is set.
         val preferredMint = resumeLightningMintUrl ?: resumeArkoorMintUrl
             ?: mintManager.getPreferredLightningMint(activeUnit)
@@ -916,7 +917,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         val mintUrl = resumeArkoorMintUrl ?: resumeLightningMintUrl
             ?: manager.getPreferredLightningMint(paymentUnit)
         if (mintUrl == null || paymentUnit != "sat") {
-            onArkoorUnavailable(getString(R.string.payment_request_arkoor_requires_mint))
+            onArkoorUnavailable()
             return
         }
         // Display the saved destination while the session refreshes its status online.
@@ -973,6 +974,9 @@ class PaymentRequestActivity : AppCompatActivity() {
                 handleLightningPaymentSuccess(PaymentHistoryEntry.TYPE_ARKOOR)
             } catch (cancelled: CancellationException) {
                 throw cancelled
+            } catch (unsupported: ArkoorMintSession.UnsupportedMintException) {
+                Log.d(TAG, "Selected mint does not offer Arkoor in sats")
+                onArkoorUnavailable()
             } catch (error: Exception) {
                 Log.e(TAG, "Arkoor checkout failed", error)
                 onArkoorUnavailable(getString(R.string.payment_request_arkoor_failed, error.message))
@@ -1080,12 +1084,12 @@ class PaymentRequestActivity : AppCompatActivity() {
             .start()
     }
 
-    private fun onArkoorUnavailable(message: String) {
+    private fun onArkoorUnavailable(message: String? = null) {
         if (hasTerminalOutcome) return
         arkoorLoading = false
         arkoorAddress = null
+        arkoorError = message
         updateUnifiedQrCode()
-        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
     /** Poll BTCPay invoice status every 2 seconds until terminal state. */
@@ -1238,7 +1242,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             showWaitingStatus()
         } else if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.UNIFIED &&
             unifiedPaymentRequest() != null) {
-            statusText.text = paymentMethodsLabel()
+            statusText.text = listOfNotNull(paymentMethodsLabel(), arkoorError).joinToString("\n")
         } else {
             showWaitingStatus()
         }

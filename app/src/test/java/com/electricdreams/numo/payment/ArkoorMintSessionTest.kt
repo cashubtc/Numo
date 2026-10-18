@@ -43,14 +43,69 @@ class ArkoorMintSessionTest {
         whenever(it.expiry).thenReturn(0u)
     }
 
-    private suspend fun supportArkoor() {
+    private suspend fun supportArkoor(
+        advertisedMethod: PaymentMethod = method,
+        unit: CurrencyUnit = CurrencyUnit.Sat,
+        disabled: Boolean = false,
+    ) {
         val nuts = mock<Nuts>()
         val info = mock<MintInfo>()
         whenever(info.nuts).thenReturn(nuts)
         whenever(nuts.nut04).thenReturn(Nut04Settings(listOf(
-            MintMethodSettings(method, CurrencyUnit.Sat, "arkoor", null, null, false)
-        ), false))
+            MintMethodSettings(advertisedMethod, unit, "arkoor", null, null, false)
+        ), disabled))
         whenever(wallet.fetchMintInfo()).thenReturn(info)
+    }
+
+    @Test
+    fun `bolt11 only mint skips arkoor without creating a quote`() = runTest {
+        supportArkoor(advertisedMethod = PaymentMethod.Bolt11)
+        assertUnsupportedMint()
+    }
+
+    @Test
+    fun `arkoor in another unit is unavailable for sats checkout`() = runTest {
+        supportArkoor(unit = CurrencyUnit.Usd)
+        assertUnsupportedMint()
+    }
+
+    @Test
+    fun `disabled minting skips arkoor without creating a quote`() = runTest {
+        supportArkoor(disabled = true)
+        assertUnsupportedMint()
+    }
+
+    @Test
+    fun `missing mint info skips arkoor without creating a quote`() = runTest {
+        whenever(wallet.fetchMintInfo()).thenReturn(null)
+        assertUnsupportedMint()
+    }
+
+    @Test
+    fun `mint info network failure remains a real failure`() = runTest {
+        val offline = RuntimeException("offline")
+        whenever(wallet.fetchMintInfo()).thenThrow(offline)
+        val failure = runCatching {
+            ArkoorMintSession(wallet).receive(1_000, onRequestReady = {}, onRetry = {})
+        }.exceptionOrNull()
+        assertEquals(offline, failure)
+        verify(wallet, never()).mintQuote(any(), anyOrNull(), anyOrNull(), anyOrNull())
+    }
+
+    private suspend fun assertUnsupportedMint() {
+        var ready = false
+        var retries = 0
+        val failure = runCatching {
+            ArkoorMintSession(wallet).receive(1_000, onRequestReady = {
+                ready = true
+            }, onRetry = { retries++ })
+        }.exceptionOrNull()
+        assertTrue(failure is ArkoorMintSession.UnsupportedMintException)
+        assertEquals(false, ready)
+        assertEquals(0, retries)
+        verify(wallet, never()).mintQuote(any(), anyOrNull(), anyOrNull(), anyOrNull())
+        verify(wallet, never()).checkMintQuote(any())
+        verify(wallet, never()).mint(any(), any(), anyOrNull())
     }
 
     @Test

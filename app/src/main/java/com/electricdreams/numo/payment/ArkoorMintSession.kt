@@ -16,6 +16,8 @@ class ArkoorMintSession(
     private val subscribeToQuote: ((String) -> MintQuoteWebSocket.Subscription)? = null,
     private val nowSeconds: () -> ULong = { (System.currentTimeMillis() / 1_000).toULong() },
 ) {
+    class UnsupportedMintException : IllegalStateException("Arkoor is not available at this mint")
+
     suspend fun receive(
         amountSats: Long,
         existingQuoteId: String? = null,
@@ -30,10 +32,10 @@ class ArkoorMintSession(
             checkSavedQuote(existingQuoteId, onRetry)
         } else {
             val settings = wallet.fetchMintInfo()?.nuts?.nut04
-            check(settings != null && !settings.disabled) { "Minting is disabled" }
+            if (settings == null || settings.disabled) throw UnsupportedMintException()
             val method = settings.methods.firstOrNull {
                 it.method == METHOD && it.unit == CurrencyUnit.Sat
-            } ?: error("This mint does not support Arkoor payments in sats")
+            } ?: throw UnsupportedMintException()
             method.minAmount?.value?.let { check(expected >= it) { "Below mint minimum: $it sats" } }
             method.maxAmount?.value?.takeIf { it > 0uL }?.let {
                 check(expected <= it) { "Above mint maximum: $it sats" }
