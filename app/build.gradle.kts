@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.parcelize")
@@ -70,7 +72,10 @@ android {
     }
     
     kotlin {
-        jvmToolchain(17)
+        jvmToolchain(25)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
     }
 
     buildFeatures {
@@ -123,10 +128,9 @@ dependencies {
     
     // Testing
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.mockito:mockito-core:5.12.0")
+    testImplementation("org.mockito:mockito-core:5.20.0")
     testImplementation("org.robolectric:robolectric:4.16")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation("net.bytebuddy:byte-buddy:1.14.12")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     testImplementation("androidx.test:core:1.5.0")
@@ -179,8 +183,11 @@ dependencies {
 }
 
 tasks.withType<Test>().configureEach {
+    // Allow room for Robolectric's image decoding across the full suite.
+    maxHeapSize = "1g"
+
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 
     configure<org.gradle.testing.jacoco.plugins.JacocoTaskExtension> {
@@ -201,7 +208,10 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     // Use layout.buildDirectory instead of project.buildDir (deprecated)
     val buildDir = layout.buildDirectory.get().asFile
     
-    val debugTree = fileTree("$buildDir/tmp/kotlin-classes/debug") {
+    val debugTree = files(
+        "$buildDir/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes",
+        "$buildDir/intermediates/javac/debug/compileDebugJavaWithJavac/classes"
+    ).asFileTree.matching {
         exclude(
             "**/R.class",
             "**/R$*.class",
@@ -213,7 +223,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     }
     val mainSrc = "${project.projectDir}/src/main/java"
 
-    sourceDirectories.setFrom(files(mainSrc))
+    sourceDirectories.setFrom(files(mainSrc, "${project.projectDir}/src/direct/java"))
     classDirectories.setFrom(files(debugTree))
     executionData.setFrom(fileTree(buildDir) {
         include(

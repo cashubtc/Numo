@@ -3,7 +3,8 @@
 This repository contains the source code for the Numo Android application. These guidelines serve as the definitive guide for both human developers and autonomous AI coding agents to ensure consistency, quality, and maintainability across the codebase.
 
 ## 1. Project Overview & Tech Stack
-- **Platform:** Android (Min SDK 24, Target SDK 36, Java 17).
+- **Platform:** Android (Min SDK 24, Target SDK 36, Java 17 source/bytecode,
+  JDK 25 for builds and unit tests).
 - **Language:** Kotlin (primary), Java (legacy/interop).
 - **Architecture:** MVVM/MVC mix utilizing Android Navigation Components and ViewBinding. No Jetpack Compose.
 - **Networking & Data:** OkHttp3, Jackson (JSON/CBOR), Gson.
