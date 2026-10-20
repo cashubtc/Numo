@@ -295,12 +295,35 @@ object SwapToLightningMintManager {
                     lightningMintUrl = lightningMintUrl,
                     lightningQuoteId = finalMintQuote.id,
                 )
+                val prepared = try {
+                    tempWallet.prepareMeltProofs(meltQuote.id, proofs)
+                } catch (exception: Exception) {
+                    Log.e(TAG, "Could not prepare swap payment", exception)
+                    return@withPaymentOperation SwapResult.Failure(
+                        exception.message ?: "Could not prepare swap payment")
+                }
                 val paymentId = try {
+                    val proofAmount = proofs.fold(0uL) { total, proof ->
+                        val next = total + proof.amount.value
+                        require(next >= total) { "Proof amount overflow" }
+                        next
+                    }
+                    val required = totalMeltRequired.toULong()
+                    require(proofAmount >= required &&
+                        prepared.inputFeeWithoutSwap().value <= proofAmount - required) {
+                        "Cashu proofs do not cover payment and input fees"
+                    }
                     PaymentsHistoryActivity.recordPendingSwap(appContext, recoveryId,
                         expectedAmount, paymentUnit, frame)
                 } catch (exception: Exception) {
-                    Log.e(TAG, "Could not save swap recovery information", exception)
-                    return@withPaymentOperation SwapResult.Failure("Could not save pending payment")
+                    try {
+                        prepared.cancel()
+                    } catch (cleanupException: Exception) {
+                        Log.w(TAG, "Could not cancel swap preparation", cleanupException)
+                    }
+                    Log.e(TAG, "Could not prepare pending swap", exception)
+                    return@withPaymentOperation SwapResult.Failure(
+                        exception.message ?: "Could not prepare pending payment")
                 }
                 // 5) Execute melt on unknown mint using the temporary single-mint wallet.
                 val finalized: FinalizedMelt = try {
@@ -310,7 +333,6 @@ object SwapToLightningMintManager {
                             "meltQuoteId=${meltQuote.id}, proofsCount=${proofs.size}, totalMeltRequired=$totalMeltRequired"
                     )
 
-                    val prepared = tempWallet.prepareMeltProofs(meltQuote.id, proofs)
                     prepared.confirmWithOptions(MeltConfirmOptions(skipSwap = true))
                 } catch (exception: Exception) {
                     Log.w(TAG, "Swap settlement requires a later status check", exception)
@@ -360,7 +382,6 @@ object SwapToLightningMintManager {
         finalizationMutex.withLock {
             val saved = PaymentsHistoryActivity.getPaymentEntryById(appContext, entry.id) ?: entry
             val swapJson = saved.swapToLightningMintJson ?: return@withPaymentOperation false
-            if (saved.isCompleted()) return@withPaymentOperation true
             try {
                 val frame = Gson().fromJson(swapJson,
                     PaymentHistoryEntry.Companion.SwapToLightningMintFrame::class.java)

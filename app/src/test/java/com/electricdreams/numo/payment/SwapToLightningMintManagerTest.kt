@@ -27,6 +27,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -51,6 +52,7 @@ class SwapToLightningMintManagerTest {
     private val destination: Wallet = mock()
     private val prepared: PreparedMelt = mock()
     private val checked: MintQuote = mock()
+    private val payerProof: Proof = mock()
     private val factory = SwapToLightningMintManager.temporaryWalletFactory
     private var openedId: String? = null
     private lateinit var paymentId: String
@@ -80,11 +82,9 @@ class SwapToLightningMintManagerTest {
         whenever(melt.amount).thenReturn(Amount(985u))
         whenever(melt.feeReserve).thenReturn(Amount(10u))
         whenever(source.meltQuote(any(), any(), anyOrNull(), anyOrNull())).thenReturn(melt)
-        whenever(source.prepareMeltProofs(any(), any())).thenAnswer {
-            val saved = PaymentsHistoryActivity.getPaymentEntryById(context, requireNotNull(openedId))
-            assertNotNull(saved?.swapToLightningMintJson)
-            prepared
-        }
+        whenever(source.prepareMeltProofs(any(), any())).thenReturn(prepared)
+        whenever(payerProof.amount).thenReturn(Amount(1_000u))
+        whenever(prepared.inputFeeWithoutSwap()).thenReturn(Amount(0u))
         whenever(prepared.confirmWithOptions(any())).thenReturn(
             FinalizedMelt("melt-quote", QuoteState.PAID, null, emptyList(), Amount(985u), Amount(10u)))
         whenever(checked.state).thenReturn(QuoteState.PENDING)
@@ -164,6 +164,94 @@ class SwapToLightningMintManagerTest {
     }
 
     @Test
+    fun `preparation failure leaves checkout retryable`() = runTest {
+        whenever(source.prepareMeltProofs(any(), any())).thenAnswer {
+            throw IOException("Could not prepare payment")
+        }
+        assertTrue(swap() is SwapToLightningMintManager.SwapResult.Failure)
+        assertNull(entry().swapToLightningMintJson)
+        verify(prepared, never()).confirmWithOptions(any())
+
+        whenever(source.prepareMeltProofs(any(), any())).thenReturn(prepared)
+        assertTrue(swap() is SwapToLightningMintManager.SwapResult.Pending)
+        verify(prepared).confirmWithOptions(any())
+    }
+
+    @Test
+    fun `input fees that exceed available balance cancel preparation and allow retry`() = runTest {
+        whenever(prepared.inputFeeWithoutSwap()).thenReturn(Amount(6u))
+        assertTrue(swap() is SwapToLightningMintManager.SwapResult.Failure)
+        assertNull(entry().swapToLightningMintJson)
+        verify(prepared).cancel()
+        verify(prepared, never()).confirmWithOptions(any())
+
+        whenever(prepared.inputFeeWithoutSwap()).thenReturn(Amount(0u))
+        assertTrue(swap() is SwapToLightningMintManager.SwapResult.Pending)
+        verify(prepared).confirmWithOptions(any())
+    }
+
+    @Test
+    fun `input fees use the presented proof balance`() = runTest {
+        whenever(payerProof.amount).thenReturn(Amount(998u))
+        whenever(prepared.inputFeeWithoutSwap()).thenReturn(Amount(4u))
+        assertTrue(swap() is SwapToLightningMintManager.SwapResult.Failure)
+        assertNull(entry().swapToLightningMintJson)
+        verify(prepared).cancel()
+        verify(prepared, never()).confirmWithOptions(any())
+    }
+
+    @Test
+    fun `input fees that exactly fit the balance can be confirmed`() = runTest {
+        whenever(prepared.inputFeeWithoutSwap()).thenReturn(Amount(5u))
+        assertTrue(swap() is SwapToLightningMintManager.SwapResult.Pending)
+        verify(prepared).confirmWithOptions(any())
+        verify(prepared, never()).cancel()
+    }
+
+    @Test
+    fun `checkout completion during preparation cancels the unsubmitted melt`() = runTest {
+        whenever(source.prepareMeltProofs(any(), any())).thenAnswer {
+            PaymentsHistoryActivity.completePendingPayment(context, paymentId, "",
+                PaymentHistoryEntry.TYPE_ARKOOR, "https://original.example")
+            prepared
+        }
+        assertTrue(swap() is SwapToLightningMintManager.SwapResult.Failure)
+        assertTrue(entry().isCompleted())
+        assertNull(entry().swapToLightningMintJson)
+        verify(prepared).cancel()
+        verify(prepared, never()).confirmWithOptions(any())
+    }
+
+    @Test
+    fun `recovery metadata is saved before confirming the melt`() = runTest {
+        whenever(prepared.confirmWithOptions(any())).thenAnswer {
+            val saved = PaymentsHistoryActivity.getPaymentEntryById(context, requireNotNull(openedId))
+            assertNotNull(saved?.swapToLightningMintJson)
+            FinalizedMelt("melt-quote", QuoteState.PAID, null, emptyList(), Amount(985u), Amount(10u))
+        }
+        assertTrue(swap() is SwapToLightningMintManager.SwapResult.Pending)
+    }
+
+    @Test
+    fun `swap quote is claimed after another lightning quote completes checkout`() = runTest {
+        assertSwapClaimedAfterCheckoutCompleted(PaymentHistoryEntry.TYPE_LIGHTNING)
+    }
+
+    @Test
+    fun `swap quote is claimed after arkoor completes checkout`() = runTest {
+        assertSwapClaimedAfterCheckoutCompleted(PaymentHistoryEntry.TYPE_ARKOOR)
+    }
+
+    @Test
+    fun `completed checkout does not confirm an unpaid swap quote`() = runTest {
+        swap()
+        PaymentsHistoryActivity.completePendingPayment(context, paymentId, "",
+            PaymentHistoryEntry.TYPE_ARKOOR, "https://original.example")
+        assertFalse(SwapToLightningMintManager.tryFinalizePendingSwap(context, entry()))
+        verify(destination, never()).mint(any(), any(), anyOrNull())
+    }
+
+    @Test
     fun `empty mint response remains pending`() = runTest {
         whenever(checked.state).thenReturn(QuoteState.PAID)
         whenever(destination.mint(any(), any(), anyOrNull())).thenReturn(emptyList())
@@ -200,8 +288,33 @@ class SwapToLightningMintManagerTest {
         assertTrue(entry().isCompleted())
     }
 
+    @Test
+    fun `checking a claimed quote does not mint it again`() = runTest {
+        whenever(checked.state).thenReturn(QuoteState.PAID)
+        whenever(destination.mint(any(), any(), anyOrNull())).thenReturn(listOf(mock<Proof>()))
+        assertTrue(swap() is SwapToLightningMintManager.SwapResult.Success)
+
+        whenever(checked.state).thenReturn(QuoteState.ISSUED)
+        assertTrue(SwapToLightningMintManager.tryFinalizePendingSwap(context, entry()))
+        verify(destination).mint("mint-quote", org.cashudevkit.SplitTarget.None, null)
+    }
+
+    private suspend fun assertSwapClaimedAfterCheckoutCompleted(paymentType: String) {
+        swap()
+        PaymentsHistoryActivity.completePendingPayment(context, paymentId, "", paymentType,
+            "https://original.example", lightningQuoteId = "original-quote",
+            lightningMintUrl = "https://original.example")
+        whenever(checked.state).thenReturn(QuoteState.PAID)
+        whenever(destination.mint(any(), any(), anyOrNull())).thenReturn(listOf(mock<Proof>()))
+
+        assertTrue(SwapToLightningMintManager.tryFinalizePendingSwap(context, entry()))
+        verify(destination).mint("mint-quote", org.cashudevkit.SplitTarget.None, null)
+        assertEquals(paymentType, entry().paymentType)
+        assertEquals("original-quote", entry().lightningQuoteId)
+    }
+
     private suspend fun swap(id: String? = paymentId) = SwapToLightningMintManager.swapFromUnknownMint(
-        context, emptyList(), 1_000L, "https://payer.example",
+        context, listOf(payerProof), 1_000L, "https://payer.example",
         SwapToLightningMintManager.PaymentContext(id, 1_000L, "sat"))
 
     private fun entry() = requireNotNull(PaymentsHistoryActivity.getPaymentEntryById(context, paymentId))

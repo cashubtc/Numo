@@ -1742,6 +1742,11 @@ class PaymentRequestActivity : AppCompatActivity() {
     private fun handlePendingSwap(paymentId: String) {
         if (!beginTerminalOutcome("swap_pending")) return
         pendingPaymentId = paymentId
+        PaymentsHistoryActivity.getPaymentEntryById(this, paymentId)
+            ?.getSwapToLightningMintFrame()?.let { frame ->
+                lightningMintUrl = frame.lightningMintUrl
+                lightningQuoteId = frame.lightningQuoteId
+            }
         cancelNfcSafetyTimeout()
         nostrHandler?.stop()
         nfcAnimationContainer.visibility = View.GONE

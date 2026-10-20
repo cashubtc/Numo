@@ -265,6 +265,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     val intent = Intent(this@PaymentsHistoryActivity, com.electricdreams.numo.PaymentReceivedActivity::class.java).apply {
                         putExtra(com.electricdreams.numo.PaymentReceivedActivity.EXTRA_TOKEN, "")
                         putExtra(com.electricdreams.numo.PaymentReceivedActivity.EXTRA_AMOUNT, entry.amount)
+                        putExtra(com.electricdreams.numo.PaymentReceivedActivity.EXTRA_UNIT, entry.getUnit())
                     }
                     startActivity(intent)
                     
