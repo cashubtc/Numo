@@ -745,12 +745,13 @@ class RestoreWalletActivity : AppCompatActivity() {
         mnemonic: String,
         mints: List<String>
     ): Map<String, Pair<Long, Long>> {
-        return CashuWalletManager.restoreFromMnemonic(mnemonic, this@RestoreWalletActivity) { mintUrl, status, balanceBefore, balanceAfter ->
-            // Only show progress for selected mints
-            if (mints.contains(mintUrl)) {
-                withContext(Dispatchers.Main) {
-                    updateMintProgress(mintUrl, status, balanceBefore, balanceAfter)
-                }
+        return CashuWalletManager.restoreFromMnemonic(
+            mnemonic,
+            this@RestoreWalletActivity,
+            selectedMintUrls = mints,
+        ) { mintUrl, status, balanceBefore, balanceAfter ->
+            withContext(Dispatchers.Main) {
+                updateMintProgress(mintUrl, status, balanceBefore, balanceAfter)
             }
         }
     }

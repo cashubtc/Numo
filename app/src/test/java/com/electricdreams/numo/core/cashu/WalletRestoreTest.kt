@@ -6,7 +6,13 @@ import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.ui.seed.CdkMnemonicRule
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
+import org.cashudevkit.CurrencyUnit
+import org.cashudevkit.MintUrl
 import org.cashudevkit.Wallet
 import org.cashudevkit.WalletRepository
 import org.cashudevkit.WalletStore
@@ -15,6 +21,7 @@ import org.cashudevkit.Restored
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -22,6 +29,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -63,8 +71,10 @@ class WalletRestoreTest {
     @After
     fun tearDown() {
         CashuWalletManager.repositoryFactory = originalFactory
+        MintManager.getInstance(context).setMintChangeListener(null)
         setField("wallet", null)
         setField("database", null)
+        setField("appContext", null)
     }
 
     @Test
@@ -94,9 +104,105 @@ class WalletRestoreTest {
         whenever(replacement.getWallet(any(), any())).thenReturn(mint)
         whenever(mint.restore()).thenThrow(IllegalStateException("mint unavailable"))
         CashuWalletManager.repositoryFactory = { _, _ -> replacement }
-        expectFailure { CashuWalletManager.restoreFromMnemonic(mnemonic) { _, _, _, _ -> } }
+        expectFailure {
+            CashuWalletManager.restoreFromMnemonic(
+                mnemonic,
+                selectedMintUrls = MintManager.getInstance(context).getAllowedMints().take(1),
+            ) { _, _, _, _ -> }
+        }
         assertOriginalWallet()
         verify(replacement).close()
+    }
+
+    @Test
+    fun `deselected unavailable mint does not prevent selected mint restore`() = runTest {
+        val mints = MintManager.getInstance(context).getAllowedMints()
+        val selectedUrl = mints.first()
+        val unavailableUrl = mints.last()
+        assertTrue(selectedUrl != unavailableUrl)
+        val replacement: WalletRepository = mock()
+        val mint: Wallet = mock()
+        whenever(replacement.getWallet(any(), any())).thenReturn(mint)
+        whenever(replacement.createWallet(eq(MintUrl(unavailableUrl)), any(), any()))
+            .thenThrow(IllegalStateException("mint unavailable"))
+        whenever(mint.restore()).thenReturn(Restored(Amount(0u), Amount(42u), Amount(0u)))
+        CashuWalletManager.repositoryFactory = { _, _ -> replacement }
+        val progressMints = mutableSetOf<String>()
+
+        val result = CashuWalletManager.restoreFromMnemonic(
+            mnemonic,
+            selectedMintUrls = listOf(selectedUrl),
+        ) { mintUrl, _, _, _ -> progressMints.add(mintUrl) }
+
+        assertEquals(mapOf(selectedUrl to (0L to 42L)), result)
+        assertEquals(setOf(selectedUrl), progressMints)
+        assertSame(replacement, CashuWalletManager.getWallet())
+        verify(replacement).createWallet(MintUrl(selectedUrl), CurrencyUnit.Sat, 10u)
+        verify(replacement, never()).createWallet(eq(MintUrl(unavailableUrl)), any(), any())
+        verify(replacement, never()).getWallet(eq(MintUrl(unavailableUrl)), any())
+    }
+
+    @Test
+    fun `empty mint selection preserves active wallet`() = runTest {
+        var constructed = false
+        CashuWalletManager.repositoryFactory = { _, _ -> constructed = true; mock() }
+
+        expectFailure {
+            CashuWalletManager.restoreFromMnemonic(
+                mnemonic,
+                selectedMintUrls = emptyList(),
+            ) { _, _, _, _ -> }
+        }
+
+        assertFalse(constructed)
+        assertOriginalWallet()
+    }
+
+    @Test
+    fun `initialization creates wallet after failed first restore with unchanged mints`() = runTest {
+        setField("appContext", null)
+        setField("wallet", null)
+        PreferenceStore.wallet(context).remove("wallet_mnemonic")
+        val mints = MintManager.getInstance(context).getAllowedMints()
+        val stagedWallet: WalletRepository = mock()
+        val mint: Wallet = mock()
+        whenever(stagedWallet.getWallet(any(), any())).thenReturn(mint)
+        whenever(mint.restore()).thenThrow(IllegalStateException("mint unavailable"))
+        CashuWalletManager.repositoryFactory = { _, _ -> stagedWallet }
+
+        expectFailure {
+            CashuWalletManager.restoreFromMnemonic(mnemonic, context) { _, _, _, _ -> }
+        }
+        assertNull(CashuWalletManager.getWallet())
+        assertNull(CashuWalletManager.getMnemonic())
+        verify(stagedWallet).close()
+
+        val newMnemonic = "legal winner thank year wave sausage worth useful legal winner thank yellow"
+        CashuWalletManager.wipeDatabase(context)
+        PreferenceStore.wallet(context).putString("wallet_mnemonic", newMnemonic)
+        val newWallet: WalletRepository = mock()
+        whenever(newWallet.getWallet(any(), any())).thenReturn(mock())
+        CashuWalletManager.repositoryFactory = { seed, _ ->
+            assertEquals(newMnemonic, seed)
+            newWallet
+        }
+
+        CashuWalletManager.init(context)
+        withContext(Dispatchers.Default) {
+            withTimeout(5_000) {
+                CashuWalletManager.walletState.first {
+                    it == WalletState.READY && CashuWalletManager.getWallet() === newWallet
+                }
+            }
+        }
+
+        assertSame(newWallet, CashuWalletManager.getWallet())
+        assertEquals(newMnemonic, CashuWalletManager.getMnemonic())
+        assertEquals(mints, MintManager.getInstance(context).getAllowedMints())
+        for (url in mints) {
+            verify(newWallet).createWallet(MintUrl(url), CurrencyUnit.Sat, 10u)
+        }
+        verify(newWallet, never()).close()
     }
 
     @Test

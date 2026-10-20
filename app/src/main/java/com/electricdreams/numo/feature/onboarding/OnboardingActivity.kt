@@ -1193,7 +1193,11 @@ class OnboardingActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val results = CashuWalletManager.restoreFromMnemonic(mnemonic, this@OnboardingActivity) { mintUrl, status, before, after ->
+                val results = CashuWalletManager.restoreFromMnemonic(
+                    mnemonic,
+                    this@OnboardingActivity,
+                    selectedMintUrls = selectedMints.toList(),
+                ) { mintUrl, status, before, after ->
                     if (selectedMints.contains(mintUrl)) {
                         withContext(Dispatchers.Main) {
                             updateMintProgress(mintUrl, status, before, after)

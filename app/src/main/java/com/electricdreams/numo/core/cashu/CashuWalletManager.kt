@@ -94,7 +94,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
 
     /** Initialize from ModernPOSActivity. Safe to call multiple times. */
     fun init(context: Context) {
-        if (this::appContext.isInitialized) return
+        if (this::appContext.isInitialized && wallet != null) return
 
         appContext = context.applicationContext
         val mintManager = MintManager.getInstance(appContext)
@@ -105,7 +105,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
         // Build initial wallet
         val initialMints = mintManager.getAllowedMints()
         scope.launchPaymentOperation {
-            rebuildWallet(initialMints)
+            rebuildWallet(initialMints, onlyIfMissing = true)
         }
     }
 
@@ -144,12 +144,14 @@ object CashuWalletManager : MintManager.MintChangeListener {
      * This will replace the current wallet with one derived from the provided seed phrase.
      * @param newMnemonic The 12-word seed phrase to restore from
      * @param context Optional context to initialize the manager if not already initialized
+     * @param selectedMintUrls Mints to restore; defaults to all configured mints
      * @param onMintProgress Callback for progress updates: (mintUrl, status, balanceBefore, balanceAfter)
      * @return Map of mint URLs to their balance changes (newBalance - oldBalance)
      */
     suspend fun restoreFromMnemonic(
         newMnemonic: String,
         context: Context? = null,
+        selectedMintUrls: List<String>? = null,
         onMintProgress: suspend (mintUrl: String, status: String, balanceBefore: Long, balanceAfter: Long) -> Unit
     ): Map<String, Pair<Long, Long>> = walletMutex.withLock {
         val mnemonic = newMnemonic.trim().lowercase(Locale.ROOT)
@@ -162,7 +164,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
         }
 
         val mintManager = MintManager.getInstance(appContext)
-        val mints = mintManager.getAllowedMints()
+        val mints = selectedMintUrls?.distinct() ?: mintManager.getAllowedMints()
         require(mints.isNotEmpty()) { "Select at least one mint to restore" }
         val balancesBefore = mints.associateWith { getBalanceForMint(it) }
         val balanceChanges = mutableMapOf<String, Pair<Long, Long>>()
@@ -638,7 +640,11 @@ object CashuWalletManager : MintManager.MintChangeListener {
      * Rebuild wallet + database using the provided mint URLs.
      * Runs on our IO coroutine scope.
      */
-    private suspend fun rebuildWallet(mints: List<String>): Unit = walletMutex.withLock {
+    private suspend fun rebuildWallet(
+        mints: List<String>,
+        onlyIfMissing: Boolean = false,
+    ): Unit = walletMutex.withLock {
+        if (onlyIfMissing && wallet != null) return@withLock
         _walletState.value = WalletState.LOADING
         try {
             // Close any previous instances
@@ -672,7 +678,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
             }
 
             // 3) Construct WalletRepository in sats.
-            val newWallet = WalletRepository(mnemonic, db)
+            val newWallet = repositoryFactory(mnemonic, db)
             val unitStr = MintManager.getInstance(appContext).getPreferredUnit()
         val unit = getCurrencyUnit(unitStr)
 
