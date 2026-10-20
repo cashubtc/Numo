@@ -1,132 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
+    android:layout_height="match_parent">
 
-    <!-- Top App Bar -->
-    <com.electricdreams.numo.ui.components.NumoTopBar
-        android:id="@+id/top_bar"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        app:topBarTitle="@string/language_settings_title"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/top_bar"
-        app:layout_constraintBottom_toBottomOf="parent">
+        <!-- Top App Bar -->
 
-        <LinearLayout
-            android:id="@+id/language_content"
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/space_2xl">
+            app:topBarTitle="@string/language_settings_title"
+            app:layout_constraintTop_toTopOf="parent"
+            android:minHeight="64dp"
+            app:topBarSettingsStyle="true" />
 
-            <!-- Section Header -->
-            <TextView
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@id/top_bar"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:clipToPadding="false">
+
+            <LinearLayout
+                android:id="@+id/language_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/space_l"
-                android:paddingBottom="@dimen/row_padding_vertical"
-                android:text="@string/language_settings_section_app_language"
-                android:textAppearance="@style/Text.SectionHeader" />
+                android:orientation="vertical"
+                android:paddingBottom="24dp"
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
-            <!-- Language Radio Group -->
-            <RadioGroup
-                android:id="@+id/language_radio_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                <!-- Section Header -->
 
-                <RadioButton
-                    android:id="@+id/radio_english"
+                <TextView
+                    android:text="@string/language_settings_section_app_language"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="@dimen/settings_section_gap"
+                    android:accessibilityHeading="true" />
+
+                <!-- Language Radio Group -->
+
+                <RadioGroup
+                    android:id="@+id/language_radio_group"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/settings_item_height"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="@drawable/selector_radio_custom"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:text="@string/language_settings_option_english"
-                    android:textAppearance="@style/Text.RowTitle" />
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_settings_group"
+                    android:clipToOutline="true"
+                    android:showDividers="none">
 
-                <RadioButton
-                    android:id="@+id/radio_german"
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radio_english"
+                        android:text="@string/language_settings_option_english"
+                        style="@style/Widget.Numo.SettingsChoice" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radio_german"
+                        android:text="@string/language_settings_option_german"
+                        style="@style/Widget.Numo.SettingsChoice" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radio_spanish"
+                        android:text="@string/language_settings_option_spanish"
+                        style="@style/Widget.Numo.SettingsChoice" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radio_portuguese"
+                        android:text="@string/language_settings_option_portuguese"
+                        style="@style/Widget.Numo.SettingsChoice" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radio_korean"
+                        android:text="@string/language_settings_option_korean"
+                        style="@style/Widget.Numo.SettingsChoice" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radio_japanese"
+                        android:text="@string/language_settings_option_japanese"
+                        style="@style/Widget.Numo.SettingsChoice" />
+
+                </RadioGroup>
+
+                <!-- Current language summary -->
+
+                <TextView
+                    android:id="@+id/current_language_summary"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/settings_item_height"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="@drawable/selector_radio_custom"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:text="@string/language_settings_option_german"
-                    android:textAppearance="@style/Text.RowTitle" />
+                    android:layout_height="wrap_content"
+                    android:paddingHorizontal="0dp"
+                    android:paddingTop="@dimen/space_l"
+                    android:textAppearance="@style/Text.SettingsBody"
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
-                <RadioButton
-                    android:id="@+id/radio_spanish"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/settings_item_height"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="@drawable/selector_radio_custom"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:text="@string/language_settings_option_spanish"
-                    android:textAppearance="@style/Text.RowTitle" />
+            </LinearLayout>
 
-                <RadioButton
-                    android:id="@+id/radio_portuguese"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/settings_item_height"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="@drawable/selector_radio_custom"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:text="@string/language_settings_option_portuguese"
-                    android:textAppearance="@style/Text.RowTitle" />
+        </ScrollView>
 
-                <RadioButton
-                    android:id="@+id/radio_korean"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/settings_item_height"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="@drawable/selector_radio_custom"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:text="@string/language_settings_option_korean"
-                    android:textAppearance="@style/Text.RowTitle" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <RadioButton
-                    android:id="@+id/radio_japanese"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/settings_item_height"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="@drawable/selector_radio_custom"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:text="@string/language_settings_option_japanese"
-                    android:textAppearance="@style/Text.RowTitle" />
-
-            </RadioGroup>
-
-            <!-- Current language summary -->
-            <TextView
-                android:id="@+id/current_language_summary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/space_l"
-                android:textAppearance="@style/Text.Body"
-                android:textColor="@color/color_text_secondary" />
-
-        </LinearLayout>
-    </ScrollView>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/offline_explainer_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_bg_white"
+    tools:context=".feature.offline.OfflineExplainerActivity">
+
+    <ImageButton
+        android:id="@+id/close_button"
+        android:layout_width="@dimen/icon_size_large"
+        android:layout_height="@dimen/icon_size_large"
+        android:layout_marginStart="@dimen/space_s"
+        android:layout_marginTop="@dimen/space_s"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/offline_explainer_close_content_description"
+        android:padding="@dimen/space_m"
+        android:src="@drawable/ic_close"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/color_text_primary" />
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/close_button">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="@dimen/margin_screen_horizontal"
+            android:paddingTop="@dimen/space_xl"
+            android:paddingBottom="@dimen/space_2xl">
+
+            <!-- Globe with a status badge cut out of its lower-right edge -->
+            <FrameLayout
+                android:layout_width="@dimen/offline_hero_frame_size"
+                android:layout_height="@dimen/offline_hero_frame_size"
+                android:importantForAccessibility="noHideDescendants">
+
+                <ImageView
+                    android:id="@+id/hero_icon"
+                    android:layout_width="@dimen/offline_hero_icon_size"
+                    android:layout_height="@dimen/offline_hero_icon_size"
+                    android:layout_gravity="top|start"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_globe"
+                    app:tint="@color/color_text_primary" />
+
+                <FrameLayout
+                    android:layout_width="@dimen/offline_hero_badge_size"
+                    android:layout_height="@dimen/offline_hero_badge_size"
+                    android:layout_gravity="bottom|end"
+                    android:background="@drawable/bg_offline_badge_ring">
+
+                    <ImageView
+                        android:id="@+id/hero_badge"
+                        android:layout_width="@dimen/offline_hero_badge_icon_size"
+                        android:layout_height="@dimen/offline_hero_badge_icon_size"
+                        android:layout_gravity="center"
+                        android:importantForAccessibility="no"
+                        android:src="@drawable/ic_status_degraded" />
+                </FrameLayout>
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/title"
+                style="@style/Text.DisplayXL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_xl"
+                android:accessibilityHeading="true"
+                android:accessibilityLiveRegion="polite"
+                android:letterSpacing="-0.02"
+                android:text="@string/offline_explainer_title" />
+
+            <TextView
+                android:id="@+id/subtitle"
+                style="@style/Text.OfflineIntro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_m"
+                android:breakStrategy="balanced"
+                android:text="@string/offline_explainer_subtitle" />
+
+            <!-- "Needs internet" then "Works offline", each an outlined card -->
+            <LinearLayout
+                android:id="@+id/capability_groups"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -7,7 +7,16 @@ import com.electricdreams.numo.ndef.CashuPaymentHelper.extractCashuToken
 import com.electricdreams.numo.ndef.CashuPaymentHelper.isCashuPaymentRequest
 import com.electricdreams.numo.ndef.CashuPaymentHelper.isCashuToken
 
-import com.google.gson.JsonParser
+import com.electricdreams.numo.AppGlobals
+import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.payment.SwapToLightningMintManager
+import kotlinx.coroutines.runBlocking
+import org.cashudevkit.Amount
+import org.cashudevkit.CurrencyUnit
+import org.cashudevkit.MintUrl
+import org.cashudevkit.Proof
+import org.cashudevkit.Wallet
+import org.cashudevkit.WalletRepository
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -17,13 +26,61 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.util.ReflectionHelpers
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 /**
- * Pure tests for the deterministic helpers in [CashuPaymentHelper].
+ * Tests for payment parsing and checkout unit handling in [CashuPaymentHelper].
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class CashuPaymentHelperTest {
+
+    @Test
+    fun `cashu proof redemption uses saved checkout unit after preference changes`(): Unit = runBlocking {
+        val context: Context = ApplicationProvider.getApplicationContext()
+        AppGlobals.init(context)
+        val manager = mock<MintManager>()
+        whenever(manager.getPreferredUnit()).thenReturn("usd")
+        val repository = mock<WalletRepository>()
+        val wallet = mock<Wallet>()
+        val mintUrl = "https://mint.test"
+        whenever(repository.getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)).thenReturn(wallet)
+        val proof = mock<Proof>()
+        whenever(proof.amount).thenReturn(Amount(1_000u))
+        val proofs = listOf(proof)
+        val previousWallet = CashuWalletManager.getWallet()
+        ReflectionHelpers.setStaticField(MintManager::class.java, "instance", manager)
+        ReflectionHelpers.setStaticField(CashuWalletManager::class.java, "wallet", repository)
+
+        try {
+            val result = CashuPaymentHelper.redeemProofsWithSwap(
+                context, proofs, mintUrl, "sat", 1_000L, "sat", listOf(mintUrl),
+                SwapToLightningMintManager.PaymentContext("saved-payment", 1_000L, paymentUnit = "sat"),
+            )
+
+            assertEquals("SUCCESS_KNOWN", result)
+            verify(repository).getWallet(MintUrl(mintUrl), CurrencyUnit.Sat)
+            verify(wallet).receiveProofs(eq(proofs), any(), anyOrNull(), anyOrNull())
+        } finally {
+            ReflectionHelpers.setStaticField(MintManager::class.java, "instance", null)
+            ReflectionHelpers.setStaticField(CashuWalletManager::class.java, "wallet", previousWallet)
+        }
+    }
+
+    @Test(expected = CashuPaymentHelper.RedemptionException::class)
+    fun `cashu redemption rejects proofs in a different checkout unit`(): Unit = runBlocking {
+        val context: Context = ApplicationProvider.getApplicationContext()
+        CashuPaymentHelper.redeemProofsWithSwap(
+            context, emptyList(), "https://mint.test", "usd", 100L, "sat", null,
+            SwapToLightningMintManager.PaymentContext("saved-payment", 100L, paymentUnit = "sat"),
+        )
+    }
 
     @Test
     fun `isCashuToken recognizes cashuA prefix`() {

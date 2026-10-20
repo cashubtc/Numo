@@ -1,130 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
+    android:layout_height="match_parent">
 
-    <!-- Top App Bar -->
-    <com.electricdreams.numo.ui.components.NumoTopBar
-        android:id="@+id/top_bar"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        app:topBarTitle="@string/settings_theme_title"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_bar">
+        <!-- Top App Bar -->
 
-        <LinearLayout
-            android:id="@+id/theme_content"
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/space_2xl">
+            app:topBarTitle="@string/settings_theme_title"
+            app:layout_constraintTop_toTopOf="parent"
+            android:minHeight="64dp"
+            app:topBarSettingsStyle="true" />
 
-            <!-- Mode Section Header -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/space_l"
-                android:paddingBottom="@dimen/row_padding_vertical"
-                android:text="@string/theme_settings_section_mode"
-                android:textAppearance="@style/Text.SectionHeader" />
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/top_bar"
+            android:clipToPadding="false">
 
-            <!-- Dark Mode Toggle -->
             <LinearLayout
+                android:id="@+id/theme_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:background="@drawable/bg_row_ripple">
+                android:orientation="vertical"
+                android:paddingBottom="24dp"
+                android:paddingHorizontal="@dimen/settings_page_margin">
+
+                <com.electricdreams.numo.ui.components.ThemePreviewView
+                    android:id="@+id/theme_preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="264dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@drawable/bg_theme_preview"
+                    android:contentDescription="@string/theme_settings_preview_description"
+                    android:importantForAccessibility="yes" />
+
+                <!-- Mode Section Header -->
 
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/theme_settings_dark_mode_label"
-                    android:textAppearance="@style/Text.RowTitle" />
+                    android:text="@string/theme_settings_section_mode"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="@dimen/settings_section_gap"
+                    android:accessibilityHeading="true" />
+
+                <!-- Dark Mode Toggle -->
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/dark_mode_switch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    style="@style/Widget.Numo.SettingsSwitch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="@dimen/settings_switch_height"
+                    android:text="@string/theme_settings_dark_mode_label"
+                    android:textAppearance="@style/Text.RowTitle"
+                    android:paddingHorizontal="0dp"
+                    android:paddingVertical="@dimen/settings_row_padding"
+                    android:background="@drawable/bg_settings_group" />
+
+                <!-- App Theme Section Header -->
+
+                <TextView
+                    android:text="@string/theme_settings_section_app_theme"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="@dimen/settings_section_gap"
+                    android:accessibilityHeading="true" />
+
+                <!-- Theme Radio Group -->
+
+                <RadioGroup
+                    android:id="@+id/theme_radio_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_settings_group"
+                    android:clipToOutline="true"
+                    android:showDividers="none">
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radio_obsidian"
+                        android:text="@string/theme_settings_option_obsidian"
+                        style="@style/Widget.Numo.SettingsChoice" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radio_bitcoin_orange"
+                        android:text="@string/theme_settings_option_bitcoin_orange"
+                        style="@style/Widget.Numo.SettingsChoice" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radio_green"
+                        android:text="@string/theme_settings_option_green"
+                        style="@style/Widget.Numo.SettingsChoice" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radio_white"
+                        android:text="@string/theme_settings_option_white"
+                        style="@style/Widget.Numo.SettingsChoice" />
+
+                </RadioGroup>
+
             </LinearLayout>
 
-            <!-- App Theme Section Header -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/section_gap"
-                android:paddingBottom="@dimen/row_padding_vertical"
-                android:text="@string/theme_settings_section_app_theme"
-                android:textAppearance="@style/Text.SectionHeader" />
+        </ScrollView>
 
-            <!-- Theme Radio Group -->
-            <RadioGroup
-                android:id="@+id/theme_radio_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <RadioButton
-                    android:id="@+id/radio_obsidian"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/settings_item_height"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="@drawable/selector_radio_custom"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:text="@string/theme_settings_option_obsidian"
-                    android:textAppearance="@style/Text.RowTitle" />
-
-                <RadioButton
-                    android:id="@+id/radio_bitcoin_orange"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/settings_item_height"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="@drawable/selector_radio_custom"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:text="@string/theme_settings_option_bitcoin_orange"
-                    android:textAppearance="@style/Text.RowTitle" />
-
-                <RadioButton
-                    android:id="@+id/radio_green"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/settings_item_height"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="@drawable/selector_radio_custom"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:text="@string/theme_settings_option_green"
-                    android:textAppearance="@style/Text.RowTitle" />
-
-                <RadioButton
-                    android:id="@+id/radio_white"
-                    android:layout_width="match_parent"
-                    android:layout_height="@dimen/settings_item_height"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="@drawable/selector_radio_custom"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:text="@string/theme_settings_option_white"
-                    android:textAppearance="@style/Text.RowTitle" />
-            </RadioGroup>
-
-        </LinearLayout>
-    </ScrollView>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

@@ -130,6 +130,73 @@ class PaymentsHistoryActivityTest {
     }
 
     @Test
+    fun `legacy arkoor request migrates into independent quote fields`() {
+        val id = PaymentsHistoryActivity.addPendingPayment(
+            context, 1_000L, "sat", 1_000L, null, null, "1,000 sats",
+        )
+        PaymentsHistoryActivity.updatePendingWithLightningInfo(
+            context, id, "ark1address", "ark-quote", "http://127.0.0.1:3339",
+            paymentType = PaymentHistoryEntry.TYPE_ARKOOR,
+        )
+        val entry = PaymentsHistoryActivity.getPaymentHistory(context).single()
+        assertNull(entry.paymentType)
+        assertEquals("ark1address", entry.arkoorAddress)
+        assertEquals("ark-quote", entry.arkoorQuoteId)
+        assertEquals("http://127.0.0.1:3339", entry.arkoorMintUrl)
+        assertNull(entry.lightningInvoice)
+        assertNull(entry.lightningQuoteId)
+        assertTrue(entry.isPending())
+    }
+
+    @Test
+    fun `both quote callback orders preserve independent requests through completion`() {
+        for (arkoorFirst in listOf(true, false)) {
+            val id = PaymentsHistoryActivity.addPendingPayment(
+                context, 1_000L, "sat", 1_000L, null, null, "1,000 sats",
+            )
+            val saveArk = {
+                PaymentsHistoryActivity.updatePendingWithArkoorInfo(
+                    context, id, "ark1address", "ark-quote", "https://mint.example",
+                )
+            }
+            val saveLightning = {
+                PaymentsHistoryActivity.updatePendingWithLightningInfo(
+                    context, id, "lnbc1invoice", "ln-quote", "https://mint.example",
+                )
+            }
+            if (arkoorFirst) { saveArk(); saveLightning() } else { saveLightning(); saveArk() }
+            PaymentsHistoryActivity.updatePendingWithNostrInfo(context, id, "nprofile", "secret")
+            val pending = PaymentsHistoryActivity.getPaymentEntryById(context, id)
+                ?: error("Missing pending checkout")
+            assertNull(pending.paymentType)
+            assertEquals("ark-quote", pending.arkoorQuoteId)
+            assertEquals("ln-quote", pending.lightningQuoteId)
+            val intent = com.electricdreams.numo.payment.PaymentIntentFactory
+                .createResumePaymentIntent(context, pending)
+            assertEquals("ark-quote", intent.getStringExtra("arkoor_quote_id"))
+            assertEquals("ln-quote", intent.getStringExtra("lightning_quote_id"))
+            assertEquals("lnbc1invoice", intent.getStringExtra("lightning_invoice"))
+            PaymentsHistoryActivity.completePendingPayment(
+                context, id, "", PaymentHistoryEntry.TYPE_ARKOOR, "https://mint.example",
+            )
+            val completed = PaymentsHistoryActivity.getPaymentEntryById(context, id)
+                ?: error("Missing completed checkout")
+            assertTrue(completed.isCompleted())
+            assertEquals(PaymentHistoryEntry.TYPE_ARKOOR, completed.paymentType)
+            assertEquals("ark1address", completed.arkoorAddress)
+            assertEquals("ark-quote", completed.arkoorQuoteId)
+            assertEquals("lnbc1invoice", completed.lightningInvoice)
+            assertEquals("ln-quote", completed.lightningQuoteId)
+            // Late callbacks must not replace the method that completed the checkout.
+            PaymentsHistoryActivity.completePendingPayment(
+                context, id, "", PaymentHistoryEntry.TYPE_LIGHTNING, "https://mint.example",
+            )
+            assertEquals(PaymentHistoryEntry.TYPE_ARKOOR,
+                PaymentsHistoryActivity.getPaymentEntryById(context, id)?.paymentType)
+        }
+    }
+
+    @Test
     fun `cancelPendingPayment removes only pending entries`() {
         val id1 = PaymentsHistoryActivity.addPendingPayment(
             context = context,
@@ -324,7 +391,7 @@ class PaymentsHistoryActivityTest {
     }
 
     @Test
-    fun `expired payment is not tappable and does not show details`() {
+    fun `expired payment opens its details`() {
         val paymentId = PaymentsHistoryActivity.addPendingPayment(
             context = context, amount = 100L, entryUnit = "sat", enteredAmount = 100L,
             bitcoinPrice = null, paymentRequest = null, formattedAmount = null
@@ -345,17 +412,15 @@ class PaymentsHistoryActivityTest {
         val holder = adapter.createViewHolder(recyclerView, 1) as PaymentsHistoryAdapter.TransactionViewHolder
         adapter.bindViewHolder(holder, position)
 
-        // Click the main content or the item view and verify no activity is launched
-        assertFalse(holder.mainContent.isClickable)
-        assertFalse(holder.itemView.isClickable)
-
-        val shadowActivity = org.robolectric.Shadows.shadowOf(activity)
-        assertNull(shadowActivity.nextStartedActivity)
-
+        // Every row opens its details, where an expired payment says so and can be deleted
         holder.mainContent.performClick()
-        holder.itemView.performClick()
 
-        assertNull(shadowActivity.nextStartedActivity)
+        val started = org.robolectric.Shadows.shadowOf(activity).nextStartedActivity
+        assertEquals(TransactionDetailActivity::class.java.name, started?.component?.className)
+        assertEquals(
+            PaymentHistoryEntry.STATUS_EXPIRED,
+            started?.getStringExtra(TransactionDetailActivity.EXTRA_TRANSACTION_STATUS),
+        )
     }
 
     @Test
@@ -392,6 +457,40 @@ class PaymentsHistoryActivityTest {
     }
 
     @Test
+    fun `a settled sale is named by what sold, as in Sales, with no badge or sign`() {
+        val basket = com.electricdreams.numo.core.model.CheckoutBasket(
+            items = listOf(
+                com.electricdreams.numo.core.model.CheckoutBasketItem(
+                    itemId = "bun", uuid = "bun-uuid", name = "Cinnamon Bun", quantity = 2,
+                    priceType = "FIAT", netPriceCents = 425, priceSats = 0, priceCurrency = "USD",
+                    vatEnabled = false, vatRate = 0,
+                ),
+            ),
+            currency = "USD",
+            totalSatoshis = 10_109,
+        )
+        val paymentId = PaymentsHistoryActivity.addPendingPayment(
+            context = context, amount = 10_109L, entryUnit = "sat", enteredAmount = 10_109L,
+            bitcoinPrice = null, paymentRequest = null, formattedAmount = null,
+            checkoutBasketJson = basket.toJson(),
+        )
+        PaymentsHistoryActivity.completePendingPayment(
+            context = context, paymentId = paymentId, token = "token",
+            paymentType = PaymentHistoryEntry.TYPE_CASHU, mintUrl = null
+        )
+
+        val activity = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup().get()
+        val recyclerView = activity.findViewById<RecyclerView>(R.id.history_recycler_view)
+        val adapter = recyclerView.adapter as PaymentsHistoryAdapter
+        val holder = adapter.createViewHolder(recyclerView, 1) as PaymentsHistoryAdapter.TransactionViewHolder
+        adapter.bindViewHolder(holder, 1)
+
+        assertEquals("2 × Cinnamon Bun", holder.titleText.text.toString())
+        assertFalse(holder.amountText.text.startsWith("+"))
+        assertEquals(View.GONE, holder.statusBadge.visibility)
+    }
+
+    @Test
     fun `custom zero decimal currency entry displays formatted amount with correct scale`() {
         val paymentId = PaymentsHistoryActivity.addPendingPayment(
             context = context,
@@ -422,9 +521,9 @@ class PaymentsHistoryActivityTest {
         val holder = adapter.createViewHolder(recyclerView, 1) as PaymentsHistoryAdapter.TransactionViewHolder
         adapter.bindViewHolder(holder, position)
 
-        // Assert that the amount display is "+10 POINT" instead of "+1000 POINT" or similar scaling bug
+        // "10 POINT", not "1000 POINT" or a similar scaling bug; sales carry no "+" sign
         val amountDisplay = holder.amountText.text.toString()
-        assertEquals("+10 POINT", amountDisplay)
+        assertEquals("10 POINT", amountDisplay)
     }
 
     @Test
@@ -453,6 +552,23 @@ class PaymentsHistoryActivityTest {
         assertEquals(1, history.size)
         val entry = history.first()
         assertTrue(entry.isExpired())
+    }
+
+    @Test
+    fun `old arkoor quotes stay resumable for late payments`() {
+        val entry = PaymentHistoryEntry(
+            token = "", amount = 330L, enteredAmount = 330L,
+            date = java.util.Date(System.currentTimeMillis() - 3 * 60 * 60 * 1000L),
+            rawStatus = PaymentHistoryEntry.STATUS_PENDING,
+            paymentType = PaymentHistoryEntry.TYPE_ARKOOR,
+            lightningInvoice = "ark1address", lightningQuoteId = "quote",
+            lightningMintUrl = "http://127.0.0.1:3339",
+        )
+        context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE).edit()
+            .putString("history", com.google.gson.Gson().toJson(listOf(entry))).apply()
+        val controller = Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup()
+        assertTrue(PaymentsHistoryActivity.getPaymentHistory(context).single().isPending())
+        controller.pause().stop().destroy()
     }
 
     @Test

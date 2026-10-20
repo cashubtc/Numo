@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_clear_logs">Protokolle löschen</string>
+    <string name="settings_clear_search">Suche löschen</string>
+</resources>

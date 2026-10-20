@@ -14,7 +14,6 @@ import com.electricdreams.numo.core.wallet.impl.CdkWalletProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.MintUrl
 import org.cashudevkit.Wallet
@@ -26,6 +25,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.cashudevkit.WalletSqliteDatabase
 import org.cashudevkit.WalletStore
 import org.cashudevkit.generateMnemonic
+
+import com.electricdreams.numo.core.update.launchPaymentOperation
 
 /**
  * Global owner of the CDK WalletRepository and its backing SQLite database.
@@ -93,7 +94,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
 
         // Build initial wallet
         val initialMints = mintManager.getAllowedMints()
-        scope.launch {
+        scope.launchPaymentOperation {
             rebuildWallet(initialMints)
         }
     }
@@ -302,7 +303,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
 
     override fun onMintsChanged(newMints: List<String>) {
         Log.d(TAG, "Mint list changed, rebuilding wallet with ${'$'}{newMints.size} mints")
-        scope.launch {
+        scope.launchPaymentOperation {
             rebuildWallet(newMints)
         }
     }
@@ -469,8 +470,13 @@ object CashuWalletManager : MintManager.MintChangeListener {
                         val methodObj = org.json.JSONObject()
                         methodObj.put("method", method.method.toMethodString())
                         methodObj.put("unit", method.unit.toUnitString())
-                        method.minAmount?.let { methodObj.put("min_amount", it.value.toString()) }
-                        method.maxAmount?.let { methodObj.put("max_amount", it.value.toString()) }
+                        // BigInteger preserves CDK's unsigned amount as a JSON number.
+                        method.minAmount?.let {
+                            methodObj.put("min_amount", it.value.toString().toBigInteger())
+                        }
+                        method.maxAmount?.let {
+                            methodObj.put("max_amount", it.value.toString().toBigInteger())
+                        }
                         method.description?.let { methodObj.put("description", it) }
                         methodsArray.put(methodObj)
                     }
@@ -485,8 +491,12 @@ object CashuWalletManager : MintManager.MintChangeListener {
                         val methodObj = org.json.JSONObject()
                         methodObj.put("method", method.method.toMethodString())
                         methodObj.put("unit", method.unit.toUnitString())
-                        method.minAmount?.let { methodObj.put("min_amount", it.value.toString()) }
-                        method.maxAmount?.let { methodObj.put("max_amount", it.value.toString()) }
+                        method.minAmount?.let {
+                            methodObj.put("min_amount", it.value.toString().toBigInteger())
+                        }
+                        method.maxAmount?.let {
+                            methodObj.put("max_amount", it.value.toString().toBigInteger())
+                        }
                         methodsArray.put(methodObj)
                     }
                     nut05Obj.put("methods", methodsArray)

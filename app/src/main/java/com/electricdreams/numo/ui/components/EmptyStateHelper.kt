@@ -17,7 +17,10 @@ object EmptyStateHelper {
     ) {
         view.findViewById<ImageView>(R.id.empty_state_icon).setImageResource(icon)
         view.findViewById<TextView>(R.id.empty_state_title).text = title
-        view.findViewById<TextView>(R.id.empty_state_description).text = description
+        view.findViewById<TextView>(R.id.empty_state_description).apply {
+            text = description
+            visibility = if (description.isBlank()) View.GONE else View.VISIBLE
+        }
 
         val actionBtn = view.findViewById<TextView>(R.id.empty_state_action)
         if (actionLabel != null && onAction != null) {

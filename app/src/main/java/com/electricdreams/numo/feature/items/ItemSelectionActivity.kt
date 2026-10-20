@@ -3,6 +3,7 @@ package com.electricdreams.numo.feature.items
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import com.electricdreams.numo.util.setSoftInputModeResize
 import android.view.LayoutInflater
@@ -44,6 +45,7 @@ import com.electricdreams.numo.feature.items.handlers.BasketUIHandler
 import com.electricdreams.numo.feature.items.handlers.CheckoutHandler
 import com.electricdreams.numo.feature.items.handlers.ItemSearchHandler
 import com.electricdreams.numo.feature.items.handlers.SelectionAnimationHandler
+import com.electricdreams.numo.feature.offline.OfflineExplainerActivity
 
 import com.electricdreams.numo.core.payment.BTCPayConfig
 import com.electricdreams.numo.core.payment.BtcPayAppsService
@@ -412,7 +414,7 @@ class ItemSelectionActivity : AppCompatActivity() {
 
         checkoutButton.setOnClickListener {
             if (!com.electricdreams.numo.core.util.NetworkUtils.isNetworkAvailable(this)) {
-                Toast.makeText(this, getString(R.string.pos_error_no_network_charge), Toast.LENGTH_SHORT).show()
+                OfflineExplainerActivity.start(this)
                 return@setOnClickListener
             }
             // Save basket before checkout if not already saved, or update existing
@@ -521,11 +523,6 @@ class ItemSelectionActivity : AppCompatActivity() {
             ContextCompat.getColor(this, R.color.color_bg_white)
         }
         
-        // Set light/dark icons in navigation bar
-        WindowCompat.getInsetsController(window, window.decorView).apply {
-            isAppearanceLightNavigationBars = !isDarkBackground
-        }
-        
         // Also update status bar
         window.statusBarColor = if (isDarkBackground) {
             ContextCompat.getColor(this, R.color.empty_state_background)
@@ -533,8 +530,12 @@ class ItemSelectionActivity : AppCompatActivity() {
             ContextCompat.getColor(this, R.color.color_bg_white)
         }
         
+        val isDarkTheme = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK ==
+            Configuration.UI_MODE_NIGHT_YES
+        val useLightIcons = isDarkBackground || isDarkTheme
         WindowCompat.getInsetsController(window, window.decorView).apply {
-            isAppearanceLightStatusBars = !isDarkBackground
+            isAppearanceLightStatusBars = !useLightIcons
+            isAppearanceLightNavigationBars = !useLightIcons
         }
     }
 

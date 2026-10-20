@@ -49,17 +49,20 @@ class ReceiptUnitIntegrationTest {
             items = listOf(item), currency = "EUR", totalSatoshis = 50,
             chargeUnit = "points", chargeAmountAtomic = 50, chargeIssuerScope = issuer,
         )
-        val intent = Intent(context, BasketReceiptActivity::class.java)
-            .putExtra(BasketReceiptActivity.EXTRA_CHECKOUT_BASKET_JSON, basket.toJson())
-            .putExtra(BasketReceiptActivity.EXTRA_TOTAL_SATOSHIS, 50L)
-        val controller = Robolectric.buildActivity(BasketReceiptActivity::class.java, intent).setup()
+        val intent = Intent(context, TransactionDetailActivity::class.java)
+            .putExtra(TransactionDetailActivity.EXTRA_CHECKOUT_BASKET_JSON, basket.toJson())
+            .putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_AMOUNT, 50L)
+            .putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_UNIT, "points")
+            .putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ISSUER_SCOPE, issuer)
+        val controller = Robolectric.buildActivity(TransactionDetailActivity::class.java, intent).setup()
         try {
             val activity = controller.get()
-            assertEquals("50 POINTS", activity.findViewById<TextView>(R.id.total_amount).text.toString())
-            val subtitle = activity.findViewById<TextView>(R.id.total_subtitle)
+            assertEquals("50 POINTS", activity.findViewById<TextView>(R.id.detail_amount).text.toString())
+            val subtitle = activity.findViewById<TextView>(R.id.detail_mint_url)
             assertEquals("merchant-loyalty-rewards.example", subtitle.text.toString())
             assertEquals(View.VISIBLE, subtitle.visibility)
-            assertEquals("50 POINTS", activity.findViewById<TextView>(R.id.item_total).text.toString())
+            assertEquals("50 POINTS · merchant-loyalty-rewards.example",
+                activity.findViewById<TextView>(R.id.item_total).text.toString())
             assertEquals(
                 "25 POINTS · merchant-loyalty-rewards.example each",
                 activity.findViewById<TextView>(R.id.item_unit_price).text.toString(),
@@ -71,16 +74,16 @@ class ReceiptUnitIntegrationTest {
 
     @Test
     fun `receipt screen honors a legacy payment unit when the basket has none`() {
-        val intent = Intent(context, BasketReceiptActivity::class.java)
-            .putExtra(BasketReceiptActivity.EXTRA_CHECKOUT_BASKET_JSON, legacyYenBasket().toJson())
-            .putExtra(BasketReceiptActivity.EXTRA_PAYMENT_UNIT, "jpy")
-            .putExtra(BasketReceiptActivity.EXTRA_TOTAL_SATOSHIS, 1_000L)
-        val controller = Robolectric.buildActivity(BasketReceiptActivity::class.java, intent).setup()
+        val intent = Intent(context, TransactionDetailActivity::class.java)
+            .putExtra(TransactionDetailActivity.EXTRA_CHECKOUT_BASKET_JSON, legacyYenBasket().toJson())
+            .putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_UNIT, "jpy")
+            .putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_AMOUNT, 1_000L)
+        val controller = Robolectric.buildActivity(TransactionDetailActivity::class.java, intent).setup()
         try {
             val expected = UnitAmountFormatter.formatAtomic(
                 1_000, UnitDescriptor.defaultFor(UnitId.of("jpy")),
             )
-            val paidAmount = controller.get().findViewById<TextView>(R.id.paid_amount)
+            val paidAmount = controller.get().findViewById<TextView>(R.id.final_total_value)
             assertEquals(expected, paidAmount.text.toString())
         } finally {
             controller.pause().stop().destroy()
@@ -98,8 +101,11 @@ class ReceiptUnitIntegrationTest {
         val controller = Robolectric.buildActivity(TransactionDetailActivity::class.java, intent)
             .setup()
         try {
-            val equivalent = controller.get().findViewById<TextView>(R.id.sats_equivalent)
-            assertEquals("≈ " + Amount(100_000, Amount.Currency.JPY), equivalent.text.toString())
+            val activity = controller.get()
+            assertEquals(Amount(100_000, Amount.Currency.JPY).toString(),
+                activity.findViewById<TextView>(R.id.final_total_value).text.toString())
+            assertEquals("≈ " + Amount(10_000, Amount.Currency.BTC),
+                activity.findViewById<TextView>(R.id.sats_equivalent).text.toString())
         } finally {
             controller.pause().stop().destroy()
         }

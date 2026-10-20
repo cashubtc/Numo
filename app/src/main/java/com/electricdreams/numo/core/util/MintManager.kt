@@ -35,15 +35,12 @@ class MintManager private constructor(context: Context) {
         private const val KEY_MINT_REFRESH_PREFIX = "mintRefresh_"
         private const val REFRESH_INTERVAL_MS = 60 * 1000L // 1 minute
 
-        // Default mints
-        private val DEFAULT_MINTS: Set<String> = setOf(
+        internal val DEFAULT_MINTS = setOf(
             "https://mint.minibits.cash/Bitcoin",
             "https://mint.macadamia.cash",
             "https://antifiat.cash",
             "https://mint.cubabitcoin.org",
         )
-        
-        // Default Lightning mint (first of the default mints)
         private const val DEFAULT_LIGHTNING_MINT = "https://mint.minibits.cash/Bitcoin"
 
         @Volatile
@@ -93,8 +90,8 @@ class MintManager private constructor(context: Context) {
         // Ensure preferred Lightning mint is valid (exists in allowed mints)
         val preferred = preferredLightningMint
         if (preferred == null || !allowedMints.contains(preferred)) {
-            // Set to first allowed mint or default
-            preferredLightningMint = allowedMints.firstOrNull() ?: DEFAULT_LIGHTNING_MINT
+            preferredLightningMint = DEFAULT_LIGHTNING_MINT.takeIf { it in allowedMints }
+                ?: allowedMints.firstOrNull()
             savePreferredLightningMint()
         }
     }
@@ -309,7 +306,7 @@ class MintManager private constructor(context: Context) {
      * Whether the POS should accept payments from unknown mints by swapping
      * them into the configured Lightning mint.
      *
-     * Default: true (current behavior).
+     * Enabled by default; the saved user preference takes precedence.
      */
     fun isSwapFromUnknownMintsEnabled(): Boolean = enableSwapFromUnknownMints
 

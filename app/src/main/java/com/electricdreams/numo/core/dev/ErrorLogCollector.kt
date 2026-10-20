@@ -1,111 +1,116 @@
-/**
- * Background collector that mirrors android.util.Log error output for this
- * process into [ErrorLogStore] by tailing logcat.
- *
- * This keeps the existing Log.e() usage intact while providing an in-app
- * history of recent errors for the Developer Settings > Error Logs screen.
- */
 package com.electricdreams.numo.core.dev
 
-import android.os.Build
 import android.os.Process
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.concurrent.atomic.AtomicBoolean
+import android.util.Log
+import com.electricdreams.numo.core.data.model.ErrorLogEntry
+import java.io.IOException
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 
+/** Collects this process's errors while Developer Mode is enabled, in every build variant. */
 object ErrorLogCollector {
-
-    private val running = AtomicBoolean(false)
-    private var workerThread: Thread? = null
-
-    // Example logcat -v time prefix: "03-15 12:34:56.789"
-    private val logcatDateFormat = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US)
-
-    /**
-     * Start tailing logcat for this process's error-level logs.
-     * Safe to call multiple times; only the first call starts the collector.
-     */
-    fun start() {
-        if (!running.compareAndSet(false, true)) return
-
-        workerThread = Thread {
-            try {
-                val pid = Process.myPid()
-                val cmd = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    arrayOf("logcat", "-v", "time", "--pid", pid.toString(), "*:E")
-                } else {
-                    arrayOf("logcat", "-v", "time", "*:E")
-                }
-
-                val process = Runtime.getRuntime().exec(cmd)
-                BufferedReader(InputStreamReader(process.inputStream)).use { reader ->
-                    var line: String?
-                    while (running.get()) {
-                        line = reader.readLine() ?: break
-                        parseAndStoreLine(line!!, pid)
-                    }
-                }
-                process.destroy()
-            } catch (_: Throwable) {
-                // Collector is best-effort for developer diagnostics; ignore failures.
-            } finally {
-                running.set(false)
-            }
-        }.apply {
-            name = "Numo-ErrorLogCollector"
-            isDaemon = true
-            start()
-        }
-    }
-
-    /**
-     * Stop tailing logcat.
-     */
-    fun stop() {
-        running.set(false)
-        workerThread?.interrupt()
-        workerThread = null
-    }
-
-    private fun parseAndStoreLine(raw: String, pid: Int) {
-        // For pre-N devices, filter out other pids manually.
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N && !raw.contains(" $pid ")) {
-            return
-        }
-
-        // Expected -v time format: "MM-dd HH:mm:ss.SSS PID T TAG: message"
-        val firstSpace = raw.indexOf(' ')
-        val secondSpace = if (firstSpace > 0) raw.indexOf(' ', firstSpace + 1) else -1
-        if (secondSpace <= 0) return
-
-        val timestampStr = raw.substring(0, secondSpace) // "MM-dd HH:mm:ss.SSS"
-        val rest = raw.substring(secondSpace + 1)
-
-        val colonIndex = rest.indexOf(':')
-        if (colonIndex <= 0) return
-
-        val header = rest.substring(0, colonIndex).trim()
-        val message = rest.substring(colonIndex + 1).trim()
-
-        // header typically ends with the tag, e.g. "1234 1234 E MyTag"
-        val parts = header.split(Regex("\\s+"))
-        val tag = parts.lastOrNull() ?: "Unknown"
-
-        val timestamp = parseTimestamp(timestampStr) ?: Date()
-
-        ErrorLogStore.appendError(
-            tag = tag,
-            message = message,
-            throwable = null,
+    private val monitor by lazy {
+        ErrorLogMonitor(
+            scope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
+            pid = Process.myPid(),
+            processFactory = { pid ->
+                ProcessBuilder("logcat", "-B", "--pid", pid.toString(),
+                    "-b", "main", "-b", "system", "-b", "crash")
+                    .redirectErrorStream(true)
+                    .start()
+            },
+            record = ErrorLogStore::record,
         )
     }
 
-    private fun parseTimestamp(value: String): Date? = try {
-        logcatDateFormat.parse(value)
-    } catch (_: Exception) {
-        null
+    val state get() = monitor.state
+
+    fun start() = monitor.start()
+
+    fun stop() = monitor.stop()
+}
+
+enum class ErrorLogCollectionState { STOPPED, STARTING, COLLECTING, RETRYING }
+
+/** Owns the subprocess so stopping collection also unblocks a pending read. */
+internal class ErrorLogMonitor(
+    private val scope: CoroutineScope,
+    private val pid: Int,
+    private val processFactory: (Int) -> java.lang.Process,
+    private val record: (ErrorLogEntry) -> Unit,
+) {
+    private val mutableState = MutableStateFlow(ErrorLogCollectionState.STOPPED)
+    val state = mutableState.asStateFlow()
+    private var job: Job? = null
+    private var process: java.lang.Process? = null
+
+    @Synchronized
+    fun start() {
+        if (job?.isActive == true) return
+        mutableState.value = ErrorLogCollectionState.STARTING
+        job = scope.launch {
+            var retryDelay = 1_000L
+            while (isActive) {
+                var child: java.lang.Process? = null
+                try {
+                    synchronized(this@ErrorLogMonitor) {
+                        if (!isActive) return@launch
+                        child = processFactory(pid)
+                        process = child
+                        mutableState.value = ErrorLogCollectionState.COLLECTING
+                    }
+                    val activeProcess = child ?: return@launch
+                    val assembler = ErrorLogAssembler(record)
+                    activeProcess.inputStream.buffered().use { input ->
+                        val reader = LogcatRecordReader(input, pid)
+                        while (isActive) {
+                            val entry = reader.read() ?: throw IOException("logcat closed its output")
+                            ensureActive()
+                            assembler.accept(entry)
+                            retryDelay = 1_000L
+                        }
+                    }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    synchronized(this@ErrorLogMonitor) {
+                        if (isActive) {
+                            mutableState.value = ErrorLogCollectionState.RETRYING
+                            // Warning level avoids feeding collection failures back into the store.
+                            Log.w(TAG, "Error log collection failed; retrying", e)
+                        }
+                    }
+                } finally {
+                    synchronized(this@ErrorLogMonitor) {
+                        child?.destroy()
+                        if (process === child) process = null
+                    }
+                }
+                delay(retryDelay)
+                retryDelay = (retryDelay * 2).coerceAtMost(30_000L)
+            }
+        }
+    }
+
+    @Synchronized
+    fun stop() {
+        job?.cancel()
+        job = null
+        process?.destroy()
+        process = null
+        mutableState.value = ErrorLogCollectionState.STOPPED
+    }
+
+    companion object {
+        private const val TAG = "ErrorLogCollector"
     }
 }

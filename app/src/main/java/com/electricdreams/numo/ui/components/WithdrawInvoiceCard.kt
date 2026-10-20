@@ -8,14 +8,13 @@ import android.view.LayoutInflater
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Button
 import android.widget.EditText
-
-import android.widget.TextView
-import com.electricdreams.numo.R
 import com.google.android.material.card.MaterialCardView
+
+import com.electricdreams.numo.R
 
 /**
  * A beautiful, reusable card component for Lightning invoice input.
- * 
+ *
  * Features:
  * - Elegant card design with icon
  * - Multi-line invoice input
@@ -39,24 +38,25 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
 
     private var listener: OnContinueListener? = null
     private var scanListener: OnScanListener? = null
-    
+
     private val invoiceInput: EditText
     private val continueButton: Button
     private val scanButton: Button
 
     init {
         LayoutInflater.from(context).inflate(R.layout.component_withdraw_invoice_card, this, true)
-        
+
         // Setup card styling
-        radius = resources.getDimension(R.dimen.card_corner_radius)
+        radius = resources.getDimension(R.dimen.settings_card_radius)
         cardElevation = 0f
-        setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
-        
+        setCardBackgroundColor(context.getColor(R.color.color_bg_card))
+        strokeWidth = 0
+
         // Find views
         invoiceInput = findViewById(R.id.invoice_input)
         continueButton = findViewById(R.id.continue_button)
         scanButton = findViewById(R.id.scan_button)
-        
+
         setupListeners()
     }
 
@@ -70,7 +70,7 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
                 updateButtonState(hasInput)
             }
         })
-        
+
         // Continue button
         continueButton.setOnClickListener {
             val invoice = invoiceInput.text.toString().trim()
@@ -93,13 +93,13 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
                     .start()
             }
         }
-        
+
         // Scan button
         scanButton.setOnClickListener {
             scanListener?.onScanClicked()
         }
     }
-    
+
     private fun updateButtonState(enabled: Boolean) {
         continueButton.isEnabled = enabled
     }
@@ -117,26 +117,26 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
     fun setOnScanListener(listener: OnScanListener) {
         this.scanListener = listener
     }
-    
+
     /**
      * Get the current invoice text
      */
     fun getInvoice(): String = invoiceInput.text.toString().trim()
-    
+
     /**
      * Set invoice text (e.g., from QR scan)
      */
     fun setInvoice(invoice: String) {
         invoiceInput.setText(invoice)
     }
-    
+
     /**
      * Clear the input field
      */
     fun clearInput() {
         invoiceInput.text?.clear()
     }
-    
+
     /**
      * Enable or disable the card
      */
@@ -146,7 +146,7 @@ class WithdrawInvoiceCard @JvmOverloads constructor(
         scanButton.isEnabled = enabled
         alpha = if (enabled) 1f else 0.5f
     }
-    
+
     /**
      * Play entrance animation
      */

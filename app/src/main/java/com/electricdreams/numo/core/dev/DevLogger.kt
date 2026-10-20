@@ -1,9 +1,8 @@
 /**
  * Developer logging helper.
  *
- * This wrapper mirrors [android.util.Log] for error-level logging while
- * additionally persisting error information to [ErrorLogStore] so it can
- * be inspected from the in-app Developer Settings.
+ * Errors are persisted by [ErrorLogCollector] when Developer Mode is enabled.
+ * Use the same collection path as Log.e to avoid recording each error twice.
  */
 package com.electricdreams.numo.core.dev
 
@@ -12,7 +11,7 @@ import android.util.Log
 object DevLogger {
 
     /**
-     * Log an error message and persist it to [ErrorLogStore].
+     * Log an error message for logcat and the developer error collector.
      */
     @JvmStatic
     fun e(tag: String, message: String, throwable: Throwable? = null) {
@@ -21,8 +20,6 @@ object DevLogger {
         } else {
             Log.e(tag, message)
         }
-
-        ErrorLogStore.appendError(tag = tag, message = message, throwable = throwable)
     }
 
     /**
@@ -30,6 +27,6 @@ object DevLogger {
      */
     @JvmStatic
     fun e(tag: String, message: String) {
-        e(tag, message, null as Throwable?)
+        e(tag, message, null)
     }
 }

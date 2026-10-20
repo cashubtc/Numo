@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_tour_welcome_title">Willkommen bei Numo</string>
+    <string name="onboarding_tour_welcome_body">Akzeptiere Bitcoin für alles, was du verkaufst.</string>
+    <string name="onboarding_tour_tap_title">Ein Tap. Bezahlt.</string>
+    <string name="onboarding_tour_tap_body">Lass Kunden mit einer kompatiblen Bitcoin-Wallet per Tap bezahlen.</string>
+    <string name="onboarding_tour_withdraw_title">Dein Umsatz. Deine Wallet.</string>
+    <string name="onboarding_tour_withdraw_body">Richte automatische Auszahlungen ein, um deine Einnahmen an deine selbstverwahrte Wallet zu senden.</string>
+    <string name="onboarding_tour_sales_title">Dein Tag in Zahlen.</string>
+    <string name="onboarding_tour_sales_body">Verfolge deine Umsätze, erkenne Stoßzeiten und sieh, was sich verkauft.</string>
+    <string name="onboarding_tour_next">Weiter</string>
+    <string name="onboarding_tour_start">Loslegen</string>
+    <string name="onboarding_tour_coffee">Kaffee</string>
+    <string name="onboarding_tour_shirt">T-Shirt</string>
+    <string name="onboarding_tour_tote">Stoffbeutel</string>
+    <string name="onboarding_tour_paid">Zahlung erhalten</string>
+    <string name="onboarding_tour_auto_withdraw">Automatische Auszahlung</string>
+    <string name="onboarding_tour_to_wallet">An deine Wallet</string>
+    <string name="onboarding_tour_sent">Gesendet</string>
+    <string name="onboarding_tour_today">Heutiger Umsatz</string>
+    <string name="onboarding_tour_sats">%1$s Sats</string>
+    <plurals name="onboarding_tour_payments">
+        <item quantity="one">%1$d Zahlung</item>
+        <item quantity="other">%1$d Zahlungen</item>
+    </plurals>
+    <string name="onboarding_tour_add_item">Artikel hinzufügen</string>
+</resources>

@@ -1,422 +1,442 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_bg_white"
-    android:fitsSystemWindows="true">
+    android:layout_height="match_parent">
 
-    <!-- Top App Bar -->
-    <com.electricdreams.numo.ui.components.NumoTopBar
-        android:id="@+id/top_bar"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        app:topBarTitle="@string/withdraw_lightning_title"
-        app:topBarNavContentDescription="@string/withdraw_lightning_toolbar_back"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:fillViewport="true"
-        android:clipToPadding="false"
-        android:clipChildren="false"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_bar">
+        <!-- Top App Bar -->
 
-        <LinearLayout
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            app:topBarTitle="@string/withdraw_lightning_title"
+            app:topBarNavContentDescription="@string/withdraw_lightning_toolbar_back"
+            app:layout_constraintTop_toTopOf="parent"
+            android:minHeight="64dp"
+            app:topBarSettingsStyle="true" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:fillViewport="true"
             android:clipToPadding="false"
             android:clipChildren="false"
-            android:paddingBottom="100dp">
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/top_bar">
 
-            <!-- Balance Hero Section -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/balance_card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                android:layout_marginTop="@dimen/margin_screen_horizontal"
-                app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="@dimen/radius_card"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_hero_gradient"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="@dimen/space_xl">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/withdraw_lightning_balance_label"
-                        android:textAppearance="@style/Text.Caption"
-                        android:textColor="@color/color_text_secondary"
-                        android:textSize="13sp"
-                        android:textAllCaps="true"
-                        android:letterSpacing="0.06" />
-
-                    <TextView
-                        android:id="@+id/balance_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_s"
-                        android:text="₿0"
-                        android:textAppearance="@style/Text.DisplayAmount"
-                        android:textColor="@color/color_text_primary"
-                        android:textSize="40sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/fiat_balance_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_xs"
-                        android:textColor="@color/color_text_secondary"
-                        android:textSize="16sp" />
-
-                    <TextView
-                        android:id="@+id/mint_name_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_s"
-                        android:text="@string/withdraw_lightning_mint_name_label"
-                        android:textAppearance="@style/Text.Caption"
-                        android:textColor="@color/color_text_tertiary"
-                        android:textSize="13sp" />
-
-                </LinearLayout>
-
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Tabs -->
             <LinearLayout
-                android:id="@+id/tabs_container"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginTop="@dimen/space_xl"
-                android:background="@drawable/bg_button_secondary_pill"
-                android:padding="5dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/tab_lightning"
-                    android:layout_width="wrap_content"
-                    android:layout_height="42dp"
-                    android:minWidth="125dp"
-                    android:gravity="center"
-                    android:paddingHorizontal="21dp"
-                    android:text="@string/withdraw_tab_lightning"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/color_bg_white"
-                    android:background="@drawable/bg_button_primary_green" />
-
-                <TextView
-                    android:id="@+id/tab_cashu"
-                    android:layout_width="wrap_content"
-                    android:layout_height="42dp"
-                    android:minWidth="125dp"
-                    android:gravity="center"
-                    android:paddingHorizontal="21dp"
-                    android:text="@string/withdraw_tab_cashu"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/color_text_secondary"
-                    android:background="@android:color/transparent" />
-
-            </LinearLayout>
-
-            <!-- Lightning Container -->
-            <LinearLayout
-                android:id="@+id/lightning_options_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <!-- Section Header -->
-                <TextView
-                    style="@style/Text.SectionHeader"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/space_xl"
-                    android:layout_marginTop="@dimen/section_gap"
-                    android:layout_marginBottom="@dimen/space_m"
-                    android:text="@string/auto_withdraw_section_destination" />
-
-                <!-- Invoice Card -->
-                <com.electricdreams.numo.ui.components.WithdrawInvoiceCard
-                    android:id="@+id/invoice_card"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal" />
-
-                <!-- OR Divider -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/space_2xl"
-                    android:layout_marginVertical="@dimen/margin_screen_horizontal"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_weight="1"
-                        android:background="@color/color_divider" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="@dimen/space_l"
-                        android:text="@string/common_or"
-                        android:textAppearance="@style/Text.Caption"
-                        android:textColor="@color/color_text_tertiary"
-                        android:textSize="12sp"
-                        android:textAllCaps="true"
-                        android:letterSpacing="0.06" />
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_weight="1"
-                        android:background="@color/color_divider" />
-
-                </LinearLayout>
-
-                <!-- Address Card -->
-                <com.electricdreams.numo.ui.components.WithdrawAddressCard
-                    android:id="@+id/address_card"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal" />
-
-            </LinearLayout>
-
-            <!-- Cashu Token Container -->
-            <LinearLayout
-                android:id="@+id/cashu_token_options_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:visibility="gone">
+                android:clipToPadding="false"
+                android:clipChildren="false"
+                android:paddingBottom="24dp"
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
-                <!-- Section Header -->
-                <TextView
-                    style="@style/Text.SectionHeader"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/space_xl"
-                    android:layout_marginTop="@dimen/section_gap"
-                    android:layout_marginBottom="@dimen/space_m"
-                    android:text="@string/withdraw_tab_cashu" />
+                <!-- Balance Hero Section -->
 
-                <!-- Amount Input Card -->
                 <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/cashu_input_card"
+                    android:id="@+id/balance_card"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                    app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="@dimen/radius_card"
-                    app:cardElevation="0dp"
-                    app:strokeWidth="0dp">
+                    android:layout_marginTop="@dimen/margin_screen_horizontal"
+                    style="@style/Widget.Numo.SettingsCard">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:background="@drawable/bg_hero_gradient"
+                        android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="@dimen/margin_screen_horizontal">
+                        android:padding="@dimen/space_xl">
 
-                        <!-- Amount Label -->
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="@dimen/space_m"
-                            android:fontFamily="sans-serif-medium"
-                            android:text="@string/withdraw_lightning_amount_label"
-                            android:textColor="@color/color_text_primary"
-                            android:textSize="15sp" />
+                            android:text="@string/withdraw_lightning_balance_label"
+                            android:textAppearance="@style/Text.SettingsCaption"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="13sp"
+                            android:textAllCaps="true"
+                            android:letterSpacing="0.06" />
 
-                        <com.google.android.material.textfield.TextInputLayout
-                            style="@style/Widget.Numo.TextInputLayout.OutlinedBox"
-                            android:layout_width="match_parent"
+                        <TextView
+                            android:id="@+id/balance_text"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/space_s">
+                            android:layout_marginTop="@dimen/space_s"
+                            android:text="₿0"
+                            android:textAppearance="@style/Text.DisplayAmount"
+                            android:textColor="@color/color_text_primary"
+                            android:textSize="40sp"
+                            android:textStyle="bold" />
 
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/cashu_amount_input"
-                                android:layout_width="match_parent"
-                                android:layout_height="@dimen/button_height"
-                                android:hint="@string/withdraw_amount_placeholder"
-                                android:inputType="number"
-                                android:textColor="@color/color_text_primary"
-                                android:textColorHint="@color/color_text_tertiary"
-                                android:textSize="15sp" />
+                        <TextView
+                            android:id="@+id/fiat_balance_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/space_xs"
+                            android:textColor="@color/color_text_secondary"
+                            android:textSize="16sp" />
 
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <!-- Create Button -->
-                        <Button
-                            android:id="@+id/create_token_button"
-                            style="@style/Widget.Button.Primary.Green"
-                            android:layout_width="match_parent"
-                            android:layout_height="@dimen/button_height"
-                            android:layout_marginTop="@dimen/space_l"
-                            android:text="@string/withdraw_cashu_create_button"
-                            android:textAllCaps="false"
-                            android:textSize="17sp"
-                            android:enabled="false" />
+                        <TextView
+                            android:id="@+id/mint_name_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/space_s"
+                            android:text="@string/withdraw_lightning_mint_name_label"
+                            android:textAppearance="@style/Text.SettingsCaption"
+                            android:textColor="@color/color_text_tertiary"
+                            android:textSize="13sp" />
 
                     </LinearLayout>
+
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Result Card -->
-                 <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/token_result_card"
+                <!-- Tabs -->
+
+                <LinearLayout
+                    android:id="@+id/tabs_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="@dimen/space_xl"
+                    android:background="@drawable/bg_button_secondary_pill"
+                    android:padding="5dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tab_lightning"
+                        android:layout_width="wrap_content"
+                        android:layout_height="42dp"
+                        android:minWidth="125dp"
+                        android:gravity="center"
+                        android:paddingHorizontal="21dp"
+                        android:text="@string/withdraw_tab_lightning"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/color_bg_white"
+                        android:background="@drawable/bg_button_primary_green" />
+
+                    <TextView
+                        android:id="@+id/tab_cashu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="42dp"
+                        android:minWidth="125dp"
+                        android:gravity="center"
+                        android:paddingHorizontal="21dp"
+                        android:text="@string/withdraw_tab_cashu"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/color_text_secondary"
+                        android:background="@android:color/transparent" />
+
+                </LinearLayout>
+
+                <!-- Lightning Container -->
+
+                <LinearLayout
+                    android:id="@+id/lightning_options_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                    android:layout_marginTop="@dimen/margin_screen_horizontal"
-                    android:layout_marginBottom="@dimen/space_xl"
-                    app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="@dimen/radius_card"
-                    app:cardElevation="0dp"
-                    app:strokeWidth="0dp"
-                    android:visibility="gone">
+                    android:orientation="vertical">
+
+                    <!-- Section Header -->
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginBottom="12dp"
+                        android:text="@string/auto_withdraw_section_destination"
+                        android:textAppearance="@style/Text.SettingsSection"
+                        android:textAllCaps="false"
+                        android:layout_marginEnd="8dp"
+                        android:accessibilityHeading="true" />
+
+                    <!-- Invoice Card -->
+
+                    <com.electricdreams.numo.ui.components.WithdrawInvoiceCard
+                        android:id="@+id/invoice_card"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/margin_screen_horizontal" />
+
+                    <!-- OR Divider -->
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="@dimen/space_xl"
-                        android:gravity="center">
+                        android:layout_marginHorizontal="@dimen/space_2xl"
+                        android:layout_marginVertical="@dimen/margin_screen_horizontal"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                        <ImageView
-                            android:id="@+id/token_qr_code"
-                            android:contentDescription="@string/cd_qr_code"
-                            android:layout_width="200dp"
-                            android:layout_height="200dp"
-                            android:layout_marginBottom="@dimen/space_l"/>
-
-                        <com.google.android.material.button.MaterialButtonToggleGroup
-                            android:id="@+id/qr_speed_selector"
-                            android:layout_width="match_parent"
-                            android:layout_height="48dp"
-                            android:layout_marginBottom="@dimen/space_l"
-                            android:visibility="gone"
-                            app:singleSelection="true"
-                            app:selectionRequired="true">
-
-                            <com.google.android.material.button.MaterialButton
-                                android:id="@+id/btn_qr_speed_slow"
-                                style="@style/Widget.Numo.Button.Segmented"
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:text="@string/withdraw_animated_qr_speed_slow" />
-
-                            <com.google.android.material.button.MaterialButton
-                                android:id="@+id/btn_qr_speed_normal"
-                                style="@style/Widget.Numo.Button.Segmented"
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:text="@string/withdraw_animated_qr_speed_normal" />
-
-                            <com.google.android.material.button.MaterialButton
-                                android:id="@+id/btn_qr_speed_fast"
-                                style="@style/Widget.Numo.Button.Segmented"
-                                android:layout_width="0dp"
-                                android:layout_height="match_parent"
-                                android:layout_weight="1"
-                                android:text="@string/withdraw_animated_qr_speed_fast" />
-
-                        </com.google.android.material.button.MaterialButtonToggleGroup>
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1"
+                            android:background="@color/color_divider" />
 
                         <TextView
-                            android:id="@+id/token_text"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:maxLines="2"
-                            android:ellipsize="end"
-                            android:background="@drawable/bg_pill_badge"
-                            android:padding="@dimen/space_m"
-                            android:fontFamily="monospace"
+                            android:layout_marginHorizontal="@dimen/space_l"
+                            android:text="@string/common_or"
+                            android:textAppearance="@style/Text.SettingsCaption"
+                            android:textColor="@color/color_text_tertiary"
                             android:textSize="12sp"
-                            android:textColor="@color/color_text_secondary"/>
+                            android:textAllCaps="true"
+                            android:letterSpacing="0.06" />
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/copy_token_button"
-                            style="@style/Widget.Numo.Button.Dialog.Confirm"
-                            android:layout_width="match_parent"
-                            android:layout_height="@dimen/top_bar_height"
-                            android:layout_marginTop="@dimen/space_l"
-                            android:text="@string/withdraw_cashu_copy_token" />
+                        <View
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1"
+                            android:background="@color/color_divider" />
 
                     </LinearLayout>
-                 </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Address Card -->
+
+                    <com.electricdreams.numo.ui.components.WithdrawAddressCard
+                        android:id="@+id/address_card"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/margin_screen_horizontal" />
+
+                </LinearLayout>
+
+                <!-- Cashu Token Container -->
+
+                <LinearLayout
+                    android:id="@+id/cashu_token_options_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <!-- Section Header -->
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_marginTop="24dp"
+                        android:layout_marginBottom="12dp"
+                        android:text="@string/withdraw_tab_cashu"
+                        android:textAppearance="@style/Text.SettingsSection"
+                        android:textAllCaps="false"
+                        android:layout_marginEnd="8dp"
+                        android:accessibilityHeading="true" />
+
+                    <!-- Amount Input Card -->
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cashu_input_card"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.Numo.SettingsCard">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="@dimen/margin_screen_horizontal">
+
+                            <!-- Amount Label -->
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="@dimen/space_m"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="@string/withdraw_lightning_amount_label"
+                                android:textColor="@color/color_text_primary"
+                                android:textSize="15sp" />
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                style="@style/Widget.Numo.SettingsTextInput"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/space_s">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/cashu_amount_input"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="@dimen/button_height"
+                                    android:hint="@string/withdraw_amount_placeholder"
+                                    android:inputType="number"
+                                    android:textColor="@color/color_text_primary"
+                                    android:textColorHint="?attr/colorOnSurfaceVariant"
+                                    android:textSize="15sp" />
+
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <!-- Create Button -->
+
+                            <Button
+                                android:id="@+id/create_token_button"
+                                style="@style/Widget.Button.Primary.Green"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/space_l"
+                                android:text="@string/withdraw_cashu_create_button"
+                                android:textAllCaps="false"
+                                android:textSize="17sp"
+                                android:enabled="false"
+                                android:minHeight="56dp" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Result Card -->
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/token_result_card"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/margin_screen_horizontal"
+                        android:layout_marginBottom="@dimen/space_xl"
+                        android:visibility="gone"
+                        style="@style/Widget.Numo.SettingsCard">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="@dimen/space_xl"
+                            android:gravity="center">
+
+                            <ImageView
+                                android:id="@+id/token_qr_code"
+                                android:contentDescription="@string/cd_qr_code"
+                                android:layout_width="200dp"
+                                android:layout_height="200dp"
+                                android:layout_marginBottom="@dimen/space_l" />
+
+                            <com.google.android.material.button.MaterialButtonToggleGroup
+                                android:id="@+id/qr_speed_selector"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:layout_marginBottom="@dimen/space_l"
+                                android:visibility="gone"
+                                app:singleSelection="true"
+                                app:selectionRequired="true">
+
+                                <com.google.android.material.button.MaterialButton
+                                    android:id="@+id/btn_qr_speed_slow"
+                                    style="@style/Widget.Numo.Button.Segmented"
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:text="@string/withdraw_animated_qr_speed_slow" />
+
+                                <com.google.android.material.button.MaterialButton
+                                    android:id="@+id/btn_qr_speed_normal"
+                                    style="@style/Widget.Numo.Button.Segmented"
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:text="@string/withdraw_animated_qr_speed_normal" />
+
+                                <com.google.android.material.button.MaterialButton
+                                    android:id="@+id/btn_qr_speed_fast"
+                                    style="@style/Widget.Numo.Button.Segmented"
+                                    android:layout_width="0dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight="1"
+                                    android:text="@string/withdraw_animated_qr_speed_fast" />
+
+                            </com.google.android.material.button.MaterialButtonToggleGroup>
+
+                            <TextView
+                                android:id="@+id/token_text"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:maxLines="2"
+                                android:ellipsize="end"
+                                android:background="@drawable/bg_pill_badge"
+                                android:padding="@dimen/space_m"
+                                android:fontFamily="monospace"
+                                android:textSize="12sp"
+                                android:textColor="@color/color_text_secondary" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/copy_token_button"
+                                style="@style/Widget.Numo.Button.Dialog.Confirm"
+                                android:layout_width="match_parent"
+                                android:layout_height="@dimen/top_bar_height"
+                                android:layout_marginTop="@dimen/space_l"
+                                android:text="@string/withdraw_cashu_copy_token" />
+
+                        </LinearLayout>
+
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
 
             </LinearLayout>
 
-        </LinearLayout>
+        </ScrollView>
 
-    </ScrollView>
+        <!-- Loading Overlay -->
 
-    <!-- Loading Overlay -->
-    <FrameLayout
-        android:id="@+id/loading_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/color_overlay_white_50"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ProgressBar
-            android:id="@+id/loading_spinner"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="center"
-            android:indeterminate="true"
-            android:indeterminateTint="@color/color_primary" />
-
-    </FrameLayout>
-
-    <!-- Full-screen QR Overlay -->
-    <FrameLayout
-        android:id="@+id/fullscreen_qr_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/color_bg_white"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:id="@+id/fullscreen_qr_code"
-            android:contentDescription="@string/cd_qr_code"
+        <FrameLayout
+            android:id="@+id/loading_overlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_margin="@dimen/space_xl"
-            android:scaleType="fitCenter" />
+            android:background="@color/color_overlay_white_50"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-    </FrameLayout>
+            <ProgressBar
+                android:id="@+id/loading_spinner"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:indeterminateTint="@color/color_primary" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        </FrameLayout>
+
+        <!-- Full-screen QR Overlay -->
+        <FrameLayout
+            android:id="@+id/fullscreen_qr_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/color_bg_white"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/fullscreen_qr_code"
+                android:contentDescription="@string/cd_qr_code"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="@dimen/space_xl"
+                android:scaleType="fitCenter" />
+
+        </FrameLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

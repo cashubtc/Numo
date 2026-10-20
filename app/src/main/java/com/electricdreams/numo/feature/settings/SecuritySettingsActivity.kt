@@ -3,20 +3,22 @@ package com.electricdreams.numo.feature.settings
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import com.electricdreams.numo.core.backup.DeviceRecoveryBackup
-import com.electricdreams.numo.util.startActivityForResultCompat
 import android.view.View
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+
 import com.electricdreams.numo.R
+import com.electricdreams.numo.core.backup.DeviceRecoveryBackup
+import com.electricdreams.numo.databinding.ActivitySecuritySettingsBinding
 import com.electricdreams.numo.feature.pin.PinEntryActivity
 import com.electricdreams.numo.feature.pin.PinManager
 import com.electricdreams.numo.feature.pin.PinSetupActivity
 import com.electricdreams.numo.ui.util.DialogHelper
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
+import com.electricdreams.numo.util.startActivityForResultCompat
 
 class SecuritySettingsActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivitySecuritySettingsBinding
 
     private lateinit var pinManager: PinManager
 
@@ -36,21 +38,17 @@ class SecuritySettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_security_settings)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+        binding = ActivitySecuritySettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
         pinManager = PinManager.getInstance(this)
 
-        setupPinItem = findViewById(R.id.setup_pin_item)
-        changePinItem = findViewById(R.id.change_pin_item)
-        removePinItem = findViewById(R.id.remove_pin_item)
+        setupPinItem = binding.setupPinItem
+        changePinItem = binding.changePinItem
+        removePinItem = binding.removePinItem
 
-        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
+        binding.topBar.onNavClick { finish() }
 
         // Static text is now set directly in XML for cleaner layout; no explicit binding needed here
 
@@ -83,7 +81,7 @@ class SecuritySettingsActivity : AppCompatActivity() {
         }
 
         // Backup mnemonic - requires PIN if set
-        findViewById<View>(R.id.backup_mnemonic_item).setOnClickListener {
+        binding.backupMnemonicItem.setOnClickListener {
             if (pinManager.isPinEnabled()) {
                 pendingAction = PendingAction.BACKUP_MNEMONIC
                 requestPinVerification()
@@ -92,7 +90,7 @@ class SecuritySettingsActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<View>(R.id.device_backup_item).setOnClickListener {
+        binding.deviceBackupItem.setOnClickListener {
             if (pinManager.isPinEnabled()) {
                 pendingAction = PendingAction.ENABLE_DEVICE_BACKUP
                 requestPinVerification()
@@ -102,7 +100,7 @@ class SecuritySettingsActivity : AppCompatActivity() {
         }
 
         // Restore wallet - requires PIN if set
-        findViewById<View>(R.id.restore_wallet_item).setOnClickListener {
+        binding.restoreWalletItem.setOnClickListener {
             if (pinManager.isPinEnabled()) {
                 pendingAction = PendingAction.RESTORE_WALLET
                 requestPinVerification()
@@ -120,7 +118,7 @@ class SecuritySettingsActivity : AppCompatActivity() {
 
     private fun updateBackupUI() {
         val isBackupEnabled = DeviceRecoveryBackup.isEnabled(this)
-        val deviceBackupItem = findViewById<com.electricdreams.numo.ui.components.SettingsRowView>(R.id.device_backup_item)
+        val deviceBackupItem = binding.deviceBackupItem
         if (isBackupEnabled) {
             deviceBackupItem.setSubtitle(getString(R.string.security_settings_device_backup_enabled_subtitle))
         } else {

@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.electricdreams.numo.R;
+import com.electricdreams.numo.core.update.UpdateOperationGate;
 
 import java.util.List;
 
@@ -43,6 +44,7 @@ public class NdefHostCardEmulationService extends HostApduService {
     
     // NFC reading state tracking
     private boolean isNfcReading = false;
+    private AutoCloseable updateOperation;
     private boolean isNfcWriting = false; // Tracks if payer actually started writing
     private Handler nfcTimeoutHandler;
     private Runnable nfcTimeoutRunnable;
@@ -134,6 +136,7 @@ public class NdefHostCardEmulationService extends HostApduService {
     
     @Override
     public void onDestroy() {
+        releaseUpdateOperation();
         Log.i(TAG, "=== HCE Service onDestroy called ===");
         super.onDestroy();
         
@@ -152,6 +155,10 @@ public class NdefHostCardEmulationService extends HostApduService {
 
     @Override
     public byte[] processCommandApdu(byte[] commandApdu, Bundle extras) {
+        if (updateOperation == null) {
+            updateOperation = UpdateOperationGate.shared.tryBeginOperation();
+            if (updateOperation == null) return STATUS_FAILED;
+        }
         try {
             // Log all incoming APDUs at INFO level for visibility
             Log.i(TAG, "=== Received APDU command ===");
@@ -213,7 +220,20 @@ public class NdefHostCardEmulationService extends HostApduService {
 
     @Override
     public void onDeactivated(int reason) {
+        releaseUpdateOperation();
         Log.i(TAG, "=== HCE Service deactivated with reason: " + reason + " ===");
+    }
+
+    private void releaseUpdateOperation() {
+        if (updateOperation != null) {
+            try {
+                updateOperation.close();
+            } catch (Exception e) {
+                Log.e(TAG, "Could not release NFC update guard", e);
+            } finally {
+                updateOperation = null;
+            }
+        }
     }
     
     /**

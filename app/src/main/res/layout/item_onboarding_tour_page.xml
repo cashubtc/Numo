@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingBottom="16dp">
+
+        <com.electricdreams.numo.feature.onboarding.OnboardingSceneView
+            android:id="@+id/tour_scene"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:importantForAccessibility="no" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tour_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:textAppearance="@style/Text.Onboarding.Headline"
+            android:breakStrategy="balanced"
+            android:hyphenationFrequency="none"
+            android:gravity="center"
+            android:textColor="@color/color_text_on_dark" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tour_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:textAppearance="@style/Text.Onboarding.Body"
+            android:breakStrategy="balanced"
+            android:hyphenationFrequency="none"
+            android:maxWidth="360dp"
+            android:textColor="@color/onboarding_tour_secondary" />
+    </LinearLayout>
+</ScrollView>

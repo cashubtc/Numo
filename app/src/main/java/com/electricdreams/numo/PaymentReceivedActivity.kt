@@ -305,7 +305,6 @@ class PaymentReceivedActivity : AppCompatActivity() {
             PaymentIntentFactory.createTransactionDetailIntent(
                 context = this,
                 entry = entry,
-                position = history.size - 1,
             ),
         )
     }

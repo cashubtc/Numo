@@ -6,9 +6,6 @@
 
 Numo is an Android Point-of-Sale application that enables merchants to receive Cashu ecash payments via tap-2-pay.
 
-> [!WARNING]
-> This application is **NOT** a wallet. It only acts as a terminal to receive payments and immediately generate redemption tokens. It does not store any tokens. tokens **MUST** be redeemed in a proper Cashu wallet after receiving them, or the funds will be lost.
-
 ## Overview
 
 The application acts as a simple point-of-sale terminal for receiving Bitcoin payments. When a customer approaches their phone with a supporting wallet, the app receives the ecash payment.
@@ -46,6 +43,10 @@ When the merchant switches to the "lightning" tab in the payment screen, a fresh
 
 
 ## Debug Build
+
+Builds and unit tests use JDK 25. Install JDK 25 and select it as the Gradle JDK
+in your IDE, or let Gradle provision it automatically. The app continues to target
+Java 17 source and bytecode for Android compatibility.
 
 To build the debug version of the app:
 

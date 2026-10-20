@@ -15,12 +15,13 @@ import com.google.gson.*
 import org.json.JSONObject
 
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.MintUrl
 import org.cashudevkit.ReceiveOptions
 import org.cashudevkit.SplitTarget
 import org.cashudevkit.Token as CdkToken
+
+import com.electricdreams.numo.core.update.withPaymentOperation
 
 /**
  * Helper class for Cashu payment-related operations.
@@ -524,7 +525,7 @@ object CashuPaymentHelper {
     suspend fun redeemToken(
         tokenString: String?,
         expectedUnit: String,
-    ): String = withContext(Dispatchers.IO) {
+    ): String = withPaymentOperation(Dispatchers.IO) {
         if (!isCashuToken(tokenString)) {
             val errorMsg = "Cannot redeem: Invalid token format"
             Log.e(TAG, errorMsg)

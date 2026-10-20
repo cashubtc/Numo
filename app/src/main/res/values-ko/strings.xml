@@ -160,6 +160,7 @@
     <string name="onboarding_mints_count">%1$d개 민트%2$s 선택됨</string>
     <string name="onboarding_mints_continue_restore">지갑 복원</string>
     <string name="onboarding_mints_continue_new_wallet">계속하다</string>
+    <string name="onboarding_mints_none_reachable">기본 민트에 연결할 수 없습니다. 연결을 확인하고 뒤로 돌아가 다시 시도하거나 민트를 추가하세요.</string>
     <string name="onboarding_mints_add_different">다른 민트 추가</string>
     <string name="onboarding_mints_add_hint">민트 주소를 입력하세요</string>
     <string name="onboarding_mints_scan_row_title">QR 코드 스캔</string>
@@ -381,6 +382,7 @@
     <string name="history_toolbar_title">활동</string>
     <string name="history_section_payment_history">결제 내역</string>
     <string name="history_empty">결제 내역이 없습니다</string>
+    <string name="history_empty_subtitle">첫 결제 요청 후에는 받은 모든 결제 기록이 여기에 표시됩니다.</string>
 
     <string name="transaction_row_copy">복사</string>
     <string name="transaction_row_open">열려 있는</string>
@@ -408,7 +410,7 @@
     <string name="transaction_detail_type_payment_received">결제 완료</string>
     <string name="transaction_detail_mint_label">민트에서</string>
     <string name="transaction_detail_view_receipt">영수증 보기</string>
-    <string name="transaction_detail_section_transaction_details">거래 세부정보</string>
+    <string name="transaction_detail_section_payment">결제</string>
 
     <string name="transaction_detail_payment_type_label">결제 유형</string>
     <string name="transaction_detail_payment_type_cashu">카슈</string>
@@ -894,8 +896,6 @@
     <string name="onboarding_generating_hint">잠시만 기다려 주세요</string>
     <string name="onboarding_fetching_searching_backup">백업 검색 중…</string>
     <string name="onboarding_fetching_checking_relays">민트 설정에 대한 Nostr 릴레이 확인 중</string>
-    <string name="pos_error_no_network_pending_payment">대기 중인 결제를 열려면 네트워크 연결이 필요합니다.</string>
-    <string name="pos_error_no_network_charge">결제를 생성하려면 네트워크 연결이 필요합니다.</string>
     <string name="settings_item_default_payment_method_title">기본 결제 수단</string>
     <string name="settings_item_default_payment_method_subtitle">통합</string>
     <string name="default_payment_method_explainer_title">빠른 설정</string>
@@ -906,37 +906,27 @@
     <string name="default_payment_method_option_lightning">Lightning</string>
     <string name="payment_request_default_method_set">%1$s(이)가 기본 결제 수단으로 설정되었습니다</string>
     <!-- Insights Screen -->
-    <string name="insights_open">인사이트 열기</string>
+    <string name="insights_open">매출</string>
     <string name="insights_title">매출</string>
-    <string name="insights_back">뒤로</string>
     <string name="insights_view_options">보기 옵션</string>
-    <string name="insights_this_week">이번 주</string>
-    <string name="insights_last_7_weeks">지난 7주</string>
-    <string name="insights_last_7_months">지난 7개월</string>
     <string name="insights_date_range">기간</string>
     <string name="insights_range_days">지난 7일</string>
     <string name="insights_range_weeks">지난 7주</string>
     <string name="insights_range_months">지난 7개월</string>
-    <string name="insights_day_count_one">거래 1건</string>
-    <string name="insights_day_count_other">거래 %1$d건</string>
     <string name="insights_quick_charge">빠른 결제</string>
     <string name="insights_items_count_one">항목 1개</string>
     <string name="insights_items_count_other">항목 %1$d개</string>
     <string name="insights_items_lead_with_more">%1$s · %2$s 외 %3$d개</string>
     <string name="insights_item_xn">%1$d × %2$s</string>
-    <string name="insights_empty_headline">매출 0</string>
-    <string name="insights_empty_hint">여기에 매출이 표시됩니다.</string>
     <string name="insights_empty_day">%1$s의 매출이 없습니다</string>
+    <plurals name="insights_sales_count">
+        <item quantity="other">판매 %d건</item>
+    </plurals>
+    <string name="insights_tips_amount">팁 %1$s</string>
+    <string name="insights_empty_title">아직 매출이 없습니다</string>
+    <string name="insights_empty_subtitle">판매할 때마다 판매한 항목과 시간이 여기에 표시됩니다.</string>
     <string name="insights_show_me_in">표시 단위</string>
     <string name="insights_currency_sats">₿</string>
-    <string name="insights_close">닫기</string>
-    <string name="insights_day_label_mon">월</string>
-    <string name="insights_day_label_tue">화</string>
-    <string name="insights_day_label_wed">수</string>
-    <string name="insights_day_label_thu">목</string>
-    <string name="insights_day_label_fri">금</string>
-    <string name="insights_day_label_sat">토</string>
-    <string name="insights_day_label_sun">일</string>
     <string name="auto_withdraw_lightning_address_valid">유효한 라이트닝 주소</string>
     <string name="auto_withdraw_lightning_address_invalid">유효하지 않은 라이트닝 주소</string>
     <!-- BTCMap Explainer -->
@@ -1002,4 +992,41 @@
     <string name="item_entry_local_currency_conversion_label">%1$s · 청구 시 환산</string>
     <string name="item_entry_unscoped_unit_label">%1$s · 발행자 미지정</string>
     <string name="item_entry_error_price_too_large">가격이 너무 큽니다</string>
+
+    <!-- Offline mode -->
+    <string name="offline_strip_title">오프라인</string>
+    <string name="offline_strip_subtitle">새 결제는 인터넷이 필요합니다</string>
+    <string name="offline_strip_back_online_title">다시 연결됨</string>
+    <string name="offline_strip_back_online_subtitle">새 결제를 다시 받을 수 있습니다</string>
+    <string name="offline_strip_action_details">오프라인에서 가능한 기능 보기</string>
+    <string name="offline_explainer_title">오프라인 상태입니다.</string>
+    <string name="offline_explainer_subtitle">다시 온라인 상태가 될 때까지 새 결제를 시작할 수 없습니다. Wi-Fi 또는 모바일 데이터를 확인하세요.</string>
+    <string name="offline_explainer_back_online_title">다시 온라인 상태입니다.</string>
+    <string name="offline_explainer_back_online_subtitle">모든 기능을 다시 사용할 수 있습니다.</string>
+    <string name="offline_explainer_close_content_description">닫기</string>
+    <string name="offline_feature_catalog">카탈로그 및 바구니</string>
+    <string name="offline_feature_history">활동 및 매출</string>
+    <string name="offline_feature_exchange_rate">환율</string>
+    <string name="offline_feature_withdrawals">인출</string>
+    <string name="offline_feature_auto_withdraw">자동 인출</string>
+    <string name="offline_status_available">사용 가능</string>
+    <string name="offline_status_unavailable">사용 불가</string>
+    <string name="offline_status_paused">일시 중지됨</string>
+    <string name="payment_request_instruction_scan">스캔하여 결제하세요</string>
+    <string name="payment_request_offline_note">고객이 결제하면 다시 온라인 상태가 될 때 Numo가 확인합니다.</string>
+    <string name="offline_strip_pane_title">%1$s. %2$s</string>
+    <string name="offline_explainer_group_needs_internet">인터넷 필요</string>
+    <string name="offline_explainer_group_works_offline">오프라인에서 사용 가능</string>
+    <string name="offline_feature_new_charges">새 결제</string>
+    <string name="offline_feature_payment_on_screen">이 결제</string>
+    <string name="offline_status_confirms_later">다시 온라인 상태가 되면 확인됩니다</string>
+    <string name="offline_status_using_rate">%1$s 기준 환율</string>
+    <string name="offline_status_updating">업데이트 중…</string>
+    <string name="offline_row_content_description">%1$s, %2$s</string>
+    <string name="offline_row_content_description_outdated">%1$s, 오래된 정보. %2$s</string>
+    <string name="payment_request_arkoor_address">Ark 주소</string>
+    <string name="payment_request_arkoor_waiting">표시된 금액을 이 Ark 주소로 보내세요</string>
+    <string name="payment_request_arkoor_retrying">민트에 다시 연결 중…</string>
+    <string name="payment_request_arkoor_failed">Arkoor 결제 실패: %1$s</string>
+    <string name="payment_request_arkoor_requires_mint">Arkoor 민트를 선택하고 기본 단위로 sats를 사용하세요.</string>
 </resources>

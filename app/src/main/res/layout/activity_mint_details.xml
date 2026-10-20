@@ -1,489 +1,384 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
-
-    <!-- Top Bar -->
-    <com.electricdreams.numo.ui.components.NumoTopBar
-        android:id="@+id/top_bar"
+    android:layout_height="match_parent">
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        app:topBarTitle="@string/mint_details_title"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Error Banner -->
-    <LinearLayout
-        android:id="@+id/error_banner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="@dimen/margin_screen_horizontal"
-        android:paddingVertical="@dimen/space_m"
-        android:background="@color/color_error_bg"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/top_bar">
-
-        <ImageView
-            android:importantForAccessibility="no"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginEnd="@dimen/space_m"
-            android:src="@drawable/ic_warning"
-            app:tint="@color/color_error" />
-
-        <TextView
-            android:id="@+id/error_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/mint_details_fetch_error"
-            android:textAppearance="@style/Text.Chip"
-            android:textColor="@color/color_error" />
-
-        <ImageButton
-            android:id="@+id/error_retry_button"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_refresh"
-            app:tint="@color/color_error"
-            android:contentDescription="@string/common_retry" />
-
-    </LinearLayout>
-
-    <!-- Scrollable Content -->
-    <ScrollView
-        android:id="@+id/scroll_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:fillViewport="true"
-        app:layout_constraintTop_toBottomOf="@id/error_banner"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <LinearLayout
+        android:layout_height="match_parent">
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/space_2xl">
-
-            <!-- ==================== -->
-            <!-- HEADER SECTION (Hero Card) -->
-            <!-- ==================== -->
+            app:topBarTitle="@string/mint_details_title"
+            app:layout_constraintTop_toTopOf="parent"
+            android:minHeight="64dp"
+            app:topBarSettingsStyle="true" />
+        <ScrollView
+            android:id="@+id/scroll_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:fillViewport="true"
+            app:layout_constraintTop_toBottomOf="@id/top_bar"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:clipToPadding="false">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:gravity="center_horizontal"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingVertical="@dimen/space_xl">
-
-                        <!-- Icon -->
-                        <FrameLayout
-                            android:id="@+id/icon_container"
-                            android:layout_width="80dp"
-                            android:layout_height="80dp"
-                            android:background="@drawable/bg_circle"
-                            android:backgroundTint="@color/color_bg_tertiary">
-
-                            <com.google.android.material.imageview.ShapeableImageView
-                                android:id="@+id/mint_icon"
-                                android:layout_width="78dp"
-                                android:layout_height="78dp"
-                                android:layout_gravity="center"
-                                android:scaleType="centerCrop"
-                                app:shapeAppearanceOverlay="@style/ShapeAppearance.Circle"
-                                app:strokeColor="@color/color_bg_white"
-                                app:strokeWidth="2dp"
-                                android:src="@drawable/ic_bitcoin"
-                                android:contentDescription="@string/cd_mint_icon" />
-
-                        </FrameLayout>
-
-                        <!-- Name -->
+                android:paddingBottom="24dp"
+                android:paddingHorizontal="@dimen/settings_page_margin">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingVertical="@dimen/settings_row_padding"
+                    android:layout_marginTop="@dimen/space_l">
+                    <FrameLayout
+                        android:id="@+id/icon_container"
+                        android:layout_width="@dimen/settings_row_icon_size"
+                        android:layout_height="@dimen/settings_row_icon_size"
+                        android:background="@drawable/bg_circle"
+                        android:backgroundTint="@color/color_bg_tertiary"
+                        android:layout_marginEnd="@dimen/settings_row_icon_gap">
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/mint_icon"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:scaleType="centerCrop"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearance.Circle"
+                            app:strokeColor="@color/color_bg_white"
+                            app:strokeWidth="2dp"
+                            android:src="@drawable/ic_bitcoin"
+                            android:importantForAccessibility="no" />
+                    </FrameLayout>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
                         <TextView
                             android:id="@+id/mint_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/space_l"
-                            android:text="Mint Name"
-                            style="@style/Text.Heading1"
-                            android:textAlignment="center" />
-
-                        <!-- URL -->
+                            android:textAppearance="@style/Text.RowTitle" />
                         <TextView
                             android:id="@+id/mint_url"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/space_xs"
-                            android:text="mint.example.com"
-                            style="@style/Text.RowSubtitle"
-                            android:textAlignment="center" />
-
-                        <!-- Balance -->
+                            android:layout_marginTop="@dimen/settings_row_subtitle_gap"
+                            android:textAppearance="@style/Text.SettingsCaption" />
                         <TextView
                             android:id="@+id/balance_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/space_l"
-                            android:text="₿0"
-                            android:textAppearance="@style/Text.Subtitle" />
-
-                        <!-- Lightning Badge (shown if this is the lightning mint) -->
+                            android:layout_marginTop="@dimen/settings_row_subtitle_gap"
+                            android:textAppearance="@style/Text.SettingsCaption" />
                         <LinearLayout
                             android:id="@+id/lightning_badge"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="@dimen/space_m"
+                            android:layout_marginTop="@dimen/space_s"
                             android:orientation="horizontal"
                             android:gravity="center_vertical"
-                            android:paddingHorizontal="@dimen/space_m"
-                            android:paddingVertical="@dimen/space_s"
-                            android:background="@drawable/bg_badge_lightning"
                             android:visibility="gone">
-
                             <ImageView
                                 android:importantForAccessibility="no"
                                 android:layout_width="16dp"
                                 android:layout_height="16dp"
                                 android:layout_marginEnd="@dimen/space_s"
                                 android:src="@drawable/ic_lightning_bolt"
-                                app:tint="@color/color_bitcoin_orange" />
-
+                                app:tint="?attr/colorOnSurfaceVariant" />
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/mints_lightning_mint"
-                                android:textAppearance="@style/Text.Chip"
-                                android:textColor="@color/color_bitcoin_orange" />
-
+                                android:textAppearance="@style/Text.SettingsCaption"
+                                android:textColor="?attr/colorOnSurfaceVariant" />
                         </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- ==================== -->
-            <!-- DESCRIPTION SECTION -->
-            <!-- ==================== -->
-            <LinearLayout
-                android:id="@+id/description_section"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="@style/Text.SectionHeader"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="@dimen/space_l"
-                    android:paddingBottom="@dimen/row_padding_vertical"
-                    android:text="@string/mint_details_about" />
-
-                <TextView
-                    android:id="@+id/description_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingVertical="@dimen/row_padding_vertical"
-                    style="@style/Text.Body"
-                    android:textColor="@color/color_text_primary"
-                    android:lineSpacingMultiplier="1.4" />
-
-            </LinearLayout>
-
-            <!-- ==================== -->
-            <!-- MOTD SECTION -->
-            <!-- ==================== -->
-            <LinearLayout
-                android:id="@+id/motd_section"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="@style/Text.SectionHeader"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="@dimen/section_gap"
-                    android:paddingBottom="@dimen/row_padding_vertical"
-                    android:text="@string/mint_details_announcement" />
-
+                    </LinearLayout>
+                </LinearLayout>
                 <LinearLayout
+                    android:id="@+id/error_banner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingVertical="@dimen/row_padding_vertical"
-                    android:gravity="center_vertical">
-
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="0dp"
+                    android:paddingVertical="@dimen/space_s"
+                    android:visibility="gone"
+                    android:accessibilityLiveRegion="polite">
                     <ImageView
                         android:importantForAccessibility="no"
-                        android:layout_width="@dimen/icon_size_small"
-                        android:layout_height="@dimen/icon_size_small"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
                         android:layout_marginEnd="@dimen/space_m"
-                        android:src="@drawable/ic_info"
-                        app:tint="@color/color_bitcoin_orange" />
-
+                        android:src="@drawable/ic_warning"
+                        app:tint="?attr/colorOnSurfaceVariant" />
                     <TextView
-                        android:id="@+id/motd_text"
+                        android:id="@+id/error_text"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textAppearance="@style/Text.Chip"
-                        android:textColor="@color/color_text_primary"
-                        android:lineSpacingMultiplier="1.3" />
-
+                        android:text="@string/mint_details_fetch_error"
+                        android:textAppearance="@style/Text.SettingsCaption"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/error_retry_button"
+                        android:textAllCaps="false"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:minHeight="48dp"
+                        android:text="@string/common_retry" />
                 </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- ==================== -->
-            <!-- DETAILS SECTION -->
-            <!-- ==================== -->
-            <LinearLayout
-                android:id="@+id/details_section"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
+                <LinearLayout
+                    android:id="@+id/description_section"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@style/Text.SectionHeader"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="@dimen/section_gap"
-                    android:paddingBottom="@dimen/row_padding_vertical"
-                    android:text="@string/mint_details_details" />
-
-                <!-- URL Row -->
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:layout_marginTop="@dimen/settings_section_gap">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/Text.SettingsSection"
+                        android:text="@string/mint_details_about"
+                        android:textAllCaps="false"
+                        android:layout_marginTop="0dp"
+                        android:layout_marginBottom="12dp"
+                        android:accessibilityHeading="true" />
+                    <TextView
+                        android:id="@+id/description_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:textAppearance="@style/Text.SettingsBody" />
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/motd_section"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:layout_marginTop="@dimen/settings_section_gap">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/Text.SettingsSection"
+                        android:text="@string/mint_details_announcement"
+                        android:textAllCaps="false"
+                        android:layout_marginTop="0dp"
+                        android:layout_marginBottom="12dp"
+                        android:accessibilityHeading="true" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        <TextView
+                            android:id="@+id/motd_text"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textAppearance="@style/Text.SettingsBody"
+                            android:textColor="?attr/colorOnSurfaceVariant" />
+                    </LinearLayout>
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/details_section"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="@dimen/settings_section_gap">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/Text.SettingsSection"
+                        android:text="@string/mint_details_details"
+                        android:textAllCaps="false"
+                        android:layout_marginTop="0dp"
+                        android:layout_marginBottom="12dp"
+                        android:accessibilityHeading="true" />
                     <LinearLayout
                         android:id="@+id/url_row"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingVertical="@dimen/row_padding_vertical"
-                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:paddingVertical="@dimen/settings_row_padding"
+                        android:paddingHorizontal="0dp"
                         android:background="@drawable/bg_row_ripple"
                         android:clickable="true"
-                        android:focusable="true">
-
-                        <TextView
+                        android:focusable="true"
+                        android:screenReaderFocusable="true"
+                        android:minHeight="48dp">
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="@string/mint_details_url"
-                            android:textAppearance="@style/Text.RowTitle" />
-
-                        <TextView
-                            android:id="@+id/url_value"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:maxWidth="200dp"
-                            android:textAppearance="@style/Text.RowSubtitle"
-                            android:textAlignment="textEnd"
-                            android:maxLines="1"
-                            android:ellipsize="middle" />
-
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/mint_details_url"
+                                android:textAppearance="@style/Text.RowTitle" />
+                            <TextView
+                                android:id="@+id/url_value"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textAppearance="@style/Text.SettingsCaption"
+                                android:layout_marginTop="@dimen/settings_row_subtitle_gap" />
+                        </LinearLayout>
                         <ImageView
                             android:importantForAccessibility="no"
-                            android:layout_width="16dp"
-                            android:layout_height="16dp"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
                             android:layout_marginStart="@dimen/space_s"
+                            android:padding="14dp"
                             android:src="@drawable/ic_copy"
                             app:tint="@color/color_text_tertiary" />
-
                     </LinearLayout>
-
-                    <!-- Software Row -->
                     <LinearLayout
                         android:id="@+id/software_row"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingVertical="@dimen/row_padding_vertical"
-                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:paddingVertical="@dimen/settings_row_padding"
+                        android:paddingHorizontal="0dp"
                         android:visibility="gone">
-
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/mint_details_software"
                             android:textAppearance="@style/Text.RowTitle" />
-
                         <TextView
                             android:id="@+id/software_value"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/Text.RowSubtitle"
-                            android:textAlignment="textEnd" />
-
+                            android:textAppearance="@style/Text.SettingsCaption"
+                            android:textAlignment="textEnd"
+                            android:layout_weight="1"
+                            android:layout_marginStart="@dimen/space_m" />
                     </LinearLayout>
-
-                    <!-- Version Row -->
                     <LinearLayout
                         android:id="@+id/version_row"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:gravity="center_vertical"
-                        android:paddingVertical="@dimen/row_padding_vertical"
-                        android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                        android:paddingVertical="@dimen/settings_row_padding"
+                        android:paddingHorizontal="0dp"
                         android:visibility="gone">
-
                         <TextView
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="@string/mint_details_version"
                             android:textAppearance="@style/Text.RowTitle" />
-
                         <TextView
                             android:id="@+id/version_value"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/Text.RowSubtitle"
-                            android:textAlignment="textEnd" />
-
+                            android:textAppearance="@style/Text.SettingsCaption"
+                            android:textAlignment="textEnd"
+                            android:layout_weight="1"
+                            android:layout_marginStart="@dimen/space_m" />
+                    </LinearLayout>
                 </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- ==================== -->
-            <!-- CONTACT SECTION -->
-            <!-- ==================== -->
-            <LinearLayout
-                android:id="@+id/contact_section"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
+                <LinearLayout
+                    android:id="@+id/contact_section"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="gone"
+                    android:layout_marginTop="@dimen/settings_section_gap">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/Text.SettingsSection"
+                        android:text="@string/mint_details_contact"
+                        android:textAllCaps="false"
+                        android:layout_marginTop="0dp"
+                        android:layout_marginBottom="12dp"
+                        android:accessibilityHeading="true" />
+                    <LinearLayout
+                        android:id="@+id/contact_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+                </LinearLayout>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@style/Text.SectionHeader"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:paddingTop="@dimen/section_gap"
-                    android:paddingBottom="@dimen/row_padding_vertical"
-                    android:text="@string/mint_details_contact" />
-
+                    android:textAppearance="@style/Text.SettingsSection"
+                    android:text="@string/mint_details_actions"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="@dimen/settings_section_gap"
+                    android:layout_marginBottom="12dp"
+                    android:accessibilityHeading="true" />
                 <LinearLayout
-                    android:id="@+id/contact_container"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" />
-
-            </LinearLayout>
-
-            <!-- ==================== -->
-            <!-- ACTIONS SECTION -->
-            <!-- ==================== -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAppearance="@style/Text.SectionHeader"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/section_gap"
-                android:paddingBottom="@dimen/row_padding_vertical"
-                android:text="@string/mint_details_actions" />
-
-            <!-- Set as Lightning Mint Button -->
-                <LinearLayout
-                    android:id="@+id/set_lightning_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingVertical="@dimen/row_padding_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:background="@drawable/bg_row_ripple"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <ImageView
-                        android:importantForAccessibility="no"
-                        android:layout_width="@dimen/icon_size_small"
-                        android:layout_height="@dimen/icon_size_small"
-                        android:layout_marginEnd="@dimen/row_icon_gap"
-                        android:src="@drawable/ic_lightning_bolt"
-                        app:tint="@color/color_icon_secondary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
+                    style="@style/Widget.Numo.SettingsGroup">
+                    <LinearLayout
+                        android:id="@+id/set_lightning_button"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/Text.RowTitle"
-                        android:text="@string/mints_set_as_lightning" />
-
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingVertical="@dimen/settings_row_padding"
+                        android:paddingHorizontal="0dp"
+                        android:background="@drawable/bg_row_ripple"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:screenReaderFocusable="true"
+                        android:minHeight="48dp">
+                        <ImageView
+                            android:importantForAccessibility="no"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginEnd="@dimen/space_m"
+                            android:src="@drawable/ic_lightning_bolt"
+                            app:tint="?attr/colorOnSurfaceVariant" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/Text.RowTitle"
+                            android:text="@string/mints_set_as_lightning" />
+                    </LinearLayout>
                 </LinearLayout>
-
-                <!-- Copy URL Button -->
-                <LinearLayout
-                    android:id="@+id/copy_url_button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingVertical="@dimen/row_padding_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                    android:background="@drawable/bg_row_ripple"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <ImageView
-                        android:importantForAccessibility="no"
-                        android:layout_width="@dimen/icon_size_small"
-                        android:layout_height="@dimen/icon_size_small"
-                        android:layout_marginEnd="@dimen/row_icon_gap"
-                        android:src="@drawable/ic_copy"
-                        app:tint="@color/color_icon_secondary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="@style/Text.RowTitle"
-                        android:text="@string/mint_details_copy_url" />
-
-                </LinearLayout>
-
-                <!-- Delete Button -->
                 <LinearLayout
                     android:id="@+id/delete_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingVertical="@dimen/row_padding_vertical"
-                    android:paddingHorizontal="@dimen/margin_screen_horizontal"
+                    android:paddingVertical="@dimen/settings_row_padding"
+                    android:paddingHorizontal="0dp"
                     android:background="@drawable/bg_row_ripple"
                     android:clickable="true"
-                    android:focusable="true">
-
+                    android:focusable="true"
+                    android:screenReaderFocusable="true"
+                    android:minHeight="48dp">
                     <ImageView
                         android:importantForAccessibility="no"
-                        android:layout_width="@dimen/icon_size_small"
-                        android:layout_height="@dimen/icon_size_small"
-                        android:layout_marginEnd="@dimen/row_icon_gap"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginEnd="@dimen/space_m"
                         android:src="@drawable/ic_trash"
                         app:tint="@color/color_error" />
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/Text.RowTitle"
                         android:text="@string/mint_details_delete"
                         android:textColor="@color/color_error" />
-
+                </LinearLayout>
             </LinearLayout>
-
-        </LinearLayout>
-    </ScrollView>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+        </ScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

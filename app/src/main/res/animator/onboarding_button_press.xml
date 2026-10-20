@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Press acknowledgment for onboarding actions: quick 0.97 scale down, unhurried release. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <set>
+            <objectAnimator
+                android:propertyName="scaleX"
+                android:valueTo="0.97"
+                android:valueType="floatType"
+                android:duration="110"
+                android:interpolator="@android:interpolator/decelerate_cubic" />
+            <objectAnimator
+                android:propertyName="scaleY"
+                android:valueTo="0.97"
+                android:valueType="floatType"
+                android:duration="110"
+                android:interpolator="@android:interpolator/decelerate_cubic" />
+        </set>
+    </item>
+    <item>
+        <set>
+            <objectAnimator
+                android:propertyName="scaleX"
+                android:valueTo="1"
+                android:valueType="floatType"
+                android:duration="200"
+                android:interpolator="@android:interpolator/decelerate_cubic" />
+            <objectAnimator
+                android:propertyName="scaleY"
+                android:valueTo="1"
+                android:valueType="floatType"
+                android:duration="200"
+                android:interpolator="@android:interpolator/decelerate_cubic" />
+        </set>
+    </item>
+</selector>

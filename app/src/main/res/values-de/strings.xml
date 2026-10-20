@@ -169,6 +169,7 @@
     <string name="onboarding_mints_count">%1$d Mint%2$s ausgewählt</string>
     <string name="onboarding_mints_continue_restore">Wallet wiederherstellen</string>
     <string name="onboarding_mints_continue_new_wallet">Fortfahren</string>
+    <string name="onboarding_mints_none_reachable">Keine der Standard-Mints ist erreichbar. Prüfe deine Verbindung und gehe zurück, um es erneut zu versuchen, oder füge eine Mint hinzu.</string>
     <string name="onboarding_mints_add_different">Einen anderen Mint hinzufügen</string>
     <string name="onboarding_mints_add_hint">Mint-Adresse eingeben</string>
     <string name="onboarding_mints_scan_row_title">QR-Code scannen</string>
@@ -435,7 +436,7 @@
     <string name="transaction_detail_type_payment_received">Zahlung erhalten</string>
     <string name="transaction_detail_mint_label">Von Mint</string>
     <string name="transaction_detail_view_receipt">Beleg anzeigen</string>
-    <string name="transaction_detail_section_transaction_details">TRANSAKTIONSDETAILS</string>
+    <string name="transaction_detail_section_payment">Zahlung</string>
 
     <string name="transaction_detail_payment_type_label">Zahlungsart</string>
     <string name="transaction_detail_payment_type_cashu">Cashu</string>
@@ -620,8 +621,6 @@
     <string name="item_selection_charge_button">Anfordern</string>
     <string name="item_selection_charge_button_default">Anfordern</string>
     <string name="pos_error_no_mints_configured">Füge mindestens einen Mint in Einstellungen → Mints hinzu, bevor du Kunden etwas in Rechnung stellst.</string>
-    <string name="pos_error_no_network_pending_payment">Für ausstehende Zahlungen ist eine Netzwerkverbindung erforderlich.</string>
-    <string name="pos_error_no_network_charge">Für die Erstellung einer Zahlungsanfrage ist eine Netzwerkverbindung erforderlich.</string>
 
     <string name="item_selection_save_button">Speichern</string>
     <string name="item_selection_saved_baskets_button">Gespeichert</string>
@@ -991,37 +990,28 @@
     <string name="auto_withdraw_percentage_max" translatable="false">98%</string>
 
     <!-- Insights Screen -->
-    <string name="insights_open">Einblicke öffnen</string>
+    <string name="insights_open">Verkäufe</string>
     <string name="insights_title">Verkäufe</string>
-    <string name="insights_back">Zurück</string>
     <string name="insights_view_options">Ansichtsoptionen</string>
-    <string name="insights_this_week">Diese Woche</string>
-    <string name="insights_last_7_weeks">Letzte 7 Wochen</string>
-    <string name="insights_last_7_months">Letzte 7 Monate</string>
     <string name="insights_date_range">Datumsbereich</string>
     <string name="insights_range_days">Letzte 7 Tage</string>
     <string name="insights_range_weeks">Letzte 7 Wochen</string>
     <string name="insights_range_months">Letzte 7 Monate</string>
-    <string name="insights_day_count_one">1 Transaktion</string>
-    <string name="insights_day_count_other">%1$d Transaktionen</string>
     <string name="insights_quick_charge">Schnelle Zahlungsanfrage</string>
     <string name="insights_items_count_one">1 Artikel</string>
     <string name="insights_items_count_other">%1$d Artikel</string>
     <string name="insights_items_lead_with_more">%1$s · %2$s +%3$d mehr</string>
     <string name="insights_item_xn">%1$d × %2$s</string>
-    <string name="insights_empty_headline">0 Verkäufe</string>
-    <string name="insights_empty_hint">Deine Verkäufe werden hier angezeigt.</string>
     <string name="insights_empty_day">Keine Verkäufe am %1$s</string>
+    <plurals name="insights_sales_count">
+        <item quantity="one">%d Verkauf</item>
+        <item quantity="other">%d Verkäufe</item>
+    </plurals>
+    <string name="insights_tips_amount">%1$s Trinkgeld</string>
+    <string name="insights_empty_title">Noch keine Verkäufe</string>
+    <string name="insights_empty_subtitle">Jeder Verkauf erscheint hier, mit dem, was verkauft wurde, und wann.</string>
     <string name="insights_show_me_in">Anzeigen in</string>
     <string name="insights_currency_sats">₿</string>
-    <string name="insights_close">Schließen</string>
-    <string name="insights_day_label_mon">Mo</string>
-    <string name="insights_day_label_tue">Di</string>
-    <string name="insights_day_label_wed">Mi</string>
-    <string name="insights_day_label_thu">Do</string>
-    <string name="insights_day_label_fri">Fr</string>
-    <string name="insights_day_label_sat">Sa</string>
-    <string name="insights_day_label_sun">So</string>
     <string name="developer_wallet_logs_title">Wallet-Protokolle</string>
     <string name="developer_wallet_logs_subtitle">Aktuelle Wallet-Aktivitätsprotokolle anzeigen und exportieren</string>
     <string name="developer_wallet_logs_section_title">WALLET-AKTIVITÄTSPROTOKOLLE</string>
@@ -1100,4 +1090,41 @@
     <string name="item_entry_local_currency_conversion_label">%1$s · Umrechnung beim Bezahlen</string>
     <string name="item_entry_unscoped_unit_label">%1$s · Aussteller nicht angegeben</string>
     <string name="item_entry_error_price_too_large">Der Preis ist zu hoch</string>
+
+    <!-- Offline mode -->
+    <string name="offline_strip_title">Offline</string>
+    <string name="offline_strip_subtitle">Neue Zahlungen brauchen Internet</string>
+    <string name="offline_strip_back_online_title">Wieder online</string>
+    <string name="offline_strip_back_online_subtitle">Neue Zahlungen funktionieren wieder</string>
+    <string name="offline_strip_action_details">Zeigen, was offline funktioniert</string>
+    <string name="offline_explainer_title">Du bist offline.</string>
+    <string name="offline_explainer_subtitle">Ohne Internet kannst du keine neuen Zahlungen starten. Prüfe WLAN oder mobile Daten.</string>
+    <string name="offline_explainer_back_online_title">Du bist wieder online.</string>
+    <string name="offline_explainer_back_online_subtitle">Alles ist wieder verfügbar.</string>
+    <string name="offline_explainer_close_content_description">Schließen</string>
+    <string name="offline_feature_catalog">Katalog &amp; Warenkörbe</string>
+    <string name="offline_feature_history">Aktivität &amp; Verkäufe</string>
+    <string name="offline_feature_exchange_rate">Wechselkurs</string>
+    <string name="offline_feature_withdrawals">Abhebungen</string>
+    <string name="offline_feature_auto_withdraw">Automatische Abhebungen</string>
+    <string name="offline_status_available">Verfügbar</string>
+    <string name="offline_status_unavailable">Nicht verfügbar</string>
+    <string name="offline_status_paused">Pausiert</string>
+    <string name="payment_request_instruction_scan">Scannen zum Bezahlen</string>
+    <string name="payment_request_offline_note">Wenn der Kunde bezahlt, bestätigt Numo die Zahlung, sobald du wieder online bist.</string>
+    <string name="offline_strip_pane_title">%1$s. %2$s</string>
+    <string name="offline_explainer_group_needs_internet">Braucht Internet</string>
+    <string name="offline_explainer_group_works_offline">Funktioniert offline</string>
+    <string name="offline_feature_new_charges">Neue Zahlungen</string>
+    <string name="offline_feature_payment_on_screen">Diese Zahlung</string>
+    <string name="offline_status_confirms_later">Wird bestätigt, sobald du wieder online bist</string>
+    <string name="offline_status_using_rate">Kurs von %1$s</string>
+    <string name="offline_status_updating">Wird aktualisiert…</string>
+    <string name="offline_row_content_description">%1$s, %2$s</string>
+    <string name="offline_row_content_description_outdated">%1$s, veraltet. %2$s</string>
+    <string name="payment_request_arkoor_address">Ark-Adresse</string>
+    <string name="payment_request_arkoor_waiting">Sende den angezeigten Betrag an diese Ark-Adresse</string>
+    <string name="payment_request_arkoor_retrying">Verbindung zur Mint wird wiederhergestellt…</string>
+    <string name="payment_request_arkoor_failed">Arkoor-Zahlung fehlgeschlagen: %1$s</string>
+    <string name="payment_request_arkoor_requires_mint">Wähle eine Arkoor-Mint und verwende Sats als Basiseinheit.</string>
 </resources>

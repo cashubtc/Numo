@@ -11,7 +11,10 @@ import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
+import androidx.core.view.ViewCompat
+
 import com.electricdreams.numo.R
+import com.electricdreams.numo.databinding.ComponentSettingsRowBinding
 
 /**
  * Standard clickable settings row: optional leading icon, title, optional
@@ -50,12 +53,13 @@ class SettingsRowView @JvmOverloads constructor(
 
     init {
         orientation = HORIZONTAL
+        isBaselineAligned = false
         gravity = android.view.Gravity.CENTER_VERTICAL
         setPaddingRelative(
-            resources.getDimensionPixelSize(R.dimen.margin_screen_horizontal),
-            resources.getDimensionPixelSize(R.dimen.row_padding_vertical),
-            resources.getDimensionPixelSize(R.dimen.margin_screen_horizontal),
-            resources.getDimensionPixelSize(R.dimen.row_padding_vertical),
+            0,
+            resources.getDimensionPixelSize(R.dimen.settings_row_padding),
+            0,
+            resources.getDimensionPixelSize(R.dimen.settings_row_padding),
         )
         isClickable = true
         isFocusable = true
@@ -63,12 +67,13 @@ class SettingsRowView @JvmOverloads constructor(
             setBackgroundResource(R.drawable.bg_row_ripple)
         }
 
-        LayoutInflater.from(context).inflate(R.layout.component_settings_row, this, true)
-        iconView = findViewById(R.id.row_icon)
-        titleView = findViewById(R.id.row_title)
-        subtitleView = findViewById(R.id.row_subtitle)
-        trailingTextView = findViewById(R.id.row_trailing_text)
-        trailingIconView = findViewById(R.id.row_trailing_icon)
+        val binding = ComponentSettingsRowBinding.inflate(LayoutInflater.from(context), this)
+        iconView = binding.rowIcon
+        titleView = binding.rowTitle
+        subtitleView = binding.rowSubtitle
+        trailingTextView = binding.rowTrailingText
+        trailingIconView = binding.rowTrailingIcon
+        ViewCompat.setScreenReaderFocusable(this, true)
 
         context.withStyledAttributes(attrs, R.styleable.SettingsRowView) {
             val iconRes = getResourceId(R.styleable.SettingsRowView_rowIcon, 0)
@@ -109,6 +114,10 @@ class SettingsRowView @JvmOverloads constructor(
         }
     }
 
+    /** Text currently presented to the user, including dynamic setting summaries. */
+    val searchableText: String
+        get() = listOf(titleView.text, subtitleView.text, trailingTextView.text).joinToString(" ")
+
     fun setIcon(@DrawableRes res: Int) {
         iconView.setImageResource(res)
         iconView.visibility = View.VISIBLE
@@ -123,19 +132,19 @@ class SettingsRowView @JvmOverloads constructor(
     }
 
     fun setSubtitle(text: CharSequence?) {
+        subtitleView.text = text
         if (text.isNullOrEmpty()) {
             subtitleView.visibility = View.GONE
         } else {
-            subtitleView.text = text
             subtitleView.visibility = View.VISIBLE
         }
     }
 
     fun setTrailingText(text: CharSequence?) {
+        trailingTextView.text = text
         if (text.isNullOrEmpty()) {
             trailingTextView.visibility = View.GONE
         } else {
-            trailingTextView.text = text
             trailingTextView.visibility = View.VISIBLE
         }
     }

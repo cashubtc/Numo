@@ -21,14 +21,26 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import com.electricdreams.numo.core.dev.WalletLogger
+import com.electricdreams.numo.core.network.ConnectivityMonitor
+import com.electricdreams.numo.core.util.NetworkUtils
+import com.electricdreams.numo.feature.offline.OfflineExplainerActivity
+import com.electricdreams.numo.ui.offline.OfflineStripController
+import com.electricdreams.numo.ui.offline.OfflineStripView
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.view.updateLayoutParams
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
+import androidx.core.content.ContextCompat
+import android.view.animation.DecelerateInterpolator
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.Amount.Currency
@@ -37,7 +49,6 @@ import com.electricdreams.numo.core.model.UnitDescriptor
 import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.model.UnitAmountFormatter
 import com.electricdreams.numo.core.util.MintManager
-import com.electricdreams.numo.core.util.MintLimitChecker
 import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
 import com.electricdreams.numo.core.util.CurrencyManager
@@ -45,7 +56,10 @@ import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.feature.tips.TipSelectionActivity
 import com.electricdreams.numo.ndef.CashuPaymentHelper
 import com.electricdreams.numo.ndef.NdefHostCardEmulationService
+import com.electricdreams.numo.payment.UnifiedPaymentRequest
+import com.electricdreams.numo.payment.ArkoorMintSession
 import com.electricdreams.numo.payment.LightningMintHandler
+import com.electricdreams.numo.payment.MintQuoteWebSocket
 import com.electricdreams.numo.payment.NostrPaymentHandler
 import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.payment.PaymentTabManager
@@ -53,19 +67,22 @@ import com.electricdreams.numo.payment.PaymentWebhookDispatcher
 import com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
 import com.electricdreams.numo.ui.util.QrCodeGenerator
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
-import com.electricdreams.numo.feature.settings.DeveloperPrefs
 import com.electricdreams.numo.core.payment.BtcPayQrCodeBuilder
 import com.electricdreams.numo.core.payment.IPaymentService
 import com.electricdreams.numo.core.payment.PaymentServiceFactory
 import com.electricdreams.numo.core.payment.PaymentState
 import com.electricdreams.numo.core.payment.impl.BTCPayPaymentService
 import com.electricdreams.numo.core.wallet.WalletError
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
+import com.electricdreams.numo.core.update.holdPaymentScreen
+import com.electricdreams.numo.core.update.launchPaymentOperation
 
 class PaymentRequestActivity : AppCompatActivity() {
 
@@ -137,8 +154,16 @@ class PaymentRequestActivity : AppCompatActivity() {
     // Payment handlers
     private var nostrHandler: NostrPaymentHandler? = null
     private var lightningHandler: LightningMintHandler? = null
+    private var quoteSockets: MintQuoteWebSocket? = null
+    private var arkoorJob: Job? = null
+    private var isDualQuoteCheckout = false
+    private var arkoorLoading = false
+    private var arkoorError: String? = null
+    private var arkoorAddress: String? = null
+    private var arkoorMintUrl: String? = null
+    private var resumeArkoorQuoteId: String? = null
+    private var resumeArkoorMintUrl: String? = null
     private var lightningStarted = false
-    private var isBolt11Supported = true
 
     // BTCPay payment tracking
     private var btcPayPaymentId: String? = null
@@ -176,6 +201,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     // Pending NFC animation outcome data consumed when native animation reaches terminal frame.
     private var pendingNfcSuccessToken: String? = null
+    private var pendingNfcSuccessMintUrl: String? = null
     private var pendingNfcSuccessAmount: Long = 0
     private var currentOverlayActionMode: OverlayActionMode = OverlayActionMode.SUCCESS
     private var isProcessingNfcPayment = false
@@ -196,6 +222,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!holdPaymentScreen()) return
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContentView(R.layout.activity_payment_request)
         
@@ -274,6 +301,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         animationLabelBaseTranslationY = animationResultLabelText.translationY
 
         setupNfcAnimationOverlay()
+        observeConnectivityForPayment()
 
         // Initialize tab manager
         tabManager = PaymentTabManager(
@@ -304,59 +332,18 @@ class PaymentRequestActivity : AppCompatActivity() {
             override fun onTabSelected(tab: PaymentTabManager.PaymentTab) {
                 Log.d(TAG, "onTabSelected() called. tab=$tab, lightningStarted=$lightningStarted, lightningInvoice=$lightningInvoice")
                 when (tab) {
-                    PaymentTabManager.PaymentTab.UNIFIED -> {
-                        if (!lightningStarted && DeveloperPrefs.isLightningInvoiceDelayed(this@PaymentRequestActivity) && isBolt11Supported) {
-                            startLightningMintFlow()
-                        }
-                        setHceToUnified()
-                    }
-                    PaymentTabManager.PaymentTab.LIGHTNING -> {
-                        if (!lightningStarted && DeveloperPrefs.isLightningInvoiceDelayed(this@PaymentRequestActivity) && isBolt11Supported) {
-                            startLightningMintFlow()
-                        }
-                        if (lightningInvoice != null) {
-                            setHceToLightning()
-                        }
-                    }
-                    PaymentTabManager.PaymentTab.CASHU -> {
-                        setHceToCashu()
-                    }
+                    PaymentTabManager.PaymentTab.UNIFIED -> setHceToUnified()
+                    PaymentTabManager.PaymentTab.LIGHTNING -> setHceToLightning()
+                    PaymentTabManager.PaymentTab.CASHU -> setHceToCashu()
                 }
+                updatePaymentMethodStatus()
             }
         })
 
         // Initialize Bitcoin price worker
         bitcoinPriceWorker = BitcoinPriceWorker.getInstance(this)
 
-        // Capture the payment unit once. Legacy callers without the extra fall back to the
-        // preference only at this boundary; all downstream work uses this immutable snapshot.
-        val mintManager = MintManager.getInstance(this)
-        val rawPaymentUnit = intent.getStringExtra(EXTRA_PAYMENT_UNIT)
-            ?: mintManager.getPreferredUnit()
-        val paymentAssetResult = PaymentAssetResolver.resolve(
-            rawUnit = rawPaymentUnit,
-            rawIssuerScope = intent.getStringExtra(EXTRA_PAYMENT_ISSUER_SCOPE),
-            supportedAssets = mintManager.getSupportedChargeAssets(),
-        )
-        val paymentAsset = when (paymentAssetResult) {
-            is PaymentAssetResolver.Result.Resolved -> paymentAssetResult.asset
-            is PaymentAssetResolver.Result.Rejected -> {
-                Log.e(
-                    TAG,
-                    "Rejected payment asset: unit=$rawPaymentUnit, " +
-                        "reason=${paymentAssetResult.reason}",
-                )
-                Toast.makeText(
-                    this,
-                    R.string.payment_request_error_unsupported_unit,
-                    Toast.LENGTH_SHORT,
-                ).show()
-                finish()
-                return
-            }
-        }
-        paymentUnit = paymentAsset.unit
-        paymentIssuerScope = paymentAsset.issuerScope
+        if (!initializePaymentUnit()) return
 
         // Get payment amount from intent. It is always atomic in paymentUnit.
         paymentAmount = intent.getLongExtra(EXTRA_PAYMENT_AMOUNT, 0)
@@ -380,6 +367,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         resumeLightningQuoteId = intent.getStringExtra(EXTRA_LIGHTNING_QUOTE_ID)
         resumeLightningMintUrl = intent.getStringExtra(EXTRA_LIGHTNING_MINT_URL)
         resumeLightningInvoice = intent.getStringExtra(EXTRA_LIGHTNING_INVOICE)
+        resumeArkoorQuoteId = intent.getStringExtra(EXTRA_ARKOOR_QUOTE_ID)
+        resumeArkoorMintUrl = intent.getStringExtra(EXTRA_ARKOOR_MINT_URL)
 
         // Get resume data for Nostr if available
         resumeNostrSecretHex = intent.getStringExtra(EXTRA_NOSTR_SECRET_HEX)
@@ -412,13 +401,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             val toShare = when (currentTab) {
                 PaymentTabManager.PaymentTab.LIGHTNING -> lightningHandler?.currentInvoice ?: lightningInvoice
                 PaymentTabManager.PaymentTab.CASHU -> nostrHandler?.paymentRequest ?: btcPayCashuPR ?: hcePaymentRequest
-                PaymentTabManager.PaymentTab.UNIFIED -> {
-                    val creq = nostrHandler?.paymentRequestBech32
-                    val lnbc = lightningHandler?.currentInvoice ?: lightningInvoice
-                    if (creq != null || lnbc != null) {
-                        org.cashudevkit.createBip321Uri(creq, lnbc, null)
-                    } else null
-                }
+                PaymentTabManager.PaymentTab.UNIFIED -> unifiedPaymentRequest()
             }
             if (toShare != null) {
                 sharePaymentRequest(toShare)
@@ -439,11 +422,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         // Initialize all payment modes (NDEF, Nostr, Lightning)
         initializePaymentRequest()
 
-        // If resuming a local Lightning payment, auto-switch to Lightning tab.
-        // BTCPay resume uses resumeLightningQuoteId for the invoice ID — don't switch tab for it.
-        if (isResumingPayment && resumeLightningQuoteId != null && paymentService !is BTCPayPaymentService) {
-            tabManager.selectTab(PaymentTabManager.PaymentTab.LIGHTNING)
-        }
+
     }
 
     /**
@@ -524,6 +503,45 @@ class PaymentRequestActivity : AppCompatActivity() {
         Log.d(TAG, "   📱 Formatted: $formattedAmountString")
     }
 
+    private fun initializePaymentUnit(): Boolean {
+        // Capture the payment unit once. Legacy callers without the extra fall back to the
+        // preference only at this boundary; all downstream work uses this immutable snapshot.
+        val mintManager = MintManager.getInstance(this)
+        val savedPayment = intent.getStringExtra(EXTRA_RESUME_PAYMENT_ID)?.let {
+            PaymentsHistoryActivity.getPaymentEntryById(this, it)
+        }
+        val rawPaymentUnit = intent.getStringExtra(EXTRA_PAYMENT_UNIT)
+            ?: savedPayment?.getUnit()
+            ?: if (intent.hasExtra(EXTRA_ARKOOR_QUOTE_ID)) "sat" else mintManager.getPreferredUnit()
+        val paymentAssetResult = PaymentAssetResolver.resolve(
+            rawUnit = rawPaymentUnit,
+            rawIssuerScope = intent.getStringExtra(EXTRA_PAYMENT_ISSUER_SCOPE)
+                ?: savedPayment?.issuerScope,
+            supportedAssets = mintManager.getSupportedChargeAssets(),
+        )
+        val paymentAsset = when (paymentAssetResult) {
+            is PaymentAssetResolver.Result.Resolved -> paymentAssetResult.asset
+            is PaymentAssetResolver.Result.Rejected -> {
+                Log.e(
+                    TAG,
+                    "Rejected payment asset: unit=$rawPaymentUnit, " +
+                        "reason=${paymentAssetResult.reason}",
+                )
+                Toast.makeText(
+                    this,
+                    R.string.payment_request_error_unsupported_unit,
+                    Toast.LENGTH_SHORT,
+                ).show()
+                finish()
+                return false
+            }
+        }
+        paymentUnit = paymentAsset.unit
+        paymentIssuerScope = paymentAsset.issuerScope
+
+        return true
+    }
+
     private fun updateConvertedAmount(formattedAmountString: String) {
         if (!paymentUnit.isSat) {
             convertedAmountDisplay.visibility = View.GONE
@@ -590,13 +608,14 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
-        if (hasFocus && nfcAnimationContainer.visibility == View.VISIBLE) {
+        if (hasFocus && ::nfcAnimationContainer.isInitialized && nfcAnimationContainer.visibility == View.VISIBLE) {
             applyFullscreenForAnimationOverlay()
         }
     }
 
     override fun onResume() {
         super.onResume()
+        if (isFinishing) return
         try {
             val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
             if (nfcAdapter != null) {
@@ -684,7 +703,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         cashuLogoCard.visibility = View.GONE
         cashuLoadingSpinner.visibility = View.VISIBLE
 
-        uiScope.launch {
+        uiScope.launchPaymentOperation {
             val result = paymentService.createPayment(paymentAmount, "Payment of $paymentAmount sats", checkoutBasketJson)
             result.onSuccess { payment ->
                 btcPayPaymentId = payment.paymentId
@@ -743,7 +762,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     fetchBtcPayLightningInBackground(payment.paymentId)
                 }
 
-                statusText.text = getString(R.string.payment_request_status_waiting_for_payment)
+                showWaitingStatus()
 
                 // Start polling BTCPay for payment status
                 startBtcPayPolling(payment.paymentId)
@@ -783,7 +802,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         cashuLoadingSpinner.visibility = View.VISIBLE
 
         val btcPay = paymentService as BTCPayPaymentService
-        uiScope.launch {
+        uiScope.launchPaymentOperation {
             val result = btcPay.fetchExistingPaymentData(invoiceId)
             result.onSuccess { payment ->
                 btcPayPaymentId = invoiceId
@@ -827,7 +846,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     fetchBtcPayLightningInBackground(invoiceId)
                 }
 
-                statusText.text = getString(R.string.payment_request_status_waiting_for_payment)
+                showWaitingStatus()
                 startBtcPayPolling(invoiceId)
             }.onFailure { error ->
                 Log.e(TAG, "BTCPay resume failed: ${error.message}", error)
@@ -848,7 +867,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
     private fun fetchBtcPayLightningInBackground(invoiceId: String) {
         val btcPay = paymentService as? BTCPayPaymentService ?: return
-        uiScope.launch {
+        uiScope.launchPaymentOperation {
             for (attempt in 1..10) {
                 delay(1500)
                 if (hasTerminalOutcome) break
@@ -856,7 +875,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 if (bolt11 != null) {
                     Log.d(TAG, "Got bolt11 in background after $attempt attempt(s)")
                     showBtcPayLightningQr(bolt11)
-                    return@launch
+                    return@launchPaymentOperation
                 }
                 Log.d(TAG, "Background bolt11 fetch attempt $attempt — not ready yet")
             }
@@ -867,7 +886,7 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     /**
-     * Local (CDK) mode: the original flow – NDEF, Nostr, and Lightning tab.
+     * Local CDK checkout: Cashu plus independently quoted Lightning and Arkoor options.
      */
     private fun initializeLocalPaymentRequest() {
         // Get allowed mints supporting the active unit
@@ -876,17 +895,28 @@ class PaymentRequestActivity : AppCompatActivity() {
         val allowedMints = getAllowedMintsForPayment(mintManager)
         Log.d(TAG, "Using ${allowedMints.size} allowed mints for payment request")
 
-        // Initialize Lightning handler with preferred mint (will be started when tab is selected)
-        val preferredLightningMint = paymentIssuerScope
-            ?.takeIf { it in allowedMints }
-            ?: mintManager.getPreferredLightningMint(activeUnit)
+        isDualQuoteCheckout = true
+        arkoorLoading = true
+        lightningStarted = true
+        // Offer independently quoted methods when the selected mint supports them.
+        // Both start immediately, including when the delayed-Lightning preference is set.
+        val preferredMint = resumeLightningMintUrl ?: resumeArkoorMintUrl
+            ?: paymentIssuerScope ?: mintManager.getPreferredLightningMint(activeUnit)
+        val sockets = MintQuoteWebSocket(lifecycleScope)
+        quoteSockets = sockets
         lightningHandler = LightningMintHandler(
-            context = this,
-            preferredMint = preferredLightningMint,
-            allowedMints = allowedMints,
-            uiScope = uiScope,
-            paymentUnit = activeUnit,
+            this, preferredMint, allowedMints, lifecycleScope,
+            quoteSockets = sockets, paymentUnit = activeUnit,
         )
+        largeAmountDisplay.text = if (activeUnit == "sat") {
+            Amount(paymentAmount, Currency.BTC).toString()
+        } else {
+            formattedAmountString
+        }
+        convertedAmountDisplay.visibility = View.GONE
+        tabManager.selectTab(PaymentTabManager.PaymentTab.UNIFIED)
+        startLightningMintFlow()
+        startArkoorPaymentFlow()
 
         // Check if NDEF is available
         val ndefAvailable = NdefHostCardEmulationService.isHceAvailable(this)
@@ -931,49 +961,194 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
 
         // Initialize Nostr handler and start payment flow
-        nostrHandler = NostrPaymentHandler(this, allowedMints, activeUnit)
+        nostrHandler = NostrPaymentHandler(this, allowedMints, paymentUnit = activeUnit)
         startNostrPaymentFlow()
 
-        // Show Lightning when an allowed issuer advertises BOLT11 minting for this unit.
-        uiScope.launch {
-            val lightningRoute = mintManager.findPaymentMint(
-                paymentUnit,
-                com.electricdreams.numo.core.util.MintOperation.MINT,
-                com.electricdreams.numo.core.util.MintCapabilities.BOLT11,
-                allowedMints,
-                preferredLightningMint,
-            )
-            isBolt11Supported = lightningRoute != null
+    }
 
-            if (!isBolt11Supported) {
-                Log.d(TAG, "Mint does not support bolt11. Bypassing Lightning tab and showing BIP321 Cashu request.")
-                // Bypass lightning entirely
-                runOnUiThread {
-                    // Hide Lightning tab ONLY
-                    lightningTab.visibility = View.GONE
-                    
-                    // Force selecting UNIFIED tab if LIGHTNING was the default
-                    if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.LIGHTNING) {
-                        tabManager.selectTab(PaymentTabManager.PaymentTab.UNIFIED)
-                    }
-                    
-                    // We need to call updateUnifiedQrCode here because the creq might already be ready
-                    updateUnifiedQrCode()
+    private fun startArkoorPaymentFlow() {
+        val manager = MintManager.getInstance(this)
+        val mintUrl = resumeArkoorMintUrl ?: resumeLightningMintUrl
+            ?: manager.getPreferredLightningMint(paymentUnit.value)
+        if (mintUrl == null || !paymentUnit.isSat) {
+            onArkoorUnavailable()
+            return
+        }
+        // Display the saved destination while the session refreshes its status online.
+        // Restoring a request does not establish that the checkout has been paid.
+        val savedAddress = intent.getStringExtra(EXTRA_ARKOOR_ADDRESS)
+        if (resumeArkoorQuoteId != null && resumeArkoorMintUrl != null &&
+            savedAddress != null &&
+            (savedAddress.startsWith("ark1") || savedAddress.startsWith("tark1"))) {
+            arkoorAddress = savedAddress
+            arkoorMintUrl = mintUrl
+            arkoorLoading = false
+            updateUnifiedQrCode()
+        }
+        arkoorJob = lifecycleScope.launchPaymentOperation {
+            try {
+                withContext(Dispatchers.IO) {
+                    val repository = com.electricdreams.numo.core.cashu.CashuWalletManager.getWallet()
+                        ?: error("Wallet not ready")
+                    val wallet = repository.getWallet(
+                        org.cashudevkit.MintUrl(mintUrl), org.cashudevkit.CurrencyUnit.Sat,
+                    )
+                    ArkoorMintSession(wallet, subscribeToQuote = { quoteId ->
+                        checkNotNull(quoteSockets).subscribe(mintUrl, "arkoor_mint_quote", quoteId)
+                    }).receive(
+                        amountSats = paymentAmount,
+                        existingQuoteId = resumeArkoorQuoteId,
+                        onRequestReady = { quote ->
+                            withContext(Dispatchers.Main) {
+                                arkoorAddress = quote.request
+                                arkoorMintUrl = mintUrl
+                                arkoorLoading = false
+                                pendingPaymentId?.let { id ->
+                                    PaymentsHistoryActivity.updatePendingWithArkoorInfo(
+                                        context = this@PaymentRequestActivity,
+                                        paymentId = id,
+                                        address = quote.request,
+                                        quoteId = quote.id,
+                                        mintUrl = mintUrl,
+                                    )
+                                }
+                                updateUnifiedQrCode()
+                            }
+                        },
+                        onRetry = { error ->
+                            Log.w(TAG, "Arkoor quote check or issuance will retry", error)
+                            withContext(Dispatchers.Main) {
+                                if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.UNIFIED) {
+                                    statusText.setText(R.string.payment_request_arkoor_retrying)
+                                }
+                            }
+                        },
+                    )
                 }
-            } else {
-                // Unless developer setting to delay it is enabled, start it immediately
-                if (!DeveloperPrefs.isLightningInvoiceDelayed(this@PaymentRequestActivity)) {
-                    startLightningMintFlow()
-                }
+                handleLightningPaymentSuccess(PaymentHistoryEntry.TYPE_ARKOOR)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (unsupported: ArkoorMintSession.UnsupportedMintException) {
+                Log.d(TAG, "Selected mint does not offer Arkoor in sats")
+                onArkoorUnavailable()
+            } catch (error: Exception) {
+                Log.e(TAG, "Arkoor checkout failed", error)
+                onArkoorUnavailable(getString(R.string.payment_request_arkoor_failed, error.message))
             }
         }
     }
 
     /**
-     * Poll BTCPay invoice status every 2 seconds until terminal state.
+     * Offline mid-payment: keep the QR up (an issued invoice can still be paid), drop the tap
+     * prompt since ecash over NFC needs the mint, and swap "Waiting for payment..." for a line
+     * that reassures the merchant.
      */
+    private fun observeConnectivityForPayment() {
+        val contactlessIcon = findViewById<ImageView>(R.id.contactless_icon)
+        val instructionText = findViewById<TextView>(R.id.instruction_text)
+        val iconGap = resources.getDimensionPixelSize(R.dimen.space_m)
+        val offlinePill = findViewById<View>(R.id.offline_pill)
+        offlinePill.setOnClickListener {
+            OfflineExplainerActivity.start(this, paymentOnScreen = confirmsAfterReconnect())
+        }
+        ViewCompat.replaceAccessibilityAction(
+            offlinePill,
+            AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
+            getString(R.string.offline_strip_action_details),
+            null
+        )
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    ConnectivityMonitor.getInstance(this@PaymentRequestActivity).isOnline.collect { online ->
+                        contactlessIcon.visibility = if (online) View.VISIBLE else View.GONE
+                        instructionText.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                            marginStart = if (online) iconGap else 0
+                        }
+                        instructionText.setText(
+                            if (online) R.string.payment_request_instruction_scan_or_tap
+                            else R.string.payment_request_instruction_scan
+                        )
+                        refreshWaitingStatus()
+                    }
+                }
+                launch { OfflineStripController.stripMode.collect(::renderOfflinePill) }
+            }
+        }
+    }
+
+    private fun refreshWaitingStatus() {
+        // Preserve errors and results while updating either checkout's waiting line.
+        val current = statusText.text.toString()
+        if (current == getString(R.string.payment_request_status_waiting_for_payment) ||
+            current == getString(R.string.payment_request_offline_note) ||
+            (isDualQuoteCheckout && current == paymentMethodsLabel())) {
+            if (isDualQuoteCheckout) updatePaymentMethodStatus() else showWaitingStatus()
+        }
+    }
+
+    /** "Waiting for payment...", or the offline reassurance while there's no connection. */
+    private fun showWaitingStatus() {
+        val offline = !NetworkUtils.isNetworkAvailable(this)
+        statusText.text = getString(
+            if (offline && confirmsAfterReconnect()) R.string.payment_request_offline_note
+            else R.string.payment_request_status_waiting_for_payment
+        )
+    }
+
+    /**
+     * Whether a payment made while offline is picked up on reconnect: the local wallet keeps
+     * polling its mint quote and re-subscribes to Nostr. BTCPay polling gives up after repeated
+     * errors, so it makes no such promise.
+     */
+    private fun confirmsAfterReconnect(): Boolean =
+        !(::paymentService.isInitialized && paymentService is BTCPayPaymentService)
+
+    /** The header's stand-in for the app-wide strip, which this screen opts out of. */
+    private fun renderOfflinePill(mode: OfflineStripView.Mode?) {
+        val pill = findViewById<View>(R.id.offline_pill)
+        val text = findViewById<TextView>(R.id.offline_pill_text)
+        pill.animate().cancel()
+        if (mode == null) {
+            if (pill.visibility != View.VISIBLE) return
+            pill.animate().alpha(0f).scaleX(PILL_HIDDEN_SCALE).scaleY(PILL_HIDDEN_SCALE)
+                .setDuration(PILL_OUT_MS)
+                .withEndAction { pill.visibility = View.GONE }
+                .start()
+            return
+        }
+        val offline = mode == OfflineStripView.Mode.OFFLINE
+        val color = ContextCompat.getColor(
+            this,
+            if (offline) R.color.color_warning else R.color.color_success_green
+        )
+        text.setText(if (offline) R.string.offline_strip_title else R.string.offline_strip_back_online_title)
+        text.setTextColor(color)
+        pill.isClickable = offline
+        pill.isFocusable = offline
+        if (pill.visibility != View.VISIBLE) {
+            pill.alpha = 0f
+            pill.scaleX = PILL_HIDDEN_SCALE
+            pill.scaleY = PILL_HIDDEN_SCALE
+            pill.visibility = View.VISIBLE
+        }
+        pill.animate().alpha(1f).scaleX(1f).scaleY(1f)
+            .setDuration(PILL_IN_MS)
+            .setInterpolator(DecelerateInterpolator(2f))
+            .start()
+    }
+
+    private fun onArkoorUnavailable(message: String? = null) {
+        if (hasTerminalOutcome) return
+        arkoorLoading = false
+        arkoorAddress = null
+        arkoorError = message
+        updateUnifiedQrCode()
+    }
+
+    /** Poll BTCPay invoice status every 2 seconds until terminal state. */
     private fun startBtcPayPolling(paymentId: String) {
-        btcPayPollingJob = uiScope.launch {
+        btcPayPollingJob = uiScope.launchPaymentOperation {
             var consecutiveErrors = 0
             var pollInterval = 2000L
 
@@ -985,7 +1160,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     btcPayPollingJob?.cancel()
                     pendingPaymentId?.let { PaymentsHistoryActivity.markPaymentExpired(this@PaymentRequestActivity, it) }
                     handlePaymentError("Invoice expired")
-                    return@launch
+                    return@launchPaymentOperation
                 }
 
                 delay(pollInterval)
@@ -1074,22 +1249,13 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun setHceToUnified() {
-        // In BTCPay mode hcePaymentRequestBech32 is not set; fall back to stripped cashuPR
-        val creq = hcePaymentRequestBech32 ?: hcePaymentRequest
-        val lnbc = lightningInvoice
-
-        if (creq == null && lnbc == null) {
-            Log.w(TAG, "setHceToUnified() called but both creq and lnbc are null")
-            return
-        }
-
-        val payload = org.cashudevkit.createBip321Uri(creq, lnbc, null)
+        val payload = unifiedPaymentRequest() ?: return
 
         try {
             val hceService = NdefHostCardEmulationService.getInstance()
             if (hceService != null) {
                 Log.d(TAG, "setHceToUnified(): Switching HCE payload to Unified. payload=$payload")
-                hceService.setPaymentRequest(payload ?: "", paymentAmount)
+                hceService.setPaymentRequest(payload, paymentAmount)
                 currentHceMode = HceMode.UNIFIED
             } else {
                 Log.w(TAG, "setHceToUnified(): HCE service not available")
@@ -1110,46 +1276,54 @@ class PaymentRequestActivity : AppCompatActivity() {
     private fun prepareBtcPayCashuPR(rawCashuPR: String, amount: Long): Pair<String, String?> =
         BtcPayQrCodeBuilder.prepareCashuQrContent(rawCashuPR, amount)
 
-    private fun updateUnifiedQrCode() {
-        val creq = nostrHandler?.paymentRequestBech32 ?: hcePaymentRequestBech32 ?: btcPayCashuPRBech32 ?: btcPayCashuPR ?: hcePaymentRequest
-        val lnbc = lightningInvoice
+    private fun unifiedPaymentRequest(): String? {
+        val creq = nostrHandler?.paymentRequestBech32 ?: hcePaymentRequestBech32
+            ?: btcPayCashuPRBech32 ?: btcPayCashuPR ?: hcePaymentRequest
+        return UnifiedPaymentRequest(
+            amountSats = paymentAmount,
+            cashu = creq,
+            lightning = lightningInvoice,
+            ark = arkoorAddress,
+            lightningPending = lightningStarted && lightningInvoice == null,
+            arkoorPending = arkoorLoading,
+        ).toUri()
+    }
 
-
-        // We only show the unified QR when BOTH Cashu and Lightning requests are ready
-        // (unless lightning is explicitly disabled or errored out, but for simplicity we assume we need both if Lightning is supported)
-        
-        // Since we attempt to fetch lightning invoice by default if allowed mints are set, 
-        // we'll wait for both unless lnbc fails (which we handle below).
-        // Let's implement the logic: If we have creq, we still want to wait for lnbc if lightning was started.
-        
-        // Actually, if we don't have creq yet, definitely wait.
-        if (creq == null) return
-        
-        // If Lightning is enabled (lightningStarted is true) and we don't have lnbc yet, wait.
-        // If lnbc is null because of an error, it stays null, but we don't want to spin forever. 
-        // Wait, if there's an error, onError hides the lightning spinner. But does it hide the unified spinner? 
-        // We should just hide the unified spinner and show creq if lnbc fails, or we should never show it?
-        // For simplicity: if lightningStarted == true and lightningInvoice == null, we wait. BUT wait, how do we know if it errored? 
-        // Let's just track if lightning is "in progress". For now, we will require both. If one fails, the user is notified.
-        
-        if (lightningStarted && lnbc == null) {
-            // Still waiting for lightning invoice
-            return
+    private fun updatePaymentMethodStatus() {
+        if (hasTerminalOutcome || !isDualQuoteCheckout) return
+        statusText.visibility = View.VISIBLE
+        if (!NetworkUtils.isNetworkAvailable(this) && confirmsAfterReconnect()) {
+            showWaitingStatus()
+        } else if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.UNIFIED &&
+            unifiedPaymentRequest() != null) {
+            statusText.text = listOfNotNull(paymentMethodsLabel(), arkoorError).joinToString("\n")
+        } else {
+            showWaitingStatus()
         }
-        
-        val unifiedUri = org.cashudevkit.createBip321Uri(creq, lnbc, null)
+    }
 
+    private fun paymentMethodsLabel(): String = listOfNotNull(
+        "Cashu".takeIf { nostrHandler?.paymentRequestBech32 != null || hcePaymentRequest != null },
+        "Lightning".takeIf { lightningInvoice != null },
+        getString(R.string.payment_request_arkoor).takeIf { arkoorAddress != null },
+    ).joinToString(" · ")
+
+    private fun updateUnifiedQrCode() {
+        if (hasTerminalOutcome) return
+        val unifiedUri = unifiedPaymentRequest() ?: return
         try {
-            val qrBitmap = generateThemedQrCode(unifiedUri)
-            unifiedQrImageView.setImageBitmap(qrBitmap)
+            // Square modules keep this denser, multi-method QR readable.
+            unifiedQrImageView.setImageBitmap(
+                QrCodeGenerator.generate(unifiedUri, 1024, roundedDots = false),
+            )
             unifiedQrImageView.visibility = View.VISIBLE
             unifiedLoadingSpinner.visibility = View.GONE
-            
+            updatePaymentMethodStatus()
             if (tabManager.getCurrentTab() == PaymentTabManager.PaymentTab.UNIFIED) {
                 setHceToUnified()
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error generating Unified QR bitmap: ${e.message}", e)
+        } catch (error: Exception) {
+            Log.e(TAG, "Error generating unified payment QR", error)
         }
     }
 
@@ -1163,7 +1337,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                     cashuQrImageView.setImageBitmap(qrBitmap)
                     cashuQrImageView.visibility = View.VISIBLE
                     cashuLoadingSpinner.visibility = View.GONE
-                    statusText.text = getString(R.string.payment_request_status_waiting_for_payment)
+                    updatePaymentMethodStatus()
                     updateUnifiedQrCode()
                 } catch (e: Exception) {
                     Log.e(TAG, "Error generating Cashu QR bitmap: ${e.message}", e)
@@ -1204,27 +1378,23 @@ class PaymentRequestActivity : AppCompatActivity() {
     }
 
     private fun startLightningMintFlow() {
+        val handler = lightningHandler ?: return
         lightningStarted = true
 
-        // Check if we're resuming with existing Lightning quote
-        if (resumeLightningQuoteId != null && resumeLightningMintUrl != null && resumeLightningInvoice != null) {
-            Log.d(TAG, "Resuming Lightning quote: id=$resumeLightningQuoteId")
-            
-            lightningHandler?.resume(
-                quoteId = resumeLightningQuoteId!!,
-                mintUrlStr = resumeLightningMintUrl!!,
-                invoice = resumeLightningInvoice!!,
-                callback = createLightningCallback()
-            )
+        val quoteId = resumeLightningQuoteId
+        val mintUrl = resumeLightningMintUrl
+        val invoice = resumeLightningInvoice
+        if (quoteId != null && mintUrl != null && invoice != null) {
+            handler.resume(quoteId, mintUrl, invoice, createLightningCallback())
         } else {
-            // Start fresh Lightning flow
-            lightningHandler?.start(paymentAmount, createLightningCallback())
+            handler.start(paymentAmount, createLightningCallback())
         }
     }
 
     private fun createLightningCallback(): LightningMintHandler.Callback {
         return object : LightningMintHandler.Callback {
             override fun onInvoiceReady(bolt11: String, quoteId: String, mintUrl: String) {
+                if (hasTerminalOutcome) return
                 // Store for history
                 lightningInvoice = bolt11
                 lightningQuoteId = quoteId
@@ -1267,14 +1437,13 @@ class PaymentRequestActivity : AppCompatActivity() {
             }
 
             override fun onError(message: String) {
+                if (hasTerminalOutcome) return
                 // Hide loading spinner on error
                 lightningLoadingSpinner.visibility = View.GONE
-                lightningStarted = false // Mark as finished/failed so unified QR can proceed with just Cashu
+                lightningStarted = false // Other available methods can still be offered.
                 updateUnifiedQrCode()
                 
-                // Do not immediately fail the whole payment; NFC or Nostr may still succeed.
-                // Surface a toast to inform the user that the Unified QR will only contain Cashu, 
-                // or that the Lightning tab is unavailable.
+                // Keep Cashu and Arkoor available when Lightning cannot create its quote.
                 val errorMsg = getString(R.string.payment_request_lightning_error_failed, message)
                 Toast.makeText(this@PaymentRequestActivity, errorMsg, Toast.LENGTH_LONG).show()
             }
@@ -1313,11 +1482,11 @@ class PaymentRequestActivity : AppCompatActivity() {
                         // Raw Cashu token received over NFC. Delegate full
                         // validation, swap-to-Lightning-mint (if needed),
                         // and redemption to CashuPaymentHelper.
-                        uiScope.launch {
+                        uiScope.launchPaymentOperation {
                             // Check if we are already processing a payment to avoid double-processing
                             if (isProcessingNfcPayment) {
                                 Log.d(TAG, "NFC token received but ignored - already processing a payment")
-                                return@launch
+                                return@launchPaymentOperation
                             }
                             
                             // Mark as processing immediately to lock out subsequent NFC reads
@@ -1366,7 +1535,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                                                 throw Exception("BTCPay redemption failed: ${e.message}")
                                             }
                                         }
-                                        return@launch
+                                        return@launchPaymentOperation
                                     } else {
                                         Log.w(TAG, "BTCPay invoice ID not available, falling back to local flow (likely to fail)")
                                     }
@@ -1486,18 +1655,17 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Update pending payment to completed (Cashu payment path)
         pendingPaymentId?.let { paymentId ->
-            val creq = nostrHandler?.paymentRequestBech32 
-                ?: hcePaymentRequestBech32 
-                ?: btcPayCashuPRBech32 
-                ?: btcPayCashuPR 
-                ?: hcePaymentRequest
             PaymentsHistoryActivity.completePendingPayment(
                 context = this,
                 paymentId = paymentId,
                 token = token,
                 paymentType = PaymentHistoryEntry.TYPE_CASHU,
+                paymentRequest = nostrHandler?.paymentRequestBech32 ?: hcePaymentRequestBech32
+                    ?: btcPayCashuPRBech32 ?: btcPayCashuPR ?: hcePaymentRequest,
                 mintUrl = mintUrl,
-                lightningInvoice = creq,
+                lightningInvoice = lightningInvoice,
+                lightningQuoteId = lightningQuoteId,
+                lightningMintUrl = lightningMintUrl,
             )
         }
 
@@ -1529,7 +1697,10 @@ class PaymentRequestActivity : AppCompatActivity() {
         Log.d(TAG, "Lightning payment successful (no Cashu token)")
         cancelNfcSafetyTimeout()
 
-        WalletLogger.log("IN", paymentAmount, lightningMintUrl ?: "Unknown", "Lightning payment successful (NFC)")
+        val paidMint = if (paymentType == PaymentHistoryEntry.TYPE_ARKOOR) {
+            arkoorMintUrl
+        } else lightningMintUrl
+        WalletLogger.log("IN", paymentAmount, paidMint ?: "Unknown", "$paymentType payment successful")
 
         statusText.visibility = View.VISIBLE
         statusText.text = getString(R.string.payment_request_status_success)
@@ -1541,7 +1712,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 paymentId = paymentId,
                 token = "",
                 paymentType = paymentType,
-                mintUrl = lightningMintUrl,
+                mintUrl = paidMint,
                 lightningInvoice = lightningInvoice,
                 lightningQuoteId = lightningQuoteId,
                 lightningMintUrl = lightningMintUrl,
@@ -1557,7 +1728,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
-        showPaymentSuccess("", paymentAmount)
+        showPaymentSuccess("", paymentAmount, paidMint)
     }
 
     /**
@@ -1600,6 +1771,10 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Immediately stop/clear NFC/HCE service to prevent paying wallets from attempting again
         clearHceService()
+
+        arkoorJob?.cancel()
+        lightningHandler?.cancel()
+        quoteSockets?.close()
 
         return true
     }
@@ -1673,8 +1848,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         nostrHandler = null
 
         // Stop Lightning handler
+        arkoorJob?.cancel()
         lightningHandler?.cancel()
         lightningHandler = null
+        quoteSockets?.close()
+        quoteSockets = null
 
         // Clean up HCE service
         clearHceService()
@@ -1695,8 +1873,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         btcPayPollingJob = null
         nostrHandler?.stop()
         nostrHandler = null
+        arkoorJob?.cancel()
         lightningHandler?.cancel()
         lightningHandler = null
+        quoteSockets?.close()
+        quoteSockets = null
 
         // Clean up HCE service
         clearHceService()
@@ -1772,14 +1953,14 @@ class PaymentRequestActivity : AppCompatActivity() {
      * This is extracted so it can be called from both the normal flow and the NFC animation flow.
      * This ensures auto-withdrawal logic is consistent across all payment paths.
      */
-    private fun triggerPostPaymentOperations(token: String) {
+    private fun triggerPostPaymentOperations(token: String, receivedMintUrl: String?) {
         // Archive the basket now that payment is complete
         markBasketAsPaid()
         
         // Check for auto-withdrawal after successful payment (runs in background, survives activity destruction)
         AutoWithdrawManager.getInstance(this).onPaymentReceived(
             token = token,
-            lightningMintUrl = lightningMintUrl,
+            lightningMintUrl = receivedMintUrl,
             paymentUnit = paymentUnit.value,
         )
     }
@@ -1803,7 +1984,7 @@ class PaymentRequestActivity : AppCompatActivity() {
      * Unified success handler for all payment types.
      * Always renders the native success overlay so NFC and non-NFC success paths stay consistent.
      */
-    private fun showPaymentSuccess(token: String, amount: Long) {
+    private fun showPaymentSuccess(token: String, amount: Long, receivedMintUrl: String? = null) {
         if (nfcAnimationContainer.visibility != View.VISIBLE) {
             nfcOverlayShownAtMs = SystemClock.elapsedRealtime()
             Log.d(TAG, "overlay_shown_ms=$nfcOverlayShownAtMs")
@@ -1817,6 +1998,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             applyFullscreenForAnimationOverlay()
         }
         pendingNfcSuccessToken = token
+        pendingNfcSuccessMintUrl = receivedMintUrl
         pendingNfcSuccessAmount = amount
         showNfcAnimationSuccess(formattedAmountString)
     }
@@ -1871,8 +2053,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         nostrHandler = null
 
         // Stop Lightning handler
+        arkoorJob?.cancel()
         lightningHandler?.cancel()
         lightningHandler = null
+        quoteSockets?.close()
+        quoteSockets = null
 
         // Clean up HCE service
         clearHceService()
@@ -1895,6 +2080,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         resetResultTextViews()
         resetResultActionButtons()
         pendingNfcSuccessToken = null
+        pendingNfcSuccessMintUrl = null
         pendingNfcSuccessAmount = 0
 
         animationResultLabelText.animate().cancel()
@@ -2046,14 +2232,15 @@ class PaymentRequestActivity : AppCompatActivity() {
         animateResultTextIn(showAmount = success)
         showResultActionsAnimated(mode)
 
-        if (success && pendingNfcSuccessToken != null) {
-            val token = pendingNfcSuccessToken!!
+        if (success) pendingNfcSuccessToken?.let { token ->
+            val receivedMintUrl = pendingNfcSuccessMintUrl
             pendingNfcSuccessToken = null
+            pendingNfcSuccessMintUrl = null
             pendingNfcSuccessAmount = 0
 
             // Trigger auto-withdrawal and basket archiving (same as showPaymentSuccess does)
             // but don't show PaymentReceivedActivity since we're already showing animation
-            triggerPostPaymentOperations(token)
+            triggerPostPaymentOperations(token, receivedMintUrl)
         }
     }
 
@@ -2258,7 +2445,6 @@ class PaymentRequestActivity : AppCompatActivity() {
             PaymentIntentFactory.createTransactionDetailIntent(
                 context = this,
                 entry = entry,
-                position = history.size - 1,
             ),
         )
     }
@@ -2272,6 +2458,9 @@ class PaymentRequestActivity : AppCompatActivity() {
         private const val NFC_READ_TIMEOUT_MS = 5_000L
         private const val BTCPAY_INVOICE_TIMEOUT_MS = 15 * 60 * 1000L // 15 min
         private const val BTCPAY_MAX_POLL_ERRORS = 5
+        private const val PILL_IN_MS = 220L
+        private const val PILL_OUT_MS = 160L
+        private const val PILL_HIDDEN_SCALE = 0.92f
 
 
 
@@ -2287,6 +2476,9 @@ class PaymentRequestActivity : AppCompatActivity() {
         const val EXTRA_LIGHTNING_QUOTE_ID = "lightning_quote_id"
         const val EXTRA_LIGHTNING_MINT_URL = "lightning_mint_url"
         const val EXTRA_LIGHTNING_INVOICE = "lightning_invoice"
+        const val EXTRA_ARKOOR_ADDRESS = "arkoor_address"
+        const val EXTRA_ARKOOR_QUOTE_ID = "arkoor_quote_id"
+        const val EXTRA_ARKOOR_MINT_URL = "arkoor_mint_url"
         const val EXTRA_NOSTR_SECRET_HEX = "nostr_secret_hex"
         const val EXTRA_NOSTR_NPROFILE = "nostr_nprofile"
 

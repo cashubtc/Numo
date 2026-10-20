@@ -1,43 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/top_bar_height"
+    android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingStart="@dimen/space_l"
-    android:paddingEnd="@dimen/space_s"
-    android:background="?attr/selectableItemBackground"
+    android:paddingStart="0dp"
+    android:paddingEnd="0dp"
+    android:background="@drawable/bg_settings_group"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    android:clipToOutline="true"
+                    android:foreground="?attr/selectableItemBackground"
+    android:minHeight="@dimen/settings_switch_height">
 
     <!-- Tip icon -->
+
     <ImageView
         android:importantForAccessibility="no"
-        android:layout_width="@dimen/icon_size_small"
-        android:layout_height="@dimen/icon_size_small"
-        android:layout_marginEnd="@dimen/space_l"
+        android:layout_width="@dimen/settings_row_icon_size"
+        android:layout_height="@dimen/settings_row_icon_size"
+        android:layout_marginEnd="@dimen/settings_row_icon_gap"
+                        android:padding="@dimen/settings_icon_padding"
         android:src="@drawable/ic_tip"
-        app:tint="@color/color_icon_secondary" />
+        app:tint="?attr/colorPrimary" />
 
     <!-- Percentage text -->
+
     <TextView
         android:id="@+id/preset_percentage"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="10%"
-        android:textAppearance="@style/Text.Body"
+        android:textAppearance="@style/Text.RowTitle"
         android:textColor="@color/color_text_primary" />
 
     <!-- Delete button -->
+
     <ImageButton
         android:id="@+id/delete_button"
-        android:layout_width="@dimen/icon_size_large"
-        android:layout_height="@dimen/icon_size_large"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_delete"
         android:contentDescription="@string/desc_remove_preset"
-        app:tint="@color/color_text_tertiary" />
+        app:tint="@color/color_text_tertiary"
+        android:padding="12dp" />
 
 </LinearLayout>

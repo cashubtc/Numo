@@ -262,6 +262,15 @@ class BitcoinPriceWorker private constructor(context: Context) {
         }.start()
     }
 
+    /** When the current currency's cached price was fetched, or null if its age is unknown. */
+    fun getPriceUpdatedAt(): Long? {
+        if (getCurrentPrice() <= 0.0) return null
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val currency = currencyManager.getCurrentCurrency()
+        // The legacy global timestamp cannot be attributed to a currency safely.
+        return prefs.getLong(KEY_LAST_UPDATE_TIME_PREFIX + currency, 0L).takeIf { it > 0L }
+    }
+
     /** Cache the Bitcoin price for a specific currency in SharedPreferences. */
     private fun cachePrice(currency: String, price: Double) {
         val cachedAt = System.currentTimeMillis()

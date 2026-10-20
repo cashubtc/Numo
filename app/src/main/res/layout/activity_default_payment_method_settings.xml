@@ -1,156 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
+    android:layout_height="match_parent">
 
-    <!-- Top App Bar -->
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/top_bar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@color/color_bg_white"
-        android:paddingHorizontal="16dp"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="match_parent">
 
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:padding="12dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/common_back"
-            android:src="@drawable/ic_chevron_back"
-            android:tint="@color/color_text_primary"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        <!-- Top App Bar -->
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/settings_item_default_payment_method_title"
-            android:textAppearance="@style/Text.Title"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_bar">
-
-        <LinearLayout
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="32dp">
+            android:minHeight="64dp"
+            app:topBarTitle="@string/settings_item_default_payment_method_title"
+            app:topBarSettingsStyle="true"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Explainer Card -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/top_bar"
+            android:clipToPadding="false">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="24dp"
-                android:background="@drawable/bg_button_secondary_pill"
-                android:orientation="horizontal"
-                android:padding="16dp">
+                android:orientation="vertical"
+                android:paddingBottom="24dp"
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_info"
-                    app:tint="@color/color_text_primary" />
+                <!-- Explainer Card -->
+
+                <!-- Options Section Header -->
+
+                <TextView
+                    android:layout_marginTop="@dimen/settings_section_gap"
+                    android:text="@string/default_payment_method_section_options"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
+                    android:textAllCaps="false"
+                    android:accessibilityHeading="true" />
+
+                <!-- Options Radio Group -->
+
+                <RadioGroup
+                    android:id="@+id/payment_method_radio_group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_settings_group"
+                    android:clipToOutline="true"
+                    android:showDividers="none">
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radio_unified"
+                        android:text="@string/default_payment_method_option_unified"
+                        style="@style/Widget.Numo.SettingsChoice" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radio_cashu"
+                        android:text="@string/default_payment_method_option_cashu"
+                        style="@style/Widget.Numo.SettingsChoice" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/radio_lightning"
+                        android:text="@string/default_payment_method_option_lightning"
+                        style="@style/Widget.Numo.SettingsChoice" />
+
+                </RadioGroup>
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="12dp"
-                    android:orientation="vertical">
+                    android:layout_marginTop="24dp"
+                    android:background="@drawable/bg_settings_group"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="0dp"
+                    android:paddingVertical="@dimen/settings_row_padding"
+                    android:clipToOutline="true">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/default_payment_method_explainer_title"
-                        android:textAppearance="@style/Text.BodyBold"
-                        android:textColor="@color/color_text_primary" />
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_info"
+                        app:tint="@color/color_text_primary" />
 
-                    <TextView
-                        android:layout_width="match_parent"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="@string/default_payment_method_explainer_body"
-                        android:textSize="14sp"
-                        android:textColor="@color/color_text_secondary"
-                        android:lineSpacingExtra="2dp" />
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/default_payment_method_explainer_title"
+                            android:textAppearance="@style/Text.BodyBold"
+                            android:textColor="@color/color_text_primary" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/default_payment_method_explainer_body"
+                            android:textSize="14sp"
+                            android:textColor="?attr/colorOnSurfaceVariant" />
+
+                    </LinearLayout>
+
                 </LinearLayout>
+
             </LinearLayout>
 
-            <!-- Options Section Header -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="32dp"
-                android:layout_marginBottom="4dp"
-                android:text="@string/default_payment_method_section_options"
-                android:textAppearance="@style/Text.SectionHeader" />
+        </ScrollView>
 
-            <!-- Options Radio Group -->
-            <RadioGroup
-                android:id="@+id/payment_method_radio_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <RadioButton
-                    android:id="@+id/radio_unified"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
-                    android:text="@string/default_payment_method_option_unified"
-                    android:textAppearance="@style/Text.BodyBold" />
-
-                <RadioButton
-                    android:id="@+id/radio_cashu"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
-                    android:text="@string/default_payment_method_option_cashu"
-                    android:textAppearance="@style/Text.BodyBold" />
-
-                <RadioButton
-                    android:id="@+id/radio_lightning"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:button="@null"
-                    android:drawableEnd="?android:attr/listChoiceIndicatorSingle"
-                    android:drawableTint="@color/color_primary_green"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="24dp"
-                    android:text="@string/default_payment_method_option_lightning"
-                    android:textAppearance="@style/Text.BodyBold" />
-            </RadioGroup>
-
-        </LinearLayout>
-    </ScrollView>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

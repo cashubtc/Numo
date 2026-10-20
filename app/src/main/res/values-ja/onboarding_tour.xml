@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_tour_welcome_title">Numoへようこそ</string>
+    <string name="onboarding_tour_welcome_body">あらゆる商品の支払いをビットコインで。</string>
+    <string name="onboarding_tour_tap_title">タッチでお支払い。</string>
+    <string name="onboarding_tour_tap_body">対応するビットコインウォレットから、タッチで支払えます。</string>
+    <string name="onboarding_tour_withdraw_title">売上を自分のウォレットへ。</string>
+    <string name="onboarding_tour_withdraw_body">自動出金を設定して、売上を自分で管理するウォレットに送れます。</string>
+    <string name="onboarding_tour_sales_title">今日の売上をひと目で。</string>
+    <string name="onboarding_tour_sales_body">売上の推移や忙しい時間帯、売れ筋商品を確認できます。</string>
+    <string name="onboarding_tour_next">次へ</string>
+    <string name="onboarding_tour_start">はじめる</string>
+    <string name="onboarding_tour_coffee">コーヒー</string>
+    <string name="onboarding_tour_shirt">Tシャツ</string>
+    <string name="onboarding_tour_tote">トートバッグ</string>
+    <string name="onboarding_tour_paid">支払いを受け取りました</string>
+    <string name="onboarding_tour_auto_withdraw">自動出金</string>
+    <string name="onboarding_tour_to_wallet">自分のウォレットへ</string>
+    <string name="onboarding_tour_sent">送信済み</string>
+    <string name="onboarding_tour_today">今日の売上</string>
+    <string name="onboarding_tour_sats">%1$s sats</string>
+    <plurals name="onboarding_tour_payments">
+        <item quantity="one">%1$d件の支払い</item>
+        <item quantity="other">%1$d件の支払い</item>
+    </plurals>
+    <string name="onboarding_tour_add_item">商品を追加</string>
+</resources>

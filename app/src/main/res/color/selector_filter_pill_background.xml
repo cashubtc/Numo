@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Activity "Filter" pill: tonal at rest, filled when any filter is active (selected) -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="@color/color_brand_foreground" android:state_selected="true" />
+    <item android:color="@color/color_bg_secondary" />
+</selector>

@@ -1,38 +1,41 @@
 package com.electricdreams.numo.feature.settings
 
 import android.os.Bundle
-import android.widget.RadioButton
 import android.widget.RadioGroup
 import androidx.appcompat.app.AppCompatActivity
+
 import com.electricdreams.numo.R
-import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
+import com.electricdreams.numo.databinding.ActivityDefaultPaymentMethodSettingsBinding
 import com.electricdreams.numo.payment.DefaultPaymentMethodManager
 import com.electricdreams.numo.payment.PaymentTabManager.PaymentTab
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 class DefaultPaymentMethodSettingsActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityDefaultPaymentMethodSettingsBinding
 
     private lateinit var defaultPaymentMethodManager: DefaultPaymentMethodManager
     private lateinit var radioGroup: RadioGroup
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_default_payment_method_settings)
-
-        enableEdgeToEdgeWithPill(this, lightNavIcons = true)
+        binding = ActivityDefaultPaymentMethodSettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
         defaultPaymentMethodManager = DefaultPaymentMethodManager.getInstance(this)
-        
+
         setupViews()
         setupListeners()
         loadCurrentPreference()
     }
 
     private fun setupViews() {
-        radioGroup = findViewById(R.id.payment_method_radio_group)
+        radioGroup = binding.paymentMethodRadioGroup
     }
 
     private fun setupListeners() {
-        findViewById<android.view.View>(R.id.back_button).setOnClickListener { finish() }
+        binding.topBar.onNavClick { finish() }
 
         radioGroup.setOnCheckedChangeListener { _, checkedId ->
             val selectedTab = when (checkedId) {
@@ -52,6 +55,6 @@ class DefaultPaymentMethodSettingsActivity : AppCompatActivity() {
             PaymentTab.CASHU -> R.id.radio_cashu
             PaymentTab.LIGHTNING -> R.id.radio_lightning
         }
-        findViewById<RadioButton>(radioButtonId)?.isChecked = true
+        radioGroup.check(radioButtonId)
     }
 }

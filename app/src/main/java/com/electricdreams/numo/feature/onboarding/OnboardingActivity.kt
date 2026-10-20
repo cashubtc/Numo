@@ -46,6 +46,7 @@ import androidx.gridlayout.widget.GridLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.electricdreams.numo.BuildConfig
 import com.electricdreams.numo.ModernPOSActivity
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
@@ -90,12 +91,6 @@ class OnboardingActivity : AppCompatActivity() {
     companion object {
         private const val PREFS_NAME = "OnboardingPrefs"
         private const val KEY_ONBOARDING_COMPLETE = "onboarding_complete"
-        private val ONBOARDING_DEFAULT_MINTS = listOf(
-            "https://mint.minibits.cash/Bitcoin",
-            "https://mint.macadamia.cash",
-            "https://antifiat.cash",
-            "https://mint.cubabitcoin.org"
-        )
 
         fun isOnboardingComplete(context: Context): Boolean {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -122,7 +117,8 @@ class OnboardingActivity : AppCompatActivity() {
 
     private var currentStep = OnboardingStep.WELCOME
     private var isRestoreFlow = false
-    private var welcomeAnimator: OnboardingWelcomeAnimator? = null
+    private lateinit var welcomeTour: OnboardingTourView
+    private var previewOnly = false
 
     // === Data ===
     private var generatedMnemonic: String? = null
@@ -138,17 +134,8 @@ class OnboardingActivity : AppCompatActivity() {
     // === Views ===
     // Step 1: Welcome
     private lateinit var welcomeContainer: FrameLayout
-    private lateinit var welcomeBackgroundOverlay: View
-    private lateinit var welcomeLetterN: ImageView
-    private lateinit var welcomeLetterU: ImageView
-    private lateinit var welcomeLetterM: ImageView
-    private lateinit var welcomeLetterO: ImageView
-    private lateinit var welcomeLetterContainer: android.widget.LinearLayout
-    private lateinit var welcomeTagline: TextView
     private lateinit var termsText: TextView
     private lateinit var acceptButton: MaterialButton
-    private lateinit var circularRevealView: View
-    private lateinit var scrollingItemsContainer: FrameLayout
 
     // Step 2: Choose Path
     private lateinit var choosePathContainer: FrameLayout
@@ -237,8 +224,11 @@ class OnboardingActivity : AppCompatActivity() {
         
         super.onCreate(savedInstanceState)
 
-        // Check if onboarding is already complete - redirect to main app
-        if (isOnboardingComplete(this)) {
+        // Preview protects an existing setup; unfinished onboarding always follows the real flow.
+        val onboardingComplete = isOnboardingComplete(this)
+        previewOnly = BuildConfig.DEBUG && onboardingComplete &&
+            intent.getBooleanExtra("preview_onboarding", false)
+        if (onboardingComplete && !previewOnly) {
             val intent = Intent(this, ModernPOSActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
@@ -254,14 +244,15 @@ class OnboardingActivity : AppCompatActivity() {
         initViews()
         setupListeners()
         showStep(OnboardingStep.WELCOME)
+        savedInstanceState?.let { welcomeTour.restorePlaybackState(it) }
     }
 
     private fun setupWindow() {
         // Enable edge-to-edge display
         WindowCompat.setDecorFitsSystemWindows(window, false)
         
-        // Default to white/light bars (will be updated per screen)
-        updateWindowBarsForStep(OnboardingStep.WELCOME)
+        // Match the navy onboarding surface before the first frame.
+        updateWindowBars()
 
         // Apply insets as padding to content, but don't consume them
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
@@ -271,53 +262,22 @@ class OnboardingActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Updates the status bar and navigation bar colors based on the current onboarding step.
-     * Welcome screen: Navy status bar (top matches navy curve), green nav bar (bottom matches green).
-     * All other screens: White/light bars.
-     */
-    private fun updateWindowBarsForStep(step: OnboardingStep) {
-        val windowInsetsController = WindowInsetsControllerCompat(window, window.decorView)
-        
-        if (step == OnboardingStep.WELCOME) {
-            // Start with white bars (animator will transition to navy)
-            val whiteColor = android.graphics.Color.WHITE
-            window.statusBarColor = whiteColor
-            window.navigationBarColor = whiteColor
-
-            // Dark icons on white background
-            windowInsetsController.isAppearanceLightStatusBars = true
-            windowInsetsController.isAppearanceLightNavigationBars = true
-        } else if (step == OnboardingStep.CHOOSE_PATH) {
-            // Navy bars — nav bar matches dark teaser area at bottom
-            window.statusBarColor = ContextCompat.getColor(this, R.color.numo_navy)
-            window.navigationBarColor = ContextCompat.getColor(this, R.color.numo_navy)
-            windowInsetsController.isAppearanceLightStatusBars = false
-            windowInsetsController.isAppearanceLightNavigationBars = false
-        } else {
-            // Navy bars for all other onboarding screens
-            val navy = ContextCompat.getColor(this, R.color.numo_navy)
-            window.statusBarColor = navy
-            window.navigationBarColor = navy
-            windowInsetsController.isAppearanceLightStatusBars = false
-            windowInsetsController.isAppearanceLightNavigationBars = false
+    private fun updateWindowBars() {
+        val navy = ContextCompat.getColor(this, R.color.numo_navy)
+        window.statusBarColor = navy
+        window.navigationBarColor = navy
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
         }
     }
 
     private fun initViews() {
         // Welcome
         welcomeContainer = findViewById(R.id.welcome_container)
-        welcomeBackgroundOverlay = findViewById(R.id.welcome_background_overlay)
-        welcomeLetterN = findViewById(R.id.welcome_letter_n)
-        welcomeLetterU = findViewById(R.id.welcome_letter_u)
-        welcomeLetterM = findViewById(R.id.welcome_letter_m)
-        welcomeLetterO = findViewById(R.id.welcome_letter_o)
-        welcomeLetterContainer = findViewById(R.id.welcome_wordmark_letters)
-        welcomeTagline = findViewById(R.id.welcome_tagline)
+        welcomeTour = findViewById(R.id.welcome_tour)
         termsText = findViewById(R.id.terms_text)
         acceptButton = findViewById(R.id.accept_button)
-        circularRevealView = findViewById(R.id.welcome_circular_reveal)
-        scrollingItemsContainer = findViewById(R.id.scrolling_items_container)
 
         // Choose Path
         choosePathContainer = findViewById(R.id.choose_path_container)
@@ -453,8 +413,11 @@ class OnboardingActivity : AppCompatActivity() {
                         }
 
                         override fun updateDrawState(ds: TextPaint) {
-                            ds.isUnderlineText = true
-                            ds.isFakeBoldText = true
+                            ds.isUnderlineText = false
+                            // Real medium, not fake bold: synthetic bolding smears Roboto at 12sp.
+                            ds.typeface = android.graphics.Typeface.create(
+                                "sans-serif-medium", android.graphics.Typeface.NORMAL,
+                            )
                         }
                     }
                     spannableString.setSpan(clickableSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -590,7 +553,7 @@ class OnboardingActivity : AppCompatActivity() {
     private fun setupListeners() {
         // Welcome
         acceptButton.setOnClickListener {
-            showStep(OnboardingStep.CHOOSE_PATH)
+            if (previewOnly) finish() else showStep(OnboardingStep.CHOOSE_PATH)
         }
 
         // Choose Path
@@ -660,8 +623,7 @@ class OnboardingActivity : AppCompatActivity() {
 
         // Stop welcome animation if leaving welcome screen
         if (currentStep == OnboardingStep.WELCOME && step != OnboardingStep.WELCOME) {
-            welcomeAnimator?.stop()
-            welcomeAnimator = null
+            welcomeTour.setActive(false)
         }
 
         // Close explainer and stop chevron animation if leaving CHOOSE_PATH
@@ -672,8 +634,8 @@ class OnboardingActivity : AppCompatActivity() {
 
         currentStep = step
 
-        // Update window bars based on the step (green only for welcome screen)
-        updateWindowBarsForStep(step)
+        // Keep the system bars continuous between onboarding steps.
+        updateWindowBars()
 
         // Hide all containers
         welcomeContainer.visibility = View.GONE
@@ -974,37 +936,25 @@ class OnboardingActivity : AppCompatActivity() {
         chevronAnimatorSet = null
     }
 
-    /**
-     * Cinematic welcome screen animation with 5 phases:
-     * 1. Circular reveal (blank white → navy)
-     * 2. Staggered per-letter NUMO reveal (white on navy)
-     * 3. Tagline fades in
-     * 4. Get Started button and terms fade in
-     */
     private fun animateWelcomeScreen() {
-        welcomeAnimator?.stop()
-        welcomeAnimator = OnboardingWelcomeAnimator(
-            activity = this,
-            container = welcomeContainer,
-            letterViews = listOf(welcomeLetterN, welcomeLetterU, welcomeLetterM, welcomeLetterO),
-            letterContainer = welcomeLetterContainer,
-            tagline = welcomeTagline,
-            acceptButton = acceptButton,
-            termsText = termsText,
-            revealView = circularRevealView,
-            emojiContainer = scrollingItemsContainer
-        )
-        welcomeAnimator?.start(lifecycleScope)
+        welcomeTour.setActive(lifecycle.currentState.isAtLeast(androidx.lifecycle.Lifecycle.State.RESUMED))
     }
 
     override fun onPause() {
+        if (::welcomeTour.isInitialized) welcomeTour.setActive(false)
         super.onPause()
-        welcomeAnimator?.pause()
     }
 
     override fun onResume() {
         super.onResume()
-        welcomeAnimator?.resume()
+        if (::welcomeTour.isInitialized) {
+            welcomeTour.setActive(currentStep == OnboardingStep.WELCOME)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        if (::welcomeTour.isInitialized) welcomeTour.savePlaybackState(outState)
+        super.onSaveInstanceState(outState)
     }
 
     // === New Wallet Flow ===
@@ -1024,7 +974,7 @@ class OnboardingActivity : AppCompatActivity() {
                 discoveredMints.clear()
                 selectedMints.clear()
                 onboardingMintDisplayNames.clear()
-                val healthyMints = filterHealthyMints(ONBOARDING_DEFAULT_MINTS.shuffled())
+                val healthyMints = filterHealthyMints(MintManager.DEFAULT_MINTS.shuffled())
                 discoveredMints.addAll(healthyMints)
                 selectedMints.addAll(healthyMints)
                 backupFound = false
@@ -1199,7 +1149,7 @@ class OnboardingActivity : AppCompatActivity() {
             } else {
                 backupFound = false
                 backupTimestamp = null
-                val healthyMints = filterHealthyMints(ONBOARDING_DEFAULT_MINTS.shuffled())
+                val healthyMints = filterHealthyMints(MintManager.DEFAULT_MINTS.shuffled())
                 discoveredMints.addAll(healthyMints)
                 selectedMints.addAll(healthyMints)
             }
@@ -1304,13 +1254,20 @@ class OnboardingActivity : AppCompatActivity() {
         // Populate the RecyclerView adapter
         // First mint is the default, rest are popular
         val mintList = discoveredMints.toList()
-        val defaultMint = mintList.firstOrNull() ?: return
+        val defaultMint = mintList.firstOrNull()
         val popularMints = mintList.drop(1)
         // All popular mints start as accepted
         val acceptedMints = selectedMints.filter { it != defaultMint }.toSet()
 
         mintAdapter.setMints(defaultMint, popularMints, acceptedMints)
         updateContinueButtonState()
+        if (mintList.isEmpty()) {
+            Toast.makeText(
+                this,
+                R.string.onboarding_mints_none_reachable,
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     private fun showAddMintBottomSheet() {
@@ -1382,15 +1339,13 @@ class OnboardingActivity : AppCompatActivity() {
 
     /**
      * Pings each mint in parallel and returns only the ones that respond successfully.
-     * Falls back to the full list if all mints are unreachable.
      */
-    private suspend fun filterHealthyMints(mints: List<String>): List<String> =
+    internal suspend fun filterHealthyMints(mints: List<String>): List<String> =
         withContext(Dispatchers.IO) {
             val results = mints.map { url ->
                 async { url to mintProfileService.validateMintUrl(url).isValid }
             }.awaitAll()
-            val healthy = results.filter { it.second }.map { it.first }
-            healthy.ifEmpty { mints } // fall back to full list if none reachable
+            results.filter { it.second }.map { it.first }
         }
 
     private fun refreshMintProfilesForReview() {
@@ -1774,15 +1729,14 @@ class OnboardingActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        welcomeAnimator?.stop()
-        welcomeAnimator = null
+        if (::welcomeTour.isInitialized) welcomeTour.setActive(false)
         super.onDestroy()
     }
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         when (currentStep) {
-            OnboardingStep.WELCOME -> finish()
+            OnboardingStep.WELCOME -> if (!welcomeTour.previousPage()) finish()
             OnboardingStep.CHOOSE_PATH -> showStep(OnboardingStep.WELCOME)
             OnboardingStep.ENTER_SEED -> showStep(OnboardingStep.CHOOSE_PATH)
             OnboardingStep.REVIEW_MINTS -> {

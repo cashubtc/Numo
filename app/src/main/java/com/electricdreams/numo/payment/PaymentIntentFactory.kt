@@ -17,8 +17,9 @@ object PaymentIntentFactory {
 
     fun createResumePaymentIntent(
         context: Context,
-        entry: PaymentHistoryEntry,
+        savedEntry: PaymentHistoryEntry,
     ): Intent {
+        val entry = savedEntry.withSeparateArkoorQuote()
         return Intent(context, PaymentRequestActivity::class.java).apply {
             putExtra(PaymentRequestActivity.EXTRA_PAYMENT_AMOUNT, entry.amount)
             putExtra(PaymentRequestActivity.EXTRA_PAYMENT_UNIT, entry.getUnit())
@@ -37,6 +38,15 @@ object PaymentIntentFactory {
             entry.lightningInvoice?.let {
                 putExtra(PaymentRequestActivity.EXTRA_LIGHTNING_INVOICE, it)
             }
+            entry.arkoorAddress?.let {
+                putExtra(PaymentRequestActivity.EXTRA_ARKOOR_ADDRESS, it)
+            }
+            entry.arkoorQuoteId?.let {
+                putExtra(PaymentRequestActivity.EXTRA_ARKOOR_QUOTE_ID, it)
+            }
+            entry.arkoorMintUrl?.let {
+                putExtra(PaymentRequestActivity.EXTRA_ARKOOR_MINT_URL, it)
+            }
             entry.nostrSecretHex?.let {
                 putExtra(PaymentRequestActivity.EXTRA_NOSTR_SECRET_HEX, it)
             }
@@ -49,17 +59,15 @@ object PaymentIntentFactory {
     fun createTransactionDetailIntent(
         context: Context,
         entry: HistoryEntry,
-        position: Int,
     ): Intent = when (entry) {
-        is PaymentHistoryEntry -> createPaymentDetailIntent(context, entry, position)
-        is WithdrawHistoryEntry -> createWithdrawDetailIntent(context, entry, position)
+        is PaymentHistoryEntry -> createPaymentDetailIntent(context, entry)
+        is WithdrawHistoryEntry -> createWithdrawDetailIntent(context, entry)
         else -> throw IllegalArgumentException("Unknown HistoryEntry type: ${entry::class}")
     }
 
     private fun createWithdrawDetailIntent(
         context: Context,
         entry: WithdrawHistoryEntry,
-        position: Int,
     ): Intent {
         return Intent(context, TransactionDetailActivity::class.java).apply {
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TOKEN, entry.token ?: "")
@@ -70,7 +78,6 @@ object PaymentIntentFactory {
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ENTERED_AMOUNT, entry.amountSats)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_MINT_URL, entry.mintUrl)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_REQUEST, entry.destination.ifBlank { entry.lightningAddress })
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_POSITION, position)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_TYPE, PaymentHistoryEntry.TYPE_LIGHTNING)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ID, entry.id)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_LABEL, entry.label)
@@ -80,7 +87,6 @@ object PaymentIntentFactory {
     private fun createPaymentDetailIntent(
         context: Context,
         entry: PaymentHistoryEntry,
-        position: Int,
     ): Intent {
         return Intent(context, TransactionDetailActivity::class.java).apply {
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TOKEN, entry.token)
@@ -97,15 +103,18 @@ object PaymentIntentFactory {
                 putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ISSUER_SCOPE, it)
             }
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_REQUEST, entry.paymentRequest)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_POSITION, position)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_PAYMENT_TYPE, entry.paymentType)
-            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_LIGHTNING_INVOICE, entry.lightningInvoice)
+            putExtra(
+                TransactionDetailActivity.EXTRA_TRANSACTION_LIGHTNING_INVOICE,
+                entry.getPaymentReference(),
+            )
             putExtra(TransactionDetailActivity.EXTRA_CHECKOUT_BASKET_JSON, entry.checkoutBasketJson)
             putExtra(TransactionDetailActivity.EXTRA_BASKET_ID, entry.basketId)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_AMOUNT, entry.tipAmountSats)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_TIP_PERCENTAGE, entry.tipPercentage)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_ID, entry.id)
             putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_LABEL, entry.label)
+            putExtra(TransactionDetailActivity.EXTRA_TRANSACTION_STATUS, entry.status)
         }
     }
 }

@@ -6,7 +6,7 @@ package com.electricdreams.numo.core.data.model
 import java.util.Date
 
 /**
- * Represents a single error log line, including optional stack trace.
+ * Represents an error event, including an optional abbreviated stack trace.
  */
 data class ErrorLogEntry(
     /** Unique identifier for this log entry (for stable list handling). */
@@ -17,6 +17,6 @@ data class ErrorLogEntry(
     val tag: String,
     /** Human-readable error message. */
     val message: String,
-    /** Optional stack trace string, if a throwable was provided. */
+    /** Exception description and the top stack frames, when available. */
     val stackTrace: String? = null,
 )

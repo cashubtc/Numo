@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/space_2xl">
+
+    <!-- Header: close ✕, centred title and Reset, matching the app's other sheets -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/top_bar_height"
+        android:paddingHorizontal="@dimen/space_xs">
+
+        <ImageButton
+            android:id="@+id/filter_close_button"
+            android:layout_width="@dimen/icon_size_large"
+            android:layout_height="@dimen/icon_size_large"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/common_close"
+            android:padding="@dimen/space_m"
+            android:src="@drawable/ic_close"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/color_text_secondary" />
+
+        <TextView
+            style="@style/Text.Title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:accessibilityHeading="true"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:maxLines="1"
+            android:paddingHorizontal="@dimen/space_3xl"
+            android:text="@string/history_filter_button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:targetApi="p" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/filter_reset_button"
+            style="@style/Widget.Numo.Button.Tertiary"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:text="@string/history_filter_reset"
+            android:textAppearance="@style/TextAppearance.Numo.Chip"
+            android:textColor="@color/color_text_secondary"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/color_divider" />
+
+    <TextView
+        style="@style/Text.RowTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_xl"
+        android:layout_marginTop="@dimen/space_l"
+        android:text="@string/history_filter_status"
+        android:textColor="@color/color_text_secondary" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/status_chips"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_xs"
+        android:paddingHorizontal="@dimen/space_l"
+        app:chipSpacingHorizontal="@dimen/space_s"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_status_all"
+            style="@style/Widget.Numo.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/history_filter_status_all" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_status_paid"
+            style="@style/Widget.Numo.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/history_filter_status_paid" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_status_pending"
+            style="@style/Widget.Numo.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/history_filter_status_pending" />
+    </com.google.android.material.chip.ChipGroup>
+
+    <TextView
+        style="@style/Text.RowTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/space_xl"
+        android:layout_marginTop="@dimen/space_l"
+        android:text="@string/history_filter_date"
+        android:textColor="@color/color_text_secondary" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/date_chips"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/space_xs"
+        android:paddingHorizontal="@dimen/space_l"
+        app:chipSpacingHorizontal="@dimen/space_s"
+        app:chipSpacingVertical="0dp"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_date_any"
+            style="@style/Widget.Numo.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/history_filter_date_any" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_date_today"
+            style="@style/Widget.Numo.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/history_filter_date_today" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_date_last_7_days"
+            style="@style/Widget.Numo.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/history_filter_date_last_7_days" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_date_last_30_days"
+            style="@style/Widget.Numo.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/history_filter_date_last_30_days" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_date_this_month"
+            style="@style/Widget.Numo.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/history_filter_date_this_month" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_date_custom"
+            style="@style/Widget.Numo.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/history_filter_date_custom_option" />
+    </com.google.android.material.chip.ChipGroup>
+
+</LinearLayout>

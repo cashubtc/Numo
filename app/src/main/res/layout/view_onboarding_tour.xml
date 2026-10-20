@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="90dp"
+            android:paddingTop="24dp">
+
+            <ImageView
+                android:layout_width="120dp"
+                android:layout_height="54dp"
+                android:layout_gravity="center"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_numo_wordmark_white" />
+        </FrameLayout>
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/tour_pager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingBottom="16dp">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/accept_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="60dp"
+                android:paddingVertical="14dp"
+                android:text="@string/onboarding_tour_start"
+                android:textAppearance="@style/Text.Onboarding.Action"
+                android:letterSpacing="0"
+                android:textAllCaps="false"
+                android:textColor="@color/numo_navy"
+                android:stateListAnimator="@animator/onboarding_button_press"
+                app:backgroundTint="@color/color_text_on_dark"
+                app:cornerRadius="30dp"
+                app:elevation="0dp" />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/terms_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:textAppearance="@style/Text.Onboarding.Legal"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="6dp"
+                android:text="@string/onboarding_terms_text"
+                android:textColor="@color/onboarding_tour_secondary"
+                android:textColorLink="@color/color_text_on_dark" />
+        </LinearLayout>
+    </LinearLayout>
+</merge>

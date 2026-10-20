@@ -5,27 +5,30 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
-import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import org.cashudevkit.FinalizedMelt
+import org.cashudevkit.MintUrl
+import org.cashudevkit.QuoteState
+
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.databinding.ActivityWithdrawMeltQuoteBinding
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.cashudevkit.CurrencyUnit
-import org.cashudevkit.FinalizedMelt
-import org.cashudevkit.MintUrl
-import org.cashudevkit.QuoteState
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
+
+import com.electricdreams.numo.core.update.holdPaymentScreen
+import com.electricdreams.numo.core.update.launchPaymentOperation
 
 class WithdrawMeltQuoteActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityWithdrawMeltQuoteBinding
 
     companion object {
         private const val TAG = "WithdrawMeltQuote"
@@ -61,13 +64,10 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_withdraw_melt_quote)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+        if (!holdPaymentScreen()) return
+        binding = ActivityWithdrawMeltQuoteBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
         mintUrl = intent.getStringExtra("mint_url") ?: ""
         quoteId = intent.getStringExtra("quote_id") ?: ""
@@ -94,24 +94,24 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        topBar = findViewById(R.id.top_bar)
-        summaryText = findViewById(R.id.summary_text)
-        destinationText = findViewById(R.id.destination_text)
-        amountText = findViewById(R.id.amount_text)
-        feeText = findViewById(R.id.fee_text)
-        totalText = findViewById(R.id.total_text)
-        confirmButton = findViewById(R.id.confirm_button)
-        confirmationScroll = findViewById(R.id.confirmation_scroll)
-        processingContainer = findViewById(R.id.processing_container)
-        processingStatusText = findViewById(R.id.processing_status_text)
-        processingAmountValue = findViewById(R.id.processing_amount_value)
-        processingDestinationValue = findViewById(R.id.processing_destination_value)
-        processingStepPreparingIndicator = findViewById(R.id.processing_step_preparing_indicator)
-        processingStepContactingIndicator = findViewById(R.id.processing_step_contacting_indicator)
-        processingStepSettlingIndicator = findViewById(R.id.processing_step_settling_indicator)
-        processingStepPreparingLabel = findViewById(R.id.processing_step_preparing_label)
-        processingStepContactingLabel = findViewById(R.id.processing_step_contacting_label)
-        processingStepSettlingLabel = findViewById(R.id.processing_step_settling_label)
+        topBar = binding.topBar
+        summaryText = binding.summaryText
+        destinationText = binding.destinationText
+        amountText = binding.amountText
+        feeText = binding.feeText
+        totalText = binding.totalText
+        confirmButton = binding.confirmButton
+        confirmationScroll = binding.confirmationScroll
+        processingContainer = binding.processingContainer
+        processingStatusText = binding.processingStatusText
+        processingAmountValue = binding.processingAmountValue
+        processingDestinationValue = binding.processingDestinationValue
+        processingStepPreparingIndicator = binding.processingStepPreparingIndicator
+        processingStepContactingIndicator = binding.processingStepContactingIndicator
+        processingStepSettlingIndicator = binding.processingStepSettlingIndicator
+        processingStepPreparingLabel = binding.processingStepPreparingLabel
+        processingStepContactingLabel = binding.processingStepContactingLabel
+        processingStepSettlingLabel = binding.processingStepSettlingLabel
     }
 
     private fun setupListeners() {
@@ -151,7 +151,7 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
     private fun confirmWithdrawal() {
         setLoading(true)
 
-        lifecycleScope.launch {
+        lifecycleScope.launchPaymentOperation {
             var withdrawEntryId: String? = null
             val autoWithdrawManager = AutoWithdrawManager.getInstance(this@WithdrawMeltQuoteActivity)
 
@@ -166,7 +166,7 @@ class WithdrawMeltQuoteActivity : AppCompatActivity() {
                         ).show()
                         setLoading(false)
                     }
-                    return@launch
+                    return@launchPaymentOperation
                 }
 
                 val destinationLabel = lightningAddress ?: request

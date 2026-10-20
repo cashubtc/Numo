@@ -1,110 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
+    android:layout_height="match_parent">
 
-    <com.electricdreams.numo.ui.components.NumoTopBar
-        android:id="@+id/top_bar"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        app:topBarTitle="@string/webhook_settings_title"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_bar">
-
-        <LinearLayout
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/space_2xl">
+            app:topBarTitle="@string/webhook_settings_title"
+            app:layout_constraintTop_toTopOf="parent"
+            android:minHeight="64dp"
+            app:topBarSettingsStyle="true" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/space_l"
-                android:paddingBottom="@dimen/space_s"
-                android:text="@string/webhook_settings_description"
-                android:textAppearance="@style/Text.Helper" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/space_l"
-                android:paddingBottom="@dimen/row_padding_vertical"
-                android:text="@string/webhook_settings_section_endpoints"
-                android:textAppearance="@style/Text.SectionHeader" />
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/top_bar"
+            android:clipToPadding="false">
 
             <LinearLayout
-                android:id="@+id/endpoints_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:id="@+id/endpoints_list"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" />
-
-                <include
-                    android:id="@+id/empty_state_text"
-                    layout="@layout/component_empty_state" />
-            </LinearLayout>
-
-            <Button
-                android:id="@+id/add_endpoint_button"
-                style="@style/Widget.Button.Secondary.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/margin_screen_horizontal"
-                android:layout_marginTop="@dimen/space_s"
-                android:text="@string/action_add_endpoint"
-                android:gravity="center" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal"
-                android:paddingTop="@dimen/section_gap"
-                android:paddingBottom="@dimen/row_padding_vertical"
-                android:text="@string/webhook_settings_section_actions"
-                android:textAppearance="@style/Text.SectionHeader" />
-
-            <LinearLayout
-                android:id="@+id/sync_all_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_row_ripple"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingVertical="@dimen/row_padding_vertical"
-                android:paddingHorizontal="@dimen/margin_screen_horizontal">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/row_icon_gap"
-                    android:src="@drawable/ic_refresh"
-                    app:tint="@color/color_icon_secondary" />
+                android:orientation="vertical"
+                android:paddingBottom="24dp"
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/action_sync_all_endpoints"
-                    android:textAppearance="@style/Text.RowTitle" />
-            </LinearLayout>
-        </LinearLayout>
-    </ScrollView>
+                    android:paddingHorizontal="0dp"
+                    android:paddingTop="@dimen/space_l"
+                    android:paddingBottom="@dimen/space_s"
+                    android:text="@string/webhook_settings_description"
+                    android:textAppearance="@style/Text.SettingsBody" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:text="@string/webhook_settings_section_endpoints"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="@dimen/settings_section_gap"
+                    android:accessibilityHeading="true" />
+
+                <LinearLayout
+                    android:id="@+id/endpoints_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:id="@+id/endpoints_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+
+                    <include
+                        android:id="@+id/empty_state_text"
+                        layout="@layout/component_settings_empty_state" />
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/add_endpoint_button"
+                    style="@style/Widget.Button.Secondary.Outlined"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/space_s"
+                    android:text="@string/action_add_endpoint"
+                    android:gravity="center" />
+
+                <TextView
+                    android:text="@string/webhook_settings_section_actions"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="@dimen/settings_section_gap"
+                    android:accessibilityHeading="true" />
+
+                <com.electricdreams.numo.ui.components.SettingsRowView
+                    android:id="@+id/sync_all_button"
+                    style="@style/Widget.Numo.SettingsRow"
+                    android:minHeight="@dimen/settings_row_height"
+                    app:rowIcon="@drawable/ic_refresh"
+                    app:rowTitle="@string/action_sync_all_endpoints"
+                    app:rowShowChevron="false" />
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

@@ -3,7 +3,6 @@ package com.electricdreams.numo.feature.pin
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import com.electricdreams.numo.util.startActivityForResultCompat
 import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
@@ -12,21 +11,25 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+
 import com.electricdreams.numo.R
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.electricdreams.numo.databinding.ActivityPinEntryBinding
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
+import com.electricdreams.numo.util.startActivityForResultCompat
 
 /**
  * Full-screen PIN entry activity for unlocking protected features.
- * 
+ *
  * Features:
- * - Clean, Apple-like UI with numeric keypad
+ * - Scrollable settings layout with a numeric keypad
  * - Animated PIN dots with error shake
  * - 3-second cooldown after wrong PIN (keypad disabled, countdown shown)
  * - Lockout display when too many attempts
  * - Option to reset via mnemonic
  */
 class PinEntryActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityPinEntryBinding
 
     private lateinit var pinManager: PinManager
     private lateinit var pinDots: PinDotsView
@@ -46,13 +49,9 @@ class PinEntryActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_pin_entry)
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+        binding = ActivityPinEntryBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
         pinManager = PinManager.getInstance(this)
         initViews()
@@ -62,17 +61,17 @@ class PinEntryActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        pinDots = findViewById(R.id.pin_dots)
-        pinKeypad = findViewById(R.id.pin_keypad)
-        errorMessage = findViewById(R.id.error_message)
-        lockoutOverlay = findViewById(R.id.lockout_overlay)
-        lockoutMessage = findViewById(R.id.lockout_message)
-        lockoutResetButton = findViewById(R.id.lockout_reset_button)
-        forgotPinButton = findViewById(R.id.forgot_pin_button)
-        backButton = findViewById(R.id.back_button)
+        pinDots = binding.pinDots
+        pinKeypad = binding.pinKeypad
+        errorMessage = binding.errorMessage
+        lockoutOverlay = binding.lockoutOverlay
+        lockoutMessage = binding.lockoutMessage
+        lockoutResetButton = binding.lockoutResetButton
+        forgotPinButton = binding.forgotPinButton
+        backButton = binding.backButton
 
-        val titleView = findViewById<TextView>(R.id.title)
-        val subtitleView = findViewById<TextView>(R.id.subtitle)
+        val titleView = binding.title
+        val subtitleView = binding.subtitle
 
         intent.getStringExtra(EXTRA_TITLE)?.let { titleView.text = it }
         intent.getStringExtra(EXTRA_SUBTITLE)?.let { subtitleView.text = it }
@@ -93,7 +92,7 @@ class PinEntryActivity : AppCompatActivity() {
             override fun onDigitPressed(digit: String) {
                 // Ignore input if disabled during cooldown
                 if (isInputDisabled) return
-                
+
                 if (enteredPin.length < PinManager.MAX_PIN_LENGTH) {
                     enteredPin.append(digit)
                     pinDots.addDigit()
@@ -110,7 +109,7 @@ class PinEntryActivity : AppCompatActivity() {
             override fun onDeletePressed() {
                 // Ignore input if disabled during cooldown
                 if (isInputDisabled) return
-                
+
                 if (enteredPin.isNotEmpty()) {
                     enteredPin.deleteCharAt(enteredPin.length - 1)
                     pinDots.removeDigit()
@@ -172,7 +171,7 @@ class PinEntryActivity : AppCompatActivity() {
     private fun startCooldown(durationMs: Long) {
         isInputDisabled = true
         pinKeypad.alpha = 0.4f
-        
+
         cooldownTimer?.cancel()
         cooldownTimer = object : CountDownTimer(durationMs, 100) {
             override fun onTick(millisUntilFinished: Long) {

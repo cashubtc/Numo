@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.parcelize")
@@ -12,8 +14,8 @@ android {
         applicationId = "com.electricdreams.numo"
         minSdk = 24
         targetSdk = 36
-        versionCode = 24
-        versionName = "1.9"
+        versionCode = providers.gradleProperty("numoVersionCode").orElse("25").get().toInt()
+        versionName = providers.gradleProperty("numoVersionName").orElse("1.9").get()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -33,6 +35,26 @@ android {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
         }
+        create("play") {
+            initWith(getByName("release"))
+            matchingFallbacks += "release"
+        }
+    }
+
+    // Keep existing debug/release commands for direct APK distribution. The Play build
+    // contains neither the APK installer permission nor the direct updater implementation.
+    sourceSets {
+        getByName("debug") {
+            kotlin.srcDir("src/direct/java")
+        }
+        getByName("release") {
+            kotlin.srcDir("src/direct/java")
+            manifest.srcFile("src/direct/AndroidManifest.xml")
+        }
+        getByName("testDebug").kotlin.srcDir("src/testDirect/java")
+        getByName("testRelease").kotlin.srcDir("src/testDirect/java")
+        getByName("testDebug").resources.srcDir("src/testDirect/resources")
+        getByName("testRelease").resources.srcDir("src/testDirect/resources")
     }
     
     splits {
@@ -50,7 +72,10 @@ android {
     }
     
     kotlin {
-        jvmToolchain(17)
+        jvmToolchain(25)
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
     }
 
     buildFeatures {
@@ -78,6 +103,8 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
+            // Opt in to the onboarding preview PNGs: ./gradlew testDebugUnitTest -Dnumo.previews=true
+            all { it.systemProperty("numo.previews", System.getProperty("numo.previews") ?: "false") }
         }
     }
 
@@ -92,7 +119,7 @@ dependencies {
 
     // AndroidX Libraries
     implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.11.0")
+    implementation("com.google.android.material:material:1.14.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.gridlayout:gridlayout:1.0.0")
     implementation("androidx.viewpager2:viewpager2:1.0.0")
@@ -101,10 +128,9 @@ dependencies {
     
     // Testing
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.mockito:mockito-core:5.12.0")
+    testImplementation("org.mockito:mockito-core:5.20.0")
     testImplementation("org.robolectric:robolectric:4.16")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
-    testImplementation("net.bytebuddy:byte-buddy:1.14.12")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     testImplementation("androidx.test:core:1.5.0")
@@ -153,11 +179,15 @@ dependencies {
     
     // Custom Tabs for embedded web links
     implementation("androidx.browser:browser:1.8.0")
+    "playImplementation"("com.google.android.play:app-update-ktx:2.1.0")
 }
 
 tasks.withType<Test>().configureEach {
+    // Allow room for Robolectric's image decoding across the full suite.
+    maxHeapSize = "1g"
+
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 
     configure<org.gradle.testing.jacoco.plugins.JacocoTaskExtension> {
@@ -178,7 +208,10 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     // Use layout.buildDirectory instead of project.buildDir (deprecated)
     val buildDir = layout.buildDirectory.get().asFile
     
-    val debugTree = fileTree("$buildDir/tmp/kotlin-classes/debug") {
+    val debugTree = files(
+        "$buildDir/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes",
+        "$buildDir/intermediates/javac/debug/compileDebugJavaWithJavac/classes"
+    ).asFileTree.matching {
         exclude(
             "**/R.class",
             "**/R$*.class",
@@ -190,7 +223,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     }
     val mainSrc = "${project.projectDir}/src/main/java"
 
-    sourceDirectories.setFrom(files(mainSrc))
+    sourceDirectories.setFrom(files(mainSrc, "${project.projectDir}/src/direct/java"))
     classDirectories.setFrom(files(debugTree))
     executionData.setFrom(fileTree(buildDir) {
         include(

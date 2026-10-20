@@ -1,0 +1,16 @@
+diff --git a/crates/bark/src/backend.rs b/crates/bark/src/backend.rs
+--- a/crates/bark/src/backend.rs
++++ b/crates/bark/src/backend.rs
+@@ -3094,9 +3094,9 @@ impl MintPayment for BarkBackend {
+                 // Wait for the polling interval
+                 tokio::time::sleep(poll_interval).await;
+ 
+-                // Try to claim all lightning receives, waiting for an ongoing
+-                // wallet-side claim to finish instead of dropping this tick.
+-                if let Err(e) = wallet.try_claim_all_lightning_receives(true).await {
++                // Drive Lightning claims only until their next park. Waiting for
++                // unpaid invoices would block events for the Arkoor alternative.
++                if let Err(e) = wallet.try_claim_all_lightning_receives(false).await {
+                     warn!("Failed to claim lightning receives: {}", e);
+                 }
+ 

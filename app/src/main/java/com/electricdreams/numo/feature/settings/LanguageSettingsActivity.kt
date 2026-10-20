@@ -2,18 +2,20 @@ package com.electricdreams.numo.feature.settings
 
 import android.os.Build
 import android.os.Bundle
-import android.view.View
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
+
 import com.electricdreams.numo.R
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.electricdreams.numo.databinding.ActivityLanguageSettingsBinding
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 class LanguageSettingsActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityLanguageSettingsBinding
 
     private lateinit var languageRadioGroup: RadioGroup
     private lateinit var radioEnglish: RadioButton
@@ -26,24 +28,20 @@ class LanguageSettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_language_settings)
+        binding = ActivityLanguageSettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, windowInsets ->
-            val insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(0, insets.top, 0, insets.bottom)
-            WindowInsetsCompat.CONSUMED
-        }
+        binding.topBar.onNavClick { finish() }
 
-        findViewById<com.electricdreams.numo.ui.components.NumoTopBar>(R.id.top_bar).onNavClick { finish() }
-
-        languageRadioGroup = findViewById(R.id.language_radio_group)
-        radioEnglish = findViewById(R.id.radio_english)
-        radioSpanish = findViewById(R.id.radio_spanish)
-        radioPortuguese = findViewById(R.id.radio_portuguese)
-        radioKorean = findViewById(R.id.radio_korean)
-        radioJapanese = findViewById(R.id.radio_japanese)
-        radioGerman = findViewById(R.id.radio_german)
-        currentLanguageSummary = findViewById(R.id.current_language_summary)
+        languageRadioGroup = binding.languageRadioGroup
+        radioEnglish = binding.radioEnglish
+        radioSpanish = binding.radioSpanish
+        radioPortuguese = binding.radioPortuguese
+        radioKorean = binding.radioKorean
+        radioJapanese = binding.radioJapanese
+        radioGerman = binding.radioGerman
+        currentLanguageSummary = binding.currentLanguageSummary
 
         val appLocales = AppCompatDelegate.getApplicationLocales()
         val currentLangCode = if (!appLocales.isEmpty) {

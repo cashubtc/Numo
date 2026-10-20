@@ -11,7 +11,10 @@ import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.content.withStyledAttributes
+import androidx.core.view.ViewCompat
+
 import com.electricdreams.numo.R
+import com.electricdreams.numo.databinding.ComponentTopBarBinding
 
 /**
  * Standard Numo top bar: nav icon on start, centered title, optional trailing
@@ -42,10 +45,10 @@ class NumoTopBar @JvmOverloads constructor(
     private val actionButton: ImageButton
 
     init {
-        LayoutInflater.from(context).inflate(R.layout.component_top_bar, this, true)
-        backButton = findViewById(R.id.top_bar_back)
-        titleView = findViewById(R.id.top_bar_title)
-        actionButton = findViewById(R.id.top_bar_action)
+        val binding = ComponentTopBarBinding.inflate(LayoutInflater.from(context), this)
+        backButton = binding.topBarBack
+        titleView = binding.topBarTitle
+        actionButton = binding.topBarAction
 
         minHeight = resources.getDimensionPixelSize(R.dimen.top_bar_height)
         layoutParams?.height = resources.getDimensionPixelSize(R.dimen.top_bar_height)
@@ -58,6 +61,9 @@ class NumoTopBar @JvmOverloads constructor(
         setBackgroundColor(ContextCompat.getColor(context, R.color.color_bg_white))
 
         context.withStyledAttributes(attrs, R.styleable.NumoTopBar) {
+            if (getBoolean(R.styleable.NumoTopBar_topBarSettingsStyle, false)) {
+                applySettingsStyle()
+            }
             getString(R.styleable.NumoTopBar_topBarTitle)?.let { titleView.text = it }
 
             val navIconRes = getResourceId(R.styleable.NumoTopBar_topBarNavIcon, 0)
@@ -82,6 +88,26 @@ class NumoTopBar @JvmOverloads constructor(
                 actionButton.imageTintList = ContextCompat.getColorStateList(context, actionTintRes)
             }
         }
+    }
+
+    private fun applySettingsStyle() {
+        setBackgroundResource(R.color.settings_background)
+        val padding = resources.getDimensionPixelSize(R.dimen.space_s)
+        setPadding(padding, padding, padding, padding)
+        backButton.setImageResource(R.drawable.ic_arrow_back)
+        titleView.setTextAppearance(R.style.Text_SettingsPageTitle)
+        titleView.gravity = android.view.Gravity.START or android.view.Gravity.CENTER_VERTICAL
+        titleView.maxLines = 2
+        titleView.layoutParams = (titleView.layoutParams as LayoutParams).apply {
+            width = 0
+            startToStart = LayoutParams.UNSET
+            endToEnd = LayoutParams.UNSET
+            startToEnd = R.id.top_bar_back
+            endToStart = R.id.top_bar_action
+            marginStart = padding
+            marginEnd = padding
+        }
+        ViewCompat.setAccessibilityHeading(titleView, true)
     }
 
     fun setTitle(text: CharSequence) {

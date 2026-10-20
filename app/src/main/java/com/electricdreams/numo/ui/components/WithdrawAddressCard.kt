@@ -8,14 +8,13 @@ import android.view.LayoutInflater
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.Button
 import android.widget.EditText
-
-import android.widget.TextView
-import com.electricdreams.numo.R
 import com.google.android.material.card.MaterialCardView
+
+import com.electricdreams.numo.R
 
 /**
  * A beautiful, reusable card component for Lightning address input with amount.
- * 
+ *
  * Features:
  * - Elegant card design with icon
  * - Lightning address input with validation
@@ -35,24 +34,25 @@ class WithdrawAddressCard @JvmOverloads constructor(
     }
 
     private var listener: OnContinueListener? = null
-    
+
     private val addressInput: EditText
     private val amountInput: EditText
     private val continueButton: Button
 
     init {
         LayoutInflater.from(context).inflate(R.layout.component_withdraw_address_card, this, true)
-        
+
         // Setup card styling
-        radius = resources.getDimension(R.dimen.card_corner_radius)
+        radius = resources.getDimension(R.dimen.settings_card_radius)
         cardElevation = 0f
-        setCardBackgroundColor(android.graphics.Color.TRANSPARENT)
-        
+        setCardBackgroundColor(context.getColor(R.color.color_bg_card))
+        strokeWidth = 0
+
         // Find views
         addressInput = findViewById(R.id.address_input)
         amountInput = findViewById(R.id.amount_input)
         continueButton = findViewById(R.id.continue_button)
-        
+
         setupListeners()
     }
 
@@ -65,7 +65,7 @@ class WithdrawAddressCard @JvmOverloads constructor(
                 updateButtonState()
             }
         })
-        
+
         // Input validation for amount
         amountInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -74,12 +74,12 @@ class WithdrawAddressCard @JvmOverloads constructor(
                 updateButtonState()
             }
         })
-        
+
         // Continue button
         continueButton.setOnClickListener {
             val address = addressInput.text.toString().trim()
             val amountSats = amountInput.text.toString().toLongOrNull()
-            
+
             if (address.isNotBlank() && amountSats != null && amountSats > 0) {
                 // Scale animation feedback
                 it.animate()
@@ -100,7 +100,7 @@ class WithdrawAddressCard @JvmOverloads constructor(
             }
         }
     }
-    
+
     private fun updateButtonState() {
         val hasAddress = !addressInput.text.isNullOrBlank()
         val hasValidAmount = amountInput.text.toString().toLongOrNull()?.let { it > 0 } ?: false
@@ -114,24 +114,24 @@ class WithdrawAddressCard @JvmOverloads constructor(
     fun setOnContinueListener(listener: OnContinueListener) {
         this.listener = listener
     }
-    
+
     /**
      * Get the current address
      */
     fun getAddress(): String = addressInput.text.toString().trim()
-    
+
     /**
      * Get the current amount in sats
      */
     fun getAmountSats(): Long? = amountInput.text.toString().toLongOrNull()
-    
+
     /**
      * Set the address (e.g., from preferences)
      */
     fun setAddress(address: String) {
         addressInput.setText(address)
     }
-    
+
     /**
      * Set the suggested amount (e.g., balance - fee buffer)
      */
@@ -140,7 +140,7 @@ class WithdrawAddressCard @JvmOverloads constructor(
             amountInput.setText(amountSats.toString())
         }
     }
-    
+
     /**
      * Clear all input fields
      */
@@ -148,7 +148,7 @@ class WithdrawAddressCard @JvmOverloads constructor(
         addressInput.text?.clear()
         amountInput.text?.clear()
     }
-    
+
     /**
      * Enable or disable the card
      */
@@ -162,7 +162,7 @@ class WithdrawAddressCard @JvmOverloads constructor(
         }
         alpha = if (enabled) 1f else 0.5f
     }
-    
+
     /**
      * Play entrance animation
      */

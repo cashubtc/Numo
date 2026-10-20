@@ -1,0 +1,120 @@
+# Bark 0.6.2 server configuration for isolated Bitcoin regtest.
+data_dir = "/data/captaind"
+network = "regtest"
+vtxo_lifetime = 4320
+min_board_amount = "20000 sat"
+vtxo_exit_delta = 144
+max_vtxo_exit_depth = 100
+max_arkoor_fanout = 4
+required_board_confirmations = 3
+min_trusted_confs = 2
+rpc_rich_errors = true
+txindex_check_interval = "30s"
+sync_manager_block_poll_interval = "100ms"
+watchman_min_balance = "0 sat"
+transaction_rebroadcast_interval = "1m"
+otel_deployment_name = "my_regtest"
+max_read_mailbox_items = 100
+round_interval = "10s"
+round_submit_time = "2s"
+round_sign_time = "2s"
+nb_round_nonces = 8
+round_forfeit_nonces_timeout = "30s"
+offboard_session_timeout = "30s"
+offboard_check_interval = "1s"
+offboard_acceptable_fee_rate_duration = "15m"
+cln_reconnect_interval = "10s"
+invoice_check_interval = "3s"
+cln_xpay_timeout = "60s"
+invoice_check_base_delay = "10s"
+max_invoice_check_delay = "10m"
+invoice_poll_interval = "30s"
+htlc_settlement_poll_interval = "60s"
+track_all_base_delay = "1s"
+max_track_all_delay = "60s"
+htlc_expiry_delta = 40
+htlc_send_expiry_delta = 258
+max_user_invoice_cltv_delta = 250
+invoice_expiry = "48h"
+receive_htlc_forward_timeout = "3min"
+ln_receive_anti_dos_required = false
+ln_max_fee_ppm = 900000
+[watchman]
+enabled = false
+reaction_interval = "10m"
+sweep_interval = "2h"
+progress_grace_period = 2
+claim_chunksize = 20
+incremental_relay_fee = "100 sat/kvb"
+min_cpfp_amount = "10000 sat"
+[fees.board]
+min_fee_sat = 330 # Can be dust
+base_fee_sat = 100
+ppm = 1000 # 0.1%
+[fees.offboard]
+base_fee_sat = 200
+fixed_additional_vb = 212
+ppm_expiry_table = [
+    { expiry_blocks_threshold = 0, ppm = 0 },       # exp <= 96: 0 ppm
+    { expiry_blocks_threshold = 97, ppm = 1000 },   # 96 < exp <= 198: 1,000 ppm (0.1%)
+    { expiry_blocks_threshold = 199, ppm = 4000 },  # 198 < exp <= 2160: 4,000 ppm (0.4%)
+    { expiry_blocks_threshold = 2161, ppm = 8000 }, # 2160 < exp: 8,000 ppm (0.8%)
+]
+[fees.refresh]
+base_fee_sat = 150
+ppm_expiry_table = [
+    { expiry_blocks_threshold = 0, ppm = 0 },       # exp <= 96: 0 ppm
+    { expiry_blocks_threshold = 97, ppm = 1000 },   # 96 < exp <= 198: 1,000 ppm (0.1%)
+    { expiry_blocks_threshold = 199, ppm = 4000 },  # 198 < exp <= 2160: 4,000 ppm (0.4%)
+    { expiry_blocks_threshold = 2161, ppm = 8000 }, # 2160 < exp: 8,000 ppm (0.8%)
+]
+[fees.lightning_receive]
+base_fee_sat = 100
+ppm = 2000 # 0.2%
+[fees.lightning_send]
+min_fee_sat = 10
+base_fee_sat = 75
+ppm_expiry_table = [
+    { expiry_blocks_threshold = 0, ppm = 0 },       # exp <= 96: 0 ppm
+    { expiry_blocks_threshold = 97, ppm = 1000 },   # 96 < exp <= 198: 1,000 ppm (0.1%)
+    { expiry_blocks_threshold = 199, ppm = 4000 },  # 198 < exp <= 2160: 4,000 ppm (0.4%)
+    { expiry_blocks_threshold = 2161, ppm = 8000 }, # 2160 < exp: 8,000 ppm (0.8%)
+]
+[vtxopool]
+vtxo_targets = [ "1000sat:10", "10000sat:10" ]
+vtxo_target_issue_threshold = 80
+vtxo_lifetime = 432
+vtxo_pre_expiry = 144
+max_vtxo_exit_depth = 3
+[fee_estimator]
+update_interval = "1m"
+history_duration = "60m"
+fallback_fee_rate_fast = "25sat/vb"
+fallback_fee_rate_regular = "10sat/vb"
+fallback_fee_rate_slow = "4sat/vb"
+[rpc]
+public_address = "0.0.0.0:3535"
+admin_address = "127.0.0.1:3536"
+integration_address = "127.0.0.1:3537"
+[postgres]
+host = "postgres"
+user = "postgres"
+password = "postgres"
+port = 5432
+name = "bark-server-db"
+max_connections = 10
+[bitcoind]
+url = "http://bitcoind:18443"
+rpc_user = "second"
+rpc_pass = "ark"
+
+[[cln_array]]
+uri = "https://cln:9736"
+priority = 1
+server_cert_path = "/data/cln/regtest/ca.pem"
+client_cert_path = "/data/cln/regtest/client.pem"
+client_key_path = "/data/cln/regtest/client-key.pem"
+hold_invoice.uri = "https://cln:9988"
+hold_invoice.server_cert_path = "/data/cln/regtest/hold/ca.pem"
+hold_invoice.client_cert_path = "/data/cln/regtest/hold/client.pem"
+hold_invoice.client_key_path = "/data/cln/regtest/hold/client-key.pem"

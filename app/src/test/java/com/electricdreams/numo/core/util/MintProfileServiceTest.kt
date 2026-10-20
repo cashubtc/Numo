@@ -16,7 +16,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.lang.reflect.Field
+import org.robolectric.util.ReflectionHelpers
 import java.util.Base64
 
 @RunWith(RobolectricTestRunner::class)
@@ -36,8 +36,8 @@ class MintProfileServiceTest {
             .clear()
             .commit()
 
-        resetSingleton(MintManager.Companion, "instance")
-        resetSingleton(MintProfileService.Companion, "instance")
+        ReflectionHelpers.setStaticField(MintManager::class.java, "instance", null)
+        ReflectionHelpers.setStaticField(MintProfileService::class.java, "instance", null)
 
         mintManager = MintManager.getInstance(context)
         mintProfileService = MintProfileService.getInstance(context)
@@ -152,24 +152,6 @@ class MintProfileServiceTest {
         assertTrue(result.success)
         assertNull(result.displayName)
         assertFalse(result.iconCached)
-    }
-
-    private fun resetSingleton(target: Any, fieldName: String) {
-        val clazz = target::class.java
-        var current: Class<*>? = clazz
-        var field: Field? = null
-        while (current != null && field == null) {
-            try {
-                field = current.getDeclaredField(fieldName)
-            } catch (_: NoSuchFieldException) {
-                current = current.superclass
-            }
-        }
-
-        field?.let {
-            it.isAccessible = true
-            it.set(target, null)
-        }
     }
 
     private fun iconBytes(): ByteArray {

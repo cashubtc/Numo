@@ -107,4 +107,19 @@ class MintDetailsActivityTest {
             assertNotNull("Confirmation dialog should be shown", dialog)
         }
     }
+    @Test
+    fun `URL row copies the complete address including endpoint path`() {
+        val fullUrl = "$mintUrl/Bitcoin"
+        val intent = Intent(ApplicationProvider.getApplicationContext(), MintDetailsActivity::class.java)
+            .putExtra(MintDetailsActivity.EXTRA_MINT_URL, fullUrl)
+        ActivityScenario.launch<MintDetailsActivity>(intent).use { scenario ->
+            scenario.onActivity { activity ->
+                activity.findViewById<View>(R.id.url_row).performClick()
+                val clipboard = activity.getSystemService(android.content.Context.CLIPBOARD_SERVICE)
+                    as android.content.ClipboardManager
+                assertEquals(fullUrl, clipboard.primaryClip?.getItemAt(0)?.text.toString())
+            }
+        }
+    }
+
 }

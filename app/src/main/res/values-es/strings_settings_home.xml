@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_section_checkout">Cobro</string>
+    <string name="settings_section_connections">Conexiones</string>
+    <string name="settings_search_hint">Buscar ajustes</string>
+    <string name="settings_search_empty">No se encontraron ajustes. Prueba con otra palabra.</string>
+    <string name="settings_btcpay_enabled">Activado · Pagos a través de tu servidor</string>
+    <string name="settings_btcpay_disabled">Conecta tu propio servidor de pagos</string>
+    <string name="settings_unavailable_btcpay">No disponible mientras BTCPay Server esté activado</string>
+    <string name="settings_security_description">Protección con PIN, copia de seguridad y recuperación de la cartera</string>
+    <string name="settings_mode_light">Modo claro</string>
+    <string name="settings_mode_dark">Modo oscuro</string>
+    <string name="settings_theme_summary">%1$s · %2$s</string>
+</resources>

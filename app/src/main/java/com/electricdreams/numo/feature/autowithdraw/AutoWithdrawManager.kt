@@ -15,7 +15,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 import org.cashudevkit.FinalizedMelt
@@ -28,6 +27,8 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.Date
 import java.util.UUID
+
+import com.electricdreams.numo.core.update.launchPaymentOperation
 
 /**
  * Data class representing a withdrawal history entry (automatic or manual).
@@ -186,7 +187,7 @@ class AutoWithdrawManager internal constructor(
         }
         
         // Launch in application-scoped coroutine that survives activity destruction
-        withdrawalScope.launch {
+        withdrawalScope.launchPaymentOperation {
             try {
                 Log.d(TAG, "🚀 Starting auto-withdrawal check in background scope")
                 checkAndTriggerWithdrawals(mintUrl, unit.value)

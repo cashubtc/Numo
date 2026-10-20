@@ -5,11 +5,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.backup.DeviceRecoveryBackup
 import com.electricdreams.numo.databinding.ActivityDeviceBackupRestoreBinding
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
+
+import com.electricdreams.numo.core.update.holdPaymentScreen
 
 /** Unlocks a recovery envelope that Android restored before Numo was launched. */
 class DeviceBackupRestoreActivity : AppCompatActivity() {
@@ -18,6 +20,7 @@ class DeviceBackupRestoreActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!holdPaymentScreen()) return
         if (!DeviceRecoveryBackup.hasRestoredBackup(this)) {
             Toast.makeText(this, R.string.restore_device_backup_missing, Toast.LENGTH_LONG).show()
             finish()
@@ -26,12 +29,8 @@ class DeviceBackupRestoreActivity : AppCompatActivity() {
 
         binding = ActivityDeviceBackupRestoreBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
-            view.setPadding(0, systemBars.top, 0, maxOf(systemBars.bottom, ime.bottom))
-            insets
-        }
+        applySettingsWindowInsets(this, binding.root)
+
         binding.topBar.onNavClick { finish() }
         binding.unlockBackupButton.setOnClickListener { unlockBackup() }
         binding.passwordInput.setOnEditorActionListener { _, _, _ ->

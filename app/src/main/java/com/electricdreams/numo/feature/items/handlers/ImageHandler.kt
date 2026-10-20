@@ -183,7 +183,7 @@ class ImageHandler(
             val photoFile = createImageFile()
             selectedImageUri = FileProvider.getUriForFile(
                 activity,
-                "com.electricdreams.numo.fileprovider",
+                "${activity.packageName}.fileprovider",
                 photoFile,
             )
             takePictureLauncher.launch(selectedImageUri)

@@ -1,297 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.electricdreams.numo.ui.components.SettingsPageLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/color_bg_white">
+    android:layout_height="match_parent">
 
-    <!-- Top App Bar -->
-    <com.electricdreams.numo.ui.components.NumoTopBar
-        android:id="@+id/top_bar"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/top_bar_height"
-        app:topBarTitle="@string/developer_settings_title"
-        app:topBarNavIcon="@drawable/ic_close"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="match_parent">
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/top_bar">
+        <!-- Top App Bar -->
 
-        <LinearLayout
+        <com.electricdreams.numo.ui.components.NumoTopBar
+            android:id="@+id/top_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/space_2xl">
+            app:topBarTitle="@string/developer_settings_title"
+            app:layout_constraintTop_toTopOf="parent"
+            android:minHeight="64dp"
+            app:topBarSettingsStyle="true" />
 
-            <!-- Debugging Section -->
-            <TextView
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/top_bar"
+            android:clipToPadding="false">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/settings_horizontal_padding"
-                android:paddingTop="@dimen/space_l"
-                android:paddingBottom="@dimen/space_s"
-                android:text="@string/developer_settings_section_debugging"
-                style="@style/Text.SectionHeader" />
+                android:orientation="vertical"
+                android:paddingBottom="24dp"
+                android:paddingHorizontal="@dimen/settings_page_margin">
 
-            <!-- Restart Onboarding -->
-            <LinearLayout
-                android:id="@+id/restart_onboarding_item"
-                android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="@dimen/settings_horizontal_padding">
+                <!-- Debugging Section -->
 
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/space_l"
-                    android:src="@drawable/ic_restore"
-                    app:tint="@color/color_icon_secondary" />
+                <TextView
+                    android:text="@string/developer_settings_section_debugging"
+                    style="@style/Widget.Numo.SettingsSectionTitle"
+                    android:textAllCaps="false"
+                    android:layout_marginTop="@dimen/settings_section_gap"
+                    android:accessibilityHeading="true" />
+
+                <!-- Restart Onboarding -->
 
                 <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    style="@style/Widget.Numo.SettingsGroup">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/developer_settings_restart_onboarding_title"
-                        android:textAppearance="@style/Text.RowTitle" />
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/restart_onboarding_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_restore"
+                        app:rowTitle="@string/developer_settings_restart_onboarding_title"
+                        app:rowSubtitle="@string/developer_settings_restart_onboarding_subtitle" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/btcmap_reset"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_btcmap_logo"
+                        app:rowTitle="@string/developer_settings_reset_btcmap_promo_title"
+                        app:rowSubtitle="@string/developer_settings_reset_btcmap_promo_subtitle" />
+
+                    <LinearLayout
+                        android:id="@+id/delay_lightning_invoice_item"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/developer_settings_restart_onboarding_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
+                        android:minHeight="@dimen/settings_switch_height"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingHorizontal="0dp"
+                        android:paddingVertical="@dimen/space_m"
+                        android:screenReaderFocusable="true">
+
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_marginEnd="@dimen/space_l"
+                            android:src="@drawable/ic_lightning_bolt"
+                            app:tint="?attr/colorPrimary"
+                            android:contentDescription="@null"
+                            android:padding="@dimen/settings_icon_padding" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:layout_marginEnd="@dimen/space_l">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/developer_settings_lightning_invoice_title"
+                                android:textAppearance="@style/Text.RowTitle" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/developer_settings_lightning_invoice_subtitle"
+                                android:textAppearance="@style/Text.SettingsCaption"
+                                android:layout_marginTop="@dimen/settings_row_subtitle_gap" />
+
+                        </LinearLayout>
+
+                        <com.google.android.material.materialswitch.MaterialSwitch
+                            android:id="@+id/delay_lightning_invoice_switch"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minHeight="48dp"
+                            android:contentDescription="@string/developer_settings_lightning_invoice_title" />
+
+                    </LinearLayout>
+
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/error_logs_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_warning"
+                        app:rowTitle="@string/developer_error_logs_title"
+                        app:rowSubtitle="@string/developer_error_logs_subtitle" />
+
+                    <com.electricdreams.numo.ui.components.SettingsRowView
+                        android:id="@+id/wallet_logs_item"
+                        style="@style/Widget.Numo.SettingsRow"
+                        app:rowIcon="@drawable/ic_history"
+                        app:rowTitle="@string/developer_wallet_logs_title"
+                        app:rowSubtitle="@string/developer_wallet_logs_subtitle" />
+
                 </LinearLayout>
 
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
-            </LinearLayout>
+                <!-- Warning Text -->
 
-            <!-- Reset BTCMap Promo -->
-            <LinearLayout
-                android:id="@+id/btcmap_reset"
-                android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="@dimen/settings_horizontal_padding">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/space_l"
-                    android:src="@drawable/ic_btcmap_logo"
-                    app:tint="@color/color_icon_secondary" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
+                <TextView
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:paddingHorizontal="@dimen/settings_row_padding"
+                    android:paddingTop="@dimen/space_l"
+                    android:text="@string/developer_settings_warning"
+                    android:textAppearance="@style/Text.SettingsCaption"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:background="@drawable/bg_settings_warning"
+                    android:padding="@dimen/space_l"
+                    android:layout_marginTop="@dimen/space_l" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/developer_settings_reset_btcmap_promo_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/developer_settings_reset_btcmap_promo_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
             </LinearLayout>
 
-            <!-- Delay Lightning Invoice -->
-            <LinearLayout
-                android:id="@+id/delay_lightning_invoice_item"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="72dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="@dimen/settings_horizontal_padding"
-                android:paddingVertical="@dimen/space_m">
+        </ScrollView>
 
-                <ImageView
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/space_l"
-                    android:src="@drawable/ic_lightning_bolt"
-                    app:tint="@color/color_icon_secondary"
-                    android:contentDescription="@null" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:layout_marginEnd="@dimen/space_l">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/developer_settings_lightning_invoice_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/developer_settings_lightning_invoice_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/delay_lightning_invoice_switch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-            </LinearLayout>
-
-            <!-- Error Logs -->
-            <LinearLayout
-                android:id="@+id/error_logs_item"
-                android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="@dimen/settings_horizontal_padding">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/space_l"
-                    android:src="@drawable/ic_warning"
-                    app:tint="@color/color_icon_secondary" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/developer_error_logs_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/developer_error_logs_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
-            </LinearLayout>
-
-            <!-- Wallet Logs -->
-            <LinearLayout
-                android:id="@+id/wallet_logs_item"
-                android:layout_width="match_parent"
-                android:layout_height="72dp"
-                android:background="?attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:paddingHorizontal="@dimen/settings_horizontal_padding">
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:layout_marginEnd="@dimen/space_l"
-                    android:src="@drawable/ic_history"
-                    app:tint="@color/color_icon_secondary" />
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/developer_wallet_logs_title"
-                        android:textAppearance="@style/Text.RowTitle" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/developer_wallet_logs_subtitle"
-                        android:textAppearance="@style/Text.RowSubtitle"
-                        android:layout_marginTop="2dp" />
-                </LinearLayout>
-
-                <ImageView
-                    android:importantForAccessibility="no"
-                    android:layout_width="@dimen/icon_size_small"
-                    android:layout_height="@dimen/icon_size_small"
-                    android:src="@drawable/ic_chevron_forward"
-                    app:tint="@color/color_icon_secondary" />
-            </LinearLayout>
-
-            <!-- Warning Text -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="@dimen/settings_horizontal_padding"
-                android:paddingTop="@dimen/space_l"
-                android:text="@string/developer_settings_warning"
-                android:textAppearance="@style/Text.Caption"
-                android:textColor="@color/color_warning"
-                android:background="@color/color_bg_secondary"
-                android:padding="@dimen/space_l"
-                android:layout_marginHorizontal="@dimen/space_l"
-                android:layout_marginTop="@dimen/space_l" />
-
-        </LinearLayout>
-    </ScrollView>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.electricdreams.numo.ui.components.SettingsPageLayout>

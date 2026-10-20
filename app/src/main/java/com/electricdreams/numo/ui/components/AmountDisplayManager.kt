@@ -39,6 +39,10 @@ class AmountDisplayManager(
     var requestedAmount: Long = 0
         private set
 
+    /** Current input value, independent of any in-flight text animation. */
+    var formattedAmount: String = ""
+        private set
+
     private var currentMintLimits: CashuWalletManager.MintLimits? = null
     private var chargeAsset: AssetId = AssetId.global(
         UnitId.ofOrNull(MintManager.getInstance(context).getPreferredUnit()) ?: UnitId.SAT,
@@ -169,7 +173,8 @@ class AmountDisplayManager(
                 rawInput
             }
             
-            amountDisplayText = Amount(fiatCents, currency).toString()
+            formattedAmount = Amount(fiatCents, currency).toString()
+            amountDisplayText = formattedAmount
             amountDisplayText = if (amountDisplayText.length > 9) Amount(fiatCents, currency).toShortString() else amountDisplayText
             
             // Convert fiat to satoshis for secondary display and requestedAmount
@@ -179,7 +184,8 @@ class AmountDisplayManager(
         } else {
             // Input mode: satoshi, display sats as primary, fiat as secondary
             satsValue = if (currentInputStr.isEmpty()) 0L else currentInputStr.toLong()
-            amountDisplayText = formatAmount(currentInputStr)
+            formattedAmount = formatAmount(currentInputStr)
+            amountDisplayText = formattedAmount
             if (!isDirectNonSatUnit) {
                 amountDisplayText = if (amountDisplayText.length > 9) Amount(satsValue, Amount.Currency.BTC).toShortString() else amountDisplayText
             }
@@ -244,7 +250,8 @@ class AmountDisplayManager(
                 )
                 if (limitCheck.isValid) {
                     submitButton.text = context.getString(R.string.pos_charge_button)
-                    submitButton.isEnabled = isNetworkAvailable
+                    // Offline stays tappable (but dimmed) so a tap can explain why
+                    submitButton.isEnabled = true
                     submitButton.alpha = if (isNetworkAvailable) 1.0f else 0.5f
                 } else {
                     val buttonText = when (limitCheck.limitType) {

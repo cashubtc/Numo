@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="android.widget.FrameLayout">
+
+    <!-- Tappable area; top padding grows by the status bar inset at runtime -->
+    <LinearLayout
+        android:id="@+id/strip_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_offline_strip_ripple"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/space_xl"
+        android:paddingTop="@dimen/space_xs"
+        android:paddingBottom="@dimen/space_m">
+
+        <!-- Fades separately from the ripple background when the mode swaps -->
+        <LinearLayout
+            android:id="@+id/strip_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/strip_title"
+                style="@style/Text.OfflineStripTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/offline_strip_title" />
+
+            <TextView
+                android:id="@+id/strip_subtitle"
+                style="@style/Text.OfflineStripSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_2xs"
+                android:gravity="center"
+                android:text="@string/offline_strip_subtitle" />
+        </LinearLayout>
+    </LinearLayout>
+</merge>

@@ -5,7 +5,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import com.electricdreams.numo.util.startActivityForResultCompat
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -18,21 +17,26 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.gridlayout.widget.GridLayout
+import com.google.android.material.button.MaterialButton
+
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.cashu.CashuWalletManager
-import com.electricdreams.numo.feature.enableEdgeToEdgeWithPill
+import com.electricdreams.numo.databinding.ActivityPinResetBinding
 import com.electricdreams.numo.ui.util.DialogHelper
-import com.google.android.material.button.MaterialButton
+import com.electricdreams.numo.ui.util.applySettingsWindowInsets
+import com.electricdreams.numo.util.startActivityForResultCompat
 
 /**
  * Activity for resetting PIN using mnemonic verification.
- * 
+ *
  * Flow:
  * 1. User enters 12-word seed phrase
  * 2. Verify it matches stored mnemonic
  * 3. Remove PIN and optionally set new one
  */
 class PinResetActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityPinResetBinding
 
     private lateinit var pinManager: PinManager
     private lateinit var seedInputGrid: GridLayout
@@ -46,8 +50,9 @@ class PinResetActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdgeWithPill(this)
-        setContentView(R.layout.activity_pin_reset)
+        binding = ActivityPinResetBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        applySettingsWindowInsets(this, binding.root)
 
         pinManager = PinManager.getInstance(this)
 
@@ -57,14 +62,14 @@ class PinResetActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        seedInputGrid = findViewById(R.id.seed_input_grid)
-        pasteButton = findViewById(R.id.paste_button)
-        resetButton = findViewById(R.id.reset_button)
-        validationStatus = findViewById(R.id.validation_status)
-        validationIcon = findViewById(R.id.validation_icon)
-        validationText = findViewById(R.id.validation_text)
+        seedInputGrid = binding.seedInputGrid
+        pasteButton = binding.pasteButton
+        resetButton = binding.resetButton
+        validationStatus = binding.validationStatus
+        validationIcon = binding.validationIcon
+        validationText = binding.validationText
 
-        findViewById<View>(R.id.back_button).setOnClickListener { finish() }
+        binding.topBar.onNavClick { finish() }
     }
 
     private fun setupSeedInputs() {

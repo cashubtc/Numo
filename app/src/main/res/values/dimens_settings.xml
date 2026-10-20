@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="settings_row_icon_size">40dp</dimen>
+    <dimen name="settings_icon_padding">8dp</dimen>
+    <dimen name="settings_content_max_width">720dp</dimen>
+    <!-- Flat settings content has one gutter; rows do not add another horizontal inset. -->
+    <dimen name="settings_page_margin">@dimen/margin_content_horizontal</dimen>
+    <dimen name="settings_card_radius">24dp</dimen>
+    <dimen name="settings_row_padding">16dp</dimen>
+    <dimen name="settings_row_icon_gap">16dp</dimen>
+    <dimen name="settings_row_subtitle_gap">4dp</dimen>
+    <dimen name="settings_row_height">64dp</dimen>
+    <dimen name="settings_switch_height">72dp</dimen>
+    <dimen name="settings_detail_row_height">80dp</dimen>
+    <dimen name="settings_section_gap">24dp</dimen>
+    <dimen name="settings_section_title_gap">12dp</dimen>
+</resources>

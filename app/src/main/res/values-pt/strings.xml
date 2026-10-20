@@ -132,6 +132,7 @@
     <string name="onboarding_mints_count">%1$d mint%2$s selecionado(s)</string>
     <string name="onboarding_mints_continue_restore">Restaurar carteira</string>
     <string name="onboarding_mints_continue_new_wallet">Continuar</string>
+    <string name="onboarding_mints_none_reachable">Não foi possível conectar aos mints padrão. Verifique sua conexão e volte para tentar novamente, ou adicione um mint.</string>
     <string name="onboarding_mints_hero_label">MINT PADRÃO</string>
     <string name="onboarding_mints_hero_subtitle">Guarda seu bitcoin</string>
     <string name="onboarding_mints_hero_default_badge">Padrão</string>
@@ -312,6 +313,7 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="history_toolbar_title">Atividade</string>
     <string name="history_section_payment_history">HISTÓRICO DE PAGAMENTOS</string>
     <string name="history_empty">Nenhum histórico de pagamentos</string>
+    <string name="history_empty_subtitle">Depois da sua primeira cobrança, você verá aqui o registro de cada pagamento recebido.</string>
     <string name="transaction_row_copy">Copiar</string>
     <string name="transaction_row_open">Abrir</string>
     <string name="transaction_row_delete">Excluir</string>
@@ -332,7 +334,7 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="transaction_detail_type_payment_received">Pagamento recebido</string>
     <string name="transaction_detail_mint_label">Do mint</string>
     <string name="transaction_detail_view_receipt">Ver recibo</string>
-    <string name="transaction_detail_section_transaction_details">DETALHES DA TRANSAÇÃO</string>
+    <string name="transaction_detail_section_payment">Pagamento</string>
     <string name="transaction_detail_payment_type_label">Tipo de pagamento</string>
     <string name="transaction_detail_payment_type_cashu">Cashu</string>
     <string name="transaction_detail_amount_label">Valor</string>
@@ -743,37 +745,28 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="default_payment_method_option_lightning">Lightning</string>
     <string name="payment_request_default_method_set">%1$s definido como método de pagamento padrão</string>
     <!-- Tela de Estatísticas / Vendas -->
-    <string name="insights_open">Abrir estatísticas</string>
+    <string name="insights_open">Vendas</string>
     <string name="insights_title">Vendas</string>
-    <string name="insights_back">Voltar</string>
     <string name="insights_view_options">Ver opções</string>
-    <string name="insights_this_week">Esta semana</string>
-    <string name="insights_last_7_weeks">Últimas 7 semanas</string>
-    <string name="insights_last_7_months">Últimos 7 meses</string>
     <string name="insights_date_range">Período</string>
     <string name="insights_range_days">Últimos 7 dias</string>
     <string name="insights_range_weeks">Últimas 7 semanas</string>
     <string name="insights_range_months">Últimos 7 meses</string>
-    <string name="insights_day_count_one">1 transação</string>
-    <string name="insights_day_count_other">%1$d transações</string>
     <string name="insights_quick_charge">Cobrança rápida</string>
     <string name="insights_items_count_one">1 item</string>
     <string name="insights_items_count_other">%1$d itens</string>
     <string name="insights_items_lead_with_more">%1$s · %2$s +%3$d mais</string>
     <string name="insights_item_xn">%1$d × %2$s</string>
-    <string name="insights_empty_headline">0 vendas</string>
-    <string name="insights_empty_hint">Suas vendas aparecerão aqui.</string>
     <string name="insights_empty_day">Nenhuma venda em %1$s</string>
+    <plurals name="insights_sales_count">
+        <item quantity="one">%d venda</item>
+        <item quantity="other">%d vendas</item>
+    </plurals>
+    <string name="insights_tips_amount">%1$s em gorjetas</string>
+    <string name="insights_empty_title">Ainda não há vendas</string>
+    <string name="insights_empty_subtitle">Cada venda aparece aqui, com o que foi vendido e quando.</string>
     <string name="insights_show_me_in">Exibir em</string>
     <string name="insights_currency_sats">₿</string>
-    <string name="insights_close">Fechar</string>
-    <string name="insights_day_label_mon">Seg</string>
-    <string name="insights_day_label_tue">Ter</string>
-    <string name="insights_day_label_wed">Qua</string>
-    <string name="insights_day_label_thu">Qui</string>
-    <string name="insights_day_label_fri">Sex</string>
-    <string name="insights_day_label_sat">Sáb</string>
-    <string name="insights_day_label_sun">Dom</string>
     <string name="auto_withdraw_lightning_address_valid">Endereço Lightning válido</string>
     <string name="auto_withdraw_lightning_address_invalid">Endereço Lightning inválido</string>
     <!-- BTCMap Explainer -->
@@ -841,4 +834,41 @@ Estes termos podem ser atualizados. O uso continuado implica aceitação.
     <string name="item_entry_local_currency_conversion_label">%1$s · convertido ao cobrar</string>
     <string name="item_entry_unscoped_unit_label">%1$s · emissor não especificado</string>
     <string name="item_entry_error_price_too_large">O preço é demasiado elevado</string>
+
+    <!-- Offline mode -->
+    <string name="offline_strip_title">Offline</string>
+    <string name="offline_strip_subtitle">Novas cobranças precisam de internet</string>
+    <string name="offline_strip_back_online_title">Online de novo</string>
+    <string name="offline_strip_back_online_subtitle">Novas cobranças funcionam de novo</string>
+    <string name="offline_strip_action_details">Ver o que funciona offline</string>
+    <string name="offline_explainer_title">Você está offline.</string>
+    <string name="offline_explainer_subtitle">Você não pode iniciar novas cobranças sem internet. Verifique o Wi-Fi ou os dados móveis.</string>
+    <string name="offline_explainer_back_online_title">Você está online de novo.</string>
+    <string name="offline_explainer_back_online_subtitle">Tudo está disponível novamente.</string>
+    <string name="offline_explainer_close_content_description">Fechar</string>
+    <string name="offline_feature_catalog">Catálogo e cestas</string>
+    <string name="offline_feature_history">Atividade e vendas</string>
+    <string name="offline_feature_exchange_rate">Taxa de câmbio</string>
+    <string name="offline_feature_withdrawals">Saques</string>
+    <string name="offline_feature_auto_withdraw">Saques automáticos</string>
+    <string name="offline_status_available">Disponível</string>
+    <string name="offline_status_unavailable">Indisponível</string>
+    <string name="offline_status_paused">Pausado</string>
+    <string name="payment_request_instruction_scan">Escaneie para pagar</string>
+    <string name="payment_request_offline_note">Se o cliente pagar, o Numo vai confirmar assim que você estiver online de novo.</string>
+    <string name="offline_strip_pane_title">%1$s. %2$s</string>
+    <string name="offline_explainer_group_needs_internet">Precisa de internet</string>
+    <string name="offline_explainer_group_works_offline">Funciona offline</string>
+    <string name="offline_feature_new_charges">Novas cobranças</string>
+    <string name="offline_feature_payment_on_screen">Esta cobrança</string>
+    <string name="offline_status_confirms_later">Será confirmado quando você estiver online de novo</string>
+    <string name="offline_status_using_rate">Cotação de %1$s</string>
+    <string name="offline_status_updating">Atualizando…</string>
+    <string name="offline_row_content_description">%1$s, %2$s</string>
+    <string name="offline_row_content_description_outdated">%1$s, desatualizado. %2$s</string>
+    <string name="payment_request_arkoor_address">Endereço Ark</string>
+    <string name="payment_request_arkoor_waiting">Envie o valor exibido para este endereço Ark</string>
+    <string name="payment_request_arkoor_retrying">Reconectando à mint…</string>
+    <string name="payment_request_arkoor_failed">Falha no pagamento Arkoor: %1$s</string>
+    <string name="payment_request_arkoor_requires_mint">Selecione uma mint Arkoor e use sats como unidade base.</string>
 </resources>
