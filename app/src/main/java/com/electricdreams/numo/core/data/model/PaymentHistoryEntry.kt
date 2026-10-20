@@ -261,6 +261,7 @@ data class PaymentHistoryEntry(
             val meltQuoteId: String,
             val lightningMintUrl: String,
             val lightningQuoteId: String,
+            val meltPaid: Boolean = false,
         )
 
         /**

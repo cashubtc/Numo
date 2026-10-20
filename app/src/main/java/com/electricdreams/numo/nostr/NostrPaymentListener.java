@@ -34,6 +34,7 @@ public final class NostrPaymentListener {
     private final List<String> relays;
     private final SuccessHandler successHandler;
     private final ErrorHandler errorHandler;
+    private final String paymentId;
 
     private NostrWebSocketClient client;
     private volatile boolean stopped = false;
@@ -48,6 +49,7 @@ public final class NostrPaymentListener {
 
     public interface ErrorHandler {
         void onPaymentFailure(String message, Throwable t);
+        default void onPaymentPending(String paymentId) {}
     }
 
     public NostrPaymentListener(byte[] secretKey32,
@@ -58,6 +60,19 @@ public final class NostrPaymentListener {
                                 SuccessHandler successHandler,
                                 ErrorHandler errorHandler,
                                 String paymentUnit) {
+        this(secretKey32, pubkeyHex, expectedAmount, allowedMints, relays,
+                successHandler, errorHandler, paymentUnit, null);
+    }
+
+    public NostrPaymentListener(byte[] secretKey32,
+                                String pubkeyHex,
+                                long expectedAmount,
+                                List<String> allowedMints,
+                                List<String> relays,
+                                SuccessHandler successHandler,
+                                ErrorHandler errorHandler,
+                                String paymentUnit,
+                                String paymentId) {
         if (secretKey32 == null || secretKey32.length != 32) {
             throw new IllegalArgumentException("secretKey32 must be 32 bytes");
         }
@@ -69,6 +84,7 @@ public final class NostrPaymentListener {
         this.relays = relays;
         this.successHandler = successHandler;
         this.errorHandler = errorHandler;
+        this.paymentId = paymentId;
     }
 
     public synchronized void start() {
@@ -117,6 +133,7 @@ public final class NostrPaymentListener {
     }
 
     private void handlePaymentEvent(String relayUrl, NostrEvent event) {
+        if (stopped) return;
         // Deduplicate by event ID across all relays. Synchronize so only one
         // thread at a time can perform the check-and-add.
         synchronized (seenEventIds) {
@@ -137,12 +154,8 @@ public final class NostrPaymentListener {
 
             Log.d(TAG, "Attempting PaymentRequestPayload redemption (with swap) from relay=" + relayUrl);
 
-            // For Nostr, we create a minimal PaymentContext that ties this
-            // redemption to the expected amount. There is no explicit
-            // paymentId here; higher-level callers can correlate via Nostr
-            // metadata if needed.
             SwapToLightningMintManager.PaymentContext paymentContext =
-                    new SwapToLightningMintManager.PaymentContext(null, expectedAmount, paymentUnit);
+                    new SwapToLightningMintManager.PaymentContext(paymentId, expectedAmount, paymentUnit);
 
             // Call the high-level, swap-aware redemption helper so that
             // incoming ecash from unknown mints can be swapped to the
@@ -183,7 +196,9 @@ public final class NostrPaymentListener {
             }
         } catch (RuntimeException re) {
             Throwable cause = re.getCause();
-            if (cause instanceof CashuPaymentHelper.RedemptionException) {
+            if (cause instanceof CashuPaymentHelper.PendingSwapException) {
+                notifyPending((CashuPaymentHelper.PendingSwapException) cause);
+            } else if (cause instanceof CashuPaymentHelper.RedemptionException) {
                 CashuPaymentHelper.RedemptionException e = (CashuPaymentHelper.RedemptionException) cause;
                 String detail = e.getMessage() != null ? e.getMessage() : "Unknown redemption error";
                 Log.e(TAG, "Redemption error for event from " + relayUrl + ": " + detail, e);
@@ -199,6 +214,8 @@ public final class NostrPaymentListener {
                     errorHandler.onPaymentFailure(detail, re);
                 }
             }
+        } catch (CashuPaymentHelper.PendingSwapException e) {
+            notifyPending(e);
         } catch (CashuPaymentHelper.RedemptionException e) {
             String detail = e.getMessage() != null ? e.getMessage() : "Unknown redemption error";
             Log.e(TAG, "Redemption error for event from " + relayUrl + ": " + detail, e);
@@ -213,6 +230,13 @@ public final class NostrPaymentListener {
             if (errorHandler != null) {
                 errorHandler.onPaymentFailure(detail, e);
             }
+        }
+    }
+
+    private void notifyPending(CashuPaymentHelper.PendingSwapException pending) {
+        stop();
+        if (errorHandler != null) {
+            errorHandler.onPaymentPending(pending.getPaymentId());
         }
     }
 }

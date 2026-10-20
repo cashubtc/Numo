@@ -1,5 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
+    <string name="payment_swap_pending_title">Payment confirmation pending</string>
+    <string name="payment_swap_pending_message">Do not charge the customer again. Check this payment in history to finish confirming it.</string>
+    <string name="payment_swap_check_status">Check status</string>
     <string name="app_name">Numo</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>

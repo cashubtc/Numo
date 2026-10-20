@@ -1,24 +1,25 @@
 package com.electricdreams.numo.payment
 
+import android.content.Context
 import android.util.Log
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.dev.WalletLogger
+import com.electricdreams.numo.core.update.withPaymentOperation
+import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import com.electricdreams.numo.core.util.MintManager
-import com.electricdreams.numo.nostr.Bech32
+import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.cashudevkit.Amount as CdkAmount
-import org.cashudevkit.CurrencyUnit
 import org.cashudevkit.FinalizedMelt
+import org.cashudevkit.MeltConfirmOptions
 import org.cashudevkit.MeltQuote
 import org.cashudevkit.MintUrl
 import org.cashudevkit.QuoteState
-import java.security.MessageDigest
-import kotlin.math.roundToLong
-import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
-import org.cashudevkit.MeltConfirmOptions
-
-import com.electricdreams.numo.core.update.withPaymentOperation
+import org.cashudevkit.Wallet
 
 /**
  * Coordinates swapping a Cashu payment from an unknown mint into the
@@ -32,14 +33,17 @@ import com.electricdreams.numo.core.update.withPaymentOperation
  * 4. Request a melt quote from the unknown mint to pay that Lightning invoice.
  * 5. Enforce a maximum fee reserve of 5% of the quote amount.
  * 6. Execute the melt and fetch the final melt quote state.
- * 7. Verify that the payment preimage returned by the unknown mint hashes
- *    to the payment hash encoded in the BOLT11 invoice.
- * 8. Rely on the existing LightningMintHandler flow to mint proofs on the
- *    Lightning mint once the invoice is paid.
+ * 7. Mint the paid quote on the Lightning mint.
+ * 8. Keep unresolved quotes available for later confirmation in history.
  */
 object SwapToLightningMintManager {
 
     private const val TAG = "SwapToLightningMintManager"
+    private val finalizationMutex = Mutex()
+    private val swapMutex = Mutex()
+    internal var temporaryWalletFactory:
+        (Context, String, String, String) -> Wallet =
+        SwapWalletStore::open
 
     /** Maximum allowed melt fee reserve as a fraction of the quote amount (5%). */
     private const val MAX_FEE_RESERVE_RATIO = 0.05
@@ -55,6 +59,8 @@ object SwapToLightningMintManager {
         ) : SwapResult()
 
         data class Failure(val errorMessage: String) : SwapResult()
+
+        data class Pending(val paymentId: String) : SwapResult()
     }
 
     /**
@@ -84,342 +90,261 @@ object SwapToLightningMintManager {
      * @param paymentContext Context describing the POS payment (id, amount).
      */
     suspend fun swapFromUnknownMint(
-        appContext: android.content.Context,
+        appContext: Context,
         proofs: List<org.cashudevkit.Proof>,
         expectedAmount: Long,
         unknownMintUrl: String,
         paymentContext: PaymentContext
     ): SwapResult = withPaymentOperation(Dispatchers.IO) {
-        Log.d(
-            TAG,
-            "swapFromUnknownMint: start " +
-                "unknownMintUrl=$unknownMintUrl, " +
-                "expectedAmount=$expectedAmount, " +
-                "paymentContext.paymentId=${paymentContext.paymentId}, " +
-                "paymentContext.amountSats=${paymentContext.amountSats}, " +
-                "proofsCount=${proofs.size}"
-        )
-
-        // 1) Create a temporary single-mint Wallet and receive the payer's
-        //    token so that it holds the proofs we want to melt. This wallet
-        //    is entirely ephemeral and uses its own random seed.
-
-        val mintManager = MintManager.getInstance(appContext)
-        val paymentUnit = paymentContext.unit ?: mintManager.getPreferredUnit()
-        val tempWallet = try {
-            CashuWalletManager.getTemporaryWalletForMint(unknownMintUrl, paymentUnit)
-        } catch (t: Throwable) {
-            val msg = "Failed to create temporary wallet for unknown mint: ${'$'}{t.message}"
-            Log.e(TAG, msg, t)
-            return@withPaymentOperation SwapResult.Failure(msg)
-        }
-        tempWallet.keysets(org.cashudevkit.KeysetLoadPolicy.REFRESH)
-
-        Log.d(TAG, "swapFromUnknownMint: temporary wallet created for mint=$unknownMintUrl")
-
-        val wallet = CashuWalletManager.getWallet()
-            ?: run {
-                Log.e(TAG, "swapFromUnknownMint: main wallet not initialized for Lightning mint")
-                return@withPaymentOperation SwapResult.Failure("Wallet not initialized for Lightning mint")
+        swapMutex.withLock {
+            val saved = paymentContext.paymentId?.let {
+                PaymentsHistoryActivity.getPaymentEntryById(appContext, it)
             }
-
-        Log.d(TAG, "swapFromUnknownMint: main wallet for Lightning mint is available")
-
-        // We request a mint quote, just to have the bolt11 request to feed to the melt quote request
-        // Then, we take the fee estimate from the melt quote response and
-        // ask for a new mint quote with the adjusted amount
-
-        val feeBuffer = kotlin.math.ceil(paymentContext.amountSats * MAX_FEE_RESERVE_RATIO).toLong()
-        var lightningAmount = paymentContext.amountSats - feeBuffer
-
-        Log.d(
-            TAG,
-            "swapFromUnknownMint: initial fee buffer=$feeBuffer (ratio=${"%.2f".format(MAX_FEE_RESERVE_RATIO * 100)}%), " +
-                "initialLightningAmount=$lightningAmount from received=${paymentContext.amountSats}"
-        )
-
-        if (lightningAmount <= 0L) {
-            val msg = "Received amount $lightningAmount is too small after 5% fee buffer"
-            Log.e(TAG, msg)
-            try { tempWallet.close() } catch (_: Throwable) {}
-            return@withPaymentOperation SwapResult.Failure(msg)
-        }
-
-        val lightningMintUrl = mintManager.getPreferredLightningMint(paymentUnit)
-            ?: run {
-                Log.e(TAG, "No preferred Lightning mint configured")
-                try { tempWallet.close() } catch (_: Throwable) {}
-                return@withPaymentOperation SwapResult.Failure("No Lightning mint configured")
+            if (saved?.swapToLightningMintJson != null) {
+                return@withPaymentOperation SwapResult.Pending(saved.id)
             }
-        Log.d(TAG, "swapFromUnknownMint: preferred Lightning mint is $lightningMintUrl")
-        
-        // Check if the preferred lightning mint actually supports bolt11
-        val limits = mintManager.getMintLimits(lightningMintUrl, appContext)
-        val limitCheck = com.electricdreams.numo.core.util.MintLimitChecker.checkMintLimits(paymentContext.amountSats, limits, paymentUnit)
-        if (!limitCheck.isBolt11Supported) {
-            val msg = "Preferred mint does not support Lightning (bolt11). Cannot perform swap."
-            Log.e(TAG, msg)
-            try { tempWallet.close() } catch (_: Throwable) {}
-            return@withPaymentOperation SwapResult.Failure(msg)
-        }
-        if (!limitCheck.isValid) {
-            val msg = "Amount ${paymentContext.amountSats} is not within Lightning limits for preferred mint."
-            Log.e(TAG, msg)
-            try { tempWallet.close() } catch (_: Throwable) {}
-            return@withPaymentOperation SwapResult.Failure(msg)
-        }
+            Log.d(
+                TAG,
+                "swapFromUnknownMint: start " +
+                    "unknownMintUrl=$unknownMintUrl, " +
+                    "expectedAmount=$expectedAmount, " +
+                    "paymentContext.paymentId=${paymentContext.paymentId}, " +
+                    "paymentContext.amountSats=${paymentContext.amountSats}, " +
+                    "proofsCount=${proofs.size}"
+            )
 
-        Log.d(
-            TAG,
-            "swapFromUnknownMint: requesting initial Lightning mint quote for fee estimation: " +
-                "lightningMintUrl=$lightningMintUrl, amount=$lightningAmount"
-        )
+            // 1) Create a temporary single-mint Wallet and receive the payer's
+            //    token so that it holds the proofs we want to melt. Its seed and
+            //    database are retained locally for recovery.
 
-        val lightningMintUrlObj = MintUrl(lightningMintUrl)
-        val unit = CashuWalletManager.getCurrencyUnit(paymentUnit)
-        val lightningWallet = wallet.getWallet(lightningMintUrlObj, unit)
-            ?: run {
-                Log.e(TAG, "Failed to get Lightning wallet for: $lightningMintUrl")
-                return@withPaymentOperation SwapResult.Failure("Failed to get Lightning wallet")
+            val mintManager = MintManager.getInstance(appContext)
+            val paymentUnit = paymentContext.unit ?: mintManager.getPreferredUnit()
+            val recoveryId = paymentContext.paymentId ?: java.util.UUID.randomUUID().toString()
+            val tempWallet = try {
+                temporaryWalletFactory(appContext, recoveryId, unknownMintUrl, paymentUnit)
+            } catch (t: Throwable) {
+                val msg = "Failed to create temporary wallet for unknown mint: ${'$'}{t.message}"
+                Log.e(TAG, msg, t)
+                return@withPaymentOperation SwapResult.Failure(msg)
             }
-        val mintQuote = lightningWallet.mintQuote(org.cashudevkit.PaymentMethod.Bolt11, CdkAmount(lightningAmount.toULong()), null, null)
-
-        Log.d(
-            TAG,
-            "swapFromUnknownMint: received initial Lightning mint quote: " +
-                "quoteId=${mintQuote.id}, requestLength=${mintQuote.request.length}"
-        )
-
-        var meltQuote: MeltQuote = try {
-            Log.d(TAG, "swapFromUnknownMint: requesting initial melt quote from unknown mint for preliminary Lightning invoice")
-            tempWallet.meltQuote(org.cashudevkit.PaymentMethod.Bolt11, mintQuote.request, null, null)
-        } catch (t: Throwable) {
-            val msg = "Failed to request melt quote from unknown mint: ${'$'}{t.message}"
-            Log.e(TAG, msg, t)
-            tempWallet.close()
-            return@withPaymentOperation SwapResult.Failure(msg)
-        }
-
-        val feeReserveEstimate = meltQuote.feeReserve.value.toLong()
-        Log.d(
-            TAG,
-            "swapFromUnknownMint: initial melt quote from unknown mint: " +
-                "meltQuoteId=${meltQuote.id}, amount=${meltQuote.amount.value.toLong()}, feeReserveEstimate=$feeReserveEstimate"
-        )
-        if (feeReserveEstimate > feeBuffer) {
-            val msg = "Lightning fee reserve estimate is too big ($feeReserveEstimate)"
-            Log.e(TAG, msg)
-            try { tempWallet.close() } catch (_: Throwable) {}
-            return@withPaymentOperation SwapResult.Failure(msg)
-        }
-
-        val minOverhead = kotlin.math.ceil(paymentContext.amountSats * MIN_FEE_OVERHEAD).toLong()
-        lightningAmount = paymentContext.amountSats - minOverhead - feeReserveEstimate
-
-        Log.d(
-            TAG,
-            "swapFromUnknownMint: adjusted Lightning amount=$lightningAmount after applying " +
-                "minFeeOverheadCeil=$minOverhead and feeReserveEstimate=$feeReserveEstimate"
-        )
-
-        if (lightningAmount <= 0L) {
-            val msg = "Adjusted lightning amount is non-positive after fees (overhead=$minOverhead, feeReserve=$feeReserveEstimate, received=${paymentContext.amountSats})"
-            Log.e(TAG, msg)
-            try { tempWallet.close() } catch (_: Throwable) {}
-            return@withPaymentOperation SwapResult.Failure(msg)
-        }
-
-        Log.d(
-            TAG,
-            "swapFromUnknownMint: requesting Lightning mint quote: " +
-                "lightningMintUrl=$lightningMintUrl, mintQuoteAmount=$lightningAmount"
-        )
-
-        val finalMintQuote = lightningWallet.mintQuote(org.cashudevkit.PaymentMethod.Bolt11, CdkAmount(lightningAmount.toULong()), null, null)
-
-        val bolt11 = finalMintQuote.request
-        Log.d(
-            TAG,
-            "swapFromUnknownMint: using Lightning invoice for swap: " +
-                "quoteId=${finalMintQuote.id}, bolt11Length=${bolt11.length}"
-        )
-
-        // 4) Request a melt quote from the unknown mint for this bolt11.
-        meltQuote = try {
-            Log.d(TAG, "swapFromUnknownMint: requesting final melt quote from unknown mint using Lightning bolt11 invoice")
-            tempWallet.meltQuote(org.cashudevkit.PaymentMethod.Bolt11, bolt11, null, null)
-        } catch (t: Throwable) {
-            val msg = "Failed to request melt quote from unknown mint: ${'$'}{t.message}"
-            Log.e(TAG, msg, t)
-            tempWallet.close()
-            return@withPaymentOperation SwapResult.Failure(msg)
-        }
-
-        val quoteAmount = meltQuote.amount.value.toLong()
-        val feeReserve = meltQuote.feeReserve.value.toLong()
-
-        Log.d(
-            TAG,
-            "swapFromUnknownMint: melt quote details: " +
-                "meltQuoteAmount=$quoteAmount, " +
-                "meltQuoteFeeReserve=$feeReserve, " +
-                "totalMeltRequired=${quoteAmount + feeReserve}, " +
-                "receivedSats=${paymentContext.amountSats}, " +
-                "feeBufferReserved=$feeBuffer (ratio=${"%.2f".format(MAX_FEE_RESERVE_RATIO * 100)}%), " +
-                "lightningMintQuoteAmount=$lightningAmount"
-        )
-
-        if (quoteAmount <= 0) {
-            val msg = "Invalid melt quote amount (zero or negative)"
-            Log.e(TAG, msg)
-            return@withPaymentOperation SwapResult.Failure(msg)
-        }
-
-        val totalMeltRequired = quoteAmount + feeReserve
-        if (totalMeltRequired > paymentContext.amountSats) {
-            val msg = "Unknown-mint melt requires $totalMeltRequired sats but temp wallet balance is ${paymentContext.amountSats}"
-            Log.w(TAG, msg)
-            try { tempWallet.close() } catch (_: Throwable) {}
-            return@withPaymentOperation SwapResult.Failure(msg)
-        }
-
-        // 4) At this point we have:
-        //    - A Lightning mint quote (LightningMintInvoiceManager)
-        //    - An unknown-mint melt quote from the temporary wallet
-        //    We now record this as a SwapToLightningMint frame in
-        //    PaymentHistory so it can be inspected later.
-        if (paymentContext.paymentId != null) {
             try {
-                val frame = PaymentHistoryEntry.Companion.SwapToLightningMintFrame(
+                tempWallet.keysets(org.cashudevkit.KeysetLoadPolicy.REFRESH)
+
+                Log.d(TAG, "swapFromUnknownMint: temporary wallet created for mint=$unknownMintUrl")
+
+                val wallet = CashuWalletManager.getWallet()
+                    ?: run {
+                        Log.e(TAG, "swapFromUnknownMint: main wallet not initialized for Lightning mint")
+                        return@withPaymentOperation SwapResult.Failure("Wallet not initialized for Lightning mint")
+                    }
+
+                Log.d(TAG, "swapFromUnknownMint: main wallet for Lightning mint is available")
+
+                // We request a mint quote, just to have the bolt11 request to feed to the melt quote request
+                // Then, we take the fee estimate from the melt quote response and
+                // ask for a new mint quote with the adjusted amount
+
+                val feeBuffer = kotlin.math.ceil(paymentContext.amountSats * MAX_FEE_RESERVE_RATIO).toLong()
+                var lightningAmount = paymentContext.amountSats - feeBuffer
+
+                Log.d(
+                    TAG,
+                    "swapFromUnknownMint: initial fee buffer=$feeBuffer (ratio=${"%.2f".format(MAX_FEE_RESERVE_RATIO * 100)}%), " +
+                        "initialLightningAmount=$lightningAmount from received=${paymentContext.amountSats}"
+                )
+
+                if (lightningAmount <= 0L) {
+                    val msg = "Received amount $lightningAmount is too small after 5% fee buffer"
+                    Log.e(TAG, msg)
+                    return@withPaymentOperation SwapResult.Failure(msg)
+                }
+
+                val lightningMintUrl = mintManager.getPreferredLightningMint(paymentUnit)
+                    ?: run {
+                        Log.e(TAG, "No preferred Lightning mint configured")
+                            return@withPaymentOperation SwapResult.Failure("No Lightning mint configured")
+                    }
+                Log.d(TAG, "swapFromUnknownMint: preferred Lightning mint is $lightningMintUrl")
+
+                // Check if the preferred lightning mint actually supports bolt11
+                val limits = mintManager.getMintLimits(lightningMintUrl, appContext)
+                val limitCheck = com.electricdreams.numo.core.util.MintLimitChecker.checkMintLimits(paymentContext.amountSats, limits, paymentUnit)
+                if (!limitCheck.isBolt11Supported) {
+                    val msg = "Preferred mint does not support Lightning (bolt11). Cannot perform swap."
+                    Log.e(TAG, msg)
+                    return@withPaymentOperation SwapResult.Failure(msg)
+                }
+                if (!limitCheck.isValid) {
+                    val msg = "Amount ${paymentContext.amountSats} is not within Lightning limits for preferred mint."
+                    Log.e(TAG, msg)
+                    return@withPaymentOperation SwapResult.Failure(msg)
+                }
+
+                Log.d(
+                    TAG,
+                    "swapFromUnknownMint: requesting initial Lightning mint quote for fee estimation: " +
+                        "lightningMintUrl=$lightningMintUrl, amount=$lightningAmount"
+                )
+
+                val lightningMintUrlObj = MintUrl(lightningMintUrl)
+                val unit = CashuWalletManager.getCurrencyUnit(paymentUnit)
+                val lightningWallet = wallet.getWallet(lightningMintUrlObj, unit)
+                    ?: run {
+                        Log.e(TAG, "Failed to get Lightning wallet for: $lightningMintUrl")
+                        return@withPaymentOperation SwapResult.Failure("Failed to get Lightning wallet")
+                    }
+                val mintQuote = lightningWallet.mintQuote(org.cashudevkit.PaymentMethod.Bolt11, CdkAmount(lightningAmount.toULong()), null, null)
+
+                Log.d(
+                    TAG,
+                    "swapFromUnknownMint: received initial Lightning mint quote: " +
+                        "quoteId=${mintQuote.id}, requestLength=${mintQuote.request.length}"
+                )
+
+                var meltQuote: MeltQuote = try {
+                    Log.d(TAG, "swapFromUnknownMint: requesting initial melt quote from unknown mint for preliminary Lightning invoice")
+                    tempWallet.meltQuote(org.cashudevkit.PaymentMethod.Bolt11, mintQuote.request, null, null)
+                } catch (t: Throwable) {
+                    val msg = "Failed to request melt quote from unknown mint: ${'$'}{t.message}"
+                    Log.e(TAG, msg, t)
+                    return@withPaymentOperation SwapResult.Failure(msg)
+                }
+
+                val feeReserveEstimate = meltQuote.feeReserve.value.toLong()
+                Log.d(
+                    TAG,
+                    "swapFromUnknownMint: initial melt quote from unknown mint: " +
+                        "meltQuoteId=${meltQuote.id}, amount=${meltQuote.amount.value.toLong()}, feeReserveEstimate=$feeReserveEstimate"
+                )
+                if (feeReserveEstimate > feeBuffer) {
+                    val msg = "Lightning fee reserve estimate is too big ($feeReserveEstimate)"
+                    Log.e(TAG, msg)
+                    return@withPaymentOperation SwapResult.Failure(msg)
+                }
+
+                val minOverhead = kotlin.math.ceil(paymentContext.amountSats * MIN_FEE_OVERHEAD).toLong()
+                lightningAmount = paymentContext.amountSats - minOverhead - feeReserveEstimate
+
+                Log.d(
+                    TAG,
+                    "swapFromUnknownMint: adjusted Lightning amount=$lightningAmount after applying " +
+                        "minFeeOverheadCeil=$minOverhead and feeReserveEstimate=$feeReserveEstimate"
+                )
+
+                if (lightningAmount <= 0L) {
+                    val msg = "Adjusted lightning amount is non-positive after fees (overhead=$minOverhead, feeReserve=$feeReserveEstimate, received=${paymentContext.amountSats})"
+                    Log.e(TAG, msg)
+                    return@withPaymentOperation SwapResult.Failure(msg)
+                }
+
+                Log.d(
+                    TAG,
+                    "swapFromUnknownMint: requesting Lightning mint quote: " +
+                        "lightningMintUrl=$lightningMintUrl, mintQuoteAmount=$lightningAmount"
+                )
+
+                val finalMintQuote = lightningWallet.mintQuote(org.cashudevkit.PaymentMethod.Bolt11, CdkAmount(lightningAmount.toULong()), null, null)
+
+                val bolt11 = finalMintQuote.request
+                Log.d(
+                    TAG,
+                    "swapFromUnknownMint: using Lightning invoice for swap: " +
+                        "quoteId=${finalMintQuote.id}, bolt11Length=${bolt11.length}"
+                )
+
+                // 4) Request a melt quote from the unknown mint for this bolt11.
+                meltQuote = try {
+                    Log.d(TAG, "swapFromUnknownMint: requesting final melt quote from unknown mint using Lightning bolt11 invoice")
+                    tempWallet.meltQuote(org.cashudevkit.PaymentMethod.Bolt11, bolt11, null, null)
+                } catch (t: Throwable) {
+                    val msg = "Failed to request melt quote from unknown mint: ${'$'}{t.message}"
+                    Log.e(TAG, msg, t)
+                    return@withPaymentOperation SwapResult.Failure(msg)
+                }
+
+                val quoteAmount = meltQuote.amount.value.toLong()
+                val feeReserve = meltQuote.feeReserve.value.toLong()
+
+                Log.d(
+                    TAG,
+                    "swapFromUnknownMint: melt quote details: " +
+                        "meltQuoteAmount=$quoteAmount, " +
+                        "meltQuoteFeeReserve=$feeReserve, " +
+                        "totalMeltRequired=${quoteAmount + feeReserve}, " +
+                        "receivedSats=${paymentContext.amountSats}, " +
+                        "feeBufferReserved=$feeBuffer (ratio=${"%.2f".format(MAX_FEE_RESERVE_RATIO * 100)}%), " +
+                        "lightningMintQuoteAmount=$lightningAmount"
+                )
+
+                if (quoteAmount <= 0) {
+                    val msg = "Invalid melt quote amount (zero or negative)"
+                    Log.e(TAG, msg)
+                    return@withPaymentOperation SwapResult.Failure(msg)
+                }
+
+                val totalMeltRequired = quoteAmount + feeReserve
+                if (totalMeltRequired > paymentContext.amountSats) {
+                    val msg = "Unknown-mint melt requires $totalMeltRequired sats but temp wallet balance is ${paymentContext.amountSats}"
+                    Log.w(TAG, msg)
+                    return@withPaymentOperation SwapResult.Failure(msg)
+                }
+
+                var frame = PaymentHistoryEntry.Companion.SwapToLightningMintFrame(
                     unknownMintUrl = unknownMintUrl,
                     meltQuoteId = meltQuote.id,
                     lightningMintUrl = lightningMintUrl,
                     lightningQuoteId = finalMintQuote.id,
                 )
-                val frameJson = com.google.gson.Gson().toJson(frame)
-
-                PaymentsHistoryActivity
-                    .updatePendingWithLightningInfo(
-                        context = appContext,
-                        paymentId = paymentContext.paymentId,
-                        swapToLightningMintJson = frameJson,
+                val paymentId = try {
+                    PaymentsHistoryActivity.recordPendingSwap(appContext, recoveryId,
+                        expectedAmount, paymentUnit, frame)
+                } catch (exception: Exception) {
+                    Log.e(TAG, "Could not save swap recovery information", exception)
+                    return@withPaymentOperation SwapResult.Failure("Could not save pending payment")
+                }
+                // 5) Execute melt on unknown mint using the temporary single-mint wallet.
+                val finalized: FinalizedMelt = try {
+                    Log.d(
+                        TAG,
+                        "swapFromUnknownMint: executing melt on unknown mint: " +
+                            "meltQuoteId=${meltQuote.id}, proofsCount=${proofs.size}, totalMeltRequired=$totalMeltRequired"
                     )
-            } catch (t: Throwable) {
-                Log.w(TAG, "Failed to store SwapToLightningMint frame for paymentId=${paymentContext.paymentId}", t)
-            }
-        }
 
-        // 5) Execute melt on unknown mint using the temporary single-mint wallet.
-        val finalized: FinalizedMelt = try {
-            Log.d(
-                TAG,
-                "swapFromUnknownMint: executing melt on unknown mint: " +
-                    "meltQuoteId=${meltQuote.id}, proofsCount=${proofs.size}, totalMeltRequired=$totalMeltRequired"
-            )
-            
-            val prepared = tempWallet.prepareMeltProofs(meltQuote.id, proofs)
-            prepared.confirmWithOptions(MeltConfirmOptions (skipSwap = true))
-        } catch (t: Throwable) {
-            val msg = "Melt execution failed on unknown mint: ${t.message}"
-            Log.e(TAG, msg, t)
-            return@withPaymentOperation SwapResult.Failure(msg)
-        } finally {
-            try {
-                tempWallet.close()
-            } catch (_: Throwable) {
-            }
-        }
-
-        Log.d(TAG, "swapFromUnknownMint: melt result: state=${finalized.state}, feePaid=${finalized.feePaid.value}, preimage=${finalized.preimage}")
-
-        if (finalized.state != QuoteState.PAID) {
-            val msg = "Melt not paid on unknown mint: state=${finalized.state}"
-            Log.e(TAG, msg)
-            return@withPaymentOperation SwapResult.Failure(msg)
-        }
-        WalletLogger.log("OUT", quoteAmount, unknownMintUrl, "Melt successful during swap")
-
-        // 6) We no longer verify the preimage against the BOLT11 invoice
-        // payment hash here. The Lightning mint will only mint proofs if the
-        // invoice was actually paid, so a successful mint later implicitly
-        // confirms the payment. We rely on that instead of doing an explicit
-        // SHA-256(preimage) vs. payment_hash comparison.
-
-        // 7) Attempt to mint the Lightning mint quote so that the merchant
-        //    receives ecash on their Lightning mint. This is done
-        //    opportunistically as part of the swap flow; other components
-        //    (e.g. LightningMintHandler) may also mint the quote if they
-        //    were started from a separate Lightning-receive UI flow.
-        try {
-            Log.d(TAG, "Checking Lightning mint quote state for quoteId=${finalMintQuote.id}")
-            // Use checkMintQuote to verify quote is paid before minting
-            val checkedQuote = try {
-                lightningWallet.checkMintQuote(finalMintQuote.id)
-            } catch (checkError: Throwable) {
-                val msg = "Failed to check Lightning mint quote state for quoteId=${finalMintQuote.id}: ${checkError.message}"
-                Log.e(TAG, msg, checkError)
-                return@withPaymentOperation SwapResult.Failure(msg)
-            }
-            
-            Log.d(TAG, "Lightning mint quote state=${checkedQuote.state}")
-
-            when (checkedQuote.state) {
-                QuoteState.PAID -> {
-                    Log.d(TAG, "Lightning quote is PAID; attempting wallet.mint for quoteId=${finalMintQuote.id}")
-                    val mintedProofs = try {
-                        lightningWallet.mint(finalMintQuote.id, org.cashudevkit.SplitTarget.None, null)
-                    } catch (mintError: Throwable) {
-                        val msg = "Failed to mint proofs on Lightning mint for quoteId=${finalMintQuote.id}: ${mintError.message}"
-                        Log.e(TAG, msg, mintError)
-                        return@withPaymentOperation SwapResult.Failure(msg)
-                    }
-
-                    if (mintedProofs.isNotEmpty()) {
-                        val mintAmount = mintedProofs.map { it.amount.value.toLong() }.sum()
-                        WalletLogger.log("IN", mintAmount, lightningMintUrl, "Mint successful during swap")
-                    }
-
-                    if (mintedProofs.isEmpty()) {
-                        val msg = "Lightning mint returned no proofs for paid quoteId=${finalMintQuote.id}"
-                        Log.e(TAG, msg)
-                        return@withPaymentOperation SwapResult.Failure(msg)
-                    }
-
-                    Log.d(TAG, "Minted ${mintedProofs.size} proofs on Lightning mint as part of swap flow")
+                    val prepared = tempWallet.prepareMeltProofs(meltQuote.id, proofs)
+                    prepared.confirmWithOptions(MeltConfirmOptions(skipSwap = true))
+                } catch (exception: Exception) {
+                    Log.w(TAG, "Swap settlement requires a later status check", exception)
+                    return@withPaymentOperation SwapResult.Pending(paymentId)
                 }
-                QuoteState.ISSUED -> {
-                    // Quote already issued/minted by another component (e.g. LightningMintHandler).
-                    // We consider this a success condition for the swap.
-                    Log.d(TAG, "Lightning mint quote already ISSUED; assuming proofs are available for quoteId=${finalMintQuote.id}")
+
+                if (finalized.state != QuoteState.PAID) {
+                    return@withPaymentOperation SwapResult.Pending(paymentId)
                 }
-                else -> {
-                    val msg = "Lightning mint quote not paid after unknown-mint melt (state=${checkedQuote.state})"
-                    Log.w(TAG, msg)
-                    return@withPaymentOperation SwapResult.Failure(msg)
+                frame = frame.copy(meltPaid = true)
+                try {
+                    PaymentsHistoryActivity.recordPendingSwap(appContext, paymentId,
+                        expectedAmount, paymentUnit, frame)
+                } catch (exception: Exception) {
+                    Log.w(TAG, "Could not refresh pending swap metadata", exception)
+                }
+                try {
+                    WalletLogger.log("OUT", quoteAmount, unknownMintUrl, "Melt successful during swap")
+                    val entry = PaymentsHistoryActivity.getPaymentEntryById(appContext, paymentId)
+                    if (entry != null && tryFinalizePendingSwap(appContext, entry)) {
+                        return@withPaymentOperation SwapResult.Success(lightningMintUrl, expectedAmount)
+                    }
+                } catch (exception: Exception) {
+                    Log.w(TAG, "Swap confirmation requires a later status check", exception)
+                }
+                SwapResult.Pending(paymentId)
+            } finally {
+                try {
+                    tempWallet.close()
+                } catch (exception: Exception) {
+                    Log.w(TAG, "Could not close swap wallet", exception)
                 }
             }
-        } catch (t: Throwable) {
-            val msg = "Error while finalizing Lightning mint quote after swap: ${t.message}"
-            Log.w(TAG, msg, t)
-            return@withPaymentOperation SwapResult.Failure(msg)
         }
-
-        // At this point, we know the unknown mint has paid the exact invoice
-        // we generated from our Lightning mint. The LightningMintHandler is
-        // responsible for monitoring the quote and minting proofs. From the
-        // POS perspective, we can treat the swap as successful and rely on
-        // the Lightning flow to finalize balances.
-
-        Log.d(
-            TAG,
-            "Swap from unknown mint completed successfully for paymentId=${paymentContext.paymentId} " +
-                "(unknownMintUrl=$unknownMintUrl, lightningMintUrl=$lightningMintUrl, amountSats=$expectedAmount)"
-        )
-
-        return@withPaymentOperation SwapResult.Success(
-            lightningMintUrl = lightningMintUrl,
-            amountSats = expectedAmount
-        )
     }
 
     /**
@@ -429,90 +354,51 @@ object SwapToLightningMintManager {
      * @return true if the payment was successfully finalized (minted), false otherwise.
      */
     suspend fun tryFinalizePendingSwap(
-        appContext: android.content.Context,
+        appContext: Context,
         entry: PaymentHistoryEntry
     ): Boolean = withPaymentOperation(Dispatchers.IO) {
-        val swapJson = entry.swapToLightningMintJson ?: return@withPaymentOperation false
-        val frame = try {
-            com.google.gson.Gson().fromJson(swapJson, PaymentHistoryEntry.Companion.SwapToLightningMintFrame::class.java)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to parse SwapToLightningMintFrame", e)
-            return@withPaymentOperation false
-        }
-
-        val lightningQuoteId = frame.lightningQuoteId
-        val lightningMintUrl = frame.lightningMintUrl
-        
-        Log.d(TAG, "tryFinalizePendingSwap: Checking status for quoteId=$lightningQuoteId on mint=$lightningMintUrl")
-
-        val wallet = CashuWalletManager.getWallet()
-        if (wallet == null) {
-            Log.e(TAG, "tryFinalizePendingSwap: Wallet not initialized")
-            return@withPaymentOperation false
-        }
-
-        try {
-            val mintUrl = MintUrl(lightningMintUrl)
-            val unit = CashuWalletManager.getCurrencyUnit(entry.getUnit())
-            val mintWallet = wallet.getWallet(mintUrl, unit)
-
-            val quote = mintWallet.checkMintQuote(lightningQuoteId)
-            
-            Log.d(TAG, "tryFinalizePendingSwap: Quote state is ${quote.state}")
-
-            when (quote.state) {
-                org.cashudevkit.QuoteState.PAID -> {
-                    Log.d(TAG, "tryFinalizePendingSwap: Quote PAID. Minting tokens...")
-                    val proofs = try {
-                        mintWallet.mint(lightningQuoteId, org.cashudevkit.SplitTarget.None, null)
-                    } catch (e: Exception) {
-                        Log.e(TAG, "tryFinalizePendingSwap: Minting failed", e)
-                        emptyList()
+        finalizationMutex.withLock {
+            val saved = PaymentsHistoryActivity.getPaymentEntryById(appContext, entry.id) ?: entry
+            val swapJson = saved.swapToLightningMintJson ?: return@withPaymentOperation false
+            if (saved.isCompleted()) return@withPaymentOperation true
+            try {
+                val frame = Gson().fromJson(swapJson,
+                    PaymentHistoryEntry.Companion.SwapToLightningMintFrame::class.java)
+                val wallet = CashuWalletManager.getWallet() ?: return@withPaymentOperation false
+                val unit = CashuWalletManager.getCurrencyUnit(saved.getUnit())
+                val mintWallet = wallet.getWallet(MintUrl(frame.lightningMintUrl), unit)
+                val quote = mintWallet.checkMintQuote(frame.lightningQuoteId)
+                when (quote.state) {
+                    QuoteState.PAID -> {
+                        val proofs = mintWallet.mint(frame.lightningQuoteId,
+                            org.cashudevkit.SplitTarget.None, null)
+                        if (proofs.isEmpty()) return@withPaymentOperation false
                     }
-                    
-                    if (proofs.isNotEmpty()) {
-                        Log.d(TAG, "tryFinalizePendingSwap: Mint successful. Updating history.")
-                        
-                        withPaymentOperation(Dispatchers.Main) {
-                            PaymentsHistoryActivity.completePendingPayment(
-                                context = appContext,
-                                paymentId = entry.id,
-                                token = "", // Lightning payments have no token string
-                                paymentType = PaymentHistoryEntry.TYPE_LIGHTNING,
-                                mintUrl = lightningMintUrl,
-                                lightningQuoteId = lightningQuoteId,
-                                lightningMintUrl = lightningMintUrl
-                            )
+                    QuoteState.ISSUED -> Unit
+                    else -> {
+                        if (!frame.meltPaid) {
+                            temporaryWalletFactory(appContext, saved.id, frame.unknownMintUrl,
+                                saved.getUnit()).use { it.recoverIncompleteSagas() }
                         }
-                        return@withPaymentOperation true
-                    } else {
-                        Log.e(TAG, "tryFinalizePendingSwap: Mint returned no proofs")
                         return@withPaymentOperation false
                     }
                 }
-                org.cashudevkit.QuoteState.ISSUED -> {
-                    Log.d(TAG, "tryFinalizePendingSwap: Quote already ISSUED. Marking as complete.")
-                     withPaymentOperation(Dispatchers.Main) {
-                        PaymentsHistoryActivity.completePendingPayment(
-                            context = appContext,
-                            paymentId = entry.id,
-                            token = "",
-                            paymentType = PaymentHistoryEntry.TYPE_LIGHTNING,
-                            mintUrl = lightningMintUrl,
-                            lightningQuoteId = lightningQuoteId,
-                            lightningMintUrl = lightningMintUrl
-                        )
-                    }
-                    return@withPaymentOperation true
-                }
-                else -> {
-                    Log.d(TAG, "tryFinalizePendingSwap: Quote state ${quote.state} is not terminal success.")
-                    return@withPaymentOperation false
-                }
+                PaymentsHistoryActivity.completePendingPayment(
+                    context = appContext,
+                    paymentId = saved.id,
+                    token = "",
+                    paymentType = PaymentHistoryEntry.TYPE_LIGHTNING,
+                    mintUrl = frame.lightningMintUrl,
+                    lightningQuoteId = frame.lightningQuoteId,
+                    lightningMintUrl = frame.lightningMintUrl,
+                )
+                BalanceRefreshBroadcast.send(appContext,
+                    "swap_finalized")
+                PaymentsHistoryActivity.getPaymentEntryById(appContext, saved.id)?.isCompleted() == true
+            } catch (exception: Exception) {
+                Log.w(TAG, "Could not confirm pending swap yet", exception)
+                false
             }
-        } catch (e: Exception) {
-            Log.e(TAG, "tryFinalizePendingSwap: Error checking/minting quote", e)
-            return@withPaymentOperation false
         }
     }
 }

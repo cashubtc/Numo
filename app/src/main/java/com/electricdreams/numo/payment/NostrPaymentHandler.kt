@@ -36,6 +36,8 @@ class NostrPaymentHandler(
         
         /** Called when a payment attempt fails */
         fun onPaymentFailure(message: String)
+
+        fun onPaymentPending(paymentId: String) {}
         
         /** Called when an error occurs */
         fun onError(message: String)
@@ -93,7 +95,7 @@ class NostrPaymentHandler(
         }
 
         // Create and start listener
-        startListener(paymentAmount, eph, profile, callback)
+        startListener(paymentAmount, eph, profile, callback, pendingPaymentId)
     }
 
     /**
@@ -108,7 +110,8 @@ class NostrPaymentHandler(
         paymentAmount: Long,
         storedSecretHex: String,
         storedNprofile: String,
-        callback: Callback
+        callback: Callback,
+        pendingPaymentId: String? = null,
     ) {
         Log.d(TAG, "Resuming with stored nostr keys")
         
@@ -118,14 +121,15 @@ class NostrPaymentHandler(
         secretHex = storedSecretHex
 
         // Create and start listener
-        startListener(paymentAmount, eph, storedNprofile, callback)
+        startListener(paymentAmount, eph, storedNprofile, callback, pendingPaymentId)
     }
 
     private fun startListener(
         paymentAmount: Long,
         eph: NostrKeyPair,
         profile: String,
-        callback: Callback
+        callback: Callback,
+        pendingPaymentId: String?,
     ) {
         val nostrPubHex = eph.hexPub
         val nostrSecret = eph.secretKeyBytes
@@ -174,12 +178,17 @@ class NostrPaymentHandler(
             relayList,
             { token -> callback.onTokenReceived(token) },
             object : NostrPaymentListener.ErrorHandler {
+                override fun onPaymentPending(paymentId: String) {
+                    callback.onPaymentPending(paymentId)
+                }
+
                 override fun onPaymentFailure(message: String, t: Throwable?) {
                     Log.e(TAG, "NostrPaymentListener payment failure: $message", t)
                     callback.onPaymentFailure(message ?: t?.message ?: "Unknown Nostr payment failure")
                 }
             },
             paymentUnit,
+            pendingPaymentId,
         ).also { it.start() }
 
         Log.d(TAG, "Nostr payment listener started")

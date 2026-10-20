@@ -563,6 +563,9 @@ object CashuPaymentHelper {
                 is SwapToLightningMintManager.SwapResult.Failure -> {
                     throw RedemptionException("Swap to Lightning mint failed: ${swapResult.errorMessage}")
                 }
+                is SwapToLightningMintManager.SwapResult.Pending -> {
+                    throw PendingSwapException(swapResult.paymentId)
+                }
             }
         }
     }
@@ -716,6 +719,9 @@ object CashuPaymentHelper {
                     is SwapToLightningMintManager.SwapResult.Failure -> {
                         throw RedemptionException("Swap to Lightning mint failed: ${swapResult.errorMessage}")
                     }
+                    is SwapToLightningMintManager.SwapResult.Pending -> {
+                        throw PendingSwapException(swapResult.paymentId)
+                    }
                 }
             }
         }
@@ -808,7 +814,10 @@ object CashuPaymentHelper {
 
     // === Exception type ====================================================
 
-    class RedemptionException : Exception {
+    class PendingSwapException(val paymentId: String) :
+        RedemptionException("Payment confirmation pending")
+
+    open class RedemptionException : Exception {
         constructor(message: String) : super(message)
         constructor(message: String, cause: Throwable) : super(message, cause)
     }

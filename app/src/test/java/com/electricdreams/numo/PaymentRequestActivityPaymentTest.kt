@@ -11,6 +11,7 @@ import com.electricdreams.numo.core.network.ConnectivityMonitor
 import com.electricdreams.numo.core.update.UpdateOperationGate
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
+import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.ndef.NdefHostCardEmulationService
 import com.electricdreams.numo.payment.LightningMintHandler
 import com.electricdreams.numo.payment.MintQuoteWebSocket
@@ -87,6 +88,45 @@ class PaymentRequestActivityPaymentTest {
         ReflectionHelpers.getField<MintQuoteWebSocket?>(activity, "quoteSockets")?.close()
         ReflectionHelpers.setStaticField(MintManager::class.java, "instance", null)
         ReflectionHelpers.setStaticField(AutoWithdrawManager::class.java, "instance", null)
+    }
+
+    @Test
+    fun `resuming a pending swap does not start payment handlers`() {
+        val id = PaymentsHistoryActivity.addPendingPayment(activity, 1_000L, "sat", 1_000L,
+            null, null, "1,000 sats")
+        PaymentsHistoryActivity.recordPendingSwap(activity, id, 1_000L, "sat",
+            PaymentHistoryEntry.Companion.SwapToLightningMintFrame(
+                "https://source.example", "melt", "https://destination.example", "mint", true))
+        val saved = requireNotNull(PaymentsHistoryActivity.getPaymentEntryById(activity, id))
+        val intent = PaymentIntentFactory.createResumePaymentIntent(activity, saved)
+        mockConstruction(LightningMintHandler::class.java).use { lightning ->
+            mockConstruction(NostrPaymentHandler::class.java).use { nostr ->
+                Robolectric.buildActivity(PaymentRequestActivity::class.java, intent).setup().use {
+                    assertTrue(lightning.constructed().isEmpty())
+                    assertTrue(nostr.constructed().isEmpty())
+                    val status = ReflectionHelpers.getField<TextView>(it.get(), "statusText")
+                    assertEquals(activity.getString(R.string.payment_swap_pending_title), status.text)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `pending swap shows confirmation status and preserves pending history`() {
+        val id = PaymentsHistoryActivity.addPendingPayment(activity, 1_000L, "sat", 1_000L,
+            null, null, "1,000 sats")
+        PaymentsHistoryActivity.recordPendingSwap(activity, id, 1_000L, "sat",
+            PaymentHistoryEntry.Companion.SwapToLightningMintFrame(
+                "https://source.example", "melt", "https://destination.example", "mint", true))
+        ReflectionHelpers.setField(activity, "pendingPaymentId", id)
+        ReflectionHelpers.callInstanceMethod<Void>(activity, "handlePendingSwap",
+            ReflectionHelpers.ClassParameter.from(String::class.java, id))
+        val status = ReflectionHelpers.getField<TextView>(activity, "statusText")
+        assertEquals(activity.getString(R.string.payment_swap_pending_title), status.text)
+        assertTrue(PaymentsHistoryActivity.getPaymentEntryById(activity, id)?.isPending() == true)
+        ReflectionHelpers.callInstanceMethod<Void>(activity, "handlePaymentError",
+            ReflectionHelpers.ClassParameter.from(String::class.java, "late transport error"))
+        assertEquals(activity.getString(R.string.payment_swap_pending_title), status.text)
     }
 
     @Test
