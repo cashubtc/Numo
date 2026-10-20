@@ -76,7 +76,8 @@
         <activity
             android:name=".feature.settings.AppUpdateActivity"
             android:exported="false"
-            android:theme="@style/Theme.Numo" />
+            android:theme="@style/Theme.Numo.Settings"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name="com.electricdreams.numo.ModernPOSActivity"
