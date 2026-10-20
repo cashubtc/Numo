@@ -125,6 +125,16 @@
                         android:background="@drawable/bg_settings_group"
                         android:padding="8dp" />
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/confirm_button"
+                        style="@style/Widget.Numo.Button.Dialog.Confirm"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:layout_marginTop="16dp"
+                        android:text="@string/pin_setup_continue"
+                        android:enabled="false"
+                        app:cornerRadius="16dp" />
+
                     <TextView
                         android:id="@+id/forgot_pin_button"
                         android:layout_width="match_parent"

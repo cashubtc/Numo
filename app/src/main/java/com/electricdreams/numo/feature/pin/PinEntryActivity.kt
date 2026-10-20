@@ -97,12 +97,7 @@ class PinEntryActivity : AppCompatActivity() {
                     enteredPin.append(digit)
                     pinDots.addDigit()
                     hideError()
-
-                    // Auto-submit when minimum length reached
-                    if (enteredPin.length >= PinManager.MIN_PIN_LENGTH) {
-                        // Small delay for visual feedback before validation
-                        handler.postDelayed({ validatePin() }, 100)
-                    }
+                    updateConfirmButton()
                 }
             }
 
@@ -114,9 +109,13 @@ class PinEntryActivity : AppCompatActivity() {
                     enteredPin.deleteCharAt(enteredPin.length - 1)
                     pinDots.removeDigit()
                     hideError()
+                    updateConfirmButton()
                 }
             }
         })
+
+        binding.confirmButton.setOnClickListener { validatePin() }
+        updateConfirmButton()
 
         forgotPinButton.setOnClickListener {
             openPinReset()
@@ -128,6 +127,9 @@ class PinEntryActivity : AppCompatActivity() {
     }
 
     private fun validatePin() {
+        if (isInputDisabled || enteredPin.length < PinManager.MIN_PIN_LENGTH) return
+        isInputDisabled = true
+        updateConfirmButton()
         val result = pinManager.validatePin(enteredPin.toString())
 
         when {
@@ -170,6 +172,7 @@ class PinEntryActivity : AppCompatActivity() {
      */
     private fun startCooldown(durationMs: Long) {
         isInputDisabled = true
+        updateConfirmButton()
         pinKeypad.alpha = 0.4f
 
         cooldownTimer?.cancel()
@@ -181,6 +184,7 @@ class PinEntryActivity : AppCompatActivity() {
 
             override fun onFinish() {
                 isInputDisabled = false
+                updateConfirmButton()
                 pinKeypad.alpha = 1.0f
                 hideError()
             }
@@ -190,6 +194,11 @@ class PinEntryActivity : AppCompatActivity() {
     private fun showError(message: String) {
         errorMessage.text = message
         errorMessage.visibility = View.VISIBLE
+    }
+
+    private fun updateConfirmButton() {
+        binding.confirmButton.isEnabled = !isInputDisabled &&
+            enteredPin.length >= PinManager.MIN_PIN_LENGTH
     }
 
     private fun hideError() {
@@ -204,12 +213,16 @@ class PinEntryActivity : AppCompatActivity() {
     }
 
     private fun showLockout(remainingMs: Long) {
+        isInputDisabled = true
+        updateConfirmButton()
         lockoutOverlay.visibility = View.VISIBLE
         updateLockoutMessage(remainingMs)
         startLockoutCountdown()
     }
 
     private fun hideLockout() {
+        isInputDisabled = false
+        updateConfirmButton()
         lockoutOverlay.visibility = View.GONE
         lockoutUpdateRunnable?.let { handler.removeCallbacks(it) }
     }
@@ -237,7 +250,7 @@ class PinEntryActivity : AppCompatActivity() {
                 }
             }
         }
-        handler.post(lockoutUpdateRunnable!!)
+        lockoutUpdateRunnable?.let { handler.post(it) }
     }
 
     private fun openPinReset() {
@@ -258,7 +271,7 @@ class PinEntryActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        lockoutUpdateRunnable?.let { handler.removeCallbacks(it) }
+        handler.removeCallbacksAndMessages(null)
         cooldownTimer?.cancel()
     }
 
