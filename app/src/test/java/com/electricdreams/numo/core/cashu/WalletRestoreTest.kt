@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.ui.seed.CdkMnemonicRule
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.test.runTest
 import org.cashudevkit.Wallet
@@ -17,6 +18,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -31,6 +33,9 @@ import java.io.File
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
 class WalletRestoreTest {
+    @get:Rule
+    val mnemonicValidation = CdkMnemonicRule()
+
     private val context: Context = ApplicationProvider.getApplicationContext()
     private val originalFactory = CashuWalletManager.repositoryFactory
     private lateinit var oldWallet: WalletRepository
@@ -40,6 +45,7 @@ class WalletRestoreTest {
 
     @Before
     fun setUp() {
+        mnemonicValidation.accept(mnemonic)
         PreferenceStore.wallet(context).remove("wallet_database_file")
         PreferenceStore.wallet(context).putString("wallet_mnemonic", "original seed")
         CashuWalletManager.appContext = context

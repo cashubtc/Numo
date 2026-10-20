@@ -2,30 +2,38 @@ package com.electricdreams.numo.ui.seed
 
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class Bip39MnemonicTest {
+    @get:Rule
+    val mnemonicValidation = CdkMnemonicRule()
+
+    private val mnemonic = List(11) { "abandon" }.plus("about").joinToString(" ")
+
     @Test
-    fun `standard entropy vectors have valid checksums`() {
-        assertTrue(Bip39Wordlist.isValidMnemonic(List(11) { "abandon" }.plus("about").joinToString(" ")))
-        assertTrue(Bip39Wordlist.isValidMnemonic(List(23) { "abandon" }.plus("art").joinToString(" ")))
-        assertTrue(Bip39Wordlist.isValidMnemonic(List(11) { "zoo" }.plus("wrong").joinToString(" ")))
+    fun `CDK acceptance allows the phrase`() {
+        mnemonicValidation.accept(mnemonic)
+        assertTrue(Bip39Wordlist.isValidMnemonic(mnemonic))
+        mnemonicValidation.verifyValidated(mnemonic)
     }
 
     @Test
-    fun `known words with incorrect checksum are rejected`() {
-        assertFalse(Bip39Wordlist.isValidMnemonic(List(12) { "abandon" }.joinToString(" ")))
+    fun `CDK rejection prevents accepting the phrase`() {
+        assertFalse(Bip39Wordlist.isValidMnemonic(mnemonic))
+        mnemonicValidation.verifyValidated(mnemonic)
     }
 
     @Test
-    fun `unknown words and unsupported lengths are rejected`() {
-        assertFalse(Bip39Wordlist.isValidMnemonic(List(11) { "abandon" }.joinToString(" ")))
-        assertFalse(Bip39Wordlist.isValidMnemonic(List(11) { "abandon" }.plus("invalidword").joinToString(" ")))
-    }
-
-    @Test
-    fun `capitalization and whitespace are normalized`() {
+    fun `phrase is normalized before CDK validation`() {
+        mnemonicValidation.accept(mnemonic)
         assertTrue(Bip39Wordlist.isValidMnemonic("  " + List(11) { "ABANDON" }
             .plus("ABOUT").joinToString("\n ") + "  "))
+        mnemonicValidation.verifyValidated(mnemonic)
     }
 }
