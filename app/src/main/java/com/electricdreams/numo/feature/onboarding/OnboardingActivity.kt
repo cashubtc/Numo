@@ -1058,7 +1058,8 @@ class OnboardingActivity : AppCompatActivity() {
             input.setTextColor(ContextCompat.getColor(this, if (isInvalid) R.color.color_seed_word_invalid else R.color.color_bg_white))
         }
 
-        val canContinue = allFilled && allBip39
+        val canContinue = allFilled && allBip39 &&
+            Bip39Wordlist.isValidMnemonic(words.joinToString(" "))
         seedContinueButton.isEnabled = canContinue
         seedContinueButton.alpha = if (canContinue) 1f else 0.5f
 

@@ -1,5 +1,8 @@
 package com.electricdreams.numo.ui.seed
 
+import java.security.MessageDigest
+import java.util.Locale
+
 /**
  * BIP39 English wordlist (2048 words).
  * Source: https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt
@@ -266,4 +269,24 @@ object Bip39Wordlist {
     )
 
     fun isValid(word: String): Boolean = word.lowercase() in words
+
+    private val wordIndices by lazy { words.sorted().withIndex().associate { it.value to it.index } }
+
+    fun isValidMnemonic(mnemonic: String): Boolean {
+        val phrase = mnemonic.trim().lowercase(Locale.ROOT).split(Regex("\\s+"))
+        if (phrase.size !in listOf(12, 15, 18, 21, 24)) return false
+        val indices = phrase.map { wordIndices[it] ?: return false }
+        val bits = indices.flatMap { index -> (10 downTo 0).map { (index shr it) and 1 } }
+        val entropyBits = bits.size * 32 / 33
+        val entropy = ByteArray(entropyBits / 8) { byte ->
+            (0 until 8).fold(0) { value, bit ->
+                (value shl 1) or bits[byte * 8 + bit]
+            }.toByte()
+        }
+        val checksum = MessageDigest.getInstance("SHA-256").digest(entropy)
+        return (entropyBits until bits.size).all { bit ->
+            val offset = bit - entropyBits
+            bits[bit] == ((checksum[offset / 8].toInt() shr (7 - offset % 8)) and 1)
+        }
+    }
 }

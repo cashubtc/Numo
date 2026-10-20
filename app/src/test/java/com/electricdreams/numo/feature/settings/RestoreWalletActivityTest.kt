@@ -57,7 +57,7 @@ class RestoreWalletActivityTest {
                 assertFalse("Button should still be disabled with 11 words", continueButton.isEnabled)
                 
                 // Fill last one
-                inputs[11].setText(validWord)
+                inputs[11].setText("about")
                 
                 assertTrue("Button should be enabled with 12 valid words", continueButton.isEnabled)
             }
@@ -86,6 +86,18 @@ class RestoreWalletActivityTest {
     }
 
     @Test
+    fun `invalid checksum keeps continue disabled`() {
+        ActivityScenario.launch(RestoreWalletActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                findAllSeedInputs(activity).forEach { it.setText("abandon") }
+                assertFalse(activity.findViewById<MaterialButton>(R.id.continue_button).isEnabled)
+                assertEquals(activity.getString(R.string.restore_seed_invalid_checksum),
+                    activity.findViewById<TextView>(R.id.validation_text).text)
+            }
+        }
+    }
+
+    @Test
     fun `continue button click shows fetching overlay`() {
         ActivityScenario.launch(RestoreWalletActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
@@ -93,6 +105,7 @@ class RestoreWalletActivityTest {
                 for (input in inputs) {
                     input.setText("abandon")
                 }
+                inputs.last().setText("about")
                 
                 val continueButton = activity.findViewById<MaterialButton>(R.id.continue_button)
                 continueButton.performClick()

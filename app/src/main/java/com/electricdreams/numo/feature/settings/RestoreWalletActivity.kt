@@ -395,6 +395,7 @@ class RestoreWalletActivity : AppCompatActivity() {
         val filledCount = words.count { it.isNotBlank() }
         val allFilled = filledCount == 12
         val allValid = words.all { it.isBlank() || Bip39Wordlist.isValid(it) }
+        val validChecksum = allFilled && Bip39Wordlist.isValidMnemonic(words.joinToString(" "))
 
         // Update validation status
         when {
@@ -415,6 +416,13 @@ class RestoreWalletActivity : AppCompatActivity() {
                 validationText.text = getString(R.string.onboarding_seed_words_entered_count, filledCount)
                 validationText.setTextColor(ContextCompat.getColor(this, R.color.color_warning))
             }
+            !validChecksum -> {
+                validationStatus.visibility = View.VISIBLE
+                validationIcon.setImageResource(R.drawable.ic_close)
+                validationIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_warning_red))
+                validationText.text = getString(R.string.restore_seed_invalid_checksum)
+                validationText.setTextColor(ContextCompat.getColor(this, R.color.color_warning_red))
+            }
             else -> {
                 validationStatus.visibility = View.VISIBLE
                 validationIcon.setImageResource(R.drawable.ic_check)
@@ -425,7 +433,7 @@ class RestoreWalletActivity : AppCompatActivity() {
         }
 
         // Update continue button state
-        val canContinue = allFilled && allValid
+        val canContinue = allFilled && allValid && validChecksum
         continueButton.isEnabled = canContinue
         continueButton.alpha = if (canContinue) 1f else 0.5f
 

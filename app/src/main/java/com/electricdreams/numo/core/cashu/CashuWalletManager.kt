@@ -10,6 +10,13 @@ import com.electricdreams.numo.core.dev.WalletLogger
 import com.electricdreams.numo.core.wallet.TemporaryMintWalletFactory
 import com.electricdreams.numo.core.wallet.WalletProvider
 import com.electricdreams.numo.core.wallet.impl.CdkWalletProvider
+import com.electricdreams.numo.ui.seed.Bip39Wordlist
+import java.util.Locale
+import java.util.UUID
+import kotlin.coroutines.coroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -45,6 +52,12 @@ object CashuWalletManager : MintManager.MintChangeListener {
     private const val TAG = "CashuWalletManager"
     private const val KEY_MNEMONIC = "wallet_mnemonic"
     private const val DB_FILE_NAME = "cashu_wallet.db"
+    private const val KEY_DATABASE_FILE = "wallet_database_file"
+    private val walletMutex = Mutex()
+    internal var repositoryFactory: (String, WalletStore) -> WalletRepository = ::WalletRepository
+
+    private fun databaseFileName(context: Context): String =
+        PreferenceStore.wallet(context).getString(KEY_DATABASE_FILE) ?: DB_FILE_NAME
 
     fun getCurrencyUnit(unit: String): CurrencyUnit {
         return when (unit.lowercase()) {
@@ -103,11 +116,11 @@ object CashuWalletManager : MintManager.MintChangeListener {
     fun wipeDatabase(context: Context) {
         closeResources()
         val appCtx = context.applicationContext
-        val deleted = appCtx.deleteDatabase(DB_FILE_NAME)
+        val deleted = appCtx.deleteDatabase(databaseFileName(appCtx))
         if (deleted) {
             Log.d(TAG, "Deleted existing wallet database via deleteDatabase")
         } else {
-            val dbFile = appCtx.getDatabasePath(DB_FILE_NAME)
+            val dbFile = appCtx.getDatabasePath(databaseFileName(appCtx))
             if (dbFile.exists()) {
                 dbFile.delete()
                 Log.d(TAG, "Deleted existing wallet database via file deletion")
@@ -138,91 +151,93 @@ object CashuWalletManager : MintManager.MintChangeListener {
         newMnemonic: String,
         context: Context? = null,
         onMintProgress: suspend (mintUrl: String, status: String, balanceBefore: Long, balanceAfter: Long) -> Unit
-    ): Map<String, Pair<Long, Long>> {
+    ): Map<String, Pair<Long, Long>> = walletMutex.withLock {
+        val mnemonic = newMnemonic.trim().lowercase(Locale.ROOT)
+            .split(Regex("\\s+")).joinToString(" ")
+        require(Bip39Wordlist.isValidMnemonic(mnemonic)) { "Invalid recovery phrase" }
         if (!this::appContext.isInitialized) {
-            if (context != null) {
-                appContext = context.applicationContext
-                val mintManager = MintManager.getInstance(appContext)
-                mintManager.setMintChangeListener(this)
-            } else {
-                throw IllegalStateException("CashuWalletManager not initialized")
-            }
+            appContext = context?.applicationContext
+                ?: throw IllegalStateException("CashuWalletManager not initialized")
+            MintManager.getInstance(appContext).setMintChangeListener(this)
         }
 
         val mintManager = MintManager.getInstance(appContext)
         val mints = mintManager.getAllowedMints()
+        require(mints.isNotEmpty()) { "Select at least one mint to restore" }
+        val balancesBefore = mints.associateWith { getBalanceForMint(it) }
         val balanceChanges = mutableMapOf<String, Pair<Long, Long>>()
-
-        // Get balances before restore
-        val balancesBefore = mutableMapOf<String, Long>()
-        for (mintUrl in mints) {
-            balancesBefore[mintUrl] = getBalanceForMint(mintUrl)
+        val stagedName = "cashu_wallet_restore_${UUID.randomUUID()}.db"
+        val stagedFile = appContext.getDatabasePath(stagedName)
+        check(stagedFile.parentFile?.let { it.isDirectory || it.mkdirs() } == true) {
+            "Could not create wallet directory"
         }
-
-        // Delete existing database to start fresh
-        wipeDatabase(appContext)
-
-        // Save new mnemonic
-        val prefs = PreferenceStore.wallet(appContext)
-        prefs.putString(KEY_MNEMONIC, newMnemonic)
-        Log.i(TAG, "Saved new mnemonic for restore")
-        DeviceRecoveryBackup.updateIfEnabled(appContext)
-
-        // Recreate database
-        val dbFile = appContext.getDatabasePath(DB_FILE_NAME)
-        dbFile.apply {
-            parentFile?.let { parent ->
-                if (!parent.exists()) {
-                    parent.mkdirs()
+        val stagedDatabase = WalletStore.Sqlite(stagedFile.absolutePath)
+        var stagedWallet: WalletRepository? = null
+        var committed = false
+        try {
+            val replacement = repositoryFactory(mnemonic, stagedDatabase)
+            stagedWallet = replacement
+            val unit = getCurrencyUnit(mintManager.getPreferredUnit())
+            for (mintUrl in mints) {
+                val oldBalance = balancesBefore[mintUrl] ?: 0L
+                try {
+                    onMintProgress(mintUrl, "Connecting...", oldBalance, 0L)
+                    replacement.createWallet(MintUrl(mintUrl), unit, 10u)
+                    onMintProgress(mintUrl, "Restoring proofs...", oldBalance, 0L)
+                    val mintWallet = replacement.getWallet(MintUrl(mintUrl), unit)
+                        ?: throw IllegalStateException("Restored mint wallet is unavailable")
+                    val recovered = mintWallet.restore().unspent.value.toLong()
+                    balanceChanges[mintUrl] = oldBalance to recovered
+                    onMintProgress(mintUrl, "Complete", oldBalance, recovered)
+                } catch (exception: Exception) {
+                    coroutineContext.ensureActive()
+                    Log.e(TAG, "Could not complete wallet restore", exception)
+                    onMintProgress(mintUrl, "Failed: ${exception.message}", oldBalance, 0L)
+                    throw exception
                 }
             }
-        }
-        val db = WalletStore.Sqlite(dbFile.absolutePath)
+            coroutineContext.ensureActive()
+            val prefs = PreferenceStore.wallet(appContext)
+            val oldName = databaseFileName(appContext)
+            val oldMnemonic = prefs.getString(KEY_MNEMONIC)
+            val values = mutableMapOf(
+                KEY_MNEMONIC to mnemonic,
+                KEY_DATABASE_FILE to stagedName,
+            )
+            // Retain the previous wallet locally for recovery after an intentional replacement.
+            oldMnemonic?.let { values["wallet_archive_$oldName"] = it }
+            check(prefs.commitStrings(values)) { "Could not save restored wallet" }
 
-        // Create new wallet with restored mnemonic
-        val newWallet = WalletRepository(newMnemonic, db)
-
-        // Add mints and restore each one
-        for (mintUrl in mints) {
-            try {
-                onMintProgress(mintUrl, "Connecting...", balancesBefore[mintUrl] ?: 0L, 0L)
-                
-                val unitStr = mintManager.getPreferredUnit()
-                val unit = getCurrencyUnit(unitStr)
-                newWallet.createWallet(MintUrl(mintUrl), unit, 10u)
-                
-                onMintProgress(mintUrl, "Restoring proofs...", balancesBefore[mintUrl] ?: 0L, 0L)
-                
-                val mintWallet = newWallet.getWallet(MintUrl(mintUrl), unit)
-                val recoveredAmount = mintWallet?.restore()?.unspent?.value?.toLong() ?: 0L
-                if (recoveredAmount > 0) {
-                    WalletLogger.log("IN", recoveredAmount, mintUrl, "Mint restored")
-                }
-                val oldBalance = balancesBefore[mintUrl] ?: 0L
-                val newBalance = recoveredAmount
-                
-                balanceChanges[mintUrl] = Pair(oldBalance, newBalance)
-                
-                onMintProgress(mintUrl, "Complete", oldBalance, newBalance)
-                
-                Log.d(TAG, "Restored mint $mintUrl: before=$oldBalance, after=$newBalance")
-            } catch (t: Throwable) {
-                Log.e(TAG, "Failed to restore mint $mintUrl", t)
-                val oldBalance = balancesBefore[mintUrl] ?: 0L
-                balanceChanges[mintUrl] = Pair(oldBalance, 0L)
-                onMintProgress(mintUrl, "Failed: ${t.message}", oldBalance, 0L)
-            }
-        }
-
-        //database = db
-        wallet = newWallet
+            val oldWallet = wallet
+            val oldDatabase = database
+            wallet = replacement
+            database = stagedDatabase
+            committed = true
             _walletState.value = WalletState.READY
-
-        Log.d(TAG, "Wallet restore complete. Restored ${mints.size} mints.")
-        
-        // Notify UI that wallet is ready after restore
-        BalanceRefreshBroadcast.send(appContext, "wallet_restored")
-        return balanceChanges
+            try {
+                oldWallet?.close()
+                oldDatabase?.destroy()
+            } catch (exception: Exception) {
+                Log.w(TAG, "Could not close previous wallet resources", exception)
+            }
+            try {
+                DeviceRecoveryBackup.updateIfEnabled(appContext)
+            } catch (exception: Exception) {
+                Log.e(TAG, "Could not refresh recovery backup", exception)
+            }
+            BalanceRefreshBroadcast.send(appContext, "wallet_restored")
+            balanceChanges
+        } finally {
+            if (!committed) {
+                try {
+                    stagedWallet?.close()
+                    stagedDatabase.destroy()
+                } catch (exception: Exception) {
+                    Log.w(TAG, "Could not close staged wallet resources", exception)
+                }
+                appContext.deleteDatabase(stagedName)
+            }
+        }
     }
 
     /**
@@ -623,7 +638,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
      * Rebuild wallet + database using the provided mint URLs.
      * Runs on our IO coroutine scope.
      */
-    private suspend fun rebuildWallet(mints: List<String>) {
+    private suspend fun rebuildWallet(mints: List<String>): Unit = walletMutex.withLock {
         _walletState.value = WalletState.LOADING
         try {
             // Close any previous instances
@@ -635,7 +650,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
             }
 
             // 1) Open or create the on-disk SQLite database.
-            val dbFile = appContext.getDatabasePath(DB_FILE_NAME).apply {
+            val dbFile = appContext.getDatabasePath(databaseFileName(appContext)).apply {
                 parentFile?.let { parent ->
                     if (!parent.exists()) {
                         parent.mkdirs()
