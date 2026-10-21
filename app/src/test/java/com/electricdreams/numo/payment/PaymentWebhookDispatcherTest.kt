@@ -70,9 +70,12 @@ class PaymentWebhookDispatcherTest {
 
         val body = request.body.readUtf8()
         assertTrue(body.contains("\"event\":\"payment.received\""))
-        assertTrue(body.contains("\"payloadVersion\":2"))
+        assertTrue(body.contains("\"payloadVersion\":3"))
         assertTrue(body.contains("\"paymentType\":\"cashu\""))
         assertTrue(body.contains("\"amountSats\":2100"))
+        assertTrue(body.contains("\"amountAtomic\":2100"))
+        assertTrue(body.contains("\"chargeUnit\":\"sat\""))
+        assertTrue(body.contains("\"netPriceAtomic\":250"))
         assertTrue(body.contains("\"baseAmountSats\":2000"))
         assertTrue(body.contains("\"entryUnit\":\"USD\""))
         assertTrue(body.contains("\"checkout\":{"))

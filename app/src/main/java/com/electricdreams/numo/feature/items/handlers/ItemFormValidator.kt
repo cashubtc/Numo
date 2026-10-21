@@ -29,7 +29,11 @@ class ItemFormValidator(
         val quantity: Int = 0,
         val alertThreshold: Int = 5,
         val sku: String = "",
-        val gtin: String = ""
+        val gtin: String = "",
+        val priceUnit: String? = null,
+        val priceAtomic: Long? = null,
+        val grossPriceAtomic: Long? = null,
+        val priceIssuerScope: String? = null,
     )
 
     /**
@@ -58,67 +62,58 @@ class ItemFormValidator(
             return ValidationResult(false)
         }
 
-        // Validate and get price based on type
-        var fiatPrice = 0.0
-        var satsPrice = 0L
-
-        when (pricingHandler.getCurrentPriceType()) {
-            PriceType.FIAT -> {
-                val priceInput = pricingHandler.getPriceInput()
-                val priceStr = priceInput.text.toString().trim()
-                if (priceStr.isEmpty()) {
-                    priceInput.error = activity.getString(R.string.item_entry_error_price_required)
-                    priceInput.requestFocus()
-                    return ValidationResult(false)
-                }
-
-                // Normalize decimal separator: replace comma with period for parsing
-                val normalizedPriceStr = priceStr.replace(",", ".")
-                val enteredPrice = normalizedPriceStr.toDoubleOrNull() ?: 0.0
-                if (enteredPrice < 0) {
-                    priceInput.error = activity.getString(R.string.item_entry_error_price_positive)
-                    priceInput.requestFocus()
-                    return ValidationResult(false)
-                }
-
-                // Validate max 2 decimal places (accepting both . and , as separators)
-                if (!pricingHandler.isValidFiatPrice(priceStr)) {
-                    priceInput.error = activity.getString(R.string.item_entry_error_price_decimals)
-                    priceInput.requestFocus()
-                    return ValidationResult(false)
-                }
-
-                // Convert entered price to net price if VAT is enabled
-                fiatPrice = VatCalculator.calculateNetPriceForStorage(
-                    enteredPrice = enteredPrice,
-                    vatEnabled = pricingHandler.isVatEnabled(),
-                    priceIncludesVat = pricingHandler.isPriceIncludesVat(),
-                    vatRate = pricingHandler.getVatRate()
-                )
+        val isSats = pricingHandler.getCurrentPriceType() == PriceType.SATS
+        val priceInput = if (isSats) pricingHandler.getSatsInput() else pricingHandler.getPriceInput()
+        val price = priceInput.text.toString().trim()
+        val inputError = when {
+            price.isEmpty() -> if (isSats) {
+                R.string.item_entry_error_sats_required
+            } else {
+                R.string.item_entry_error_price_required
             }
-            PriceType.SATS -> {
-                val satsInput = pricingHandler.getSatsInput()
-                val satsStr = satsInput.text.toString().trim()
-                if (satsStr.isEmpty()) {
-                    satsInput.error = activity.getString(R.string.item_entry_error_sats_required)
-                    satsInput.requestFocus()
-                    return ValidationResult(false)
-                }
-
-                satsPrice = satsStr.toLongOrNull() ?: 0L
-                if (satsPrice < 0) {
-                    satsInput.error = activity.getString(R.string.item_entry_error_sats_positive)
-                    satsInput.requestFocus()
-                    return ValidationResult(false)
-                }
-
-                // Validate it's an integer (no decimals)
-                if (satsStr.contains(".") || satsStr.contains(",")) {
-                    satsInput.error = activity.getString(R.string.item_entry_error_sats_whole_number)
-                    satsInput.requestFocus()
-                    return ValidationResult(false)
-                }
+            price.startsWith("-") -> if (isSats) {
+                R.string.item_entry_error_sats_positive
+            } else {
+                R.string.item_entry_error_price_positive
             }
+            else -> null
+        }
+        if (inputError != null) {
+            priceInput.error = activity.getString(inputError)
+            priceInput.requestFocus()
+            return ValidationResult(false)
+        }
+        if (!pricingHandler.isValidFiatPrice(price)) {
+            pricingHandler.showPricePrecisionError()
+            priceInput.requestFocus()
+            return ValidationResult(false)
+        }
+
+        val enteredAtomic = try {
+            pricingHandler.getEnteredAtomicAmount()
+        } catch (e: ArithmeticException) {
+            priceInput.error = activity.getString(R.string.item_entry_error_price_too_large)
+            priceInput.requestFocus()
+            return ValidationResult(false)
+        } catch (e: IllegalArgumentException) {
+            pricingHandler.showPricePrecisionError()
+            priceInput.requestFocus()
+            return ValidationResult(false)
+        }
+        val vatAmounts = try {
+            VatCalculator.calculateAtomicAmounts(
+                enteredAmount = enteredAtomic,
+                vatRate = if (pricingHandler.isVatEnabled()) pricingHandler.getVatRate() else 0,
+                priceIncludesVat = pricingHandler.isPriceIncludesVat(),
+            )
+        } catch (e: ArithmeticException) {
+            priceInput.error = activity.getString(R.string.item_entry_error_price_too_large)
+            priceInput.requestFocus()
+            return ValidationResult(false)
+        }
+        val satsPrice = if (isSats) vatAmounts.net.value else 0L
+        val fiatPrice = if (isSats) 0.0 else {
+            vatAmounts.net.toMajorUnits(pricingHandler.getSelectedUnitDescriptor()).toDouble()
         }
 
         // Validate inventory if tracking enabled
@@ -151,7 +146,11 @@ class ItemFormValidator(
             quantity = quantity,
             alertThreshold = alertThreshold,
             sku = skuHandler.getSku(),
-            gtin = gtinHandler.getGtin()
+            gtin = gtinHandler.getGtin(),
+            priceUnit = vatAmounts.net.unit.value,
+            priceAtomic = vatAmounts.net.value,
+            grossPriceAtomic = vatAmounts.gross.value,
+            priceIssuerScope = vatAmounts.net.asset.issuerScope,
         )
     }
 }

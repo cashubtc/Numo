@@ -51,6 +51,20 @@ class BitcoinPriceWorkerTest {
     }
 
     @Test
+    fun `unscoped legacy timestamps cannot make another currency quote fresh`() {
+        val prefs = context.getSharedPreferences("BitcoinPricePrefs", Context.MODE_PRIVATE)
+        prefs.edit()
+            .putLong("lastUpdateTime", 100L)
+            .putLong("lastUpdateTime_USD", 100L)
+            .apply()
+
+        currencyManager.setPreferredCurrency(CurrencyManager.CURRENCY_USD)
+        assertEquals(100L, worker.getCurrentPriceTimestamp())
+        currencyManager.setPreferredCurrency(CurrencyManager.CURRENCY_EUR)
+        assertEquals(0L, worker.getCurrentPriceTimestamp())
+    }
+
+    @Test
     fun `getCurrentPrice follows currency manager`() {
         currencyManager.setPreferredCurrency(CurrencyManager.CURRENCY_USD)
         assertEquals(50_000.0, worker.getCurrentPrice(), 0.0001)

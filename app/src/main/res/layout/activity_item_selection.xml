@@ -331,8 +331,10 @@
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/basket_header"
                         android:layout_width="match_parent"
-                        android:layout_height="@dimen/top_bar_height"
+                        android:layout_height="wrap_content"
+                        android:minHeight="@dimen/top_bar_height"
                         android:paddingHorizontal="@dimen/space_l"
+                        android:paddingVertical="@dimen/space_m"
                         android:background="?attr/selectableItemBackground">
 
                         <ImageView
@@ -359,12 +361,15 @@
 
                         <TextView
                             android:id="@+id/basket_total"
-                            android:layout_width="wrap_content"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/space_l"
                             android:layout_marginEnd="@dimen/space_s"
+                            android:gravity="end"
                             android:textAppearance="@style/Text.Subtitle"
                             tools:text="$74.97"
                             app:layout_constraintEnd_toStartOf="@id/basket_chevron"
+                            app:layout_constraintStart_toEndOf="@id/basket_item_count"
                             app:layout_constraintTop_toTopOf="parent"
                             app:layout_constraintBottom_toBottomOf="parent" />
 

@@ -26,7 +26,8 @@ import org.cashudevkit.generateMnemonic
  * @param walletProvider Function that returns the current CDK WalletRepository instance
  */
 class CdkWalletProvider(
-    private val walletProvider: () -> WalletRepository?
+    private val walletProvider: () -> WalletRepository?,
+    private val currencyUnitProvider: (() -> CurrencyUnit)? = null,
 ) : WalletProvider, TemporaryMintWalletFactory {
 
     companion object {
@@ -247,7 +248,9 @@ class CdkWalletProvider(
 
         return try {
             val cdkToken = CdkToken.decode(encodedToken)
-            val tokenUnit = cdkToken.unit() ?: getActiveUnit()
+            // Unit-less legacy Cashu tokens are denominated in sat. Never use the mutable app
+            // preference here: the token itself, not UI state, defines its denomination.
+            val tokenUnit = cdkToken.unit() ?: CurrencyUnit.Sat
 
             val mintUrl = cdkToken.mintUrl()
             val mintWallet = w.getWallet(mintUrl, tokenUnit)
@@ -288,11 +291,14 @@ class CdkWalletProvider(
     override suspend fun getTokenInfo(encodedToken: String): WalletResult<TokenInfo> {
         return try {
             val cdkToken = CdkToken.decode(encodedToken)
+            val tokenUnit = cdkToken.unit() ?: CurrencyUnit.Sat
             val result = TokenInfo(
                 mintUrl = cdkToken.mintUrl().url,
                 amount = Satoshis(cdkToken.value().value.toLong()),
                 proofsCount = 0,
-                unit = cdkToken.unit().toString().lowercase()
+                unit = with(com.electricdreams.numo.core.cashu.CashuWalletManager) {
+                    tokenUnit.toUnitString()
+                },
             )
             WalletResult.Success(result)
         } catch (e: Exception) {
@@ -371,6 +377,7 @@ class CdkWalletProvider(
     // ========================================================================
 
     private fun getActiveUnit(): CurrencyUnit {
+        currencyUnitProvider?.let { return it() }
         val hasAppContext = try { com.electricdreams.numo.core.cashu.CashuWalletManager.appContext; true } catch (e: Exception) { false }
         val unitStr = if (hasAppContext) {
             com.electricdreams.numo.core.util.MintManager.getInstance(com.electricdreams.numo.core.cashu.CashuWalletManager.appContext).getPreferredUnit()

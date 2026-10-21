@@ -1,6 +1,5 @@
 package com.electricdreams.numo.feature.history
 
-import android.app.Activity
 import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -26,6 +25,8 @@ import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.data.model.HistoryEntry
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.prefs.PreferenceStore
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.util.SavedBasketManager
@@ -51,7 +52,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.lang.reflect.Type
 import java.text.SimpleDateFormat
-import java.util.Collections
 import java.util.Date
 import java.util.Locale
 
@@ -155,26 +155,24 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
 
         lifecycleScope.launch {
             try {
+                val preferredUnit = UnitId.of(
+                    com.electricdreams.numo.core.util.MintManager
+                        .getInstance(this@PaymentsHistoryActivity)
+                        .getPreferredUnit(),
+                )
                 val balances = withContext(Dispatchers.IO) {
-                    CashuWalletManager.getAllMintBalances()
+                    CashuWalletManager.getAllMintBalances(preferredUnit.value)
                 }
-                val totalSats = balances.values.sum()
-
-                // Display primary balance
-                val preferredUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this@PaymentsHistoryActivity).getPreferredUnit()
-                val lowerUnit = preferredUnit.lowercase()
-                val isCustomUnit = lowerUnit != "sat"
                 
-                if (isCustomUnit) {
-                    val currency = Amount.Currency.fromCode(lowerUnit)
-                    if (currency.symbol != lowerUnit.uppercase()) {
-                        val valueToFormat = if (currency.isZeroDecimal()) totalSats * 100 else totalSats
-                        binding.balanceSats?.text = Amount(valueToFormat, currency).toString()
-                    } else {
-                        binding.balanceSats?.text = "$totalSats $preferredUnit"
-                    }
+                if (!preferredUnit.isSat) {
+                    binding.balanceSats?.text = UnitAmountFormatter.formatBalances(
+                        balances,
+                        preferredUnit,
+                    )
+                    binding.balanceSats?.visibility = View.VISIBLE
                     binding.balanceFiat?.visibility = View.GONE
                 } else {
+                    val totalSats = balances.values.fold(0L) { sum, value -> Math.addExact(sum, value) }
                     val satAmount = Amount(totalSats, Amount.Currency.BTC)
                     binding.balanceSats?.text = satAmount.toString()
                     binding.balanceSats?.visibility = View.VISIBLE
@@ -263,6 +261,10 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     val intent = Intent(this@PaymentsHistoryActivity, com.electricdreams.numo.PaymentReceivedActivity::class.java).apply {
                         putExtra(com.electricdreams.numo.PaymentReceivedActivity.EXTRA_TOKEN, "")
                         putExtra(com.electricdreams.numo.PaymentReceivedActivity.EXTRA_AMOUNT, entry.amount)
+                        putExtra(
+                            com.electricdreams.numo.PaymentReceivedActivity.EXTRA_UNIT,
+                            entry.getUnit(),
+                        )
                     }
                     startActivity(intent)
                     
@@ -633,6 +635,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     tipAmountSats = entry.tipAmountSats,
                     tipPercentage = entry.tipPercentage,
                     swapToLightningMintJson = entry.swapToLightningMintJson,
+                    issuerScope = entry.issuerScope,
                 )
                 history[index] = updated
                 modified = true
@@ -689,8 +692,12 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
             basketId: String? = null,
             tipAmountSats: Long = 0,
             tipPercentage: Int = 0,
+            ecashUnit: String? = null,
+            issuerScope: String? = null,
         ): String {
-            val ecashUnit = com.electricdreams.numo.core.util.MintManager.getInstance(context).getPreferredUnit()
+            val resolvedEcashUnit = ecashUnit
+                ?: com.electricdreams.numo.core.util.MintManager.getInstance(context)
+                    .getPreferredUnit()
             val entry = PaymentHistoryEntry.createPending(
                 amount = amount,
                 entryUnit = entryUnit,
@@ -702,7 +709,8 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                 basketId = basketId,
                 tipAmountSats = tipAmountSats,
                 tipPercentage = tipPercentage,
-                ecashUnit = ecashUnit,
+                ecashUnit = resolvedEcashUnit,
+                issuerScope = issuerScope,
             )
 
             val history = getPaymentHistory(context).toMutableList()
@@ -764,6 +772,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     tipPercentage = existing.tipPercentage,
                     label = existing.label,
                     btcPayInvoiceId = btcPayInvoiceId ?: existing.btcPayInvoiceId,
+                    issuerScope = existing.issuerScope,
                 )
                 history[index] = updated
 
@@ -817,6 +826,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     tipAmountSats = existing.tipAmountSats, // Preserve tip info
                     tipPercentage = existing.tipPercentage, // Preserve tip info
                     swapToLightningMintJson = swapToLightningMintJson ?: existing.swapToLightningMintJson,
+                    issuerScope = existing.issuerScope,
                 )
                 history[index] = updated
 
@@ -888,6 +898,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     tipAmountSats = existing.tipAmountSats, // Preserve tip info
                     tipPercentage = existing.tipPercentage, // Preserve tip info
                     label = existing.label, // Preserve label
+                    issuerScope = existing.issuerScope,
                 )
                 history[index] = updated
 
@@ -938,6 +949,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     basketId = existing.basketId, // Preserve basket ID
                     tipAmountSats = tipAmountSats,
                     tipPercentage = tipPercentage,
+                    issuerScope = existing.issuerScope,
                 )
                 history[index] = updated
 
@@ -984,6 +996,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                 tipAmountSats = existing.tipAmountSats,
                 tipPercentage = existing.tipPercentage,
                 swapToLightningMintJson = existing.swapToLightningMintJson,
+                issuerScope = existing.issuerScope,
             )
             history[index] = updated
 
@@ -1024,6 +1037,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                 tipAmountSats = existing.tipAmountSats,
                 tipPercentage = existing.tipPercentage,
                 swapToLightningMintJson = existing.swapToLightningMintJson,
+                issuerScope = existing.issuerScope,
             )
             history[index] = updated
 
@@ -1094,6 +1108,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     tipPercentage = existing.tipPercentage,
                     swapToLightningMintJson = existing.swapToLightningMintJson,
                     label = label?.ifBlank { null },
+                    issuerScope = existing.issuerScope,
                 )
                 history[index] = updated
 

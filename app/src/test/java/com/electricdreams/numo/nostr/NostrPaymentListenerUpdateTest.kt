@@ -62,7 +62,7 @@ class NostrPaymentListenerUpdateTest {
     }
 
     private fun listener(onFailure: NostrPaymentListener.ErrorHandler) = NostrPaymentListener(
-        secret, "pubkey", 10L, emptyList(), emptyList(), {}, onFailure, "sat",
+        secret, "pubkey", 10L, "sat", emptyList(), emptyList(), {}, onFailure,
     )
 
     private fun handleEvent(listener: NostrPaymentListener) {

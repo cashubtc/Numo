@@ -13,12 +13,36 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.reflect.Field
 
 @RunWith(RobolectricTestRunner::class)
 class ItemManagerTest {
+
+    @Test
+    fun `legacy catalog migration preserves active ecash currency and gross price`() {
+        CurrencyManager.getInstance(context).setPreferredCurrency("EUR")
+        MintManager.getInstance(context).setPreferredUnit("usd")
+        val legacy = JSONObject()
+            .put("id", "legacy-usd").put("name", "Coffee")
+            .put("price", Item.calculateNetFromGross(3.99, 20.0))
+            .put("priceType", "FIAT").put("vatEnabled", true).put("vatRate", 20)
+        context.getSharedPreferences("ItemManagerPrefs", Context.MODE_PRIVATE).edit()
+            .putString("items_list", JSONArray().put(legacy).toString()).commit()
+        resetSingleton()
+        val migrated = ItemManager.getInstance(context).getAllItems().single()
+        assertEquals("usd", migrated.priceUnit)
+        assertEquals(399L, migrated.grossPriceAtomic)
+
+        MintManager.getInstance(context).setPreferredUnit("eur")
+        resetSingleton()
+        val reloaded = ItemManager.getInstance(context).getAllItems().single()
+        assertEquals("usd", reloaded.priceUnit)
+        assertEquals(399L, reloaded.grossPriceAtomic)
+    }
 
     private lateinit var context: Context
     private lateinit var itemManager: ItemManager
@@ -32,6 +56,10 @@ class ItemManagerTest {
         // Ensure clean state
         val prefs = context.getSharedPreferences("ItemManagerPrefs", Context.MODE_PRIVATE)
         prefs.edit().clear().apply()
+
+        MintManager.getInstance(context).setPreferredUnit("sat")
+        // Sat wallets use the local fiat currency for legacy catalog prices.
+        CurrencyManager.getInstance(context).setPreferredCurrency(CurrencyManager.CURRENCY_USD)
         
         itemManager = ItemManager.getInstance(context)
     }
@@ -150,6 +178,52 @@ class ItemManagerTest {
         assertEquals(99.99, loaded.price, 0.001)
         assertTrue(loaded.vatEnabled)
         assertEquals(20, loaded.vatRate)
+        assertEquals("usd", loaded.priceUnit)
+        assertEquals(9_999L, loaded.priceAtomic)
+    }
+
+    @Test
+    fun `custom unit price persists without reinterpretation`() {
+        val item = Item(
+            name = "Loyalty item",
+            priceType = PriceType.FIAT,
+            priceUnit = "POINTS",
+            priceAtomic = 75L,
+            priceIssuerScope = "https://mint.example",
+        )
+        itemManager.addItem(item)
+
+        resetSingleton()
+        val loaded = ItemManager.getInstance(context).getAllItems().single()
+
+        assertEquals("points", loaded.priceUnit)
+        assertEquals(75L, loaded.priceAtomic)
+        assertEquals("https://mint.example", loaded.priceIssuerScope)
+    }
+
+    @Test
+    fun `one corrupt persisted item does not hide valid catalog items`() {
+        val corrupt = JSONObject()
+            .put("id", "bad")
+            .put("name", "Bad")
+            .put("price", -1.0)
+            .put("priceType", "FIAT")
+        val valid = JSONObject()
+            .put("id", "good")
+            .put("name", "Good")
+            .put("price", 2.5)
+            .put("priceType", "FIAT")
+        context.getSharedPreferences("ItemManagerPrefs", Context.MODE_PRIVATE)
+            .edit()
+            .putString("items_list", JSONArray().put(corrupt).put(valid).toString())
+            .commit()
+
+        resetSingleton()
+        val loaded = ItemManager.getInstance(context).getAllItems()
+
+        assertEquals(1, loaded.size)
+        assertEquals("good", loaded.single().id)
+        assertEquals(250L, loaded.single().priceAtomic)
     }
     
     @Test

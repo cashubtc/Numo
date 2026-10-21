@@ -45,6 +45,12 @@ data class BasketItem(
      * @return Total sats.
      */
     fun getTotalSats(): Long = item.priceSats * quantity
+
+    /** Gross line total with its unit and issuer identity preserved. */
+    fun getGrossAtomicAmount(legacyFiatUnit: String): AtomicAmount {
+        require(quantity >= 0) { "Basket quantity cannot be negative" }
+        return item.getGrossAtomicAmount(legacyFiatUnit) * quantity
+    }
     
     /**
      * Check if this item is priced in sats.

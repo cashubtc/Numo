@@ -15,7 +15,6 @@ import androidx.core.widget.doAfterTextChanged
 
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.model.Item
-import com.electricdreams.numo.core.model.PriceType
 import com.electricdreams.numo.core.util.CurrencyManager
 import com.electricdreams.numo.core.util.ItemManager
 import com.electricdreams.numo.databinding.ActivityItemEntryBinding
@@ -151,6 +150,9 @@ class ItemEntryActivity : AppCompatActivity() {
             priceTypeToggle = binding.priceTypeToggle,
             btnPriceFiat = binding.btnPriceFiat,
             btnPriceBitcoin = binding.btnPriceBitcoin,
+            priceUnitLayout = binding.priceUnitLayout,
+            priceUnitInput = binding.priceUnitInput,
+            priceUnitWarning = binding.priceUnitWarning,
             fiatPriceLayout = binding.fiatPriceLayout,
             satsPriceLayout = binding.satsPriceLayout,
             priceInput = binding.itemPriceInput,
@@ -303,14 +305,13 @@ class ItemEntryActivity : AppCompatActivity() {
     }
 
     private fun loadPricingData(item: Item) {
-        pricingHandler.setCurrentPriceType(item.priceType)
-        when (item.priceType) {
-            PriceType.FIAT -> {
-                val displayPrice = if (item.vatEnabled) item.getGrossPrice() else item.price
-                pricingHandler.setFiatPrice(displayPrice)
-            }
-            PriceType.SATS -> pricingHandler.setSatsPrice(item.priceSats)
+        val fiatUnit = currencyManager.getCurrentCurrency()
+        val displayAmount = if (item.vatEnabled) {
+            item.getGrossAtomicAmount(fiatUnit)
+        } else {
+            item.getNetAtomicAmount(fiatUnit)
         }
+        pricingHandler.setAtomicPrice(displayAmount)
         pricingHandler.setVatFields(item.vatEnabled, item.vatRate, true)
     }
 

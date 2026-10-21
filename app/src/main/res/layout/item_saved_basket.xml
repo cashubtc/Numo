@@ -85,8 +85,9 @@
 
             <!-- Right: Total -->
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:orientation="vertical"
                 android:gravity="end">
 
@@ -94,6 +95,7 @@
                     android:id="@+id/basket_total"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:gravity="end"
                     android:textAppearance="@style/Text.RowTitle"
                     tools:text="$45.99" />
 

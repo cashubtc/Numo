@@ -16,7 +16,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.lang.reflect.Field
+import org.robolectric.util.ReflectionHelpers
 import java.util.Base64
 
 @RunWith(RobolectricTestRunner::class)
@@ -36,8 +36,8 @@ class MintProfileServiceTest {
             .clear()
             .commit()
 
-        resetSingleton(MintManager.Companion, "instance")
-        resetSingleton(MintProfileService.Companion, "instance")
+        ReflectionHelpers.setStaticField(MintManager::class.java, "instance", null)
+        ReflectionHelpers.setStaticField(MintProfileService::class.java, "instance", null)
 
         mintManager = MintManager.getInstance(context)
         mintProfileService = MintProfileService.getInstance(context)
@@ -80,6 +80,11 @@ class MintProfileServiceTest {
         server.enqueue(
             MockResponse()
                 .setResponseCode(200)
+                .setBody("{\"keysets\":[{\"id\":\"a\",\"unit\":\"sat\"},{\"id\":\"b\",\"unit\":\"POINTS\"}]}"),
+        )
+        server.enqueue(
+            MockResponse()
+                .setResponseCode(200)
                 .setBody(Buffer().write(iconBytes())),
         )
 
@@ -90,6 +95,25 @@ class MintProfileServiceTest {
         assertTrue(result.iconCached)
         assertEquals("Test Mint", mintManager.getMintDisplayName(mintUrl))
         assertNotNull(MintIconCache.getCachedIconFile(mintUrl))
+        assertEquals(setOf("points", "sat"), result.supportedUnits?.map { it.lowercase() }?.toSet())
+        assertEquals(
+            setOf("points", "sat"),
+            mintManager.getMintUnits(mintUrl).map { it.value }.toSet(),
+        )
+    }
+
+    @Test
+    fun `malformed keysets response falls back to keys without clearing known units`() = runBlocking {
+        val mintUrl = server.url("/").toString().removeSuffix("/")
+        mintManager.setMintUnits(mintUrl, listOf("sat"))
+        server.enqueue(MockResponse().setBody("{}"))
+        server.enqueue(MockResponse().setBody("{}"))
+        server.enqueue(MockResponse().setBody("{\"keysets\":[{\"unit\":\"sat\"}]}"))
+
+        val result = mintProfileService.fetchAndStoreMintProfile(mintUrl)
+
+        assertEquals(setOf("sat"), result.supportedUnits)
+        assertTrue(mintManager.mintSupportsUnit(mintUrl, "sat"))
     }
 
     @Test
@@ -117,30 +141,17 @@ class MintProfileServiceTest {
                 .setResponseCode(200)
                 .setBody("{}"),
         )
+        server.enqueue(
+            MockResponse()
+                .setResponseCode(200)
+                .setBody("{\"keysets\":[{\"id\":\"a\",\"unit\":\"sat\"}]}"),
+        )
 
         val result = mintProfileService.fetchAndStoreMintProfile(mintUrl)
 
         assertTrue(result.success)
         assertNull(result.displayName)
         assertFalse(result.iconCached)
-    }
-
-    private fun resetSingleton(target: Any, fieldName: String) {
-        val clazz = target::class.java
-        var current: Class<*>? = clazz
-        var field: Field? = null
-        while (current != null && field == null) {
-            try {
-                field = current.getDeclaredField(fieldName)
-            } catch (_: NoSuchFieldException) {
-                current = current.superclass
-            }
-        }
-
-        field?.let {
-            it.isAccessible = true
-            it.set(target, null)
-        }
     }
 
     private fun iconBytes(): ByteArray {

@@ -2,6 +2,7 @@ package com.electricdreams.numo.core.util
 
 import android.util.Log
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.model.UnitId
 
 object MintLimitChecker {
 
@@ -22,7 +23,11 @@ object MintLimitChecker {
         val isBolt11Supported: Boolean = true
     )
 
-    fun checkMintLimits(amount: Long, mintLimits: CashuWalletManager.MintLimits?, preferredUnit: String = "sat"): LimitCheckResult {
+    fun checkMintLimits(
+        amount: Long,
+        mintLimits: CashuWalletManager.MintLimits?,
+        preferredUnit: String = "sat",
+    ): LimitCheckResult {
         return checkMintLimitsWithTip(amount, 0, mintLimits, preferredUnit)
     }
     
@@ -33,9 +38,12 @@ object MintLimitChecker {
      * @param mintLimits The mint limits from the mint info
      * @param preferredUnit The unit to check against
      */
-    fun checkMintLimitsWithTip(amount: Long, tipAmount: Long, mintLimits: CashuWalletManager.MintLimits?, preferredUnit: String = "sat"): LimitCheckResult {
-        val totalAmount = amount + tipAmount
-        
+    fun checkMintLimitsWithTip(
+        amount: Long,
+        tipAmount: Long,
+        mintLimits: CashuWalletManager.MintLimits?,
+        preferredUnit: String = "sat",
+    ): LimitCheckResult {
         if (mintLimits == null) {
             return LimitCheckResult(
                 isValid = true,
@@ -46,22 +54,52 @@ object MintLimitChecker {
             )
         }
 
-        val bolt11Method = mintLimits.mintMethods.find { method ->
-            val methodStr = method.method
-            val unitStr = method.unit
-            val methodMatch = methodStr.equals("bolt11", ignoreCase = true) ||
-                methodStr.contains("Bolt11") || methodStr.contains("bolt11")
-            val unitMatch = unitStr.equals(preferredUnit, ignoreCase = true)
-            methodMatch && unitMatch
+        val expectedUnit = UnitId.ofOrNull(preferredUnit)
+        if (expectedUnit == null || expectedUnit.isReserved) {
+            Log.e(TAG, "Cannot check mint limits for invalid unit: $preferredUnit")
+            return LimitCheckResult(
+                isValid = false,
+                minAmount = null,
+                maxAmount = null,
+                limitType = LimitType.DISABLED,
+                isBolt11Supported = false,
+            )
         }
 
-        if (bolt11Method == null || bolt11Method.disabled) {
+        val bolt11Method = MintCapabilities("", mintLimits).find(
+            expectedUnit, MintOperation.MINT, MintCapabilities.BOLT11,
+        )
+
+        if (bolt11Method == null) {
             return LimitCheckResult(
                 isValid = true,
                 minAmount = null,
                 maxAmount = null,
                 limitType = LimitType.NONE,
                 isBolt11Supported = false
+            )
+        }
+
+        if (amount < 0L || tipAmount < 0L) {
+            return LimitCheckResult(
+                isValid = false,
+                minAmount = bolt11Method.minAmount,
+                maxAmount = bolt11Method.maxAmount,
+                limitType = LimitType.MIN,
+                isBolt11Supported = true,
+            )
+        }
+
+        val totalAmount = try {
+            Math.addExact(amount, tipAmount)
+        } catch (e: ArithmeticException) {
+            Log.e(TAG, "Payment amount overflow for unit $expectedUnit", e)
+            return LimitCheckResult(
+                isValid = false,
+                minAmount = bolt11Method.minAmount,
+                maxAmount = bolt11Method.maxAmount,
+                limitType = LimitType.MAX,
+                isBolt11Supported = true,
             )
         }
 

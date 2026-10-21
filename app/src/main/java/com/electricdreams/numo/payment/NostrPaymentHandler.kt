@@ -1,9 +1,12 @@
 package com.electricdreams.numo.payment
 
 import android.content.Context
-import com.electricdreams.numo.R
 import android.util.Log
+import com.electricdreams.numo.R
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
+import com.electricdreams.numo.core.model.UnitId
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.ndef.CashuPaymentHelper
 import com.electricdreams.numo.nostr.Nip19
@@ -22,8 +25,10 @@ import com.electricdreams.numo.nostr.NostrPaymentListener
 class NostrPaymentHandler(
     private val context: Context,
     private val allowedMints: List<String>,
-    private val paymentUnit: String? = null,
+    paymentUnit: String,
 ) {
+    private val paymentUnit = UnitId.of(paymentUnit).value
+
     /**
      * Callback interface for Nostr payment events.
      */
@@ -63,7 +68,7 @@ class NostrPaymentHandler(
     /**
      * Start a new Nostr payment flow with fresh keys.
      *
-     * @param paymentAmount Amount in satoshis
+     * @param paymentAmount Amount in atomic units of the captured payment unit
      * @param pendingPaymentId Optional ID for updating pending payment record
      * @param callback Callback for payment events
      */
@@ -99,7 +104,7 @@ class NostrPaymentHandler(
     /**
      * Resume a Nostr payment flow with stored keys.
      *
-     * @param paymentAmount Amount in satoshis
+     * @param paymentAmount Amount in atomic units of the captured payment unit
      * @param storedSecretHex Previously stored secret key hex
      * @param storedNprofile Previously stored nprofile
      * @param callback Callback for payment events
@@ -140,15 +145,27 @@ class NostrPaymentHandler(
         // enabled.
         val mintManager = MintManager.getInstance(context)
         val mintsForPaymentRequest =
-            if (mintManager.isSwapFromUnknownMintsEnabled()) null else allowedMints
+            if (
+                mintManager.isSwapFromUnknownMintsEnabled() &&
+                CashuPaymentHelper.supportsUnknownMintSwap(context, paymentUnit)
+            ) {
+                null
+            } else {
+                allowedMints
+            }
 
         // Create payment request with Nostr transport
         val request = CashuPaymentHelper.createPaymentRequestWithNostr(
-            paymentAmount,
-            context.getString(R.string.payment_request_default_description, paymentAmount),
-            mintsForPaymentRequest,
-            profile,
-            paymentUnit = paymentUnit,
+            amount = paymentAmount,
+            unit = paymentUnit,
+            description = context.getString(
+                R.string.payment_request_default_description,
+                UnitAmountFormatter.formatAtomic(
+                    paymentAmount, UnitDescriptor.defaultFor(UnitId.of(paymentUnit)),
+                ),
+            ),
+            allowedMints = mintsForPaymentRequest,
+            nprofile = profile,
         )
 
         if (request == null) {
@@ -170,6 +187,7 @@ class NostrPaymentHandler(
             nostrSecret,
             nostrPubHex,
             paymentAmount,
+            paymentUnit,
             allowedMints,
             relayList,
             { token -> callback.onTokenReceived(token) },
@@ -178,8 +196,7 @@ class NostrPaymentHandler(
                     Log.e(TAG, "NostrPaymentListener payment failure: $message", t)
                     callback.onPaymentFailure(message ?: t?.message ?: "Unknown Nostr payment failure")
                 }
-            },
-            paymentUnit,
+            }
         ).also { it.start() }
 
         Log.d(TAG, "Nostr payment listener started")
@@ -236,4 +253,3 @@ class NostrPaymentHandler(
         )
     }
 }
-

@@ -5,6 +5,8 @@ import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
+import com.electricdreams.numo.PaymentRequestActivity
+import com.electricdreams.numo.payment.PaymentIntentFactory
 import com.electricdreams.numo.ui.adapter.PaymentsHistoryAdapter
 import org.junit.Assert.*
 import org.junit.Before
@@ -85,6 +87,46 @@ class PaymentsHistoryActivityTest {
         assertTrue(entry.isCompleted())
         assertEquals(token, entry.token)
         assertEquals(mintUrl, entry.mintUrl)
+    }
+
+    @Test
+    fun `custom unit issuer survives pending payment updates`() {
+        val issuer = "https://points.example"
+        val paymentId = PaymentsHistoryActivity.addPendingPayment(
+            context = context,
+            amount = 75L,
+            entryUnit = "points",
+            enteredAmount = 75L,
+            bitcoinPrice = null,
+            paymentRequest = null,
+            formattedAmount = "75 POINTS",
+            ecashUnit = "POINTS",
+            issuerScope = issuer,
+            tipAmountSats = 5L,
+        )
+
+        PaymentsHistoryActivity.updatePendingWithLightningInfo(
+            context = context,
+            paymentId = paymentId,
+            lightningQuoteId = "quote-id",
+        )
+        PaymentsHistoryActivity.completePendingPayment(
+            context = context,
+            paymentId = paymentId,
+            token = "token",
+            paymentType = PaymentHistoryEntry.TYPE_CASHU,
+            mintUrl = issuer,
+        )
+
+        val entry = PaymentsHistoryActivity.getPaymentHistory(context).single()
+        assertEquals("points", entry.getUnit())
+        assertEquals(issuer, entry.issuerScope)
+        assertTrue(entry.getTipDisplayString().contains("POINTS"))
+        val resumeIntent = PaymentIntentFactory.createResumePaymentIntent(context, entry)
+        assertEquals(
+            issuer,
+            resumeIntent.getStringExtra(PaymentRequestActivity.EXTRA_PAYMENT_ISSUER_SCOPE),
+        )
     }
 
     @Test

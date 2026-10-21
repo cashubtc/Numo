@@ -30,7 +30,7 @@ class PaymentServiceFactoryTest {
         val prefs = PreferenceStore.app(context)
         prefs.putBoolean("btcpay_enabled", false)
 
-        val service = PaymentServiceFactory.create(context)
+        val service = PaymentServiceFactory.create(context, "sat")
         assertTrue(service is LocalPaymentService)
     }
 
@@ -42,7 +42,7 @@ class PaymentServiceFactoryTest {
         prefs.putString("btcpay_api_key", "secret-key")
         prefs.putString("btcpay_store_id", "store-id")
 
-        val service = PaymentServiceFactory.create(context)
+        val service = PaymentServiceFactory.create(context, "sat")
         assertTrue(service is BTCPayPaymentService)
     }
 
@@ -52,7 +52,20 @@ class PaymentServiceFactoryTest {
         prefs.putBoolean("btcpay_enabled", true)
         prefs.putString("btcpay_server_url", "") // Missing URL
 
-        val service = PaymentServiceFactory.create(context)
+        val service = PaymentServiceFactory.create(context, "sat")
         assertTrue("Should fallback if URL is empty", service is LocalPaymentService)
+    }
+
+    @Test
+    fun `non-sat units never use sat-denominated BTCPay service`() {
+        val prefs = PreferenceStore.app(context)
+        prefs.putBoolean("btcpay_enabled", true)
+        prefs.putString("btcpay_server_url", "https://btcpay.example.com")
+        prefs.putString("btcpay_api_key", "secret-key")
+        prefs.putString("btcpay_store_id", "store-id")
+
+        val service = PaymentServiceFactory.create(context, "points")
+
+        assertTrue(service is LocalPaymentService)
     }
 }

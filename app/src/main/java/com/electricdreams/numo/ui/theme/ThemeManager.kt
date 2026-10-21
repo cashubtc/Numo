@@ -6,6 +6,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.widget.TextViewCompat
 import com.electricdreams.numo.R
 import com.electricdreams.numo.core.prefs.PreferenceStore
 
@@ -56,7 +57,7 @@ class ThemeManager(
         amountDisplay.setTextColor(textColor)
         secondaryAmountDisplay.setTextColor(textColor)
         errorMessage.setTextColor(textColor)
-        
+
         // Update currency switch icon tint
         (switchCurrencyButton as? ImageButton)?.setColorFilter(textColor)
         
@@ -92,19 +93,27 @@ class ThemeManager(
         windowInsetsController.isAppearanceLightStatusBars = isWhiteTheme
         windowInsetsController.isAppearanceLightNavigationBars = isWhiteTheme
         
-        // Special button handling for different themes
+        applyChargeButtonTheme(submitButton, theme)
+        activity.findViewById<TextView>(R.id.charge_unit_selector)?.let { selector ->
+            applyChargeButtonTheme(selector, theme)
+            TextViewCompat.setCompoundDrawableTintList(selector, selector.textColors)
+        }
+    }
+
+    /** Keep the unit selector and Charge button on the same day/night theme resources. */
+    private fun applyChargeButtonTheme(button: TextView, theme: String) {
         when (theme) {
             "white" -> {
-                submitButton.setBackgroundResource(R.drawable.bg_button_black)
-                submitButton.setTextColor(android.graphics.Color.WHITE)
+                button.setBackgroundResource(R.drawable.bg_button_black)
+                button.setTextColor(android.graphics.Color.WHITE)
             }
             "obsidian" -> {
-                submitButton.setBackgroundResource(R.drawable.bg_button_white)
-                submitButton.setTextColor(activity.resources.getColorStateList(R.color.button_text_obsidian, null))
+                button.setBackgroundResource(R.drawable.bg_button_white)
+                button.setTextColor(ContextCompat.getColorStateList(activity, R.color.button_text_obsidian))
             }
             else -> {
-                submitButton.setBackgroundResource(R.drawable.bg_button_charge)
-                submitButton.setTextColor(android.graphics.Color.WHITE)
+                button.setBackgroundResource(R.drawable.bg_button_charge)
+                button.setTextColor(android.graphics.Color.WHITE)
             }
         }
     }

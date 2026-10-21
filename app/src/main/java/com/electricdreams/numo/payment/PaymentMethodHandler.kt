@@ -1,14 +1,15 @@
 package com.electricdreams.numo.payment
 
-import android.content.Context
 import android.content.Intent
 import com.electricdreams.numo.util.startActivityForResultCompat
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.electricdreams.numo.PaymentRequestActivity
 import com.electricdreams.numo.R
+import com.electricdreams.numo.core.model.AssetId
+import com.electricdreams.numo.core.model.UnitId
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
 import com.electricdreams.numo.core.util.MintManager
-import com.electricdreams.numo.feature.tips.TipSelectionActivity
 import com.electricdreams.numo.feature.tips.TipsManager
 import com.electricdreams.numo.ndef.CashuPaymentHelper
 import com.electricdreams.numo.ndef.NdefHostCardEmulationService
@@ -21,11 +22,25 @@ class PaymentMethodHandler(
 ) {
 
     /** Show payment method dialog for the specified amount */
-    fun showPaymentMethodDialog(amount: Long, formattedAmount: String, checkoutBasketJson: String? = null) {
+    fun showPaymentMethodDialog(
+        amount: Long,
+        formattedAmount: String,
+        checkoutBasketJson: String? = null,
+        chargeAsset: AssetId = AssetId.global(
+            UnitId.of(MintManager.getInstance(activity).getPreferredUnit()),
+        ),
+    ) {
         val tipsManager = TipsManager.getInstance(activity)
-        
+
         val routing = PaymentRoutingCore.determinePaymentRoute(tipsManager.tipsEnabled)
-        val intent = routing.buildIntent(activity, amount, formattedAmount, checkoutBasketJson)
+        val intent = routing.buildIntent(
+            context = activity,
+            amount = amount,
+            paymentUnit = chargeAsset.unit.value,
+            formattedAmount = formattedAmount,
+            checkoutBasketJson = checkoutBasketJson,
+            paymentIssuerScope = chargeAsset.issuerScope,
+        )
         activity.startActivityForResultCompat(intent, REQUEST_CODE_PAYMENT)
     }
 
@@ -45,9 +60,21 @@ class PaymentMethodHandler(
         // preference, which would prevent them from paying with other mints
         // even though the POS will accept them via swap.
         val mintsForPaymentRequest =
-            if (mintManager.isSwapFromUnknownMintsEnabled()) null else allowedMints
+            if (mintManager.isSwapFromUnknownMintsEnabled() &&
+                CashuPaymentHelper.supportsUnknownMintSwap(activity, activeUnit)
+            ) null else allowedMints
 
-        val paymentRequest = CashuPaymentHelper.createPaymentRequest(amount, "Payment of $amount sats", mintsForPaymentRequest)?.original
+        val paymentRequest = CashuPaymentHelper.createPaymentRequest(
+            amount = amount,
+            unit = activeUnit,
+            description = activity.getString(
+                R.string.payment_request_default_description,
+                UnitAmountFormatter.formatAtomic(
+                    amount, UnitDescriptor.defaultFor(UnitId.of(activeUnit)),
+                ),
+            ),
+            allowedMints = mintsForPaymentRequest,
+        )?.original
             ?: run {
                 Toast.makeText(activity, R.string.payment_toast_failed_create_request, Toast.LENGTH_SHORT).show()
                 return

@@ -3,7 +3,6 @@ package com.electricdreams.numo.feature.items
 import android.Manifest
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -26,7 +25,6 @@ import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.electricdreams.numo.R
-import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.Item
 import com.electricdreams.numo.core.util.BasketManager
 import com.electricdreams.numo.core.util.CurrencyManager
@@ -372,7 +370,9 @@ class CheckoutScannerActivity : AppCompatActivity() {
             itemVariation.visibility = View.GONE
         }
 
-        val currencyCode = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(this)
+        val currencyCode = com.electricdreams.numo.core.util.CurrencyManager
+            .getInstance(this)
+            .getCurrentCurrency()
         itemPrice.text = item.getFormattedPrice(currencyCode)
 
         updateQuantityDisplay()

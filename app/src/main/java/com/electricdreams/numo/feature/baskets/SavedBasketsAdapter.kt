@@ -8,8 +8,11 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.electricdreams.numo.R
-import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.model.AssetId
+import com.electricdreams.numo.core.model.AtomicAmount
 import com.electricdreams.numo.core.model.SavedBasket
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.util.CurrencyManager
 
 /**
@@ -88,20 +91,18 @@ class SavedBasketsAdapter(
         }
 
         private fun formatTotal(basket: SavedBasket): String {
-            val fiatTotal = basket.getTotalFiatPrice()
-            val satsTotal = basket.getTotalSatsPrice()
             val currencyCode = currencyManager.getCurrentCurrency()
-            val currency = Amount.Currency.fromCode(currencyCode)
-
-            return when {
-                fiatTotal > 0 && satsTotal > 0 -> {
-                    val fiatAmount = Amount.fromMajorUnits(fiatTotal, currency)
-                    val satsAmount = Amount(satsTotal, Amount.Currency.BTC)
-                    "$fiatAmount + $satsAmount"
+            return runCatching {
+                val totals = basket.getPriceTotals(currencyCode)
+                if (totals.isEmpty()) {
+                    UnitAmountFormatter.formatAsset(
+                        AtomicAmount(0, AssetId.global(UnitId.of(currencyCode))),
+                    )
+                } else {
+                    totals.joinToString(" + ") { UnitAmountFormatter.formatAsset(it) }
                 }
-                satsTotal > 0 -> Amount(satsTotal, Amount.Currency.BTC).toString()
-                fiatTotal > 0 -> Amount.fromMajorUnits(fiatTotal, currency).toString()
-                else -> Amount.fromMajorUnits(0.0, currency).toString()
+            }.getOrElse {
+                "—"
             }
         }
     }

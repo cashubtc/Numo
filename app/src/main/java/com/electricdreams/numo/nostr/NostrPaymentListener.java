@@ -29,7 +29,7 @@ public final class NostrPaymentListener {
     private final byte[] secretKey32;
     private final String pubkeyHex;
     private final long expectedAmount;
-    private final String paymentUnit;
+    private final String expectedUnit;
     private final List<String> allowedMints;
     private final List<String> relays;
     private final SuccessHandler successHandler;
@@ -53,18 +53,18 @@ public final class NostrPaymentListener {
     public NostrPaymentListener(byte[] secretKey32,
                                 String pubkeyHex,
                                 long expectedAmount,
+                                String expectedUnit,
                                 List<String> allowedMints,
                                 List<String> relays,
                                 SuccessHandler successHandler,
-                                ErrorHandler errorHandler,
-                                String paymentUnit) {
+                                ErrorHandler errorHandler) {
         if (secretKey32 == null || secretKey32.length != 32) {
             throw new IllegalArgumentException("secretKey32 must be 32 bytes");
         }
         this.secretKey32 = secretKey32;
         this.pubkeyHex = pubkeyHex;
         this.expectedAmount = expectedAmount;
-        this.paymentUnit = paymentUnit;
+        this.expectedUnit = expectedUnit;
         this.allowedMints = allowedMints;
         this.relays = relays;
         this.successHandler = successHandler;
@@ -142,7 +142,11 @@ public final class NostrPaymentListener {
             // paymentId here; higher-level callers can correlate via Nostr
             // metadata if needed.
             SwapToLightningMintManager.PaymentContext paymentContext =
-                    new SwapToLightningMintManager.PaymentContext(null, expectedAmount, paymentUnit);
+                    new SwapToLightningMintManager.PaymentContext(
+                            null,
+                            expectedAmount,
+                            expectedUnit
+                    );
 
             // Call the high-level, swap-aware redemption helper so that
             // incoming ecash from unknown mints can be swapped to the
@@ -155,6 +159,7 @@ public final class NostrPaymentListener {
                                     AppGlobals.INSTANCE.getAppContext(),
                                     payloadJson,
                                     expectedAmount,
+                                    expectedUnit,
                                     allowedMints,
                                     paymentContext,
                                     continuation

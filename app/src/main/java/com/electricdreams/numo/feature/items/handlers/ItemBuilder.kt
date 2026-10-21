@@ -2,6 +2,7 @@ package com.electricdreams.numo.feature.items.handlers
 
 import com.electricdreams.numo.core.model.Item
 import com.electricdreams.numo.core.model.PriceType
+import com.electricdreams.numo.core.model.UnitId
 import java.util.UUID
 
 /**
@@ -67,9 +68,15 @@ class ItemBuilder {
             this.sku = sku
             this.gtin = gtin
 
-            // Pricing
-            this.priceType = priceType
-            when (priceType) {
+            // Unit-aware pricing is authoritative when supplied by the validator. Legacy fields
+            // remain populated so older receipt and export code can still read the item.
+            val explicitUnit = UnitId.ofOrNull(validationResult.priceUnit)
+            this.priceType = when {
+                explicitUnit == null -> priceType
+                explicitUnit.isSat -> PriceType.SATS
+                else -> PriceType.FIAT
+            }
+            when (this.priceType) {
                 PriceType.FIAT -> {
                     price = validationResult.fiatPrice // Always store net price (excluding VAT)
                     priceSats = 0L
@@ -77,8 +84,12 @@ class ItemBuilder {
                 PriceType.SATS -> {
                     price = 0.0
                     priceSats = validationResult.satsPrice
+                }
             }
-            }
+            priceUnit = explicitUnit?.value
+            priceAtomic = validationResult.priceAtomic
+            grossPriceAtomic = validationResult.grossPriceAtomic
+            priceIssuerScope = validationResult.priceIssuerScope
 
             // VAT (available for both fiat and Bitcoin items)
             this.vatEnabled = vatEnabled

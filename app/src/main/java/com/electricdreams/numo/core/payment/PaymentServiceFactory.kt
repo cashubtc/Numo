@@ -2,6 +2,7 @@ package com.electricdreams.numo.core.payment
 
 import android.content.Context
 import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.payment.impl.BTCPayPaymentService
 import com.electricdreams.numo.core.payment.impl.LocalPaymentService
 import com.electricdreams.numo.core.prefs.PreferenceStore
@@ -17,9 +18,23 @@ import com.electricdreams.numo.core.util.MintManager
 object PaymentServiceFactory {
 
     fun create(context: Context): IPaymentService {
-        val prefs = PreferenceStore.app(context)
+        val unit = MintManager.getInstance(context).getPreferredUnit()
+        return create(context, unit)
+    }
 
-        if (prefs.getBoolean("btcpay_enabled", false)) {
+    /**
+     * Create a service for a captured charge unit. BTCPay's current API is sat-denominated, so
+     * non-sat payments stay on the local Cashu path instead of being silently re-denominated.
+     */
+    fun create(
+        context: Context,
+        paymentUnit: String,
+        issuerScope: String? = null,
+    ): IPaymentService {
+        val prefs = PreferenceStore.app(context)
+        val unit = UnitId.of(paymentUnit)
+
+        if (unit.isSat && prefs.getBoolean("btcpay_enabled", false)) {
             val config = BTCPayConfig(
                 serverUrl = prefs.getString("btcpay_server_url") ?: "",
                 apiKey = prefs.getString("btcpay_api_key") ?: "",
@@ -35,8 +50,10 @@ object PaymentServiceFactory {
         }
 
         return LocalPaymentService(
-            walletProvider = CashuWalletManager.getWalletProvider(),
-            mintManager = MintManager.getInstance(context)
+            walletProvider = CashuWalletManager.getWalletProvider(unit.value),
+            mintManager = MintManager.getInstance(context),
+            paymentUnit = unit.value,
+            issuerScope = issuerScope,
         )
     }
 }

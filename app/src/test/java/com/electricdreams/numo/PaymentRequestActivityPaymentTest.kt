@@ -7,6 +7,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
+import com.electricdreams.numo.core.model.AssetId
+import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.network.ConnectivityMonitor
 import com.electricdreams.numo.core.update.UpdateOperationGate
 import com.electricdreams.numo.core.util.MintManager
@@ -132,6 +134,7 @@ class PaymentRequestActivityPaymentTest {
     fun `resumed arkoor quote is checked in its saved sats wallet despite dollar preference`(): Unit = runBlocking {
         val manager = mock<MintManager>()
         whenever(manager.getPreferredUnit()).thenReturn("usd")
+        whenever(manager.getSupportedChargeAssets()).thenReturn(listOf(AssetId.global(UnitId.SAT)))
         ReflectionHelpers.setStaticField(MintManager::class.java, "instance", manager)
         val repository = mock<WalletRepository>()
         val wallet = mock<Wallet>()
@@ -248,7 +251,7 @@ class PaymentRequestActivityPaymentTest {
         completePayment(PaymentHistoryEntry.TYPE_ARKOOR)
         displaySuccess()
         displaySuccess()
-        verify(withdrawals, times(1)).onPaymentReceived("", "https://arkoor.test")
+        verify(withdrawals, times(1)).onPaymentReceived("", "https://arkoor.test", "sat")
     }
 
     @Test
@@ -257,7 +260,7 @@ class PaymentRequestActivityPaymentTest {
         ReflectionHelpers.setField(activity, "lightningMintUrl", "https://lightning.test")
         completePayment(PaymentHistoryEntry.TYPE_ARKOOR)
         displaySuccess()
-        verify(withdrawals).onPaymentReceived("", "https://arkoor.test")
+        verify(withdrawals).onPaymentReceived("", "https://arkoor.test", "sat")
     }
 
     @Test
@@ -266,7 +269,7 @@ class PaymentRequestActivityPaymentTest {
         ReflectionHelpers.setField(activity, "lightningMintUrl", "https://lightning.test")
         completePayment(PaymentHistoryEntry.TYPE_LIGHTNING)
         displaySuccess()
-        verify(withdrawals).onPaymentReceived("", "https://lightning.test")
+        verify(withdrawals).onPaymentReceived("", "https://lightning.test", "sat")
     }
 
     private fun assertLocalCheckoutAmount(
@@ -276,6 +279,11 @@ class PaymentRequestActivityPaymentTest {
         val mintManager = mock<MintManager>()
         whenever(mintManager.getPreferredUnit()).thenReturn(unit)
         whenever(mintManager.getAllowedMints()).thenReturn(emptyList())
+        val issuer = "https://points.test".takeIf { expectedUnit == "points" }
+        issuer?.let { activity.intent.putExtra(PaymentRequestActivity.EXTRA_PAYMENT_ISSUER_SCOPE, it) }
+        whenever(mintManager.getSupportedChargeAssets()).thenReturn(
+            listOf(AssetId(UnitId.of(expectedUnit), issuer)),
+        )
         ReflectionHelpers.setStaticField(MintManager::class.java, "instance", mintManager)
         ReflectionHelpers.callInstanceMethod<Void>(activity, "initializePaymentUnit")
         ReflectionHelpers.setField(activity, "paymentAmount", amount)

@@ -1,7 +1,8 @@
 package com.electricdreams.numo.core.model
 
 import com.google.gson.annotations.SerializedName
-import com.electricdreams.numo.core.util.CurrencyManager
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 /**
  * Immutable snapshot of an item in the checkout basket.
@@ -62,6 +63,22 @@ data class CheckoutBasketItem(
     /** VAT rate as integer percentage (e.g., 20 for 20%) */
     @SerializedName("vatRate")
     val vatRate: Int,
+
+    /** Canonical unit of [netPriceAtomic]. Null only in legacy receipt snapshots. */
+    @SerializedName("priceUnit")
+    val priceUnit: String? = null,
+
+    /** NET price per unit in the unit's atomic denomination. */
+    @SerializedName("netPriceAtomic")
+    val netPriceAtomic: Long? = null,
+
+    /** GROSS price per unit in the same atomic denomination. */
+    @SerializedName("grossPriceAtomic")
+    val grossPriceAtomic: Long? = null,
+
+    /** Issuer scope for non-fungible custom units. */
+    @SerializedName("priceIssuerScope")
+    val priceIssuerScope: String? = null,
 ) {
 
     /**
@@ -77,35 +94,39 @@ data class CheckoutBasketItem(
     /**
      * Calculate the net total (quantity × net price) in minor units.
      */
-    fun getNetTotalCents(): Long = netPriceCents * quantity
+    fun getNetTotalCents(): Long = Math.multiplyExact(netPriceCents, quantity.toLong())
 
     /**
      * Calculate the net total in sats (for sats-priced items).
      */
-    fun getNetTotalSats(): Long = priceSats * quantity
+    fun getNetTotalSats(): Long = Math.multiplyExact(priceSats, quantity.toLong())
 
     /**
      * Calculate VAT amount per unit in minor units.
      */
     fun getVatPerUnitCents(): Long {
         if (!vatEnabled || vatRate <= 0 || priceType != "FIAT") return 0L
-        return (netPriceCents * vatRate) / 100
+        return BigDecimal.valueOf(netPriceCents)
+            .multiply(BigDecimal.valueOf(vatRate.toLong()))
+            .divide(BigDecimal.valueOf(100L), 0, RoundingMode.DOWN)
+            .longValueExact()
     }
 
     /**
      * Calculate total VAT amount for this line item in minor units.
      */
-    fun getTotalVatCents(): Long = getVatPerUnitCents() * quantity
+    fun getTotalVatCents(): Long = Math.multiplyExact(getVatPerUnitCents(), quantity.toLong())
 
     /**
      * Calculate gross price per unit (including VAT) in minor units.
      */
-    fun getGrossPricePerUnitCents(): Long = netPriceCents + getVatPerUnitCents()
+    fun getGrossPricePerUnitCents(): Long = Math.addExact(netPriceCents, getVatPerUnitCents())
 
     /**
      * Calculate gross total (including VAT) in minor units.
      */
-    fun getGrossTotalCents(): Long = getGrossPricePerUnitCents() * quantity
+    fun getGrossTotalCents(): Long =
+        Math.multiplyExact(getGrossPricePerUnitCents(), quantity.toLong())
 
     /**
      * Check if this item is priced in sats.
@@ -117,6 +138,61 @@ data class CheckoutBasketItem(
      */
     fun isFiatPrice(): Boolean = priceType == "FIAT"
 
+    /** Resolve this snapshot's unit-bearing NET amount, including legacy receipts. */
+    fun getNetAtomicAmount(): AtomicAmount {
+        val unit = if (priceUnit == null) {
+            if (isSatsPrice()) UnitId.SAT else UnitId.of(priceCurrency)
+        } else {
+            requireNotNull(UnitId.ofOrNull(priceUnit)?.takeUnless { it.isReserved }) {
+                "Invalid checkout item unit: $priceUnit"
+            }
+        }
+        val asset = priceIssuerScope?.takeIf {
+            it.isNotBlank() && UnitDescriptor.defaultFor(unit).kind == UnitKind.CUSTOM
+        }?.let {
+            AssetId.mintScoped(unit, it)
+        } ?: AssetId.global(unit)
+        val value = netPriceAtomic ?: if (isSatsPrice()) {
+            priceSats
+        } else {
+            legacyFiatAtomicValue(netPriceCents, unit)
+        }
+        return AtomicAmount(value, asset)
+    }
+
+    fun getGrossAtomicAmount(): AtomicAmount {
+        val net = getNetAtomicAmount()
+        val explicitGross = grossPriceAtomic
+        if (explicitGross != null) return AtomicAmount(explicitGross, net.asset)
+        if (netPriceAtomic == null && isFiatPrice()) {
+            // Preserve the receipt's original VAT calculation before changing denomination.
+            return AtomicAmount(
+                legacyFiatAtomicValue(getGrossPricePerUnitCents(), net.unit),
+                net.asset,
+            )
+        }
+        if (!vatEnabled || vatRate <= 0) return net
+        val gross = BigDecimal.valueOf(net.value)
+            .multiply(BigDecimal.valueOf(100L + vatRate.toLong()))
+            .divide(
+                BigDecimal.valueOf(100L),
+                0,
+                RoundingMode.HALF_UP,
+            )
+            .longValueExact()
+        return AtomicAmount(gross, net.asset)
+    }
+
+    fun getNetLineAtomicAmount(): AtomicAmount = getNetAtomicAmount() * quantity
+
+    fun getGrossLineAtomicAmount(): AtomicAmount = getGrossAtomicAmount() * quantity
+
+    private fun legacyFiatAtomicValue(cents: Long, unit: UnitId): Long =
+        BigDecimal.valueOf(cents, 2)
+            .movePointRight(UnitDescriptor.defaultFor(unit).fractionDigits)
+            .setScale(0, RoundingMode.HALF_UP)
+            .longValueExact()
+
     companion object {
         /**
          * Create a CheckoutBasketItem from a BasketItem snapshot.
@@ -126,6 +202,7 @@ data class CheckoutBasketItem(
             currencyCode: String
         ): CheckoutBasketItem {
             val item = basketItem.item
+            val atomicPrice = item.getNetAtomicAmount(currencyCode)
             return CheckoutBasketItem(
                 itemId = item.id ?: "",
                 uuid = item.uuid,
@@ -135,11 +212,16 @@ data class CheckoutBasketItem(
                 category = item.category,
                 quantity = basketItem.quantity,
                 priceType = item.priceType.name,
+                // Retained for old receipt renderers; unit-aware readers use netPriceAtomic.
                 netPriceCents = (item.price * 100).toLong(),
                 priceSats = item.priceSats,
                 priceCurrency = currencyCode,
                 vatEnabled = item.vatEnabled,
                 vatRate = item.vatRate,
+                priceUnit = atomicPrice.unit.value,
+                netPriceAtomic = atomicPrice.value,
+                grossPriceAtomic = item.getGrossAtomicAmount(currencyCode).value,
+                priceIssuerScope = atomicPrice.asset.issuerScope,
             )
         }
     }

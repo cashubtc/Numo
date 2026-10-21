@@ -30,6 +30,8 @@ import com.electricdreams.numo.core.util.ItemManager
 import com.electricdreams.numo.databinding.ActivityItemListBinding
 import com.electricdreams.numo.feature.items.CsvImportHelper
 import com.electricdreams.numo.ui.util.DialogHelper
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 class ItemListActivity : AppCompatActivity() {
@@ -412,7 +414,9 @@ class ItemListActivity : AppCompatActivity() {
                 }
 
                 // Price
-                val currencyCode = com.electricdreams.numo.core.util.MintManager.getActiveCurrencyCode(itemView.context)
+                val currencyCode = com.electricdreams.numo.core.util.CurrencyManager
+                    .getInstance(itemView.context)
+                    .getCurrentCurrency()
                 priceView.text = item.getFormattedPrice(currencyCode)
 
                 // Stock quantity (only if tracking inventory)

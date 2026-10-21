@@ -12,7 +12,9 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintSet
 import com.electricdreams.numo.R
-import com.electricdreams.numo.core.model.Amount
+import com.electricdreams.numo.core.model.UnitAmountFormatter
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
 import com.electricdreams.numo.core.util.MintIconCache
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.databinding.ComponentMintListItemBinding
@@ -121,24 +123,16 @@ class MintListItem @JvmOverloads constructor(
         
         val preferredUnit = mintManager.getPreferredUnit()
         val supportsUnit = mintManager.mintSupportsUnit(url, preferredUnit)
-        val lowerUnit = preferredUnit.lowercase()
-        val isCustomUnit = lowerUnit != "sat"
         
         container.alpha = 1.0f
         if (!supportsUnit) {
             balanceText.text = context.getString(R.string.mints_unsupported_unit, preferredUnit)
         } else {
-            if (isCustomUnit) {
-                val currency = Amount.Currency.fromCode(lowerUnit)
-                if (currency.symbol != lowerUnit.uppercase()) {
-                    val valueToFormat = if (currency.isZeroDecimal()) balance * 100 else balance
-                    balanceText.text = Amount(valueToFormat, currency).toString()
-                } else {
-                    balanceText.text = "$balance $preferredUnit"
-                }
-            } else {
-                balanceText.text = Amount(balance, Amount.Currency.BTC).toString()
-            }
+            val unit = UnitId.of(preferredUnit)
+            balanceText.text = UnitAmountFormatter.formatAtomic(
+                balance,
+                UnitDescriptor.defaultFor(unit),
+            )
         }
         
         // Load icon

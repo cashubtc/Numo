@@ -44,6 +44,10 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.model.Amount
 import com.electricdreams.numo.core.model.Amount.Currency
+import com.electricdreams.numo.core.model.PaymentAssetResolver
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
+import com.electricdreams.numo.core.model.UnitAmountFormatter
 import com.electricdreams.numo.core.util.MintManager
 import com.electricdreams.numo.core.util.SavedBasketManager
 import com.electricdreams.numo.core.worker.BitcoinPriceWorker
@@ -125,7 +129,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     private enum class OverlayActionMode { SUCCESS, ERROR }
 
     private var paymentAmount: Long = 0
-    private var paymentUnit: String = "sat"
+    private var paymentUnit: UnitId = UnitId.SAT
+    private var paymentIssuerScope: String? = null
     private var bitcoinPriceWorker: BitcoinPriceWorker? = null
     private var hcePaymentRequest: String? = null
     private var hcePaymentRequestBech32: String? = null
@@ -338,7 +343,9 @@ class PaymentRequestActivity : AppCompatActivity() {
         // Initialize Bitcoin price worker
         bitcoinPriceWorker = BitcoinPriceWorker.getInstance(this)
 
-        // Get payment amount from intent
+        if (!initializePaymentUnit()) return
+
+        // Get payment amount from intent. It is always atomic in paymentUnit.
         paymentAmount = intent.getLongExtra(EXTRA_PAYMENT_AMOUNT, 0)
 
         if (paymentAmount <= 0) {
@@ -348,9 +355,9 @@ class PaymentRequestActivity : AppCompatActivity() {
             return
         }
 
-        // Get formatted amount string if provided, otherwise format as BTC
+        // Get formatted amount string if provided, otherwise use a unit-aware fallback.
         formattedAmountString = intent.getStringExtra(EXTRA_FORMATTED_AMOUNT)
-            ?: Amount(paymentAmount, Currency.BTC).toString()
+            ?: formatPaymentAmountFallback(paymentAmount, paymentUnit)
 
         // Check if we're resuming a pending payment
         pendingPaymentId = intent.getStringExtra(EXTRA_RESUME_PAYMENT_ID)
@@ -362,7 +369,6 @@ class PaymentRequestActivity : AppCompatActivity() {
         resumeLightningInvoice = intent.getStringExtra(EXTRA_LIGHTNING_INVOICE)
         resumeArkoorQuoteId = intent.getStringExtra(EXTRA_ARKOOR_QUOTE_ID)
         resumeArkoorMintUrl = intent.getStringExtra(EXTRA_ARKOOR_MINT_URL)
-        initializePaymentUnit()
 
         // Get resume data for Nostr if available
         resumeNostrSecretHex = intent.getStringExtra(EXTRA_NOSTR_SECRET_HEX)
@@ -453,8 +459,8 @@ class PaymentRequestActivity : AppCompatActivity() {
                 entryUnit = if (parsedBase.currency == Currency.BTC) "sat" else parsedBase.currency.name
                 enteredAmount = parsedBase.value
             } else {
-                // Fallback: use sats for base amount
-                entryUnit = "sat"
+                // Fallback: preserve the immutable charge unit.
+                entryUnit = paymentUnit.value
                 enteredAmount = baseAmountSats
             }
             Log.d(TAG, "Creating pending payment with tip: base=$enteredAmount $entryUnit, tip=$tipAmountSats sats, total=$paymentAmount sats")
@@ -466,7 +472,7 @@ class PaymentRequestActivity : AppCompatActivity() {
                 enteredAmount = parsedAmount.value
             } else {
                 // Fallback if parsing fails (shouldn't happen with valid formatted amounts)
-                entryUnit = "sat"
+                entryUnit = paymentUnit.value
                 enteredAmount = paymentAmount
             }
         }
@@ -485,29 +491,59 @@ class PaymentRequestActivity : AppCompatActivity() {
             basketId = savedBasketId,
             tipAmountSats = tipAmountSats,
             tipPercentage = tipPercentage,
+            ecashUnit = paymentUnit.value,
+            issuerScope = paymentIssuerScope,
         )
 
         Log.d(TAG, "✅ CREATED PENDING PAYMENT: id=$pendingPaymentId")
-        Log.d(TAG, "   💰 Total amount: $paymentAmount sats")
+        Log.d(TAG, "   💰 Total amount: $paymentAmount $paymentUnit")
         Log.d(TAG, "   📊 Base amount: $enteredAmount $entryUnit")  
         Log.d(TAG, "   💸 Tip: $tipAmountSats sats ($tipPercentage%)")
         Log.d(TAG, "   🛒 Has basket: ${checkoutBasketJson != null}")
         Log.d(TAG, "   📱 Formatted: $formattedAmountString")
     }
 
-    private fun initializePaymentUnit() {
-        // A checkout keeps its original unit even when the merchant changes preferences.
-        paymentUnit = intent.getStringExtra(EXTRA_PAYMENT_UNIT)
-            ?: pendingPaymentId?.let {
-                PaymentsHistoryActivity.getPaymentEntryById(this, it)?.getUnit()
+    private fun initializePaymentUnit(): Boolean {
+        // Capture the payment unit once. Legacy callers without the extra fall back to the
+        // preference only at this boundary; all downstream work uses this immutable snapshot.
+        val mintManager = MintManager.getInstance(this)
+        val savedPayment = intent.getStringExtra(EXTRA_RESUME_PAYMENT_ID)?.let {
+            PaymentsHistoryActivity.getPaymentEntryById(this, it)
+        }
+        val rawPaymentUnit = intent.getStringExtra(EXTRA_PAYMENT_UNIT)
+            ?: savedPayment?.getUnit()
+            ?: if (intent.hasExtra(EXTRA_ARKOOR_QUOTE_ID)) "sat" else mintManager.getPreferredUnit()
+        val paymentAssetResult = PaymentAssetResolver.resolve(
+            rawUnit = rawPaymentUnit,
+            rawIssuerScope = intent.getStringExtra(EXTRA_PAYMENT_ISSUER_SCOPE)
+                ?: savedPayment?.issuerScope,
+            supportedAssets = mintManager.getSupportedChargeAssets(),
+        )
+        val paymentAsset = when (paymentAssetResult) {
+            is PaymentAssetResolver.Result.Resolved -> paymentAssetResult.asset
+            is PaymentAssetResolver.Result.Rejected -> {
+                Log.e(
+                    TAG,
+                    "Rejected payment asset: unit=$rawPaymentUnit, " +
+                        "reason=${paymentAssetResult.reason}",
+                )
+                Toast.makeText(
+                    this,
+                    R.string.payment_request_error_unsupported_unit,
+                    Toast.LENGTH_SHORT,
+                ).show()
+                finish()
+                return false
             }
-            ?: if (resumeArkoorQuoteId != null) "sat" else MintManager.getInstance(this).getPreferredUnit()
+        }
+        paymentUnit = paymentAsset.unit
+        paymentIssuerScope = paymentAsset.issuerScope
+
+        return true
     }
 
     private fun updateConvertedAmount(formattedAmountString: String) {
-        val isCustomUnit = paymentUnit.lowercase() != "sat"
-        
-        if (isCustomUnit) {
+        if (!paymentUnit.isSat) {
             convertedAmountDisplay.visibility = View.GONE
             return
         }
@@ -544,6 +580,10 @@ class PaymentRequestActivity : AppCompatActivity() {
                 convertedAmountDisplay.visibility = View.GONE
             }
         }
+    }
+
+    private fun formatPaymentAmountFallback(amount: Long, unit: UnitId): String {
+        return UnitAmountFormatter.formatAtomic(amount, UnitDescriptor.defaultFor(unit))
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -633,7 +673,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         statusText.text = getString(R.string.payment_request_status_preparing)
 
         // Create the payment service (BTCPay or Local)
-        paymentService = PaymentServiceFactory.create(this)
+        paymentService = PaymentServiceFactory.create(
+            context = this,
+            paymentUnit = paymentUnit.value,
+            issuerScope = paymentIssuerScope,
+        )
 
         val isBtcPay = paymentService is BTCPayPaymentService
 
@@ -847,8 +891,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     private fun initializeLocalPaymentRequest() {
         // Get allowed mints supporting the active unit
         val mintManager = MintManager.getInstance(this)
-        val activeUnit = paymentUnit
-        val allowedMints = mintManager.getAllowedMints().filter { mintManager.mintSupportsUnit(it, activeUnit) }
+        val activeUnit = paymentUnit.value
+        val allowedMints = getAllowedMintsForPayment(mintManager)
         Log.d(TAG, "Using ${allowedMints.size} allowed mints for payment request")
 
         isDualQuoteCheckout = true
@@ -857,7 +901,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         // Offer independently quoted methods when the selected mint supports them.
         // Both start immediately, including when the delayed-Lightning preference is set.
         val preferredMint = resumeLightningMintUrl ?: resumeArkoorMintUrl
-            ?: mintManager.getPreferredLightningMint(activeUnit)
+            ?: paymentIssuerScope ?: mintManager.getPreferredLightningMint(activeUnit)
         val sockets = MintQuoteWebSocket(lifecycleScope)
         quoteSockets = sockets
         lightningHandler = LightningMintHandler(
@@ -886,13 +930,23 @@ class PaymentRequestActivity : AppCompatActivity() {
             // prevent them from paying with other mints even though the POS
             // will accept them via swap.
             val mintsForPaymentRequest =
-                if (mintManager.isSwapFromUnknownMintsEnabled()) null else allowedMints
+                if (
+                    mintManager.isSwapFromUnknownMintsEnabled() &&
+                    CashuPaymentHelper.supportsUnknownMintSwap(this, activeUnit)
+                ) {
+                    null
+                } else {
+                    allowedMints
+                }
 
             val generatedHce = CashuPaymentHelper.createPaymentRequest(
-                paymentAmount,
-                getString(R.string.payment_request_default_description, paymentAmount),
-                mintsForPaymentRequest,
-                paymentUnit = activeUnit,
+                amount = paymentAmount,
+                unit = activeUnit,
+                description = getString(
+                    R.string.payment_request_default_description,
+                    formatPaymentAmountFallback(paymentAmount, paymentUnit),
+                ),
+                allowedMints = mintsForPaymentRequest,
             )
             hcePaymentRequest = generatedHce?.original
             hcePaymentRequestBech32 = generatedHce?.bech32
@@ -915,8 +969,8 @@ class PaymentRequestActivity : AppCompatActivity() {
     private fun startArkoorPaymentFlow() {
         val manager = MintManager.getInstance(this)
         val mintUrl = resumeArkoorMintUrl ?: resumeLightningMintUrl
-            ?: manager.getPreferredLightningMint(paymentUnit)
-        if (mintUrl == null || paymentUnit != "sat") {
+            ?: manager.getPreferredLightningMint(paymentUnit.value)
+        if (mintUrl == null || !paymentUnit.isSat) {
             onArkoorUnavailable()
             return
         }
@@ -1491,17 +1545,18 @@ class PaymentRequestActivity : AppCompatActivity() {
                                 val paymentContext = com.electricdreams.numo.payment.SwapToLightningMintManager.PaymentContext(
                                     paymentId = paymentId,
                                     amountSats = paymentAmount,
-                                    unit = paymentUnit,
+                                    paymentUnit = paymentUnit.value,
                                 )
 
                                 val mintManager = MintManager.getInstance(this@PaymentRequestActivity)
-                                val activeUnit = paymentUnit
-                                val allowedMints = mintManager.getAllowedMints().filter { mintManager.mintSupportsUnit(it, activeUnit) }
+                                val activeUnit = paymentUnit.value
+                                val allowedMints = getAllowedMintsForPayment(mintManager)
 
                                 val redeemedToken = CashuPaymentHelper.redeemTokenWithSwap(
                                     appContext = this@PaymentRequestActivity,
                                     tokenString = token,
                                     expectedAmount = paymentAmount,
+                                    expectedUnit = activeUnit,
                                     allowedMints = allowedMints,
                                     paymentContext = paymentContext,
                                 )
@@ -1848,8 +1903,10 @@ class PaymentRequestActivity : AppCompatActivity() {
         
         // If we have tip info, show it below the converted amount
         if (tipAmountSats > 0) {
-            val tipAmount = Amount(tipAmountSats, Currency.BTC)
-            val tipAmountStr = tipAmount.toString()
+            val tipAmountStr = UnitAmountFormatter.formatAtomic(
+                tipAmountSats,
+                UnitDescriptor.defaultFor(paymentUnit),
+            )
             val tipText = if (tipPercentage > 0) {
                 getString(R.string.payment_request_tip_info_with_percentage, tipAmountStr, tipPercentage)
             } else {
@@ -1858,7 +1915,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             tipInfoText.text = tipText
             tipInfoText.visibility = View.VISIBLE
             
-            Log.d(TAG, "Displaying tip info: $tipAmountSats sats ($tipPercentage%)")
+            Log.d(TAG, "Displaying tip info: $tipAmountSats $paymentUnit ($tipPercentage%)")
         } else {
             tipInfoText.visibility = View.GONE
         }
@@ -1883,6 +1940,14 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
     }
 
+    private fun getAllowedMintsForPayment(mintManager: MintManager): List<String> {
+        val supportingMints = mintManager.getAllowedMints().filter {
+            mintManager.mintSupportsUnit(it, paymentUnit.value)
+        }
+        val issuerScope = paymentIssuerScope ?: return supportingMints
+        return supportingMints.filter { it == issuerScope }
+    }
+
     /**
      * Trigger post-payment operations (basket archiving + auto-withdrawal).
      * This is extracted so it can be called from both the normal flow and the NFC animation flow.
@@ -1893,7 +1958,11 @@ class PaymentRequestActivity : AppCompatActivity() {
         markBasketAsPaid()
         
         // Check for auto-withdrawal after successful payment (runs in background, survives activity destruction)
-        AutoWithdrawManager.getInstance(this).onPaymentReceived(token, receivedMintUrl)
+        AutoWithdrawManager.getInstance(this).onPaymentReceived(
+            token = token,
+            lightningMintUrl = receivedMintUrl,
+            paymentUnit = paymentUnit.value,
+        )
     }
 
     private fun dispatchPaymentReceivedWebhook() {
@@ -2397,6 +2466,7 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         const val EXTRA_PAYMENT_AMOUNT = "payment_amount"
         const val EXTRA_PAYMENT_UNIT = "payment_unit"
+        const val EXTRA_PAYMENT_ISSUER_SCOPE = "payment_issuer_scope"
         const val EXTRA_FORMATTED_AMOUNT = "formatted_amount"
         const val RESULT_EXTRA_TOKEN = "payment_token"
         const val RESULT_EXTRA_AMOUNT = "payment_amount"

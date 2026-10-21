@@ -26,13 +26,10 @@
 
     <!-- Basket receipt item details -->
     <string name="basket_receipt_vat_label">incl. %1$d%% VAT</string>
-    <string name="basket_receipt_equivalent_label">equivalent</string>
     <string name="basket_receipt_payment_item_label">Payment</string>
     <string name="basket_receipt_paid_equivalent_label">paid</string>
 
     <!-- Basket receipt totals and tip -->
-    <string name="basket_receipt_fiat_subtotal_net_label">Fiat Subtotal (net)</string>
-    <string name="basket_receipt_fiat_items_label">Fiat Items</string>
     <string name="basket_receipt_item_each">%1$s each</string>
     <string name="basket_receipt_total_paid_label">Total Paid</string>
     <string name="basket_receipt_tip_label">Tip</string>

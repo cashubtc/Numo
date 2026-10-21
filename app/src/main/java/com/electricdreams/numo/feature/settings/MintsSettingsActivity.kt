@@ -14,22 +14,25 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.electricdreams.numo.R
+import com.electricdreams.numo.core.cashu.CashuWalletManager
+import com.electricdreams.numo.core.model.UnitDescriptor
+import com.electricdreams.numo.core.model.UnitId
+import com.electricdreams.numo.ui.components.UnitPickerDialog
+import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
+import com.electricdreams.numo.core.util.MintIconCache
+import com.electricdreams.numo.core.util.MintManager
+import com.electricdreams.numo.core.util.MintProfileService
+import com.electricdreams.numo.feature.onboarding.AddMintBottomSheet
+import com.electricdreams.numo.feature.scanner.QRScannerActivity
+import com.electricdreams.numo.ui.components.MintListItem
+import com.electricdreams.numo.ui.util.DialogHelper
 import com.google.android.material.materialswitch.MaterialSwitch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-import com.electricdreams.numo.R
-import com.electricdreams.numo.core.cashu.CashuWalletManager
-import com.electricdreams.numo.core.util.BalanceRefreshBroadcast
-import com.electricdreams.numo.core.util.MintIconCache
-import com.electricdreams.numo.core.util.MintManager
-import com.electricdreams.numo.core.util.MintProfileService
 import com.electricdreams.numo.databinding.ActivityMintsSettingsBinding
-import com.electricdreams.numo.feature.onboarding.AddMintBottomSheet
-import com.electricdreams.numo.feature.scanner.QRScannerActivity
-import com.electricdreams.numo.ui.components.MintListItem
-import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.ui.util.applySettingsWindowInsets
 
 /**
@@ -58,6 +61,7 @@ class MintsSettingsActivity : AppCompatActivity() {
     private lateinit var activeUnitRow: View
     private lateinit var activeUnitValue: TextView
     private lateinit var swapUnknownMintsSwitch: MaterialSwitch
+    private lateinit var swapUnknownMintsRow: View
     private lateinit var allMintsHeader: TextView
     private lateinit var mintsContainer: LinearLayout
     private lateinit var emptyState: View
@@ -157,6 +161,7 @@ class MintsSettingsActivity : AppCompatActivity() {
         activeUnitRow = binding.activeUnitRow
         activeUnitValue = binding.activeUnitValue
         swapUnknownMintsSwitch = binding.swapUnknownMintsSwitch
+        swapUnknownMintsRow = binding.swapUnknownMintsRow
         allMintsHeader = binding.allMintsHeader
         mintsContainer = binding.mintsContainer
         emptyState = binding.emptyState
@@ -211,36 +216,31 @@ class MintsSettingsActivity : AppCompatActivity() {
     }
 
     private fun showUnitSelectorDialog() {
-        val mintUrl = selectedLightningMint ?: return
         lifecycleScope.launch {
-            val limits = mintManager.getMintLimits(mintUrl, this@MintsSettingsActivity)
-            val units = mutableSetOf<String>()
-            limits?.mintMethods?.forEach { units.add(it.unit.lowercase()) }
-            if (units.isEmpty()) {
-                units.add("sat")
-            }
+            val items = mintManager.getSupportedUnits().map { it.value }
+            val currentUnit = mintManager.getPreferredUnit()
+            if (items.isEmpty() || items.singleOrNull() == currentUnit) return@launch
+            val selectedIndex = items.indexOf(currentUnit)
 
-            val items = units.toList().sorted()
-            val currentUnit = mintManager.getPreferredUnit().lowercase()
-            var selectedIndex = items.indexOf(currentUnit)
-            if (selectedIndex < 0) selectedIndex = 0
-
-            val builder = androidx.appcompat.app.AlertDialog.Builder(this@MintsSettingsActivity)
-            builder.setTitle(getString(R.string.mints_select_base_unit))
-            builder.setSingleChoiceItems(items.toTypedArray(), selectedIndex) { dialog, which ->
+            UnitPickerDialog.show(
+                context = this@MintsSettingsActivity,
+                title = R.string.mints_select_base_unit,
+                labels = items.map { UnitDescriptor.defaultFor(UnitId.of(it)).displayCode },
+                selectedIndex = selectedIndex,
+                description = R.string.unit_picker_mints_description,
+            ) { which ->
                 val selectedUnit = items[which]
                 if (selectedUnit != currentUnit) {
                     mintManager.setPreferredUnit(selectedUnit)
+                    selectedLightningMint = mintManager.getPreferredLightningMint(selectedUnit)
                     // Trigger refresh
-                    activeUnitValue.text = selectedUnit
+                    activeUnitValue.text = UnitDescriptor.defaultFor(UnitId.of(selectedUnit)).displayCode
                     // Let CashuWalletManager rebuild the wallet with the new unit
                     // Balance will be updated via broadcast
                     Toast.makeText(this@MintsSettingsActivity, getString(R.string.mints_changed_base_unit_toast, selectedUnit), Toast.LENGTH_SHORT).show()
+                    loadMintsAndBalances()
                 }
-                dialog.dismiss()
             }
-            builder.setNegativeButton(android.R.string.cancel, null)
-            builder.show()
         }
     }
 
@@ -377,7 +377,16 @@ class MintsSettingsActivity : AppCompatActivity() {
         lightningMintSection.visibility = View.VISIBLE
 
         lightningMintRow.bind(url, mintBalances[url] ?: 0L)
-        activeUnitValue.text = mintManager.getPreferredUnit()
+        val preferredUnit = mintManager.getPreferredUnit()
+        activeUnitValue.text = UnitDescriptor.defaultFor(UnitId.of(preferredUnit)).displayCode
+        activeUnitRow.visibility = if (mintManager.getSupportedUnits().any { it.value != preferredUnit }) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+        swapUnknownMintsRow.visibility = if (
+            com.electricdreams.numo.ndef.CashuPaymentHelper.supportsUnknownMintSwap(this, preferredUnit)
+        ) View.VISIBLE else View.GONE
     }
 
     private fun openMintDetails(mintUrl: String) {

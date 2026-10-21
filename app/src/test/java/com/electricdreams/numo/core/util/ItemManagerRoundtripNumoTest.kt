@@ -69,4 +69,27 @@ class ItemManagerRoundtripNumoTest {
         assertTrue(importedItem.trackInventory)
         assertEquals(50, importedItem.quantity)
     }
+
+    @Test
+    fun `custom unit metadata survives CSV roundtrip`() {
+        itemManager.addItem(
+            Item(
+                name = "Arcade credit",
+                priceType = PriceType.FIAT,
+                priceUnit = "credit",
+                priceAtomic = 42L,
+                priceIssuerScope = "https://arcade.example",
+            ),
+        )
+
+        val file = File(context.cacheDir, "test_custom_unit.csv")
+        FileOutputStream(file).use { itemManager.exportItemsToCsv(it) }
+        itemManager.clearItems()
+
+        assertEquals(1, itemManager.importItemsFromCsv(file.absolutePath, true))
+        val imported = itemManager.getAllItems().single()
+        assertEquals("credit", imported.priceUnit)
+        assertEquals(42L, imported.priceAtomic)
+        assertEquals("https://arcade.example", imported.priceIssuerScope)
+    }
 }
