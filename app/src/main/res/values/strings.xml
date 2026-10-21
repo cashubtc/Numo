@@ -185,6 +185,8 @@
     <string name="onboarding_mints_hero_helper">Withdraw to your own wallet anytime, or set a payout threshold to do it automatically.</string>
     <string name="onboarding_mints_popular_header">POPULAR MINTS</string>
     <string name="onboarding_mints_tap_hint">Tap to change default mint</string>
+    <string name="onboarding_mints_restore_hint">Tap × to exclude a mint</string>
+    <string name="onboarding_mints_exclude">Exclude %1$s from restore</string>
     <string name="onboarding_mints_add_new_button">+ Add New Mint</string>
     <string name="onboarding_mints_set_default_toast">%1$s set as default</string>
     <string name="onboarding_add_mint_sheet_title">Add a Mint</string>

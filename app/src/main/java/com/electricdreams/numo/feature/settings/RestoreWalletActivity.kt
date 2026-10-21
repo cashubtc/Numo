@@ -701,16 +701,6 @@ class RestoreWalletActivity : AppCompatActivity() {
         mintProgressContainer.removeAllViews()
         mintProgressViews.clear()
 
-        // First, update the MintManager with selected mints
-        val mintManager = MintManager.getInstance(this)
-
-        // Add any new mints that weren't previously configured
-        for (mintUrl in selectedMints) {
-            if (!mintManager.isMintAllowed(mintUrl)) {
-                mintManager.addMint(mintUrl)
-            }
-        }
-
         // Initialize mint progress items for selected mints
         selectedMints.forEach { mintUrl ->
             val progressView = createMintProgressView(mintUrl)

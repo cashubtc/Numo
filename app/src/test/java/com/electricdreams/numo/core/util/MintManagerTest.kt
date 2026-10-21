@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -76,6 +78,49 @@ class MintManagerTest {
         assertEquals(listOf(customMint), mintManager.getAllowedMints())
         assertEquals(customMint, mintManager.getPreferredLightningMint())
         assertFalse(mintManager.isSwapFromUnknownMintsEnabled())
+    }
+
+    @Test
+    fun `restore commits selected and preferred mints without requesting a rebuild`() {
+        var notified = false
+        mintManager.setMintChangeListener(object : MintManager.MintChangeListener {
+            override fun onMintsChanged(newMints: List<String>) {
+                notified = true
+            }
+        })
+        val selected = listOf("https://first.mint", "https://preferred.mint")
+        mintManager.commitRestoredMints(selected, selected.last()) { }
+
+        assertEquals(selected.toSet(), mintManager.getAllowedMints().toSet())
+        assertEquals(selected.last(), mintManager.getPreferredLightningMint())
+        assertFalse(notified)
+        resetSingleton()
+        val reloaded = MintManager.getInstance(context)
+        assertEquals(selected.toSet(), reloaded.getAllowedMints().toSet())
+        assertEquals(selected.last(), reloaded.getPreferredLightningMint())
+    }
+
+    @Test
+    fun `failed wallet commit rolls back mint configuration in memory and on disk`() {
+        val originalMints = mintManager.getAllowedMints().toSet()
+        val originalPreferred = mintManager.getPreferredLightningMint()
+        val failure = IllegalStateException("Could not save restored wallet")
+
+        try {
+            mintManager.commitRestoredMints(listOf("https://new.mint"), null) {
+                throw failure
+            }
+            fail("Restore must fail")
+        } catch (exception: IllegalStateException) {
+            assertSame(failure, exception)
+        }
+
+        assertEquals(originalMints, mintManager.getAllowedMints().toSet())
+        assertEquals(originalPreferred, mintManager.getPreferredLightningMint())
+        resetSingleton()
+        val reloaded = MintManager.getInstance(context)
+        assertEquals(originalMints, reloaded.getAllowedMints().toSet())
+        assertEquals(originalPreferred, reloaded.getPreferredLightningMint())
     }
 
     @Test

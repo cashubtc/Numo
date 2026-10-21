@@ -348,6 +348,12 @@ class OnboardingActivity : AppCompatActivity() {
             override fun onAddMintClicked() {
                 showAddMintBottomSheet()
             }
+            override fun onMintRemoved(mintUrl: String) {
+                discoveredMints.remove(mintUrl)
+                selectedMints.clear()
+                selectedMints.addAll(mintAdapter.getAllSelectedMints())
+                updateContinueButtonState()
+            }
             override fun onRequestSetDefault(mintUrl: String, mintName: String) {
                 val previousDefaultUrl = mintAdapter.getDefaultMintUrl()
                 mintAdapter.confirmSetDefault(mintUrl)
@@ -1175,14 +1181,14 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun performRestore() {
         val mnemonic = enteredMnemonic ?: return
+        selectedMints.clear()
+        selectedMints.addAll(mintAdapter.getAllSelectedMints())
+        if (selectedMints.isEmpty()) return
 
         showStep(OnboardingStep.RESTORING)
         restoringStatus.text = getString(R.string.onboarding_restoring_initializing)
         mintProgressContainer.removeAllViews()
         mintProgressViews.clear()
-
-        // Persist final onboarding selection before restore.
-        applySelectedMintsToMintManager()
 
         // Create progress views for each mint
         for (mintUrl in selectedMints) {
@@ -1197,6 +1203,7 @@ class OnboardingActivity : AppCompatActivity() {
                     mnemonic,
                     this@OnboardingActivity,
                     selectedMintUrls = selectedMints.toList(),
+                    preferredMintUrl = mintAdapter.getDefaultMintUrl(),
                 ) { mintUrl, status, before, after ->
                     if (selectedMints.contains(mintUrl)) {
                         withContext(Dispatchers.Main) {
@@ -1264,7 +1271,7 @@ class OnboardingActivity : AppCompatActivity() {
         // All popular mints start as accepted
         val acceptedMints = selectedMints.filter { it != defaultMint }.toSet()
 
-        mintAdapter.setMints(defaultMint, popularMints, acceptedMints)
+        mintAdapter.setMints(defaultMint, popularMints, acceptedMints, allowRemoval = isRestoreFlow)
         updateContinueButtonState()
         if (mintList.isEmpty()) {
             Toast.makeText(

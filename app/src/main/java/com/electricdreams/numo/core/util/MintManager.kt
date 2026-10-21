@@ -98,6 +98,38 @@ class MintManager private constructor(context: Context) {
     /** Get the list of allowed mints. */
     fun getAllowedMints(): List<String> = ArrayList(allowedMints)
 
+    /** Commit a restore selection without scheduling a rebuild of the staged wallet. */
+    internal fun commitRestoredMints(
+        mintUrls: List<String>,
+        preferredMintUrl: String?,
+        commitWallet: () -> Unit,
+    ) {
+        val restoredMints = mintUrls.toMutableSet()
+        require(restoredMints.isNotEmpty()) { "Select at least one mint to restore" }
+        val preferred = listOfNotNull(preferredMintUrl, preferredLightningMint)
+            .firstOrNull { it in restoredMints && mintSupportsUnit(it, preferredUnit) }
+            ?: restoredMints.firstOrNull { mintSupportsUnit(it, preferredUnit) }
+
+        try {
+            check(preferences.edit()
+                .putStringSet(KEY_MINTS, restoredMints)
+                .putString(KEY_PREFERRED_LIGHTNING_MINT, preferred)
+                .commit()) { "Could not save restored mints" }
+            commitWallet()
+        } catch (exception: Exception) {
+            val rolledBack = preferences.edit()
+                .putStringSet(KEY_MINTS, allowedMints)
+                .putString(KEY_PREFERRED_LIGHTNING_MINT, preferredLightningMint)
+                .commit()
+            if (!rolledBack) {
+                Log.e(TAG, "Could not roll back restored mint preferences")
+            }
+            throw exception
+        }
+        allowedMints = restoredMints
+        preferredLightningMint = preferred
+    }
+
     /**
      * Returns true if at least one mint is configured.
      * Used by UI to disable payment flows when no mints are available.

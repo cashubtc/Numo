@@ -145,6 +145,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
      * @param newMnemonic The 12-word seed phrase to restore from
      * @param context Optional context to initialize the manager if not already initialized
      * @param selectedMintUrls Mints to restore; defaults to all configured mints
+     * @param preferredMintUrl Preferred Lightning mint after a successful restore
      * @param onMintProgress Callback for progress updates: (mintUrl, status, balanceBefore, balanceAfter)
      * @return Map of mint URLs to their balance changes (newBalance - oldBalance)
      */
@@ -152,6 +153,7 @@ object CashuWalletManager : MintManager.MintChangeListener {
         newMnemonic: String,
         context: Context? = null,
         selectedMintUrls: List<String>? = null,
+        preferredMintUrl: String? = null,
         onMintProgress: suspend (mintUrl: String, status: String, balanceBefore: Long, balanceAfter: Long) -> Unit
     ): Map<String, Pair<Long, Long>> = walletMutex.withLock {
         val mnemonic = newMnemonic.trim().lowercase(Locale.ROOT)
@@ -208,7 +210,9 @@ object CashuWalletManager : MintManager.MintChangeListener {
             )
             // Retain the previous wallet locally for recovery after an intentional replacement.
             oldMnemonic?.let { values["wallet_archive_$oldName"] = it }
-            check(prefs.commitStrings(values)) { "Could not save restored wallet" }
+            mintManager.commitRestoredMints(mints, preferredMintUrl) {
+                check(prefs.commitStrings(values)) { "Could not save restored wallet" }
+            }
 
             val oldWallet = wallet
             val oldDatabase = database

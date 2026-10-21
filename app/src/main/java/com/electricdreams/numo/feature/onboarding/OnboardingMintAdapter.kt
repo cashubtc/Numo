@@ -23,6 +23,7 @@ class OnboardingMintAdapter(
         fun onDefaultMintChanged(newDefaultUrl: String)
         fun onAddMintClicked()
         fun onRequestSetDefault(mintUrl: String, mintName: String)
+        fun onMintRemoved(mintUrl: String)
     }
 
     sealed class ListItem {
@@ -67,13 +68,20 @@ class OnboardingMintAdapter(
     val accepted = mutableSetOf<String>()
 
     private var headerTitle = ""
+    private var allowRemoval = false
 
     fun setHeaderStrings(headerTitle: String) {
         this.headerTitle = headerTitle
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setMints(defaultUrl: String?, popularUrls: List<String>, acceptedUrls: Set<String>) {
+    fun setMints(
+        defaultUrl: String?,
+        popularUrls: List<String>,
+        acceptedUrls: Set<String>,
+        allowRemoval: Boolean = false,
+    ) {
+        this.allowRemoval = allowRemoval
         mints.clear()
         defaultUrl?.let { mints.add(it) }
         mints.addAll(popularUrls)
@@ -81,6 +89,16 @@ class OnboardingMintAdapter(
         accepted.addAll(acceptedUrls)
         rebuildItems()
         notifyDataSetChanged()
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun removeMint(url: String) {
+        if (!allowRemoval || pendingSwapIndex != -1 || !mints.remove(url)) return
+        accepted.remove(url)
+        mints.firstOrNull()?.let { accepted.remove(it) }
+        rebuildItems()
+        notifyDataSetChanged()
+        listener.onMintRemoved(url)
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -372,7 +390,10 @@ class OnboardingMintAdapter(
             is ListItem.Header -> {
                 val h = holder as HeaderViewHolder
                 h.title.text = item.title
-                h.count.setText(R.string.onboarding_mints_tap_hint)
+                h.count.setText(
+                    if (allowRemoval) R.string.onboarding_mints_restore_hint
+                    else R.string.onboarding_mints_tap_hint
+                )
 
                 val lp = h.itemView.layoutParams as RecyclerView.LayoutParams
                 lp.topMargin = (20 * density).toInt()
@@ -387,6 +408,7 @@ class OnboardingMintAdapter(
                     .setAllCornerSizes(22f * density)
                     .build()
                 listener.onLoadMintIcon(item.url, h.mintIcon)
+                bindRemoveButton(h.removeButton, item.url)
             }
             is ListItem.Mint -> {
                 val h = holder as MintViewHolder
@@ -398,6 +420,7 @@ class OnboardingMintAdapter(
                     .setAllCornerSizes(20f * density)
                     .build()
                 listener.onLoadMintIcon(item.url, h.icon)
+                bindRemoveButton(h.removeButton, item.url)
 
                 val lp = h.itemView.layoutParams as RecyclerView.LayoutParams
                 h.itemView.background =
@@ -444,6 +467,15 @@ class OnboardingMintAdapter(
         }
     }
 
+    private fun bindRemoveButton(button: View, mintUrl: String) {
+        button.visibility = if (allowRemoval) View.VISIBLE else View.GONE
+        button.contentDescription = button.context.getString(
+            R.string.onboarding_mints_exclude,
+            listener.onResolveMintName(mintUrl),
+        )
+        button.setOnClickListener { removeMint(mintUrl) }
+    }
+
     class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById(R.id.header_title)
         val count: TextView = view.findViewById(R.id.header_count)
@@ -454,11 +486,13 @@ class OnboardingMintAdapter(
         val mintName: TextView = view.findViewById(R.id.hero_mint_name)
         val mintSubtitle: TextView = view.findViewById(R.id.hero_mint_subtitle)
         val gradientRing: GradientRingView = view.findViewById(R.id.hero_gradient_ring)
+        val removeButton: View = view.findViewById(R.id.remove_mint_button)
     }
 
     class MintViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val icon: ShapeableImageView = view.findViewById(R.id.mint_icon)
         val name: TextView = view.findViewById(R.id.mint_name)
+        val removeButton: View = view.findViewById(R.id.remove_mint_button)
     }
 
     class AddMintViewHolder(view: View) : RecyclerView.ViewHolder(view) {

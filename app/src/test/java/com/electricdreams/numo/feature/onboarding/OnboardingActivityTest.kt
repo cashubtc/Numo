@@ -5,6 +5,7 @@ import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import android.widget.FrameLayout
+import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -361,6 +362,72 @@ class OnboardingActivityTest {
     }
 
     @Test
+    fun `restore review can exclude unavailable default and promote a healthy mint`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val unavailable = "https://unavailable.mint"
+                val healthy = "https://healthy.mint"
+                setupMints(activity, default = unavailable, popular = listOf(healthy))
+                ReflectionHelpers.setField(activity, "isRestoreFlow", true)
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
+
+                removeButtonForMint(activity, 0).apply {
+                    assertEquals(View.VISIBLE, visibility)
+                    performClick()
+                }
+
+                val adapter = ReflectionHelpers.getField<OnboardingMintAdapter>(activity, "mintAdapter")
+                assertEquals(healthy, adapter.getDefaultMintUrl())
+                assertEquals(setOf(healthy), adapter.getAllSelectedMints())
+                assertEquals(setOf(healthy), ReflectionHelpers.getField<Set<String>>(
+                    activity, "selectedMints",
+                ))
+                // Re-rendering after a failed attempt must not select the excluded mint again.
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
+                assertEquals(setOf(healthy), adapter.getAllSelectedMints())
+                assertTrue(activity.findViewById<MaterialButton>(R.id.mints_continue_button).isEnabled)
+            }
+        }
+    }
+
+    @Test
+    fun `restore review can exclude a non-default mint and disables continue when empty`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val healthy = "https://healthy.mint"
+                val unavailable = "https://unavailable.mint"
+                setupMints(activity, default = healthy, popular = listOf(unavailable))
+                ReflectionHelpers.setField(activity, "isRestoreFlow", true)
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
+
+                removeButtonForMint(activity, 2).performClick()
+
+                val adapter = ReflectionHelpers.getField<OnboardingMintAdapter>(activity, "mintAdapter")
+                assertEquals(healthy, adapter.getDefaultMintUrl())
+                assertEquals(setOf(healthy), adapter.getAllSelectedMints())
+                removeButtonForMint(activity, 0).performClick()
+                assertNull(adapter.getDefaultMintUrl())
+                assertTrue(adapter.getAllSelectedMints().isEmpty())
+                assertFalse(activity.findViewById<MaterialButton>(R.id.mints_continue_button).isEnabled)
+                assertEquals(2, adapter.itemCount)
+            }
+        }
+    }
+
+    @Test
+    fun `new wallet review keeps removal controls hidden`() {
+        ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                setupMints(activity, "https://first.mint", listOf("https://second.mint"))
+                ReflectionHelpers.callInstanceMethod<Unit>(activity, "updateReviewMintsUI")
+
+                assertEquals(View.GONE, removeButtonForMint(activity, 0).visibility)
+                assertEquals(View.GONE, removeButtonForMint(activity, 2).visibility)
+            }
+        }
+    }
+
+    @Test
     fun `review screen continue button exists and is enabled with mints`() {
         ActivityScenario.launch(OnboardingActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
@@ -387,6 +454,14 @@ class OnboardingActivityTest {
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────
+
+    private fun removeButtonForMint(activity: OnboardingActivity, position: Int): View {
+        val recycler = activity.findViewById<RecyclerView>(R.id.mints_recycler_view)
+        val adapter = ReflectionHelpers.getField<OnboardingMintAdapter>(activity, "mintAdapter")
+        val holder = adapter.onCreateViewHolder(recycler, adapter.getItemViewType(position))
+        adapter.onBindViewHolder(holder, position)
+        return holder.itemView.findViewById(R.id.remove_mint_button)
+    }
 
     private fun setupMints(activity: OnboardingActivity, default: String, popular: List<String>) {
         val discovered = ReflectionHelpers.getField<LinkedHashSet<String>>(activity, "discoveredMints")

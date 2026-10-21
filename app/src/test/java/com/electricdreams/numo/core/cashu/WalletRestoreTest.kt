@@ -36,6 +36,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.util.ReflectionHelpers
 import java.io.File
 
 @RunWith(RobolectricTestRunner::class)
@@ -65,6 +66,9 @@ class WalletRestoreTest {
         oldFile.writeText("original database")
         backup = File(context.filesDir, "numo_recovery_backup.json")
         backup.writeText("original encrypted backup")
+        context.getSharedPreferences("MintPreferences", Context.MODE_PRIVATE)
+            .edit().clear().commit()
+        ReflectionHelpers.setStaticField(MintManager::class.java, "instance", null)
         MintManager.getInstance(context).setMintChangeListener(null)
     }
 
@@ -99,6 +103,9 @@ class WalletRestoreTest {
 
     @Test
     fun `mint restore failure preserves active wallet`() = runTest {
+        val mintManager = MintManager.getInstance(context)
+        val originalMints = mintManager.getAllowedMints()
+        val originalPreferred = mintManager.getPreferredLightningMint()
         val replacement: WalletRepository = mock()
         val mint: Wallet = mock()
         whenever(replacement.getWallet(any(), any())).thenReturn(mint)
@@ -107,18 +114,21 @@ class WalletRestoreTest {
         expectFailure {
             CashuWalletManager.restoreFromMnemonic(
                 mnemonic,
-                selectedMintUrls = MintManager.getInstance(context).getAllowedMints().take(1),
+                selectedMintUrls = listOf("https://new.mint"),
             ) { _, _, _, _ -> }
         }
         assertOriginalWallet()
+        assertEquals(originalMints, mintManager.getAllowedMints())
+        assertEquals(originalPreferred, mintManager.getPreferredLightningMint())
         verify(replacement).close()
     }
 
     @Test
     fun `deselected unavailable mint does not prevent selected mint restore`() = runTest {
-        val mints = MintManager.getInstance(context).getAllowedMints()
-        val selectedUrl = mints.first()
-        val unavailableUrl = mints.last()
+        val mintManager = MintManager.getInstance(context)
+        val mints = mintManager.getAllowedMints()
+        val unavailableUrl = requireNotNull(mintManager.getPreferredLightningMint())
+        val selectedUrl = mints.first { it != unavailableUrl }
         assertTrue(selectedUrl != unavailableUrl)
         val replacement: WalletRepository = mock()
         val mint: Wallet = mock()
@@ -132,11 +142,21 @@ class WalletRestoreTest {
         val result = CashuWalletManager.restoreFromMnemonic(
             mnemonic,
             selectedMintUrls = listOf(selectedUrl),
-        ) { mintUrl, _, _, _ -> progressMints.add(mintUrl) }
+        ) { mintUrl, _, _, _ ->
+            progressMints.add(mintUrl)
+            assertEquals(mints, mintManager.getAllowedMints())
+            assertEquals(unavailableUrl, mintManager.getPreferredLightningMint())
+        }
 
         assertEquals(mapOf(selectedUrl to (0L to 42L)), result)
         assertEquals(setOf(selectedUrl), progressMints)
         assertSame(replacement, CashuWalletManager.getWallet())
+        assertEquals(listOf(selectedUrl), mintManager.getAllowedMints())
+        assertEquals(selectedUrl, mintManager.getPreferredLightningMint())
+        ReflectionHelpers.setStaticField(MintManager::class.java, "instance", null)
+        val reloadedMints = MintManager.getInstance(context)
+        assertEquals(listOf(selectedUrl), reloadedMints.getAllowedMints())
+        assertEquals(selectedUrl, reloadedMints.getPreferredLightningMint())
         verify(replacement).createWallet(MintUrl(selectedUrl), CurrencyUnit.Sat, 10u)
         verify(replacement, never()).createWallet(eq(MintUrl(unavailableUrl)), any(), any())
         verify(replacement, never()).getWallet(eq(MintUrl(unavailableUrl)), any())
