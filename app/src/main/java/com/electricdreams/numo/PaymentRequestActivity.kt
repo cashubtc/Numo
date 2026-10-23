@@ -413,6 +413,14 @@ class PaymentRequestActivity : AppCompatActivity() {
         // Set up tip display UI (after pending payment is created)
         setupTipDisplay()
 
+        val resumedSwap = pendingPaymentId?.let {
+            PaymentsHistoryActivity.getPaymentEntryById(this, it)
+        }
+        if (resumedSwap?.swapToLightningMintJson != null) {
+            handlePendingSwap(resumedSwap.id)
+            return
+        }
+
         // Initialize all payment modes (NDEF, Nostr, Lightning)
         initializePaymentRequest()
 
@@ -1293,8 +1301,12 @@ class PaymentRequestActivity : AppCompatActivity() {
 
             override fun onTokenReceived(token: String) {
                 runOnUiThread {
-                    handlePaymentSuccess(token)
+                    if (token.isEmpty()) handleLightningPaymentSuccess() else handlePaymentSuccess(token)
                 }
+            }
+
+            override fun onPaymentPending(paymentId: String) {
+                runOnUiThread { handlePendingSwap(paymentId) }
             }
 
             override fun onPaymentFailure(message: String) {
@@ -1316,7 +1328,8 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         if (isResumingPayment && resumeNostrSecretHex != null && resumeNostrNprofile != null) {
             // Resume with stored keys
-            handler.resume(paymentAmount, resumeNostrSecretHex!!, resumeNostrNprofile!!, callback)
+            handler.resume(paymentAmount, resumeNostrSecretHex!!, resumeNostrNprofile!!, callback,
+                pendingPaymentId)
         } else {
             // Start fresh
             handler.start(paymentAmount, pendingPaymentId, callback)
@@ -1516,6 +1529,8 @@ class PaymentRequestActivity : AppCompatActivity() {
                                         handleLightningPaymentSuccess()
                                     }
                                 }
+                            } catch (e: CashuPaymentHelper.PendingSwapException) {
+                                withContext(Dispatchers.Main) { handlePendingSwap(e.paymentId) }
                             } catch (e: CashuPaymentHelper.RedemptionException) {
                                 val msg = e.message ?: "Unknown redemption error"
                                 Log.e(TAG, "Error in NDEF payment redemption: $msg", e)
@@ -1724,7 +1739,52 @@ class PaymentRequestActivity : AppCompatActivity() {
         return true
     }
 
+    private fun handlePendingSwap(paymentId: String) {
+        if (!beginTerminalOutcome("swap_pending")) return
+        pendingPaymentId = paymentId
+        PaymentsHistoryActivity.getPaymentEntryById(this, paymentId)
+            ?.getSwapToLightningMintFrame()?.let { frame ->
+                lightningMintUrl = frame.lightningMintUrl
+                lightningQuoteId = frame.lightningQuoteId
+            }
+        cancelNfcSafetyTimeout()
+        nostrHandler?.stop()
+        nfcAnimationContainer.visibility = View.GONE
+        statusText.visibility = View.VISIBLE
+        statusText.setText(R.string.payment_swap_pending_title)
+        val dialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.payment_swap_pending_title)
+            .setMessage(R.string.payment_swap_pending_message)
+            .setCancelable(false)
+            .setPositiveButton(R.string.payment_request_animation_close) { _, _ -> cleanupAndFinish() }
+            .setNeutralButton(R.string.payment_swap_check_status, null)
+            .show()
+        dialog.getButton(android.content.DialogInterface.BUTTON_NEUTRAL).setOnClickListener { button ->
+            button.isEnabled = false
+            uiScope.launchPaymentOperation {
+                val entry = PaymentsHistoryActivity.getPaymentEntryById(this@PaymentRequestActivity,
+                    paymentId)
+                val finalized = entry != null &&
+                    com.electricdreams.numo.payment.SwapToLightningMintManager.tryFinalizePendingSwap(
+                        applicationContext, entry)
+                withContext(Dispatchers.Main) {
+                    button.isEnabled = true
+                    if (finalized) {
+                        dialog.dismiss()
+                        hasTerminalOutcome = false
+                        handleLightningPaymentSuccess()
+                    }
+                }
+            }
+        }
+    }
+
     private fun handlePaymentError(errorMessage: String) {
+        val swap = pendingPaymentId?.let { PaymentsHistoryActivity.getPaymentEntryById(this, it) }
+        if (swap?.swapToLightningMintJson != null) {
+            handlePendingSwap(swap.id)
+            return
+        }
         // If we've already processed a terminal outcome (e.g. a successful
         // payment), ignore late errors so we don't show the failure screen
         // on top of a genuine success.

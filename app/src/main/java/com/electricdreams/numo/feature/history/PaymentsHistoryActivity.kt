@@ -45,7 +45,6 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.DateValidatorPointBackward
 import com.google.android.material.datepicker.MaterialDatePicker
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -210,6 +209,9 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
         when (entry) {
             is PaymentHistoryEntry -> {
                 when {
+                    (entry.isPending() || entry.isExpired()) && entry.getSwapLightningQuoteId() != null -> {
+                        checkAndFinalizeSwap(entry)
+                    }
                     entry.isPending() -> {
                         val activeUnit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
                         if (!entry.getUnit().equals(activeUnit, ignoreCase = true)) {
@@ -244,7 +246,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
             show()
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             val success = com.electricdreams.numo.payment.SwapToLightningMintManager.tryFinalizePendingSwap(
                 this@PaymentsHistoryActivity,
                 entry
@@ -263,14 +265,15 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     val intent = Intent(this@PaymentsHistoryActivity, com.electricdreams.numo.PaymentReceivedActivity::class.java).apply {
                         putExtra(com.electricdreams.numo.PaymentReceivedActivity.EXTRA_TOKEN, "")
                         putExtra(com.electricdreams.numo.PaymentReceivedActivity.EXTRA_AMOUNT, entry.amount)
+                        putExtra(com.electricdreams.numo.PaymentReceivedActivity.EXTRA_UNIT, entry.getUnit())
                     }
                     startActivity(intent)
                     
                     // Reload list
                     loadHistory()
                 } else {
-                    // Fall back to resume if not finalized
-                    resumePendingPayment(entry)
+                    Toast.makeText(this@PaymentsHistoryActivity,
+                        R.string.payment_swap_pending_message, Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -588,7 +591,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
      *   in [PaymentHistoryEntry.lightningQuoteId] but have no lightningMintUrl/nostrNprofile;
      *   without an active BTCPay connection these can never settle)
      */
-    private fun expireStaleBtcPayEntries() {
+    private fun expireStaleBtcPayEntries(): Unit = synchronized(Companion) {
         val appContext = applicationContext
         val history = getPaymentHistory(appContext).toMutableList()
         val cutoff = System.currentTimeMillis() - STALE_PENDING_THRESHOLD_MS
@@ -596,7 +599,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
 
         var modified = false
         history.forEachIndexed { index, entry ->
-            if (entry.isPending() && (
+            if (entry.isPending() && entry.swapToLightningMintJson == null && (
                 // Ark addresses can still receive funds after quote expiry.
                 // Keep their pending entries resumable so late payments can be claimed.
                 (entry.date.time < cutoff && entry.arkoorQuoteId == null) ||
@@ -677,6 +680,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
          * Returns the ID of the created entry.
          */
         @JvmStatic
+        @Synchronized
         fun addPendingPayment(
             context: Context,
             amount: Long,
@@ -714,10 +718,43 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
             return entry.id
         }
 
+        @Synchronized
+        fun recordPendingSwap(
+            context: Context,
+            paymentId: String?,
+            amount: Long,
+            unit: String,
+            frame: PaymentHistoryEntry.Companion.SwapToLightningMintFrame,
+        ): String {
+            val history = getPaymentHistory(context).toMutableList()
+            val existing = history.indexOfFirst { it.id == paymentId }
+            val entry = if (existing >= 0) history[existing] else PaymentHistoryEntry.createPending(
+                amount = amount,
+                entryUnit = unit,
+                enteredAmount = amount,
+                bitcoinPrice = null,
+                paymentRequest = null,
+                formattedAmount = null,
+                ecashUnit = unit,
+            ).copy(id = paymentId ?: java.util.UUID.randomUUID().toString())
+            check(entry.isPending()) { "Payment is no longer pending" }
+            check(entry.getSwapLightningQuoteId()?.let { it == frame.lightningQuoteId } != false) {
+                "Payment already has a pending swap"
+            }
+            val updated = entry.copy(swapToLightningMintJson = Gson().toJson(frame))
+            if (existing >= 0) history[existing] = updated else history.add(updated)
+            check(context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+                .putString(KEY_HISTORY, Gson().toJson(history)).commit()) {
+                "Could not save pending swap"
+            }
+            return updated.id
+        }
+
         /**
          * Update a pending payment to completed with full payment details.
          */
         @JvmStatic
+        @Synchronized
         fun completePendingPayment(
             context: Context,
             paymentId: String,
@@ -731,8 +768,9 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
             paymentRequest: String? = null,
         ) {
             val history = getPaymentHistory(context).toMutableList()
-            // Only complete entries that are still pending — never overwrite expired/cancelled status
-            val index = history.indexOfFirst { it.id == paymentId && it.isPending() }
+            // Older swap entries may have expired locally while still awaiting confirmation.
+            val index = history.indexOfFirst { it.id == paymentId && (it.isPending() ||
+                (it.isExpired() && it.swapToLightningMintJson != null)) }
 
             if (index >= 0) {
                 val existing = history[index]
@@ -764,6 +802,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     tipPercentage = existing.tipPercentage,
                     label = existing.label,
                     btcPayInvoiceId = btcPayInvoiceId ?: existing.btcPayInvoiceId,
+                    swapToLightningMintJson = existing.swapToLightningMintJson,
                 )
                 history[index] = updated
 
@@ -776,6 +815,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
          * Update a pending payment with Lightning quote info (for resume capability).
          */
         @JvmStatic
+        @Synchronized
         fun updatePendingWithLightningInfo(
             context: Context,
             paymentId: String,
@@ -827,6 +867,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
 
         /** Save Arkoor independently of the Lightning quote and the eventual paid method. */
         @JvmStatic
+        @Synchronized
         fun updatePendingWithArkoorInfo(
             context: Context,
             paymentId: String,
@@ -850,6 +891,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
          * Update a pending payment with Nostr info (for resume capability).
          */
         @JvmStatic
+        @Synchronized
         fun updatePendingWithNostrInfo(
             context: Context,
             paymentId: String,
@@ -888,6 +930,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     tipAmountSats = existing.tipAmountSats, // Preserve tip info
                     tipPercentage = existing.tipPercentage, // Preserve tip info
                     label = existing.label, // Preserve label
+                    swapToLightningMintJson = existing.swapToLightningMintJson,
                 )
                 history[index] = updated
 
@@ -900,6 +943,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
          * Update a pending payment with tip information.
          */
         @JvmStatic
+        @Synchronized
         fun updatePendingWithTipInfo(
             context: Context,
             paymentId: String,
@@ -938,6 +982,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
                     basketId = existing.basketId, // Preserve basket ID
                     tipAmountSats = tipAmountSats,
                     tipPercentage = tipPercentage,
+                    swapToLightningMintJson = existing.swapToLightningMintJson,
                 )
                 history[index] = updated
 
@@ -951,12 +996,14 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
          * Keeps the entry in history unlike [cancelPendingPayment].
          */
         @JvmStatic
+        @Synchronized
         fun markPaymentExpired(context: Context, paymentId: String) {
             val history = getPaymentHistory(context).toMutableList()
             val index = history.indexOfFirst { it.id == paymentId && it.isPending() }
             if (index == -1) return
 
             val existing = history[index]
+            if (existing.swapToLightningMintJson != null) return
             val updated = PaymentHistoryEntry(
                 id = existing.id,
                 token = existing.token,
@@ -991,12 +1038,14 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
             prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
         }
 
+        @Synchronized
         fun markPaymentFailed(context: Context, paymentId: String) {
             val history = getPaymentHistory(context).toMutableList()
             val index = history.indexOfFirst { it.id == paymentId && it.isPending() }
             if (index == -1) return
 
             val existing = history[index]
+            if (existing.swapToLightningMintJson != null) return
             val updated = PaymentHistoryEntry(
                 id = existing.id,
                 token = existing.token,
@@ -1035,10 +1084,12 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
          * Cancel a pending payment (mark as cancelled or delete).
          */
         @JvmStatic
+        @Synchronized
         fun cancelPendingPayment(context: Context, paymentId: String) {
             val history = getPaymentHistory(context).toMutableList()
             // Remove cancelled pending payments (they're not useful)
-            history.removeAll { it.id == paymentId && it.isPending() }
+            history.removeAll { it.id == paymentId && it.isPending() &&
+                it.swapToLightningMintJson == null }
 
             val prefs = context.getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
             prefs.edit().putString(KEY_HISTORY, Gson().toJson(history)).apply()
@@ -1048,6 +1099,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
          * Delete the payment with [paymentId] from history, whatever its status.
          */
         @JvmStatic
+        @Synchronized
         fun deletePayment(context: Context, paymentId: String) {
             val history = getPaymentHistory(context).toMutableList()
             if (history.removeAll { it.id == paymentId }) {
@@ -1060,6 +1112,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
          * Update the label on a payment history entry.
          */
         @JvmStatic
+        @Synchronized
         fun updateLabel(context: Context, paymentId: String, label: String?) {
             val history = getPaymentHistory(context).toMutableList()
             val index = history.indexOfFirst { it.id == paymentId }
@@ -1106,6 +1159,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
          * Add a payment to history with comprehensive information (legacy method).
          */
         @JvmStatic
+        @Synchronized
         fun addToHistory(
             context: Context,
             token: String,
@@ -1145,6 +1199,7 @@ class PaymentsHistoryActivity : AppCompatActivity(), HistoryFilterSheet.Host {
          */
         @Deprecated("Use addToHistory with full parameters")
         @JvmStatic
+        @Synchronized
         fun addToHistory(context: Context, token: String, amount: Long) {
             addToHistory(context, token, amount, "sat", "sat", amount, null, null, null)
         }

@@ -32,6 +32,42 @@ class PaymentsHistoryActivityTest {
     }
 
     @Test
+    fun `pending swap remains recoverable after stale threshold and expiry callbacks`() {
+        val id = PaymentsHistoryActivity.addPendingPayment(context, 100L, "sat", 100L,
+            null, null, null)
+        val frame = PaymentHistoryEntry.Companion.SwapToLightningMintFrame(
+            "https://source.example", "melt", "https://destination.example", "mint", true)
+        PaymentsHistoryActivity.recordPendingSwap(context, id, 100L, "sat", frame)
+        val saved = PaymentsHistoryActivity.getPaymentEntryById(context, id)
+        val backdated = requireNotNull(saved).copy(
+            date = java.util.Date(System.currentTimeMillis() - 3 * 60 * 60 * 1000L))
+        context.getSharedPreferences("PaymentHistory", Context.MODE_PRIVATE).edit()
+            .putString("history", com.google.gson.Gson().toJson(listOf(backdated))).commit()
+        PaymentsHistoryActivity.markPaymentExpired(context, id)
+        PaymentsHistoryActivity.markPaymentFailed(context, id)
+        PaymentsHistoryActivity.cancelPendingPayment(context, id)
+        Robolectric.buildActivity(PaymentsHistoryActivity::class.java).setup().use {
+            val updated = PaymentsHistoryActivity.getPaymentEntryById(context, id)
+            assertTrue(updated?.isPending() == true)
+            assertEquals("mint", updated?.getSwapLightningQuoteId())
+        }
+    }
+
+    @Test
+    fun `completing a swap preserves its recovery metadata`() {
+        val id = PaymentsHistoryActivity.addPendingPayment(context, 100L, "sat", 100L,
+            null, null, null)
+        val frame = PaymentHistoryEntry.Companion.SwapToLightningMintFrame(
+            "https://source.example", "melt", "https://destination.example", "mint", true)
+        PaymentsHistoryActivity.recordPendingSwap(context, id, 100L, "sat", frame)
+        PaymentsHistoryActivity.completePendingPayment(context, id, "",
+            PaymentHistoryEntry.TYPE_LIGHTNING, "https://destination.example")
+        val saved = PaymentsHistoryActivity.getPaymentEntryById(context, id)
+        assertTrue(saved?.isCompleted() == true)
+        assertEquals("mint", saved?.getSwapLightningQuoteId())
+    }
+
+    @Test
     fun `addPendingPayment creates pending entry`() {
         val paymentId = PaymentsHistoryActivity.addPendingPayment(
             context = context,

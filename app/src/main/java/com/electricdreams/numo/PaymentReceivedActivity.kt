@@ -35,6 +35,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_TOKEN = "extra_token"
         const val EXTRA_AMOUNT = "extra_amount"
+        const val EXTRA_UNIT = "extra_unit"
         const val EXTRA_FROM_NFC_ANIMATION = "extra_from_nfc_animation"
         private const val TAG = "PaymentReceivedActivity"
     }
@@ -94,12 +95,11 @@ class PaymentReceivedActivity : AppCompatActivity() {
         tokenString = intent.getStringExtra(EXTRA_TOKEN)
         amount = intent.getLongExtra(EXTRA_AMOUNT, 0)
         fromNfcAnimation = intent.getBooleanExtra(EXTRA_FROM_NFC_ANIMATION, false)
-        unit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
+        unit = intent.getStringExtra(EXTRA_UNIT)?.takeIf { it.isNotBlank() }
+            ?: com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
         
         // Parse token to extract amount and unit if provided
-        if (tokenString != null && tokenString!!.isNotBlank()) {
-            parseToken(tokenString!!)
-        }
+        tokenString?.takeIf { it.isNotBlank() }?.let(::parseToken)
         
         // Set up UI
         updateAmountDisplay()
@@ -156,8 +156,7 @@ class PaymentReceivedActivity : AppCompatActivity() {
             Log.d(TAG, "Parsed token: amount=$amount, unit=$unit")
         } catch (e: Exception) {
             Log.e(TAG, "Error parsing token: ${e.message}", e)
-            // Fallback to provided amount or 0
-            unit = com.electricdreams.numo.core.util.MintManager.getInstance(this).getPreferredUnit()
+            // Keep the amount and unit supplied with the payment.
         }
     }
     

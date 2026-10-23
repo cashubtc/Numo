@@ -211,17 +211,18 @@ data class PaymentHistoryEntry(
         }
     }
 
-    /**
-     * Helper to retrieve the Lightning quote ID from the swapToLightningMintJson frame.
-     */
-    fun getSwapLightningQuoteId(): String? {
+    /** Saved swap metadata, if present and readable. */
+    fun getSwapToLightningMintFrame(): Companion.SwapToLightningMintFrame? {
         if (swapToLightningMintJson == null) return null
         return try {
-            com.google.gson.Gson().fromJson(swapToLightningMintJson, PaymentHistoryEntry.Companion.SwapToLightningMintFrame::class.java).lightningQuoteId
+            com.google.gson.Gson().fromJson(swapToLightningMintJson,
+                Companion.SwapToLightningMintFrame::class.java)
         } catch (e: Exception) {
             null
         }
     }
+
+    fun getSwapLightningQuoteId(): String? = getSwapToLightningMintFrame()?.lightningQuoteId
 
     /**
      * Legacy-like secondary constructor for backward compatibility.
@@ -261,6 +262,7 @@ data class PaymentHistoryEntry(
             val meltQuoteId: String,
             val lightningMintUrl: String,
             val lightningQuoteId: String,
+            val meltPaid: Boolean = false,
         )
 
         /**
