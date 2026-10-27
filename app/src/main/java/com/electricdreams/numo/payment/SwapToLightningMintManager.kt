@@ -4,21 +4,20 @@ import android.util.Log
 import com.electricdreams.numo.core.cashu.CashuWalletManager
 import com.electricdreams.numo.core.data.model.PaymentHistoryEntry
 import com.electricdreams.numo.core.dev.WalletLogger
+import com.electricdreams.numo.core.update.withPaymentOperation
 import com.electricdreams.numo.core.util.MintManager
-import com.electricdreams.numo.nostr.Bech32
+import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import org.cashudevkit.Amount as CdkAmount
-import org.cashudevkit.CurrencyUnit
+import kotlinx.coroutines.delay
 import org.cashudevkit.FinalizedMelt
+import org.cashudevkit.MeltConfirmOptions
 import org.cashudevkit.MeltQuote
+import org.cashudevkit.MintQuote
 import org.cashudevkit.MintUrl
 import org.cashudevkit.QuoteState
-import java.security.MessageDigest
-import kotlin.math.roundToLong
-import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
-import org.cashudevkit.MeltConfirmOptions
-
-import com.electricdreams.numo.core.update.withPaymentOperation
+import org.cashudevkit.WalletInterface
+import org.cashudevkit.Amount as CdkAmount
 
 /**
  * Coordinates swapping a Cashu payment from an unknown mint into the
@@ -44,6 +43,8 @@ object SwapToLightningMintManager {
     /** Maximum allowed melt fee reserve as a fraction of the quote amount (5%). */
     private const val MAX_FEE_RESERVE_RATIO = 0.05
     private const val MIN_FEE_OVERHEAD = 0.005
+    private const val LIGHTNING_QUOTE_MAX_ATTEMPTS = 5
+    private const val LIGHTNING_QUOTE_RETRY_DELAY_MS = 1_000L
 
     /**
      * Result of attempting to swap a payment from an unknown mint.
@@ -354,7 +355,9 @@ object SwapToLightningMintManager {
             Log.d(TAG, "Checking Lightning mint quote state for quoteId=${finalMintQuote.id}")
             // Use checkMintQuote to verify quote is paid before minting
             val checkedQuote = try {
-                lightningWallet.checkMintQuote(finalMintQuote.id)
+                checkLightningMintQuoteWithRetry(lightningWallet, finalMintQuote.id)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (checkError: Throwable) {
                 val msg = "Failed to check Lightning mint quote state for quoteId=${finalMintQuote.id}: ${checkError.message}"
                 Log.e(TAG, msg, checkError)
@@ -368,6 +371,8 @@ object SwapToLightningMintManager {
                     Log.d(TAG, "Lightning quote is PAID; attempting wallet.mint for quoteId=${finalMintQuote.id}")
                     val mintedProofs = try {
                         lightningWallet.mint(finalMintQuote.id, org.cashudevkit.SplitTarget.None, null)
+                    } catch (cancelled: CancellationException) {
+                        throw cancelled
                     } catch (mintError: Throwable) {
                         val msg = "Failed to mint proofs on Lightning mint for quoteId=${finalMintQuote.id}: ${mintError.message}"
                         Log.e(TAG, msg, mintError)
@@ -398,6 +403,8 @@ object SwapToLightningMintManager {
                     return@withPaymentOperation SwapResult.Failure(msg)
                 }
             }
+        } catch (cancelled: CancellationException) {
+            throw cancelled
         } catch (t: Throwable) {
             val msg = "Error while finalizing Lightning mint quote after swap: ${t.message}"
             Log.w(TAG, msg, t)
@@ -420,6 +427,28 @@ object SwapToLightningMintManager {
             lightningMintUrl = lightningMintUrl,
             amountSats = expectedAmount
         )
+    }
+
+    internal suspend fun checkLightningMintQuoteWithRetry(
+        lightningWallet: WalletInterface,
+        quoteId: String,
+    ): MintQuote {
+        var quote = lightningWallet.checkMintQuote(quoteId)
+        for (attempt in 1 until LIGHTNING_QUOTE_MAX_ATTEMPTS) {
+            if (quote.state != QuoteState.UNPAID && quote.state != QuoteState.PENDING) {
+                return quote
+            }
+
+            // The receiving mint may need time to observe the successful melt's payment.
+            Log.d(
+                TAG,
+                "Lightning mint quote $quoteId is ${quote.state}; " +
+                    "retrying check (${attempt + 1}/$LIGHTNING_QUOTE_MAX_ATTEMPTS)",
+            )
+            delay(LIGHTNING_QUOTE_RETRY_DELAY_MS)
+            quote = lightningWallet.checkMintQuote(quoteId)
+        }
+        return quote
     }
 
     /**
