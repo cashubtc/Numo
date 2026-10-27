@@ -4,6 +4,8 @@ import android.util.Log
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -26,6 +28,7 @@ import java.io.IOException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SwapToLightningMintManagerTest {
+    private val testDispatcher = StandardTestDispatcher(TestCoroutineScheduler())
     private val wallet = mock<WalletInterface>()
     private val quoteId = "swap-lightning-quote"
     private lateinit var logMock: MockedStatic<Log>
@@ -41,7 +44,7 @@ class SwapToLightningMintManagerTest {
     }
 
     @Test
-    fun `paid quote returns immediately`() = runTest {
+    fun `paid quote returns immediately`() = runTest(testDispatcher) {
         val paid = quote(QuoteState.PAID)
         whenever(wallet.checkMintQuote(quoteId)).thenReturn(paid)
 
@@ -53,7 +56,7 @@ class SwapToLightningMintManagerTest {
     }
 
     @Test
-    fun `issued quote returns immediately`() = runTest {
+    fun `issued quote returns immediately`() = runTest(testDispatcher) {
         val issued = quote(QuoteState.ISSUED)
         whenever(wallet.checkMintQuote(quoteId)).thenReturn(issued)
 
@@ -65,7 +68,7 @@ class SwapToLightningMintManagerTest {
     }
 
     @Test
-    fun `unpaid and pending quotes retry until paid`() = runTest {
+    fun `unpaid and pending quotes retry until paid`() = runTest(testDispatcher) {
         val unpaid = quote(QuoteState.UNPAID)
         val pending = quote(QuoteState.PENDING)
         val paid = quote(QuoteState.PAID)
@@ -80,7 +83,7 @@ class SwapToLightningMintManagerTest {
     }
 
     @Test
-    fun `pending quote can become issued by another component`() = runTest {
+    fun `pending quote can become issued by another component`() = runTest(testDispatcher) {
         val pending = quote(QuoteState.PENDING)
         val issued = quote(QuoteState.ISSUED)
         whenever(wallet.checkMintQuote(quoteId)).thenReturn(pending, issued)
@@ -93,7 +96,7 @@ class SwapToLightningMintManagerTest {
     }
 
     @Test
-    fun `unpaid quote stops after five checks`() = runTest {
+    fun `unpaid quote stops after five checks`() = runTest(testDispatcher) {
         val unpaid = quote(QuoteState.UNPAID)
         whenever(wallet.checkMintQuote(quoteId)).thenReturn(unpaid)
 
@@ -105,7 +108,7 @@ class SwapToLightningMintManagerTest {
     }
 
     @Test
-    fun `pending quote stops after five checks`() = runTest {
+    fun `pending quote stops after five checks`() = runTest(testDispatcher) {
         val pending = quote(QuoteState.PENDING)
         whenever(wallet.checkMintQuote(quoteId)).thenReturn(pending)
 
@@ -117,7 +120,7 @@ class SwapToLightningMintManagerTest {
     }
 
     @Test
-    fun `paid quote on final attempt succeeds`() = runTest {
+    fun `paid quote on final attempt succeeds`() = runTest(testDispatcher) {
         val unpaid = quote(QuoteState.UNPAID)
         val paid = quote(QuoteState.PAID)
         whenever(wallet.checkMintQuote(quoteId)).thenReturn(unpaid, unpaid, unpaid, unpaid, paid)
@@ -130,7 +133,7 @@ class SwapToLightningMintManagerTest {
     }
 
     @Test
-    fun `quote check error propagates without retrying`() = runTest {
+    fun `quote check error propagates without retrying`() = runTest(testDispatcher) {
         val error = IOException("Mint unavailable")
         whenever(wallet.checkMintQuote(quoteId)).thenAnswer { throw error }
 
@@ -144,7 +147,7 @@ class SwapToLightningMintManagerTest {
     }
 
     @Test
-    fun `cancellation during retry delay stops checking`() = runTest {
+    fun `cancellation during retry delay stops checking`() = runTest(testDispatcher) {
         val pending = quote(QuoteState.PENDING)
         whenever(wallet.checkMintQuote(quoteId)).thenReturn(pending)
         val checking = launch {
@@ -164,7 +167,7 @@ class SwapToLightningMintManagerTest {
     }
 
     @Test
-    fun `cancellation during quote check propagates without retrying`() = runTest {
+    fun `cancellation during quote check propagates without retrying`() = runTest(testDispatcher) {
         val cancelled = CancellationException("Checkout closed")
         whenever(wallet.checkMintQuote(quoteId)).thenThrow(cancelled)
 
