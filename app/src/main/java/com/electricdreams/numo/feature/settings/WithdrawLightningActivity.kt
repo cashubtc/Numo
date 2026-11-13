@@ -26,7 +26,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.cashudevkit.MintUrl
 import org.cashudevkit.P2pkLockedProofSendMode
@@ -48,6 +47,9 @@ import com.electricdreams.numo.ui.components.WithdrawAddressCard
 import com.electricdreams.numo.ui.components.WithdrawInvoiceCard
 import com.electricdreams.numo.ui.util.QrCodeGenerator
 import com.electricdreams.numo.ui.util.applySettingsWindowInsets
+
+import com.electricdreams.numo.core.update.holdPaymentScreen
+import com.electricdreams.numo.core.update.launchPaymentOperation
 
 /**
  * Premium Apple-like activity for withdrawing balance from a mint via Lightning.
@@ -135,6 +137,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!holdPaymentScreen()) return
         binding = ActivityWithdrawLightningBinding.inflate(layoutInflater)
         setContentView(binding.root)
         applySettingsWindowInsets(this, binding.root)
@@ -311,7 +314,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
         animatedQrJob = null
         setLoading(true)
 
-        lifecycleScope.launch {
+        lifecycleScope.launchPaymentOperation {
             try {
                 val walletRepo = CashuWalletManager.getWallet()
                 if (walletRepo == null) {
@@ -428,7 +431,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
         backgroundColor: Int
     ) {
         val encoder = token.urEncoder(null)
-        animatedQrJob = lifecycleScope.launch {
+        animatedQrJob = lifecycleScope.launchPaymentOperation {
             qrSpeedSelector.visibility = View.VISIBLE
             while (isActive) {
                 val frame = withContext(Dispatchers.Default) {
@@ -501,7 +504,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
         setLoading(true)
 
-        lifecycleScope.launch {
+        lifecycleScope.launchPaymentOperation {
             try {
                 val wallet = CashuWalletManager.getWallet()
                 if (wallet == null) {
@@ -513,7 +516,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
                         ).show()
                         setLoading(false)
                     }
-                    return@launch
+                    return@launchPaymentOperation
                 }
 
                 // Get melt quote
@@ -580,7 +583,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
         setLoading(true)
 
-        lifecycleScope.launch {
+        lifecycleScope.launchPaymentOperation {
             try {
                 val wallet = CashuWalletManager.getWallet()
                 if (wallet == null) {
@@ -592,7 +595,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
                         ).show()
                         setLoading(false)
                     }
-                    return@launch
+                    return@launchPaymentOperation
                 }
 
                 // Get melt quote for Lightning address
@@ -687,6 +690,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        if (isFinishing) return
         // Refresh balance when returning to this activity
         refreshBalance()
     }
@@ -696,7 +700,7 @@ class WithdrawLightningActivity : AppCompatActivity() {
      * Called when broadcast is received or when activity resumes.
      */
     private fun refreshBalance() {
-        lifecycleScope.launch {
+        lifecycleScope.launchPaymentOperation {
             try {
                 val newBalance = withContext(Dispatchers.IO) {
                     CashuWalletManager.getBalanceForMint(mintUrl)

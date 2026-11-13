@@ -1,0 +1,29 @@
+[info]
+url = "http://127.0.0.1:3339"
+listen_host = "0.0.0.0"
+listen_port = 3339
+# CDK requires a seed reference; Compose supplies a public regtest-only seed.
+seed = "env:NUMO_TEST_MINT_SEED"
+
+[info.quote_ttl]
+mint_ttl = 3600
+melt_ttl = 120
+
+[mint_info]
+name = "Numo Arkoor regtest"
+description = "Docker integration test mint backed by Bark on Bitcoin regtest"
+
+[payment_backend]
+backend = "grpcprocessor"
+unit = "sat"
+min_mint = 2
+max_mint = 1000000
+
+[grpc_processor]
+address = "processor"
+port = 50059
+supported_units = ["sat"]
+allow_insecure = true
+
+[database]
+engine = "sqlite"

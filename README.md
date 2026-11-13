@@ -44,6 +44,10 @@ When the merchant switches to the "lightning" tab in the payment screen, a fresh
 
 ## Debug Build
 
+Builds and unit tests use JDK 25. Install JDK 25 and select it as the Gradle JDK
+in your IDE, or let Gradle provision it automatically. The app continues to target
+Java 17 source and bytecode for Android compatibility.
+
 To build the debug version of the app:
 
 ```bash

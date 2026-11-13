@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:focusable="true"
+    android:gravity="center_vertical"
+    android:minHeight="@dimen/list_row_height"
+    android:orientation="horizontal"
+    android:paddingHorizontal="@dimen/margin_screen_horizontal"
+    android:paddingVertical="@dimen/space_m">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/capability_title"
+            style="@style/Text.OfflineRowTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="New charges" />
+
+        <TextView
+            android:id="@+id/capability_status"
+            style="@style/Text.OfflineRowStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_2xs"
+            tools:text="Unavailable" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/capability_icon"
+        android:layout_width="@dimen/icon_size_small"
+        android:layout_height="@dimen/icon_size_small"
+        android:layout_marginStart="@dimen/space_l"
+        android:importantForAccessibility="no"
+        tools:src="@drawable/ic_status_unavailable" />
+</LinearLayout>

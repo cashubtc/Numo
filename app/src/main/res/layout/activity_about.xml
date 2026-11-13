@@ -72,6 +72,14 @@
 
                 <!-- ================ -->
 
+                <com.electricdreams.numo.ui.components.SettingsRowView
+                    android:id="@+id/update_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/settings_section_gap"
+                    app:rowTitle="@string/update_check"
+                    app:rowShowChevron="true" />
+
                 <!-- DEVICE INFO SECTION -->
 
                 <!-- ================ -->

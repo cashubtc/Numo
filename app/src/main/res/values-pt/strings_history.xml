@@ -75,23 +75,28 @@
     <!-- Activity screen -->
     <string name="history_total_balance_label">Saldo total</string>
     <string name="history_menu_export_activity">Exportar atividade</string>
-    <string name="history_menu_filter">Filtrar transações</string>
-    <string name="history_menu_filter_paid">Concluído</string>
-    <string name="history_menu_filter_pending">Pendente</string>
-    <string name="history_menu_filter_all">Todas</string>
-    <string name="history_filter_date_all">Todo</string>
     <string name="history_filter_date_today">Hoje</string>
-    <string name="history_filter_date_week">Semana</string>
-    <string name="history_filter_date_month">Mês</string>
     <string name="history_export_success">Atividade exportada para CSV</string>
     <string name="history_export_error">Erro ao exportar atividade</string>
 
     <!-- Basket receipt -->
     <string name="basket_receipt_title">Recibo</string>
-    <string name="history_filter_date_custom">Intervalo personalizado...</string>
-    <string name="history_filter_status_format">Status: %1$s</string>
-    <string name="history_filter_header_format">Filtrar por: %1$s</string>
-    <string name="history_filter_date_format">Data: %1$s</string>
-    <string name="history_filter_date_range_format">%1$s - %2$s</string>
+    <string name="history_filter_date_range_format">%1$s – %2$s</string>
     <string name="history_filter_date_picker_title">Selecionar período</string>
+    <string name="history_filter_button">Filtrar</string>
+    <string name="history_filter_button_count">Filtrar · %1$d</string>
+    <string name="history_filter_reset">Redefinir</string>
+    <string name="history_filter_status">Status</string>
+    <string name="history_filter_date">Data</string>
+    <string name="history_filter_status_all">Todas</string>
+    <string name="history_filter_status_paid">Pagas</string>
+    <string name="history_filter_status_pending">Pendentes</string>
+    <string name="history_filter_date_any">Qualquer data</string>
+    <string name="history_filter_date_last_7_days">Últimos 7 dias</string>
+    <string name="history_filter_date_last_30_days">Últimos 30 dias</string>
+    <string name="history_filter_date_this_month">Este mês</string>
+    <string name="history_filter_date_custom_option">Personalizado…</string>
+    <string name="history_filter_remove">Remover filtro %1$s</string>
+    <string name="history_empty_filtered_title">Nada encontrado</string>
+    <string name="history_empty_filtered_subtitle">Nenhum resultado para estes filtros. Tente outros ou redefina.</string>
 </resources>

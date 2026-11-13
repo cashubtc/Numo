@@ -70,7 +70,21 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/space_l"
                 android:gravity="center"
-                tools:text="March 15, 2026 at 11:31 AM" />
+                tools:text="March 15, 2026, 11:31 AM" />
+
+            <!-- Status, only while the payment isn't settled: pending, expired or failed -->
+            <TextView
+                android:id="@+id/detail_status"
+                style="@style/Text.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_xs"
+                android:fontFamily="sans-serif-medium"
+                android:gravity="center"
+                android:visibility="gone"
+                tools:text="Expired"
+                tools:textColor="@color/color_error"
+                tools:visibility="visible" />
 
             <!-- Transaction Details Section Header -->
             <TextView
@@ -80,7 +94,7 @@
                 android:layout_marginStart="@dimen/space_xl"
                 android:layout_marginEnd="@dimen/space_xl"
                 android:layout_marginTop="@dimen/space_2xl"
-                android:text="@string/transaction_detail_section_transaction_details" />
+                android:text="@string/transaction_detail_section_payment" />
 
             <!-- Transaction Type Row -->
             <LinearLayout
@@ -166,6 +180,52 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/row_subtitle_gap"
                         tools:text="$71,833.46" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Tip Row: tips are kept apart from the sale amount above -->
+            <LinearLayout
+                android:id="@+id/row_tip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="@dimen/space_xl"
+                android:paddingEnd="@dimen/space_xl"
+                android:paddingTop="@dimen/space_l"
+                android:paddingBottom="@dimen/space_l"
+                android:visibility="gone"
+                tools:visibility="visible">
+
+                <ImageView
+                    android:layout_width="@dimen/icon_size_small"
+                    android:layout_height="@dimen/icon_size_small"
+                    android:src="@drawable/ic_tip"
+                    app:tint="@color/color_text_secondary"
+                    android:contentDescription="@null" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginStart="@dimen/space_l">
+
+                    <TextView
+                        style="@style/Text.BodyBold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/transaction_detail_tip_label" />
+
+                    <TextView
+                        android:id="@+id/detail_tip"
+                        style="@style/Text.Body"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/row_subtitle_gap"
+                        tools:text="$1.28 · 15%" />
 
                 </LinearLayout>
 
@@ -381,15 +441,12 @@
             <!-- Items Section Header -->
             <TextView
                 android:id="@+id/items_header"
+                style="@style/Text.SectionHeader"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
-                android:layout_marginTop="32dp"
-                android:textSize="12sp"
-                android:fontFamily="sans-serif-medium"
-                android:textColor="@color/color_text_secondary"
-                android:letterSpacing="0.08"
+                android:layout_marginStart="@dimen/space_xl"
+                android:layout_marginEnd="@dimen/space_xl"
+                android:layout_marginTop="@dimen/space_2xl"
                 android:text="@string/basket_receipt_items_header_single"
                 android:visibility="gone"
                 tools:text="3 ITEMS" />
@@ -400,8 +457,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="12dp"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="@dimen/space_m"
+                android:layout_marginHorizontal="@dimen/space_xl"
                 android:background="@drawable/bg_rounded_card_large"
                 android:clipChildren="false"
                 android:clipToPadding="false"
@@ -417,8 +474,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="20dp"
-                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="@dimen/space_m"
+                android:layout_marginHorizontal="@dimen/space_xl"
                 android:background="@drawable/bg_rounded_card_large"
                 android:padding="16dp"
                 android:visibility="gone">
@@ -511,6 +568,7 @@
 
                 <!-- Divider before total -->
                 <View
+                    android:id="@+id/totals_divider"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginTop="14dp"

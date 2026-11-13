@@ -9,11 +9,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.EditText
 import android.widget.Button
-import android.widget.FrameLayout
 import android.widget.LinearLayout
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
 import com.electricdreams.numo.R
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -58,12 +54,8 @@ class AddMintBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val originalPaddingBottom = view.paddingBottom
-        ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
-            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
-            v.updatePadding(bottom = originalPaddingBottom + ime.bottom)
-            insets
-        }
+        // The dialog resizes above the keyboard. Extra IME padding would reduce the
+        // scrollable viewport a second time and push the actions out of view.
 
         val urlInput = view.findViewById<EditText>(R.id.mint_url_input)
         val addButton = view.findViewById<Button>(R.id.add_mint_button)

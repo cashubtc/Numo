@@ -91,12 +91,6 @@ class OnboardingActivity : AppCompatActivity() {
     companion object {
         private const val PREFS_NAME = "OnboardingPrefs"
         private const val KEY_ONBOARDING_COMPLETE = "onboarding_complete"
-        private val ONBOARDING_DEFAULT_MINTS = listOf(
-            "https://mint.minibits.cash/Bitcoin",
-            "https://mint.macadamia.cash",
-            "https://antifiat.cash",
-            "https://mint.cubabitcoin.org"
-        )
 
         fun isOnboardingComplete(context: Context): Boolean {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -353,6 +347,12 @@ class OnboardingActivity : AppCompatActivity() {
             }
             override fun onAddMintClicked() {
                 showAddMintBottomSheet()
+            }
+            override fun onMintRemoved(mintUrl: String) {
+                discoveredMints.remove(mintUrl)
+                selectedMints.clear()
+                selectedMints.addAll(mintAdapter.getAllSelectedMints())
+                updateContinueButtonState()
             }
             override fun onRequestSetDefault(mintUrl: String, mintName: String) {
                 val previousDefaultUrl = mintAdapter.getDefaultMintUrl()
@@ -980,7 +980,7 @@ class OnboardingActivity : AppCompatActivity() {
                 discoveredMints.clear()
                 selectedMints.clear()
                 onboardingMintDisplayNames.clear()
-                val healthyMints = filterHealthyMints(ONBOARDING_DEFAULT_MINTS.shuffled())
+                val healthyMints = filterHealthyMints(MintManager.DEFAULT_MINTS.shuffled())
                 discoveredMints.addAll(healthyMints)
                 selectedMints.addAll(healthyMints)
                 backupFound = false
@@ -1064,7 +1064,8 @@ class OnboardingActivity : AppCompatActivity() {
             input.setTextColor(ContextCompat.getColor(this, if (isInvalid) R.color.color_seed_word_invalid else R.color.color_bg_white))
         }
 
-        val canContinue = allFilled && allBip39
+        val canContinue = allFilled && allBip39 &&
+            Bip39Wordlist.isValidMnemonic(words.joinToString(" "))
         seedContinueButton.isEnabled = canContinue
         seedContinueButton.alpha = if (canContinue) 1f else 0.5f
 
@@ -1155,7 +1156,7 @@ class OnboardingActivity : AppCompatActivity() {
             } else {
                 backupFound = false
                 backupTimestamp = null
-                val healthyMints = filterHealthyMints(ONBOARDING_DEFAULT_MINTS.shuffled())
+                val healthyMints = filterHealthyMints(MintManager.DEFAULT_MINTS.shuffled())
                 discoveredMints.addAll(healthyMints)
                 selectedMints.addAll(healthyMints)
             }
@@ -1180,14 +1181,14 @@ class OnboardingActivity : AppCompatActivity() {
 
     private fun performRestore() {
         val mnemonic = enteredMnemonic ?: return
+        selectedMints.clear()
+        selectedMints.addAll(mintAdapter.getAllSelectedMints())
+        if (selectedMints.isEmpty()) return
 
         showStep(OnboardingStep.RESTORING)
         restoringStatus.text = getString(R.string.onboarding_restoring_initializing)
         mintProgressContainer.removeAllViews()
         mintProgressViews.clear()
-
-        // Persist final onboarding selection before restore.
-        applySelectedMintsToMintManager()
 
         // Create progress views for each mint
         for (mintUrl in selectedMints) {
@@ -1198,7 +1199,12 @@ class OnboardingActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val results = CashuWalletManager.restoreFromMnemonic(mnemonic, this@OnboardingActivity) { mintUrl, status, before, after ->
+                val results = CashuWalletManager.restoreFromMnemonic(
+                    mnemonic,
+                    this@OnboardingActivity,
+                    selectedMintUrls = selectedMints.toList(),
+                    preferredMintUrl = mintAdapter.getDefaultMintUrl(),
+                ) { mintUrl, status, before, after ->
                     if (selectedMints.contains(mintUrl)) {
                         withContext(Dispatchers.Main) {
                             updateMintProgress(mintUrl, status, before, after)
@@ -1260,13 +1266,20 @@ class OnboardingActivity : AppCompatActivity() {
         // Populate the RecyclerView adapter
         // First mint is the default, rest are popular
         val mintList = discoveredMints.toList()
-        val defaultMint = mintList.firstOrNull() ?: return
+        val defaultMint = mintList.firstOrNull()
         val popularMints = mintList.drop(1)
         // All popular mints start as accepted
         val acceptedMints = selectedMints.filter { it != defaultMint }.toSet()
 
-        mintAdapter.setMints(defaultMint, popularMints, acceptedMints)
+        mintAdapter.setMints(defaultMint, popularMints, acceptedMints, allowRemoval = isRestoreFlow)
         updateContinueButtonState()
+        if (mintList.isEmpty()) {
+            Toast.makeText(
+                this,
+                R.string.onboarding_mints_none_reachable,
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
     private fun showAddMintBottomSheet() {
@@ -1338,15 +1351,13 @@ class OnboardingActivity : AppCompatActivity() {
 
     /**
      * Pings each mint in parallel and returns only the ones that respond successfully.
-     * Falls back to the full list if all mints are unreachable.
      */
-    private suspend fun filterHealthyMints(mints: List<String>): List<String> =
+    internal suspend fun filterHealthyMints(mints: List<String>): List<String> =
         withContext(Dispatchers.IO) {
             val results = mints.map { url ->
                 async { url to mintProfileService.validateMintUrl(url).isValid }
             }.awaitAll()
-            val healthy = results.filter { it.second }.map { it.first }
-            healthy.ifEmpty { mints } // fall back to full list if none reachable
+            results.filter { it.second }.map { it.first }
         }
 
     private fun refreshMintProfilesForReview() {

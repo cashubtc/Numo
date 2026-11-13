@@ -6,17 +6,27 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.electricdreams.numo.R
 import com.electricdreams.numo.ui.seed.SeedWordEditText
+import com.electricdreams.numo.ui.seed.CdkMnemonicRule
 import com.google.android.material.button.MaterialButton
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.junit.Before
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [34])
 class RestoreWalletActivityTest {
+    @get:Rule
+    val mnemonicValidation = CdkMnemonicRule()
+
+    @Before
+    fun allowValidMnemonic() {
+        mnemonicValidation.accept(List(11) { "abandon" }.plus("about").joinToString(" "))
+    }
 
     @Test
     fun `initial state shows seed entry screen`() {
@@ -57,7 +67,7 @@ class RestoreWalletActivityTest {
                 assertFalse("Button should still be disabled with 11 words", continueButton.isEnabled)
                 
                 // Fill last one
-                inputs[11].setText(validWord)
+                inputs[11].setText("about")
                 
                 assertTrue("Button should be enabled with 12 valid words", continueButton.isEnabled)
             }
@@ -86,6 +96,18 @@ class RestoreWalletActivityTest {
     }
 
     @Test
+    fun `invalid checksum keeps continue disabled`() {
+        ActivityScenario.launch(RestoreWalletActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                findAllSeedInputs(activity).forEach { it.setText("abandon") }
+                assertFalse(activity.findViewById<MaterialButton>(R.id.continue_button).isEnabled)
+                assertEquals(activity.getString(R.string.restore_seed_invalid_checksum),
+                    activity.findViewById<TextView>(R.id.validation_text).text)
+            }
+        }
+    }
+
+    @Test
     fun `continue button click shows fetching overlay`() {
         ActivityScenario.launch(RestoreWalletActivity::class.java).use { scenario ->
             scenario.onActivity { activity ->
@@ -93,6 +115,7 @@ class RestoreWalletActivityTest {
                 for (input in inputs) {
                     input.setText("abandon")
                 }
+                inputs.last().setText("about")
                 
                 val continueButton = activity.findViewById<MaterialButton>(R.id.continue_button)
                 continueButton.performClick()

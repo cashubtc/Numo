@@ -4,12 +4,14 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.lang.reflect.Field
+import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
 class MintManagerTest {
@@ -20,44 +22,105 @@ class MintManagerTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
+        context.getSharedPreferences("MintPreferences", Context.MODE_PRIVATE)
+            .edit().clear().commit()
         resetSingleton()
         mintManager = MintManager.getInstance(context)
-        mintManager.resetToDefaults()
     }
 
     private fun resetSingleton() {
-        val instance = MintManager.Companion
-        val clazz = instance::class.java
-        try {
-            var field: Field? = null
-            var currentClass: Class<*>? = clazz
-            while (currentClass != null) {
-                try {
-                    field = currentClass.getDeclaredField("instance")
-                    break
-                } catch (e: NoSuchFieldException) {
-                    currentClass = currentClass.superclass
-                }
-            }
-            if (field != null) {
-                field.isAccessible = true
-                field.set(instance, null)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        ReflectionHelpers.setStaticField(MintManager::class.java, "instance", null)
     }
 
     @Test
-    fun testDefaultMints() {
+    fun `fresh install uses public mints and prefers Minibits`() {
         assertTrue(mintManager.hasAnyMints())
         val mints = mintManager.getAllowedMints()
         assertFalse(mints.isEmpty())
-        assertTrue(mints.contains("https://mint.minibits.cash/Bitcoin"))
-        assertTrue(mints.contains("https://mint.macadamia.cash"))
-        assertTrue(mints.contains("https://antifiat.cash"))
-        assertFalse(mints.contains("https://mint.chorus.community"))
-        assertFalse(mints.contains("https://mint.coinos.io"))
+        assertEquals(
+            setOf(
+                "https://mint.minibits.cash/Bitcoin",
+                "https://mint.macadamia.cash",
+                "https://antifiat.cash",
+                "https://mint.cubabitcoin.org",
+            ),
+            mints.toSet()
+        )
+        assertEquals("https://mint.minibits.cash/Bitcoin", mintManager.getPreferredLightningMint())
+    }
+
+    @Test
+    fun `reset restores public defaults after mint customization`() {
+        mintManager.getAllowedMints().forEach { mintManager.removeMint(it) }
+        mintManager.addMint("https://custom.mint")
+
+        mintManager.resetToDefaults()
+
+        assertEquals(MintManager.DEFAULT_MINTS, mintManager.getAllowedMints().toSet())
+        assertEquals("https://mint.minibits.cash/Bitcoin", mintManager.getPreferredLightningMint())
+    }
+
+    @Test
+    fun `fresh install enables swaps from unknown mints`() {
+        assertTrue(mintManager.isSwapFromUnknownMintsEnabled())
+    }
+
+    @Test
+    fun `saved mints and disabled swaps survive reinitialization`() {
+        mintManager.getAllowedMints().forEach { mintManager.removeMint(it) }
+        val customMint = "http://127.0.0.1:3339"
+        mintManager.addMint(customMint)
+        mintManager.setSwapFromUnknownMintsEnabled(false)
+
+        resetSingleton()
+        mintManager = MintManager.getInstance(context)
+
+        assertEquals(listOf(customMint), mintManager.getAllowedMints())
+        assertEquals(customMint, mintManager.getPreferredLightningMint())
+        assertFalse(mintManager.isSwapFromUnknownMintsEnabled())
+    }
+
+    @Test
+    fun `restore commits selected and preferred mints without requesting a rebuild`() {
+        var notified = false
+        mintManager.setMintChangeListener(object : MintManager.MintChangeListener {
+            override fun onMintsChanged(newMints: List<String>) {
+                notified = true
+            }
+        })
+        val selected = listOf("https://first.mint", "https://preferred.mint")
+        mintManager.commitRestoredMints(selected, selected.last()) { }
+
+        assertEquals(selected.toSet(), mintManager.getAllowedMints().toSet())
+        assertEquals(selected.last(), mintManager.getPreferredLightningMint())
+        assertFalse(notified)
+        resetSingleton()
+        val reloaded = MintManager.getInstance(context)
+        assertEquals(selected.toSet(), reloaded.getAllowedMints().toSet())
+        assertEquals(selected.last(), reloaded.getPreferredLightningMint())
+    }
+
+    @Test
+    fun `failed wallet commit rolls back mint configuration in memory and on disk`() {
+        val originalMints = mintManager.getAllowedMints().toSet()
+        val originalPreferred = mintManager.getPreferredLightningMint()
+        val failure = IllegalStateException("Could not save restored wallet")
+
+        try {
+            mintManager.commitRestoredMints(listOf("https://new.mint"), null) {
+                throw failure
+            }
+            fail("Restore must fail")
+        } catch (exception: IllegalStateException) {
+            assertSame(failure, exception)
+        }
+
+        assertEquals(originalMints, mintManager.getAllowedMints().toSet())
+        assertEquals(originalPreferred, mintManager.getPreferredLightningMint())
+        resetSingleton()
+        val reloaded = MintManager.getInstance(context)
+        assertEquals(originalMints, reloaded.getAllowedMints().toSet())
+        assertEquals(originalPreferred, reloaded.getPreferredLightningMint())
     }
 
     @Test
@@ -110,6 +173,25 @@ class MintManagerTest {
         mintManager.removeMint(mint2)
         // Should revert to other available
         assertEquals(mint1, mintManager.getPreferredLightningMint())
+    }
+
+    @Test
+    fun `selecting mint for saved sats checkout leaves dollar preference unchanged`() {
+        mintManager.getAllowedMints().forEach { mintManager.removeMint(it) }
+        val mint = "https://mint.minibits.cash/Bitcoin"
+        mintManager.addMint(mint)
+        mintManager.setMintInfo(mint, """
+            {"nuts":{"4":{"methods":[{"method":"bolt11","unit":"sat"}],"disabled":false}}}
+        """.trimIndent())
+        val previousUnit = mintManager.getPreferredUnit()
+        try {
+            mintManager.setPreferredUnit("usd")
+            assertEquals(mint, mintManager.getPreferredLightningMint("sat"))
+            assertEquals(null, mintManager.getPreferredLightningMint())
+            assertEquals("usd", mintManager.getPreferredUnit())
+        } finally {
+            mintManager.setPreferredUnit(previousUnit)
+        }
     }
 
     @Test

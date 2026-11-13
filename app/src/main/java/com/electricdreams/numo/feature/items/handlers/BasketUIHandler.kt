@@ -145,9 +145,10 @@ class BasketUIHandler(
         val isNetworkAvailable = NetworkUtils.isNetworkAvailable(context)
 
         checkoutButton.text = context.getString(R.string.item_selection_charge_button)
-        val canCharge = mintManager.hasAnyMints() && isNetworkAvailable
-        checkoutButton.isEnabled = canCharge
-        checkoutButton.alpha = if (canCharge) 1.0f else 0.5f
+        val hasMints = mintManager.hasAnyMints()
+        // Offline stays tappable (but dimmed) so a tap can explain why
+        checkoutButton.isEnabled = hasMints
+        checkoutButton.alpha = if (hasMints && isNetworkAvailable) 1.0f else 0.5f
     }
 
     /**

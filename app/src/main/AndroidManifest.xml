@@ -74,6 +74,12 @@
 
         <!-- Modern POS Activity - Main App -->
         <activity
+            android:name=".feature.settings.AppUpdateActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Numo.Settings"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name="com.electricdreams.numo.ModernPOSActivity"
             android:exported="true"
             android:label="@string/app_name"
@@ -121,6 +127,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.electricdreams.numo.ModernPOSActivity" />
         </activity>
+
+        <activity android:name="com.electricdreams.numo.feature.offline.OfflineExplainerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Numo.Settings"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden" />
 
         <activity android:name="com.electricdreams.numo.feature.history.PaymentsHistoryActivity"
             android:exported="false"
@@ -621,7 +633,7 @@
         <!-- FileProvider for camera image capture -->
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="com.electricdreams.numo.fileprovider"
+            android:authorities="${applicationId}.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

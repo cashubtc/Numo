@@ -21,7 +21,8 @@ import com.electricdreams.numo.nostr.NostrPaymentListener
  */
 class NostrPaymentHandler(
     private val context: Context,
-    private val allowedMints: List<String>
+    private val allowedMints: List<String>,
+    private val paymentUnit: String? = null,
 ) {
     /**
      * Callback interface for Nostr payment events.
@@ -146,7 +147,8 @@ class NostrPaymentHandler(
             paymentAmount,
             context.getString(R.string.payment_request_default_description, paymentAmount),
             mintsForPaymentRequest,
-            profile
+            profile,
+            paymentUnit = paymentUnit,
         )
 
         if (request == null) {
@@ -176,7 +178,8 @@ class NostrPaymentHandler(
                     Log.e(TAG, "NostrPaymentListener payment failure: $message", t)
                     callback.onPaymentFailure(message ?: t?.message ?: "Unknown Nostr payment failure")
                 }
-            }
+            },
+            paymentUnit,
         ).also { it.start() }
 
         Log.d(TAG, "Nostr payment listener started")

@@ -1,0 +1,183 @@
+name: numo-arkoor
+
+services:
+  bitcoind:
+    image: bitcoin/bitcoin:30.0
+    command:
+      - bitcoind
+      - -regtest
+      - -server
+      - -txindex
+      - -rpcbind=0.0.0.0
+      - -rpcallowip=0.0.0.0/0
+      - -rpcuser=second
+      - -rpcpassword=ark
+      - -fallbackfee=0.00001
+      - -printtoconsole
+    volumes:
+      - bitcoin-data:/home/bitcoin/.bitcoin
+    healthcheck:
+      test: ["CMD", "bitcoin-cli", "-regtest", "-rpcuser=second", "-rpcpassword=ark", "getblockchaininfo"]
+      interval: 2s
+      timeout: 5s
+      retries: 60
+
+  chain-setup:
+    image: bitcoin/bitcoin:30.0
+    entrypoint: /bin/sh
+    command:
+      - -ec
+      - |
+        cli='bitcoin-cli -regtest -rpcconnect=bitcoind -rpcuser=second -rpcpassword=ark'
+        if ! $$cli -rpcwallet=miner getwalletinfo >/dev/null 2>&1; then
+          if ! $$cli loadwallet miner >/dev/null 2>&1; then
+            $$cli createwallet miner
+          fi
+        fi
+        if [ "$$($$cli getblockcount)" -lt 101 ]; then
+          $$cli -rpcwallet=miner -generate 101
+        fi
+    depends_on:
+      bitcoind:
+        condition: service_healthy
+
+  electrs:
+    image: mempool/electrs:v3.3.0@sha256:de9dd2f5a328d5f464936dc4128d848f9b8bf72221ab3c9b8e2949df50899b74
+    command:
+      - --network=regtest
+      - --db-dir=/data
+      - --daemon-rpc-addr=bitcoind:18443
+      - --cookie=second:ark
+      - --http-addr=0.0.0.0:3002
+      - --electrum-rpc-addr=0.0.0.0:50001
+      - --cors=*
+    volumes:
+      - bitcoin-data:/root/.bitcoin:ro
+      - electrs-data:/data
+    depends_on:
+      chain-setup:
+        condition: service_completed_successfully
+
+  postgres:
+    image: postgres:16.4
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bark-server-db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 2s
+      timeout: 5s
+      retries: 60
+
+  cln:
+    image: secondark/cln-hold:v26.06.6@sha256:d39a7befb75611a76002a5c2e75c8d9d3be9796c68d0bb1148de98f1dbe7add1
+    hostname: cln
+    entrypoint: /bin/sh
+    command: ["-ec", "mkdir -p /root/.lightning/regtest; exec /root/cln/start.sh"]
+    environment:
+      CLN_LOG_LEVEL: info
+    volumes:
+      - cln-data:/root/.lightning
+    depends_on:
+      chain-setup:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "lightning-cli", "--network=regtest", "getinfo"]
+      interval: 2s
+      timeout: 5s
+      retries: 90
+
+  captaind:
+    image: secondark/captaind:0.6.2@sha256:b6deb27623e033038881f524ff11ea9444b79759bb5dec038179841eebecda54
+    entrypoint: /etc/numo/captaind-entrypoint.sh
+    environment:
+      CAPTAIND_LOG: info
+    restart: on-failure:10
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/3535'"]
+      interval: 2s
+      timeout: 5s
+      retries: 90
+    volumes:
+      - ./captaind.toml:/etc/numo/captaind.toml:ro
+      - ./captaind-entrypoint.sh:/etc/numo/captaind-entrypoint.sh:ro
+      - ark-data:/data/captaind
+      - cln-data:/data/cln:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      cln:
+        condition: service_healthy
+
+  processor:
+    image: numo-arkoor-services:local
+    build:
+      context: .
+      target: services
+    environment:
+      SERVER_ADDRESS: 0.0.0.0
+      SERVER_PORT: "50059"
+      TLS_ENABLE: "false"
+      ALLOW_INSECURE: "true"
+      BARK_MNEMONIC: "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+      BARK_NETWORK: regtest
+      BARK_SERVER_ADDRESS: http://captaind:3535
+      BARK_ESPLORA_ADDRESS: http://electrs:3002
+      BARK_DATA_DIR: /data/bark
+      BARK_PAYMENT_METHODS: bolt11,arkoor
+      BARK_EVENT_POLL_INTERVAL_MS: "500"
+    volumes:
+      - processor-data:/data/bark
+    depends_on:
+      captaind:
+        condition: service_healthy
+      electrs:
+        condition: service_started
+    restart: on-failure:10
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/50059'"]
+      interval: 2s
+      timeout: 5s
+      retries: 90
+
+  mint:
+    image: numo-arkoor-services:local
+    entrypoint: mint-entrypoint.sh
+    environment:
+      NUMO_TEST_MINT_SEED: "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f"
+    ports:
+      - "127.0.0.1:3339:3339"
+    volumes:
+      - mint-data:/data/mint
+    depends_on:
+      processor:
+        condition: service_healthy
+    restart: on-failure:10
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3339/v1/info"]
+      interval: 2s
+      timeout: 5s
+      retries: 120
+
+  # Invoked by provision.py/pay.py; its wallet is separate from the mint's wallet.
+  bark:
+    image: secondark/bark:0.6.2@sha256:30a91f2c31a16ec7d1a4d7744989ff2113fd003febb75aedfe2449db9133e671
+    profiles: ["tools"]
+    entrypoint: bark
+    environment:
+      BARK_DATADIR: /data/bark
+    volumes:
+      - payer-data:/data/bark
+
+volumes:
+  bitcoin-data:
+  electrs-data:
+  postgres-data:
+  cln-data:
+  ark-data:
+  processor-data:
+  mint-data:
+  payer-data:

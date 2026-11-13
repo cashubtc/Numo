@@ -3,7 +3,8 @@
 This repository contains the source code for the Numo Android application. These guidelines serve as the definitive guide for both human developers and autonomous AI coding agents to ensure consistency, quality, and maintainability across the codebase.
 
 ## 1. Project Overview & Tech Stack
-- **Platform:** Android (Min SDK 24, Target SDK 36, Java 17).
+- **Platform:** Android (Min SDK 24, Target SDK 36, Java 17 source/bytecode,
+  JDK 25 for builds and unit tests).
 - **Language:** Kotlin (primary), Java (legacy/interop).
 - **Architecture:** MVVM/MVC mix utilizing Android Navigation Components and ViewBinding. No Jetpack Compose.
 - **Networking & Data:** OkHttp3, Jackson (JSON/CBOR), Gson.
@@ -122,3 +123,16 @@ Use quotes around the class and method name. If the method uses Kotlin backticks
 4. **Self-Correction Loop:** If you modify logic, immediately run the corresponding unit test. If a test doesn't exist, create a fast, localized unit test before verifying manually or via UI.
 5. **Build Before Finish:** Ensure the app builds (`./gradlew assembleDebug`) before declaring a task complete.
 6. **No Hallucinated Tooling:** Do not attempt to run `ktlint`, `detekt`, or `spotless` unless explicitly configured in the project. Rely on `./gradlew lintDebug` and compilation checks.
+7. **Keep Scripts in `scripts/`:** Store automation scripts in the repository's `scripts/` directory. GitHub Actions `run` steps should invoke those scripts or a single simple command; do not embed script bodies, heredocs, loops, conditionals, or multi-command setup in workflow YAML. Pass workflow inputs and secrets through environment variables or quoted arguments.
+
+## 8. Security Fixes
+
+When a task involves a vulnerability or an uncoordinated security fix, do not
+describe the exploit in depth in anything public: PR titles or bodies, commit
+messages, review comments, or code comments. Keep the public summary high-level
+(state that a security issue was fixed) and leave out reproduction steps, proofs
+of concept, root-cause specifics, and attack paths.
+
+Until a fix has been released and disclosure has been coordinated, send the
+detailed write-up to the security contact listed under "Reporting a Vulnerability"
+in `SECURITY.md`.

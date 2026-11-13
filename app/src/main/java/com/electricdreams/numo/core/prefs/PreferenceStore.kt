@@ -61,6 +61,20 @@ class ThreadSafePreferences(
         }
     }
 
+    fun commitStrings(values: Map<String, String?>): Boolean = synchronized(lock) {
+        val previous = values.keys.associateWith { prefs.getString(it, null) }
+        val editor = prefs.edit()
+        values.forEach { (key, value) -> editor.putString(key, value) }
+        if (editor.commit()) {
+            true
+        } else {
+            val rollback = prefs.edit()
+            previous.forEach { (key, value) -> rollback.putString(key, value) }
+            rollback.commit()
+            false
+        }
+    }
+
     fun remove(key: String) {
         synchronized(lock) {
             prefs.edit().remove(key).apply()

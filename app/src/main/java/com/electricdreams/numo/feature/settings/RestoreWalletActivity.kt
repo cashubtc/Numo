@@ -25,7 +25,6 @@ import java.util.Date
 import java.util.Locale
 import kotlin.coroutines.resume
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 
@@ -38,6 +37,9 @@ import com.electricdreams.numo.ui.seed.Bip39Wordlist
 import com.electricdreams.numo.ui.seed.SeedWordEditText
 import com.electricdreams.numo.ui.util.DialogHelper
 import com.electricdreams.numo.ui.util.applySettingsWindowInsets
+
+import com.electricdreams.numo.core.update.holdPaymentScreen
+import com.electricdreams.numo.core.update.launchPaymentOperation
 
 /**
  * Activity for restoring wallet from a 12-word seed phrase.
@@ -121,6 +123,7 @@ class RestoreWalletActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!holdPaymentScreen()) return
         binding = ActivityRestoreWalletBinding.inflate(layoutInflater)
         setContentView(binding.root)
         applySettingsWindowInsets(this, binding.root)
@@ -392,6 +395,7 @@ class RestoreWalletActivity : AppCompatActivity() {
         val filledCount = words.count { it.isNotBlank() }
         val allFilled = filledCount == 12
         val allValid = words.all { it.isBlank() || Bip39Wordlist.isValid(it) }
+        val validChecksum = allFilled && Bip39Wordlist.isValidMnemonic(words.joinToString(" "))
 
         // Update validation status
         when {
@@ -412,6 +416,13 @@ class RestoreWalletActivity : AppCompatActivity() {
                 validationText.text = getString(R.string.onboarding_seed_words_entered_count, filledCount)
                 validationText.setTextColor(ContextCompat.getColor(this, R.color.color_warning))
             }
+            !validChecksum -> {
+                validationStatus.visibility = View.VISIBLE
+                validationIcon.setImageResource(R.drawable.ic_close)
+                validationIcon.setColorFilter(ContextCompat.getColor(this, R.color.color_warning_red))
+                validationText.text = getString(R.string.restore_seed_invalid_checksum)
+                validationText.setTextColor(ContextCompat.getColor(this, R.color.color_warning_red))
+            }
             else -> {
                 validationStatus.visibility = View.VISIBLE
                 validationIcon.setImageResource(R.drawable.ic_check)
@@ -422,7 +433,7 @@ class RestoreWalletActivity : AppCompatActivity() {
         }
 
         // Update continue button state
-        val canContinue = allFilled && allValid
+        val canContinue = allFilled && allValid && validChecksum
         continueButton.isEnabled = canContinue
         continueButton.alpha = if (canContinue) 1f else 0.5f
 
@@ -442,7 +453,7 @@ class RestoreWalletActivity : AppCompatActivity() {
         updateUIForStep(RestoreStep.FETCHING_BACKUP)
         fetchingStatus.text = getString(R.string.onboarding_status_restoring_wallet)
 
-        lifecycleScope.launch {
+        lifecycleScope.launchPaymentOperation {
             // Fetch backup from Nostr
             val result = withContext(Dispatchers.IO) {
                 fetchMintBackupSuspend(mnemonic)
@@ -690,16 +701,6 @@ class RestoreWalletActivity : AppCompatActivity() {
         mintProgressContainer.removeAllViews()
         mintProgressViews.clear()
 
-        // First, update the MintManager with selected mints
-        val mintManager = MintManager.getInstance(this)
-
-        // Add any new mints that weren't previously configured
-        for (mintUrl in selectedMints) {
-            if (!mintManager.isMintAllowed(mintUrl)) {
-                mintManager.addMint(mintUrl)
-            }
-        }
-
         // Initialize mint progress items for selected mints
         selectedMints.forEach { mintUrl ->
             val progressView = createMintProgressView(mintUrl)
@@ -707,7 +708,7 @@ class RestoreWalletActivity : AppCompatActivity() {
             mintProgressViews[mintUrl] = progressView
         }
 
-        lifecycleScope.launch {
+        lifecycleScope.launchPaymentOperation {
             try {
                 progressStatus.text = getString(R.string.onboarding_restoring_initializing)
 
@@ -734,12 +735,13 @@ class RestoreWalletActivity : AppCompatActivity() {
         mnemonic: String,
         mints: List<String>
     ): Map<String, Pair<Long, Long>> {
-        return CashuWalletManager.restoreFromMnemonic(mnemonic, this@RestoreWalletActivity) { mintUrl, status, balanceBefore, balanceAfter ->
-            // Only show progress for selected mints
-            if (mints.contains(mintUrl)) {
-                withContext(Dispatchers.Main) {
-                    updateMintProgress(mintUrl, status, balanceBefore, balanceAfter)
-                }
+        return CashuWalletManager.restoreFromMnemonic(
+            mnemonic,
+            this@RestoreWalletActivity,
+            selectedMintUrls = mints,
+        ) { mintUrl, status, balanceBefore, balanceAfter ->
+            withContext(Dispatchers.Main) {
+                updateMintProgress(mintUrl, status, balanceBefore, balanceAfter)
             }
         }
     }

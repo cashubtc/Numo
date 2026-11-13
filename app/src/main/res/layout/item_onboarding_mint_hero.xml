@@ -113,6 +113,16 @@
 
                 </LinearLayout>
 
+                <ImageButton
+                    android:id="@+id/remove_mint_button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:padding="12dp"
+                    android:src="@drawable/ic_close"
+                    android:tint="@color/color_text_on_dark_subtle"
+                    android:visibility="gone" />
+
             </LinearLayout>
 
             <!-- Divider -->

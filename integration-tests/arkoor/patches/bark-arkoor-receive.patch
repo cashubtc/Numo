@@ -1,0 +1,427 @@
+diff --git a/crates/bark/src/backend.rs b/crates/bark/src/backend.rs
+index d1e92d5..83b499a 100644
+--- a/crates/bark/src/backend.rs
++++ b/crates/bark/src/backend.rs
+@@ -30,6 +30,8 @@ use tracing::{debug, info, warn};
+ 
+ use crate::settings::{AdvertisedMethod, BackendConfig};
+ 
++mod arkoor_receive;
++
+ const ONCHAIN_CONFIRMATIONS: u32 = 1;
+ const ONCHAIN_FEE_INDEX: u32 = 0;
+ const ONCHAIN_ESTIMATED_BLOCKS: u32 = 6;
+@@ -305,8 +307,11 @@ impl BarkStateStore {
+             tx.open_table(LIGHTNING_SEND_INTENTS_TABLE)?;
+             tx.open_table(COMPLETED_LIGHTNING_SENDS_TABLE)?;
+             tx.open_table(ARKOOR_SEND_INTENTS_TABLE)?;
++            tx.open_table(ARKOOR_QUOTES_TABLE)?;
+             tx.open_table(COMPLETED_ARKOOR_SENDS_TABLE)?;
+             tx.open_table(SCAN_CURSOR_TABLE)?;
++            tx.open_table(arkoor_receive::QUOTES)?;
++            tx.open_table(arkoor_receive::REPORTED)?;
+         }
+         tx.commit()?;
+         Ok(())
+@@ -2478,6 +2483,7 @@ impl MintPayment for BarkBackend {
+ 
+         let bolt11_options = match options {
+             IncomingPaymentOptions::Bolt11(opts) => Some(opts),
++            IncomingPaymentOptions::Custom(opts) => return self.create_arkoor_receive(*opts).await,
+             IncomingPaymentOptions::Onchain(opts) => {
+                 let address = {
+                     let mut onchain = self.onchain_wallet.write().await;
+@@ -3097,13 +3103,14 @@ impl MintPayment for BarkBackend {
+                 // Rotate the starting event kind every tick so a busy kind
+                 // cannot starve the others.
+                 let mut event = None;
+-                for kind in 0..5 {
+-                    let result = match (tick + kind) % 5 {
++                for kind in 0..6 {
++                    let result = match (tick + kind) % 6 {
+                         0 => backend.next_lightning_receive_event().await,
+                         1 => backend.next_onchain_receive_event().await,
+                         2 => backend.next_lightning_send_event().await,
+                         3 => backend.next_onchain_send_event().await,
+-                        _ => backend.next_arkoor_send_event().await,
++                        4 => backend.next_arkoor_send_event().await,
++                        _ => backend.next_arkoor_receive_event().await,
+                     };
+                     match result {
+                         Ok(Some(found)) => {
+@@ -3146,6 +3153,9 @@ impl MintPayment for BarkBackend {
+                     )
+                     .await;
+             }
++            if let Some(receipts) = self.check_arkoor_receive(quote_id).await? {
++                return Ok(receipts);
++            }
+             return self.check_onchain_receive(quote_id, true).await;
+         }
+ 
+@@ -3181,6 +3191,14 @@ impl MintPayment for BarkBackend {
+                     return self.arkoor_send_response(&send, true);
+                 }
+             }
++            if self.state_store.get_arkoor_quote(&quote_id_str)?.is_some() {
++                return Ok(MakePaymentResponse {
++                    payment_lookup_id: PaymentIdentifier::QuoteId(quote_id.clone()),
++                    payment_proof: None,
++                    status: MeltQuoteState::Unpaid,
++                    total_spent: Amount::new(0, CurrencyUnit::Sat),
++                });
++            }
+ 
+             match self.state_store.lightning_send_for_quote(&quote_id_str) {
+                 Ok(Some((payment_hash, _))) => {
+@@ -3683,6 +3701,23 @@ mod tests {
+         std::fs::remove_file(path).expect("remove test state store");
+     }
+ 
++    #[test]
++    fn fresh_state_store_has_empty_arkoor_quotes() {
++        let path = std::env::temp_dir().join(format!(
++            "bark-empty-arkoor-quotes-{}.redb",
++            uuid::Uuid::new_v4()
++        ));
++        let store = BarkStateStore::open(path.clone()).expect("open state store");
++
++        assert!(store
++            .get_arkoor_quote(&QuoteId::new().to_string())
++            .expect("read empty arkoor quotes")
++            .is_none());
++
++        drop(store);
++        std::fs::remove_file(path).expect("remove test state store");
++    }
++
+     #[test]
+     fn lightning_fee_cap_rejects_uncapped_and_excessive_fees() {
+         assert!(BarkBackend::enforce_lightning_fee_cap(1, None).is_err());
+diff --git a/crates/bark/src/backend/arkoor_receive.rs b/crates/bark/src/backend/arkoor_receive.rs
+new file mode 100644
+index 0000000..cb39aac
+--- /dev/null
++++ b/crates/bark/src/backend/arkoor_receive.rs
+@@ -0,0 +1,321 @@
++//! Incoming Arkoor payments are correlated by a fresh address per mint quote.
++//! Bark's durable movement history remains authoritative even after VTXOs are spent.
++
++use bark::movement::{Movement, MovementStatus, PaymentMethod};
++use cdk_common::payment::CustomIncomingPaymentOptions;
++
++use super::{
++    BarkBackend, BarkStateStore, CreateIncomingPaymentResponse, CurrencyUnit, Event,
++    PaymentIdentifier, QuoteId, WaitPaymentResponse, ARKOOR_PAYMENT_METHOD,
++    MAX_RECEIVE_QUOTES_SCANNED_PER_TICK,
++};
++use redb::{ReadableDatabase, ReadableTable, TableDefinition};
++use serde::{Deserialize, Serialize};
++use std::str::FromStr;
++
++type Error = cdk_common::payment::Error;
++pub(super) const QUOTES: TableDefinition<&str, &str> =
++    TableDefinition::new("arkoor_receive_quotes");
++pub(super) const REPORTED: TableDefinition<&str, &str> =
++    TableDefinition::new("reported_arkoor_receives");
++const SCAN: &str = "arkoor_receive_scan";
++
++#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
++struct ReceiveQuote {
++    address: String,
++    expiry: Option<u64>,
++}
++
++impl BarkStateStore {
++    fn arkoor_receive_quotes(&self) -> Result<Vec<(String, ReceiveQuote)>, Error> {
++        let tx = self.db.begin_read().map_err(Self::store_error)?;
++        let table = tx.open_table(QUOTES).map_err(Self::store_error)?;
++        table
++            .iter()
++            .map_err(Self::store_error)?
++            .map(|row| {
++                let (key, value) = row.map_err(Self::store_error)?;
++                Ok((
++                    key.value().to_owned(),
++                    serde_json::from_str(value.value()).map_err(Self::store_error)?,
++                ))
++            })
++            .collect()
++    }
++
++    fn arkoor_receive_quote(&self, id: &str) -> Result<Option<ReceiveQuote>, Error> {
++        let tx = self.db.begin_read().map_err(Self::store_error)?;
++        let table = tx.open_table(QUOTES).map_err(Self::store_error)?;
++        table
++            .get(id)
++            .map_err(Self::store_error)?
++            .map(|value| serde_json::from_str(value.value()).map_err(Self::store_error))
++            .transpose()
++    }
++
++    // A retried create call must keep the first address, including concurrent calls.
++    fn insert_arkoor_receive_quote(
++        &self,
++        id: &str,
++        quote: ReceiveQuote,
++    ) -> Result<ReceiveQuote, Error> {
++        let tx = self.db.begin_write().map_err(Self::store_error)?;
++        let result = {
++            let mut table = tx.open_table(QUOTES).map_err(Self::store_error)?;
++            let existing = table
++                .get(id)
++                .map_err(Self::store_error)?
++                .map(|value| value.value().to_owned());
++            match existing {
++                Some(value) => serde_json::from_str(&value).map_err(Self::store_error)?,
++                None => {
++                    let value = serde_json::to_string(&quote).map_err(Self::store_error)?;
++                    table
++                        .insert(id, value.as_str())
++                        .map_err(Self::store_error)?;
++                    quote
++                }
++            }
++        };
++        tx.commit().map_err(Self::store_error)?;
++        Ok(result)
++    }
++
++    fn claim_arkoor_receive_event(&self, payment_id: &str) -> Result<bool, Error> {
++        let tx = self.db.begin_write().map_err(Self::store_error)?;
++        let fresh = {
++            let mut table = tx.open_table(REPORTED).map_err(Self::store_error)?;
++            let fresh = table.get(payment_id).map_err(Self::store_error)?.is_none();
++            if fresh {
++                table
++                    .insert(payment_id, "reported")
++                    .map_err(Self::store_error)?;
++            }
++            fresh
++        };
++        tx.commit().map_err(Self::store_error)?;
++        Ok(fresh)
++    }
++}
++
++fn received_payments(
++    quote_id: &QuoteId,
++    address: &str,
++    movements: &[Movement],
++) -> Vec<WaitPaymentResponse> {
++    movements
++        .iter()
++        .filter(|movement| movement.status == MovementStatus::Successful)
++        .flat_map(|movement| {
++            movement.received_on.iter().filter_map(move |destination| {
++                let PaymentMethod::Ark(received_address) = &destination.destination else {
++                    return None;
++                };
++                if received_address.to_string() != address || destination.amount.to_sat() == 0 {
++                    return None;
++                }
++                Some(WaitPaymentResponse {
++                    payment_identifier: PaymentIdentifier::QuoteId(quote_id.clone()),
++                    payment_amount: cdk_common::amount::Amount::new(
++                        destination.amount.to_sat(),
++                        CurrencyUnit::Sat,
++                    ),
++                    // One Bark mailbox movement may contain multiple quote addresses.
++                    payment_id: format!("arkoor:{}:{}", movement.id, quote_id),
++                })
++            })
++        })
++        .collect()
++}
++
++impl BarkBackend {
++    pub(super) async fn create_arkoor_receive(
++        &self,
++        opts: CustomIncomingPaymentOptions,
++    ) -> Result<CreateIncomingPaymentResponse, Error> {
++        // CDK 0.18's gRPC server reconstructs custom incoming options with
++        // an empty method name. Arkoor is this backend's only custom method.
++        if !opts.method.is_empty() && opts.method != ARKOOR_PAYMENT_METHOD {
++            return Err(Error::UnsupportedPaymentOption);
++        }
++        if let Some(amount) = &opts.amount {
++            if amount.unit() != &CurrencyUnit::Sat {
++                return Err(Error::UnsupportedUnit);
++            }
++            if amount.clone().to_u64() == 0 {
++                return Err(Error::Custom("Arkoor amount must be positive".to_owned()));
++            }
++        }
++        let id = opts.quote_id.to_string();
++        let quote = match self.state_store.arkoor_receive_quote(&id)? {
++            Some(quote) => quote,
++            None => {
++                let address = self
++                    .wallet
++                    .new_address()
++                    .await
++                    .map_err(|e| Error::Custom(format!("Failed to create Ark address: {e}")))?;
++                self.state_store.insert_arkoor_receive_quote(
++                    &id,
++                    ReceiveQuote {
++                        address: address.to_string(),
++                        expiry: opts.unix_expiry,
++                    },
++                )?
++            }
++        };
++        Ok(CreateIncomingPaymentResponse {
++            request_lookup_id: PaymentIdentifier::QuoteId(opts.quote_id),
++            request: quote.address,
++            expiry: quote.expiry,
++            extra_json: None,
++        })
++    }
++
++    pub(super) async fn check_arkoor_receive(
++        &self,
++        quote_id: &QuoteId,
++    ) -> Result<Option<Vec<WaitPaymentResponse>>, Error> {
++        let Some(quote) = self
++            .state_store
++            .arkoor_receive_quote(&quote_id.to_string())?
++        else {
++            return Ok(None);
++        };
++        self.wallet
++            .sync_mailbox()
++            .await
++            .map_err(|e| Error::Custom(format!("Failed to sync Ark mailbox: {e}")))?;
++        let movements = self
++            .wallet
++            .history()
++            .await
++            .map_err(|e| Error::Custom(format!("Failed to load Ark movements: {e}")))?;
++        // Status polling always returns all receipts. CDK deduplicates payment IDs.
++        Ok(Some(received_payments(
++            quote_id,
++            &quote.address,
++            &movements,
++        )))
++    }
++
++    pub(super) async fn next_arkoor_receive_event(&self) -> Result<Option<Event>, Error> {
++        let quotes = self.state_store.arkoor_receive_quotes()?;
++        if quotes.is_empty() {
++            return Ok(None);
++        }
++        self.wallet
++            .sync_mailbox()
++            .await
++            .map_err(|e| Error::Custom(format!("Failed to sync Ark mailbox: {e}")))?;
++        let movements = self
++            .wallet
++            .history()
++            .await
++            .map_err(|e| Error::Custom(format!("Failed to load Ark movements: {e}")))?;
++        let window =
++            self.state_store
++                .rotated_records(SCAN, quotes, MAX_RECEIVE_QUOTES_SCANNED_PER_TICK)?;
++        for (id, quote) in window {
++            let quote_id = QuoteId::from_str(&id).map_err(BarkStateStore::store_error)?;
++            self.state_store.put_scan_cursor(SCAN, &id)?;
++            for receipt in received_payments(&quote_id, &quote.address, &movements) {
++                if self
++                    .state_store
++                    .claim_arkoor_receive_event(&receipt.payment_id)?
++                {
++                    return Ok(Some(Event::PaymentReceived(receipt)));
++                }
++            }
++        }
++        Ok(None)
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++
++    const ADDRESS: &str = "ark1pndckx4ezqqp4cn00sj5cswh7vrhh9vm647qr3ht5a57s4vdp7vrpptxv66x3ehfzqyp4cn00sj5cswh7vrhh9vm647qr3ht5a57s4vdp7vrpptxv66x3ehgjdr0q7";
++
++    fn movement(id: u32, amount: u64, status: &str) -> Movement {
++        serde_json::from_value(serde_json::json!({
++            "id": id, "status": status,
++            "subsystem": {"name": "bark.arkoor", "kind": "receive"},
++            "metadata": {}, "intended_balance": amount, "effective_balance": amount,
++            "offchain_fee": 0, "sent_to": [],
++            "received_on": [{"destination": {"type": "ark", "value": ADDRESS}, "amount": amount}],
++            "input_vtxos": [], "output_vtxos": [], "exited_vtxos": [],
++            "time": {"created_at": "2026-09-01T00:00:00Z", "updated_at": "2026-09-01T00:00:00Z", "completed_at": null}
++        })).expect("movement fixture")
++    }
++
++    #[test]
++    fn incoming_payments_match_address_and_only_successful_receipts() {
++        let quote = QuoteId::new();
++        let movements = vec![
++            movement(1, 500, "successful"),
++            movement(2, 700, "successful"),
++            movement(3, 900, "pending"),
++            movement(4, 0, "successful"),
++        ];
++        let receipts = received_payments(&quote, ADDRESS, &movements);
++        assert_eq!(receipts.len(), 2);
++        assert_eq!(receipts[0].payment_amount.clone().to_u64(), 500);
++        assert_eq!(receipts[1].payment_amount.clone().to_u64(), 700);
++        assert_ne!(receipts[0].payment_id, receipts[1].payment_id);
++        assert_eq!(
++            receipts[0].payment_id,
++            received_payments(&quote, ADDRESS, &movements)[0].payment_id
++        );
++        assert!(received_payments(&quote, "another address", &movements).is_empty());
++        let other_quote = QuoteId::new();
++        assert_ne!(
++            receipts[0].payment_id,
++            received_payments(&other_quote, ADDRESS, &movements)[0].payment_id
++        );
++    }
++
++    #[test]
++    fn receive_quote_and_event_deduplication_survive_restart() {
++        let path = std::env::temp_dir().join(format!("bark-receive-{}.redb", uuid::Uuid::new_v4()));
++        let quote = ReceiveQuote {
++            address: ADDRESS.to_owned(),
++            expiry: Some(123),
++        };
++        {
++            let store = BarkStateStore::open(path.clone()).expect("open");
++            assert_eq!(
++                store
++                    .insert_arkoor_receive_quote("quote", quote.clone())
++                    .expect("insert"),
++                quote
++            );
++            let replacement = ReceiveQuote {
++                address: "unused".to_owned(),
++                expiry: None,
++            };
++            assert_eq!(
++                store
++                    .insert_arkoor_receive_quote("quote", replacement)
++                    .expect("retry"),
++                quote
++            );
++            assert!(store.claim_arkoor_receive_event("payment").expect("claim"));
++        }
++        {
++            let store = BarkStateStore::open(path.clone()).expect("reopen");
++            assert_eq!(
++                store.arkoor_receive_quote("quote").expect("read"),
++                Some(quote)
++            );
++            assert!(!store
++                .claim_arkoor_receive_event("payment")
++                .expect("claim again"));
++            assert!(store
++                .claim_arkoor_receive_event("second payment")
++                .expect("new payment"));
++        }
++        std::fs::remove_file(path).expect("cleanup");
++    }
++}

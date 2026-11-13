@@ -1,5 +1,10 @@
 package com.electricdreams.numo.ui.seed
 
+import android.util.Log
+import org.cashudevkit.FfiException
+import org.cashudevkit.mnemonicToEntropy
+import java.util.Locale
+
 /**
  * BIP39 English wordlist (2048 words).
  * Source: https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt
@@ -266,4 +271,18 @@ object Bip39Wordlist {
     )
 
     fun isValid(word: String): Boolean = word.lowercase() in words
+
+    fun isValidMnemonic(mnemonic: String): Boolean {
+        val normalized = mnemonic.trim().lowercase(Locale.ROOT)
+            .split(Regex("\\s+")).joinToString(" ")
+        return try {
+            mnemonicToEntropy(normalized).fill(0)
+            true
+        } catch (exception: FfiException) {
+            Log.d(TAG, "Invalid recovery phrase", exception)
+            false
+        }
+    }
+
+    private const val TAG = "Bip39Wordlist"
 }

@@ -30,15 +30,12 @@ class MintManager private constructor(context: Context) {
         private const val KEY_MINT_REFRESH_PREFIX = "mintRefresh_"
         private const val REFRESH_INTERVAL_MS = 60 * 1000L // 1 minute
 
-        // Default mints
-        private val DEFAULT_MINTS: Set<String> = setOf(
+        internal val DEFAULT_MINTS = setOf(
             "https://mint.minibits.cash/Bitcoin",
             "https://mint.macadamia.cash",
             "https://antifiat.cash",
             "https://mint.cubabitcoin.org",
         )
-        
-        // Default Lightning mint (first of the default mints)
         private const val DEFAULT_LIGHTNING_MINT = "https://mint.minibits.cash/Bitcoin"
 
         @Volatile
@@ -87,8 +84,8 @@ class MintManager private constructor(context: Context) {
         // Ensure preferred Lightning mint is valid (exists in allowed mints)
         val preferred = preferredLightningMint
         if (preferred == null || !allowedMints.contains(preferred)) {
-            // Set to first allowed mint or default
-            preferredLightningMint = allowedMints.firstOrNull() ?: DEFAULT_LIGHTNING_MINT
+            preferredLightningMint = DEFAULT_LIGHTNING_MINT.takeIf { it in allowedMints }
+                ?: allowedMints.firstOrNull()
             savePreferredLightningMint()
         }
     }
@@ -100,6 +97,38 @@ class MintManager private constructor(context: Context) {
 
     /** Get the list of allowed mints. */
     fun getAllowedMints(): List<String> = ArrayList(allowedMints)
+
+    /** Commit a restore selection without scheduling a rebuild of the staged wallet. */
+    internal fun commitRestoredMints(
+        mintUrls: List<String>,
+        preferredMintUrl: String?,
+        commitWallet: () -> Unit,
+    ) {
+        val restoredMints = mintUrls.toMutableSet()
+        require(restoredMints.isNotEmpty()) { "Select at least one mint to restore" }
+        val preferred = listOfNotNull(preferredMintUrl, preferredLightningMint)
+            .firstOrNull { it in restoredMints && mintSupportsUnit(it, preferredUnit) }
+            ?: restoredMints.firstOrNull { mintSupportsUnit(it, preferredUnit) }
+
+        try {
+            check(preferences.edit()
+                .putStringSet(KEY_MINTS, restoredMints)
+                .putString(KEY_PREFERRED_LIGHTNING_MINT, preferred)
+                .commit()) { "Could not save restored mints" }
+            commitWallet()
+        } catch (exception: Exception) {
+            val rolledBack = preferences.edit()
+                .putStringSet(KEY_MINTS, allowedMints)
+                .putString(KEY_PREFERRED_LIGHTNING_MINT, preferredLightningMint)
+                .commit()
+            if (!rolledBack) {
+                Log.e(TAG, "Could not roll back restored mint preferences")
+            }
+            throw exception
+        }
+        allowedMints = restoredMints
+        preferredLightningMint = preferred
+    }
 
     /**
      * Returns true if at least one mint is configured.
@@ -133,8 +162,10 @@ class MintManager private constructor(context: Context) {
      * Filters out mints that do not support the active preferred unit.
      * Falls back to the first allowed supporting mint if not set or invalid.
      */
-    fun getPreferredLightningMint(): String? {
-        val activeUnit = getPreferredUnit()
+    fun getPreferredLightningMint(): String? = getPreferredLightningMint(getPreferredUnit())
+
+    /** Select a mint for a saved checkout without changing the preferred base unit. */
+    fun getPreferredLightningMint(activeUnit: String): String? {
         val supportingMints = allowedMints.filter { mintSupportsUnit(it, activeUnit) }
         
         val preferred = preferredLightningMint
@@ -215,7 +246,7 @@ class MintManager private constructor(context: Context) {
      * Whether the POS should accept payments from unknown mints by swapping
      * them into the configured Lightning mint.
      *
-     * Default: true (current behavior).
+     * Enabled by default; the saved user preference takes precedence.
      */
     fun isSwapFromUnknownMintsEnabled(): Boolean = enableSwapFromUnknownMints
 
