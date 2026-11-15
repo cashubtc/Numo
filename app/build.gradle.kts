@@ -161,7 +161,7 @@ dependencies {
     implementation("com.google.zxing:core:3.5.3")
 
     // CDK Kotlin bindings
-    implementation("org.cashudevkit:cdk-android:0.18.0-rc.0")
+    implementation("org.cashudevkit:cdk-android:0.18.3")
     
     // ML Kit Barcode Scanning
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
