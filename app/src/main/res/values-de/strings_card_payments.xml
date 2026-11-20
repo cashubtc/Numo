@@ -31,6 +31,8 @@
     <string name="card_payment_status_cancelled">Kartenzahlung abgebrochen</string>
     <string name="card_payment_status_failed">Kartenzahlung fehlgeschlagen: %1$s</string>
     <string name="card_payment_status_unresolved">Die Kartenzahlung konnte nicht bestätigt werden. Tippe auf die Schaltfläche, um den Status zu prüfen; die Karte wird nicht doppelt belastet.</string>
+    <string name="card_payment_status_amount_too_small">%1$s liegt unter dem Mindestbetrag von Stripe für Kartenzahlungen. Nimm diesen Verkauf stattdessen mit Bitcoin an.</string>
+    <string name="card_payment_status_currency_not_supported">Dein Stripe-Konto kann keine Kartenzahlungen in %1$s annehmen. Stelle die Währung in Numo auf die Währung deines Stripe-Kontos um.</string>
     <string name="card_payment_completed_late">Eine Kartenzahlung wurde nach dem Schließen des Bezahlvorgangs abgeschlossen. Sie wurde zu deinem Zahlungsverlauf hinzugefügt.</string>
     <string name="card_payment_also_charged">Die Karte wurde zusätzlich für einen bereits bezahlten Verkauf belastet. Erstatte den Betrag in deinem Stripe Dashboard.</string>
     <string name="card_payment_status_amount_unavailable">Kartenbetrag nicht verfügbar: Der Bitcoin-Kurs in %1$s ist noch nicht geladen</string>
