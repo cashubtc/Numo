@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stripe_card_settings_title">カード決済</string>
+    <string name="settings_stripe_card_enabled">有効 · Stripe Tap to Pay</string>
+    <string name="settings_stripe_card_disabled">Stripe Tap to Pay でカードを受け付ける</string>
+    <string name="settings_stripe_card_unsupported">NFC 搭載の Android 13 以降が必要です</string>
+    <string name="stripe_card_enable_title">カード決済を受け付ける</string>
+    <string name="stripe_card_enable_subtitle">会計画面に「カード」タブを追加します。売上は Stripe からお使いの Stripe アカウントに入金されます。</string>
+    <string name="stripe_card_section_account">Stripe アカウント</string>
+    <string name="stripe_card_restricted_key_label">制限付き API キー (rk_…)</string>
+    <string name="stripe_card_restricted_key_saved_hint">保存済みです。置き換えるには新しいキーを入力してください。</string>
+    <string name="stripe_card_location_label">Terminal ロケーション ID (tml_…)</string>
+    <string name="stripe_card_setup_help">Stripe ダッシュボードで:\n1. Developers → API keys → Create restricted key。権限は \"Terminal Connection Tokens: Write\" のみを付与します。\n2. Terminal → Locations → この店舗のロケーションを作成し、その ID をコピーします。\n端末を紛失したときに取り消せるよう、スマートフォンごとに別のキーを使ってください。</string>
+    <string name="stripe_card_section_test">テスト</string>
+    <string name="stripe_card_test_title">接続テスト</string>
+    <string name="stripe_card_test_subtitle">キーとロケーションを Stripe で確認します</string>
+    <string name="stripe_card_test_connecting">Stripe に接続中…</string>
+    <string name="stripe_card_test_success">Stripe に接続しました</string>
+    <string name="stripe_card_test_success_test_mode">Stripe に接続しました（テストモード）</string>
+    <string name="stripe_card_test_failed">失敗しました: %1$s</string>
+    <string name="stripe_card_invalid_key">rk_live_ または rk_test_ で始まる制限付きキーを入力してください。シークレットキー (sk_…) は使用できません。</string>
+    <string name="stripe_card_invalid_location">tml_ で始まる Terminal ロケーション ID を入力してください</string>
+    <string name="stripe_card_save_failed">この端末にキーを安全に保存できませんでした</string>
+    <string name="stripe_card_remove_title">Stripe キーを削除</string>
+    <string name="stripe_card_remove_subtitle">このスマートフォンからキーを削除し、カード決済をオフにします</string>
+    <string name="stripe_card_removed">Stripe キーを削除しました</string>
+    <string name="payment_request_tab_card">カード</string>
+    <string name="payment_request_instruction_card">このスマートフォンにカードをタッチ</string>
+    <string name="card_payment_status_preparing">カードリーダーを準備中…</string>
+    <string name="card_payment_status_waiting">カードを待っています…</string>
+    <string name="card_payment_status_cancelled">カード決済がキャンセルされました</string>
+    <string name="card_payment_status_failed">カード決済に失敗しました: %1$s</string>
+    <string name="card_payment_status_amount_unavailable">カード決済額を計算できません: %1$s のビットコイン価格をまだ読み込んでいません</string>
+    <string name="card_payment_status_location_required">Stripe のカード決済には位置情報の権限が必要です</string>
+    <string name="card_payment_status_not_configured">カード決済が設定されていません</string>
+    <string name="card_payment_action_charge">%1$s を請求</string>
+    <string name="card_payment_action_retry">再試行</string>
+    <string name="transaction_detail_payment_type_card_value">カード (Stripe)</string>
+    <string name="default_payment_method_option_card">カード</string>
+</resources>

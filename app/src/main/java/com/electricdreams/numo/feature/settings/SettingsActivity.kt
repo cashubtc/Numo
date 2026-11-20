@@ -29,6 +29,8 @@ import com.electricdreams.numo.feature.pin.PinProtectionHelper
 import com.electricdreams.numo.feature.tips.TipsSettingsActivity
 import com.electricdreams.numo.payment.DefaultPaymentMethodManager
 import com.electricdreams.numo.payment.PaymentTabManager.PaymentTab
+import com.electricdreams.numo.payment.card.StripeCardSettings
+import com.electricdreams.numo.payment.card.StripeTerminalManager
 import com.electricdreams.numo.ui.components.SettingsRowView
 import com.electricdreams.numo.util.startActivityForResultCompat
 
@@ -88,6 +90,11 @@ class SettingsActivity : AppCompatActivity() {
         binding.btcpaySettingsItem.setSubtitle(getString(
             if (btcPayEnabled) R.string.settings_btcpay_enabled else R.string.settings_btcpay_disabled
         ))
+        binding.stripeCardSettingsItem.setSubtitle(getString(when {
+            !StripeTerminalManager.isDeviceSupported(this) -> R.string.settings_stripe_card_unsupported
+            StripeCardSettings.getInstance(this).isReady() -> R.string.settings_stripe_card_enabled
+            else -> R.string.settings_stripe_card_disabled
+        }))
         updateAvailability(binding.mintsSettingsItem, !btcPayEnabled,
             R.string.settings_item_mints_subtitle, R.string.settings_unavailable_btcpay)
         updateAvailability(binding.withdrawalsSettingsItem, !btcPayEnabled,
@@ -109,6 +116,7 @@ class SettingsActivity : AppCompatActivity() {
             PaymentTab.UNIFIED -> R.string.default_payment_method_option_unified
             PaymentTab.CASHU -> R.string.default_payment_method_option_cashu
             PaymentTab.LIGHTNING -> R.string.default_payment_method_option_lightning
+            PaymentTab.CARD -> R.string.default_payment_method_option_card
         }))
 
         val theme = when (prefs.getString(ThemeSettingsActivity.PREF_THEME)) {
@@ -183,6 +191,9 @@ class SettingsActivity : AppCompatActivity() {
             if (webhooksSettingsItem.isEnabled) openProtectedActivity(WebhookSettingsActivity::class.java)
         }
         btcpaySettingsItem.setOnClickListener { openProtectedActivity(BtcPaySettingsActivity::class.java) }
+        stripeCardSettingsItem.setOnClickListener {
+            openProtectedActivity(StripeCardSettingsActivity::class.java)
+        }
         securitySettingsItem.setOnClickListener { openActivity(SecuritySettingsActivity::class.java) }
         languageSettingsItem.setOnClickListener { openActivity(LanguageSettingsActivity::class.java) }
         themeSettingsItem.setOnClickListener { openActivity(ThemeSettingsActivity::class.java) }

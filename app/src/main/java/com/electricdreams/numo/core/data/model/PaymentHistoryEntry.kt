@@ -252,6 +252,9 @@ data class PaymentHistoryEntry(
         const val TYPE_ARKOOR = "arkoor"
         const val TYPE_LIGHTNING = "lightning"
 
+        /** Card payment collected with Stripe Tap to Pay; paymentRequest holds the PaymentIntent ID. */
+        const val TYPE_CARD = "card"
+
         /**
          * Simple DTO for recording swap-to-Lightning-mint metadata on a
          * PaymentHistoryEntry. Serialized as JSON into swapToLightningMintJson.

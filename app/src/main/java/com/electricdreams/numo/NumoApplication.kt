@@ -5,6 +5,7 @@ import android.util.Log
 import com.electricdreams.numo.core.dev.ErrorLogCollector
 import com.electricdreams.numo.core.update.UpdateController
 import com.electricdreams.numo.feature.settings.DeveloperPrefs
+import com.electricdreams.numo.payment.card.StripeTerminalManager
 import com.electricdreams.numo.ui.offline.OfflineStripController
 
 /**
@@ -14,6 +15,11 @@ class NumoApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        // Stripe Tap to Pay runs in a dedicated ":stripetaptopay" process that creates a second
+        // instance of this class. Wallet, update, and UI initialisation must not run there.
+        if (StripeTerminalManager.isInTapToPayProcess()) return
+        StripeTerminalManager.onApplicationCreate(this)
 
         // Expose application context for components without direct Android context (e.g., Nostr listeners)
         AppGlobals.init(this)

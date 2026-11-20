@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stripe_card_settings_title">Pagamentos com cartão</string>
+    <string name="settings_stripe_card_enabled">Ativado · Stripe Tap to Pay</string>
+    <string name="settings_stripe_card_disabled">Aceite cartões com Stripe Tap to Pay</string>
+    <string name="settings_stripe_card_unsupported">Requer Android 13 ou superior com NFC</string>
+    <string name="stripe_card_enable_title">Aceitar pagamentos com cartão</string>
+    <string name="stripe_card_enable_subtitle">Adiciona uma aba Cartão no pagamento. A Stripe repassa o dinheiro para a sua própria conta Stripe.</string>
+    <string name="stripe_card_section_account">Conta Stripe</string>
+    <string name="stripe_card_restricted_key_label">Chave de API restrita (rk_…)</string>
+    <string name="stripe_card_restricted_key_saved_hint">Salva. Digite uma nova chave para substituí-la.</string>
+    <string name="stripe_card_location_label">ID do local do Terminal (tml_…)</string>
+    <string name="stripe_card_setup_help">No Dashboard da Stripe:\n1. Developers → API keys → Create restricted key. Conceda apenas \"Terminal Connection Tokens: Write\".\n2. Terminal → Locations → crie um local para esta loja e copie o ID.\nUse uma chave diferente em cada telefone para poder revogá-la se um aparelho for perdido.</string>
+    <string name="stripe_card_section_test">Teste</string>
+    <string name="stripe_card_test_title">Testar Conexão</string>
+    <string name="stripe_card_test_subtitle">Verifica a chave e o local com a Stripe</string>
+    <string name="stripe_card_test_connecting">Conectando à Stripe…</string>
+    <string name="stripe_card_test_success">Conectado à Stripe</string>
+    <string name="stripe_card_test_success_test_mode">Conectado à Stripe (modo de teste)</string>
+    <string name="stripe_card_test_failed">Falhou: %1$s</string>
+    <string name="stripe_card_invalid_key">Digite uma chave restrita que comece com rk_live_ ou rk_test_. Chaves secretas (sk_…) não são aceitas.</string>
+    <string name="stripe_card_invalid_location">Digite um ID de local do Terminal que comece com tml_</string>
+    <string name="stripe_card_save_failed">Não foi possível guardar a chave com segurança neste aparelho</string>
+    <string name="stripe_card_remove_title">Remover chave da Stripe</string>
+    <string name="stripe_card_remove_subtitle">Apaga a chave deste telefone e desativa os pagamentos com cartão</string>
+    <string name="stripe_card_removed">Chave da Stripe removida</string>
+    <string name="payment_request_tab_card">Cartão</string>
+    <string name="payment_request_instruction_card">Aproxime o cartão deste telefone</string>
+    <string name="card_payment_status_preparing">Preparando o leitor de cartão…</string>
+    <string name="card_payment_status_waiting">Aguardando o cartão…</string>
+    <string name="card_payment_status_cancelled">Pagamento com cartão cancelado</string>
+    <string name="card_payment_status_failed">Falha no pagamento com cartão: %1$s</string>
+    <string name="card_payment_status_amount_unavailable">Valor no cartão indisponível: o preço do bitcoin em %1$s ainda não foi carregado</string>
+    <string name="card_payment_status_location_required">A Stripe exige a permissão de localização para pagamentos com cartão</string>
+    <string name="card_payment_status_not_configured">Pagamentos com cartão não estão configurados</string>
+    <string name="card_payment_action_charge">Cobrar %1$s</string>
+    <string name="card_payment_action_retry">Tentar novamente</string>
+    <string name="transaction_detail_payment_type_card_value">Cartão (Stripe)</string>
+    <string name="default_payment_method_option_card">Cartão</string>
+</resources>
