@@ -272,6 +272,17 @@ object Bip39Wordlist {
 
     fun isValid(word: String): Boolean = word.lowercase() in words
 
+    /**
+     * True when [word] is a valid BIP39 word and no other word in the list
+     * starts with it, so typing can be treated as finished (e.g. "abandon").
+     * Returns false for words that prefix others (e.g. "act" -> "action").
+     */
+    fun isUnambiguousWord(word: String): Boolean {
+        val normalized = word.lowercase(Locale.ROOT)
+        return normalized in words &&
+            words.none { it != normalized && it.startsWith(normalized) }
+    }
+
     fun isValidMnemonic(mnemonic: String): Boolean {
         val normalized = mnemonic.trim().lowercase(Locale.ROOT)
             .split(Regex("\\s+")).joinToString(" ")
