@@ -1802,7 +1802,8 @@ class PaymentRequestActivity : AppCompatActivity() {
         }
         setResult(Activity.RESULT_OK, resultIntent)
 
-        showPaymentSuccess("", paymentAmount)
+        // Stripe's Tap to Pay screen already plays its approval tone, so skip ours.
+        showPaymentSuccess("", paymentAmount, playSound = false)
     }
 
     private fun handlePaymentSuccess(token: String) {
@@ -2145,7 +2146,12 @@ class PaymentRequestActivity : AppCompatActivity() {
      * Unified success handler for all payment types.
      * Always renders the native success overlay so NFC and non-NFC success paths stay consistent.
      */
-    private fun showPaymentSuccess(token: String, amount: Long, receivedMintUrl: String? = null) {
+    private fun showPaymentSuccess(
+        token: String,
+        amount: Long,
+        receivedMintUrl: String? = null,
+        playSound: Boolean = true,
+    ) {
         if (nfcAnimationContainer.visibility != View.VISIBLE) {
             nfcOverlayShownAtMs = SystemClock.elapsedRealtime()
             Log.d(TAG, "overlay_shown_ms=$nfcOverlayShownAtMs")
@@ -2161,7 +2167,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         pendingNfcSuccessToken = token
         pendingNfcSuccessMintUrl = receivedMintUrl
         pendingNfcSuccessAmount = amount
-        showNfcAnimationSuccess(formattedAmountString)
+        showNfcAnimationSuccess(formattedAmountString, playSound)
     }
 
     // ============================================================
@@ -2328,7 +2334,7 @@ class PaymentRequestActivity : AppCompatActivity() {
         nfcAnimationTimeoutRunnable = null
     }
 
-    private fun showNfcAnimationSuccess(amountText: String) {
+    private fun showNfcAnimationSuccess(amountText: String, playSound: Boolean = true) {
         if (nfcAnimationContainer.visibility != View.VISIBLE) return
 
         animationResultLabelText.animate().cancel()
@@ -2347,16 +2353,17 @@ class PaymentRequestActivity : AppCompatActivity() {
         nfcAnimationView.showSuccess(amountText)
 
         // Play success sound and vibration
-        playNfcSuccessFeedback()
+        playNfcSuccessFeedback(playSound)
     }
 
-    private fun playNfcSuccessFeedback() {
-        // Play success sound
-        try {
-            val mediaPlayer = android.media.MediaPlayer.create(this, R.raw.success_sound)
-            mediaPlayer?.setOnCompletionListener { it.release() }
-            mediaPlayer?.start()
-        } catch (_: Exception) {}
+    private fun playNfcSuccessFeedback(playSound: Boolean) {
+        if (playSound) {
+            try {
+                val mediaPlayer = android.media.MediaPlayer.create(this, R.raw.success_sound)
+                mediaPlayer?.setOnCompletionListener { it.release() }
+                mediaPlayer?.start()
+            } catch (_: Exception) {}
+        }
         
         // Vibrate
         val vibrator = getVibrator()
