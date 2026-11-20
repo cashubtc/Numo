@@ -247,6 +247,11 @@ class RestoreWalletActivity : AppCompatActivity() {
             onSeedPasteListener = { pastedText ->
                 handleSeedPhrasePaste(pastedText)
             }
+
+            // `index` is 1-based, so it is also the list position of the next field.
+            onWordCompleteListener = {
+                seedInputs.getOrNull(index)?.requestFocus()
+            }
         }
 
         seedInputs.add(input)
