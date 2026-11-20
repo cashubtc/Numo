@@ -30,6 +30,9 @@
     <string name="card_payment_status_waiting">Warte auf Karte…</string>
     <string name="card_payment_status_cancelled">Kartenzahlung abgebrochen</string>
     <string name="card_payment_status_failed">Kartenzahlung fehlgeschlagen: %1$s</string>
+    <string name="card_payment_status_unresolved">Die Kartenzahlung konnte nicht bestätigt werden. Tippe auf die Schaltfläche, um den Status zu prüfen; die Karte wird nicht doppelt belastet.</string>
+    <string name="card_payment_completed_late">Eine Kartenzahlung wurde nach dem Schließen des Bezahlvorgangs abgeschlossen. Sie wurde zu deinem Zahlungsverlauf hinzugefügt.</string>
+    <string name="card_payment_also_charged">Die Karte wurde zusätzlich für einen bereits bezahlten Verkauf belastet. Erstatte den Betrag in deinem Stripe Dashboard.</string>
     <string name="card_payment_status_amount_unavailable">Kartenbetrag nicht verfügbar: Der Bitcoin-Kurs in %1$s ist noch nicht geladen</string>
     <string name="card_payment_status_location_required">Stripe benötigt für Kartenzahlungen die Standortberechtigung</string>
     <string name="card_payment_status_not_configured">Kartenzahlungen sind nicht eingerichtet</string>

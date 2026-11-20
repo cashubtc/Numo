@@ -22,8 +22,6 @@ import com.stripe.stripeterminal.external.callable.ReaderCallback
 import com.stripe.stripeterminal.external.callable.TapToPayReaderListener
 import com.stripe.stripeterminal.external.callable.TerminalListener
 import com.stripe.stripeterminal.external.models.CaptureMethod
-import com.stripe.stripeterminal.external.models.CollectPaymentIntentConfiguration
-import com.stripe.stripeterminal.external.models.ConfirmPaymentIntentConfiguration
 import com.stripe.stripeterminal.external.models.ConnectionConfiguration.TapToPayConnectionConfiguration
 import com.stripe.stripeterminal.external.models.ConnectionTokenException
 import com.stripe.stripeterminal.external.models.DiscoveryConfiguration.TapToPayDiscoveryConfiguration
@@ -57,12 +55,48 @@ import kotlinx.coroutines.suspendCancellableCoroutine
  */
 object StripeTerminalManager {
 
-    /** Outcome of a card collection attempt that did not succeed. */
+    /**
+     * Outcome of a card collection attempt that did not succeed.
+     *
+     * @property paymentIntent the PaymentIntent of this attempt, if one was created. Pass it
+     *   back to [collectPayment] when retrying so the same sale is never charged twice.
+     * @property isUnresolved true when Stripe may have charged the card but Numo could not
+     *   confirm the outcome, e.g. after a network failure. A retry checks the status first.
+     */
     class CardPaymentException(
         message: String,
         val isCancellation: Boolean,
         cause: Throwable? = null,
+        val paymentIntent: PaymentIntent? = null,
+        val isUnresolved: Boolean = false,
     ) : Exception(message, cause)
+
+    /** What a retry must do with an earlier PaymentIntent, based on its status at Stripe. */
+    enum class RetryStep {
+        /** The card was already charged; record the payment and charge nothing. */
+        ALREADY_PAID,
+
+        /** The earlier intent was cancelled, so it can never be charged; start a new one. */
+        NEW_INTENT,
+
+        /** Collect a card again on the same intent, e.g. after a decline. */
+        COLLECT,
+
+        /** A card was collected but not charged yet; only confirm it. */
+        CONFIRM,
+
+        /** The charge may still be in flight; do not touch the card. */
+        UNRESOLVED,
+    }
+
+    /** Maps a PaymentIntent status to the safe next step. Unknown states never charge. */
+    fun retryStepFor(status: PaymentIntentStatus?): RetryStep = when (status) {
+        PaymentIntentStatus.SUCCEEDED -> RetryStep.ALREADY_PAID
+        PaymentIntentStatus.CANCELED -> RetryStep.NEW_INTENT
+        PaymentIntentStatus.REQUIRES_PAYMENT_METHOD -> RetryStep.COLLECT
+        PaymentIntentStatus.REQUIRES_CONFIRMATION -> RetryStep.CONFIRM
+        else -> RetryStep.UNRESOLVED
+    }
 
     private const val TAG = "StripeTerminalManager"
 
@@ -71,6 +105,20 @@ object StripeTerminalManager {
 
     @Volatile
     private var appContext: Context? = null
+
+    /**
+     * Scope for card collection. It outlives the checkout screen so that a charge Stripe is
+     * already confirming still reports back and gets recorded.
+     */
+    val paymentScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    /**
+     * True while Stripe is charging a collected card. Cancelling then would not stop the charge,
+     * only Numo's view of it, so callers must let the collection finish.
+     */
+    @Volatile
+    var isCharging = false
+        private set
 
     /** Location the connected reader was registered to; a settings change forces a reconnect. */
     private var connectedLocationId: String? = null
@@ -208,11 +256,14 @@ object StripeTerminalManager {
         }
 
     /**
-     * Creates a PaymentIntent for [amount] and runs Stripe's Tap to Pay UI to collect and
-     * confirm it. Cancelling the calling coroutine cancels the collection.
+     * Charges [amount] with Stripe's Tap to Pay UI and returns the succeeded PaymentIntent.
      *
-     * @return the succeeded PaymentIntent.
-     * @throws CardPaymentException when the payment fails or is cancelled.
+     * Pass the PaymentIntent from a failed attempt as [previous]. Its status is fetched from
+     * Stripe first, and the same intent is reused, so a retry never charges the card twice.
+     * Collection can be cancelled by cancelling the calling coroutine until the card has been
+     * read; after that [isCharging] is true and the caller must let the charge finish.
+     *
+     * @throws CardPaymentException when the payment fails, is cancelled or is unresolved.
      */
     @MainThread
     suspend fun collectPayment(
@@ -220,24 +271,59 @@ object StripeTerminalManager {
         amount: CardAmountResolver.CardAmount,
         description: String?,
         metadata: Map<String, String>,
+        previous: PaymentIntent? = null,
     ): PaymentIntent {
         val terminal = ensureInitialized(context)
+        var intent: PaymentIntent? = previous
         try {
-            val created = createPaymentIntent(terminal, amount, description, metadata)
-            val processed = processPaymentIntent(terminal, created)
-            if (processed.status != PaymentIntentStatus.SUCCEEDED) {
-                throw CardPaymentException(
-                    "Card payment did not complete (status: ${processed.status})",
-                    isCancellation = false,
-                )
+            var current = if (previous == null) {
+                createPaymentIntent(terminal, amount, description, metadata)
+            } else {
+                retrievePaymentIntent(terminal, previous)
             }
-            return processed
+            intent = current
+            val step = if (previous == null) RetryStep.COLLECT else retryStepFor(current.status)
+            Log.d(TAG, "Card payment ${current.id}: status=${current.status}, step=$step")
+            when (step) {
+                RetryStep.ALREADY_PAID -> return current
+                RetryStep.UNRESOLVED -> throw unresolved(current)
+                RetryStep.NEW_INTENT -> {
+                    current = createPaymentIntent(terminal, amount, description, metadata)
+                    intent = current
+                    current = collectPaymentMethod(terminal, current)
+                }
+                RetryStep.COLLECT -> current = collectPaymentMethod(terminal, current)
+                RetryStep.CONFIRM -> Unit
+            }
+            intent = current
+
+            isCharging = true
+            val confirmed = try {
+                confirmPaymentIntent(terminal, current)
+            } finally {
+                isCharging = false
+            }
+            intent = confirmed
+            if (confirmed.status != PaymentIntentStatus.SUCCEEDED) throw unresolved(confirmed)
+            return confirmed
         } catch (e: TerminalException) {
             val cancelled = e.errorCode == TerminalErrorCode.CANCELED ||
                 e.errorCode == TerminalErrorCode.CANCELED_BY_READER
-            throw CardPaymentException(e.errorMessage, cancelled, e)
+            throw CardPaymentException(
+                message = e.errorMessage,
+                isCancellation = cancelled,
+                cause = e,
+                paymentIntent = e.paymentIntent ?: intent,
+            )
         }
     }
+
+    private fun unresolved(intent: PaymentIntent) = CardPaymentException(
+        "Card payment did not complete (status: ${intent.status})",
+        isCancellation = false,
+        paymentIntent = intent,
+        isUnresolved = true,
+    )
 
     private suspend fun createPaymentIntent(
         terminal: Terminal,
@@ -255,19 +341,34 @@ object StripeTerminalManager {
         terminal.createPaymentIntent(params, continuation.asPaymentIntentCallback())
     }
 
-    private suspend fun processPaymentIntent(
+    /** Fetches the current state of [intent] from Stripe. */
+    private suspend fun retrievePaymentIntent(
         terminal: Terminal,
-        paymentIntent: PaymentIntent,
+        intent: PaymentIntent,
+    ): PaymentIntent {
+        val clientSecret = intent.clientSecret ?: throw unresolved(intent)
+        return suspendCancellableCoroutine { continuation ->
+            terminal.retrievePaymentIntent(clientSecret, continuation.asPaymentIntentCallback())
+        }
+    }
+
+    /** Shows Stripe's tap screen and reads a card. Cancelling the coroutine cancels it. */
+    private suspend fun collectPaymentMethod(
+        terminal: Terminal,
+        intent: PaymentIntent,
     ): PaymentIntent = suspendCancellableCoroutine { continuation ->
-        val cancelable = terminal.processPaymentIntent(
-            paymentIntent,
-            CollectPaymentIntentConfiguration.Builder().build(),
-            ConfirmPaymentIntentConfiguration.Builder().build(),
-            continuation.asPaymentIntentCallback(),
-        )
+        val cancelable = terminal.collectPaymentMethod(intent, continuation.asPaymentIntentCallback())
         continuation.invokeOnCancellation {
             if (!cancelable.isCompleted) cancelable.cancel(NoOpCallback)
         }
+    }
+
+    /** Charges the collected card. This is never cancelled: the charge may already be under way. */
+    private suspend fun confirmPaymentIntent(
+        terminal: Terminal,
+        intent: PaymentIntent,
+    ): PaymentIntent = suspendCancellableCoroutine { continuation ->
+        terminal.confirmPaymentIntent(intent, continuation.asPaymentIntentCallback())
     }
 
     private fun kotlinx.coroutines.CancellableContinuation<PaymentIntent>.asPaymentIntentCallback() =

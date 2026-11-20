@@ -34,6 +34,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.material.button.MaterialButton
+import com.stripe.stripeterminal.external.models.PaymentIntent
 import com.stripe.stripeterminal.external.models.TerminalException
 import androidx.lifecycle.lifecycleScope
 import androidx.appcompat.app.AppCompatActivity
@@ -137,6 +138,9 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var cardActionButton: MaterialButton
     private var cardAmount: CardAmountResolver.CardAmount? = null
     private var cardJob: Job? = null
+
+    /** PaymentIntent of the last unfinished card attempt; a retry reuses it instead of charging anew. */
+    private var cardPaymentIntent: PaymentIntent? = null
 
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -1694,8 +1698,17 @@ class PaymentRequestActivity : AppCompatActivity() {
             ?.setText(R.string.payment_request_instruction_scan_or_tap)
     }
 
+    /**
+     * Stops card collection unless Stripe is already charging the card. A charge in flight is
+     * left to finish so that it is recorded rather than lost.
+     */
     private fun cancelCardCollection() {
-        cardJob?.cancel()
+        val job = cardJob ?: return
+        if (StripeTerminalManager.isCharging) {
+            Log.w(TAG, "Card is being charged; letting it finish so the payment is recorded")
+            return
+        }
+        job.cancel()
         cardJob = null
     }
 
@@ -1727,7 +1740,9 @@ class PaymentRequestActivity : AppCompatActivity() {
             return
         }
 
-        cardJob = lifecycleScope.launchPaymentOperation {
+        // Runs outside lifecycleScope: a charge Stripe is confirming must still be recorded
+        // if this screen closes. cancelCardCollection() stops it until that point.
+        cardJob = StripeTerminalManager.paymentScope.launchPaymentOperation {
             showCardBusy(getString(R.string.card_payment_status_preparing))
             try {
                 StripeTerminalManager.ensureReaderConnected(this@PaymentRequestActivity, config)
@@ -1740,16 +1755,19 @@ class PaymentRequestActivity : AppCompatActivity() {
                         pendingPaymentId?.let { put("numo_payment_id", it) }
                         put("numo_amount_sats", paymentAmount.toString())
                     },
+                    previous = cardPaymentIntent,
                 )
-                handleCardPaymentSuccess(paymentIntent.id.orEmpty())
+                cardPaymentIntent = null
+                onCardPaymentCharged(paymentIntent.id.orEmpty())
             } catch (e: CancellationException) {
                 throw e
             } catch (e: StripeTerminalManager.CardPaymentException) {
                 Log.w(TAG, "Card payment did not complete: ${e.message}", e)
-                val message = if (e.isCancellation) {
-                    getString(R.string.card_payment_status_cancelled)
-                } else {
-                    getString(R.string.card_payment_status_failed, e.message.orEmpty())
+                e.paymentIntent?.let { cardPaymentIntent = it }
+                val message = when {
+                    e.isCancellation -> getString(R.string.card_payment_status_cancelled)
+                    e.isUnresolved -> getString(R.string.card_payment_status_unresolved)
+                    else -> getString(R.string.card_payment_status_failed, e.message.orEmpty())
                 }
                 showCardIdle(message, showRetry = true)
             } catch (e: Exception) {
@@ -1771,6 +1789,47 @@ class PaymentRequestActivity : AppCompatActivity() {
         cardStatusText.text = message
         cardProgress.visibility = View.GONE
         cardActionButton.visibility = if (showRetry && !hasTerminalOutcome) View.VISIBLE else View.GONE
+    }
+
+    /**
+     * Handles a card Stripe has charged. Normally this completes checkout. If checkout was
+     * already closed or paid another way, the charge is still recorded or reported.
+     */
+    private fun onCardPaymentCharged(paymentIntentId: String) {
+        if (hasTerminalOutcome || isDestroyed) {
+            recordLateCardPayment(paymentIntentId)
+        } else {
+            handleCardPaymentSuccess(paymentIntentId)
+        }
+    }
+
+    /**
+     * Records a card charge that completed after this checkout ended. If the sale is still
+     * pending it is completed as a card payment; if it was already paid, the merchant is told
+     * to refund the extra charge.
+     */
+    private fun recordLateCardPayment(paymentIntentId: String) {
+        val context = applicationContext
+        val paymentId = pendingPaymentId
+        val stillPending = paymentId != null &&
+            PaymentsHistoryActivity.getPaymentEntryById(context, paymentId)?.isPending() == true
+        if (paymentId != null && stillPending) {
+            Log.w(TAG, "Recording card payment $paymentIntentId that completed after checkout closed")
+            PaymentsHistoryActivity.completePendingPayment(
+                context = context,
+                paymentId = paymentId,
+                token = "",
+                paymentType = PaymentHistoryEntry.TYPE_CARD,
+                mintUrl = null,
+                paymentRequest = paymentIntentId,
+            )
+            dispatchPaymentReceivedWebhook()
+            markBasketAsPaid()
+            Toast.makeText(context, R.string.card_payment_completed_late, Toast.LENGTH_LONG).show()
+        } else {
+            Log.e(TAG, "Card payment $paymentIntentId succeeded after this sale was already settled")
+            Toast.makeText(context, R.string.card_payment_also_charged, Toast.LENGTH_LONG).show()
+        }
     }
 
     /** Records a captured card payment. Stripe holds the funds; nothing enters the Cashu wallet. */

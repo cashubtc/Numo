@@ -30,6 +30,9 @@
     <string name="card_payment_status_waiting">Aguardando o cartão…</string>
     <string name="card_payment_status_cancelled">Pagamento com cartão cancelado</string>
     <string name="card_payment_status_failed">Falha no pagamento com cartão: %1$s</string>
+    <string name="card_payment_status_unresolved">Não foi possível confirmar o pagamento com cartão. Toque no botão para verificar o status; o cartão não será cobrado duas vezes.</string>
+    <string name="card_payment_completed_late">Um pagamento com cartão foi concluído depois que o checkout foi fechado. Ele foi adicionado ao seu histórico de pagamentos.</string>
+    <string name="card_payment_also_charged">O cartão também foi cobrado por uma venda que já estava paga. Reembolse-o no seu Stripe Dashboard.</string>
     <string name="card_payment_status_amount_unavailable">Valor no cartão indisponível: o preço do bitcoin em %1$s ainda não foi carregado</string>
     <string name="card_payment_status_location_required">A Stripe exige a permissão de localização para pagamentos com cartão</string>
     <string name="card_payment_status_not_configured">Pagamentos com cartão não estão configurados</string>
