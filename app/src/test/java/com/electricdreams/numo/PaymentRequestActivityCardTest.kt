@@ -11,11 +11,13 @@ import com.electricdreams.numo.feature.autowithdraw.AutoWithdrawManager
 import com.electricdreams.numo.feature.history.PaymentsHistoryActivity
 import com.electricdreams.numo.payment.PaymentTabManager
 import com.electricdreams.numo.payment.PaymentTabManager.PaymentTab
+import com.electricdreams.numo.payment.card.StripeTerminalManager
 import com.electricdreams.numo.ui.animation.NfcPaymentAnimationView
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.Job
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -28,6 +30,7 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowToast
 import org.robolectric.util.ReflectionHelpers
 
 @RunWith(RobolectricTestRunner::class)
@@ -72,6 +75,7 @@ class PaymentRequestActivityCardTest {
     @After
     fun tearDown() {
         ReflectionHelpers.setStaticField(AutoWithdrawManager::class.java, "instance", null)
+        setCharging(false)
     }
 
     @Test
@@ -145,6 +149,70 @@ class PaymentRequestActivityCardTest {
 
         assertTrue(collection.isCancelled)
         assertEquals(View.VISIBLE, shareButton.visibility)
+    }
+
+    @Test
+    fun `card charge that completes after checkout was cancelled is still recorded`() {
+        val paymentId = addPendingPayment()
+        // Backing out of checkout ends this screen's flow but keeps the sale pending.
+        ReflectionHelpers.setField(activity, "hasTerminalOutcome", true)
+
+        call("onCardPaymentCharged", "pi_late")
+
+        val entry = PaymentsHistoryActivity.getPaymentEntryById(activity, paymentId)
+        assertTrue(entry?.isCompleted() == true)
+        assertEquals(PaymentHistoryEntry.TYPE_CARD, entry?.paymentType)
+        assertEquals("pi_late", entry?.paymentRequest)
+        assertEquals(activity.getString(R.string.card_payment_completed_late), ShadowToast.getTextOfLatestToast())
+    }
+
+    @Test
+    fun `card charge on a sale already paid another way asks for a refund`() {
+        val paymentId = addPendingPayment()
+        PaymentsHistoryActivity.completePendingPayment(
+            context = activity,
+            paymentId = paymentId,
+            token = "cashuA",
+            paymentType = PaymentHistoryEntry.TYPE_CASHU,
+            mintUrl = null,
+        )
+        ReflectionHelpers.setField(activity, "hasTerminalOutcome", true)
+
+        call("onCardPaymentCharged", "pi_extra")
+
+        val entry = PaymentsHistoryActivity.getPaymentEntryById(activity, paymentId)
+        assertEquals(PaymentHistoryEntry.TYPE_CASHU, entry?.paymentType)
+        assertEquals(activity.getString(R.string.card_payment_also_charged), ShadowToast.getTextOfLatestToast())
+    }
+
+    @Test
+    fun `leaving the card tab while the card is being charged lets the charge finish`() {
+        val collection = Job()
+        ReflectionHelpers.setField(activity, "cardJob", collection)
+        setCharging(true)
+
+        call("exitCardMode")
+
+        assertFalse(collection.isCancelled)
+        assertEquals(collection, ReflectionHelpers.getField<Job?>(activity, "cardJob"))
+    }
+
+    private fun addPendingPayment(): String {
+        val paymentId = PaymentsHistoryActivity.addPendingPayment(
+            context = activity,
+            amount = 12_345L,
+            entryUnit = "usd",
+            enteredAmount = 1_250L,
+            bitcoinPrice = 100_000.0,
+            paymentRequest = null,
+            formattedAmount = "$12.50",
+        )
+        ReflectionHelpers.setField(activity, "pendingPaymentId", paymentId)
+        return paymentId
+    }
+
+    private fun setCharging(charging: Boolean) {
+        ReflectionHelpers.setStaticField(StripeTerminalManager::class.java, "isCharging", charging)
     }
 
     private fun call(method: String, vararg args: String) {
