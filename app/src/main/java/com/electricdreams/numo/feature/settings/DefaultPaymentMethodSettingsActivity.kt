@@ -54,6 +54,7 @@ class DefaultPaymentMethodSettingsActivity : AppCompatActivity() {
             PaymentTab.UNIFIED -> R.id.radio_unified
             PaymentTab.CASHU -> R.id.radio_cashu
             PaymentTab.LIGHTNING -> R.id.radio_lightning
+            PaymentTab.CARD -> R.id.radio_unified
         }
         radioGroup.check(radioButtonId)
     }

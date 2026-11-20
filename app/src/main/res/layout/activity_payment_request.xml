@@ -252,6 +252,51 @@
                 android:indeterminate="true"
                 android:visibility="visible" />
         </FrameLayout>
+
+        <!-- Card (Stripe Tap to Pay): Stripe shows its own tap screen while collecting -->
+        <LinearLayout
+            android:id="@+id/card_container"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="@dimen/space_xl"
+            android:visibility="invisible">
+
+            <ImageView
+                android:layout_width="96dp"
+                android:layout_height="96dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_card"
+                app:tint="@color/color_text_primary" />
+
+            <TextView
+                android:id="@+id/card_status_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_l"
+                android:accessibilityLiveRegion="polite"
+                android:gravity="center"
+                android:text="@string/card_payment_status_preparing"
+                android:textColor="@color/color_text_secondary"
+                android:textSize="16sp" />
+
+            <ProgressBar
+                android:id="@+id/card_progress"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginTop="@dimen/space_m"
+                android:indeterminate="true" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/card_action_button"
+                style="@style/Widget.Numo.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="56dp"
+                android:layout_marginTop="@dimen/space_m"
+                android:text="@string/card_payment_action_retry"
+                android:visibility="gone" />
+        </LinearLayout>
     </FrameLayout>
 
 
@@ -412,6 +457,39 @@
                 android:textStyle="bold"
                 android:gravity="center"
                 android:textColor="@color/color_text_secondary"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Card Tab (only shown when Stripe card payments are set up) -->
+        <LinearLayout
+            android:id="@+id/card_tab"
+            android:layout_width="wrap_content"
+            android:layout_height="42dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="@string/payment_request_tab_card"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="@dimen/row_padding_vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/card_tab_icon"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:importantForAccessibility="no"
+                android:src="@drawable/ic_card"
+                app:tint="@color/color_text_secondary" />
+
+            <TextView
+                android:id="@+id/card_tab_text"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="0dp"
+                android:gravity="center"
+                android:text="@string/payment_request_tab_card"
+                android:textColor="@color/color_text_secondary"
+                android:textSize="18sp"
+                android:textStyle="bold"
                 android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>

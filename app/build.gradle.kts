@@ -125,6 +125,8 @@ dependencies {
     implementation("androidx.viewpager2:viewpager2:1.0.0")
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.6")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.6")
+    // Used directly by BalanceRefreshBroadcast; previously only present transitively.
+    implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
     
     // Testing
     testImplementation("junit:junit:4.13.2")
@@ -179,6 +181,10 @@ dependencies {
     
     // Custom Tabs for embedded web links
     implementation("androidx.browser:browser:1.8.0")
+
+    // Stripe Terminal: Tap to Pay card acceptance on the merchant's phone (Android 13+).
+    implementation("com.stripe:stripeterminal-core:6.0.0")
+    implementation("com.stripe:stripeterminal-taptopay:6.0.0")
     "playImplementation"("com.google.android.play:app-update-ktx:2.1.0")
 }
 

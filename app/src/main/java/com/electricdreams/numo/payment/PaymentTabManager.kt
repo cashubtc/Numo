@@ -10,7 +10,7 @@ import android.widget.TextView
 import com.electricdreams.numo.R
 
 /**
- * Manages the payment method tab UI (Unified vs Cashu vs Lightning).
+ * Manages the payment method tab UI (Unified vs Cashu vs Lightning, plus optional Card).
  *
  * Handles visual state switching between tabs and visibility of QR containers.
  */
@@ -39,10 +39,19 @@ class PaymentTabManager(
     private val lightningQrImageView: View,
     
     private val resources: Resources,
-    private val theme: Resources.Theme
+    private val theme: Resources.Theme,
+
+    /** Optional Card (Stripe Tap to Pay) tab; hidden unless [setCardTabAvailable] enables it. */
+    private val cardTab: LinearLayout? = null,
+    private val cardTabText: TextView? = null,
+    private val cardTabIcon: ImageView? = null,
+    private val cardContainer: View? = null,
 ) {
     enum class PaymentTab {
-        UNIFIED, CASHU, LIGHTNING
+        UNIFIED, CASHU, LIGHTNING,
+
+        /** Card payments are never a default method; they need the merchant to start a tap. */
+        CARD,
     }
 
     /**
@@ -92,6 +101,18 @@ class PaymentTabManager(
         unifiedTab.setOnClickListener { selectTab(PaymentTab.UNIFIED) }
         cashuTab.setOnClickListener { selectTab(PaymentTab.CASHU) }
         lightningTab.setOnClickListener { selectTab(PaymentTab.LIGHTNING) }
+        cardTab?.setOnClickListener { selectTab(PaymentTab.CARD) }
+    }
+
+    /** Shows or hides the Card tab. Hiding it while selected falls back to the default tab. */
+    fun setCardTabAvailable(available: Boolean) {
+        val tab = cardTab ?: return
+        tab.visibility = if (available) View.VISIBLE else View.GONE
+        if (!available && currentTab == PaymentTab.CARD) {
+            val fallback = DefaultPaymentMethodManager.getInstance(unifiedTab.context)
+                .getDefaultPaymentMethod()
+            selectTab(if (fallback == PaymentTab.CARD) PaymentTab.UNIFIED else fallback)
+        }
     }
     
     private fun setDefaultTab(tab: PaymentTab) {
@@ -112,6 +133,7 @@ class PaymentTabManager(
         container.removeView(unifiedTab)
         container.removeView(cashuTab)
         container.removeView(lightningTab)
+        cardTab?.let { container.removeView(it) }
         
         when (defaultTab) {
             PaymentTab.UNIFIED -> {
@@ -129,7 +151,14 @@ class PaymentTabManager(
                 container.addView(unifiedTab)
                 container.addView(cashuTab)
             }
+            PaymentTab.CARD -> {
+                container.addView(unifiedTab)
+                container.addView(cashuTab)
+                container.addView(lightningTab)
+            }
         }
+        // Card is always last: it is an alternative to the bitcoin methods, not a default.
+        cardTab?.let { container.addView(it) }
     }
 
     fun selectTab(tab: PaymentTab) {
@@ -145,26 +174,32 @@ class PaymentTabManager(
         unifiedTab.setBackgroundResource(transparentBg)
         cashuTab.setBackgroundResource(transparentBg)
         lightningTab.setBackgroundResource(transparentBg)
+        cardTab?.setBackgroundResource(transparentBg)
         
         unifiedTabText.visibility = View.GONE
         cashuTabText.visibility = View.GONE
         lightningTabText.visibility = View.GONE
+        cardTabText?.visibility = View.GONE
         
         unifiedTabIcon.visibility = View.VISIBLE
         cashuTabIcon.visibility = View.VISIBLE
         lightningTabIcon.visibility = View.VISIBLE
+        cardTabIcon?.visibility = View.VISIBLE
 
         unifiedTabText.setTextColor(secondaryColor)
         cashuTabText.setTextColor(secondaryColor)
         lightningTabText.setTextColor(secondaryColor)
+        cardTabText?.setTextColor(secondaryColor)
 
         unifiedTabIcon.setTextColor(secondaryColor)
         cashuTabIcon.setColorFilter(secondaryColor)
         lightningTabIcon.setColorFilter(secondaryColor)
+        cardTabIcon?.setColorFilter(secondaryColor)
 
         unifiedQrContainer.visibility = View.INVISIBLE
         cashuQrContainer.visibility = View.INVISIBLE
         lightningQrContainer.visibility = View.INVISIBLE
+        cardContainer?.visibility = View.INVISIBLE
 
         // Set selected
         when (tab) {
@@ -191,6 +226,14 @@ class PaymentTabManager(
                 lightningTabIcon.visibility = View.GONE
                 
                 lightningQrContainer.visibility = View.VISIBLE
+            }
+            PaymentTab.CARD -> {
+                cardTab?.setBackgroundResource(primaryBg)
+                cardTabText?.visibility = View.VISIBLE
+                cardTabText?.setTextColor(whiteColor)
+                cardTabIcon?.visibility = View.GONE
+
+                cardContainer?.visibility = View.VISIBLE
             }
         }
 

@@ -19,6 +19,19 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <!--
+      Stripe Tap to Pay card payments. Stripe's SDK requires location access, and its
+      libraries declare minSdk 26. Numo keeps minSdk 24 and only enables card payments on
+      Android 13+ (see StripeTerminalManager.isDeviceSupported).
+    -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- stripeterminal-core declares this with maxSdkVersion 30 (Bluetooth readers); Tap to Pay
+         needs it on Android 13+, so drop the library's cap when merging. -->
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        tools:remove="android:maxSdkVersion" />
+    <uses-sdk tools:overrideLibrary="com.stripe.cots,com.stripe.stripeterminal,com.stripe.stripeterminal.external,com.stripe.stripeterminal.internal.common" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
@@ -584,6 +597,18 @@
             android:label="@string/basket_names_settings_title"
             android:theme="@style/Theme.Numo.Settings"
             android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:parentActivityName=".feature.settings.SettingsActivity"
+            android:windowSoftInputMode="adjustResize">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".feature.settings.SettingsActivity" />
+        </activity>
+
+        <activity android:name="com.electricdreams.numo.feature.settings.StripeCardSettingsActivity"
+            android:exported="false"
+            android:label="@string/stripe_card_settings_title"
+            android:theme="@style/Theme.Numo.Settings"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:parentActivityName=".feature.settings.SettingsActivity"
             android:windowSoftInputMode="adjustResize">

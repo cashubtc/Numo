@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stripe_card_settings_title">카드 결제</string>
+    <string name="settings_stripe_card_enabled">사용 중 · Stripe Tap to Pay</string>
+    <string name="settings_stripe_card_disabled">Stripe Tap to Pay로 카드 결제 받기</string>
+    <string name="settings_stripe_card_unsupported">NFC가 있는 Android 13 이상이 필요합니다</string>
+    <string name="stripe_card_enable_title">카드 결제 받기</string>
+    <string name="stripe_card_enable_subtitle">결제 화면에 카드 탭을 추가합니다. 대금은 Stripe가 내 Stripe 계정으로 정산합니다.</string>
+    <string name="stripe_card_section_account">Stripe 계정</string>
+    <string name="stripe_card_restricted_key_label">제한된 API 키 (rk_…)</string>
+    <string name="stripe_card_restricted_key_saved_hint">저장됨. 바꾸려면 새 키를 입력하세요.</string>
+    <string name="stripe_card_location_label">Terminal 위치 ID (tml_…)</string>
+    <string name="stripe_card_setup_help">Stripe 대시보드에서:\n1. Developers → API keys → Create restricted key. \"Terminal Connection Tokens: Write\" 권한만 부여하세요.\n2. Terminal → Locations → 이 매장의 위치를 만들고 ID를 복사하세요.\n기기를 분실했을 때 취소할 수 있도록 휴대폰마다 다른 키를 사용하세요.</string>
+    <string name="stripe_card_section_test">테스트</string>
+    <string name="stripe_card_test_title">연결 테스트</string>
+    <string name="stripe_card_test_subtitle">Stripe에서 키와 위치를 확인합니다</string>
+    <string name="stripe_card_test_connecting">Stripe에 연결 중…</string>
+    <string name="stripe_card_test_success">Stripe에 연결됨</string>
+    <string name="stripe_card_test_success_test_mode">Stripe에 연결됨 (테스트 모드)</string>
+    <string name="stripe_card_test_failed">실패: %1$s</string>
+    <string name="stripe_card_invalid_key">rk_live_ 또는 rk_test_로 시작하는 제한된 키를 입력하세요. 비밀 키(sk_…)는 사용할 수 없습니다.</string>
+    <string name="stripe_card_invalid_location">tml_로 시작하는 Terminal 위치 ID를 입력하세요</string>
+    <string name="stripe_card_save_failed">이 기기에 키를 안전하게 저장할 수 없습니다</string>
+    <string name="stripe_card_remove_title">Stripe 키 삭제</string>
+    <string name="stripe_card_remove_subtitle">이 휴대폰에서 키를 삭제하고 카드 결제를 끕니다</string>
+    <string name="stripe_card_removed">Stripe 키를 삭제했습니다</string>
+    <string name="payment_request_tab_card">카드</string>
+    <string name="payment_request_instruction_card">이 휴대폰에 카드를 대세요</string>
+    <string name="card_payment_status_preparing">카드 리더 준비 중…</string>
+    <string name="card_payment_status_waiting">카드를 기다리는 중…</string>
+    <string name="card_payment_status_cancelled">카드 결제가 취소되었습니다</string>
+    <string name="card_payment_status_failed">카드 결제 실패: %1$s</string>
+    <string name="card_payment_status_amount_unavailable">카드 결제 금액을 계산할 수 없습니다: %1$s 기준 비트코인 가격을 아직 불러오지 못했습니다</string>
+    <string name="card_payment_status_location_required">Stripe 카드 결제에는 위치 권한이 필요합니다</string>
+    <string name="card_payment_status_not_configured">카드 결제가 설정되지 않았습니다</string>
+    <string name="card_payment_action_charge">%1$s 결제</string>
+    <string name="card_payment_action_retry">다시 시도</string>
+    <string name="transaction_detail_payment_type_card_value">카드 (Stripe)</string>
+    <string name="default_payment_method_option_card">카드</string>
+</resources>
