@@ -244,10 +244,11 @@ class TransactionDetailActivity : AppCompatActivity() {
             paymentType == PaymentHistoryEntry.TYPE_ARKOOR -> getString(R.string.payment_request_arkoor)
             paymentType == PaymentHistoryEntry.TYPE_LIGHTNING -> getString(R.string.transaction_detail_payment_type_lightning_value)
             paymentType == PaymentHistoryEntry.TYPE_CASHU -> getString(R.string.transaction_detail_payment_type_cashu_value)
+            paymentType == PaymentHistoryEntry.TYPE_CARD -> getString(R.string.transaction_detail_payment_type_card_value)
             else -> getString(R.string.transaction_detail_type_payment_received)
         }
         val hasType = isWithdrawal || paymentType == PaymentHistoryEntry.TYPE_LIGHTNING ||
-            paymentType == PaymentHistoryEntry.TYPE_CASHU
+            paymentType == PaymentHistoryEntry.TYPE_CASHU || paymentType == PaymentHistoryEntry.TYPE_CARD
         findViewById<View>(R.id.row_transaction_type).visibility =
             if (hasType || isSettled) View.VISIBLE else View.GONE
 

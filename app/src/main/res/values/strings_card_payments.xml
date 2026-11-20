@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Settings: Card payments (Stripe Tap to Pay) -->
+    <string name="stripe_card_settings_title">Card payments</string>
+    <string name="settings_stripe_card_enabled">Enabled · Stripe Tap to Pay</string>
+    <string name="settings_stripe_card_disabled">Accept cards with Stripe Tap to Pay</string>
+    <string name="settings_stripe_card_unsupported">Requires Android 13 or newer with NFC</string>
+    <string name="stripe_card_enable_title">Accept card payments</string>
+    <string name="stripe_card_enable_subtitle">Adds a Card tab at checkout. Money is paid out by Stripe to your own Stripe account.</string>
+    <string name="stripe_card_section_account">Stripe account</string>
+    <string name="stripe_card_restricted_key_label">Restricted API key (rk_…)</string>
+    <string name="stripe_card_restricted_key_saved_hint">Saved. Enter a new key to replace it.</string>
+    <string name="stripe_card_location_label">Terminal Location ID (tml_…)</string>
+    <string name="stripe_card_setup_help">In your Stripe Dashboard:\n1. Developers → API keys → Create restricted key. Give it only \"Terminal Connection Tokens: Write\".\n2. Terminal → Locations → create a location for this shop and copy its ID.\nUse a separate key for each phone so you can revoke one if a device is lost.</string>
+    <string name="stripe_card_section_test">Test</string>
+    <string name="stripe_card_test_title">Test connection</string>
+    <string name="stripe_card_test_subtitle">Checks the key and location with Stripe</string>
+    <string name="stripe_card_test_connecting">Contacting Stripe…</string>
+    <string name="stripe_card_test_success">Connected to Stripe</string>
+    <string name="stripe_card_test_success_test_mode">Connected to Stripe (test mode)</string>
+    <string name="stripe_card_test_failed">Failed: %1$s</string>
+    <string name="stripe_card_invalid_key">Enter a restricted key starting with rk_live_ or rk_test_. Secret keys (sk_…) are not accepted.</string>
+    <string name="stripe_card_invalid_location">Enter a Terminal Location ID starting with tml_</string>
+    <string name="stripe_card_save_failed">Could not store the key securely on this device</string>
+    <string name="stripe_card_remove_title">Remove Stripe key</string>
+    <string name="stripe_card_remove_subtitle">Deletes the key from this phone and turns card payments off</string>
+    <string name="stripe_card_removed">Stripe key removed</string>
+
+    <!-- Checkout: Card tab -->
+    <string name="payment_request_tab_card">Card</string>
+    <string name="payment_request_instruction_card">Tap card on this phone</string>
+    <string name="card_payment_status_preparing">Preparing card reader…</string>
+    <string name="card_payment_status_waiting">Waiting for card…</string>
+    <string name="card_payment_status_cancelled">Card payment cancelled</string>
+    <string name="card_payment_status_failed">Card payment failed: %1$s</string>
+    <string name="card_payment_status_unresolved">Couldn\'t confirm the card payment. Tap the button to check its status; the card won\'t be charged twice.</string>
+    <string name="card_payment_status_amount_too_small">%1$s is below Stripe\'s minimum card payment. Take this sale with bitcoin instead.</string>
+    <string name="card_payment_status_currency_not_supported">Your Stripe account can\'t take card payments in %1$s. Set Numo\'s currency to your Stripe account\'s currency.</string>
+    <string name="card_payment_completed_late">A card payment went through after checkout closed. It has been added to your payment history.</string>
+    <string name="card_payment_also_charged">The card was also charged for a sale that was already paid. Refund it in your Stripe Dashboard.</string>
+    <string name="card_payment_status_amount_unavailable">Card amount unavailable: the bitcoin price in %1$s is not loaded yet</string>
+    <string name="card_payment_status_location_required">Location permission is required by Stripe for card payments</string>
+    <string name="card_payment_status_not_configured">Card payments are not set up</string>
+    <string name="card_payment_action_charge">Charge %1$s</string>
+    <string name="card_payment_action_retry">Try again</string>
+    <string name="transaction_detail_payment_type_card_value">Card (Stripe)</string>
+    <string name="default_payment_method_option_card">Card</string>
+</resources>

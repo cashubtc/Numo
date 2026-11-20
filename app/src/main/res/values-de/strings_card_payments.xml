@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="stripe_card_settings_title">Kartenzahlungen</string>
+    <string name="settings_stripe_card_enabled">Aktiviert · Stripe Tap to Pay</string>
+    <string name="settings_stripe_card_disabled">Karten mit Stripe Tap to Pay akzeptieren</string>
+    <string name="settings_stripe_card_unsupported">Erfordert Android 13 oder neuer mit NFC</string>
+    <string name="stripe_card_enable_title">Kartenzahlungen akzeptieren</string>
+    <string name="stripe_card_enable_subtitle">Fügt beim Bezahlen einen Tab „Karte“ hinzu. Stripe zahlt das Geld auf dein eigenes Stripe-Konto aus.</string>
+    <string name="stripe_card_section_account">Stripe-Konto</string>
+    <string name="stripe_card_restricted_key_label">Eingeschränkter API-Schlüssel (rk_…)</string>
+    <string name="stripe_card_restricted_key_saved_hint">Gespeichert. Gib einen neuen Schlüssel ein, um ihn zu ersetzen.</string>
+    <string name="stripe_card_location_label">Terminal-Standort-ID (tml_…)</string>
+    <string name="stripe_card_setup_help">Im Stripe-Dashboard:\n1. Developers → API keys → Create restricted key. Gib ihm nur die Berechtigung \"Terminal Connection Tokens: Write\".\n2. Terminal → Locations → lege einen Standort für dieses Geschäft an und kopiere seine ID.\nVerwende für jedes Telefon einen eigenen Schlüssel, damit du ihn bei Verlust eines Geräts widerrufen kannst.</string>
+    <string name="stripe_card_section_test">Test</string>
+    <string name="stripe_card_test_title">Verbindung testen</string>
+    <string name="stripe_card_test_subtitle">Prüft Schlüssel und Standort bei Stripe</string>
+    <string name="stripe_card_test_connecting">Verbindung zu Stripe wird hergestellt…</string>
+    <string name="stripe_card_test_success">Mit Stripe verbunden</string>
+    <string name="stripe_card_test_success_test_mode">Mit Stripe verbunden (Testmodus)</string>
+    <string name="stripe_card_test_failed">Fehlgeschlagen: %1$s</string>
+    <string name="stripe_card_invalid_key">Gib einen eingeschränkten Schlüssel ein, der mit rk_live_ oder rk_test_ beginnt. Geheime Schlüssel (sk_…) werden nicht akzeptiert.</string>
+    <string name="stripe_card_invalid_location">Gib eine Terminal-Standort-ID ein, die mit tml_ beginnt</string>
+    <string name="stripe_card_save_failed">Der Schlüssel konnte auf diesem Gerät nicht sicher gespeichert werden</string>
+    <string name="stripe_card_remove_title">Stripe-Schlüssel entfernen</string>
+    <string name="stripe_card_remove_subtitle">Löscht den Schlüssel von diesem Telefon und deaktiviert Kartenzahlungen</string>
+    <string name="stripe_card_removed">Stripe-Schlüssel entfernt</string>
+    <string name="payment_request_tab_card">Karte</string>
+    <string name="payment_request_instruction_card">Karte an dieses Telefon halten</string>
+    <string name="card_payment_status_preparing">Kartenleser wird vorbereitet…</string>
+    <string name="card_payment_status_waiting">Warte auf Karte…</string>
+    <string name="card_payment_status_cancelled">Kartenzahlung abgebrochen</string>
+    <string name="card_payment_status_failed">Kartenzahlung fehlgeschlagen: %1$s</string>
+    <string name="card_payment_status_unresolved">Die Kartenzahlung konnte nicht bestätigt werden. Tippe auf die Schaltfläche, um den Status zu prüfen; die Karte wird nicht doppelt belastet.</string>
+    <string name="card_payment_status_amount_too_small">%1$s liegt unter dem Mindestbetrag von Stripe für Kartenzahlungen. Nimm diesen Verkauf stattdessen mit Bitcoin an.</string>
+    <string name="card_payment_status_currency_not_supported">Dein Stripe-Konto kann keine Kartenzahlungen in %1$s annehmen. Stelle die Währung in Numo auf die Währung deines Stripe-Kontos um.</string>
+    <string name="card_payment_completed_late">Eine Kartenzahlung wurde nach dem Schließen des Bezahlvorgangs abgeschlossen. Sie wurde zu deinem Zahlungsverlauf hinzugefügt.</string>
+    <string name="card_payment_also_charged">Die Karte wurde zusätzlich für einen bereits bezahlten Verkauf belastet. Erstatte den Betrag in deinem Stripe Dashboard.</string>
+    <string name="card_payment_status_amount_unavailable">Kartenbetrag nicht verfügbar: Der Bitcoin-Kurs in %1$s ist noch nicht geladen</string>
+    <string name="card_payment_status_location_required">Stripe benötigt für Kartenzahlungen die Standortberechtigung</string>
+    <string name="card_payment_status_not_configured">Kartenzahlungen sind nicht eingerichtet</string>
+    <string name="card_payment_action_charge">%1$s belasten</string>
+    <string name="card_payment_action_retry">Erneut versuchen</string>
+    <string name="transaction_detail_payment_type_card_value">Karte (Stripe)</string>
+    <string name="default_payment_method_option_card">Karte</string>
+</resources>
