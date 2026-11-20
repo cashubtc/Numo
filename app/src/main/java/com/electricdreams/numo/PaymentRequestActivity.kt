@@ -1764,12 +1764,26 @@ class PaymentRequestActivity : AppCompatActivity() {
             } catch (e: StripeTerminalManager.CardPaymentException) {
                 Log.w(TAG, "Card payment did not complete: ${e.message}", e)
                 e.paymentIntent?.let { cardPaymentIntent = it }
-                val message = when {
-                    e.isCancellation -> getString(R.string.card_payment_status_cancelled)
-                    e.isUnresolved -> getString(R.string.card_payment_status_unresolved)
-                    else -> getString(R.string.card_payment_status_failed, e.message.orEmpty())
+                val currency = amount.currency.uppercase(java.util.Locale.US)
+                when (e.reason) {
+                    // Setup problems: retrying would fail the same way, so offer no retry.
+                    StripeTerminalManager.FailureReason.AMOUNT_TOO_SMALL -> showCardIdle(
+                        getString(R.string.card_payment_status_amount_too_small, formatCardAmount(amount)),
+                        showRetry = false,
+                    )
+                    StripeTerminalManager.FailureReason.CURRENCY_NOT_SUPPORTED -> showCardIdle(
+                        getString(R.string.card_payment_status_currency_not_supported, currency),
+                        showRetry = false,
+                    )
+                    StripeTerminalManager.FailureReason.OTHER -> showCardIdle(
+                        when {
+                            e.isCancellation -> getString(R.string.card_payment_status_cancelled)
+                            e.isUnresolved -> getString(R.string.card_payment_status_unresolved)
+                            else -> getString(R.string.card_payment_status_failed, e.message.orEmpty())
+                        },
+                        showRetry = true,
+                    )
                 }
-                showCardIdle(message, showRetry = true)
             } catch (e: Exception) {
                 Log.e(TAG, "Card reader error", e)
                 val reason = (e as? TerminalException)?.errorMessage

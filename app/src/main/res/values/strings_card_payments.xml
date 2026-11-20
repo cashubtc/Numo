@@ -34,6 +34,8 @@
     <string name="card_payment_status_cancelled">Card payment cancelled</string>
     <string name="card_payment_status_failed">Card payment failed: %1$s</string>
     <string name="card_payment_status_unresolved">Couldn\'t confirm the card payment. Tap the button to check its status; the card won\'t be charged twice.</string>
+    <string name="card_payment_status_amount_too_small">%1$s is below Stripe\'s minimum card payment. Take this sale with bitcoin instead.</string>
+    <string name="card_payment_status_currency_not_supported">Your Stripe account can\'t take card payments in %1$s. Set Numo\'s currency to your Stripe account\'s currency.</string>
     <string name="card_payment_completed_late">A card payment went through after checkout closed. It has been added to your payment history.</string>
     <string name="card_payment_also_charged">The card was also charged for a sale that was already paid. Refund it in your Stripe Dashboard.</string>
     <string name="card_payment_status_amount_unavailable">Card amount unavailable: the bitcoin price in %1$s is not loaded yet</string>

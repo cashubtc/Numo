@@ -1,5 +1,6 @@
 package com.electricdreams.numo.payment.card
 
+import com.electricdreams.numo.payment.card.StripeTerminalManager.FailureReason
 import com.electricdreams.numo.payment.card.StripeTerminalManager.RetryStep
 import com.stripe.stripeterminal.external.models.PaymentIntentStatus
 import org.junit.Assert.assertEquals
@@ -49,5 +50,31 @@ class StripeTerminalManagerRetryTest {
         ).forEach { status ->
             assertEquals("status=$status", RetryStep.UNRESOLVED, StripeTerminalManager.retryStepFor(status))
         }
+    }
+
+    @Test
+    fun `amount below Stripe's minimum is reported as a setup problem`() {
+        assertEquals(
+            FailureReason.AMOUNT_TOO_SMALL,
+            StripeTerminalManager.failureReasonFor("amount_too_small", "amount"),
+        )
+    }
+
+    @Test
+    fun `currency the account cannot charge is reported as a setup problem`() {
+        assertEquals(
+            FailureReason.CURRENCY_NOT_SUPPORTED,
+            StripeTerminalManager.failureReasonFor(null, "currency"),
+        )
+        assertEquals(
+            FailureReason.CURRENCY_NOT_SUPPORTED,
+            StripeTerminalManager.failureReasonFor("payment_method_currency_mismatch", null),
+        )
+    }
+
+    @Test
+    fun `other Stripe errors stay retryable`() {
+        assertEquals(FailureReason.OTHER, StripeTerminalManager.failureReasonFor("card_declined", null))
+        assertEquals(FailureReason.OTHER, StripeTerminalManager.failureReasonFor(null, null))
     }
 }

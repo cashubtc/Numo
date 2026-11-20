@@ -31,6 +31,8 @@
     <string name="card_payment_status_cancelled">Pago con tarjeta cancelado</string>
     <string name="card_payment_status_failed">Error en el pago con tarjeta: %1$s</string>
     <string name="card_payment_status_unresolved">No se pudo confirmar el pago con tarjeta. Toca el botón para comprobar su estado; la tarjeta no se cobrará dos veces.</string>
+    <string name="card_payment_status_amount_too_small">%1$s está por debajo del pago mínimo con tarjeta de Stripe. Cobra esta venta con bitcoin.</string>
+    <string name="card_payment_status_currency_not_supported">Tu cuenta de Stripe no puede aceptar pagos con tarjeta en %1$s. Configura la moneda de Numo con la moneda de tu cuenta de Stripe.</string>
     <string name="card_payment_completed_late">Un pago con tarjeta se completó después de cerrar el cobro. Se ha añadido a tu historial de pagos.</string>
     <string name="card_payment_also_charged">También se cobró la tarjeta por una venta que ya estaba pagada. Reembólsalo en tu Stripe Dashboard.</string>
     <string name="card_payment_status_amount_unavailable">Importe con tarjeta no disponible: el precio de bitcoin en %1$s aún no se ha cargado</string>

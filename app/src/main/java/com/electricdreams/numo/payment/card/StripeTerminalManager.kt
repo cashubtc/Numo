@@ -69,7 +69,27 @@ object StripeTerminalManager {
         cause: Throwable? = null,
         val paymentIntent: PaymentIntent? = null,
         val isUnresolved: Boolean = false,
+        val reason: FailureReason = FailureReason.OTHER,
     ) : Exception(message, cause)
+
+    /** Failures the merchant can fix in their setup, so a retry would fail the same way. */
+    enum class FailureReason {
+        /** The amount is below Stripe's minimum charge for the currency. */
+        AMOUNT_TOO_SMALL,
+
+        /** The Stripe account cannot take card payments in Numo's currency. */
+        CURRENCY_NOT_SUPPORTED,
+
+        OTHER,
+    }
+
+    /** Classifies a Stripe API error by its `code` and `param` fields. */
+    fun failureReasonFor(code: String?, param: String?): FailureReason = when {
+        code == "amount_too_small" -> FailureReason.AMOUNT_TOO_SMALL
+        param == "currency" || code == "payment_method_currency_mismatch" ->
+            FailureReason.CURRENCY_NOT_SUPPORTED
+        else -> FailureReason.OTHER
+    }
 
     /** What a retry must do with an earlier PaymentIntent, based on its status at Stripe. */
     enum class RetryStep {
@@ -314,6 +334,7 @@ object StripeTerminalManager {
                 isCancellation = cancelled,
                 cause = e,
                 paymentIntent = e.paymentIntent ?: intent,
+                reason = failureReasonFor(e.apiError?.code, e.apiError?.param),
             )
         }
     }

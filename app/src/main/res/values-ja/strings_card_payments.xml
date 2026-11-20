@@ -31,6 +31,8 @@
     <string name="card_payment_status_cancelled">カード決済がキャンセルされました</string>
     <string name="card_payment_status_failed">カード決済に失敗しました: %1$s</string>
     <string name="card_payment_status_unresolved">カード決済を確認できませんでした。ボタンをタップして状態を確認してください。二重に請求されることはありません。</string>
+    <string name="card_payment_status_amount_too_small">%1$s は Stripe のカード決済の最低金額を下回っています。この販売はビットコインで受け付けてください。</string>
+    <string name="card_payment_status_currency_not_supported">お使いの Stripe アカウントでは %1$s でのカード決済を受け付けられません。Numo の通貨を Stripe アカウントの通貨に設定してください。</string>
     <string name="card_payment_completed_late">会計を閉じた後にカード決済が完了しました。支払い履歴に追加されました。</string>
     <string name="card_payment_also_charged">支払い済みの販売に対してカードにも請求されました。Stripe Dashboard で返金してください。</string>
     <string name="card_payment_status_amount_unavailable">カード決済額を計算できません: %1$s のビットコイン価格をまだ読み込んでいません</string>
