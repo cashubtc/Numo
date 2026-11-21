@@ -69,6 +69,8 @@ import com.electricdreams.numo.core.payment.PaymentServiceFactory
 import com.electricdreams.numo.core.payment.PaymentState
 import com.electricdreams.numo.core.payment.impl.BTCPayPaymentService
 import com.electricdreams.numo.core.wallet.WalletError
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.button.MaterialButtonToggleGroup
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -88,15 +90,10 @@ class PaymentRequestActivity : AppCompatActivity() {
     private lateinit var unifiedQrContainer: View
     private lateinit var cashuQrContainer: View
     private lateinit var lightningQrContainer: View
-    private lateinit var unifiedTab: android.widget.LinearLayout
-    private lateinit var cashuTab: android.widget.LinearLayout
-    private lateinit var lightningTab: android.widget.LinearLayout
-    private lateinit var unifiedTabText: TextView
-    private lateinit var cashuTabText: TextView
-    private lateinit var lightningTabText: TextView
-    private lateinit var unifiedTabIcon: TextView
-    private lateinit var cashuTabIcon: ImageView
-    private lateinit var lightningTabIcon: ImageView
+    private lateinit var paymentMethodToggle: MaterialButtonToggleGroup
+    private lateinit var unifiedTab: MaterialButton
+    private lateinit var cashuTab: MaterialButton
+    private lateinit var lightningTab: MaterialButton
     private lateinit var largeAmountDisplay: TextView
     private lateinit var convertedAmountDisplay: TextView
     private lateinit var statusText: TextView
@@ -264,15 +261,10 @@ class PaymentRequestActivity : AppCompatActivity() {
         unifiedQrContainer = findViewById(R.id.unified_qr_container)
         cashuQrContainer = findViewById(R.id.cashu_qr_container)
         lightningQrContainer = findViewById(R.id.lightning_qr_container)
+        paymentMethodToggle = findViewById(R.id.lightning_cashu_switch_container)
         unifiedTab = findViewById(R.id.unified_tab)
         cashuTab = findViewById(R.id.cashu_tab)
         lightningTab = findViewById(R.id.lightning_tab)
-        unifiedTabText = findViewById(R.id.unified_tab_text)
-        cashuTabText = findViewById(R.id.cashu_tab_text)
-        lightningTabText = findViewById(R.id.lightning_tab_text)
-        unifiedTabIcon = findViewById(R.id.unified_tab_icon)
-        cashuTabIcon = findViewById(R.id.cashu_tab_icon)
-        lightningTabIcon = findViewById(R.id.lightning_tab_icon)
         largeAmountDisplay = findViewById(R.id.large_amount_display)
         convertedAmountDisplay = findViewById(R.id.converted_amount_display)
         statusText = findViewById(R.id.payment_status_text)
@@ -300,15 +292,10 @@ class PaymentRequestActivity : AppCompatActivity() {
 
         // Initialize tab manager
         tabManager = PaymentTabManager(
+            toggleGroup = paymentMethodToggle,
             unifiedTab = unifiedTab,
             cashuTab = cashuTab,
             lightningTab = lightningTab,
-            unifiedTabText = unifiedTabText,
-            cashuTabText = cashuTabText,
-            lightningTabText = lightningTabText,
-            unifiedTabIcon = unifiedTabIcon,
-            cashuTabIcon = cashuTabIcon,
-            lightningTabIcon = lightningTabIcon,
             unifiedQrContainer = unifiedQrContainer,
             cashuQrContainer = cashuQrContainer,
             lightningQrContainer = lightningQrContainer,
@@ -317,9 +304,7 @@ class PaymentRequestActivity : AppCompatActivity() {
             lightningLoadingSpinner = lightningLoadingSpinner,
             cashuLoadingSpinner = cashuLoadingSpinner,
             cashuQrImageView = cashuQrImageView,
-            lightningQrImageView = lightningQrImageView,
-            resources = resources,
-            theme = theme
+            lightningQrImageView = lightningQrImageView
         )
 
         // Set up tabs with listener
