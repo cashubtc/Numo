@@ -3,13 +3,13 @@ package com.electricdreams.numo.payment.card
 import android.Manifest
 import android.app.Application
 import android.content.Context
-import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.nfc.NfcAdapter
 import android.os.Build
 import android.util.Log
 import androidx.annotation.MainThread
 import androidx.core.content.ContextCompat
+import com.electricdreams.numo.feature.settings.DeveloperPrefs
 import com.stripe.stripeterminal.Terminal
 import com.stripe.stripeterminal.TerminalApplicationDelegate
 import com.stripe.stripeterminal.external.callable.Callback
@@ -79,6 +79,8 @@ object StripeTerminalManager {
 
         /** The Stripe account cannot take card payments in Numo's currency. */
         CURRENCY_NOT_SUPPORTED,
+
+        SIMULATION_REQUIRES_TEST_KEY,
 
         OTHER,
     }
@@ -187,13 +189,6 @@ object StripeTerminalManager {
         }
     }
 
-    /**
-     * Stripe's production Tap to Pay reader refuses to run in debuggable apps, so debug
-     * builds use the simulated reader.
-     */
-    fun isSimulated(context: Context): Boolean =
-        context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
-
     @MainThread
     private fun ensureInitialized(context: Context): Terminal {
         appContext = context.applicationContext
@@ -210,32 +205,65 @@ object StripeTerminalManager {
         return Terminal.getInstance()
     }
 
-    /** Connects the phone's Tap to Pay reader, reusing an existing connection when possible. */
+    internal fun readerDiscoveryConfig(
+        context: Context,
+        config: StripeCardConfig,
+    ): TapToPayDiscoveryConfiguration {
+        val simulated = DeveloperPrefs.isStripeReaderSimulated(context)
+        if (simulated && !config.isTestMode) {
+            throw CardPaymentException(
+                "The simulated reader requires a Stripe test key",
+                isCancellation = false,
+                reason = FailureReason.SIMULATION_REQUIRES_TEST_KEY,
+            )
+        }
+        return TapToPayDiscoveryConfiguration(isSimulated = simulated)
+    }
+
+    /** Connects the phone's Tap to Pay reader, reusing a matching reader at the same location. */
     @MainThread
     suspend fun ensureReaderConnected(context: Context, config: StripeCardConfig): Reader {
+        val discoveryConfig = readerDiscoveryConfig(context, config)
         val terminal = ensureInitialized(context)
         terminal.connectedReader?.let { reader ->
-            if (connectedLocationId == config.locationId) return reader
-            disconnect(terminal)
+            if (connectedLocationId == config.locationId &&
+                reader.isSimulated == discoveryConfig.isSimulated
+            ) {
+                return reader
+            }
+            suspendCancellableCoroutine<Unit> { continuation ->
+                terminal.disconnectReader(object : Callback {
+                    override fun onSuccess() {
+                        if (continuation.isActive) continuation.resume(Unit)
+                    }
+
+                    override fun onFailure(e: TerminalException) {
+                        if (continuation.isActive) continuation.resumeWithException(e)
+                    }
+                })
+            }
         }
-        val reader = discoverTapToPayReader(context, terminal)
+        val reader = discoverTapToPayReader(context, terminal, discoveryConfig)
         val connected = connect(terminal, reader, config.locationId)
         connectedLocationId = config.locationId
         return connected
     }
 
-    private suspend fun discoverTapToPayReader(context: Context, terminal: Terminal): Reader {
+    private suspend fun discoverTapToPayReader(
+        context: Context,
+        terminal: Terminal,
+        config: TapToPayDiscoveryConfiguration,
+    ): Reader {
         // Stripe disables Tap to Pay without location access; callers request it beforehand.
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) !=
             PackageManager.PERMISSION_GRANTED
         ) {
             throw CardPaymentException("Location permission is required", isCancellation = false)
         }
-        val simulated = isSimulated(context)
         return suspendCancellableCoroutine { continuation ->
             var discovery: Cancelable? = null
             discovery = terminal.discoverReaders(
-                TapToPayDiscoveryConfiguration(isSimulated = simulated),
+                config,
                 object : DiscoveryListener {
                     override fun onUpdateDiscoveredReaders(readers: List<Reader>) {
                         val reader = readers.firstOrNull() ?: return

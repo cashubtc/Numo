@@ -42,4 +42,7 @@
     <string name="card_payment_action_retry">Tentar novamente</string>
     <string name="transaction_detail_payment_type_card_value">Cartão (Stripe)</string>
     <string name="default_payment_method_option_card">Cartão</string>
+    <string name="developer_settings_simulate_stripe_reader">Simular leitor de cartões da Stripe</string>
+    <string name="card_payment_simulation_requires_test_key">O leitor simulado requer uma chave de teste da Stripe (rk_test_…).</string>
+    <string name="card_payment_debug_reader_unsupported">A Stripe exige uma versão de produção para ler cartões físicos. Para testar no ambiente de testes, ative o leitor simulado nas configurações de desenvolvedor.</string>
 </resources>

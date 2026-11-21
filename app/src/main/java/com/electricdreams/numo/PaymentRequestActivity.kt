@@ -35,6 +35,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import com.google.android.material.button.MaterialButton
 import com.stripe.stripeterminal.external.models.PaymentIntent
+import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import androidx.lifecycle.lifecycleScope
 import androidx.appcompat.app.AppCompatActivity
@@ -1775,6 +1776,10 @@ class PaymentRequestActivity : AppCompatActivity() {
                         getString(R.string.card_payment_status_currency_not_supported, currency),
                         showRetry = false,
                     )
+                    StripeTerminalManager.FailureReason.SIMULATION_REQUIRES_TEST_KEY -> showCardIdle(
+                        getString(R.string.card_payment_simulation_requires_test_key),
+                        showRetry = false,
+                    )
                     StripeTerminalManager.FailureReason.OTHER -> showCardIdle(
                         when {
                             e.isCancellation -> getString(R.string.card_payment_status_cancelled)
@@ -1786,9 +1791,12 @@ class PaymentRequestActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Card reader error", e)
-                val reason = (e as? TerminalException)?.errorMessage
-                    ?: e.message ?: e.javaClass.simpleName
-                showCardIdle(getString(R.string.card_payment_status_failed, reason), showRetry = true)
+                if (e is TerminalException && e.errorCode == TerminalErrorCode.TAP_TO_PAY_DEBUG_NOT_SUPPORTED) {
+                    showCardIdle(getString(R.string.card_payment_debug_reader_unsupported), showRetry = false)
+                } else {
+                    val reason = (e as? TerminalException)?.errorMessage ?: e.message ?: e.javaClass.simpleName
+                    showCardIdle(getString(R.string.card_payment_status_failed, reason), showRetry = true)
+                }
             }
         }
     }
